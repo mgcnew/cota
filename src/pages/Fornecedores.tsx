@@ -464,25 +464,16 @@ function Fornecedores() {
                 />
 
                 {/* Pagination */}
-                <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground order-2 sm:order-1">
-                      {paginatedData.pagination.startIndex + 1}-{paginatedData.pagination.endIndex} de {paginatedData.pagination.totalItems}
-                    </span>
-                    <div className="order-1 sm:order-2">
-                      <DataPagination
-                        currentPage={paginatedData.pagination.currentPage}
-                        totalPages={paginatedData.pagination.totalPages}
-                        itemsPerPage={paginatedData.pagination.itemsPerPage}
-                        totalItems={paginatedData.pagination.totalItems}
-                        onPageChange={paginatedData.pagination.goToPage}
-                        onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                        startIndex={paginatedData.pagination.startIndex}
-                        endIndex={paginatedData.pagination.endIndex}
-                      />
-                    </div>
-                  </div>
-                </div>
+                <DataPagination
+                  currentPage={paginatedData.pagination.currentPage}
+                  totalPages={paginatedData.pagination.totalPages}
+                  itemsPerPage={paginatedData.pagination.itemsPerPage}
+                  totalItems={paginatedData.pagination.totalItems}
+                  onPageChange={paginatedData.pagination.goToPage}
+                  onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                  startIndex={paginatedData.pagination.startIndex}
+                  endIndex={paginatedData.pagination.endIndex}
+                />
               </CardContent>
             </Card>
           )}

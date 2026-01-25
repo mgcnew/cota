@@ -6,8 +6,11 @@ import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-selec
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown } from "lucide-react";
+import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";
 import DeletePedidoDialog from "@/components/forms/DeletePedidoDialog";
@@ -75,7 +78,7 @@ function PedidosTab() {
 
   const filteredPedidos = useMemo(() => {
     return pedidos.filter(pedido => {
-      const matchesSearch = pedido.fornecedor.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+      const matchesSearch = pedido.fornecedor.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
         pedido.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -106,38 +109,65 @@ function PedidosTab() {
     updatePedidoStatus({ pedidoId, status });
   }, [updatePedidoStatus]);
 
-  if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
+  if (isLoading) return <div className="flex items-center justify-center py-24"><Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} /></div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Metrics */}
       <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-        <MetricCard title="Ativos" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
+        <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
         <MetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
-        <MetricCard title="Total" value={stats.totalValueFormatado} icon={DollarSign} variant="info" className="hidden md:block" />
-        <MetricCard title="Economia Real" value={stats.economiaRealFormatada} icon={TrendingDown} variant="success" className="hidden md:block" />
+        <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
+        <MetricCard title="Economia Real" value={stats.economiaRealFormatada} icon={TrendingDown} variant="success" />
       </ResponsiveGrid>
 
       {/* Filters & Actions */}
-      <div className="flex flex-col sm:flex-row items-stretch gap-2">
-        <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="orange" expandedWidth="w-full sm:w-48" />
-        <select 
-          value={statusFilter} 
-          onChange={e => setStatusFilter(e.target.value)} 
-          className="h-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 text-sm"
-        >
-          <option value="all">Todos</option>
-          <option value="pendente">Pendentes</option>
-          <option value="confirmado">Confirmados</option>
-          <option value="entregue">Entregues</option>
-        </select>
-        <Button onClick={() => setAddDialogOpen(true)} className="h-10 ml-auto bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700">
-          <Plus className="h-4 w-4 mr-1" />Novo
-        </Button>
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
+        <div className="flex-1 flex flex-col sm:flex-row gap-2">
+          <ExpandableSearch
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Buscar pedido..."
+            accentColor="brand"
+            expandedWidth="w-full sm:w-64"
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className={cn("w-full sm:w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Status</SelectItem>
+              <SelectItem value="pendente">🟡 Pendentes</SelectItem>
+              <SelectItem value="confirmado">🟢 Confirmados</SelectItem>
+              <SelectItem value="entregue">🔵 Entregues</SelectItem>
+              <SelectItem value="cancelado">🔴 Cancelados</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setAddDialogOpen(true)}
+            className={designSystem.components.button.primary}
+          >
+            <Plus className="h-4 w-4 mr-1.5" />
+            Novo Pedido
+          </Button>
+        </div>
       </div>
 
+      {/* Desktop Table View */}
+      <PedidosListDesktop
+        pedidos={paginatedData.items}
+        onUpdateStatus={handleUpdateStatus}
+        onManage={handleManagePedido}
+        onRegisterDelivery={handleRegistrarEntrega}
+        onDelete={handleDeletePedidoClick}
+        isUpdating={isUpdating}
+      />
+
       {/* Mobile Cards View */}
-      <div className="md:hidden space-y-2">
+      <div className="md:hidden space-y-3">
         {paginatedData.items.map((pedido) => (
           <MobileOrderCard
             key={pedido.id}
@@ -148,31 +178,17 @@ function PedidosTab() {
         ))}
       </div>
 
-      {/* Desktop Table View */}
-      <PedidosListDesktop 
-        pedidos={paginatedData.items} 
-        onUpdateStatus={handleUpdateStatus} 
-        onManage={handleManagePedido} 
-        onRegisterDelivery={handleRegistrarEntrega} 
-        onDelete={handleDeletePedidoClick} 
-        isUpdating={isUpdating} 
-      />
-
       {/* Pagination */}
-      {paginatedData.pagination.totalPages > 1 && (
-        <div className="border-t border-gray-200 dark:border-gray-700 px-3 py-3">
-          <DataPagination
-            currentPage={paginatedData.pagination.currentPage}
-            totalPages={paginatedData.pagination.totalPages}
-            itemsPerPage={paginatedData.pagination.itemsPerPage}
-            totalItems={paginatedData.pagination.totalItems}
-            onPageChange={paginatedData.pagination.goToPage}
-            onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-            startIndex={paginatedData.pagination.startIndex}
-            endIndex={paginatedData.pagination.endIndex}
-          />
-        </div>
-      )}
+      <DataPagination
+        currentPage={paginatedData.pagination.currentPage}
+        totalPages={paginatedData.pagination.totalPages}
+        itemsPerPage={paginatedData.pagination.itemsPerPage}
+        totalItems={paginatedData.pagination.totalItems}
+        onPageChange={paginatedData.pagination.goToPage}
+        onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+        startIndex={paginatedData.pagination.startIndex}
+        endIndex={paginatedData.pagination.endIndex}
+      />
 
       {/* Dialogs */}
       <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={() => { refetch(); setAddDialogOpen(false); }} />
@@ -182,10 +198,10 @@ function PedidosTab() {
           <DeletePedidoDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} pedido={selectedPedido} onDelete={() => { refetch(); setDeleteDialogOpen(false); }} />
         </>
       )}
-      <RegistrarEntregaDialog 
-        open={entregaDialogOpen} 
-        onOpenChange={setEntregaDialogOpen} 
-        pedido={selectedPedidoRaw} 
+      <RegistrarEntregaDialog
+        open={entregaDialogOpen}
+        onOpenChange={setEntregaDialogOpen}
+        pedido={selectedPedidoRaw}
       />
     </div>
   );

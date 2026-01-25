@@ -24,6 +24,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { designSystem } from "@/styles/design-system";
 
 export default function ListaComprasTab() {
   const isMobile = useIsMobile();
@@ -133,11 +134,11 @@ export default function ListaComprasTab() {
   const clearSelection = useCallback(() => setSelectedItems(new Set()), []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Stats Cards */}
       <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }}>
         <MetricCard
-          title="Itens"
+          title="Total Itens"
           value={stats.total}
           icon={Package}
           variant="info"
@@ -155,7 +156,7 @@ export default function ListaComprasTab() {
           variant="warning"
         />
         <MetricCard
-          title="Total Estimado"
+          title="Investimento"
           value={stats.estimatedTotal.toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
@@ -169,40 +170,36 @@ export default function ListaComprasTab() {
 
 
       {/* Search and Controls */}
-      <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
-        <div className="relative w-full sm:max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Buscar produtos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white dark:bg-gray-800/50"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
+      <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div className="flex-1 flex flex-col sm:flex-row gap-2 w-full">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Input
+              placeholder="Buscar itens na lista..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={cn("pl-10 h-11", designSystem.components.input.root)}
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button
             onClick={() => setShowAddDialog(true)}
-            size="sm"
-            className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
+            className={cn("flex-1 sm:flex-none h-11 px-6", designSystem.components.button.primary)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Adicionar
+            Adicionar à Lista
           </Button>
-          {filteredItems.length > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
-            </Badge>
-          )}
-          <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
+          <ViewToggle view={viewMode} onViewChange={setViewMode} className="hidden md:flex" />
         </div>
       </div>
 
@@ -210,44 +207,44 @@ export default function ListaComprasTab() {
       {selectedItems.size > 0 && (
         <div
           className={cn(
-            "p-4 rounded-xl border animate-in fade-in slide-in-from-top-2",
-            "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800"
+            "p-5 rounded-2xl border-2 transition-all animate-in slide-in-from-top-4 duration-300",
+            "bg-zinc-900 border-[#83E509]/30 text-white shadow-2xl shadow-[#83E509]/10"
           )}
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center">
-                <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-[#83E509]/20 flex items-center justify-center border border-[#83E509]/40">
+                <span className="text-lg font-black text-[#83E509]">
                   {selectedItems.size}
                 </span>
               </div>
-              <span className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                {selectedItems.size === 1 ? "item selecionado" : "itens selecionados"}
-              </span>
-              <button
-                onClick={clearSelection}
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                Limpar seleção
-              </button>
+              <div>
+                <p className="font-bold text-sm">
+                  {selectedItems.size === 1 ? "Item selecionado" : "Itens selecionados"}
+                </p>
+                <button
+                  onClick={clearSelection}
+                  className="text-xs text-[#83E509] hover:underline font-medium"
+                >
+                  Desmarcar todos
+                </button>
+              </div>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <Button
-                size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={handleDeleteSelected}
-                className="flex-1 sm:flex-none border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                className="flex-1 sm:flex-none h-11 text-zinc-400 hover:text-red-500 hover:bg-red-500/10"
               >
                 <Trash2 className="h-4 w-4 mr-2" />
                 Remover
               </Button>
               <Button
-                size="sm"
                 onClick={handleCreateOrder}
-                className="flex-1 sm:flex-none bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
+                className={cn("flex-1 sm:flex-none h-11", designSystem.components.button.primary)}
               >
                 <PackagePlus className="h-4 w-4 mr-2" />
-                Criar Pedido
+                Gerar Pedido Compra
               </Button>
             </div>
           </div>
@@ -256,35 +253,37 @@ export default function ListaComprasTab() {
 
 
       {/* Content */}
-      {viewMode === "grid" ? (
-        <ShoppingListCards
-          items={filteredItems}
-          isLoading={isLoading}
-          selectedItems={selectedItems}
-          onToggleSelection={toggleItemSelection}
-          onDelete={async (id) => {
-            await deleteItem.mutateAsync(id);
-          }}
-          onUpdate={async (data) => {
-            await updateItem.mutateAsync(data);
-          }}
-          onEdit={(item) => setEditingItem(item)}
-        />
-      ) : (
-        <ShoppingListTable
-          items={filteredItems}
-          isLoading={isLoading}
-          selectedItems={selectedItems}
-          onToggleSelection={toggleItemSelection}
-          onSelectAll={selectAll}
-          onDelete={async (id) => {
-            await deleteItem.mutateAsync(id);
-          }}
-          onUpdate={async (data) => {
-            await updateItem.mutateAsync(data);
-          }}
-        />
-      )}
+      <div className="transition-all duration-300">
+        {viewMode === "grid" ? (
+          <ShoppingListCards
+            items={filteredItems}
+            isLoading={isLoading}
+            selectedItems={selectedItems}
+            onToggleSelection={toggleItemSelection}
+            onDelete={async (id) => {
+              await deleteItem.mutateAsync(id);
+            }}
+            onUpdate={async (data) => {
+              await updateItem.mutateAsync(data);
+            }}
+            onEdit={(item) => setEditingItem(item)}
+          />
+        ) : (
+          <ShoppingListTable
+            items={filteredItems}
+            isLoading={isLoading}
+            selectedItems={selectedItems}
+            onToggleSelection={toggleItemSelection}
+            onSelectAll={selectAll}
+            onDelete={async (id) => {
+              await deleteItem.mutateAsync(id);
+            }}
+            onUpdate={async (data) => {
+              await updateItem.mutateAsync(data);
+            }}
+          />
+        )}
+      </div>
 
       {/* Dialogs */}
       <AddProductToListDialog open={showAddDialog} onOpenChange={setShowAddDialog} />

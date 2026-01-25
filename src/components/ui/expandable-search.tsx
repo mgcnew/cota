@@ -51,6 +51,14 @@ const accentColors = {
     iconColor: "text-gray-600 dark:text-gray-400",
     bgHover: "hover:bg-gray-50 dark:hover:bg-gray-900/20",
   },
+  brand: {
+    border: "border-[#83E509]/30 dark:border-[#83E509]/20",
+    focusBorder: "focus-within:border-[#83E509] dark:focus-within:border-[#83E509]",
+    focusRing: "focus-within:ring-[#83E509]/20 dark:focus-within:ring-[#83E509]/10",
+    hoverBorder: "hover:border-[#83E509]/50 dark:hover:border-[#83E509]/40",
+    iconColor: "text-[#83E509]",
+    bgHover: "hover:bg-[#83E509]/5 dark:hover:bg-[#83E509]/10",
+  },
 };
 
 interface ExpandableSearchProps {
@@ -130,16 +138,16 @@ export const ExpandableSearch = memo(function ExpandableSearch({
           "shadow-sm transition-[width] duration-150",
           isOpen
             ? cn(
-                expandedWidth,
-                colors.focusBorder,
-                colors.focusRing,
-                "focus-within:ring-2"
-              )
+              expandedWidth,
+              colors.focusBorder,
+              colors.focusRing,
+              "focus-within:ring-2"
+            )
             : cn(
-                "w-10 cursor-pointer",
-                colors.hoverBorder,
-                colors.bgHover
-              )
+              "w-10 cursor-pointer",
+              colors.hoverBorder,
+              colors.bgHover
+            )
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -149,7 +157,7 @@ export const ExpandableSearch = memo(function ExpandableSearch({
         <div
           className={cn(
             "flex items-center justify-center z-10 transition-colors duration-100",
-            isOpen 
+            isOpen
               ? cn("absolute left-3 top-1/2 transform -translate-y-1/2", colors.iconColor)
               : "w-full h-full text-gray-400 dark:text-gray-500"
           )}

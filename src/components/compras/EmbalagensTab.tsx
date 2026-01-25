@@ -16,24 +16,26 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { cn } from "@/lib/utils";
-import { 
-  Package, Plus, Trash2, DollarSign, 
+import {
+  Package, Plus, Trash2, DollarSign,
   Building2, MoreVertical, Eye, CheckCircle2,
-  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown, Calculator
+  PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown, Calculator,
+  CircleCheck
 } from "lucide-react";
-import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
-  DropdownMenuSeparator, DropdownMenuTrigger 
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
+import { designSystem } from "@/styles/design-system";
 
 import { MobilePackagingQuoteCard } from "./embalagens/MobilePackagingQuoteCard";
 
 // Dialogs e componentes
-import { 
-  AddPackagingQuoteDialog, 
-  ManagePackagingQuoteDialog, 
-  DeletePackagingQuoteDialog, 
+import {
+  AddPackagingQuoteDialog,
+  ManagePackagingQuoteDialog,
+  DeletePackagingQuoteDialog,
   PackagingItemsDialog,
   ConvertToPackagingOrderDialog,
   PackagingQuotesTable,
@@ -80,23 +82,23 @@ function EmbalagensTab() {
   }, []);
 
   const handleManageQuote = useCallback((quote: PackagingQuoteDisplay) => {
-    startTransition(() => { 
-      setSelectedQuoteId(quote.id); 
-      setManageDialogOpen(true); 
+    startTransition(() => {
+      setSelectedQuoteId(quote.id);
+      setManageDialogOpen(true);
     });
   }, []);
 
   const handleDeleteQuote = useCallback((quote: PackagingQuoteDisplay) => {
-    startTransition(() => { 
-      setSelectedQuoteId(quote.id); 
-      setDeleteDialogOpen(true); 
+    startTransition(() => {
+      setSelectedQuoteId(quote.id);
+      setDeleteDialogOpen(true);
     });
   }, []);
 
   const handleConvertToOrder = useCallback((quote: PackagingQuoteDisplay) => {
-    startTransition(() => { 
-      setSelectedQuoteId(quote.id); 
-      setConvertDialogOpen(true); 
+    startTransition(() => {
+      setSelectedQuoteId(quote.id);
+      setConvertDialogOpen(true);
     });
   }, []);
 
@@ -109,9 +111,9 @@ function EmbalagensTab() {
   const filteredQuotes = useMemo(() => {
     return quotes.filter(q => {
       const itemNames = q.itens.map(i => i.packagingName.toLowerCase()).join(' ');
-      const matchesSearch = itemNames.includes(debouncedSearchTerm.toLowerCase()) || 
-                           q.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-      
+      const matchesSearch = itemNames.includes(debouncedSearchTerm.toLowerCase()) ||
+        q.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+
       if (statusFilter === "all") return matchesSearch;
       if (statusFilter === "prontas") {
         const respondidos = q.fornecedores.filter(f => f.status === "respondido").length;
@@ -136,10 +138,10 @@ function EmbalagensTab() {
       return q.status === "ativa" && respondidos === q.fornecedores.length && q.fornecedores.length > 0;
     }).length;
     const totalPedidos = orders.length;
-    
+
     // Calcular economia total dos pedidos
     const economiaTotal = orders.reduce((sum, order) => sum + (order.economiaEstimada || 0), 0);
-    
+
     return { total: quotesNaoConvertidas.length, ativas, concluidas, prontasParaDecisao, totalPedidos, economiaTotal };
   }, [quotes, orders, convertedQuoteIds]);
 
@@ -152,199 +154,165 @@ function EmbalagensTab() {
 
   if (quotesLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className={cn("h-10 w-10 animate-spin", designSystem.colors.text.primary)} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Sub-tabs: Cotações | Pedidos */}
-      <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-        <div className={cn(
-          "mb-4",
-          isMobile ? "sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm -mx-4 px-4 py-2 border-b border-gray-200 dark:border-gray-800 overflow-x-auto scrollbar-none" : ""
-        )}>
-          <div className={cn(
-            "flex items-center justify-between gap-3",
-            isMobile ? "w-max" : ""
-          )}>
-            <TabsList className={cn(
-              isMobile 
-                ? "h-auto w-max p-0 bg-transparent gap-2" 
-                : "h-auto p-0 bg-transparent border-0 gap-6"
-            )}>
-              <TabsTrigger 
-                value="cotacoes" 
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
+    <div className="space-y-6">
+      {/* Sub-tabs & Actions Container */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-2 bg-transparent !bg-transparent !bg-none !shadow-none !bg-opacity-0">
+        <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full md:w-auto bg-transparent">
+          <TabsList className={designSystem.components.tabs.clean.list}>
+            {[
+              { value: "cotacoes", icon: ClipboardList, label: "Cotações", badge: stats.prontasParaDecisao },
+              { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
+              { value: "analise", icon: BarChart3, label: "Análise" },
+              { value: "economia", icon: Calculator, label: "Poupança" }
+            ].map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className={designSystem.components.tabs.clean.trigger}
               >
-                <ClipboardList className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Cotações
-                {stats.prontasParaDecisao > 0 && (
-                  <Badge className="ml-1 bg-emerald-500 text-white text-[10px] px-1.5 py-0">
-                    {stats.prontasParaDecisao}
-                  </Badge>
+                <tab.icon className={cn("h-4 w-4 mr-2", activeSubTab === tab.value ? "text-[#83E509]" : "opacity-70")} />
+                {tab.label}
+                {tab.badge ? (
+                  <span className="ml-2 px-1.5 py-0.5 bg-[#83E509] text-black text-[10px] font-black rounded-full animate-bounce">
+                    {tab.badge}
+                  </span>
+                ) : null}
+                {activeSubTab === tab.value && (
+                  <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#83E509] shadow-[0_0_10px_rgba(131,229,9,0.5)] rounded-full transition-all" />
                 )}
               </TabsTrigger>
-              <TabsTrigger 
-                value="pedidos" 
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <ShoppingCart className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Pedidos
-                {stats.totalPedidos > 0 && (
-                  <Badge variant="secondary" className="ml-1 text-[10px] px-1.5 py-0">
-                    {stats.totalPedidos}
-                  </Badge>
-                )}
-              </TabsTrigger>
-              <TabsTrigger 
-                value="analise" 
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <BarChart3 className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Análise
-              </TabsTrigger>
-              <TabsTrigger 
-                value="economia" 
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <Calculator className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Economia
-              </TabsTrigger>
-            </TabsList>
+            ))}
+          </TabsList>
+        </Tabs>
 
-            {!isMobile && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => setItemsDialogOpen(true)} 
-                className="h-10 ml-auto"
-              >
-                <Package className="h-4 w-4 mr-2" />
-                Cadastrar Embalagens
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {isMobile && (
-          <div className="px-1 mb-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setItemsDialogOpen(true)} 
-              className="w-full h-10 rounded-xl bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        <div className="flex items-center gap-2">
+          {!isMobile && (
+            <Button
+              variant="outline"
+              onClick={() => setItemsDialogOpen(true)}
+              className={cn("h-10 rounded-xl", designSystem.colors.border.subtle)}
             >
               <Package className="h-4 w-4 mr-2" />
-              Cadastrar Embalagens
+              Gerenciar Itens
             </Button>
-          </div>
-        )}
+          )}
+          {activeSubTab === "cotacoes" && (
+            <Button
+              onClick={() => setAddDialogOpen(true)}
+              className={designSystem.components.button.primary}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Cotação
+            </Button>
+          )}
+        </div>
+      </div>
 
-        {/* Tab: Cotações */}
-        <TabsContent value="cotacoes" className="mt-4 space-y-4">
+      {isMobile && (
+        <Button
+          variant="outline"
+          onClick={() => setItemsDialogOpen(true)}
+          className="w-full h-11 rounded-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+        >
+          <Package className="h-4 w-4 mr-2" />
+          Gerenciar Itens de Embalagem
+        </Button>
+      )}
+
+      {activeSubTab === "cotacoes" && (
+        <div className="space-y-6 animate-in fade-in duration-500">
           {/* Métricas */}
           <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-            <MetricCard title="Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
-            <MetricCard 
-              title="Prontas" 
-              value={stats.prontasParaDecisao.toString()} 
-              icon={CheckCircle2} 
+            <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
+            <MetricCard
+              title="Prontas p/ Decisão"
+              value={stats.prontasParaDecisao.toString()}
+              icon={CheckCircle2}
               variant="success"
               onClick={() => setStatusFilter("prontas")}
             />
-            <MetricCard 
-              title="Concluídas" 
-              value={stats.concluidas.toString()} 
-              icon={DollarSign} 
+            <MetricCard
+              title="Concluídas"
+              value={stats.concluidas.toString()}
+              icon={CircleCheck}
               variant="warning"
               onClick={() => setStatusFilter("concluida")}
             />
-            <MetricCard 
-              title="Economia" 
+            <MetricCard
+              title="Economia Acumulada"
               value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
-              icon={TrendingDown} 
+              icon={TrendingDown}
               variant="success"
             />
           </ResponsiveGrid>
 
-          {/* Filtros e ações */}
-          <div className="flex flex-col sm:flex-row items-stretch gap-2">
-            <ExpandableSearch 
-              value={searchTerm} 
-              onChange={setSearchTerm} 
-              placeholder="Buscar..." 
-              accentColor="purple" 
-              expandedWidth="w-full sm:w-48" 
-            />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="ativa">Ativas</SelectItem>
-                <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
-                <SelectItem value="concluida">Concluídas</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex gap-2 ml-auto">
-              <Button onClick={() => setAddDialogOpen(true)} className="h-10 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700">
-                <Plus className="h-4 w-4 mr-1" />Nova Cotação
-              </Button>
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row items-stretch gap-3">
+            <div className="flex-1 flex flex-col sm:flex-row gap-2">
+              <ExpandableSearch
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar em embalagens..."
+                accentColor="brand"
+                expandedWidth="w-full sm:w-64"
+              />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className={cn("w-full sm:w-[180px] h-11 rounded-2xl", designSystem.components.input.root)}>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="ativa">🟢 Ativas</SelectItem>
+                  <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
+                  <SelectItem value="concluida">🔵 Concluídas</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
           {/* Alerta de prontas */}
           {stats.prontasParaDecisao > 0 && (
-            <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-3 flex items-center gap-3">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+            <div className="bg-[#83E509]/5 border border-[#83E509]/20 rounded-2xl p-4 flex items-center gap-4 animate-in zoom-in-95 duration-500">
+              <div className="w-10 h-10 rounded-full bg-[#83E509]/10 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-[#83E509]" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200">
+                <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
                   {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
                 </p>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400">Todos os fornecedores já responderam</p>
+                <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados já enviaram suas propostas</p>
               </div>
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="border-emerald-300 text-emerald-700 hover:bg-emerald-100"
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl border-[#83E509]/30 text-[#83E509] hover:bg-[#83E509]/10"
                 onClick={() => setStatusFilter("prontas")}
               >
-                Ver
+                Analisar agora
               </Button>
             </div>
           )}
 
           {/* Lista de cotações */}
           {paginatedData.items.length === 0 ? (
-            <div className="text-center py-12 bg-white dark:bg-gray-800/50 rounded-xl border">
-              <Package className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">Nenhuma cotação de embalagem encontrada</p>
-              <Button variant="outline" className="mt-4" onClick={() => setAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-1" />Criar primeira cotação
+            <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+              <Package className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
+              <p className="text-zinc-500 font-medium">Nenhuma cotação de embalagem encontrada</p>
+              <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setAddDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />Criar Primeira Cotação
               </Button>
             </div>
           ) : isMobile ? (
-            /* Mobile: Cards */
-            <div className="space-y-2">
+            <div className="space-y-3">
               {paginatedData.items.map((quote, index) => {
                 const numero = paginatedData.pagination.startIndex + index + 1;
-
                 return (
                   <MobilePackagingQuoteCard
                     key={quote.id}
@@ -358,8 +326,7 @@ function EmbalagensTab() {
               })}
             </div>
           ) : (
-            /* Desktop: Tabela */
-            <div className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
               <PackagingQuotesTable
                 quotes={paginatedData.items}
                 startIndex={paginatedData.pagination.startIndex}
@@ -372,40 +339,40 @@ function EmbalagensTab() {
 
           {/* Paginação */}
           {paginatedData.pagination.totalPages > 1 && (
-            <DataPagination
-              currentPage={paginatedData.pagination.currentPage}
-              totalPages={paginatedData.pagination.totalPages}
-              onPageChange={paginatedData.pagination.goToPage}
-              totalItems={paginatedData.pagination.totalItems}
-              itemsPerPage={paginatedData.pagination.itemsPerPage}
-              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-              startIndex={paginatedData.pagination.startIndex}
-              endIndex={paginatedData.pagination.endIndex}
-            />
+            <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
+              <DataPagination
+                currentPage={paginatedData.pagination.currentPage}
+                totalPages={paginatedData.pagination.totalPages}
+                onPageChange={paginatedData.pagination.goToPage}
+                totalItems={paginatedData.pagination.totalItems}
+                itemsPerPage={paginatedData.pagination.itemsPerPage}
+                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                startIndex={paginatedData.pagination.startIndex}
+                endIndex={paginatedData.pagination.endIndex}
+              />
+            </div>
           )}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Tab: Pedidos - forceMount evita re-mount ao trocar de tab ou minimizar/maximizar */}
-        <TabsContent value="pedidos" className="mt-4" forceMount>
-          <div className={activeSubTab !== "pedidos" ? "hidden" : ""}>
-            <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
-          </div>
-        </TabsContent>
+      {/* Other Content - Persistent ForceMount */}
+      <TabsContent value="pedidos" className="mt-0" forceMount>
+        <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+          <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
+        </div>
+      </TabsContent>
 
-        {/* Tab: Análise */}
-        <TabsContent value="analise" className="mt-4" forceMount>
-          <div className={activeSubTab !== "analise" ? "hidden" : ""}>
-            <PackagingAnalysisTab />
-          </div>
-        </TabsContent>
+      <TabsContent value="analise" className="mt-0" forceMount>
+        <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+          <PackagingAnalysisTab />
+        </div>
+      </TabsContent>
 
-        {/* Tab: Economia */}
-        <TabsContent value="economia" className="mt-4" forceMount>
-          <div className={activeSubTab !== "economia" ? "hidden" : ""}>
-            <PackagingEconomyTab />
-          </div>
-        </TabsContent>
-      </Tabs>
+      <TabsContent value="economia" className="mt-0" forceMount>
+        <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+          <PackagingEconomyTab />
+        </div>
+      </TabsContent>
 
       {/* Dialogs */}
       <AddPackagingQuoteDialog

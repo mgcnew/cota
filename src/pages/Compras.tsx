@@ -3,11 +3,11 @@ import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket, Package } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PageHeader } from "@/components/ui/page-header";
 import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 
 // Lazy load tab contents for better performance
@@ -18,8 +18,8 @@ const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"
 const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
 
 const TabLoader = () => (
-  <div className="flex items-center justify-center py-12">
-    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  <div className="flex items-center justify-center py-24">
+    <Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} />
   </div>
 );
 
@@ -74,7 +74,6 @@ function Compras() {
       key: 'n',
       ctrl: true,
       action: () => {
-        // Dispara evento customizado para abrir dialog de nova cotação/pedido
         const event = new CustomEvent('compras:nova', { detail: { tab: activeTab } });
         window.dispatchEvent(event);
       },
@@ -84,7 +83,6 @@ function Compras() {
       key: 'f',
       ctrl: true,
       action: () => {
-        // Foca no campo de busca
         const searchInput = document.querySelector('[data-search-input]') as HTMLInputElement;
         if (searchInput) searchInput.focus();
       },
@@ -96,137 +94,81 @@ function Compras() {
 
   return (
     <PageWrapper>
-      <div className="page-container">
-        {/* Tabs minimalistas */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          {/* Header com título */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
-                <ShoppingBag className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Compras</h1>
-              </div>
+      <div className={designSystem.layout.container.page}>
+        {/* Header da Página */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
+              <ShoppingBag className="h-6 w-6 text-[#83E509]" />
             </div>
-            
-            {/* Indicador de atalhos - apenas desktop */}
-            {!isMobile && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-                      <Keyboard className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="max-w-[200px]">
-                    <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
-                    <ul className="text-xs space-y-1">
-                      {shortcuts.map((s, i) => (
-                        <li key={i} className="flex justify-between gap-3">
-                          <span className="text-muted-foreground">{s.description}</span>
-                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
-                        </li>
-                      ))}
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
+            <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+              Compras
+            </h1>
           </div>
 
-          {/* Tabs - Abaixo do header, acima do conteúdo */}
+          {!isMobile && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className={designSystem.components.button.ghost}>
+                    <Keyboard className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className={designSystem.components.tooltip.content}>
+                  <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
+                  <ul className="text-xs space-y-1">
+                    {shortcuts.map((s, i) => (
+                      <li key={i} className="flex justify-between gap-3">
+                        <span className={designSystem.colors.text.secondary}>{s.description}</span>
+                        <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
+                      </li>
+                    ))}
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
+
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
+          {/* Tabs - Estilizadas conforme Design System Clean */}
           <div className={cn(
-            "mb-4",
-            isMobile ? "sticky top-0 z-10 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm -mx-4 px-4 py-2 border-b border-gray-200 dark:border-gray-800 overflow-x-auto scrollbar-none" : ""
+            "pb-1 border-b !bg-transparent !bg-none",
+            designSystem.colors.border.subtle,
+            isMobile ? "sticky top-0 z-10 bg-background/95 backdrop-blur-sm -mx-4 px-4 overflow-x-auto scrollbar-none" : ""
           )}>
-            <TabsList className={cn(
-              isMobile 
-                ? "h-auto w-max p-0 bg-transparent gap-2" 
-                : "h-auto p-0 bg-transparent border-0 gap-6"
-            )}>
-              <TabsTrigger 
-                value="cotacoes" 
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <FileText className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Cotações
-              </TabsTrigger>
-              <TabsTrigger 
-                value="pedidos"
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <ShoppingCart className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Pedidos
-              </TabsTrigger>
-              <TabsTrigger 
-                value="lista"
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <ShoppingBasket className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Lista
-              </TabsTrigger>
-              <TabsTrigger 
-                value="embalagens"
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <Package className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Embalagens
-              </TabsTrigger>
-              <TabsTrigger 
-                value="analise"
-                className={cn(
-                  "h-10 px-4 pb-2 text-sm font-medium transition-all rounded-none border-b-2 border-transparent !bg-transparent !shadow-none data-[state=active]:border-orange-600 dark:data-[state=active]:border-orange-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 text-muted-foreground hover:text-foreground hover:!bg-transparent data-[state=active]:!bg-transparent data-[state=active]:hover:!bg-transparent data-[state=active]:!shadow-none data-[state=active]:scale-100",
-                  isMobile ? "px-3 text-xs" : ""
-                )}
-              >
-                <BarChart3 className={isMobile ? "h-3.5 w-3.5 mr-1.5" : "h-4 w-4 mr-2"} />
-                Análise
-              </TabsTrigger>
+            <TabsList className={designSystem.components.tabs.clean.list}>
+              {[
+                { value: "cotacoes", icon: FileText, label: "Cotações" },
+                { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
+                { value: "lista", icon: ShoppingBasket, label: "Lista" },
+                { value: "embalagens", icon: Package, label: "Embalagens" },
+                { value: "analise", icon: BarChart3, label: "Análise" }
+              ].map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className={designSystem.components.tabs.clean.trigger}
+                >
+                  <tab.icon className={cn("h-4 w-4 mr-2", activeTab === tab.value ? "text-[#83E509]" : "opacity-70")} />
+                  {tab.label}
+                  {activeTab === tab.value && (
+                    <div className="absolute bottom-[-2px] left-0 right-0 h-[2.5px] bg-[#83E509] shadow-[0_0_12px_rgba(131,229,9,0.5)] rounded-full transition-all" />
+                  )}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
 
-          <TabsContent value="cotacoes" className="mt-0">
+          <div className="mt-6">
             <Suspense fallback={<TabLoader />}>
-              <CotacoesTab />
+              {activeTab === "cotacoes" && <CotacoesTab />}
+              {activeTab === "pedidos" && <PedidosTab />}
+              {activeTab === "analise" && <AnaliseTab />}
+              {activeTab === "lista" && <ListaComprasTab />}
+              {activeTab === "embalagens" && <EmbalagensTab />}
             </Suspense>
-          </TabsContent>
-
-          <TabsContent value="pedidos" className="mt-0">
-            <Suspense fallback={<TabLoader />}>
-              <PedidosTab />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="analise" className="mt-0">
-            <Suspense fallback={<TabLoader />}>
-              <AnaliseTab />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="lista" className="mt-0">
-            <Suspense fallback={<TabLoader />}>
-              <ListaComprasTab />
-            </Suspense>
-          </TabsContent>
-
-          <TabsContent value="embalagens" className="mt-0">
-            <Suspense fallback={<TabLoader />}>
-              <EmbalagensTab />
-            </Suspense>
-          </TabsContent>
+          </div>
         </Tabs>
       </div>
     </PageWrapper>
@@ -234,3 +176,4 @@ function Compras() {
 }
 
 export default memo(Compras);
+

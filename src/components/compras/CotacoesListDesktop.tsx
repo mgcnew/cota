@@ -7,6 +7,8 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Quote } from "@/hooks/useCotacoes";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 interface CotacoesListDesktopProps {
   cotacoes: Quote[];
@@ -18,78 +20,77 @@ interface CotacoesListDesktopProps {
   isUpdating: boolean;
 }
 
-export const CotacoesListDesktop = memo(({ 
-  cotacoes, 
-  startIndex, 
-  onUpdateStatus, 
-  onView, 
-  onManage, 
-  onDelete, 
-  isUpdating 
+export const CotacoesListDesktop = memo(({
+  cotacoes,
+  startIndex,
+  onUpdateStatus,
+  onView,
+  onManage,
+  onDelete,
+  isUpdating
 }: CotacoesListDesktopProps) => {
   return (
-    <div className="hidden md:block overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
+    <div className="hidden md:block overflow-x-auto w-full custom-scrollbar">
+      <Table className={designSystem.components.table.root}>
+        <TableHeader className={designSystem.components.table.header}>
+          <TableRow className="hover:bg-transparent border-none">
+            <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+              <div className={cn("flex items-center shadow-sm px-4 py-4 border", designSystem.components.card.flat, designSystem.colors.border.subtle)}>
                 <div className="w-[15%] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                    <ClipboardList className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <div className="w-8 h-8 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0">
+                    <ClipboardList className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
                   </div>
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cotação</span>
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Cotação</span>
                 </div>
                 <div className="w-[18%] pl-2 flex items-center gap-2">
-                  <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Produto</span>
                 </div>
-                <div className="w-[10%] pl-2 flex justify-center items-center gap-2">
-                  <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
+                <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Status</span>
                 </div>
                 <div className="w-[14%] pl-2 flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Melhor Preço</span>
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Melhor Preço</span>
                 </div>
                 <div className="w-[12%] pl-2 flex items-center gap-2">
-                  <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornec.</span>
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Fornec.</span>
                 </div>
                 <div className="w-[8%] pl-2 flex items-center gap-2">
-                  <Info className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Itens</span>
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Itens</span>
                 </div>
-                <div className="w-[10%] pl-2 flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Prazo</span>
+                <div className="w-[11%] pl-2 flex items-center gap-2">
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Prazo</span>
                 </div>
-                <div className="w-[8%] pl-2 flex justify-end items-center">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
+                <div className="w-[10%] flex justify-end items-center gap-2 px-2">
+                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Ações</span>
                 </div>
               </div>
-            </TableHead>
+            </TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
           {cotacoes.map((cotacao, index) => {
             const cotacaoNumero = startIndex + index + 1;
             return (
-              <TableRow key={cotacao.id} className="group border-none">
-                <TableCell colSpan={7} className="px-1 py-1.5">
-                  <div className="flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 transition-colors duration-150 hover:bg-gray-100 dark:hover:bg-gray-800/70">
+              <TableRow key={cotacao.id} className="group border-none hover:bg-transparent">
+                <TableCell colSpan={7} className={designSystem.components.table.cell}>
+                  <div className={cn(
+                    "flex items-center px-4 py-3 mb-1",
+                    designSystem.components.table.row
+                  )}>
                     <div className="w-[15%] flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center border border-gray-200 dark:border-gray-600/30">
-                        <ClipboardList className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                      <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-border/40">
+                        <ClipboardList className="h-4 w-4 text-[#83E509]" />
                       </div>
-                      <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">#{cotacaoNumero.toString().padStart(4, '0')}</span>
+                      <span className={cn("font-bold text-sm", designSystem.colors.text.primary)}>
+                        #{cotacaoNumero.toString().padStart(4, '0')}
+                      </span>
                     </div>
-                    <div className="w-[18%] pl-2">
-                      <CapitalizedText className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate block max-w-[150px]">
+                    <div className="w-[18%] pl-2 min-w-0">
+                      <CapitalizedText className={cn("font-bold text-sm truncate block", designSystem.colors.text.primary)}>
                         {cotacao.produtoResumo || cotacao.produto}
                       </CapitalizedText>
                     </div>
-                    <div className="w-[10%] pl-2 flex justify-center">
+                    <div className="w-[12%] pl-2 flex justify-center">
                       <StatusSelect
                         value={cotacao.status}
                         options={QUOTE_STATUS_OPTIONS}
@@ -97,27 +98,27 @@ export const CotacoesListDesktop = memo(({
                         isLoading={isUpdating}
                       />
                     </div>
-                    <div className="w-[14%] pl-2">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{cotacao.melhorPreco || 'R$ 0,00'}</span>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[100px]">{cotacao.melhorFornecedor || '-'}</p>
+                    <div className="w-[14%] pl-2 min-w-0">
+                      <span className="font-bold text-emerald-500 text-sm">{cotacao.melhorPreco || 'R$ 0,00'}</span>
+                      <p className={cn("text-xs truncate opacity-70", designSystem.colors.text.secondary)}>{cotacao.melhorFornecedor || '-'}</p>
                     </div>
                     <div className="w-[12%] pl-2">
-                      <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 rounded-full w-fit">
-                        <Building2 className="h-3 w-3 text-blue-500 dark:text-blue-400" />
-                        <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs">{cotacao.fornecedores}</span>
+                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20 w-fit">
+                        <Building2 className="h-3.5 w-3.5 text-blue-500" />
+                        <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{cotacao.fornecedores}</span>
                       </div>
                     </div>
-                    <div className="w-[8%] pl-2 flex items-center gap-1">
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{cotacao.produtosLista?.length || 0}</span>
+                    <div className="w-[8%] pl-2 flex items-center gap-1.5">
+                      <span className={cn("text-sm font-bold", designSystem.colors.text.primary)}>{cotacao.produtosLista?.length || 0}</span>
                       {cotacao.produtosLista && cotacao.produtosLista.length > 0 && (
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                              <Info className="h-3.5 w-3.5 text-zinc-400 cursor-help" />
                             </TooltipTrigger>
-                            <TooltipContent side="top" className="max-w-[250px]">
-                              <p className="font-semibold text-xs mb-1">Produtos cotados:</p>
-                              <ul className="text-xs space-y-0.5">
+                            <TooltipContent side="top" className={designSystem.components.tooltip.content}>
+                              <p className="font-bold mb-1">Produtos cotados:</p>
+                              <ul className="space-y-0.5">
                                 {cotacao.produtosLista.map((produto, idx) => (
                                   <li key={idx}>• {produto}</li>
                                 ))}
@@ -127,29 +128,35 @@ export const CotacoesListDesktop = memo(({
                         </TooltipProvider>
                       )}
                     </div>
-                    <div className="w-[10%] pl-2 text-sm text-gray-500 dark:text-gray-400">
-                      {cotacao.dataFim || '-'}
+                    <div className={cn("w-[11%] pl-2 text-xs font-medium", designSystem.colors.text.secondary)}>
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-3 w-3 opacity-50" />
+                        {cotacao.dataFim || '-'}
+                      </div>
                     </div>
-                    <div className="w-[8%] pl-2 flex justify-end">
+                    <div className="w-[10%] flex justify-end items-center px-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/70 rounded-lg">
+                          <Button variant="ghost" size="icon" className={cn(designSystem.components.button.size.icon, designSystem.components.button.ghost)}>
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+                        <DropdownMenuContent align="end" className="w-48 overflow-hidden rounded-xl">
                           {(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (
-                            <DropdownMenuItem onClick={() => onView(cotacao)} className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30">
-                              <Eye className="h-4 w-4 mr-2" />Resumo
+                            <DropdownMenuItem onClick={() => onView(cotacao)} className="gap-2">
+                              <Eye className="h-4 w-4 text-blue-500" />
+                              Resumo da Decisão
                             </DropdownMenuItem>
                           ) : (
                             <>
-                              <DropdownMenuItem onClick={() => onManage(cotacao)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70">
-                                <ClipboardList className="h-4 w-4 mr-2" />Gerenciar
+                              <DropdownMenuItem onClick={() => onManage(cotacao)} className="gap-2">
+                                <ClipboardList className="h-4 w-4 text-emerald-500" />
+                                Gerenciar Fornecedores
                               </DropdownMenuItem>
-                              <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
-                              <DropdownMenuItem onClick={() => onDelete(cotacao)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
-                                <Trash2 className="h-4 w-4 mr-2" />Excluir
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => onDelete(cotacao)} className="gap-2 text-red-500 focus:text-red-500">
+                                <Trash2 className="h-4 w-4" />
+                                Excluir Cotação
                               </DropdownMenuItem>
                             </>
                           )}

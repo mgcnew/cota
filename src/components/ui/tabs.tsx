@@ -12,7 +12,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
+      "inline-flex h-10 items-center justify-center rounded-xl p-1 text-muted-foreground transition-all bg-transparent !bg-transparent border-none !border-0 shadow-none",
       className,
     )}
     {...props}
@@ -27,21 +27,10 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background",
-      // Transição simplificada para performance
-      "transition-colors duration-150",
-      // Active state with smooth animation
-      "data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      // Hover state with subtle feedback
-      "hover:bg-background/50 hover:text-foreground/80",
-      // Active hover state
-      "data-[state=active]:hover:bg-background data-[state=active]:hover:text-foreground",
-      // Focus states
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      // Disabled state
-      "disabled:pointer-events-none disabled:opacity-50",
-      // Scale effect on active
-      "data-[state=active]:scale-[1.02]",
+      "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      // Transparência total por padrão para os triggers também
+      "bg-transparent !bg-transparent data-[state=active]:bg-transparent data-[state=active]:!bg-transparent",
+      "hover:text-zinc-900 dark:hover:text-zinc-100",
       className,
     )}
     {...props}

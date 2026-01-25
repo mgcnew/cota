@@ -329,27 +329,17 @@ function Produtos() {
                   </div>
 
                   {/* Pagination */}
-                  <div className={cn("border-t mt-4 pt-4 px-2", designSystem.colors.border.subtle)}>
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
-                      <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary, "order-2 sm:order-1")}>
-                        {paginatedData.items.length > 0
-                          ? `${((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}-${Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}`
-                          : '0'
-                        } de {safeFilteredProducts.length}
-                      </span>
-                      <div className="order-1 sm:order-2">
-                        <DataPagination
-                          currentPage={paginatedData.pagination.currentPage}
-                          totalPages={paginatedData.pagination.totalPages}
-                          itemsPerPage={paginatedData.pagination.itemsPerPage}
-                          totalItems={safeFilteredProducts.length}
-                          onPageChange={paginatedData.pagination.goToPage}
-                          onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                          startIndex={((paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage) + 1}
-                          endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
-                        />
-                      </div>
-                    </div>
+                  <div className={cn("mt-2", designSystem.colors.border.subtle)}>
+                    <DataPagination
+                      currentPage={paginatedData.pagination.currentPage}
+                      totalPages={paginatedData.pagination.totalPages}
+                      itemsPerPage={paginatedData.pagination.itemsPerPage}
+                      totalItems={safeFilteredProducts.length}
+                      onPageChange={paginatedData.pagination.goToPage}
+                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                      startIndex={(paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage}
+                      endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
+                    />
                   </div>
                 </>
               )}

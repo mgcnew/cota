@@ -12,9 +12,10 @@ import {
   PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 interface DataPaginationProps {
   currentPage: number;
@@ -86,22 +87,29 @@ export const DataPagination = memo(function DataPagination({
     if (safeCurrentPage < safeTotalPages) onPageChange(safeCurrentPage + 1);
   }, [safeCurrentPage, safeTotalPages, onPageChange]);
 
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>
-          Mostrando {safeStartIndex + 1} a {safeEndIndex} de {safeTotalItems} resultados
-        </span>
-      </div>
+  const tokens = designSystem.components.pagination;
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Itens por página:</span>
+  return (
+    <div className={tokens.wrapper}>
+      {/* Resultados e Seletor de Itens */}
+      <div className="flex items-center gap-6 order-2 sm:order-1">
+        <div className={tokens.results}>
+          {safeTotalItems > 0 ? (
+            <>
+              Mostrando <span className="text-foreground dark:text-zinc-200">{safeStartIndex + 1}</span> a <span className="text-foreground dark:text-zinc-200">{safeEndIndex}</span> de <span className="text-foreground dark:text-zinc-200">{safeTotalItems}</span> resultados
+            </>
+          ) : (
+            "Nenhum resultado encontrado"
+          )}
+        </div>
+
+        <div className="hidden md:flex items-center gap-2">
+          <span className="text-[12px] font-medium text-zinc-400">Itens:</span>
           <Select
             value={safeItemsPerPage.toString()}
             onValueChange={handleItemsPerPageChange}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="h-8 w-[65px] bg-transparent border-zinc-200 dark:border-zinc-800 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -112,45 +120,57 @@ export const DataPagination = memo(function DataPagination({
             </SelectContent>
           </Select>
         </div>
-
-        {safeTotalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={handlePrevious}
-                  className={safeCurrentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-
-              {pageNumbers.map((page, idx) =>
-                page === "ellipsis" ? (
-                  <PaginationItem key={`ellipsis-${idx}`}>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                ) : (
-                  <PaginationItem key={page}>
-                    <PaginationLink
-                      onClick={() => onPageChange(page)}
-                      isActive={safeCurrentPage === page}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                )
-              )}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={handleNext}
-                  className={safeCurrentPage === safeTotalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
       </div>
+
+      {/* Navegação */}
+      {safeTotalPages > 1 && (
+        <div className={cn(tokens.controls, "order-1 sm:order-2")}>
+          <div className={tokens.nav}>
+            <button
+              onClick={handlePrevious}
+              disabled={safeCurrentPage === 1}
+              className={tokens.navButton}
+              title="Anterior"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+
+            <Pagination className="w-auto mx-0">
+              <PaginationContent className="gap-1.5 font-sans">
+                {pageNumbers.map((page, idx) =>
+                  page === "ellipsis" ? (
+                    <PaginationItem key={`ellipsis-${idx}`}>
+                      <PaginationEllipsis className="h-9 w-9 flex items-center justify-center text-zinc-400" />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => onPageChange(page)}
+                        isActive={safeCurrentPage === page}
+                        className={cn(
+                          tokens.item,
+                          safeCurrentPage === page ? tokens.active : tokens.inactive
+                        )}
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )}
+              </PaginationContent>
+            </Pagination>
+
+            <button
+              onClick={handleNext}
+              disabled={safeCurrentPage === safeTotalPages}
+              className={tokens.navButton}
+              title="Próxima"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

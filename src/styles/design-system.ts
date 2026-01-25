@@ -203,11 +203,16 @@ export const designSystem = {
             success: "border-transparent bg-emerald-50 text-emerald-600 border border-emerald-100"
         },
 
-        // Abas (Tabs)
+        // Abas (Tabs) 
         tabs: {
-            list: "inline-flex h-10 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-900 p-1 text-muted-foreground w-full sm:w-auto",
-            trigger: "inline-flex items-center justify-center white-space-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-800 data-[state=active]:text-foreground data-[state=active]:shadow-sm text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100",
-            content: "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            list: "inline-flex h-10 items-center justify-center rounded-xl bg-zinc-100/50 dark:bg-zinc-800/40 p-1 text-muted-foreground w-full sm:w-auto backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/30",
+            trigger: "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-950 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-md text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
+            content: "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+            // Variante "Clean" para Navegação de Topo (100% transparente SEMPRE)
+            clean: {
+                list: "inline-flex h-auto items-center justify-start !bg-transparent !bg-none p-0 gap-4 md:gap-8 w-full border-none !border-0 shadow-none !shadow-none backdrop-blur-none !bg-opacity-0",
+                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 data-[state=active]:border-[#83E509] data-[state=active]:text-[#83E509] data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
+            }
         },
 
         // Tooltips
@@ -219,6 +224,19 @@ export const designSystem = {
         separator: {
             horizontal: "h-[1px] w-full bg-zinc-200 dark:bg-zinc-800 my-4",
             vertical: "h-full w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-4"
+        },
+
+        // Paginação
+        pagination: {
+            wrapper: "flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-6 mt-2",
+            results: "text-[13px] font-medium text-zinc-500 dark:text-zinc-400 order-2 sm:order-1",
+            controls: "flex items-center gap-3 order-1 sm:order-2",
+            item: "flex items-center justify-center min-w-[36px] h-9 rounded-lg border text-[13px] font-semibold transition-all duration-200",
+            active: "bg-[#83E509] border-[#83E509] text-zinc-950 shadow-[0_4px_12px_rgba(131,229,9,0.25)]",
+            inactive: "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
+            disabled: "opacity-40 pointer-events-none",
+            nav: "flex items-center gap-1.5",
+            navButton: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
         }
     },
 
