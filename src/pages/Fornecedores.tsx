@@ -27,6 +27,8 @@ import { VirtualList } from "@/components/responsive/VirtualList";
 import { FornecedoresSkeleton, ExpandableSupplierCard } from "@/components/suppliers";
 import { SupplierListDesktop } from "@/components/suppliers/SupplierListDesktop";
 import { useSupplierStats } from "@/hooks/useSupplierStats";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
 // Lazy load dialogs for better initial load performance
@@ -230,16 +232,18 @@ function Fornecedores() {
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className="page-container">
+        <div className={designSystem.layout.container.page}>
           {/* Page Title */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg transition-smooth hover:shadow-xl hover:scale-105">
-              <Building2 className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-3 mb-6">
+            <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
+              <Building2 className="h-6 w-6 text-[#83E509]" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Fornecedores</h1>
+            <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+              Fornecedores
+            </h1>
           </div>
 
-          {/* Metrics Grid - Above the fold priority (Requirement 4.1) */}
+          {/* Metrics Grid */}
           <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4">
             <MetricCard
               title="Fornecedores"
@@ -247,7 +251,7 @@ function Fornecedores() {
               icon={Building2}
               trend={{ value: "+15", label: "novos este mês", type: "positive" }}
               variant="info"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
             <MetricCard
               title="Ativos"
@@ -255,7 +259,7 @@ function Fornecedores() {
               icon={TrendingUp}
               trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
               variant="success"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
             <MetricCard
               title="Limite Total"
@@ -263,7 +267,7 @@ function Fornecedores() {
               icon={DollarSign}
               trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
               variant="default"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
             <MetricCard
               title="Cotações"
@@ -271,51 +275,55 @@ function Fornecedores() {
               icon={FileText}
               trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
               variant="warning"
-              className="transition-smooth hover:scale-[1.02]"
+              className="hover:scale-[1.02] transition-transform"
             />
           </ResponsiveGrid>
 
           {/* Filters & Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 mb-4">
-            <div className="flex-shrink-0">
-              <ExpandableSearch
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Buscar fornecedores..."
-                accentColor="amber"
-                expandedWidth="w-64"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="active">Ativos</SelectItem>
-                  <SelectItem value="inactive">Inativos</SelectItem>
-                  <SelectItem value="pending">Pendentes</SelectItem>
-                </SelectContent>
-              </Select>
-              <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
-            </div>
-            <div className="flex gap-2 ml-auto">
-              <Button
-                variant="outline"
-                onClick={() => importSuppliersRef.current?.click()}
-                className="hidden sm:flex transition-smooth"
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
-              </Button>
-              <Button
-                onClick={() => addSupplierRef.current?.click()}
-                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 transition-smooth hover:scale-[1.02]"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Fornecedor
-              </Button>
+          <div className={designSystem.layout.container.section}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="flex-1 sm:flex-shrink-0">
+                <ExpandableSearch
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Buscar fornecedores..."
+                  accentColor="gray"
+                  expandedWidth="w-full sm:w-64"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                  <SelectTrigger className={cn(designSystem.components.input.root, "w-[150px]")}>
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="active">Ativos</SelectItem>
+                    <SelectItem value="inactive">Inativos</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
+              </div>
+              <div className="flex gap-2 ml-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => importSuppliersRef.current?.click()}
+                  className={cn(designSystem.components.button.secondary, "h-10 hidden sm:flex")}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Importar
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => addSupplierRef.current?.click()}
+                  className={cn(designSystem.components.button.primary, "h-11 sm:h-10")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Fornecedor
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -446,7 +454,7 @@ function Fornecedores() {
                 </div>
 
                 {/* Desktop Table View */}
-                <SupplierListDesktop 
+                <SupplierListDesktop
                   suppliers={paginatedData.items}
                   onEdit={setEditingSupplier}
                   onDelete={setDeletingSupplier}
@@ -462,7 +470,7 @@ function Fornecedores() {
                       {paginatedData.pagination.startIndex + 1}-{paginatedData.pagination.endIndex} de {paginatedData.pagination.totalItems}
                     </span>
                     <div className="order-1 sm:order-2">
-                        <DataPagination
+                      <DataPagination
                         currentPage={paginatedData.pagination.currentPage}
                         totalPages={paginatedData.pagination.totalPages}
                         itemsPerPage={paginatedData.pagination.itemsPerPage}
