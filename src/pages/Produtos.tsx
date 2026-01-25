@@ -346,68 +346,60 @@ function Produtos() {
             </div>
           </div>
 
-          {/* Lazy loaded dialogs with Suspense */}
-          <Suspense fallback={addDialogOpen ? <DialogLoader /> : null}>
-            {addDialogOpen && (
-              <AddProductDialog
-                onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
-                onCategoryAdded={invalidateCache}
-                open={addDialogOpen}
-                onOpenChange={setAddDialogOpen}
-              />
-            )}
+          {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank when opening */}
+          <Suspense fallback={null}>
+            <AddProductDialog
+              onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
+              onCategoryAdded={invalidateCache}
+              open={addDialogOpen}
+              onOpenChange={setAddDialogOpen}
+            />
           </Suspense>
 
-          <Suspense fallback={importDialogOpen ? <DialogLoader /> : null}>
-            {importDialogOpen && (
-              <ImportProductsDialog
-                onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
-                onCategoryAdded={invalidateCache}
-                open={importDialogOpen}
-                onOpenChange={setImportDialogOpen}
-              />
-            )}
+          <Suspense fallback={null}>
+            <ImportProductsDialog
+              onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
+              onCategoryAdded={invalidateCache}
+              open={importDialogOpen}
+              onOpenChange={setImportDialogOpen}
+            />
           </Suspense>
 
-          <Suspense fallback={editingProduct ? <DialogLoader /> : null}>
-            {editingProduct && (
-              <EditProductDialog
-                product={editingProduct}
-                open={!!editingProduct}
-                onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
-                onProductUpdated={(updatedProduct) => {
-                  if (typeof updateProduct === 'function') {
-                    updateProduct({
-                      productId: updatedProduct.id,
-                      data: {
-                        name: updatedProduct.name,
-                        category: updatedProduct.category,
-                        unit: updatedProduct.unit,
-                        barcode: updatedProduct.barcode,
-                        brand_id: updatedProduct.brand_id
-                      }
-                    });
-                  }
-                  setEditingProduct(null);
-                }}
-                onCategoryAdded={invalidateCache}
-                categories={safeCategories}
-              />
-            )}
+          <Suspense fallback={null}>
+            <EditProductDialog
+              product={editingProduct}
+              open={!!editingProduct}
+              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+              onProductUpdated={(updatedProduct) => {
+                if (typeof updateProduct === 'function') {
+                  updateProduct({
+                    productId: updatedProduct.id,
+                    data: {
+                      name: updatedProduct.name,
+                      category: updatedProduct.category,
+                      unit: updatedProduct.unit,
+                      barcode: updatedProduct.barcode,
+                      brand_id: updatedProduct.brand_id
+                    }
+                  });
+                }
+                setEditingProduct(null);
+              }}
+              onCategoryAdded={invalidateCache}
+              categories={safeCategories}
+            />
           </Suspense>
 
-          <Suspense fallback={deletingProduct ? <DialogLoader /> : null}>
-            {deletingProduct && (
-              <DeleteProductDialog
-                product={deletingProduct}
-                open={!!deletingProduct}
-                onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
-                onProductDeleted={(id) => {
-                  if (typeof deleteProduct === 'function') { deleteProduct(id); }
-                  setDeletingProduct(null);
-                }}
-              />
-            )}
+          <Suspense fallback={null}>
+            <DeleteProductDialog
+              product={deletingProduct}
+              open={!!deletingProduct}
+              onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
+              onProductDeleted={(id) => {
+                if (typeof deleteProduct === 'function') { deleteProduct(id); }
+                setDeletingProduct(null);
+              }}
+            />
           </Suspense>
 
           {/* Product Price History Dialog - controlled by state */}
