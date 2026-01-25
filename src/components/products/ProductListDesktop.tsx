@@ -37,43 +37,36 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
         <TableHeader>
           <TableRow className="hover:bg-transparent border-none">
             <TableCell colSpan={9} className="px-1 py-0 border-none">
-              <div className={cn("flex items-center rounded-xl shadow-sm px-4 py-4", designSystem.components.card.flat)}>
+              <div className={cn("flex items-center rounded-xl shadow-sm px-4 py-4 border border-border/40", designSystem.components.card.flat)}>
                 <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-gray-100/50 dark:bg-gray-800/50 flex items-center justify-center flex-shrink-0">
                     <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </div>
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Produto</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Produto</span>
                 </div>
                 <div className="w-[12%] px-2 flex justify-center items-center gap-2">
-                  <Tags className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Categoria</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Categoria</span>
                 </div>
                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                  <Award className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Marca</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Marca</span>
                 </div>
                 <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
-                  <Barcode className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Código</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Código</span>
                 </div>
                 <div className="w-[11%] px-2 flex justify-center items-center gap-2">
-                  <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Status</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Status</span>
                 </div>
                 <div className="w-[10%] px-2 flex justify-center items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Preço</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Preço</span>
                 </div>
                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                  <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Fornecedor</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Fornecedor</span>
                 </div>
                 <div className="w-[8%] px-2 flex justify-center items-center gap-2">
-                  <ClipboardList className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Cot.</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Cot.</span>
                 </div>
                 <div className="w-[10%] flex justify-end items-center gap-2 px-2">
-                  <span className="uppercase tracking-wide text-xs font-bold text-gray-500 dark:text-gray-400">Ações</span>
+                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Ações</span>
                 </div>
               </div>
             </TableCell>
@@ -84,7 +77,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
             <TableRow key={product.id} className="group border-none hover:bg-transparent">
               <TableCell colSpan={9} className="px-1 py-0 border-none">
                 <div className={cn(
-                  "flex items-center px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.005] hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 cursor-default",
+                  "flex items-center px-4 py-3 rounded-xl border transition-all duration-200 hover:scale-[1.005] hover:shadow-md cursor-default mb-2",
                   designSystem.colors.surface.card,
                   designSystem.colors.border.subtle
                 )}>

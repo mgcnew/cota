@@ -36,6 +36,8 @@ import { LimitAlert } from "@/components/billing/LimitAlert";
 import { useQueryClient } from '@tanstack/react-query';
 import { useUserRole } from "@/hooks/useUserRole";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
@@ -98,7 +100,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
   const onSubmit = async (data: SupplierFormData, keepOpen = false) => {
     try {
       const { data: userData, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError || !userData.user) {
         toast({
           title: "Erro",
@@ -161,14 +163,14 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           ? `${data.name} foi adicionado! Adicione outro fornecedor.`
           : `${data.name} foi adicionado com sucesso.`,
       });
-      
+
       // Invalidar queries para atualizar dados em tempo real
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       queryClient.invalidateQueries({ queryKey: ['subscription-limits'] });
-      
+
       onAdd();
       form.reset();
-      
+
       if (!keepOpen) {
         handleOpenChange(false);
       } else {
@@ -210,30 +212,16 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
 
   // Shared Header Component
   const Header = (
-    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
-            <Building2 className="h-4 w-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            {isMobile ? (
-              <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
-                Novo Fornecedor
-              </DrawerTitle>
-            ) : (
-              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
-                Novo Fornecedor
-              </DialogTitle>
-            )}
-          </div>
+    <div className={designSystem.components.modal.header}>
+      <div className="flex items-center gap-3">
+        <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
+          <Building2 className={cn("h-4 w-4", designSystem.colors.text.primary)} />
         </div>
-        
-        <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
-          <X className="h-4 w-4" />
-        </Button>
+        <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+          Novo Fornecedor
+        </DialogTitle>
       </div>
+      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
   );
 
@@ -242,34 +230,35 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
     <>
       {Header}
       <Form {...form}>
-        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden bg-white dark:bg-gray-950" id="add-supplier-form">
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
+        <form onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className={cn("flex flex-col h-full overflow-hidden", designSystem.colors.surface.page)} id="add-supplier-form">
+          <div className={cn(designSystem.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4 sm:p-6")}>
             {/* Alerta de limite de fornecedores */}
-            <LimitAlert 
+            <LimitAlert
               resource="suppliers"
               current={subscriptionLimits.currentSuppliers}
               max={subscriptionLimits.maxSuppliers}
             />
+
             {/* Seção: Informações da Empresa */}
-            <div className="space-y-3">
-              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
+            <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
+              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
+                <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
                 Informações da Empresa
               </h3>
-              
-              <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'lg:grid-cols-2 gap-3.5'}`}>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Fornecedor *</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Nome do Fornecedor *</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Ex: Holambra Distribuidora" 
-                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        <Input
+                          placeholder="Ex: Holambra Distribuidora"
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -282,13 +271,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                   name="cnpj"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>CNPJ</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>CNPJ</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="00.000.000/0000-00" 
-                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        <Input
+                          placeholder="00.000.000/0000-00"
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -302,13 +291,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Endereço Completo</FormLabel>
+                    <FormLabel className={designSystem.typography.size.sm}>Endereço Completo</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Rua das Flores, 123, Centro, São Paulo - SP" 
-                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      <Input
+                        placeholder="Rua das Flores, 123, Centro, São Paulo - SP"
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -318,9 +307,9 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
             </div>
 
             {/* Seção: Informações de Contato */}
-            <div className="space-y-3">
-              <h3 className={`${isMobile ? 'text-[11px]' : 'text-xs'} font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-2`}>
-                <span className="w-1 h-4 bg-gray-200 dark:bg-gray-700 rounded-full"></span>
+            <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
+              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
+                <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
                 Informações de Contato
               </h3>
 
@@ -329,13 +318,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                 name="contact"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Nome do Contato Principal *</FormLabel>
+                    <FormLabel className={designSystem.typography.size.sm}>Nome do Contato Principal *</FormLabel>
                     <FormControl>
-                      <Input 
-                        placeholder="Ex: João Silva Santos" 
-                        className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                      <Input
+                        placeholder="Ex: João Silva Santos"
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -343,19 +332,19 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                 )}
               />
 
-              <div className={`grid grid-cols-1 ${isMobile ? 'gap-3' : 'sm:grid-cols-2 gap-3.5'}`}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Telefone / WhatsApp</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Telefone / WhatsApp</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="(11) 99999-9999" 
-                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        <Input
+                          placeholder="(11) 99999-9999"
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -368,14 +357,14 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={`${isMobile ? 'text-xs' : 'text-xs'} font-medium text-gray-700 dark:text-gray-300`}>Email Comercial</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Email Comercial</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="comercial@empresa.com" 
-                          type="email" 
-                          className={`${isMobile ? 'h-11 text-base' : 'h-9 text-sm'} bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 focus:border-gray-400 dark:focus:border-gray-500 focus:ring-0 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                        <Input
+                          placeholder="comercial@empresa.com"
+                          type="email"
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -385,14 +374,14 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
               </div>
             </div>
 
-            {/* Dica de preenchimento - Ocultar no mobile */}
+            {/* Dica de preenchimento */}
             {!isMobile && (
-              <div className="bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-800/30 rounded-lg p-3">
+              <div className="bg-primary/5 border border-primary/10 rounded-lg p-3">
                 <div className="flex items-start gap-2">
                   <div className="text-lg">💡</div>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-orange-900 dark:text-orange-300 text-xs mb-1.5">Dicas Rápidas</h4>
-                    <ul className="text-xs text-orange-800 dark:text-orange-400 space-y-0.5">
+                    <h4 className={cn("font-semibold text-xs mb-1.5", designSystem.colors.text.primary)}>Dicas Rápidas</h4>
+                    <ul className={cn("text-xs space-y-0.5", designSystem.colors.text.secondary)}>
                       <li>• Campos com * são obrigatórios</li>
                       <li>• Email usado para cotações</li>
                       <li>• Mantenha dados atualizados</li>
@@ -404,35 +393,37 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           </div>
 
           {/* Footer com botões */}
-          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-3 sm:py-4'} border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900`}>
-            <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2 justify-end'}`}>
-              <Button 
-                type="button" 
-                variant="outline" 
+          <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
+            <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => handleOpenChange(false)}
-                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-4'} rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 dark:text-white`}
+                className={designSystem.components.button.secondary}
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit"
-                form="add-supplier-form"
-                className={`${isMobile ? 'h-11 w-full text-base' : 'h-9 text-sm px-6'} bg-orange-600 hover:bg-orange-700 text-white rounded-lg shadow-sm transition-colors duration-200`}
-              >
-                <Plus className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'} mr-2`} />
-                Adicionar
-              </Button>
+
               {!isMobile && (
-                <Button 
+                <Button
                   type="button"
                   onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
                   variant="outline"
-                  className="h-9 rounded-lg border-orange-500 dark:border-orange-400 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/20 text-sm px-4"
+                  className={cn(designSystem.components.button.secondary, "border-primary/50 text-primary hover:bg-primary/10")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Criar Mais
                 </Button>
               )}
+
+              <Button
+                type="submit"
+                form="add-supplier-form"
+                className={designSystem.components.button.primary}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar
+              </Button>
             </div>
           </div>
         </form>
@@ -449,9 +440,9 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent 
+        <DrawerContent
           className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
-          style={{ 
+          style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
@@ -465,13 +456,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
 
   // Desktop: Usar Dialog
   return (
-    <Dialog open={open} onOpenChange={handleSetOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && (
         <DialogTrigger asChild>
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent hideClose className="w-[90vw] max-w-[520px] h-[85vh] max-h-[700px] overflow-hidden border border-gray-200 dark:border-gray-700 shadow-md rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden">
+      <DialogContent className={designSystem.components.modal.content}>
         {content}
       </DialogContent>
     </Dialog>

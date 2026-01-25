@@ -46,17 +46,17 @@ export const designSystem = {
             inverted: "text-zinc-50 dark:text-zinc-900"
         },
         surface: {
-            page: "bg-gray-50 dark:bg-zinc-950",
-            card: "bg-white dark:bg-zinc-900",
-            section: "bg-zinc-50 dark:bg-zinc-900/50",
-            hover: "hover:bg-zinc-50 dark:hover:bg-zinc-800",
-            active: "active:bg-zinc-100 dark:active:bg-zinc-700"
+            page: "bg-background", // Sincronizado com index.css
+            card: "bg-card",       // Sincronizado com index.css
+            section: "bg-muted/30 dark:bg-zinc-900/50",
+            hover: "hover:bg-accent dark:hover:bg-zinc-800",
+            active: "active:bg-accent/80 dark:active:bg-zinc-700"
         },
         border: {
-            default: "border-zinc-200 dark:border-zinc-800",
-            subtle: "border-zinc-100 dark:border-zinc-900",
-            active: "border-zinc-300 dark:border-zinc-600",
-            brand: "border-[#83E509]"
+            default: "border-border", // Sincronizado com index.css
+            subtle: "border-border/50 dark:border-zinc-900",
+            active: "border-primary",
+            brand: "border-primary"
         }
     },
 
@@ -175,14 +175,14 @@ export const designSystem = {
             footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl"
         },
 
-        // Tabelas (Data Display)
+        // Tabelas (Data Display) - Padrão de Linhas Flutuantes (Floating Rows)
         table: {
-            root: "w-full text-sm text-left border-collapse",
-            container: "rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden bg-white dark:bg-zinc-900 shadow-sm",
-            header: "bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800 h-10",
-            headerCell: "h-10 px-4 text-left align-middle font-medium text-zinc-500 dark:text-zinc-400 text-xs uppercase tracking-wide",
-            row: "border-b border-zinc-100 dark:border-zinc-800 last:border-0 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/30 transition-colors bg-white dark:bg-zinc-950",
-            cell: "p-4 align-middle text-zinc-700 dark:text-zinc-300",
+            root: "w-full text-sm text-left border-separate border-spacing-y-2", // Espaçamento vertical entre linhas
+            container: "bg-background w-full", // Fundo do sistema para as linhas flutuarem
+            header: "bg-transparent",
+            headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
+            row: "bg-card border border-border/40 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.002]",
+            cell: "p-0 align-middle", // Padrão 0 para que o container interno da linha controle o padding
             caption: "mt-4 text-sm text-muted-foreground"
         },
 

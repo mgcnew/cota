@@ -24,172 +24,103 @@
 @layer base {
   :root {
     /* ============================================
-       SOFT LIGHT MODE - Confortável para os olhos
-       Cores suavizadas para reduzir fadiga visual
+       PREMIUM MINIMALIST LIGHT MODE
        ============================================ */
     
-    /* Background Colors - Tom mais quente e suave */
-    /* WCAG AA: foreground on background = ~13:1 ✓ */
-    --background: 220 14% 94%; /* #ECEEF2 - Cinza suave com tom frio */
-    --foreground: 222 47% 15%; /* #1A2332 - Texto escuro mas não preto */
+    /* Background Colors */
+    --background: 210 20% 98%; /* Gray-50/100 - Limpo */
+    --foreground: 240 10% 3.9%; /* Zinc-950 */
     
-    /* Card System - Off-white suave */
-    /* WCAG AA: card-foreground on card = ~12:1 ✓ */
-    --card: 220 20% 98%; /* #F9FAFB - Off-white com leve tom azulado */
-    --card-foreground: 222 47% 15%;
+    /* Card System */
+    --card: 0 0% 100%; /* Branco Puro */
+    --card-foreground: 240 10% 3.9%;
     
-    /* Cor Primária: Roxo (levemente mais suave) */
-    /* WCAG AA: primary-foreground on primary = ~7:1 ✓ */
-    --primary: 262 72% 55%; /* #7E4DD2 - Roxo um pouco mais suave */
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 262 65% 65%;
-    --primary-lighter: 262 55% 75%;
+    /* Cor Primária: Verde Neon (#83E509) */
+    --primary: 88 92% 47%; 
+    --primary-foreground: 240 10% 3.9%; /* Texto escuro no verde neon para contraste */
+    --primary-light: 88 92% 57%;
+    --primary-lighter: 88 92% 77%;
     
-    /* Secondary Colors - Mais quentes */
-    /* WCAG AA: secondary-foreground on secondary = ~11:1 ✓ */
-    --secondary: 220 20% 92%; /* Cinza azulado suave */
-    --secondary-foreground: 222 40% 18%;
+    /* Secondary Colors */
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
     
-    /* Utility Colors - Cores mais suaves para os olhos */
-    /* WCAG AA: White text on success = ~3.5:1 (large text) ✓ */
-    --success: 152 60% 42%; /* #2D9D6A - Verde mais suave */
-    --success-light: 152 55% 52%;
-    /* WCAG AA: Dark text on warning */
-    --warning: 38 85% 52%; /* #E5A020 - Âmbar mais quente */
-    --warning-light: 38 80% 62%;
-    /* WCAG AA: White text on error = ~4.5:1 ✓ */
-    --error: 4 72% 55%; /* #D95550 - Vermelho mais suave */
-    --error-light: 4 65% 65%;
-    /* WCAG AA: White text on info = ~5:1 ✓ */
-    --info: 251 70% 62%; /* #8B6FE8 - Roxo info mais suave */
-    --info-light: 251 65% 72%;
+    /* Utility Colors */
+    --success: 142 76% 36%;
+    --success-light: 142 76% 46%;
+    --warning: 38 92% 50%;
+    --warning-light: 38 92% 60%;
+    --error: 0 84% 60%;
+    --error-light: 0 84% 70%;
+    --info: 199 89% 48%;
     
-    /* Neutral Palette - Tons mais quentes */
-    /* WCAG AA: muted-foreground on background = ~5:1 ✓ */
-    --muted: 220 18% 90%; /* Cinza suave */
-    --muted-foreground: 220 12% 42%; /* #5F6A7D - Texto secundário mais suave */
-    --accent: 220 18% 90%;
-    --accent-foreground: 222 40% 18%;
+    /* Neutral Palette */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     
-    /* Interactive Elements - Bordas mais visíveis */
-    --border: 220 15% 85%; /* Bordas um pouco mais escuras */
-    --input: 220 18% 90%;
-    --ring: 262 72% 55%;
-    /* WCAG AA: destructive-foreground on destructive = ~4.5:1 ✓ */
-    --destructive: 4 72% 55%;
-    --destructive-foreground: 0 0% 100%;
+    /* Interactive Elements */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 88 92% 47%;
     
-    /* Popover - Off-white */
-    --popover: 220 20% 98%;
-    --popover-foreground: 222 47% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
     
-    /* Spacing & Sizing */
+    /* Popover/Tooltips - Branco no modo claro */
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
     --radius: 0.75rem;
-    
-    /* Shadows - Mais suaves e difusas */
-    --shadow-soft: 0 1px 3px rgba(30, 40, 60, 0.06), 0 1px 2px rgba(30, 40, 60, 0.04);
-    --shadow-elevated: 0 4px 12px rgba(30, 40, 60, 0.08), 0 2px 4px rgba(30, 40, 60, 0.04);
-    --shadow-floating: 0 8px 24px rgba(30, 40, 60, 0.12), 0 4px 8px rgba(30, 40, 60, 0.06);
-    
-    /* Gradients - Mais suaves */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-light)));
-    --gradient-card: linear-gradient(145deg, hsl(var(--card)), hsl(220 15% 93%));
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-light)));
-    --gradient-warning: linear-gradient(135deg, hsl(var(--warning)), hsl(var(--warning-light)));
-    --gradient-error: linear-gradient(135deg, hsl(var(--error)), hsl(var(--error-light)));
-    --gradient-info: linear-gradient(135deg, hsl(var(--info)), hsl(var(--info-light)));
-    
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-    /* Sidebar - Tons suaves */
-    --sidebar-background: 220 20% 97%;
-    --sidebar-foreground: 222 40% 25%;
-    --sidebar-primary: 262 72% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 18% 92%;
-    --sidebar-accent-foreground: 222 40% 18%;
-    --sidebar-border: 220 15% 85%;
-    --sidebar-ring: 262 72% 55%;
   }
 
   .dark {
     /* ============================================
-       DARK MODE APRIMORADO - Confortável para os olhos
-       
-       Paleta baseada em tons neutros com leve tom azulado
-       Contraste equilibrado: não muito forte, não muito fraco
-       Cores harmoniosas que não cansam a vista
+       PREMIUM DARK MODE
        ============================================ */
     
-    /* Background - Cinza escuro neutro com leve tom azulado */
-    --background: 222 14% 11%; /* #181B20 - Base escura suave */
-    --foreground: 220 15% 85%; /* #D1D5DB - Texto principal suave, não branco puro */
+    /* Background - Zinc 950 */
+    --background: 240 10% 3.9%; 
+    --foreground: 0 0% 98%;
     
-    /* Cards - Elevação sutil sobre o background */
-    --card: 222 13% 14%; /* #1F2328 - Cards com leve elevação */
-    --card-foreground: 220 15% 85%;
+    /* Cards - Zinc 900 */
+    --card: 240 10% 10%; 
+    --card-foreground: 0 0% 98%;
     
-    /* Popovers/Dropdowns */
-    --popover: 222 13% 16%; /* #252A30 - Levemente mais claro que cards */
-    --popover-foreground: 220 15% 85%;
+    /* Popovers/Dropdowns - Zinc 800 */
+    --popover: 240 10% 15%; 
+    --popover-foreground: 0 0% 98%;
     
-    /* Cor Primária - Roxo suave e agradável */
-    --primary: 262 60% 60%; /* #9B7BD4 - Roxo mais suave, menos saturado */
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 262 55% 70%;
-    --primary-lighter: 262 50% 80%;
+    /* Cor Primária - Verde Neon (Mantém mas levemente mais saturado para tela) */
+    --primary: 88 92% 47%;
+    --primary-foreground: 240 10% 3.9%;
     
-    /* Secondary - Para elementos de suporte */
-    --secondary: 222 13% 18%; /* #2A2F36 - Fundo secundário */
-    --secondary-foreground: 220 15% 82%;
+    /* Secondary */
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
     
-    /* Muted - Texto secundário e elementos desabilitados */
-    --muted: 222 13% 18%;
-    --muted-foreground: 220 12% 55%; /* #7E8694 - Texto secundário legível */
+    /* Muted */
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
     
-    /* Accent - Para hover e estados ativos */
-    --accent: 222 13% 20%; /* #2E343C - Hover suave */
-    --accent-foreground: 220 15% 85%;
+    /* Accent */
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
     
-    /* Bordas - Sutis mas visíveis */
-    --border: 222 12% 22%; /* #353B42 - Bordas discretas */
-    --input: 222 13% 16%; /* #252A30 - Fundo de inputs */
-    --ring: 262 55% 58%; /* Foco roxo suave */
+    /* Bordas */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 88 92% 47%;
     
-    /* Destructive - Vermelho suave */
-    --destructive: 0 55% 50%; /* #C45050 - Vermelho menos agressivo */
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
     
-    /* Cores de Status - Suavizadas para dark mode */
-    --success: 152 45% 45%; /* #4A9D7A - Verde suave */
-    --success-light: 152 40% 55%;
-    --warning: 38 65% 55%; /* #D4A84A - Âmbar suave */
-    --warning-light: 38 60% 65%;
-    --error: 4 55% 55%; /* #C96060 - Vermelho suave */
-    --error-light: 4 50% 65%;
-    --info: 251 50% 60%; /* #8B7BD4 - Roxo info suave */
-    --info-light: 251 45% 70%;
-    
-    /* Sombras - Mais sutis no dark mode */
-    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.25);
-    --shadow-elevated: 0 4px 16px rgba(0, 0, 0, 0.35);
-    --shadow-floating: 0 8px 32px rgba(0, 0, 0, 0.45);
-    
-    /* Gradientes suaves */
-    --gradient-primary: linear-gradient(135deg, hsl(262 60% 60%), hsl(262 55% 70%));
-    --gradient-card: linear-gradient(145deg, hsl(222 13% 14%), hsl(222 13% 16%));
-    
-    /* Sidebar - Consistente com o tema (mesmo tom do card) */
-    --sidebar-background: 222 13% 14%; /* Mesmo tom do card */
-    --sidebar-foreground: 220 15% 82%;
-    --sidebar-primary: 262 60% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 13% 18%;
-    --sidebar-accent-foreground: 220 15% 85%;
-    --sidebar-border: 222 12% 20%;
-    --sidebar-ring: 262 55% 58%;
+    /* Cores de Status */
+    --success: 142 70% 45%;
+    --warning: 48 96% 53%;
+    --error: 0 84% 60%;
+    --info: 199 89% 48%;
   }
 }
 

@@ -291,8 +291,8 @@ function Produtos() {
             </div>
           </div>
 
-          <Card className={cn(designSystem.components.card.root, "bg-transparent border-0 shadow-none")}>
-            <CardContent className="p-0">
+          <div className="w-full">
+            <div>
               {paginatedData.items.length === 0 && !productsLoading ? (
                 <EmptyState
                   icon={Package}
@@ -353,8 +353,8 @@ function Produtos() {
                   </div>
                 </>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Lazy loaded dialogs with Suspense */}
           <Suspense fallback={addDialogOpen ? <DialogLoader /> : null}>
