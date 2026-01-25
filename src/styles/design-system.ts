@@ -146,10 +146,30 @@ export const designSystem = {
             footer: "px-6 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-sm text-zinc-500"
         },
 
+        // Cartões de Estatísticas (Metrics)
+        metricCard: {
+            root: "group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 border",
+            hover: "hover:shadow-2xl hover:scale-[1.04] hover:border-white/40 dark:hover:border-[#83E509]/30",
+            silhouette: "absolute -right-6 -bottom-6 opacity-0 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.07] transition-all duration-700 transform group-hover:-translate-y-4 group-hover:-translate-x-2 pointer-events-none rotate-6",
+            variants: {
+                light: {
+                    default: "bg-[#83E509] text-white border-[#83E509] shadow-[#83E509]/20",
+                    success: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200/40",
+                    warning: "bg-amber-500 text-white border-amber-500 shadow-amber-200/40",
+                    error: "bg-red-500 text-white border-red-500 shadow-red-200/40",
+                    info: "bg-blue-500 text-white border-blue-500 shadow-blue-200/40"
+                },
+                dark: {
+                    base: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+                    accent: "dark:hover:border-[#83E509]/30"
+                }
+            }
+        },
+
         // Botões
         button: {
             // Primário "Brand" (Ação principal)
-            primary: "inline-flex items-center justify-center gap-2 bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 active:scale-[0.98] transition-all rounded-lg text-sm font-bold px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none tracking-tight",
+            primary: "inline-flex items-center justify-center gap-2 bg-[#83E509] hover:bg-[#72cc00] text-white shadow-lg shadow-[#83E509]/20 active:scale-[0.98] transition-all rounded-lg text-sm font-bold px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none tracking-tight",
             // Secundário (Outline)
             secondary: "inline-flex items-center justify-center gap-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white active:scale-[0.98] transition-all rounded-lg text-sm font-medium px-4 py-2.5",
             // Ghost (Link/Ação sutil)

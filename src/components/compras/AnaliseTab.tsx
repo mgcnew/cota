@@ -382,10 +382,10 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard label="Preço Médio" value={`R$ ${metrics.avgPrice.toFixed(2)}`} icon={<DollarSign className="h-4 w-4" />} color="blue" />
-        <MetricCard label="Melhor Preço" value={`R$ ${metrics.minPrice.toFixed(2)}`} icon={<Award className="h-4 w-4" />} color="emerald" />
-        <MetricCard label="Cotações" value={metrics.totalQuotes.toString()} icon={<FileText className="h-4 w-4" />} color="violet" />
-        <MetricCard label="Pedidos" value={metrics.totalOrders.toString()} icon={<ShoppingCart className="h-4 w-4" />} color="amber" />
+        <MetricCard title="Preço Médio" value={`R$ ${metrics.avgPrice.toFixed(2)}`} icon={DollarSign} />
+        <MetricCard title="Melhor Preço" value={`R$ ${metrics.minPrice.toFixed(2)}`} icon={Award} />
+        <MetricCard title="Cotações" value={metrics.totalQuotes.toString()} icon={FileText} />
+        <MetricCard title="Pedidos" value={metrics.totalOrders.toString()} icon={ShoppingCart} />
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
@@ -457,13 +457,18 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricCard label="Total de Pedidos" value={metrics.count.toString()} icon={<Package className="h-4 w-4" />} color="blue" />
-        <MetricCard label="Volume Total" value={`R$ ${metrics.totalSpent.toLocaleString('pt-BR')}`} icon={<DollarSign className="h-4 w-4" />} color="emerald" />
-        <MetricCard label="Ticket Médio" value={`R$ ${metrics.avgOrder.toFixed(2)}`} icon={<TrendingUp className="h-4 w-4" />} color="violet" />
+        <MetricCard title="Total de Pedidos" value={metrics.count.toString()} icon={Package} />
+        <MetricCard title="Volume Total" value={`R$ ${metrics.totalSpent.toLocaleString('pt-BR')}`} icon={DollarSign} />
+        <MetricCard title="Ticket Médio" value={`R$ ${metrics.avgOrder.toFixed(2)}`} icon={TrendingUp} />
       </div>
 
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6">
-        <h3 className="text-lg font-bold mb-4">Pedidos Recentes</h3>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-lg bg-[#83E509]/10 text-[#83E509]">
+            <ShoppingCart className="h-5 w-5" />
+          </div>
+          <h3 className="text-lg font-bold">Pedidos Recentes</h3>
+        </div>
         <OrderHistoryList orders={orders} />
       </div>
     </div>
@@ -471,25 +476,6 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
 }
 
 // Shared UI components for Analysis
-function MetricCard({ label, value, icon, color }: { label: string; value: string; icon: React.ReactNode; color: string }) {
-  const colors = {
-    blue: "bg-blue-500/10 text-blue-600 border-blue-200 dark:border-blue-800/30",
-    emerald: "bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-800/30",
-    violet: "bg-violet-500/10 text-violet-600 border-violet-200 dark:border-violet-800/30",
-    amber: "bg-amber-500/10 text-amber-600 border-amber-200 dark:border-amber-800/30",
-  };
-
-  return (
-    <div className={cn("p-5 rounded-2xl border-2 transition-all hover:scale-[1.02]", (colors as any)[color])}>
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2 rounded-lg bg-white/50 dark:bg-zinc-900/50">{icon}</div>
-        <span className="text-xs font-bold uppercase tracking-wider opacity-70">{label}</span>
-      </div>
-      <p className="text-2xl font-black">{value}</p>
-    </div>
-  );
-}
-
 function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) {
   const combined = useMemo(() => {
     const q = quotes.map(x => ({ ...x, type: 'quote', date: new Date(x.date) }));
@@ -501,17 +487,17 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
     <ScrollArea className="h-[400px] pr-4">
       <div className="space-y-3">
         {combined.map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50">
+          <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-[#83E509]/30 transition-all">
             <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", item.type === 'order' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600')}>
+              <div className={cn("p-2 rounded-lg", item.type === 'order' ? 'bg-[#83E509]/10 text-[#83E509]' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500')}>
                 {item.type === 'order' ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
               </div>
               <div>
                 <p className="font-bold text-sm">{item.supplier}</p>
-                <p className="text-[10px] text-zinc-500">{item.date.toLocaleDateString('pt-BR')} • {item.type === 'order' ? 'Pedido' : 'Cotação'}</p>
+                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">{item.date.toLocaleDateString('pt-BR')} • {item.type === 'order' ? 'Pedido' : 'Cotação'}</p>
               </div>
             </div>
-            <span className="font-black text-[#83E509]">R$ {item.price.toFixed(2)}</span>
+            <span className="font-black text-zinc-900 dark:text-zinc-100 italic">R$ {item.price.toFixed(2)}</span>
           </div>
         ))}
       </div>
@@ -523,17 +509,23 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
   return (
     <div className="space-y-3">
       {orders.map((order) => (
-        <div key={order.id} className="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-xs font-bold text-zinc-400">ID: {order.id.substring(0, 8)}</span>
-            <Badge variant="outline" className="text-[10px] capitalize">{order.status}</Badge>
+        <div key={order.id} className="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-[#83E509]/30 transition-all bg-white dark:bg-zinc-950/20">
+          <div className="flex justify-between items-center mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">#ORD-{order.id.substring(0, 8)}</span>
+            <Badge variant="secondary" className="text-[10px] uppercase font-black tracking-widest bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-0">{order.status}</Badge>
           </div>
           <div className="flex justify-between items-end">
             <div>
-              <p className="text-lg font-black tracking-tight text-[#83E509]">R$ {Number(order.total_value).toFixed(2)}</p>
-              <p className="text-xs text-zinc-500">{new Date(order.order_date).toLocaleDateString('pt-BR')}</p>
+              <p className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">R$ {Number(order.total_value).toFixed(2)}</p>
+              <p className="text-[11px] font-bold text-zinc-500 flex items-center gap-1.5 mt-1">
+                <Calendar className="h-3 w-3" />
+                {new Date(order.order_date).toLocaleDateString('pt-BR')}
+              </p>
             </div>
-            <span className="text-xs text-zinc-400">{order.order_items?.length} itens</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+              <Package className="h-3 w-3 text-zinc-400" />
+              <span className="text-[11px] font-black text-zinc-500">{order.order_items?.length} itens</span>
+            </div>
           </div>
         </div>
       ))}
@@ -556,14 +548,14 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
   return (
     <div className="space-y-3">
       {stats.map((s, idx) => (
-        <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800">
+        <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-[#83E509]/30 transition-all">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs">{idx + 1}</div>
+            <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-black text-[10px] text-zinc-500">{idx + 1}</div>
             <span className="font-bold text-sm">{s.name}</span>
           </div>
           <div className="text-right">
-            <p className="font-black text-[#83E509]">R$ {s.avg.toFixed(2)}</p>
-            <p className="text-[10px] text-zinc-500">{s.count} interações</p>
+            <p className="font-black text-zinc-900 dark:text-zinc-100">R$ {s.avg.toFixed(2)}</p>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{s.count} interações</p>
           </div>
         </div>
       ))}

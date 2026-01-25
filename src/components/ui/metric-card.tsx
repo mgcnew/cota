@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -16,44 +16,21 @@ interface MetricCardProps {
   onClick?: () => void;
 }
 
-// Cores sólidas com significado lógico:
-// default (purple) = padrão/geral
-// success (emerald) = sucesso/dinheiro/positivo
-// warning (amber) = atenção/alertas
-// error (red) = problemas/urgente
-// info (blue) = informação/documentos
-const VARIANT_STYLES = {
-  default: {
-    cardBg: "bg-gradient-to-br from-purple-500 to-purple-600",
-    iconBg: "bg-white/20",
-    textColor: "text-white",
-    subtitleColor: "text-white/80",
-  },
-  success: {
-    cardBg: "bg-gradient-to-br from-emerald-500 to-emerald-600",
-    iconBg: "bg-white/20",
-    textColor: "text-white",
-    subtitleColor: "text-white/80",
-  },
-  warning: {
-    cardBg: "bg-gradient-to-br from-amber-500 to-amber-600",
-    iconBg: "bg-white/20",
-    textColor: "text-white",
-    subtitleColor: "text-white/80",
-  },
-  error: {
-    cardBg: "bg-gradient-to-br from-red-500 to-red-600",
-    iconBg: "bg-white/20",
-    textColor: "text-white",
-    subtitleColor: "text-white/80",
-  },
-  info: {
-    cardBg: "bg-gradient-to-br from-blue-500 to-blue-600",
-    iconBg: "bg-white/20",
-    textColor: "text-white",
-    subtitleColor: "text-white/80",
-  },
-} as const;
+const LIGHT_VARIANTS = {
+  default: "bg-[#83E509] text-white border-[#83E509] shadow-[#83E509]/20",
+  success: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200/40",
+  warning: "bg-amber-500 text-white border-amber-500 shadow-amber-200/40",
+  error: "bg-red-500 text-white border-red-500 shadow-red-200/40",
+  info: "bg-blue-500 text-white border-blue-500 shadow-blue-200/40",
+};
+
+const DARK_VARIANTS = {
+  default: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+  success: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+  warning: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+  error: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+  info: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+};
 
 export const MetricCard = memo(function MetricCard({
   title,
@@ -64,32 +41,75 @@ export const MetricCard = memo(function MetricCard({
   className,
   onClick,
 }: MetricCardProps) {
-  const styles = VARIANT_STYLES[variant];
-
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl p-4 text-white",
-        styles.cardBg,
-        // Hover effect only on desktop - brightness change
-        "md:hover:brightness-110 md:hover:shadow-md",
-        onClick && "cursor-pointer",
+        "group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 border",
+        LIGHT_VARIANTS[variant],
+        DARK_VARIANTS[variant],
+        "hover:shadow-2xl hover:scale-[1.04]",
+        "hover:border-white/40 dark:hover:border-[#83E509]/30",
+        onClick && "cursor-pointer active:scale-[0.98]",
         className
       )}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className={cn("p-2.5 rounded-xl", styles.iconBg)}>
-          <Icon className="w-5 h-5" />
+      {/* Background Silhouette (Hover Effect) */}
+      <div className="absolute -right-6 -bottom-6 opacity-0 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.07] transition-all duration-700 transform group-hover:-translate-y-4 group-hover:-translate-x-2 pointer-events-none rotate-6">
+        <Icon size={160} strokeWidth={1} />
+      </div>
+
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className={cn(
+            "p-2 rounded-xl transition-all duration-300",
+            "bg-white/20 dark:bg-zinc-800",
+            "text-white dark:text-zinc-400"
+          )}>
+            <Icon className="w-5 h-5" />
+          </div>
+          <span className={cn(
+            "text-[10px] font-black uppercase tracking-widest transition-opacity duration-300",
+            "text-white/90 dark:text-zinc-500"
+          )}>
+            {title}
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex items-baseline gap-2">
+            <h3 className={cn(
+              "text-2xl lg:text-3xl font-black tracking-tight",
+              "text-white dark:text-zinc-50"
+            )}>
+              {value}
+            </h3>
+
+            {trend && (
+              <div className={cn(
+                "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold transition-all",
+                "bg-white/20 text-white"
+              )}>
+                {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
+                  trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
+                {trend.value}
+              </div>
+            )}
+          </div>
+
+          {trend?.label && (
+            <p className={cn(
+              "text-[11px] font-medium transition-colors",
+              "text-white/70 dark:text-zinc-600"
+            )}>
+              {trend.label}
+            </p>
+          )}
         </div>
       </div>
-      <div className="space-y-1">
-        <p className="text-2xl lg:text-3xl font-bold tracking-tight">{value}</p>
-        <p className="text-sm font-medium text-white/90">{title}</p>
-        {trend && (
-          <p className="text-xs text-white/70">{trend.value} {trend.label}</p>
-        )}
-      </div>
+
+      {/* Subtle bottom accent line on hover (Dark Mode Only) */}
+      <div className="hidden dark:block absolute bottom-0 left-0 h-[2px] w-full bg-[#83E509] scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
     </div>
   );
 });

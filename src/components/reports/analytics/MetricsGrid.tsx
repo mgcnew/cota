@@ -39,7 +39,7 @@ const DEFAULT_ICONS = [TrendingUp, Clock, Users, DollarSign];
  */
 const DEFAULT_VARIANTS: Array<'success' | 'info' | 'warning' | 'default'> = [
   'success',
-  'info', 
+  'info',
   'warning',
   'default'
 ];
@@ -49,14 +49,16 @@ const DEFAULT_VARIANTS: Array<'success' | 'info' | 'warning' | 'default'> = [
  */
 function MetricSkeleton() {
   return (
-    <Card className="relative overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between mb-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-10 rounded-lg" />
+    <Card className="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900 shadow-none">
+      <CardContent className="p-5">
+        <div className="flex items-center gap-3 mb-4">
+          <Skeleton className="h-9 w-9 rounded-xl bg-zinc-100 dark:bg-zinc-800" />
+          <Skeleton className="h-3 w-20 bg-zinc-100 dark:bg-zinc-800" />
         </div>
-        <Skeleton className="h-8 w-32 mb-2" />
-        <Skeleton className="h-3 w-20" />
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-24 bg-zinc-100 dark:bg-zinc-800" />
+          <Skeleton className="h-3 w-32 bg-zinc-50 dark:bg-zinc-900" />
+        </div>
       </CardContent>
     </Card>
   );
@@ -88,7 +90,7 @@ export const MetricsGrid = memo(function MetricsGrid({ metrics, isLoading }: Met
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {displayMetrics.map((metric, index) => {
         const Icon = metric.icon || DEFAULT_ICONS[index % DEFAULT_ICONS.length];
-        const variant = metric.tipo 
+        const variant = metric.tipo
           ? getVariantFromTipo(metric.tipo)
           : DEFAULT_VARIANTS[index % DEFAULT_VARIANTS.length];
 
@@ -102,8 +104,8 @@ export const MetricsGrid = memo(function MetricsGrid({ metrics, isLoading }: Met
             trend={metric.variacao ? {
               value: metric.variacao,
               label: metric.descricao,
-              type: metric.tipo === 'positivo' ? 'positive' 
-                  : metric.tipo === 'negativo' ? 'negative' 
+              type: metric.tipo === 'positivo' ? 'positive'
+                : metric.tipo === 'negativo' ? 'negative'
                   : 'neutral'
             } : undefined}
           />
