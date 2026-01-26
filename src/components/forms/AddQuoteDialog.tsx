@@ -781,7 +781,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       {showProductSuggestions && products.length > 0 && !selectedProduct && (
                                         <div 
                                           ref={productListRef}
-                                          className="absolute z-[100] w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar"
+                                          className={cn(
+                                            "absolute z-[100] w-full mt-2 rounded-2xl shadow-xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar",
+                                            ds.colors.surface.card,
+                                            ds.colors.border.default,
+                                            "border"
+                                          )}
                                         >
                                           <div className="p-2 space-y-1">
                                             {products.map((product, index) => (
@@ -802,13 +807,21 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 className={cn(
                                                   "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
                                                   (highlightedProductIndex === index)
-                                                    ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400" 
-                                                    : "hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                                                    ? "bg-[#83E509]/10 text-[#83E509]" 
+                                                    : cn(
+                                                        ds.colors.surface.hover,
+                                                        ds.colors.text.primary
+                                                      ),
                                                 )}
                                               >
                                                 <div className={cn(
                                                   "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
-                                                  highlightedProductIndex === index ? "bg-orange-100 text-orange-600 dark:bg-orange-900/40" : "bg-gray-100 dark:bg-gray-800 text-gray-400"
+                                                  highlightedProductIndex === index 
+                                                    ? "bg-[#83E509]/20 text-[#83E509]" 
+                                                    : cn(
+                                                        ds.colors.surface.section,
+                                                        ds.colors.text.secondary
+                                                      )
                                                 )}>
                                                   <Package className="h-4 w-4" />
                                                 </div>
@@ -1214,19 +1227,31 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 "rounded-xl border transition-all duration-300 overflow-hidden",
                                 isScheduled 
                                   ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/60 dark:border-amber-800/30 shadow-sm" 
-                                  : "bg-gray-50/50 dark:bg-gray-800/30 border-gray-200/60 dark:border-gray-700/30"
+                                  : cn(
+                                      ds.colors.surface.section,
+                                      ds.colors.border.subtle,
+                                      "border"
+                                    )
                               )}>
                                 <div className="p-4">
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-3">
                                       <div className={cn(
                                         "p-2 rounded-lg transition-colors",
-                                        isScheduled ? "bg-amber-100 text-amber-600" : "bg-gray-200 text-gray-500"
+                                        isScheduled 
+                                          ? "bg-amber-100 text-amber-600" 
+                                          : cn(
+                                              ds.colors.surface.section,
+                                              ds.colors.text.secondary
+                                            )
                                       )}>
                                         <Zap className="h-4 w-4" />
                                       </div>
                                       <div className="flex flex-col">
-                                        <label className="text-sm font-semibold text-gray-900 dark:text-gray-100 cursor-pointer select-none" onClick={() => {
+                                        <label className={cn(
+                                          "text-sm font-semibold cursor-pointer select-none",
+                                          ds.colors.text.primary
+                                        )} onClick={() => {
                                             const newValue = !isScheduled;
                                             setIsScheduled(newValue);
                                             if (!newValue) {
@@ -1235,7 +1260,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         }}>
                                           Agendar Cotação
                                         </label>
-                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        <span className={cn(
+                                          "text-xs",
+                                          ds.colors.text.secondary
+                                        )}>
                                           Programar ativação automática para uma data futura
                                         </span>
                                       </div>
@@ -1267,7 +1295,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                     <Button
                                                       variant="outline"
                                                       className={cn(
-                                                        "w-full pl-3 text-left font-normal border-amber-200 dark:border-amber-800 bg-white dark:bg-gray-950",
+                                                        ds.components.button.secondary,
+                                                        "w-full justify-start",
                                                         !field.value && "text-muted-foreground"
                                                       )}
                                                     >
@@ -1280,7 +1309,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                     </Button>
                                                   </FormControl>
                                                 </PopoverTrigger>
-                                                <PopoverContent className="w-auto p-0 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-amber-200 dark:border-amber-800" align="start">
+                                                <PopoverContent className={cn(
+                                                  "w-auto p-0 backdrop-blur-xl border-amber-200 dark:border-amber-800",
+                                                  ds.colors.surface.card
+                                                )} align="start">
                                                   <Calendar
                                                     mode="single"
                                                     selected={field.value}
@@ -2053,10 +2085,17 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         )}
 
         {isSubmitting && (
-          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+          <div className={cn(
+            "absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl",
+            "bg-background/80"
+          )}>
             <div className="text-center space-y-3">
-              <div className="animate-spin h-12 w-12 border-4 border-teal-200 dark:border-gray-700 border-t-teal-600 dark:border-t-teal-400 rounded-full mx-auto"></div>
-              <p className="text-sm font-medium text-teal-900 dark:text-teal-100">Criando cotação...</p>
+              <div className={cn(
+                "animate-spin h-12 w-12 border-4 rounded-full mx-auto",
+                "border-zinc-200 dark:border-zinc-700",
+                "border-t-[#83E509]"
+              )}></div>
+              <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
             </div>
           </div>
         )}
@@ -2073,7 +2112,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           </DrawerTrigger>
         )}
         <DrawerContent 
-          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+          className={cn(
+            "rounded-t-2xl p-0 overflow-hidden flex flex-col",
+            ds.colors.surface.card,
+            ds.colors.border.default,
+            "border-t"
+          )}
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
@@ -2097,7 +2141,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       )}
       <DialogContent 
         hideClose
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-white/20 dark:border-white/10 shadow-2xl rounded-xl sm:rounded-2xl flex flex-col !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden"
+        className={cn(
+          "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden shadow-2xl rounded-xl sm:rounded-2xl flex flex-col [&>button]:hidden",
+          ds.colors.surface.card,
+          ds.colors.border.default,
+          "border backdrop-blur-xl"
+        )}
         onKeyDown={handleModalKeyDown}
       >
         {modalInnerContent}
