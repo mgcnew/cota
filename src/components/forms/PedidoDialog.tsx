@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -22,6 +22,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { cn } from "@/lib/utils";
+import { designSystem as ds } from "@/styles/design-system";
 import { OrderExportTab } from "@/components/pedidos/OrderExportTab";
 
 interface PedidoItem {
@@ -85,11 +86,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const tabs = ["itens", "resumo", "exportar"];
 
   const statusOptions = [
-    { value: "pendente", label: "Pendente", color: "bg-amber-100 text-amber-700 border-amber-200" },
-    { value: "processando", label: "Processando", color: "bg-blue-100 text-blue-700 border-blue-200" },
-    { value: "confirmado", label: "Confirmado", color: "bg-indigo-100 text-indigo-700 border-indigo-200" },
-    { value: "entregue", label: "Entregue", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-    { value: "cancelado", label: "Cancelado", color: "bg-red-100 text-red-700 border-red-200" }
+    { value: "pendente", label: "Pendente", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30" },
+    { value: "processando", label: "Processando", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30" },
+    { value: "confirmado", label: "Confirmado", color: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/30" },
+    { value: "entregue", label: "Entregue", color: "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/30" },
+    { value: "cancelado", label: "Cancelado", color: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30" }
   ];
 
   useEffect(() => {
@@ -387,7 +388,19 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
   const getStatusBadge = (statusValue: string) => {
     const config = statusOptions.find(s => s.value === statusValue) || statusOptions[0];
-    return <Badge variant="outline" className={cn("font-medium text-xs", config.color)}>{config.label}</Badge>;
+    return (
+      <Badge 
+        variant="outline" 
+        className={cn(
+          ds.typography.size.xs,
+          ds.typography.weight.bold,
+          "uppercase tracking-wider",
+          config.color
+        )}
+      >
+        {config.label}
+      </Badge>
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -402,18 +415,31 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   // Header content shared between Dialog and Drawer
   const headerContent = (
     <div className="flex items-center gap-3">
-      <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
-        <ShoppingCart className="h-4 w-4" />
+      <div className={cn(
+        "w-10 h-10 rounded-xl flex items-center justify-center shadow-lg",
+        "bg-[#83E509]"
+      )}>
+        <ShoppingCart className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
       </div>
-      <div className="flex flex-col">
-        <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
+      <div className="flex flex-col flex-1 min-w-0">
+        <DialogTitle className={cn(
+          ds.typography.size.base,
+          ds.typography.weight.bold,
+          ds.colors.text.primary,
+          "leading-none"
+        )}>
           Gerenciar Pedido
         </DialogTitle>
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[8px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest bg-gray-100/50 dark:bg-white/5 px-1.5 py-0.5 rounded-md border border-gray-200/50 dark:border-white/5">
+        <div className="flex items-center gap-2 mt-1.5">
+          <span className={cn(
+            ds.typography.size.xs,
+            ds.typography.weight.bold,
+            ds.colors.text.secondary,
+            "uppercase tracking-wider px-2 py-0.5 rounded-md",
+            ds.colors.surface.section
+          )}>
             #{pedido?.id?.substring(0, 8)}
           </span>
-          <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
           {getStatusBadge(status || pedido?.status || 'pendente')}
         </div>
       </div>
@@ -422,257 +448,418 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
   // Footer content shared between Dialog and Drawer
   const footerContent = (
-    <div className="flex items-center justify-between w-full relative z-10">
+    <div className="flex items-center justify-between w-full">
       <Button 
         variant="outline" 
         size="sm" 
         onClick={() => onOpenChange(false)} 
         disabled={loading} 
-        className="h-9 px-5 border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-white/5 font-black text-[9px] uppercase tracking-widest rounded-xl hover:bg-gray-50 transition-all shadow-sm"
+        className={cn(ds.components.button.secondary, "gap-2")}
       >
-        <X className="h-4 w-4 mr-1.5" />
+        <X className="h-4 w-4" />
         Fechar
       </Button>
       <Button 
         onClick={handleSubmit} 
         size="sm" 
         disabled={loading} 
-        className="h-9 px-8 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-[9px] tracking-widest shadow-md shadow-orange-500/10 rounded-xl transition-all active:scale-[0.98] ring-1 ring-white/20"
+        className={cn(ds.components.button.primary, "gap-2")}
       >
-        {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-        Salvar Alterações
+        {loading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Salvando...
+          </>
+        ) : (
+          <>
+            <Save className="h-4 w-4" />
+            Salvar Alterações
+          </>
+        )}
       </Button>
     </div>
   );
 
-  // Mobile: Render as Drawer (bottom sheet) - Requirements: 5.5
+  // Mobile: Render as Drawer (bottom sheet)
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent 
-          className="flex flex-col !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border-t border-white/20 rounded-t-[2.5rem] shadow-2xl animate-in slide-in-from-bottom duration-300"
+          className={cn(
+            "flex flex-col backdrop-blur-xl border-t rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300",
+            ds.colors.surface.page,
+            ds.colors.border.default
+          )}
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          <DrawerHeader className="text-left border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 px-6 py-5 backdrop-blur-md relative overflow-hidden flex-shrink-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
-            <div className="relative z-10">
-              {headerContent}
-            </div>
+          <DrawerHeader className={cn(
+            "text-left border-b px-6 py-5 backdrop-blur-md flex-shrink-0",
+            ds.colors.surface.section,
+            ds.colors.border.default
+          )}>
+            {headerContent}
           </DrawerHeader>
           
           {/* Tabs com design refinado para mobile */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-4 pt-4">
-              <TabsList className="flex-shrink-0 bg-white/40 dark:bg-gray-950/40 backdrop-blur-xl p-1 rounded-2xl border border-white/20 dark:border-white/10 grid grid-cols-4 gap-1 shadow-inner h-12">
-                <TabsTrigger value="itens" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
-                  <Package className="h-3.5 w-3.5 mr-1" />Itens
+            <div className="px-4 pt-4 flex-shrink-0">
+              <TabsList className={cn(
+                ds.components.tabs.clean.list,
+                "grid grid-cols-4 gap-1 h-12 p-1"
+              )}>
+                <TabsTrigger value="itens" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
+                  <Package className="h-3.5 w-3.5" />Itens
                 </TabsTrigger>
-                <TabsTrigger value="detalhes" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
-                  <FileText className="h-3.5 w-3.5 mr-1" />Info
+                <TabsTrigger value="detalhes" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
+                  <FileText className="h-3.5 w-3.5" />Info
                 </TabsTrigger>
-                <TabsTrigger value="resumo" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
-                  <ClipboardList className="h-3.5 w-3.5 mr-1" />Resumo
+                <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
+                  <ClipboardList className="h-3.5 w-3.5" />Resumo
                 </TabsTrigger>
-                <TabsTrigger value="exportar" className="text-[9px] uppercase tracking-wider font-black text-gray-500 dark:text-gray-400 data-[state=active]:bg-white/90 dark:data-[state=active]:bg-gray-800/90 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-300 touch-target rounded-xl transition-all">
-                  <Download className="h-3.5 w-3.5 mr-1" />Export
+                <TabsTrigger value="exportar" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
+                  <Download className="h-3.5 w-3.5" />Export
                 </TabsTrigger>
               </TabsList>
             </div>
 
             {/* Tab: Itens (Edição) */}
-            <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-3 custom-scrollbar">
-              <div className="space-y-3">
+            <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
+              <div className="space-y-4">
                 {/* Campos de Detalhes e Adicionar (Mobile) */}
-                <div className="bg-white/40 dark:bg-gray-900/40 rounded-xl p-3 border border-white/20 dark:border-white/5 space-y-3 backdrop-blur-sm">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-[8px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 pl-1">Fornecedor</Label>
-                      <Select value={fornecedor} onValueChange={setFornecedor}>
-                        <SelectTrigger className="h-8 text-[10px] font-bold bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 rounded-lg shadow-sm">
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-white/20 dark:border-white/10">
-                          {suppliers.map(s => <SelectItem key={s.id} value={s.id} className="text-xs font-bold">{s.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-4")}>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className={ds.components.input.group}>
+                        <Label className={ds.components.input.label}>Fornecedor</Label>
+                        <Select value={fornecedor} onValueChange={setFornecedor}>
+                          <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent className={cn(
+                            ds.colors.surface.card,
+                            ds.colors.border.default,
+                            "border backdrop-blur-xl"
+                          )}>
+                            {suppliers.map(s => (
+                              <SelectItem 
+                                key={s.id} 
+                                value={s.id} 
+                                className={cn(
+                                  ds.typography.size.sm,
+                                  ds.typography.weight.bold
+                                )}
+                              >
+                                {s.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className={ds.components.input.group}>
+                        <Label className={ds.components.input.label}>Entrega</Label>
+                        <Input 
+                          type="date" 
+                          value={dataEntrega} 
+                          onChange={e => setDataEntrega(e.target.value)} 
+                          onFocus={handleInputFocus}
+                          className={cn(ds.components.input.root, "h-10")} 
+                        />
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-[8px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 pl-1">Entrega</Label>
-                      <Input 
-                        type="date" 
-                        value={dataEntrega} 
-                        onChange={e => setDataEntrega(e.target.value)} 
-                        onFocus={handleInputFocus}
-                        className="h-8 text-[10px] font-bold bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 rounded-lg shadow-sm" 
-                      />
-                    </div>
-                  </div>
-                  
-                  {/* Formulário de Adição Rápida Mobile */}
-                  <div className="pt-2 border-t border-white/10 space-y-2">
-                    <Label className="text-[8px] font-black uppercase tracking-widest text-orange-500 pl-1">Adicionar Produto</Label>
-                    <div className="relative group">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                      <Input
-                        ref={newProductInputRef}
-                        placeholder="Buscar produto..."
-                        value={newProductSearch}
-                        onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
-                        onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                        onFocus={handleInputFocus}
-                        className="h-8 pl-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg"
-                      />
-                      {filteredNewProducts.length > 0 && !newProduct && (
-                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-950 border border-white/10 rounded-lg shadow-xl max-h-32 overflow-auto">
-                          {filteredNewProducts.map((p, idx) => (
-                            <button
-                              key={p.id}
-                              onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
-                              className="w-full px-3 py-2 text-left text-[10px] font-bold border-b border-white/5 last:border-none flex items-center justify-between gap-2"
-                            >
-                              <div className="flex flex-col min-w-0">
-                                <span>{p.name}</span>
-                                {p.brand_name && (
-                                  <div className="flex items-center gap-1 mt-0.5">
-                                    <span className="text-[8px] text-gray-500 uppercase">{p.brand_name}</span>
-                                    {p.brand_rating > 0 && (
-                                      <div className="flex items-center gap-0.5">
-                                        <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
-                                        <span className="text-[8px] text-amber-500">{p.brand_rating}</span>
-                                      </div>
-                                    )}
+                    
+                    {/* Formulário de Adição Rápida Mobile */}
+                    <div className={cn(
+                      "pt-4 border-t space-y-3",
+                      ds.colors.border.default
+                    )}>
+                      <Label className={cn(
+                        ds.components.input.label,
+                        "text-[#83E509]"
+                      )}>Adicionar Produto</Label>
+                      <div className="relative group">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                        <Input
+                          ref={newProductInputRef}
+                          placeholder="Buscar produto..."
+                          value={newProductSearch}
+                          onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
+                          onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
+                          onFocus={handleInputFocus}
+                          className={cn(ds.components.input.root, "pl-10")}
+                        />
+                        {filteredNewProducts.length > 0 && !newProduct && (
+                          <div className={cn(
+                            "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-40 overflow-auto custom-scrollbar",
+                            ds.colors.surface.card,
+                            ds.colors.border.default,
+                            "border"
+                          )}>
+                            {filteredNewProducts.map((p, idx) => (
+                              <button
+                                key={p.id}
+                                onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
+                                className={cn(
+                                  "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
+                                  highlightedIndex === idx 
+                                    ? "bg-[#83E509]/10 text-[#83E509]" 
+                                    : ds.colors.surface.hover,
+                                  ds.colors.border.default,
+                                  "border-b last:border-none"
+                                )}
+                              >
+                                <div className="flex flex-col min-w-0 flex-1">
+                                  <span className={cn(
+                                    ds.typography.size.sm,
+                                    ds.typography.weight.bold,
+                                    "truncate"
+                                  )}>{p.name}</span>
+                                  {p.brand_name && (
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span className={cn(
+                                        ds.typography.size.xs,
+                                        ds.colors.text.secondary,
+                                        "uppercase tracking-wider"
+                                      )}>{p.brand_name}</span>
+                                      {p.brand_rating > 0 && (
+                                        <div className="flex items-center gap-1">
+                                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                          <span className={cn(
+                                            ds.typography.size.xs,
+                                            "text-amber-600 dark:text-amber-500"
+                                          )}>{p.brand_rating}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                                {p.brand_score > 0 && (
+                                  <div className="flex items-center gap-1 bg-[#83E509]/10 px-2 py-1 rounded-lg flex-shrink-0">
+                                    <Trophy className="h-3 w-3 text-[#83E509]" />
+                                    <span className={cn(
+                                      ds.typography.size.xs,
+                                      ds.typography.weight.bold,
+                                      "text-[#83E509]"
+                                    )}>{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
                                   </div>
                                 )}
-                              </div>
-                              {p.brand_score > 0 && (
-                                <div className="flex items-center gap-0.5 bg-emerald-500/10 px-1 py-0.5 rounded">
-                                  <Trophy className="h-2 w-2 text-emerald-500" />
-                                  <span className="text-[8px] text-emerald-600">{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-5 gap-2">
+                        <Input
+                          ref={newQuantityInputRef}
+                          type="number"
+                          placeholder="Qtd"
+                          value={newQuantity}
+                          onChange={(e) => setNewQuantity(e.target.value)}
+                          onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
+                          className={cn(ds.components.input.root, "col-span-2 text-center")}
+                        />
+                        <Input
+                          ref={newPriceInputRef}
+                          placeholder="Preço"
+                          value={newPrice}
+                          onChange={(e) => setNewPrice(e.target.value)}
+                          onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
+                          className={cn(ds.components.input.root, "col-span-2 text-center")}
+                        />
+                        <Button 
+                          onClick={handleAddNewItem} 
+                          size="icon" 
+                          className={cn(ds.components.button.primary, "h-10 w-10 flex-shrink-0")}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-5 gap-2">
-                      <Input
-                        ref={newQuantityInputRef}
-                        type="number"
-                        placeholder="Qtd"
-                        value={newQuantity}
-                        onChange={(e) => setNewQuantity(e.target.value)}
-                        onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                        className="col-span-2 h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black text-center rounded-lg"
-                      />
-                      <Input
-                        ref={newPriceInputRef}
-                        placeholder="Preço"
-                        value={newPrice}
-                        onChange={(e) => setNewPrice(e.target.value)}
-                        onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                        className="col-span-2 h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black text-center rounded-lg"
-                      />
-                      <Button onClick={handleAddNewItem} size="icon" className="h-8 w-8 bg-orange-600 rounded-lg shrink-0">
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
-                <div className="flex items-center gap-2 px-1">
-                  <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Itens do Pedido</span>
-                  <Badge variant="outline" className="h-3.5 px-1 text-[7px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 rounded">
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    ds.typography.size.sm,
+                    ds.typography.weight.bold,
+                    ds.colors.text.secondary,
+                    "uppercase tracking-wider"
+                  )}>Itens do Pedido</span>
+                  <Badge className={cn(
+                    ds.components.badge.base,
+                    "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                  )}>
                     {itens.length}
                   </Badge>
                 </div>
                 
-                <div className="space-y-1 pb-4">
+                <div className="space-y-2 pb-4">
                   {itens.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400 dark:text-gray-500 border border-dashed border-white/10 rounded-xl bg-white/5 flex flex-col items-center justify-center">
-                      <Package className="h-6 w-6 opacity-20 mb-1" />
-                      <p className="text-[8px] font-black uppercase tracking-widest opacity-50">Nenhum item</p>
+                    <div className={cn(
+                      "text-center py-12 border border-dashed rounded-xl flex flex-col items-center justify-center",
+                      ds.colors.border.default,
+                      ds.colors.surface.section
+                    )}>
+                      <Package className="h-8 w-8 opacity-20 mb-2" />
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.secondary,
+                        "uppercase tracking-wider"
+                      )}>Nenhum item</p>
                     </div>
                   ) : itens.map((item, index) => (
-                    <div key={index} className="p-1.5 bg-white/60 dark:bg-gray-900/40 rounded-lg border border-white/10 backdrop-blur-md shadow-sm">
-                      <div className="flex items-center gap-2">
+                    <Card key={index} className={ds.components.card.root}>
+                      <CardContent className={cn(ds.components.card.body, "flex items-center gap-3 py-3")}>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-bold truncate text-gray-900 dark:text-white">{item.produto}</p>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400">R$ {item.valorUnitario.toFixed(2)}</span>
-                            <span className="text-[9px] font-bold text-gray-400">x {item.quantidade} {item.unidade}</span>
+                          <p className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            ds.colors.text.primary,
+                            "truncate"
+                          )}>{item.produto}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className={cn(
+                              ds.typography.size.xs,
+                              ds.typography.weight.bold,
+                              "text-[#83E509]"
+                            )}>R$ {item.valorUnitario.toFixed(2)}</span>
+                            <span className={cn(
+                              ds.typography.size.xs,
+                              ds.typography.weight.bold,
+                              ds.colors.text.secondary
+                            )}>× {item.quantidade} {item.unidade}</span>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-[10px] font-black text-gray-900 dark:text-white">R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                          <p className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            ds.colors.text.primary
+                          )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleRemoveItem(index)} className="h-6 w-6 text-gray-400 hover:text-red-500 rounded-md">
-                          <Trash2 className="h-3 w-3" />
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => handleRemoveItem(index)} 
+                          className={cn(ds.components.button.danger, "h-8 w-8")}
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
 
                 {/* Total Mobile */}
-                <div className="p-3 bg-emerald-500/5 dark:bg-emerald-900/10 rounded-xl border border-emerald-500/20 backdrop-blur-md flex justify-between items-center shadow-sm">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-0.5">Total do Pedido</span>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-black text-gray-400 uppercase">R$</span>
-                      <span className="text-lg font-black text-gray-900 dark:text-white tracking-tighter">
-                        {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
+                <Card className={cn(
+                  ds.components.card.root,
+                  "bg-[#83E509]/5 border-[#83E509]/20"
+                )}>
+                  <CardContent className={cn(ds.components.card.body, "flex justify-between items-center")}>
+                    <div className="flex flex-col">
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        "text-[#83E509]",
+                        "uppercase tracking-wider mb-1"
+                      )}>Total do Pedido</span>
+                      <div className="flex items-baseline gap-1">
+                        <span className={cn(
+                          ds.typography.size.sm,
+                          ds.typography.weight.bold,
+                          ds.colors.text.secondary,
+                          "uppercase"
+                        )}>R$</span>
+                        <span className={cn(
+                          ds.typography.size["2xl"],
+                          ds.typography.weight.bold,
+                          ds.colors.text.primary
+                        )}>
+                          {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20 ring-1 ring-white/20">
-                    <DollarSign className="h-4 w-4" />
-                  </div>
-                </div>
+                    <div className={cn(
+                      "w-12 h-12 rounded-xl flex items-center justify-center",
+                      "bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/20"
+                    )}>
+                      <DollarSign className="h-6 w-6" />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </TabsContent>
 
             {/* Tab: Detalhes (Edição) */}
-            <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-5 custom-scrollbar">
-              <div className="space-y-5">
-                <div className="space-y-1.5">
-                  <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Fornecedor</Label>
+            <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
+              <div className="space-y-4">
+                <div className={ds.components.input.group}>
+                  <Label className={ds.components.input.label}>Fornecedor</Label>
                   <Select value={fornecedor} onValueChange={setFornecedor}>
-                    <SelectTrigger className="h-10 text-xs bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-bold rounded-xl">
+                    <SelectTrigger className={ds.components.input.root}>
                       <div className="flex items-center gap-2">
-                        <Building2 className="h-3.5 w-3.5 text-orange-500" />
+                        <Building2 className="h-4 w-4 text-[#83E509]" />
                         <SelectValue placeholder="Selecione o fornecedor" />
                       </div>
                     </SelectTrigger>
-                    <SelectContent className="bg-white dark:bg-gray-950 rounded-xl">
-                      {suppliers.map(s => <SelectItem key={s.id} value={s.id} className="font-bold py-2 text-xs">{s.name}</SelectItem>)}
+                    <SelectContent className={cn(
+                      ds.colors.surface.card,
+                      ds.colors.border.default,
+                      "border rounded-xl"
+                    )}>
+                      {suppliers.map(s => (
+                        <SelectItem 
+                          key={s.id} 
+                          value={s.id} 
+                          className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            "py-2"
+                          )}
+                        >
+                          {s.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Data de Entrega</Label>
+                
+                <div className={ds.components.input.group}>
+                  <Label className={ds.components.input.label}>Data de Entrega</Label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
-                    <Input type="date" value={dataEntrega} onChange={e => setDataEntrega(e.target.value)} className="h-10 text-xs pl-9 bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-bold rounded-xl" />
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
+                    <Input 
+                      type="date" 
+                      value={dataEntrega} 
+                      onChange={e => setDataEntrega(e.target.value)} 
+                      className={cn(ds.components.input.root, "pl-10")} 
+                    />
                   </div>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Status</Label>
+                <div className="space-y-3">
+                  <Label className={ds.components.input.label}>Status</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {statusOptions.map(opt => (
                       <button
                         key={opt.value}
                         onClick={() => setStatus(opt.value)}
                         className={cn(
-                          "px-3 py-2 rounded-xl text-[9px] uppercase tracking-widest font-black border transition-all min-h-[36px]",
+                          "px-4 py-3 rounded-xl transition-all border-2",
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "uppercase tracking-wider",
                           status === opt.value 
-                            ? `${opt.color} border-current ring-2 ring-current/10` 
-                            : "bg-white/40 dark:bg-gray-900/40 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-800"
+                            ? `${opt.color} ring-2 ring-current/20` 
+                            : cn(
+                                ds.colors.surface.card,
+                                ds.colors.text.secondary,
+                                ds.colors.border.default
+                              )
                         )}
                       >
                         {opt.label}
@@ -681,73 +868,150 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1">Observações</Label>
+                <div className={ds.components.input.group}>
+                  <Label className={ds.components.input.label}>Observações</Label>
                   <Textarea
                     placeholder="Notas internas..."
                     value={observacoes}
                     onChange={e => setObservacoes(e.target.value)}
                     onFocus={handleInputFocus}
-                    className="min-h-[100px] resize-none text-xs bg-white/50 dark:bg-gray-950/50 border-gray-200 dark:border-gray-800 font-medium rounded-xl pt-2"
+                    className={cn(ds.components.input.root, "min-h-[120px] resize-none")}
                   />
                 </div>
               </div>
             </TabsContent>
 
             {/* Tab: Resumo (Visualização) */}
-            <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-6 custom-scrollbar">
-              <div className="space-y-6">
-                {/* Cards de resumo mobile semiglass */}
+            <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
+              <div className="space-y-4">
+                {/* Cards de resumo mobile */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-orange-500/5 dark:bg-orange-900/10 rounded-[1.5rem] p-4 border border-orange-500/20 dark:border-orange-800/30 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 mb-2">
-                      <Building2 className="h-3.5 w-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Fornecedor</span>
-                    </div>
-                    <p className="font-black text-xs truncate text-gray-900 dark:text-white">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
-                  </div>
-                  <div className="bg-blue-500/5 dark:bg-blue-900/10 rounded-[1.5rem] p-4 border border-blue-500/20 dark:border-blue-800/30 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 mb-2">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Entrega</span>
-                    </div>
-                    <p className="font-black text-xs text-gray-900 dark:text-white">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
-                  </div>
-                  <div className="bg-purple-500/5 dark:bg-purple-900/10 rounded-[1.5rem] p-4 border border-purple-500/20 dark:border-purple-800/30 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
-                      <Package className="h-3.5 w-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Itens</span>
-                    </div>
-                    <p className="font-black text-xs text-gray-900 dark:text-white">{itens.length} produto(s)</p>
-                  </div>
-                  <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-[1.5rem] p-4 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mb-2">
-                      <DollarSign className="h-3.5 w-3.5" />
-                      <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Total</span>
-                    </div>
-                    <p className="font-black text-xs text-emerald-700 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                  </div>
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-[#83E509]" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          ds.colors.text.secondary,
+                          "uppercase tracking-wider"
+                        )}>Fornecedor</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary,
+                        "truncate"
+                      )}>{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "text-blue-600 dark:text-blue-400",
+                          "uppercase tracking-wider"
+                        )}>Entrega</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary
+                      )}>{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                          <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "text-purple-600 dark:text-purple-400",
+                          "uppercase tracking-wider"
+                        )}>Itens</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary
+                      )}>{itens.length} produto(s)</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={cn(
+                    ds.components.card.root,
+                    "bg-[#83E509]/5 border-[#83E509]/20"
+                  )}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/20 flex items-center justify-center">
+                          <DollarSign className="h-4 w-4 text-[#83E509]" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "text-[#83E509]",
+                          "uppercase tracking-wider"
+                        )}>Total</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.base,
+                        ds.typography.weight.bold,
+                        "text-[#83E509]"
+                      )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    </CardContent>
+                  </Card>
                 </div>
 
                 {/* Status atual mobile */}
-                <div className="flex flex-col items-center justify-center gap-3 py-4 bg-white/30 dark:bg-black/20 rounded-[1.5rem] border border-white/20">
-                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">Status do Pedido</span>
-                  <div className="transform scale-110">
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(
+                    ds.components.card.body,
+                    "flex flex-col items-center justify-center gap-3 py-6"
+                  )}>
+                    <span className={cn(
+                      ds.typography.size.xs,
+                      ds.typography.weight.bold,
+                      ds.colors.text.secondary,
+                      "uppercase tracking-wider"
+                    )}>Status do Pedido</span>
                     {getStatusBadge(status || pedido?.status || 'pendente')}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
 
                 {/* Observações mobile */}
                 {observacoes && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 px-1">
-                      <FileText className="h-3.5 w-3.5 text-orange-500" />
-                      <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Observações</span>
-                    </div>
-                    <div className="bg-white/40 dark:bg-gray-900/40 rounded-2xl p-4 border border-white/20 backdrop-blur-md">
-                      <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-medium leading-relaxed">{observacoes}</p>
-                    </div>
-                  </div>
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
+                          <FileText className="h-4 w-4 text-[#83E509]" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.sm,
+                          ds.typography.weight.bold,
+                          ds.colors.text.primary
+                        )}>Observações</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.colors.text.primary,
+                        "whitespace-pre-wrap leading-relaxed pl-10"
+                      )}>{observacoes}</p>
+                    </CardContent>
+                  </Card>
                 )}
               </div>
             </TabsContent>
@@ -765,7 +1029,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             </TabsContent>
           </Tabs>
 
-          <DrawerFooter className="border-t border-white/10 dark:border-white/5 bg-white/20 dark:bg-gray-900/20 px-4 py-3 backdrop-blur-md">
+          <DrawerFooter className={cn(
+            "border-t px-4 py-3 backdrop-blur-md flex-shrink-0",
+            ds.colors.surface.section,
+            ds.colors.border.default
+          )}>
             {footerContent}
           </DrawerFooter>
         </DrawerContent>
@@ -778,47 +1046,39 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         hideClose
-        className="w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0 !bg-white/70 dark:!bg-gray-950/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-[2rem] [&>button]:hidden animate-in fade-in zoom-in-95 duration-300"
+        className={cn(
+          "w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0",
+          "backdrop-blur-xl shadow-2xl rounded-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col",
+          ds.colors.surface.page,
+          ds.colors.border.default,
+          "border"
+        )}
         onKeyDown={handleModalKeyDown}
       >
         {/* Tabs com design refinado */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          {/* Header compacto com semiglass e Tabs integradas */}
-          <div className="flex-shrink-0 border-b border-white/10 dark:border-white/5 bg-white/30 dark:bg-white/5 backdrop-blur-md relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 to-transparent pointer-events-none"></div>
-            
+          {/* Header compacto com Tabs integradas */}
+          <div className={cn(
+            "flex-shrink-0 border-b backdrop-blur-md",
+            ds.colors.surface.section,
+            ds.colors.border.default
+          )}>
             {/* Top Bar: Título, Tabs e Botão Fechar */}
-            <div className="flex items-center justify-between px-6 py-2 relative z-10 h-14">
-              <div className="flex items-center gap-6">
+            <div className="flex items-center justify-between px-6 py-4 h-16">
+              <div className="flex items-center gap-6 flex-1 min-w-0">
                 {/* Título */}
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gray-900 dark:bg-white flex items-center justify-center text-white dark:text-gray-900 shadow-lg ring-1 ring-white/20">
-                    <ShoppingCart className="h-4 w-4" />
-                  </div>
-                  <DialogTitle className="text-sm font-black text-gray-900 dark:text-white tracking-tight leading-none">
-                    Gerenciar Pedido
-                  </DialogTitle>
-                </div>
+                {headerContent}
 
                 {/* Tabs List Integrada na mesma linha */}
-                <TabsList className="flex bg-transparent p-0 h-full border-b border-transparent gap-4">
-                  <TabsTrigger 
-                    value="itens" 
-                    className="relative h-full px-0 bg-transparent border-b-2 border-transparent text-[10px] uppercase tracking-[0.15em] font-black text-gray-500 dark:text-gray-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:border-orange-500 dark:data-[state=active]:border-orange-500 rounded-none shadow-none transition-all hover:text-gray-700 dark:hover:text-gray-300"
-                  >
-                    <Package className="h-3.5 w-3.5 mr-2" />Itens
+                <TabsList className={cn(ds.components.tabs.clean.list, "ml-auto")}>
+                  <TabsTrigger value="itens" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
+                    <Package className="h-4 w-4" />Itens
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="resumo" 
-                    className="relative h-full px-0 bg-transparent border-b-2 border-transparent text-[10px] uppercase tracking-[0.15em] font-black text-gray-500 dark:text-gray-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:border-orange-500 dark:data-[state=active]:border-orange-500 rounded-none shadow-none transition-all hover:text-gray-700 dark:hover:text-gray-300"
-                  >
-                    <ClipboardList className="h-3.5 w-3.5 mr-2" />Resumo
+                  <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
+                    <ClipboardList className="h-4 w-4" />Resumo
                   </TabsTrigger>
-                  <TabsTrigger 
-                    value="exportar" 
-                    className="relative h-full px-0 bg-transparent border-b-2 border-transparent text-[10px] uppercase tracking-[0.15em] font-black text-gray-500 dark:text-gray-400 data-[state=active]:text-orange-600 dark:data-[state=active]:text-orange-400 data-[state=active]:border-orange-500 dark:data-[state=active]:border-orange-500 rounded-none shadow-none transition-all hover:text-gray-700 dark:hover:text-gray-300"
-                  >
-                    <Download className="h-3.5 w-3.5 mr-2" />Exportar
+                  <TabsTrigger value="exportar" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
+                    <Download className="h-4 w-4" />Exportar
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -827,7 +1087,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 variant="ghost" 
                 size="icon" 
                 onClick={() => onOpenChange(false)} 
-                className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                className={cn(
+                  ds.components.button.ghost,
+                  ds.components.button.size.icon,
+                  "ml-4"
+                )}
               >
                 <X className="h-4 w-4" />
                 <span className="sr-only">Fechar</span>
@@ -1117,99 +1381,235 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           </TabsContent>
 
           {/* Tab: Resumo (Visualização) */}
+          {/* Tab: Resumo (Visualização) */}
           <TabsContent value="resumo" className="flex-1 m-0 p-0 overflow-hidden outline-none data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-4 pb-16 pt-2">
-                {/* Cards de resumo com design semiglass */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div className="bg-orange-500/5 dark:bg-orange-900/10 rounded-xl p-3 border border-orange-500/20 dark:border-orange-800/30 backdrop-blur-md shadow-sm">
-                  <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400 mb-1">
-                    <Building2 className="h-3 w-3" />
-                    <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Fornecedor</span>
-                  </div>
-                  <p className="font-black text-[10px] truncate text-gray-900 dark:text-white">{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
-                </div>
-                <div className="bg-blue-500/5 dark:bg-blue-900/10 rounded-xl p-3 border border-blue-500/20 dark:border-blue-800/30 backdrop-blur-md shadow-sm">
-                  <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 mb-1">
-                    <Calendar className="h-3 w-3" />
-                    <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Entrega</span>
-                  </div>
-                  <p className="font-black text-[10px] text-gray-900 dark:text-white">{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
-                </div>
-                <div className="bg-purple-500/5 dark:bg-purple-900/10 rounded-xl p-3 border border-purple-500/20 dark:border-purple-800/30 backdrop-blur-md shadow-sm">
-                  <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400 mb-1">
-                    <Package className="h-3 w-3" />
-                    <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Itens</span>
-                  </div>
-                  <p className="font-black text-[10px] text-gray-900 dark:text-white">{itens.length} produto(s)</p>
-                </div>
-                <div className="bg-emerald-500/5 dark:bg-emerald-900/10 rounded-xl p-3 border border-emerald-500/20 dark:border-emerald-800/30 backdrop-blur-md shadow-sm">
-                  <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mb-1">
-                    <DollarSign className="h-3 w-3" />
-                    <span className="text-[8px] font-black uppercase tracking-widest opacity-70">Total</span>
-                  </div>
-                  <p className="font-black text-[10px] text-emerald-700 dark:text-emerald-400">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                </div>
-              </div>
-
-              {/* Lista de itens resumida com design semiglass */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 px-1">
-                  <ClipboardList className="h-3.5 w-3.5 text-orange-500" />
-                  <span className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Detalhamento de Itens</span>
-                </div>
-                <div className="bg-white/40 dark:bg-gray-950/40 rounded-xl border border-gray-100 dark:border-gray-800/50 overflow-hidden backdrop-blur-xl shadow-sm">
-                  <div className="max-h-[300px] overflow-auto custom-scrollbar divide-y divide-gray-100 dark:divide-gray-800/50">
-                    {itens.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-8 gap-2 opacity-30">
-                        <Package className="h-8 w-8" />
-                        <p className="text-[10px] font-black uppercase tracking-widest">Nenhum item</p>
+            <ScrollArea className="flex-1 custom-scrollbar">
+              <div className="p-6 space-y-6">
+                {/* Cards de resumo com design system */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-[#83E509]" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          ds.colors.text.secondary,
+                          "uppercase tracking-wider"
+                        )}>Fornecedor</span>
                       </div>
-                    ) : itens.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between px-3 py-2 hover:bg-gray-50/50 dark:hover:bg-white/5 transition-all group">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <div className="w-6 h-6 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0 border border-orange-500/10">
-                            <Package className="h-3 w-3 text-orange-500" />
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary,
+                        "truncate"
+                      )}>{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "text-blue-600 dark:text-blue-400",
+                          "uppercase tracking-wider"
+                        )}>Entrega</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary
+                      )}>{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                          <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "text-purple-600 dark:text-purple-400",
+                          "uppercase tracking-wider"
+                        )}>Itens</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary
+                      )}>{itens.length} produto(s)</p>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className={cn(
+                    ds.components.card.root,
+                    "bg-[#83E509]/5 border-[#83E509]/20"
+                  )}>
+                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/20 flex items-center justify-center">
+                          <DollarSign className="h-4 w-4 text-[#83E509]" />
+                        </div>
+                        <span className={cn(
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          "text-[#83E509]",
+                          "uppercase tracking-wider"
+                        )}>Total</span>
+                      </div>
+                      <p className={cn(
+                        ds.typography.size.base,
+                        ds.typography.weight.bold,
+                        "text-[#83E509]"
+                      )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Lista de itens */}
+                <Card className={ds.components.card.root}>
+                  <CardContent className="p-0">
+                    <div className={cn(
+                      "px-4 py-3 border-b",
+                      ds.colors.surface.section,
+                      ds.colors.border.default
+                    )}>
+                      <div className="flex items-center gap-2">
+                        <ClipboardList className="h-4 w-4 text-[#83E509]" />
+                        <span className={cn(
+                          ds.typography.size.sm,
+                          ds.typography.weight.bold,
+                          ds.colors.text.primary,
+                          "uppercase tracking-wider"
+                        )}>Detalhamento de Itens</span>
+                        <Badge className={cn(
+                          ds.components.badge.base,
+                          "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20 ml-auto"
+                        )}>
+                          {itens.length}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className={cn(
+                      "max-h-[320px] overflow-auto custom-scrollbar divide-y",
+                      ds.colors.border.default
+                    )}>
+                      {itens.length === 0 ? (
+                        <div className={cn(
+                          "flex flex-col items-center justify-center py-12",
+                          ds.colors.text.secondary
+                        )}>
+                          <Package className="h-10 w-10 opacity-20 mb-3" />
+                          <p className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            "uppercase tracking-wider"
+                          )}>Nenhum item</p>
+                        </div>
+                      ) : itens.map((item, index) => (
+                        <div 
+                          key={index} 
+                          className={cn(
+                            "flex items-center justify-between px-4 py-3 transition-colors",
+                            ds.colors.surface.hover
+                          )}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                              ds.typography.size.xs,
+                              ds.typography.weight.bold,
+                              ds.colors.surface.section,
+                              ds.colors.text.secondary
+                            )}>
+                              {String(index + 1).padStart(2, '0')}
+                            </div>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span className={cn(
+                                ds.typography.size.sm,
+                                ds.typography.weight.bold,
+                                ds.colors.text.primary,
+                                "truncate"
+                              )}>{item.produto || 'Não definido'}</span>
+                              <span className={cn(
+                                ds.typography.size.xs,
+                                ds.colors.text.secondary,
+                                "mt-0.5"
+                              )}>{item.unidade} • Unid. R$ {item.valorUnitario.toFixed(2)}</span>
+                            </div>
                           </div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-[10px] truncate text-gray-900 dark:text-white font-bold">{item.produto || 'Não definido'}</span>
-                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest">{item.unidade} • Unid. R$ {item.valorUnitario.toFixed(2)}</span>
+                          <div className="flex items-center gap-4 flex-shrink-0">
+                            <span className={cn(
+                              ds.typography.size.sm,
+                              ds.typography.weight.bold,
+                              ds.colors.text.secondary
+                            )}>{item.quantidade}×</span>
+                            <span className={cn(
+                              ds.typography.size.sm,
+                              ds.typography.weight.bold,
+                              "text-[#83E509]",
+                              "min-w-[100px] text-right"
+                            )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <div className="flex flex-col items-end">
-                            <span className="text-[8px] font-black text-gray-400 uppercase tracking-tighter">{item.quantidade}x</span>
-                            <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400">R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Status e Observações */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Status */}
+                  <Card className={ds.components.card.root}>
+                    <CardContent className={cn(
+                      ds.components.card.body,
+                      "flex flex-col items-center justify-center gap-3 py-6"
+                    )}>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        ds.colors.text.secondary,
+                        "uppercase tracking-wider"
+                      )}>Status do Pedido</span>
+                      {getStatusBadge(status || pedido?.status || 'pendente')}
+                    </CardContent>
+                  </Card>
+
+                  {/* Observações */}
+                  {observacoes && (
+                    <Card className={ds.components.card.root}>
+                      <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
+                            <FileText className="h-4 w-4 text-[#83E509]" />
                           </div>
+                          <span className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            ds.colors.text.primary
+                          )}>Observações</span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                        <p className={cn(
+                          ds.typography.size.sm,
+                          ds.colors.text.primary,
+                          "whitespace-pre-wrap leading-relaxed pl-10"
+                        )}>{observacoes}</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
               </div>
-
-              {/* Observações com design semiglass */}
-              {observacoes && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 px-1">
-                    <FileText className="h-3.5 w-3.5 text-orange-500" />
-                    <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Notas do Pedido</span>
-                  </div>
-                  <div className="bg-white/40 dark:bg-gray-900/40 rounded-xl p-3 border border-gray-100 dark:border-gray-800/50 backdrop-blur-md shadow-sm">
-                    <p className="text-[10px] text-gray-700 dark:text-gray-300 whitespace-pre-wrap font-medium leading-relaxed">{observacoes}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Status atual centralizado */}
-              <div className="flex flex-col items-center justify-center gap-2 py-3 border-t border-gray-100 dark:border-gray-800/50">
-                <span className="text-[8px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500">Status do Pedido</span>
-                <div className="transform scale-90">
-                  {getStatusBadge(status || pedido?.status || 'pendente')}
-                </div>
-              </div>
-            </div>
-          </ScrollArea>
+            </ScrollArea>
           </TabsContent>
 
           {/* Tab: Exportar */}
@@ -1226,14 +1626,16 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         </Tabs>
 
         {/* Footer Compacto */}
-        <div className="flex-shrink-0 px-4 py-3 border-t border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-950/40 backdrop-blur-2xl relative overflow-hidden flex items-center justify-end gap-2">
-          <div className="absolute inset-0 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none"></div>
-          
+        <div className={cn(
+          "flex-shrink-0 px-6 py-4 border-t backdrop-blur-md flex items-center justify-end gap-3",
+          ds.colors.surface.section,
+          ds.colors.border.default
+        )}>
           <Button 
             variant="outline" 
             onClick={() => onOpenChange(false)} 
             disabled={loading} 
-            className="h-8 px-4 border-white/30 dark:border-white/10 bg-white/5 dark:bg-white/5 font-black text-[9px] uppercase tracking-widest rounded-lg hover:bg-white/10 transition-all shadow-sm relative z-10"
+            className={cn(ds.components.button.secondary, "gap-2")}
           >
             Cancelar
           </Button>
@@ -1241,10 +1643,19 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           <Button 
             onClick={handleSubmit} 
             disabled={loading} 
-            className="h-8 px-6 bg-orange-600 hover:bg-orange-700 text-white font-black uppercase text-[9px] tracking-widest shadow-md shadow-orange-500/10 rounded-lg transition-all active:scale-[0.98] ring-1 ring-white/20 relative z-10"
+            className={cn(ds.components.button.primary, "gap-2")}
           >
-            {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Save className="h-3.5 w-3.5 mr-1.5" />}
-            Salvar
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4" />
+                Salvar
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>
