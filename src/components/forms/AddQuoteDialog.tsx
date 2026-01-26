@@ -6,6 +6,7 @@ import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+import { designSystem as ds } from "@/styles/design-system";
 import {
   Dialog,
   DialogContent,
@@ -664,66 +665,56 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
-      {/* Header Compacto com design sólido */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 relative overflow-hidden">
+      {/* Header - Design System */}
+      <div className={ds.components.modal.header}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#83E509] flex items-center justify-center shadow-lg shadow-[#83E509]/20">
+            <Plus className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
+          </div>
+          <div>
+            <h2 className={ds.components.modal.title}>
+              Nova Cotação
+            </h2>
+            <p className={cn(ds.colors.text.secondary, "mt-1")}>
+              Passo {currentTabIndex + 1} de {tabs.length}
+            </p>
+          </div>
+        </div>
         
-        {/* Top Bar Minimalista */}
-        <div className="flex items-center justify-between px-4 py-2 relative z-10 min-h-[3rem] gap-4 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
-          
-          {/* Lado Esquerdo: Ícone Identificador */}
-          <div className="flex items-center flex-shrink-0">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center text-white shadow-sm">
-                    <Plus className="h-4 w-4 stroke-[3]" />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  <p className="font-semibold text-xs">Nova Cotação</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => setOpen(false)} 
+          className={cn(ds.components.button.ghost, ds.components.button.size.icon)}
+        >
+          <X className="h-5 w-5" />
+          <span className="sr-only">Fechar</span>
+        </Button>
+      </div>
 
-          {/* Centro: Steps indicator ultraminimalista - Navegação Livre */}
-          <div className="flex-1 flex items-center justify-start sm:justify-center overflow-x-auto scrollbar-hide mx-2 h-full">
-            <div className="flex items-center gap-4 h-8">
-              {tabs.map((tab) => {
-                const isActive = activeTab === tab.id;
-                
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={cn(
-                      "h-full px-1 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-none border-b-2 transition-colors cursor-pointer select-none outline-none whitespace-nowrap",
-                      "!bg-transparent hover:!bg-transparent focus:!bg-transparent",
-                      "!shadow-none",
-                      isActive 
-                        ? "!border-orange-600 !text-orange-600 dark:!text-orange-400" 
-                        : "!border-transparent !text-gray-400 dark:!text-gray-500 hover:!text-gray-600 dark:hover:!text-gray-300"
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Lado Direito: Ações */}
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setOpen(false)} 
-              className="h-8 w-8 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
-            >
-              <X className="h-5 w-5" />
-              <span className="sr-only">Fechar</span>
-            </Button>
-          </div>
+      {/* Tabs Navigation - Design System Clean Style */}
+      <div className="flex-shrink-0 px-6 border-b border-zinc-100 dark:border-zinc-800 bg-transparent">
+        <div className={ds.components.tabs.clean.list}>
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            const TabIcon = tab.icon;
+            
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={cn(
+                  ds.components.tabs.clean.trigger,
+                  "flex items-center gap-2",
+                  isActive && "data-[state=active]"
+                )}
+                data-state={isActive ? "active" : "inactive"}
+              >
+                <TabIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
       
@@ -748,22 +739,22 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
                         {/* Produtos Tab */}
                         <TabsContent value="produtos" className="h-full m-0">
-                          <div className="h-full p-3 sm:p-4 md:p-6 bg-gray-50 dark:bg-gray-950/50">
+                          <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
                               {/* Formulário de Adição - Lado Esquerdo */}
-                              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
-                                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-base">
-                                    <Plus className="h-5 w-5 text-orange-600 flex-shrink-0" />
+                              <Card className={ds.components.card.root}>
+                                <CardHeader className={ds.components.card.header}>
+                                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                    <Plus className="h-5 w-5 text-[#83E509] flex-shrink-0" />
                                     <span className="truncate">Adicionar Produto</span>
                                   </CardTitle>
                                 </CardHeader>
-                                 <CardContent className="pt-4 space-y-4">
+                                 <CardContent className={cn(ds.components.card.body, "space-y-4")}>
                                   {/* Seletor de Produto com Autocomplete Dinâmico */}
-                                  <div className="relative z-50">
-                                    <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest pl-1 mb-2 block">Produto *</label>
+                                  <div className={ds.components.input.group}>
+                                    <label className={ds.components.input.label}>Produto *</label>
                                     <div className="relative group">
-                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
                                       <Input
                                         ref={productSearchRef}
                                         placeholder="Digite o nome do produto..."
@@ -782,7 +773,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           setTimeout(() => setShowProductSuggestions(false), 200);
                                         }}
                                         onKeyDown={handleProductKeyDown}
-                                        className="h-10 pl-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 font-medium text-sm rounded-xl focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+                                        className={cn(ds.components.input.root, "pl-10")}
                                         tabIndex={0}
                                       />
                                       
@@ -833,24 +824,31 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       {/* Indicador de Carregamento Dinâmico */}
                                       {isSearchingProducts && (
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                          <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                                          <Loader2 className="h-4 w-4 animate-spin text-[#83E509]" />
                                         </div>
                                       )}
 
                                       {/* Estado Vazio/Nenhum Resultado */}
                                       {showProductSuggestions && productSearch.length >= 2 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
-                                        <div className="absolute z-[100] w-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2">
-                                          <Package className="h-8 w-8 mx-auto mb-2 text-gray-300 opacity-50" />
-                                          <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Nenhum produto encontrado</p>
+                                        <div className={cn(
+                                          "absolute z-[100] w-full mt-2 rounded-xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2",
+                                          ds.colors.surface.card,
+                                          ds.colors.border.default,
+                                          "border"
+                                        )}>
+                                          <Package className={cn("h-8 w-8 mx-auto mb-2 opacity-50", ds.colors.text.muted)} />
+                                          <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.muted, "uppercase tracking-widest")}>
+                                            Nenhum produto encontrado
+                                          </p>
                                         </div>
                                       )}
                                     </div>
                                   </div>
 
                                   {/* Quantidade e Unidade */}
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2 block">Quantidade *</label>
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div className={ds.components.input.group}>
+                                      <label className={ds.components.input.label}>Quantidade *</label>
                                       <Input 
                                         ref={quantityInputRef}
                                         placeholder="Ex: 500" 
@@ -859,12 +857,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         onChange={(e) => setNewProductQuantity(e.target.value)}
                                         onFocus={handleInputFocus}
                                         onKeyDown={handleQuantityKeyDown}
-                                        className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-orange-500 focus:ring-orange-500/20"
+                                        className={ds.components.input.root}
                                         tabIndex={0}
                                       />
                                     </div>
-                                    <div>
-                                      <label className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2 block">Unidade *</label>
+                                    <div className={ds.components.input.group}>
+                                      <label className={ds.components.input.label}>Unidade *</label>
                                       <Select value={newProductUnit} onValueChange={(value) => {
                                         setNewProductUnit(value);
                                         // Auto-foco no botão adicionar após selecionar unidade
@@ -876,12 +874,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }}>
                                         <SelectTrigger 
                                           ref={unitSelectRef}
-                                          className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 focus:border-orange-500 focus:ring-orange-500/20"
+                                          className={ds.components.input.root}
                                           tabIndex={0}
                                         >
                                           <SelectValue placeholder="Selecione" />
                                         </SelectTrigger>
-                                        <SelectContent className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+                                        <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border")}>
                                           <SelectItem value="kg">kg</SelectItem>
                                           <SelectItem value="g">g</SelectItem>
                                           <SelectItem value="un">un</SelectItem>
@@ -906,7 +904,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }
                                     }}
                                     disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
-                                    className="w-full bg-orange-600 hover:bg-orange-700 text-white shadow-sm disabled:opacity-50 h-10 font-medium"
+                                    className={cn(ds.components.button.primary, "w-full mt-2")}
                                     tabIndex={0}
                                   >
                                     <Plus className="h-4 w-4 mr-2" />
@@ -914,45 +912,64 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   </Button>
                                   
                                   {/* Dica de atalhos */}
-                                  <div className="text-xs text-center text-gray-500 dark:text-gray-400 space-y-1 pt-2 border-t border-gray-100 dark:border-gray-800">
-                                    <p className="font-medium text-orange-600 dark:text-orange-400">⌨️ Atalhos de Teclado</p>
-                                    <div className="flex justify-center gap-3">
-                                        <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-[10px]">Tab</kbd> Navegar</span>
-                                        <span className="flex items-center gap-1"><kbd className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-[10px]">Enter</kbd> Adicionar</span>
+                                  <div className={cn(
+                                    "text-center space-y-2 pt-4 mt-4 border-t",
+                                    ds.typography.size.xs,
+                                    ds.colors.text.secondary,
+                                    ds.colors.border.subtle
+                                  )}>
+                                    <p className={cn(ds.typography.weight.medium, "text-[#83E509]")}>⌨️ Atalhos de Teclado</p>
+                                    <div className="flex justify-center gap-4">
+                                        <span className="flex items-center gap-1.5">
+                                          <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Tab</kbd> 
+                                          <span>Navegar</span>
+                                        </span>
+                                        <span className="flex items-center gap-1.5">
+                                          <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Enter</kbd> 
+                                          <span>Adicionar</span>
+                                        </span>
                                     </div>
                                   </div>
                                 </CardContent>
                               </Card>
 
                               {/* Lista de Produtos - Lado Direito */}
-                              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-                                <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
-                                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-base">
-                                    <Package className="h-5 w-5 text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                              <Card className={ds.components.card.root}>
+                                <CardHeader className={ds.components.card.header}>
+                                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                    <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
                                     <span className="truncate">Produtos Adicionados ({fields.length})</span>
                                   </CardTitle>
                                 </CardHeader>
-                                <CardContent className="pt-4">
+                                <CardContent className={ds.components.card.body}>
                                   {fields.length === 0 ? (
-                                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                                    <div className={cn("text-center py-8", ds.colors.text.secondary)}>
                                       <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                                      <p className="font-medium">Nenhum produto adicionado</p>
-                                      <p className="text-xs mt-1">Use o formulário para adicionar</p>
+                                      <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
+                                      <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
                                     </div>
                                   ) : (
                                     <ScrollArea className="h-[400px] pr-2">
                                       <div className="space-y-3">
                                         {fields.map((field, index) => (
-                                          <Card key={field.id} className="border-gray-200 dark:border-gray-800 transition-all bg-gray-50 dark:bg-gray-800/50 hover:border-orange-200 dark:hover:border-orange-900/50 group">
-                                            <div className="h-1 bg-gray-200 dark:bg-gray-700 group-hover:bg-orange-400 transition-colors rounded-t-xl"></div>
+                                          <Card key={field.id} className={cn(
+                                            ds.components.card.root,
+                                            "transition-all group hover:border-[#83E509]/30"
+                                          )}>
+                                            <div className="h-1 bg-zinc-200 dark:bg-zinc-700 group-hover:bg-[#83E509] transition-colors rounded-t-xl"></div>
                                             <CardContent className="p-3">
                                               <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1 min-w-0">
-                                                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                                                  <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, ds.typography.size.sm, "truncate")}>
                                                     {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
                                                   </h4>
-                                                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1 flex items-center gap-2">
-                                                    <span className="font-mono bg-white dark:bg-gray-900 px-1.5 rounded border border-gray-200 dark:border-gray-700 text-xs">
+                                                  <div className={cn(ds.typography.size.sm, ds.colors.text.secondary, "mt-1 flex items-center gap-2")}>
+                                                    <span className={cn(
+                                                      ds.typography.fontFamily.mono,
+                                                      ds.colors.surface.card,
+                                                      ds.colors.border.default,
+                                                      "px-1.5 rounded border text-xs"
+                                                    )}>
                                                         {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
                                                     </span>
                                                   </div>
@@ -962,7 +979,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                   variant="ghost"
                                                   size="sm"
                                                   onClick={() => remove(index)}
-                                                  className="text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0 flex-shrink-0"
+                                                  className={cn(ds.components.button.danger, "h-8 w-8 p-0 flex-shrink-0")}
                                                 >
                                                   <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -980,24 +997,22 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         </TabsContent>
 
                         {/* Período Tab */}
-                        <TabsContent value="periodo" className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 m-0 pb-20 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
-                          <Card className="border-white/20 dark:border-white/10 shadow-lg bg-white/40 dark:bg-gray-900/40 backdrop-blur-md">
-                            <CardHeader className="pb-3 bg-white/10 dark:bg-white/5 rounded-t-xl border-b border-white/10 dark:border-white/5">
-                              <CardTitle className="flex items-center gap-2 sm:gap-3 text-base font-bold">
-                                <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
-                                  <Clock className="h-4 w-4 drop-shadow-sm" />
+                        <TabsContent value="periodo" className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 m-0 pb-20 custom-scrollbar">
+                          <Card className={ds.components.card.root}>
+                            <CardHeader className={ds.components.card.header}>
+                              <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2 sm:gap-3")}>
+                                <div className="p-2 rounded-lg bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/25 flex-shrink-0">
+                                  <Clock className="h-4 w-4" />
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                  <span className="bg-gradient-to-r from-indigo-900 to-purple-800 dark:from-indigo-300 dark:to-purple-300 bg-clip-text text-transparent truncate">
-                                    Período da Cotação
-                                  </span>
-                                  <span className="text-xs text-gray-600 dark:text-gray-400 font-normal mt-0.5 truncate">
+                                  <span className="truncate">Período da Cotação</span>
+                                  <span className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.regular, "mt-0.5 truncate")}>
                                     Defina os prazos e agendamento da cotação
                                   </span>
                                 </div>
                               </CardTitle>
                             </CardHeader>
-                            <CardContent className="p-3 sm:p-4 space-y-6">
+                            <CardContent className={cn(ds.components.card.body, "space-y-6")}>
 
                               {/* Seção de Datas */}
                               <div className="space-y-4">
@@ -1007,14 +1022,15 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     name="dataInicio"
                                     render={({ field }) => (
                                       <FormItem className="flex flex-col">
-                                        <FormLabel>Data de Início *</FormLabel>
+                                        <FormLabel className={ds.components.input.label}>Data de Início *</FormLabel>
                                         <Popover>
                                         <PopoverTrigger asChild>
                                           <FormControl>
                                             <Button
                                               variant="outline"
                                               className={cn(
-                                                "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
+                                                ds.components.button.secondary,
+                                                "w-full justify-start",
                                                 !field.value && "text-muted-foreground"
                                               )}
                                             >
@@ -1027,7 +1043,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
+                                        <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border")} align="start">
                                           <Calendar
                                             mode="single"
                                             selected={field.value}
@@ -1047,14 +1063,15 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   name="dataFim"
                                   render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                      <FormLabel>Data de Fim *</FormLabel>
+                                      <FormLabel className={ds.components.input.label}>Data de Fim *</FormLabel>
                                       <Popover>
                                         <PopoverTrigger asChild>
                                           <FormControl>
                                             <Button
                                               variant="outline"
                                               className={cn(
-                                                "w-full pl-3 text-left font-normal border-white/20 dark:border-white/10 bg-transparent dark:text-white",
+                                                ds.components.button.secondary,
+                                                "w-full justify-start",
                                                 !field.value && "text-muted-foreground"
                                               )}
                                             >
@@ -1067,7 +1084,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl border-white/20 dark:border-white/10" align="start">
+                                        <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border")} align="start">
                                           <Calendar
                                             mode="single"
                                             selected={field.value}
@@ -1088,9 +1105,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                               {/* Presets rápidos */}
                               <div className="space-y-2">
-                                <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                                <div className={cn("flex items-center gap-2", ds.typography.size.xs, ds.colors.text.secondary)}>
                                   <Zap className="h-3 w-3" />
-                                  <span className="font-medium">Atalhos Rápidos:</span>
+                                  <span className={ds.typography.weight.medium}>Atalhos Rápidos:</span>
                                 </div>
                                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                                   <Button
@@ -1103,7 +1120,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       form.setValue("dataFim", hoje);
                                       toast({ title: "✅ Período definido", description: "Hoje (início e fim no mesmo dia)", duration: 1500 });
                                     }}
-                                    className="h-10 text-xs font-semibold bg-amber-50/30 dark:bg-amber-900/10 border-amber-200/40 dark:border-amber-800/20 hover:bg-amber-100/40 dark:hover:bg-amber-900/20 backdrop-blur-sm"
+                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
                                   >
                                     <Zap className="h-3 w-3 mr-1" />
                                     Hoje
@@ -1120,7 +1137,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       form.setValue("dataFim", fim);
                                       toast({ title: "✅ Período definido", description: "3 dias", duration: 1500 });
                                     }}
-                                    className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
+                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
                                   >
                                     <Clock className="h-3 w-3 mr-1" />
                                     3 dias
@@ -1137,7 +1154,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       form.setValue("dataFim", fim);
                                       toast({ title: "✅ Período definido", description: "7 dias (recomendado)", duration: 1500 });
                                     }}
-                                    className="h-10 text-xs font-semibold bg-indigo-50/30 dark:bg-indigo-900/10 border-indigo-200/40 dark:border-indigo-800/20 hover:bg-indigo-100/40 dark:hover:bg-indigo-900/20 backdrop-blur-sm"
+                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
                                   >
                                     <Zap className="h-3 w-3 mr-1" />
                                     7 dias
@@ -1154,7 +1171,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       form.setValue("dataFim", fim);
                                       toast({ title: "✅ Período definido", description: "14 dias", duration: 1500 });
                                     }}
-                                    className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
+                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
                                   >
                                     <Clock className="h-3 w-3 mr-1" />
                                     14 dias
@@ -1171,7 +1188,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       form.setValue("dataFim", fim);
                                       toast({ title: "✅ Período definido", description: "30 dias", duration: 1500 });
                                     }}
-                                    className="h-10 text-xs font-semibold border-white/20 dark:border-white/10 bg-transparent hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 backdrop-blur-sm"
+                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
                                   >
                                     <Clock className="h-3 w-3 mr-1" />
                                     30 dias
@@ -1183,10 +1200,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               {/* Separator com estilo visual */}
                               <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
-                                  <span className="w-full border-t border-gray-200 dark:border-gray-800" />
+                                  <span className={cn("w-full border-t", ds.colors.border.default)} />
                                 </div>
-                                <div className="relative flex justify-center text-xs uppercase">
-                                  <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 font-medium tracking-wider">
+                                <div className={cn("relative flex justify-center", ds.typography.size.xs, "uppercase")}>
+                                  <span className={cn(ds.colors.surface.card, "px-2", ds.colors.text.secondary, ds.typography.weight.medium, "tracking-wider")}>
                                     Opções Avançadas
                                   </span>
                                 </div>
@@ -1310,20 +1327,27 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                         {/* Fornecedores Tab - Layout Master-Detail Responsivo */}
                         <TabsContent value="fornecedores" className="flex-1 h-full min-h-0 overflow-hidden p-0 m-0">
-                          <div className="flex flex-col lg:flex-row h-full bg-white dark:bg-gray-950 relative">
+                          <div className={cn("flex flex-col lg:flex-row h-full relative", ds.colors.surface.page)}>
                             
                             {/* Lado Esquerdo: Lista de Fornecedores */}
                             {/* Mobile: Oculta se tiver detalhe aberto. Desktop: Sempre visível (7/12) */}
                             <div className={cn(
-                              "flex-col border-r border-gray-200 dark:border-gray-800 h-full overflow-hidden bg-white dark:bg-gray-950 transition-all duration-300",
+                              "flex-col h-full overflow-hidden transition-all duration-300",
+                              ds.colors.surface.card,
+                              ds.colors.border.default,
+                              "border-r",
                               focusedSupplierId ? "hidden lg:flex lg:w-7/12" : "flex w-full lg:w-7/12"
                             )}>
                               {/* Header Fixo */}
-                              <div className="p-4 border-b border-gray-200 dark:border-gray-800 space-y-3 bg-white dark:bg-gray-900 z-10">
+                              <div className={cn(
+                                "p-6 space-y-4 z-10",
+                                ds.colors.border.default,
+                                "border-b"
+                              )}>
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-                                    <Building2 className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                                    <span className="font-bold text-sm">Catálogo de Fornecedores</span>
+                                  <div className={cn("flex items-center gap-3", ds.colors.text.primary)}>
+                                    <Building2 className={cn("h-5 w-5", ds.colors.text.secondary)} />
+                                    <span className={cn(ds.typography.weight.bold, ds.typography.size.base)}>Catálogo de Fornecedores</span>
                                   </div>
                                   
                                   {/* Botão Selecionar Todos - Só visível se houver resultados de busca */}
@@ -1333,7 +1357,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       variant="ghost"
                                       size="sm"
                                       onClick={handleSelectAllSuppliers}
-                                      className="text-xs text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 h-8 !bg-transparent !shadow-none"
+                                      className={cn(ds.components.button.ghost, "text-[#83E509] hover:text-[#72cc00]")}
                                     >
                                       <Check className="h-3 w-3 mr-1.5" />
                                       {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id)) 
@@ -1344,44 +1368,63 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </div>
                                 
                                 <div className="relative group">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
                                   <Input
                                     placeholder="Buscar por nome, contato ou e-mail..."
                                     value={supplierSearch}
                                     onChange={(e) => setSupplierSearch(e.target.value)}
                                     onFocus={handleInputFocus}
-                                    className="pl-9 border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 focus:bg-white dark:focus:bg-gray-900 transition-all text-sm h-10 rounded-xl focus:border-orange-500 focus:ring-orange-500/20"
+                                    className={cn(ds.components.input.root, "pl-10")}
                                   />
                                 </div>
                               </div>
 
                               {/* Lista Scrollável */}
-                              <div className="flex-1 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-gray-200 dark:scrollbar-thumb-gray-800 pb-20">
+                              <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pb-20">
                                 
                                 {/* Estado Vazio (Sem busca e sem selecionados) */}
                                 {supplierSearch.length === 0 && selectedSuppliers.length === 0 && (
-                                  <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-3 text-gray-400">
-                                    <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                                      <Search className="h-6 w-6 opacity-50" />
+                                  <div className={cn(
+                                    "flex flex-col items-center justify-center h-full text-center p-8 space-y-4",
+                                    ds.colors.text.secondary
+                                  )}>
+                                    <div className={cn(
+                                      "w-16 h-16 rounded-full flex items-center justify-center",
+                                      ds.colors.surface.section
+                                    )}>
+                                      <Search className="h-8 w-8 opacity-30" />
                                     </div>
-                                    <p className="text-sm">Digite para buscar fornecedores</p>
-                                    <p className="text-xs text-gray-500">Seus fornecedores selecionados também aparecerão aqui</p>
+                                    <div className="space-y-2">
+                                      <p className={cn(ds.typography.size.base, ds.typography.weight.medium)}>Digite para buscar fornecedores</p>
+                                      <p className={cn(ds.typography.size.xs, ds.colors.text.muted)}>Seus fornecedores selecionados também aparecerão aqui</p>
+                                    </div>
                                   </div>
                                 )}
                                 
                                 {/* Resultados da Busca */}
                                 {supplierSearch.length > 0 && (
                                   <div className="mb-6">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
+                                    <h3 className={cn(
+                                      ds.typography.size.xs,
+                                      ds.typography.weight.bold,
+                                      ds.colors.text.muted,
+                                      "uppercase tracking-widest px-3 mb-3"
+                                    )}>
                                       Resultados da Busca
                                     </h3>
                                     
                                     {filteredSuppliers.length === 0 ? (
-                                      <div className="text-center p-4 text-gray-400 text-sm italic bg-gray-50 dark:bg-gray-900/50 rounded-lg mx-2 border border-dashed border-gray-200 dark:border-gray-800">
+                                      <div className={cn(
+                                        "text-center p-6 rounded-xl mx-2 border border-dashed",
+                                        ds.colors.surface.section,
+                                        ds.colors.border.subtle,
+                                        ds.colors.text.secondary,
+                                        ds.typography.size.sm
+                                      )}>
                                         Nenhum fornecedor encontrado para "{supplierSearch}"
                                       </div>
                                     ) : (
-                                      <div className="space-y-1">
+                                      <div className="space-y-2">
                                         {filteredSuppliers.map((supplier) => {
                                           const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
                                           const isFocused = focusedSupplierId === supplier.id;
@@ -1391,48 +1434,70 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               key={supplier.id}
                                               onClick={() => setFocusedSupplierId(supplier.id)}
                                               className={cn(
-                                                "group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
+                                                "group flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
                                                 isFocused 
-                                                  ? "bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800/30 shadow-sm" 
-                                                  : "bg-white dark:bg-gray-900 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-200 dark:hover:border-gray-700"
+                                                  ? cn(
+                                                      "border-[#83E509]/30 shadow-sm",
+                                                      ds.colors.surface.section
+                                                    )
+                                                  : cn(
+                                                      ds.colors.surface.card,
+                                                      ds.colors.border.subtle,
+                                                      ds.colors.surface.hover
+                                                    )
                                               )}
                                             >
                                               {/* Selection Indicator Bar */}
                                               {isFocused && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-orange-500" />
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#83E509]" />
                                               )}
 
                                               <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
                                                 <div 
                                                   className={cn(
-                                                    "w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer",
+                                                    "w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all cursor-pointer",
                                                     isSelected
-                                                      ? "bg-orange-500 border-orange-500 text-white"
-                                                      : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 group-hover:border-orange-400"
+                                                      ? "bg-[#83E509] border-[#83E509] text-zinc-950"
+                                                      : cn(
+                                                          ds.colors.border.default,
+                                                          ds.colors.surface.card,
+                                                          "hover:border-[#83E509]/50"
+                                                        )
                                                   )}
                                                   onClick={() => handleSupplierSelect(supplier)}
                                                 >
-                                                  {isSelected && <Check className="h-3 w-3" />}
+                                                  {isSelected && <Check className="h-4 w-4" />}
                                                 </div>
                                               </div>
 
                                               <div className="flex-1 min-w-0 z-10">
-                                                <div className="flex items-center justify-between">
+                                                <div className="flex items-center justify-between mb-1">
                                                   <span className={cn(
-                                                    "font-medium text-sm truncate",
-                                                    isSelected ? "text-orange-900 dark:text-orange-100" : "text-gray-900 dark:text-gray-100"
+                                                    ds.typography.weight.semibold,
+                                                    ds.typography.size.sm,
+                                                    ds.colors.text.primary,
+                                                    "truncate"
                                                   )}>
                                                     {supplier.name}
                                                   </span>
                                                   {isSelected && (
-                                                    <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 px-1.5 py-0.5 rounded">
+                                                    <span className={cn(
+                                                      ds.typography.size.xs,
+                                                      ds.typography.weight.bold,
+                                                      "uppercase tracking-wider px-2 py-0.5 rounded-md",
+                                                      "bg-[#83E509]/10 text-[#83E509]"
+                                                    )}>
                                                       Selecionado
                                                     </span>
                                                   )}
                                                 </div>
-                                                <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                                <div className={cn(
+                                                  "flex items-center gap-3",
+                                                  ds.typography.size.xs,
+                                                  ds.colors.text.secondary
+                                                )}>
                                                   {supplier.contact && (
-                                                    <span className="flex items-center gap-1 truncate">
+                                                    <span className="flex items-center gap-1.5 truncate">
                                                       <Phone className="h-3 w-3" />
                                                       {supplier.contact}
                                                     </span>
@@ -1441,8 +1506,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               </div>
 
                                               <ChevronRight className={cn(
-                                                "h-4 w-4 text-gray-300 dark:text-gray-600 transition-transform lg:hidden",
-                                                isFocused && "text-orange-500 translate-x-1"
+                                                "h-5 w-5 transition-transform lg:hidden",
+                                                ds.colors.text.muted,
+                                                isFocused && "text-[#83E509] translate-x-1"
                                               )} />
                                             </div>
                                           );
@@ -1454,22 +1520,26 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 
                                 {/* Lista de Selecionados - Sempre visível se houver selecionados */}
                                 {selectedSuppliers.length > 0 && (
-                                  <div className="mb-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                    <div className="flex items-center justify-between mb-2 px-3">
-                                      <h3 className="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">
+                                  <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                    <div className="flex items-center justify-between mb-3 px-3">
+                                      <h3 className={cn(
+                                        ds.typography.size.xs,
+                                        ds.typography.weight.bold,
+                                        "text-[#83E509] uppercase tracking-widest"
+                                      )}>
                                         Selecionados ({selectedSuppliers.length})
                                       </h3>
                                       <Button 
                                         variant="ghost" 
                                         size="sm" 
                                         onClick={handleClearAllSuppliers}
-                                        className="h-6 px-2 text-[10px] text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        className={cn(ds.components.button.danger, "h-7 px-3 text-xs")}
                                       >
                                         Limpar
                                       </Button>
                                     </div>
                                     
-                                    <div className="space-y-1">
+                                    <div className="space-y-2">
                                       {selectedSuppliers.map((supplier) => {
                                         const isFocused = focusedSupplierId === supplier.id;
                                         
@@ -1478,31 +1548,47 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             key={`selected-${supplier.id}`}
                                             onClick={() => setFocusedSupplierId(supplier.id)}
                                             className={cn(
-                                              "group flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer relative overflow-hidden bg-green-50/30 dark:bg-green-900/5",
+                                              "group flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
+                                              "bg-[#83E509]/5",
                                               isFocused 
-                                                ? "border-green-300 dark:border-green-700 shadow-sm" 
-                                                : "border-green-100 dark:border-green-900/30 hover:bg-green-50/80 dark:hover:bg-green-900/20"
+                                                ? "border-[#83E509]/40 shadow-sm" 
+                                                : cn(
+                                                    "border-[#83E509]/20",
+                                                    "hover:bg-[#83E509]/10"
+                                                  )
                                             )}
                                           >
                                             <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
                                               <div 
-                                                className="w-5 h-5 rounded border border-green-500 bg-green-500 text-white flex items-center justify-center transition-all cursor-pointer hover:bg-red-500 hover:border-red-500"
+                                                className={cn(
+                                                  "w-6 h-6 rounded-md border-2 bg-[#83E509] border-[#83E509] text-zinc-950 flex items-center justify-center transition-all cursor-pointer",
+                                                  "hover:bg-red-500 hover:border-red-500 hover:text-white"
+                                                )}
                                                 onClick={() => handleSupplierRemove(supplier.id)}
                                               >
-                                                <div className="group-hover:hidden"><Check className="h-3 w-3" /></div>
-                                                <div className="hidden group-hover:block"><X className="h-3 w-3" /></div>
+                                                <div className="group-hover:hidden"><Check className="h-4 w-4" /></div>
+                                                <div className="hidden group-hover:block"><X className="h-4 w-4" /></div>
                                               </div>
                                             </div>
 
                                             <div className="flex-1 min-w-0 z-10">
-                                              <div className="flex items-center justify-between">
-                                                <span className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">
+                                              <div className="flex items-center justify-between mb-1">
+                                                <span className={cn(
+                                                  ds.typography.weight.semibold,
+                                                  ds.typography.size.sm,
+                                                  ds.colors.text.primary,
+                                                  "truncate"
+                                                )}>
                                                   {supplier.name}
                                                 </span>
                                               </div>
-                                              <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                              <div className={cn(
+                                                "flex items-center gap-3",
+                                                ds.typography.size.xs,
+                                                ds.colors.text.secondary
+                                              )}>
                                                 {supplier.contact && (
-                                                  <span className="flex items-center gap-1 truncate">
+                                                  <span className="flex items-center gap-1.5 truncate">
                                                     <Phone className="h-3 w-3" />
                                                     {supplier.contact}
                                                   </span>
@@ -1511,9 +1597,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             </div>
                                             
                                             <ChevronRight className={cn(
-                                                "h-4 w-4 text-gray-300 dark:text-gray-600 transition-transform lg:hidden",
-                                                isFocused && "text-green-500 translate-x-1"
-                                              )} />
+                                              "h-5 w-5 transition-transform lg:hidden",
+                                              ds.colors.text.muted,
+                                              isFocused && "text-[#83E509] translate-x-1"
+                                            )} />
                                           </div>
                                         );
                                       })}
@@ -1526,7 +1613,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                             {/* Lado Direito: Painel de Detalhes (Desktop & Mobile) */}
                             {/* Mobile: Visível se tiver detalhe aberto. Desktop: Sempre visível (5/12) */}
                             <div className={cn(
-                              "flex-col bg-gray-50/50 dark:bg-gray-900/30 h-full border-l border-gray-100 dark:border-gray-800 transition-all duration-300",
+                              "flex-col h-full transition-all duration-300",
+                              ds.colors.surface.section,
+                              ds.colors.border.default,
+                              "border-l",
                               focusedSupplierId ? "flex w-full lg:w-5/12" : "hidden lg:flex lg:w-5/12"
                             )}>
                               {focusedSupplierId ? (
@@ -1536,54 +1626,73 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
 
                                   return (
-                                    <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300 bg-white dark:bg-gray-950 lg:bg-transparent">
+                                    <div className={cn(
+                                      "flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300",
+                                      "lg:bg-transparent"
+                                    )}>
                                       {/* Header do Painel */}
-                                      <div className="p-4 lg:p-6 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-900/50 flex items-center gap-3">
+                                      <div className={cn(
+                                        "p-6 flex items-center gap-4",
+                                        ds.colors.border.default,
+                                        "border-b"
+                                      )}>
                                         {/* Botão Voltar (Mobile Only) */}
                                         <Button
                                           variant="ghost"
                                           size="icon"
-                                          className="lg:hidden h-8 w-8 -ml-2"
+                                          className={cn(ds.components.button.ghost, "lg:hidden h-9 w-9")}
                                           onClick={() => setFocusedSupplierId(null)}
                                         >
                                           <ArrowLeft className="h-5 w-5" />
                                         </Button>
                                         
                                         <div className="flex-1 flex items-center justify-between gap-4">
-                                          <div>
-                                            <div className="flex items-center gap-3 mb-1">
-                                              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300 shadow-sm">
-                                                {supplier.name.substring(0, 2).toUpperCase()}
-                                              </div>
-                                              <h2 className="text-lg font-bold text-gray-900 dark:text-white leading-tight truncate">
-                                                {supplier.name}
-                                              </h2>
+                                          <div className="flex items-center gap-3">
+                                            <div className={cn(
+                                              "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
+                                              "bg-[#83E509] text-zinc-950",
+                                              ds.typography.weight.bold,
+                                              ds.typography.size.sm
+                                            )}>
+                                              {supplier.name.substring(0, 2).toUpperCase()}
                                             </div>
+                                            <h2 className={cn(
+                                              ds.typography.size.lg,
+                                              ds.typography.weight.bold,
+                                              ds.colors.text.primary,
+                                              "leading-tight truncate"
+                                            )}>
+                                              {supplier.name}
+                                            </h2>
                                           </div>
                                         </div>
                                       </div>
                                       
                                       {/* Ação Principal (Separada para Mobile) */}
-                                      <div className="px-4 lg:px-6 py-2 border-b border-gray-100 dark:border-gray-800 lg:border-0 lg:pb-0">
+                                      <div className={cn(
+                                        "px-6 py-4",
+                                        ds.colors.border.default,
+                                        "border-b lg:border-0"
+                                      )}>
                                          <Button
                                             size="sm"
                                             variant={isSelected ? "outline" : "default"}
                                             onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
                                             className={cn(
-                                              "w-full lg:w-auto transition-all !shadow-none",
+                                              "w-full lg:w-auto",
                                               isSelected 
-                                                ? "border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 !bg-transparent" 
-                                                : "bg-gray-900 text-white hover:bg-gray-800"
+                                                ? ds.components.button.danger
+                                                : ds.components.button.primary
                                             )}
                                           >
                                             {isSelected ? (
                                               <>
-                                                <X className="h-4 w-4 mr-1.5" />
+                                                <X className="h-4 w-4 mr-2" />
                                                 Remover da Cotação
                                               </>
                                             ) : (
                                               <>
-                                                <Plus className="h-4 w-4 mr-1.5" />
+                                                <Plus className="h-4 w-4 mr-2" />
                                                 Adicionar à Cotação
                                               </>
                                             )}
@@ -1591,61 +1700,127 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       </div>
 
                                       {/* Corpo do Painel */}
-                                      <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-6">
+                                      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
                                         {/* Info Cards */}
-                                        <div className="grid grid-cols-2 gap-3">
-                                          <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700/50 shadow-sm">
-                                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                                              <History className="h-3.5 w-3.5" />
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div className={cn(
+                                            "p-4 rounded-xl border shadow-sm",
+                                            ds.colors.surface.card,
+                                            ds.colors.border.default
+                                          )}>
+                                            <div className={cn(
+                                              "flex items-center gap-2 mb-2",
+                                              ds.typography.size.xs,
+                                              ds.colors.text.secondary
+                                            )}>
+                                              <History className="h-4 w-4" />
                                               Última Cotação
                                             </div>
-                                            <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">--</p>
+                                            <p className={cn(
+                                              ds.typography.weight.semibold,
+                                              ds.typography.size.sm,
+                                              ds.colors.text.primary
+                                            )}>--</p>
                                           </div>
-                                          <div className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700/50 shadow-sm">
-                                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                                              <Star className="h-3.5 w-3.5 text-amber-500" />
+                                          <div className={cn(
+                                            "p-4 rounded-xl border shadow-sm",
+                                            ds.colors.surface.card,
+                                            ds.colors.border.default
+                                          )}>
+                                            <div className={cn(
+                                              "flex items-center gap-2 mb-2",
+                                              ds.typography.size.xs,
+                                              ds.colors.text.secondary
+                                            )}>
+                                              <Star className="h-4 w-4 text-amber-500" />
                                               Avaliação
                                             </div>
-                                            <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">Novo</p>
+                                            <p className={cn(
+                                              ds.typography.weight.semibold,
+                                              ds.typography.size.sm,
+                                              ds.colors.text.primary
+                                            )}>Novo</p>
                                           </div>
                                         </div>
 
                                         {/* Contact Info */}
                                         <div className="space-y-4">
-                                          <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                          <h4 className={cn(
+                                            ds.typography.size.xs,
+                                            ds.typography.weight.bold,
+                                            "uppercase tracking-wider",
+                                            ds.colors.text.muted
+                                          )}>
                                             Informações de Contato
                                           </h4>
                                           <div className="space-y-3">
-                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors">
-                                              <Phone className="h-5 w-5 text-gray-400 mt-0.5" />
-                                              <div>
-                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Telefone / WhatsApp</p>
-                                                <p className="text-sm text-gray-500">{supplier.contact || "Não informado"}</p>
+                                            <div className={cn(
+                                              "flex items-start gap-3 p-4 rounded-xl border transition-colors",
+                                              ds.colors.surface.card,
+                                              ds.colors.border.subtle,
+                                              ds.colors.surface.hover
+                                            )}>
+                                              <Phone className={cn("h-5 w-5 mt-0.5", ds.colors.text.secondary)} />
+                                              <div className="flex-1 min-w-0">
+                                                <p className={cn(
+                                                  ds.typography.size.sm,
+                                                  ds.typography.weight.medium,
+                                                  ds.colors.text.primary
+                                                )}>Telefone / WhatsApp</p>
+                                                <p className={cn(
+                                                  ds.typography.size.sm,
+                                                  ds.colors.text.secondary,
+                                                  "truncate"
+                                                )}>{supplier.contact || "Não informado"}</p>
                                               </div>
                                             </div>
-                                            <div className="flex items-start gap-3 p-3 rounded-lg bg-white dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-colors">
-                                              <Mail className="h-5 w-5 text-gray-400 mt-0.5" />
-                                              <div>
-                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">E-mail</p>
-                                                <p className="text-sm text-gray-500">{"Não informado"}</p>
+                                            <div className={cn(
+                                              "flex items-start gap-3 p-4 rounded-xl border transition-colors",
+                                              ds.colors.surface.card,
+                                              ds.colors.border.subtle,
+                                              ds.colors.surface.hover
+                                            )}>
+                                              <Mail className={cn("h-5 w-5 mt-0.5", ds.colors.text.secondary)} />
+                                              <div className="flex-1 min-w-0">
+                                                <p className={cn(
+                                                  ds.typography.size.sm,
+                                                  ds.typography.weight.medium,
+                                                  ds.colors.text.primary
+                                                )}>E-mail</p>
+                                                <p className={cn(
+                                                  ds.typography.size.sm,
+                                                  ds.colors.text.secondary,
+                                                  "truncate"
+                                                )}>{"Não informado"}</p>
                                               </div>
                                             </div>
                                           </div>
                                         </div>
-
-
                                       </div>
                                     </div>
                                   );
                                 })()
                               ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-center p-8 space-y-4 text-gray-400">
-                                  <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center animate-pulse">
+                                <div className={cn(
+                                  "flex flex-col items-center justify-center h-full text-center p-8 space-y-4",
+                                  ds.colors.text.secondary
+                                )}>
+                                  <div className={cn(
+                                    "w-20 h-20 rounded-full flex items-center justify-center animate-pulse",
+                                    ds.colors.surface.section
+                                  )}>
                                     <MousePointerClick className="h-10 w-10 opacity-30" />
                                   </div>
-                                  <div>
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Detalhes do Fornecedor</h3>
-                                    <p className="text-sm max-w-[200px] mx-auto mt-2">
+                                  <div className="space-y-2">
+                                    <h3 className={cn(
+                                      ds.typography.size.lg,
+                                      ds.typography.weight.semibold,
+                                      ds.colors.text.primary
+                                    )}>Detalhes do Fornecedor</h3>
+                                    <p className={cn(
+                                      ds.typography.size.sm,
+                                      "max-w-[240px] mx-auto"
+                                    )}>
                                       Clique em um fornecedor da lista para ver informações detalhadas e histórico.
                                     </p>
                                   </div>
@@ -1658,152 +1833,170 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                         {/* Detalhes Tab */}
                         <TabsContent value="detalhes" className="flex-1 m-0 min-h-0">
-                          <ScrollArea className="h-full w-full [&>div>div[style]]:!pr-0 bg-gray-50 dark:bg-gray-950/50">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-3 sm:p-4">
+                          <ScrollArea className={cn("h-full w-full [&>div>div[style]]:!pr-0", ds.colors.surface.page)}>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 pb-24">
                               {/* Coluna Esquerda - Formulário de Detalhes */}
-                              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit">
-                                <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
-                                  <CardTitle className="flex items-center gap-2 text-purple-900 dark:text-purple-100 text-base">
-                                    <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400 flex-shrink-0" />
-                                    <span className="truncate">Detalhes Adicionais</span>
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent className="pt-3 space-y-3">
-                                <FormField
-                                  control={form.control}
-                                  name="observacoes"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel className="text-sm">Observações</FormLabel>
-                                      <FormControl>
-                                        <Textarea 
-                                          placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                          className="resize-none min-h-[100px] text-sm bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-white focus:border-purple-500 focus:ring-purple-500/20" 
-                                          onFocus={handleInputFocus}
-                                          {...field} 
-                                        />
-                                      </FormControl>
-                                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        Estas informações serão enviadas junto com a cotação para todos os fornecedores
-                                      </p>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
+                              <div className="space-y-6">
+                                <Card className={ds.components.card.root}>
+                                  <CardHeader className={ds.components.card.header}>
+                                    <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                      <FileText className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                      <span className="truncate">Detalhes Adicionais</span>
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className={cn(ds.components.card.body, "space-y-4")}>
+                                    <FormField
+                                      control={form.control}
+                                      name="observacoes"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel className={ds.components.input.label}>Observações</FormLabel>
+                                          <FormControl>
+                                            <Textarea 
+                                              placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
+                                              className={cn(ds.components.input.root, "resize-none min-h-[160px]")}
+                                              onFocus={handleInputFocus}
+                                              {...field} 
+                                            />
+                                          </FormControl>
+                                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                            Estas informações serão enviadas junto com a cotação para todos os fornecedores
+                                          </p>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                  </CardContent>
+                                </Card>
+                              </div>
 
-                                {/* Informações Adicionais */}
-                                <div className="bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/20 rounded-lg p-3">
-                                  <h4 className="font-medium text-purple-900 dark:text-purple-300 mb-2 flex items-center gap-2 text-sm">
-                                    <FileText className="h-3 w-3" />
-                                    Dicas para uma boa cotação
-                                  </h4>
-                                  <ul className="space-y-1 text-xs text-purple-700 dark:text-purple-300">
-                                    <li className="flex items-start gap-2">
-                                      <span className="text-purple-500 mt-0.5">•</span>
-                                      <span>Seja específico nas observações para evitar dúvidas</span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                      <span className="text-purple-500 mt-0.5">•</span>
-                                      <span>Inclua especificações técnicas quando necessário</span>
-                                    </li>
-                                    <li className="flex items-start gap-2">
-                                      <span className="text-purple-500 mt-0.5">•</span>
-                                      <span>Defina condições de pagamento e entrega</span>
-                                    </li>
-                                  </ul>
-                                </div>
-                              </CardContent>
-                            </Card>
-
-                            {/* Coluna Direita - Resumo da Cotação */}
-                            <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit">
-                              <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-800">
-                                <CardTitle className="flex items-center gap-2 text-blue-900 dark:text-blue-100 text-base">
-                                  <Package className="h-4 w-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
-                                  <span className="truncate">Resumo da Cotação</span>
-                                </CardTitle>
-                              </CardHeader>
-                              <CardContent className="pt-3 space-y-3">
+                              {/* Coluna Direita - Resumo da Cotação */}
+                              <div className="space-y-6">
                                 {/* Estatísticas Principais */}
-                                <div className="grid grid-cols-2 gap-2">
-                                  <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/20 rounded-lg p-2 text-center">
-                                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{fields.length}</div>
-                                    <div className="text-xs text-blue-700 dark:text-blue-300 font-medium">Produtos</div>
-                                  </div>
-                                  <div className="bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/20 rounded-lg p-2 text-center">
-                                    <div className="text-xl font-bold text-green-600 dark:text-green-400">{selectedSuppliers.length}</div>
-                                    <div className="text-xs text-green-700 dark:text-green-300 font-medium">Fornecedores</div>
-                                  </div>
-                                </div>
+                                <Card className={ds.components.card.root}>
+                                  <CardHeader className={ds.components.card.header}>
+                                    <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                      <LayoutList className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                      <span className="truncate">Estatísticas</span>
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className={ds.components.card.body}>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className={cn(
+                                        ds.colors.surface.section,
+                                        ds.colors.border.subtle,
+                                        "border rounded-lg p-4 text-center"
+                                      )}>
+                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-[#83E509] mb-1")}>{fields.length}</div>
+                                        <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.medium)}>Produtos</div>
+                                      </div>
+                                      <div className={cn(
+                                        ds.colors.surface.section,
+                                        ds.colors.border.subtle,
+                                        "border rounded-lg p-4 text-center"
+                                      )}>
+                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-[#83E509] mb-1")}>{selectedSuppliers.length}</div>
+                                        <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.medium)}>Fornecedores</div>
+                                      </div>
+                                    </div>
+                                  </CardContent>
+                                </Card>
 
                                 {/* Detalhes do Período */}
-                                <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-                                  <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
-                                    <Clock className="h-3 w-3 text-gray-600 dark:text-gray-400" />
-                                    Período da Cotação
-                                  </h4>
-                                  <div className="text-xs">
+                                <Card className={ds.components.card.root}>
+                                  <CardHeader className={ds.components.card.header}>
+                                    <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                      <Clock className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                      <span className="truncate">Período da Cotação</span>
+                                    </CardTitle>
+                                  </CardHeader>
+                                  <CardContent className={ds.components.card.body}>
                                     <div className="flex justify-between items-center">
-                                      <span className="text-gray-600 dark:text-gray-400">Período:</span>
-                                      <span className="font-medium text-gray-900 dark:text-white">
+                                      <span className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>Período:</span>
+                                      <span className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
                                         {form.watch("dataInicio") && form.watch("dataFim") 
                                           ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", { locale: ptBR })}`
                                           : "Não definido"
                                         }
                                       </span>
                                     </div>
-                                  </div>
-                                </div>
+                                  </CardContent>
+                                </Card>
 
                                 {/* Lista de Produtos */}
                                 {fields.length > 0 && (
-                                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-                                    <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
-                                      <Package className="h-3 w-3 text-gray-600 dark:text-gray-400" />
-                                      Produtos Selecionados
-                                    </h4>
-                                    <ScrollArea className="max-h-[120px] lg:max-h-[150px] [&>div>div[style]]:!pr-0">
-                                      <div className="space-y-1">
-                                        {fields.map((field, index) => (
-                                          <div key={field.id} className="flex items-center justify-between p-2 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
-                                            <div className="flex-1 min-w-0">
-                                              <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
-                                                {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
-                                              </p>
-                                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                                {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
-                                              </p>
+                                  <Card className={ds.components.card.root}>
+                                    <CardHeader className={ds.components.card.header}>
+                                      <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                        <Package className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                        <span className="truncate">Produtos Selecionados</span>
+                                      </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className={ds.components.card.body}>
+                                      <ScrollArea className="max-h-[200px] [&>div>div[style]]:!pr-0">
+                                        <div className="space-y-3 pr-4">
+                                          {fields.map((field, index) => (
+                                            <div key={field.id} className={cn(
+                                              "flex items-center justify-between p-4 rounded-lg border",
+                                              ds.colors.surface.section,
+                                              ds.colors.border.subtle
+                                            )}>
+                                              <div className="flex-1 min-w-0">
+                                                <p className={cn(
+                                                  ds.typography.size.sm,
+                                                  ds.typography.weight.semibold,
+                                                  ds.colors.text.primary,
+                                                  "truncate mb-1"
+                                                )}>
+                                                  {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
+                                                </p>
+                                                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                                  {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                                </p>
+                                              </div>
                                             </div>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
+                                          ))}
+                                        </div>
+                                      </ScrollArea>
+                                    </CardContent>
+                                  </Card>
                                 )}
 
                                 {/* Lista de Fornecedores */}
                                 {selectedSuppliers.length > 0 && (
-                                  <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg p-3">
-                                    <h4 className="font-medium text-gray-900 dark:text-white mb-2 flex items-center gap-2 text-sm">
-                                      <Building2 className="h-3 w-3 text-gray-600 dark:text-gray-400" />
-                                      Fornecedores Participantes
-                                    </h4>
-                                    <ScrollArea className="max-h-[100px] lg:max-h-[120px] [&>div>div[style]]:!pr-0">
-                                      <div className="space-y-1">
-                                        {selectedSuppliers.map((supplier) => (
-                                          <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-700">
-                                            <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full"></div>
-                                            <CapitalizedText className="text-xs font-medium text-gray-900 dark:text-white">
-                                              {supplier.name}
-                                            </CapitalizedText>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </ScrollArea>
-                                  </div>
+                                  <Card className={ds.components.card.root}>
+                                    <CardHeader className={ds.components.card.header}>
+                                      <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                                        <Building2 className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                        <span className="truncate">Fornecedores Participantes</span>
+                                      </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className={ds.components.card.body}>
+                                      <ScrollArea className="max-h-[180px] [&>div>div[style]]:!pr-0">
+                                        <div className="space-y-3 pr-4">
+                                          {selectedSuppliers.map((supplier) => (
+                                            <div key={supplier.id} className={cn(
+                                              "flex items-center gap-3 p-4 rounded-lg border",
+                                              ds.colors.surface.section,
+                                              ds.colors.border.subtle
+                                            )}>
+                                              <div className="w-2 h-2 bg-[#83E509] rounded-full flex-shrink-0"></div>
+                                              <CapitalizedText className={cn(
+                                                ds.typography.size.sm,
+                                                ds.typography.weight.semibold,
+                                                ds.colors.text.primary,
+                                                "truncate"
+                                              )}>
+                                                {supplier.name}
+                                              </CapitalizedText>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </ScrollArea>
+                                    </CardContent>
+                                  </Card>
                                 )}
-                              </CardContent>
-                            </Card>
+                              </div>
                             </div>
                           </ScrollArea>
                         </TabsContent>
@@ -1812,13 +2005,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 </div>
 
                 {/* Footer Fixo */}
-                <div className="flex-shrink-0 px-4 py-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
+                <div className={cn(ds.components.modal.footer, "flex-shrink-0")}>
                   <div className="flex gap-2 justify-end">
                     <Button 
                       type="button" 
                       variant="outline" 
                       onClick={() => setOpen(false)}
-                      className="h-10 px-4 text-sm font-medium rounded-xl border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                      className={ds.components.button.secondary}
                     >
                       Cancelar
                     </Button>
@@ -1827,7 +2020,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       <Button 
                         type="submit"
                         disabled={isSubmitting}
-                        className="h-10 px-6 text-sm font-bold uppercase tracking-wide bg-orange-600 hover:bg-orange-700 text-white rounded-xl shadow-sm transition-all"
+                        className={ds.components.button.primary}
                       >
                         {isSubmitting ? (
                           <>
@@ -1846,7 +2039,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         type="button"
                         onClick={handleNext}
                         disabled={!canProceedToNext()}
-                        className="h-10 px-6 text-sm font-bold uppercase tracking-wide bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 rounded-xl shadow-sm transition-all"
+                        className={ds.components.button.primary}
                       >
                         Próximo
                         <ChevronRight className="ml-2 h-4 w-4" />
