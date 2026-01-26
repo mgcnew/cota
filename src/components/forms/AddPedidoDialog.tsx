@@ -362,25 +362,46 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       key={p.id}
       onClick={() => selectProductFromList(p)}
       className={cn(
-        "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-800 last:border-none",
+        "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all rounded-lg",
         highlightedProductIndex === index 
-          ? "bg-gray-100 dark:bg-gray-800" 
-          : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+          ? "bg-[#83E509]/10 text-[#83E509]" 
+          : cn(
+              ds.colors.surface.hover,
+              ds.colors.text.primary
+            )
       )}
     >
-      <div className="flex items-center gap-2 overflow-hidden">
-        <div className="w-8 h-8 rounded flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-400 flex-shrink-0">
+      <div className="flex items-center gap-3 overflow-hidden">
+        <div className={cn(
+          "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+          highlightedProductIndex === index
+            ? "bg-[#83E509]/20 text-[#83E509]"
+            : cn(ds.colors.surface.section, ds.colors.text.secondary)
+        )}>
           <Package className="h-4 w-4" />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="font-bold tracking-tight truncate text-gray-900 dark:text-white">{p.name}</span>
+          <span className={cn(
+            ds.typography.weight.bold,
+            ds.typography.size.sm,
+            "truncate"
+          )}>{p.name}</span>
           {p.brand_name && (
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className={cn(
+                ds.typography.size.xs,
+                ds.typography.weight.bold,
+                ds.colors.text.secondary,
+                "uppercase tracking-wider"
+              )}>{p.brand_name}</span>
               {p.brand_rating > 0 && (
-                <div className="flex items-center gap-0.5">
-                  <Star className="h-2 w-2 fill-amber-400 text-amber-400" />
-                  <span className="text-[9px] font-bold text-amber-600 dark:text-amber-500">{p.brand_rating}</span>
+                <div className="flex items-center gap-1">
+                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  <span className={cn(
+                    ds.typography.size.xs,
+                    ds.typography.weight.bold,
+                    "text-amber-600 dark:text-amber-500"
+                  )}>{p.brand_rating}</span>
                 </div>
               )}
             </div>
@@ -475,27 +496,27 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden relative bg-white dark:bg-black">
+      <div className={cn("flex-1 overflow-hidden relative", ds.colors.surface.page)}>
         
         {/* Step: Produtos */}
         {activeStep === "produtos" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
+          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start">
               
               {/* Adicionar Produto */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-visible z-10">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
-                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
-                    <Plus className="h-4 w-4 text-gray-500" />
+              <Card className={ds.components.card.root}>
+                <CardHeader className={ds.components.card.header}>
+                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                    <Plus className="h-4 w-4 text-[#83E509] flex-shrink-0" />
                     <span>Adicionar Produto</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 space-y-4">
+                <CardContent className={cn(ds.components.card.body, "space-y-4")}>
                   {/* Busca */}
-                  <div className="space-y-1 relative">
-                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Produto</Label>
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Produto *</Label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
                       <Input 
                         ref={productSearchRef}
                         placeholder="Buscar produto..." 
@@ -503,11 +524,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
                         onFocus={handleInputFocus}
-                        className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" 
+                        className={cn(ds.components.input.root, "pl-10")} 
                       />
                       {/* Dropdown de resultados */}
                       {filteredProducts.length > 0 && !selectedProduct && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl max-h-[200px] overflow-y-auto z-50">
+                        <div className={cn(
+                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl max-h-[200px] overflow-y-auto z-50 custom-scrollbar",
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "border"
+                        )}>
                           {filteredProducts.map((p, i) => renderProductItem(p, i))}
                         </div>
                       )}
@@ -515,8 +541,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Quantidade</Label>
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Quantidade *</Label>
                       <Input 
                         ref={quantityInputRef}
                         type="number" 
@@ -525,13 +551,18 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         onChange={(e) => setNewProductQuantity(e.target.value)}
                         onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
                         onFocus={handleInputFocus}
-                        className="h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
+                        className={ds.components.input.root}
                       />
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Preço Unit.</Label>
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Preço Unit. *</Label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">R$</span>
+                        <span className={cn(
+                          "absolute left-3 top-1/2 -translate-y-1/2",
+                          ds.typography.size.xs,
+                          ds.typography.weight.bold,
+                          ds.colors.text.secondary
+                        )}>R$</span>
                         <Input 
                           ref={priceInputRef}
                           inputMode="decimal"
@@ -540,61 +571,96 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           onChange={(e) => setNewProductPrice(e.target.value)}
                           onKeyDown={(e) => handleProductKeyDown(e, 'price')}
                           onFocus={handleInputFocus}
-                          className="pl-8 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
+                          className={cn(ds.components.input.root, "pl-10")}
                         />
                       </div>
                     </div>
                   </div>
 
-                  <Button onClick={handleAddProduct} disabled={!selectedProduct || !newProductQuantity || !newProductPrice}
-                    className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs h-9 rounded-lg shadow-sm">
-                    <Plus className="h-3.5 w-3.5 mr-2" />
-                    Adicionar Item
+                  <Button 
+                    onClick={handleAddProduct} 
+                    disabled={!selectedProduct || !newProductQuantity || !newProductPrice}
+                    className={cn(ds.components.button.primary, "w-full")}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Item (Enter)
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Lista de Itens */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-full max-h-[400px] lg:max-h-none rounded-xl overflow-hidden flex flex-col">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
-                  <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
-                    <span className="flex items-center gap-2 text-gray-900 dark:text-white">
-                      <ShoppingCart className="h-4 w-4 text-gray-500" />
+              <Card className={cn(ds.components.card.root, "h-full max-h-[500px] lg:max-h-none flex flex-col")}>
+                <CardHeader className={cn(ds.components.card.header, "flex-shrink-0")}>
+                  <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
+                    <span className="flex items-center gap-2">
+                      <ShoppingCart className="h-4 w-4 text-[#83E509]" />
                       Itens do Pedido
                     </span>
-                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-bold">
+                    <Badge className={cn(
+                      ds.components.badge.base,
+                      "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                    )}>
                       {itens.length}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 flex-1 overflow-hidden p-0">
                   <ScrollArea className="h-full">
-                    <div className="p-4 space-y-2">
+                    <div className="p-4 space-y-3">
                       {itens.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                          <Package className="h-8 w-8 opacity-20 mb-2" />
-                          <p className="text-xs font-medium">Nenhum item adicionado</p>
+                        <div className={cn(
+                          "flex flex-col items-center justify-center py-12",
+                          ds.colors.text.secondary
+                        )}>
+                          <Package className="h-12 w-12 opacity-20 mb-3" />
+                          <p className={cn(ds.typography.size.sm, ds.typography.weight.medium)}>Nenhum item adicionado</p>
                         </div>
                       ) : (
                         itens.map((item, index) => (
-                          <div key={index} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-sm group">
-                            <div className="w-8 h-8 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 font-bold text-xs text-gray-500">
+                          <div key={index} className={cn(
+                            "flex items-center gap-3 p-4 rounded-xl border shadow-sm group",
+                            ds.colors.surface.card,
+                            ds.colors.border.default
+                          )}>
+                            <div className={cn(
+                              "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                              ds.typography.size.xs,
+                              ds.typography.weight.bold,
+                              "bg-[#83E509]/10 text-[#83E509]"
+                            )}>
                               {index + 1}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-gray-900 dark:text-white truncate">{item.produto}</p>
-                              <div className="flex items-center gap-2 mt-0.5 text-[10px] text-gray-500">
+                              <p className={cn(
+                                ds.typography.size.sm,
+                                ds.typography.weight.bold,
+                                ds.colors.text.primary,
+                                "truncate"
+                              )}>{item.produto}</p>
+                              <div className={cn(
+                                "flex items-center gap-2 mt-1",
+                                ds.typography.size.xs,
+                                ds.colors.text.secondary
+                              )}>
                                 <span>{item.quantidade} {item.unidade}</span>
-                                <span>x</span>
+                                <span>×</span>
                                 <span>R$ {item.valorUnitario.toFixed(2)}</span>
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-xs font-black text-gray-900 dark:text-white">R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
+                              <p className={cn(
+                                ds.typography.size.sm,
+                                ds.typography.weight.bold,
+                                ds.colors.text.primary
+                              )}>R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => setItens(itens.filter((_, i) => i !== index))}
-                              className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded">
-                              <Trash2 className="h-3.5 w-3.5" />
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => setItens(itens.filter((_, i) => i !== index))}
+                              className={cn(ds.components.button.danger, "h-8 w-8")}
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         )).reverse()
@@ -602,9 +668,23 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     </div>
                   </ScrollArea>
                 </CardContent>
-                <div className="p-3 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex justify-between items-center">
-                  <span className="text-xs font-bold text-gray-500 uppercase">Total Estimado</span>
-                  <span className="text-sm font-black text-gray-900 dark:text-white">
+                <div className={cn(
+                  "p-4 flex justify-between items-center",
+                  ds.colors.border.default,
+                  ds.colors.surface.section,
+                  "border-t"
+                )}>
+                  <span className={cn(
+                    ds.typography.size.sm,
+                    ds.typography.weight.bold,
+                    ds.colors.text.secondary,
+                    "uppercase"
+                  )}>Total Estimado</span>
+                  <span className={cn(
+                    ds.typography.size.lg,
+                    ds.typography.weight.bold,
+                    "text-[#83E509]"
+                  )}>
                     R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
                   </span>
                 </div>
@@ -615,49 +695,77 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {/* Step: Fornecedor */}
         {activeStep === "fornecedor" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
+          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start">
               
               {/* Selecionar Fornecedor */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
-                    <Building2 className="h-4 w-4 text-gray-500" />
+              <Card className={ds.components.card.root}>
+                <CardHeader className={ds.components.card.header}>
+                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                    <Building2 className="h-4 w-4 text-[#83E509] flex-shrink-0" />
                     <span>Selecionar Fornecedor</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 space-y-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                    <Input 
-                      ref={supplierSearchRef}
-                      placeholder="Buscar fornecedor..." 
-                      value={supplierSearch}
-                      onChange={(e) => setSupplierSearch(e.target.value)}
-                      onFocus={handleInputFocus}
-                      className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg" 
-                    />
+                <CardContent className={cn(ds.components.card.body, "space-y-4")}>
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Buscar</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                      <Input 
+                        ref={supplierSearchRef}
+                        placeholder="Buscar fornecedor..." 
+                        value={supplierSearch}
+                        onChange={(e) => setSupplierSearch(e.target.value)}
+                        onFocus={handleInputFocus}
+                        className={cn(ds.components.input.root, "pl-10")} 
+                      />
+                    </div>
                   </div>
                   
-                  <ScrollArea className="h-[250px] border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-950">
-                    <div className="p-1.5 space-y-1">
+                  <ScrollArea className={cn(
+                    "h-[280px] rounded-xl border",
+                    ds.colors.surface.section,
+                    ds.colors.border.default
+                  )}>
+                    <div className="p-2 space-y-1.5">
                       {filteredSuppliers.map(s => (
                         <button
                           key={s.id}
                           onClick={() => setFornecedor(s.id)}
                           className={cn(
-                            "w-full p-2 rounded-md text-left transition-all flex items-center gap-3 group",
+                            "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 group",
                             fornecedor === s.id 
-                              ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-sm" 
-                              : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                              ? "bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/20" 
+                              : cn(
+                                  ds.colors.surface.hover,
+                                  ds.colors.text.primary
+                                )
                           )}
                         >
-                          <Building2 className={cn("h-4 w-4", fornecedor === s.id ? "text-white dark:text-gray-900" : "text-gray-400")} />
-                          <div className="flex-1 min-w-0">
-                            <p className={cn("text-xs font-bold truncate", fornecedor === s.id ? "text-white dark:text-gray-900" : "text-gray-700 dark:text-gray-300")}>{s.name}</p>
-                            {s.contact && <p className={cn("text-[10px] truncate opacity-80", fornecedor === s.id ? "text-gray-300 dark:text-gray-600" : "text-gray-500")}>{s.contact}</p>}
+                          <div className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                            fornecedor === s.id 
+                              ? "bg-zinc-950/10 text-zinc-950" 
+                              : cn(ds.colors.surface.section, ds.colors.text.secondary)
+                          )}>
+                            <Building2 className="h-4 w-4" />
                           </div>
-                          {fornecedor === s.id && <Check className="h-4 w-4" />}
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              ds.typography.size.sm,
+                              ds.typography.weight.bold,
+                              "truncate",
+                              fornecedor === s.id && "text-zinc-950"
+                            )}>{s.name}</p>
+                            {s.contact && (
+                              <p className={cn(
+                                ds.typography.size.xs,
+                                "truncate opacity-70 mt-0.5",
+                                fornecedor === s.id ? "text-zinc-950" : ds.colors.text.secondary
+                              )}>{s.contact}</p>
+                            )}
+                          </div>
+                          {fornecedor === s.id && <Check className="h-4 w-4 text-zinc-950 flex-shrink-0" />}
                         </button>
                       ))}
                     </div>
@@ -666,52 +774,78 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               </Card>
 
               {/* Detalhes do Pedido */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
-                    <FileText className="h-4 w-4 text-gray-500" />
+              <Card className={ds.components.card.root}>
+                <CardHeader className={ds.components.card.header}>
+                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
+                    <FileText className="h-4 w-4 text-[#83E509] flex-shrink-0" />
                     <span>Detalhes da Entrega</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 space-y-4">
+                <CardContent className={cn(ds.components.card.body, "space-y-4")}>
                   {fornecedor && (
-                    <div className="p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800 mb-4">
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Fornecedor Selecionado</span>
-                      <p className="text-sm font-black text-gray-900 dark:text-white mt-1">
+                    <div className={cn(
+                      "p-4 rounded-xl border",
+                      ds.colors.surface.section,
+                      ds.colors.border.default
+                    )}>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        ds.colors.text.secondary,
+                        "uppercase tracking-wider"
+                      )}>Fornecedor Selecionado</span>
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary,
+                        "mt-1.5"
+                      )}>
                         {suppliers.find(s => s.id === fornecedor)?.name}
                       </p>
                     </div>
                   )}
 
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data de Entrega</Label>
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Data de Entrega *</Label>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn(
-                          "w-full justify-start text-left font-medium h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800",
-                          !dataEntrega && "text-gray-400"
-                        )}>
-                          <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                        <Button 
+                          variant="outline" 
+                          className={cn(
+                            ds.components.button.secondary,
+                            "w-full justify-start",
+                            !dataEntrega && ds.colors.text.secondary
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
                           {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data..."}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-gray-200 dark:border-gray-700" align="start">
-                        <Calendar mode="single" selected={dataEntrega}
-                          onSelect={setDataEntrega} locale={ptBR}
+                      <PopoverContent className={cn(
+                        "w-auto p-0",
+                        ds.colors.surface.card,
+                        ds.colors.border.default,
+                        "border"
+                      )} align="start">
+                        <Calendar 
+                          mode="single" 
+                          selected={dataEntrega}
+                          onSelect={setDataEntrega} 
+                          locale={ptBR}
                           disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} 
                         />
                       </PopoverContent>
                     </Popover>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Observações</Label>
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Observações</Label>
                     <Textarea 
                       placeholder="Instruções de entrega, pagamento..." 
                       value={observacoes}
                       onChange={(e) => setObservacoes(e.target.value)}
                       onFocus={handleInputFocus}
-                      className="min-h-[100px] resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm" 
+                      className={cn(ds.components.input.root, "min-h-[120px] resize-none")} 
                     />
                   </div>
                 </CardContent>
@@ -722,35 +856,61 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {/* Step: Confirmar */}
         {activeStep === "confirmar" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-             <div className="max-w-2xl mx-auto space-y-4">
+          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+             <div className="max-w-2xl mx-auto space-y-6">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Resumo Fornecedor */}
-                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <Building2 className="h-3.5 w-3.5 text-gray-500" />
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        "bg-[#83E509]/10"
+                      )}>
+                        <Building2 className="h-4 w-4 text-[#83E509]" />
                       </div>
-                      <span className="text-xs font-black uppercase tracking-wider text-gray-500">Fornecedor</span>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        ds.colors.text.secondary,
+                        "uppercase tracking-wider"
+                      )}>Fornecedor</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white pl-8">
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.primary,
+                      "pl-10"
+                    )}>
                       {suppliers.find(s => s.id === fornecedor)?.name}
                     </p>
                   </CardContent>
                 </Card>
 
                 {/* Resumo Entrega */}
-                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <CalendarIcon className="h-3.5 w-3.5 text-gray-500" />
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        "bg-[#83E509]/10"
+                      )}>
+                        <CalendarIcon className="h-4 w-4 text-[#83E509]" />
                       </div>
-                      <span className="text-xs font-black uppercase tracking-wider text-gray-500">Entrega</span>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        ds.colors.text.secondary,
+                        "uppercase tracking-wider"
+                      )}>Entrega</span>
                     </div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white pl-8">
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.primary,
+                      "pl-10"
+                    )}>
                       {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "-"}
                     </p>
                   </CardContent>
@@ -758,33 +918,66 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               </div>
 
               {/* Resumo Itens */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                  <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
-                    <span className="flex items-center gap-2 text-gray-900 dark:text-white">
-                      <ShoppingCart className="h-4 w-4 text-gray-500" />
+              <Card className={ds.components.card.root}>
+                <CardHeader className={ds.components.card.header}>
+                  <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
+                    <span className="flex items-center gap-2">
+                      <ShoppingCart className="h-4 w-4 text-[#83E509]" />
                       Itens do Pedido
                     </span>
-                    <Badge variant="secondary" className="font-bold">{itens.length}</Badge>
+                    <Badge className={cn(
+                      ds.components.badge.base,
+                      "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                    )}>{itens.length}</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  <div className={cn("divide-y", ds.colors.border.default)}>
                     {itens.map((item, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                        <div className="flex-1">
-                          <p className="text-xs font-bold text-gray-900 dark:text-white">{item.produto}</p>
-                          <p className="text-[10px] text-gray-500">{item.quantidade} {item.unidade} x R$ {item.valorUnitario.toFixed(2)}</p>
+                      <div key={index} className={cn(
+                        "flex items-center justify-between p-4 transition-colors",
+                        ds.colors.surface.hover
+                      )}>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            ds.colors.text.primary,
+                            "truncate"
+                          )}>{item.produto}</p>
+                          <p className={cn(
+                            ds.typography.size.xs,
+                            ds.colors.text.secondary,
+                            "mt-1"
+                          )}>{item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}</p>
                         </div>
-                        <p className="text-xs font-black text-gray-900 dark:text-white">
+                        <p className={cn(
+                          ds.typography.size.sm,
+                          ds.typography.weight.bold,
+                          ds.colors.text.primary,
+                          "ml-4"
+                        )}>
                           R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
                         </p>
                       </div>
                     ))}
                   </div>
-                  <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center">
-                    <span className="text-xs font-black uppercase tracking-wider text-gray-500">Valor Total</span>
-                    <span className="text-lg font-black text-gray-900 dark:text-white">
+                  <div className={cn(
+                    "p-4 border-t flex justify-between items-center",
+                    ds.colors.surface.section,
+                    ds.colors.border.default
+                  )}>
+                    <span className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.secondary,
+                      "uppercase tracking-wider"
+                    )}>Valor Total</span>
+                    <span className={cn(
+                      ds.typography.size.xl,
+                      ds.typography.weight.bold,
+                      "text-[#83E509]"
+                    )}>
                       R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
                     </span>
                   </div>
@@ -793,15 +986,27 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
               {/* Resumo Observações */}
               {observacoes && (
-                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <FileText className="h-3.5 w-3.5 text-gray-500" />
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center",
+                        "bg-[#83E509]/10"
+                      )}>
+                        <FileText className="h-4 w-4 text-[#83E509]" />
                       </div>
-                      <span className="text-xs font-black uppercase tracking-wider text-gray-500">Observações</span>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        ds.colors.text.secondary,
+                        "uppercase tracking-wider"
+                      )}>Observações</span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 pl-8">{observacoes}</p>
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.colors.text.primary,
+                      "pl-10"
+                    )}>{observacoes}</p>
                   </CardContent>
                 </Card>
               )}
@@ -810,6 +1015,58 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         )}
 
       </div>
+
+      {/* Footer Navigation */}
+      <div className={cn(
+        "flex-shrink-0 p-4 border-t flex items-center justify-between gap-3",
+        ds.colors.surface.section,
+        ds.colors.border.default
+      )}>
+        {currentStepIndex > 0 ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handlePrevious}
+            className={cn(ds.components.button.secondary, "gap-2")}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Voltar
+          </Button>
+        ) : (
+          <div />
+        )}
+
+        {currentStepIndex < STEPS.length - 1 ? (
+          <Button
+            type="button"
+            onClick={handleNext}
+            disabled={!canProceed()}
+            className={cn(ds.components.button.primary, "gap-2 ml-auto")}
+          >
+            Próximo
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={handleSubmit}
+            disabled={loading || !canProceed()}
+            className={cn(ds.components.button.primary, "gap-2 ml-auto")}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Criando...
+              </>
+            ) : (
+              <>
+                <Check className="h-4 w-4" />
+                Criar Pedido
+              </>
+            )}
+          </Button>
+        )}
+      </div>
     </>
   );
 
@@ -817,7 +1074,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerContent 
-          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
+          className={cn(
+            "flex flex-col p-0 gap-0 overflow-hidden border-t transition-all duration-200",
+            ds.colors.surface.page,
+            ds.colors.border.default
+          )}
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
@@ -833,7 +1094,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent 
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950"
+        className={cn(
+          "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px]",
+          "p-0 gap-0 overflow-hidden border shadow-md rounded-2xl flex flex-col",
+          ds.colors.surface.page,
+          ds.colors.border.default
+        )}
         onKeyDown={handleKeyDown}
       >
         {content}
