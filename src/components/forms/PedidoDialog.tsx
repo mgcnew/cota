@@ -943,7 +943,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           </div>
 
           {/* Tab: Itens (Edição) */}
-          <TabsContent value="itens" className="flex-1 overflow-hidden m-0 p-0 flex flex-col">
+          <TabsContent value="itens" className={cn(
+            "flex-1 overflow-hidden !m-0 p-0",
+            "data-[state=active]:flex data-[state=active]:flex-col"
+          )}>
             <div className="flex-1 flex gap-0 overflow-hidden">
               {/* Coluna Esquerda: Formulário de Detalhes e Adicionar Produto */}
               <div className={cn(
@@ -1248,9 +1251,12 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           </TabsContent>
 
           {/* Tab: Resumo (Visualização) */}
-          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0 flex flex-col">
+          <TabsContent value="resumo" className={cn(
+            "flex-1 overflow-hidden !m-0 p-0",
+            "data-[state=active]:flex data-[state=active]:flex-col"
+          )}>
             <ScrollArea className="flex-1">
-              <div className="p-6 space-y-6">
+              <div className="p-4 space-y-4">
                 {/* Cards de Estatísticas */}
                 <div className="grid grid-cols-4 gap-4">
                   <Card className={ds.components.card.root}>
