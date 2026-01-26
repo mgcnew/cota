@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, Trash2, Loader2, Building2, Calendar, Package, FileText, 
-  Save, ShoppingCart, Truck, X, Search, CheckCircle, ClipboardList, Download,
+  Save, ShoppingCart, X, Search, ClipboardList, Download,
   DollarSign, Star, Trophy
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +23,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
-import { OrderExportTab } from "@/components/pedidos/OrderExportTab";
 
 interface PedidoItem {
   produto: string;
@@ -68,22 +67,77 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const newProductInputRef = useRef<HTMLInputElement>(null);
   const newQuantityInputRef = useRef<HTMLInputElement>(null);
   const newPriceInputRef = useRef<HTMLInputElement>(null);
-  const addItemButtonRef = useRef<HTMLButtonElement>(null);
 
   // Data states
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
-  const [productSearch, setProductSearch] = useState("");
-  const [activeSearchIndex, setActiveSearchIndex] = useState<number | null>(null);
-  const debouncedProductSearch = useDebounce(productSearch, 300);
 
-  // Refs para navegação por teclado
-  const productInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const quantityInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const priceInputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const calculateTotal = () => itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
 
-  const tabs = ["itens", "resumo"];
+  // Função para exportar HTML
+  const handleDownloadHtml = useCallback(() => {
+    if (!pedido || itens.length === 0) return;
+
+    const total = calculateTotal();
+    const selectedSupplier = suppliers.find(s => s.id === fornecedor);
+    const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatDateExport = (dateString: string) => {
+      if (!dateString) return '-';
+      if (dateString.includes('/')) return dateString;
+      try { return new Date(dateString).toLocaleDateString('pt-BR'); } catch { return dateString; }
+    };
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Pedido #${pedido.id.substring(0, 8)}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f9fafb; padding: 20px; }
+    .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; }
+    .header { background: linear-gradient(135deg, #83E509 0%, #6bc109 100%); color: #18181b; padding: 30px; border-radius: 8px; margin-bottom: 30px; text-align: center; }
+    .header h1 { font-size: 24px; font-weight: 800; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .info-card { background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #83E509; }
+    .info-card strong { display: block; color: #83E509; font-size: 12px; text-transform: uppercase; font-weight: 800; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 700; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    .total-row { background: #dcfce7 !important; font-weight: 700; }
+    .total-row td { color: #166534; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header"><h1>📦 PEDIDO #${pedido.id.substring(0, 8)}</h1></div>
+    <div class="info-grid">
+      <div class="info-card"><strong>Fornecedor</strong><span>${selectedSupplier?.name || '-'}</span></div>
+      <div class="info-card"><strong>Entrega</strong><span>${formatDateExport(dataEntrega)}</span></div>
+      <div class="info-card"><strong>Itens</strong><span>${itens.length}</span></div>
+      <div class="info-card"><strong>Gerado</strong><span>${new Date().toLocaleDateString('pt-BR')}</span></div>
+    </div>
+    <table>
+      <thead><tr><th>Produto</th><th>Qtd</th><th style="text-align: right;">Valor Unit.</th><th style="text-align: right;">Subtotal</th></tr></thead>
+      <tbody>
+        ${itens.map((item, idx) => `<tr><td>${idx + 1}. ${item.produto}</td><td>${item.quantidade} ${item.unidade}</td><td style="text-align: right;">R$ ${formatCurrency(item.valorUnitario)}</td><td style="text-align: right;">R$ ${formatCurrency(item.quantidade * item.valorUnitario)}</td></tr>`).join('')}
+        <tr class="total-row"><td colspan="3" style="text-align: right;">TOTAL</td><td style="text-align: right;">R$ ${formatCurrency(total)}</td></tr>
+      </tbody>
+    </table>
+    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid #83E509;"><strong style="color: #83E509;">Observações:</strong><p>${observacoes}</p></div>` : ''}
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `pedido-${pedido.id.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    
+    toast({ title: "Pedido exportado!" });
+  }, [pedido, itens, fornecedor, dataEntrega, observacoes, suppliers, toast]);
 
   const statusOptions = [
     { value: "pendente", label: "Pendente", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30" },
@@ -98,15 +152,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       loadSuppliers();
       loadProducts();
       setActiveTab("itens");
-      
-      // Auto-foco no primeiro campo ou botão adicionar
-      setTimeout(() => {
-        if (itens.length > 0) {
-          productInputRefs.current[0]?.focus();
-        } else {
-          addButtonRef.current?.focus();
-        }
-      }, 300);
     }
     if (pedido && open) {
       setFornecedor(pedido.supplier_id || "");
@@ -172,7 +217,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     if (!productName) return;
     
     const qty = parseFloat(newQuantity) || 1;
-    // Basic cleanup for price input
     const price = typeof newPrice === 'string' ? parseFloat(newPrice.replace(',', '.')) || 0 : newPrice;
     const marca = newProduct?.brand_name || "";
 
@@ -214,159 +258,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       setHighlightedIndex(prev => Math.max(prev - 1, -1));
     }
   };
-
-  const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch || debouncedProductSearch.length < 2) return [];
-    return products.filter(p => p.name.toLowerCase().includes(debouncedProductSearch.toLowerCase())).slice(0, 30);
-  }, [products, debouncedProductSearch]);
-
-  const handleAddItem = () => {
-    const newIndex = itens.length;
-    setItens([...itens, { produto: "", quantidade: 1, valorUnitario: 0, unidade: "un", marca: "" }]);
-    
-    // Auto-foco no campo de produto do novo item
-    setTimeout(() => {
-      productInputRefs.current[newIndex]?.focus();
-    }, 50);
-  };
-  
-  const handleRemoveItem = (index: number) => {
-    setItens(itens.filter((_, i) => i !== index));
-    // Focar no item anterior ou no botão adicionar
-    setTimeout(() => {
-      if (index > 0) {
-        productInputRefs.current[index - 1]?.focus();
-      } else if (itens.length > 1) {
-        productInputRefs.current[0]?.focus();
-      } else {
-        addButtonRef.current?.focus();
-      }
-    }, 50);
-  };
-
-  // Handler para navegação por teclado nos campos de item
-  const handleItemKeyDown = useCallback((e: React.KeyboardEvent, index: number, field: 'produto' | 'quantidade' | 'preco') => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      
-      if (field === 'produto') {
-        // Se tem sugestões abertas, não faz nada (deixa o autocomplete funcionar)
-        if (activeSearchIndex === index && filteredProducts.length > 0) return;
-        // Vai para quantidade
-        quantityInputRefs.current[index]?.focus();
-        quantityInputRefs.current[index]?.select();
-      } else if (field === 'quantidade') {
-        // Vai para preço
-        priceInputRefs.current[index]?.focus();
-        priceInputRefs.current[index]?.select();
-      } else if (field === 'preco') {
-        // Se é o último item e está preenchido, adiciona novo
-        const item = itens[index];
-        if (item.produto && item.quantidade > 0) {
-          if (index === itens.length - 1) {
-            handleAddItem();
-          } else {
-            // Vai para o próximo item
-            productInputRefs.current[index + 1]?.focus();
-          }
-        }
-      }
-    } else if (e.key === 'Tab' && !e.shiftKey && field === 'preco' && index === itens.length - 1) {
-      // Tab no último campo do último item -> adiciona novo item
-      const item = itens[index];
-      if (item.produto && item.quantidade > 0) {
-        e.preventDefault();
-        handleAddItem();
-      }
-    }
-  }, [itens, activeSearchIndex, filteredProducts.length]);
-  
-  const handleItemChange = (index: number, field: keyof PedidoItem, value: any) => {
-    const newItens = [...itens];
-    newItens[index] = { ...newItens[index], [field]: value };
-    setItens(newItens);
-  };
-  
-  const calculateTotal = () => itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
-
-  // Função para exportar HTML
-  const handleDownloadHtml = useCallback(() => {
-    if (!pedido || itens.length === 0) return;
-
-    const total = calculateTotal();
-    const selectedSupplier = suppliers.find(s => s.id === fornecedor);
-    const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const formatDate = (dateString: string) => {
-      if (!dateString) return '-';
-      if (dateString.includes('/')) return dateString;
-      try { return new Date(dateString).toLocaleDateString('pt-BR'); } catch { return dateString; }
-    };
-
-    const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pedido #${pedido.id.substring(0, 8)}</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
-    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #83E509 0%, #6bc109 100%); color: #18181b; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
-    .header h1 { font-size: 28px; margin-bottom: 10px; font-weight: 800; }
-    .header p { font-size: 14px; opacity: 0.8; font-weight: 600; }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #83E509; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .info-card strong { display: block; color: #83E509; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; font-weight: 800; }
-    .info-card span { font-size: 16px; color: #1f2937; font-weight: 600; }
-    .items-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .items-section h2 { color: #83E509; margin-bottom: 15px; font-size: 18px; font-weight: 800; }
-    .items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    .items-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 700; font-size: 13px; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
-    .items-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-    .items-table tr:hover { background: #f9fafb; }
-    .total-row { background: #dcfce7 !important; font-weight: 700; }
-    .total-row td { color: #166534; font-size: 16px; padding: 15px 12px; }
-    .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>📦 PEDIDO DE COMPRA</h1>
-      <p>Pedido #${pedido.id.substring(0, 8)}</p>
-    </div>
-    <div class="info-grid">
-      <div class="info-card"><strong>Fornecedor</strong><span>${selectedSupplier?.name || '-'}</span></div>
-      <div class="info-card"><strong>Data de Entrega</strong><span>${formatDate(dataEntrega)}</span></div>
-      <div class="info-card"><strong>Total de Itens</strong><span>${itens.length} produto${itens.length !== 1 ? 's' : ''}</span></div>
-      <div class="info-card"><strong>Gerado em</strong><span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span></div>
-    </div>
-    <div class="items-section">
-      <h2>📋 Itens do Pedido</h2>
-      <table class="items-table">
-        <thead><tr><th>Produto</th><th style="text-align: center;">Quantidade</th><th style="text-align: right;">Valor Unit.</th><th style="text-align: right;">Subtotal</th></tr></thead>
-        <tbody>
-          ${itens.map((item, idx) => `<tr><td>${idx + 1}. ${item.produto}${item.marca ? `<br/><small style="color: #666; font-size: 11px;">Marca: ${item.marca}</small>` : ''}</td><td style="text-align: center;">${item.quantidade} ${item.unidade}</td><td style="text-align: right;">R$ ${formatCurrency(item.valorUnitario)}</td><td style="text-align: right;"><strong>R$ ${formatCurrency(item.quantidade * item.valorUnitario)}</strong></td></tr>`).join('')}
-          <tr class="total-row"><td colspan="3" style="text-align: right;">TOTAL DO PEDIDO</td><td style="text-align: right;">R$ ${formatCurrency(total)}</td></tr>
-        </tbody>
-      </table>
-    </div>
-    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid #83E509; margin-bottom: 30px;"><h3 style="color: #83E509; margin-bottom: 10px; font-size: 16px; font-weight: 800;">📝 Observações</h3><p style="color: #18181b; white-space: pre-wrap;">${observacoes}</p></div>` : ''}
-    <div class="footer"><p>Sistema CotaJá - Pedido de Compra</p></div>
-  </div>
-</body>
-</html>`;
-
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `pedido-${pedido.id.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.html`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    
-    toast({ title: "Pedido exportado com sucesso!" });
-  }, [pedido, itens, fornecedor, dataEntrega, observacoes, suppliers, toast]);
 
   const handleSubmit = async () => {
     if (!user || !fornecedor || !dataEntrega) {
@@ -417,47 +308,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     }
   };
 
-  // Handler para atalhos globais do modal
-  const handleModalKeyDown = useCallback((e: React.KeyboardEvent) => {
-    // Ctrl+Enter para salvar
-    if (e.ctrlKey && e.key === 'Enter') {
-      e.preventDefault();
-      handleSubmit();
-    }
-    
-    // Alt+Setas para navegar entre abas
-    if (e.altKey && e.key === 'ArrowRight') {
-      e.preventDefault();
-      const currentIndex = tabs.indexOf(activeTab);
-      if (currentIndex < tabs.length - 1) {
-        setActiveTab(tabs[currentIndex + 1]);
-      }
-    }
-    if (e.altKey && e.key === 'ArrowLeft') {
-      e.preventDefault();
-      const currentIndex = tabs.indexOf(activeTab);
-      if (currentIndex > 0) {
-        setActiveTab(tabs[currentIndex - 1]);
-      }
-    }
-    
-    // Alt+N para adicionar novo item (quando na aba itens)
-    if (e.altKey && e.key === 'n' && activeTab === 'itens') {
-      e.preventDefault();
-      handleAddItem();
-    }
-    
-    // Números 1-3 com Alt para ir direto para a aba
-    if (e.altKey && ['1', '2', '3'].includes(e.key)) {
-      e.preventDefault();
-      const tabIndex = parseInt(e.key) - 1;
-      if (tabs[tabIndex]) {
-        setActiveTab(tabs[tabIndex]);
-      }
-    }
-  }, [activeTab]);
-
-  // Scroll into view helper para inputs no mobile
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
     setTimeout(() => {
@@ -489,7 +339,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   };
 
   const selectedSupplier = suppliers.find(s => s.id === fornecedor);
-
 
   // Header content shared between Dialog and Drawer
   const headerContent = (
@@ -615,7 +464,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             {/* Tab: Itens (Edição) */}
             <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
               <div className="space-y-4">
-                {/* Campos de Detalhes e Adicionar (Mobile) */}
+                {/* Card de Detalhes do Pedido */}
                 <Card className={ds.components.card.root}>
                   <CardContent className={cn(ds.components.card.body, "space-y-4")}>
                     <div className="grid grid-cols-2 gap-3">
@@ -830,7 +679,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => handleRemoveItem(index)} 
+                          onClick={() => setItens(itens.filter((_, i) => i !== index))} 
                           className={cn(ds.components.button.danger, "h-8 w-8")}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -1040,7 +889,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           ds.colors.border.default,
           "border"
         )}
-        onKeyDown={handleModalKeyDown}
       >
         {/* Tabs com design refinado */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
@@ -1096,297 +944,320 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
           {/* Tab: Itens (Edição) */}
           <TabsContent value="itens" className="flex-1 overflow-hidden m-0 p-0 flex flex-col">
-            <div className="flex-1 flex gap-0 overflow-hidden divide-x divide-white/10">
-              {/* Coluna Esquerda: Fornecedor e Adicionar Produto */}
-              <div className="w-[280px] flex-shrink-0 flex flex-col bg-white/30 dark:bg-black/5 overflow-y-auto custom-scrollbar p-3 gap-3">
-                  <div className="space-y-3">
-                    {/* Fornecedor */}
-                    <div className="space-y-1">
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Fornecedor</Label>
-                      <Select value={fornecedor} onValueChange={setFornecedor}>
-                        <SelectTrigger className="h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg shadow-sm focus:ring-orange-500/20 transition-all">
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-3.5 w-3.5 text-orange-500" />
-                            <SelectValue placeholder="Selecione" />
-                          </div>
-                        </SelectTrigger>
-                        <SelectContent className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-white/20 dark:border-white/10 rounded-xl shadow-2xl">
-                          {suppliers.map(s => <SelectItem key={s.id} value={s.id} className="font-bold py-1.5 px-3 text-[11px]">{s.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1">Data Entrega</Label>
-                      <div className="relative group">
-                        <Calendar className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-hover:text-orange-500 transition-colors pointer-events-none" />
-                        <Input 
-                          type="date" 
-                          value={dataEntrega} 
-                          onChange={e => setDataEntrega(e.target.value)} 
-                          className="h-8 text-[11px] pl-8 bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg shadow-sm focus:ring-orange-500/20 transition-all" 
-                        />
-                      </div>
-                    </div>
-
-                    {/* Formulário de Adicionar Produto */}
-                    <div className="space-y-1 bg-white/40 dark:bg-gray-900/40 p-2.5 rounded-xl border border-white/20 dark:border-white/5 shadow-sm">
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em] pl-1 text-orange-500">Adicionar Produto</Label>
-                      
-                      {/* Product Search */}
-                      <div className="relative group mb-1.5">
-                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
-                        <Input
-                          ref={newProductInputRef}
-                          placeholder="Buscar produto..."
-                          value={newProductSearch}
-                          onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
-                          onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                          onFocus={() => setHighlightedIndex(-1)}
-                          className="h-8 pl-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-bold rounded-lg focus:ring-orange-500/20 shadow-sm"
-                        />
-                        {/* Dropdown */}
-                        {filteredNewProducts.length > 0 && !newProduct && (
-                          <div className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar animate-in fade-in slide-in-from-top-1">
-                            {filteredNewProducts.map((p, idx) => (
-                              <button
-                                key={p.id}
-                                onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
-                                onMouseEnter={() => setHighlightedIndex(idx)}
-                                className={cn(
-                                  "w-full px-3 py-1.5 text-left text-[10px] flex items-center gap-2 transition-all border-b border-white/5 last:border-none group/btn",
-                                  idx === highlightedIndex ? "bg-orange-500/10 text-orange-600 dark:text-orange-400" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/5"
-                                )}
-                              >
-                                <div className={cn("w-4 h-4 rounded flex items-center justify-center transition-all", idx === highlightedIndex ? "bg-orange-500 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-400")}>
-                                  <Package className="h-2.5 w-2.5" />
-                                </div>
-                                <span className="font-bold truncate">{p.name}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <div className="space-y-0.5">
-                           <Label className="text-[8px] font-black text-gray-400 uppercase tracking-widest pl-1">Qtd</Label>
-                           <Input
-                             ref={newQuantityInputRef}
-                             type="number"
-                             placeholder="1"
-                             value={newQuantity}
-                             onChange={(e) => setNewQuantity(e.target.value)}
-                             onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                             className="h-8 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black text-center rounded-lg shadow-sm"
-                           />
-                        </div>
-                        <div className="space-y-0.5">
-                           <Label className="text-[8px] font-black text-gray-400 uppercase tracking-widest pl-1">Preço</Label>
-                           <div className="relative">
-                             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-emerald-600 opacity-50">R$</span>
-                             <Input
-                               ref={newPriceInputRef}
-                               placeholder="0,00"
-                               value={newPrice}
-                               onChange={(e) => setNewPrice(e.target.value)}
-                               onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                               className="h-8 pl-6 text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-black rounded-lg shadow-sm"
-                             />
-                           </div>
-                        </div>
-                      </div>
-                      
-                      <Button 
-                        ref={addItemButtonRef}
-                        onClick={handleAddNewItem}
-                        className="w-full h-8 bg-orange-600 hover:bg-orange-700 text-white font-black text-[9px] uppercase tracking-widest shadow-md rounded-lg active:scale-95 transition-all"
-                      >
-                        <Plus className="h-3 w-3 mr-1.5" /> Adicionar
-                      </Button>
-                    </div>
+            <div className="flex-1 flex gap-0 overflow-hidden">
+              {/* Coluna Esquerda: Formulário de Detalhes e Adicionar Produto */}
+              <div className={cn(
+                "w-[320px] flex-shrink-0 flex flex-col overflow-y-auto custom-scrollbar p-6 gap-6",
+                ds.colors.surface.section
+              )}>
+                {/* Detalhes do Pedido */}
+                <div className="space-y-4">
+                  <h3 className={cn(
+                    ds.typography.size.sm,
+                    ds.typography.weight.bold,
+                    ds.colors.text.primary,
+                    "uppercase tracking-wider"
+                  )}>Detalhes do Pedido</h3>
+                  
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Fornecedor *</Label>
+                    <Select value={fornecedor} onValueChange={setFornecedor}>
+                      <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent className={cn(
+                        ds.colors.surface.card,
+                        ds.colors.border.default,
+                        "border backdrop-blur-xl"
+                      )}>
+                        {suppliers.map(s => (
+                          <SelectItem 
+                            key={s.id} 
+                            value={s.id} 
+                            className={cn(
+                              ds.typography.size.sm,
+                              ds.typography.weight.bold
+                            )}
+                          >
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div className="flex-1 flex flex-col space-y-1">
-                    <div className="flex items-center gap-2 pl-1">
-                      <FileText className="h-3.5 w-3.5 text-orange-500" />
-                      <Label className="text-[9px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.2em]">Observações</Label>
-                    </div>
-                    <Textarea
-                      placeholder="Adicione notas..."
-                      value={observacoes}
-                      onChange={e => setObservacoes(e.target.value)}
-                      className="flex-1 w-full min-h-[60px] resize-none text-[11px] bg-white/50 dark:bg-gray-950/50 border-white/20 dark:border-white/10 font-medium rounded-lg focus:ring-orange-500/20 transition-all shadow-sm p-2"
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Data de Entrega *</Label>
+                    <Input 
+                      type="date" 
+                      value={dataEntrega} 
+                      onChange={e => setDataEntrega(e.target.value)} 
+                      className={cn(ds.components.input.root, "h-10")} 
                     />
                   </div>
+
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Status</Label>
+                    <Select value={status} onValueChange={setStatus}>
+                      <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className={cn(
+                        ds.colors.surface.card,
+                        ds.colors.border.default,
+                        "border backdrop-blur-xl"
+                      )}>
+                        {statusOptions.map(opt => (
+                          <SelectItem 
+                            key={opt.value} 
+                            value={opt.value}
+                            className={cn(
+                              ds.typography.size.sm,
+                              ds.typography.weight.bold
+                            )}
+                          >
+                            {opt.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Observações</Label>
+                    <Textarea 
+                      value={observacoes} 
+                      onChange={e => setObservacoes(e.target.value)} 
+                      placeholder="Observações sobre o pedido..."
+                      className={cn(ds.components.input.root, "min-h-[80px] resize-none")}
+                    />
+                  </div>
+                </div>
+
+                {/* Divisor */}
+                <div className={ds.components.separator.horizontal} />
+
+                {/* Adicionar Produto */}
+                <div className="space-y-4">
+                  <h3 className={cn(
+                    ds.typography.size.sm,
+                    ds.typography.weight.bold,
+                    "text-[#83E509]",
+                    "uppercase tracking-wider"
+                  )}>Adicionar Produto</h3>
+                  
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Produto</Label>
+                    <div className="relative group">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                      <Input
+                        ref={newProductInputRef}
+                        placeholder="Buscar produto..."
+                        value={newProductSearch}
+                        onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
+                        onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
+                        className={cn(ds.components.input.root, "pl-10")}
+                      />
+                      {filteredNewProducts.length > 0 && !newProduct && (
+                        <div className={cn(
+                          "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar",
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "border"
+                        )}>
+                          {filteredNewProducts.map((p, idx) => (
+                            <button
+                              key={p.id}
+                              onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
+                              className={cn(
+                                "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
+                                highlightedIndex === idx 
+                                  ? "bg-[#83E509]/10 text-[#83E509]" 
+                                  : ds.colors.surface.hover,
+                                ds.colors.border.default,
+                                "border-b last:border-none"
+                              )}
+                            >
+                              <div className="flex flex-col min-w-0 flex-1">
+                                <span className={cn(
+                                  ds.typography.size.sm,
+                                  ds.typography.weight.bold,
+                                  "truncate"
+                                )}>{p.name}</span>
+                                {p.brand_name && (
+                                  <span className={cn(
+                                    ds.typography.size.xs,
+                                    ds.colors.text.secondary
+                                  )}>{p.brand_name}</span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Quantidade</Label>
+                      <Input
+                        ref={newQuantityInputRef}
+                        type="number"
+                        placeholder="0"
+                        value={newQuantity}
+                        onChange={(e) => setNewQuantity(e.target.value)}
+                        onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
+                        className={ds.components.input.root}
+                      />
+                    </div>
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Preço Unit.</Label>
+                      <Input
+                        ref={newPriceInputRef}
+                        placeholder="0,00"
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                        onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
+                        className={ds.components.input.root}
+                      />
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={handleAddNewItem} 
+                    disabled={!newProduct || !newQuantity || !newPrice}
+                    className={cn(ds.components.button.primary, "w-full")}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Item
+                  </Button>
+                </div>
               </div>
 
-              {/* Coluna Direita: Lista de Itens (Ocupa mais espaço) */}
-              <div className="flex-1 flex flex-col bg-white/20 dark:bg-gray-950/20 overflow-hidden relative">
-                 <div className="flex-shrink-0 px-3 py-2 bg-white/40 dark:bg-white/5 border-b border-white/10 backdrop-blur-md">
+              {/* Coluna Direita: Lista de Itens */}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <div className={cn(
+                  "px-6 py-4 border-b flex items-center justify-between",
+                  ds.colors.border.default
+                )}>
                   <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-widest">Itens do Pedido</span>
-                    <Badge variant="outline" className="h-3.5 px-1 text-[7px] font-black bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 rounded">
+                    <h3 className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.primary,
+                      "uppercase tracking-wider"
+                    )}>Itens do Pedido</h3>
+                    <Badge className={cn(
+                      ds.components.badge.base,
+                      "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                    )}>
                       {itens.length}
                     </Badge>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      ds.typography.size.xs,
+                      ds.typography.weight.bold,
+                      ds.colors.text.secondary,
+                      "uppercase tracking-wider"
+                    )}>Total:</span>
+                    <span className={cn(
+                      ds.typography.size.base,
+                      ds.typography.weight.bold,
+                      "text-[#83E509]"
+                    )}>
+                      R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
-                
-                <ScrollArea className="flex-1 custom-scrollbar">
-                  <div className="p-1 space-y-0.5">
+
+                <ScrollArea className="flex-1">
+                  <div className="p-6 space-y-3">
                     {itens.length === 0 ? (
-                      <div className="h-full flex flex-col items-center justify-center py-10 opacity-50">
-                        <Package className="h-5 w-5 opacity-30 mb-1" />
-                        <p className="text-[8px] font-black uppercase tracking-widest opacity-50">Lista vazia</p>
+                      <div className={cn(
+                        "text-center py-16 border border-dashed rounded-xl flex flex-col items-center justify-center",
+                        ds.colors.border.default,
+                        ds.colors.surface.section
+                      )}>
+                        <Package className="h-12 w-12 opacity-20 mb-3" />
+                        <p className={cn(
+                          ds.typography.size.sm,
+                          ds.typography.weight.bold,
+                          ds.colors.text.secondary,
+                          "uppercase tracking-wider"
+                        )}>Nenhum item adicionado</p>
                       </div>
-                    ) : (
-                      <div className="space-y-0.5">
-                        {itens.map((item, index) => (
-                          <div key={index} className="flex items-center gap-1 p-0.5 bg-white/80 dark:bg-gray-900/80 rounded border border-white/10 dark:border-white/5 hover:border-orange-500/20 transition-all group relative">
-                            <div className="flex-1 grid grid-cols-12 gap-1 items-center">
-                              {/* Produto */}
-                              <div className="col-span-5 relative">
-                                <Input
-                                  ref={el => productInputRefs.current[index] = el}
-                                  placeholder="Produto..."
-                                  value={item.produto}
-                                  onChange={e => { 
-                                    handleItemChange(index, 'produto', e.target.value); 
-                                    setProductSearch(e.target.value);
-                                    setActiveSearchIndex(index);
-                                  }}
-                                  onFocus={() => setActiveSearchIndex(index)}
-                                  onKeyDown={e => handleItemKeyDown(e, index, 'produto')}
-                                  className="h-5 text-[10px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-bold rounded px-1 shadow-none focus:border-white/10"
-                                />
-                                {activeSearchIndex === index && productSearch && filteredProducts.length > 0 && (
-                                  <div className="absolute z-50 w-full mt-1 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border border-white/20 dark:border-white/10 rounded shadow-xl max-h-40 overflow-auto custom-scrollbar">
-                                    {filteredProducts.map((p) => (
-                                      <button 
-                                        key={p.id} 
-                                        onClick={() => { 
-                                          handleItemChange(index, 'produto', p.name); 
-                                          handleItemChange(index, 'marca', p.brand_name || "");
-                                          setProductSearch(''); 
-                                          setActiveSearchIndex(null);
-                                          setTimeout(() => quantityInputRefs.current[index]?.focus(), 50);
-                                        }}
-                                        className="w-full px-2 py-1.5 text-left text-[9px] hover:bg-orange-500/10 text-gray-900 dark:text-white flex items-center justify-between gap-1 transition-all font-bold border-b border-gray-100 dark:border-white/5 last:border-none"
-                                      >
-                                        <div className="flex flex-col min-w-0">
-                                          <span>{p.name}</span>
-                                          {p.brand_name && (
-                                            <div className="flex items-center gap-1 mt-0.5">
-                                              <span className="text-[7px] text-gray-500 uppercase tracking-wider">{p.brand_name}</span>
-                                              {p.brand_rating > 0 && (
-                                                <div className="flex items-center gap-0.5">
-                                                  <Star className="h-1.5 w-1.5 fill-amber-400 text-amber-400" />
-                                                  <span className="text-[7px] text-amber-500">{p.brand_rating}</span>
-                                                </div>
-                                              )}
-                                            </div>
-                                          )}
-                                        </div>
-                                        {p.brand_score > 0 && (
-                                          <div className="flex items-center gap-0.5 bg-emerald-500/10 px-1 py-0.5 rounded flex-shrink-0">
-                                            <Trophy className="h-2 w-2 text-emerald-500" />
-                                            <span className="text-[7px] text-emerald-600">{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
-                                          </div>
-                                        )}
-                                      </button>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Quantidade */}
-                              <div className="col-span-2 flex gap-0.5">
-                                <Input 
-                                  ref={el => quantityInputRefs.current[index] = el}
-                                  type="number" 
-                                  value={item.quantidade || ''} 
-                                  onChange={e => handleItemChange(index, 'quantidade', parseFloat(e.target.value) || 0)} 
-                                  onKeyDown={e => handleItemKeyDown(e, index, 'quantidade')}
-                                  className="h-5 text-[10px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-black rounded text-center px-0.5 shadow-none" 
-                                />
-                                <Select value={item.unidade} onValueChange={v => handleItemChange(index, 'unidade', v)}>
-                                  <SelectTrigger className="h-5 w-10 text-[8px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-black rounded uppercase px-0.5 shadow-none"><SelectValue /></SelectTrigger>
-                                  <SelectContent className="bg-white/95 dark:bg-gray-950/95 border-white/20 rounded">
-                                    {["un", "kg", "cx", "pc", "L", "dz", "pct", "g", "ml"].map(u => (
-                                      <SelectItem key={u} value={u} className="font-black uppercase text-[9px]">{u}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-
-                              {/* Preço */}
-                              <div className="col-span-2 relative">
-                                <span className="absolute left-1 top-1/2 -translate-y-1/2 text-[8px] font-black text-emerald-600 opacity-50">R$</span>
-                                <Input 
-                                  ref={el => priceInputRefs.current[index] = el}
-                                  type="number" 
-                                  step="0.01"
-                                  value={item.valorUnitario || ''} 
-                                  onChange={e => handleItemChange(index, 'valorUnitario', parseFloat(e.target.value) || 0)} 
-                                  onKeyDown={e => handleItemKeyDown(e, index, 'preco')}
-                                  className="h-5 pl-4 text-[10px] bg-transparent border-transparent focus:bg-white/50 dark:focus:bg-gray-950/50 font-black rounded shadow-none" 
-                                />
-                              </div>
-
-                              {/* Subtotal */}
-                              <div className="col-span-2 text-right">
-                                <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
-                                  {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                                </p>
-                              </div>
-
-                              {/* Remover */}
-                              <div className="col-span-1 flex justify-end">
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => handleRemoveItem(index)} 
-                                  className="h-4 w-4 text-gray-400 hover:text-red-500 hover:bg-transparent p-0 rounded-none transition-all"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
+                    ) : itens.map((item, index) => (
+                      <Card key={index} className={ds.components.card.root}>
+                        <CardContent className={cn(ds.components.card.body, "flex items-center gap-4 py-4")}>
+                          <div className={cn(
+                            "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                            "bg-[#83E509]/10 text-[#83E509]",
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold
+                          )}>
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              ds.typography.size.sm,
+                              ds.typography.weight.bold,
+                              ds.colors.text.primary,
+                              "truncate"
+                            )}>{item.produto}</p>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className={cn(
+                                ds.typography.size.xs,
+                                ds.typography.weight.bold,
+                                ds.colors.text.secondary
+                              )}>{item.quantidade} {item.unidade}</span>
+                              <span className={cn(
+                                ds.typography.size.xs,
+                                ds.colors.text.secondary
+                              )}>×</span>
+                              <span className={cn(
+                                ds.typography.size.xs,
+                                ds.typography.weight.bold,
+                                "text-[#83E509]"
+                              )}>R$ {item.valorUnitario.toFixed(2)}</span>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
+                          <div className="text-right">
+                            <p className={cn(
+                              ds.typography.size.base,
+                              ds.typography.weight.bold,
+                              ds.colors.text.primary
+                            )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => setItens(itens.filter((_, i) => i !== index))} 
+                            className={cn(ds.components.button.danger, "h-9 w-9")}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
                 </ScrollArea>
-
-                {/* Total Footer Ultra Compacto */}
-                <div className="flex-shrink-0 px-3 py-1 bg-white/40 dark:bg-black/20 border-t border-white/10 backdrop-blur-md">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[8px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest">Total</span>
-                    <div className="flex items-baseline gap-0.5">
-                      <span className="text-[10px] font-black text-emerald-600/70 uppercase">R$</span>
-                      <span className="text-sm font-black text-gray-900 dark:text-white tracking-tighter">
-                        {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </TabsContent>
 
           {/* Tab: Resumo (Visualização) */}
-          {/* Tab: Resumo (Visualização) */}
-          <TabsContent value="resumo" className="flex-1 m-0 p-0 overflow-hidden outline-none data-[state=active]:flex data-[state=active]:flex-col">
-            <ScrollArea className="flex-1 custom-scrollbar">
+          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0 flex flex-col">
+            <ScrollArea className="flex-1">
               <div className="p-6 space-y-6">
-                {/* Cards de resumo com design system */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {/* Cards de Estatísticas */}
+                <div className="grid grid-cols-4 gap-4">
                   <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-[#83E509]" />
+                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#83E509]/10 flex items-center justify-center">
+                          <Building2 className="h-5 w-5 text-[#83E509]" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
@@ -1400,15 +1271,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         ds.typography.weight.bold,
                         ds.colors.text.primary,
                         "truncate"
-                      )}>{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
+                      )}>{selectedSupplier?.name || '-'}</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
@@ -1421,15 +1292,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         ds.typography.size.sm,
                         ds.typography.weight.bold,
                         ds.colors.text.primary
-                      )}>{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
+                      )}>{formatDate(dataEntrega)}</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                          <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                          <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
@@ -1445,15 +1316,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       )}>{itens.length} produto(s)</p>
                     </CardContent>
                   </Card>
-                  
+
                   <Card className={cn(
                     ds.components.card.root,
                     "bg-[#83E509]/5 border-[#83E509]/20"
                   )}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/20 flex items-center justify-center">
-                          <DollarSign className="h-4 w-4 text-[#83E509]" />
+                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#83E509]/20 flex items-center justify-center">
+                          <DollarSign className="h-5 w-5 text-[#83E509]" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
@@ -1463,7 +1334,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         )}>Total</span>
                       </div>
                       <p className={cn(
-                        ds.typography.size.base,
+                        ds.typography.size.lg,
                         ds.typography.weight.bold,
                         "text-[#83E509]"
                       )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
@@ -1471,91 +1342,66 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   </Card>
                 </div>
 
-                {/* Lista de itens */}
+                {/* Lista de Itens */}
                 <Card className={ds.components.card.root}>
-                  <CardContent className="p-0">
-                    <div className={cn(
-                      "px-4 py-3 border-b",
-                      ds.colors.surface.section,
-                      ds.colors.border.default
-                    )}>
-                      <div className="flex items-center gap-2">
-                        <ClipboardList className="h-4 w-4 text-[#83E509]" />
-                        <span className={cn(
-                          ds.typography.size.sm,
-                          ds.typography.weight.bold,
-                          ds.colors.text.primary,
-                          "uppercase tracking-wider"
-                        )}>Detalhamento de Itens</span>
-                        <Badge className={cn(
-                          ds.components.badge.base,
-                          "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20 ml-auto"
-                        )}>
-                          {itens.length}
-                        </Badge>
-                      </div>
+                  <CardContent className={cn(ds.components.card.body, "space-y-4")}>
+                    <div className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-[#83E509]" />
+                      <h3 className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary,
+                        "uppercase tracking-wider"
+                      )}>Itens do Pedido</h3>
                     </div>
-                    <div className={cn(
-                      "max-h-[320px] overflow-auto custom-scrollbar divide-y",
-                      ds.colors.border.default
-                    )}>
-                      {itens.length === 0 ? (
-                        <div className={cn(
-                          "flex flex-col items-center justify-center py-12",
-                          ds.colors.text.secondary
-                        )}>
-                          <Package className="h-10 w-10 opacity-20 mb-3" />
-                          <p className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            "uppercase tracking-wider"
-                          )}>Nenhum item</p>
-                        </div>
-                      ) : itens.map((item, index) => (
+                    
+                    <div className="space-y-2">
+                      {itens.map((item, index) => (
                         <div 
                           key={index} 
                           className={cn(
-                            "flex items-center justify-between px-4 py-3 transition-colors",
-                            ds.colors.surface.hover
+                            "flex items-center justify-between p-3 rounded-lg",
+                            ds.colors.surface.section
                           )}
                         >
-                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className={cn(
                               "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                              "bg-[#83E509]/10 text-[#83E509]",
                               ds.typography.size.xs,
-                              ds.typography.weight.bold,
-                              ds.colors.surface.section,
-                              ds.colors.text.secondary
+                              ds.typography.weight.bold
                             )}>
-                              {String(index + 1).padStart(2, '0')}
+                              {index + 1}
                             </div>
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <span className={cn(
+                            <div className="flex-1 min-w-0">
+                              <p className={cn(
                                 ds.typography.size.sm,
                                 ds.typography.weight.bold,
                                 ds.colors.text.primary,
                                 "truncate"
-                              )}>{item.produto || 'Não definido'}</span>
-                              <span className={cn(
-                                ds.typography.size.xs,
-                                ds.colors.text.secondary,
-                                "mt-0.5"
-                              )}>{item.unidade} • Unid. R$ {item.valorUnitario.toFixed(2)}</span>
+                              )}>{item.produto}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className={cn(
+                                  ds.typography.size.xs,
+                                  ds.colors.text.secondary
+                                )}>{item.quantidade} {item.unidade}</span>
+                                <span className={cn(
+                                  ds.typography.size.xs,
+                                  ds.colors.text.secondary
+                                )}>×</span>
+                                <span className={cn(
+                                  ds.typography.size.xs,
+                                  ds.typography.weight.bold,
+                                  "text-[#83E509]"
+                                )}>R$ {item.valorUnitario.toFixed(2)}</span>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4 flex-shrink-0">
-                            <span className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold,
-                              ds.colors.text.secondary
-                            )}>{item.quantidade}×</span>
-                            <span className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold,
-                              "text-[#83E509]",
-                              "min-w-[100px] text-right"
-                            )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                          </div>
+                          <p className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.bold,
+                            ds.colors.text.primary
+                          )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                         </div>
                       ))}
                     </div>
@@ -1563,12 +1409,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </Card>
 
                 {/* Status e Observações */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Status */}
+                <div className="grid grid-cols-2 gap-4">
                   <Card className={ds.components.card.root}>
                     <CardContent className={cn(
                       ds.components.card.body,
-                      "flex flex-col items-center justify-center gap-3 py-6"
+                      "flex flex-col items-center justify-center gap-3 py-8"
                     )}>
                       <span className={cn(
                         ds.typography.size.xs,
@@ -1576,18 +1421,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         ds.colors.text.secondary,
                         "uppercase tracking-wider"
                       )}>Status do Pedido</span>
-                      {getStatusBadge(status || pedido?.status || 'pendente')}
+                      {getStatusBadge(status)}
                     </CardContent>
                   </Card>
 
-                  {/* Observações */}
                   {observacoes && (
                     <Card className={ds.components.card.root}>
                       <CardContent className={cn(ds.components.card.body, "space-y-3")}>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
-                            <FileText className="h-4 w-4 text-[#83E509]" />
-                          </div>
+                          <FileText className="h-4 w-4 text-[#83E509]" />
                           <span className={cn(
                             ds.typography.size.sm,
                             ds.typography.weight.bold,
@@ -1597,7 +1439,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <p className={cn(
                           ds.typography.size.sm,
                           ds.colors.text.primary,
-                          "whitespace-pre-wrap leading-relaxed pl-10"
+                          "whitespace-pre-wrap leading-relaxed"
                         )}>{observacoes}</p>
                       </CardContent>
                     </Card>
@@ -1606,41 +1448,16 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               </div>
             </ScrollArea>
           </TabsContent>
+
+          {/* Footer */}
+          <div className={cn(
+            "flex-shrink-0 border-t px-6 py-4",
+            ds.colors.surface.section,
+            ds.colors.border.default
+          )}>
+            {footerContent}
+          </div>
         </Tabs>
-
-        {/* Footer Compacto */}
-        <div className={cn(
-          "flex-shrink-0 px-6 py-4 border-t backdrop-blur-md flex items-center justify-end gap-3",
-          ds.colors.surface.section,
-          ds.colors.border.default
-        )}>
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)} 
-            disabled={loading} 
-            className={cn(ds.components.button.secondary, "gap-2")}
-          >
-            Cancelar
-          </Button>
-
-          <Button 
-            onClick={handleSubmit} 
-            disabled={loading} 
-            className={cn(ds.components.button.primary, "gap-2")}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Salvando...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4" />
-                Salvar
-              </>
-            )}
-          </Button>
-        </div>
       </DialogContent>
     </Dialog>
   );
