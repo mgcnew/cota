@@ -83,7 +83,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const priceInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const addButtonRef = useRef<HTMLButtonElement>(null);
 
-  const tabs = ["itens", "resumo", "exportar"];
+  const tabs = ["itens", "resumo"];
 
   const statusOptions = [
     { value: "pendente", label: "Pendente", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30" },
@@ -288,6 +288,85 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   };
   
   const calculateTotal = () => itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
+
+  // Função para exportar HTML
+  const handleDownloadHtml = useCallback(() => {
+    if (!pedido || itens.length === 0) return;
+
+    const total = calculateTotal();
+    const selectedSupplier = suppliers.find(s => s.id === fornecedor);
+    const formatCurrency = (value: number) => value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formatDate = (dateString: string) => {
+      if (!dateString) return '-';
+      if (dateString.includes('/')) return dateString;
+      try { return new Date(dateString).toLocaleDateString('pt-BR'); } catch { return dateString; }
+    };
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido #${pedido.id.substring(0, 8)}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #83E509 0%, #6bc109 100%); color: #18181b; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
+    .header h1 { font-size: 28px; margin-bottom: 10px; font-weight: 800; }
+    .header p { font-size: 14px; opacity: 0.8; font-weight: 600; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #83E509; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .info-card strong { display: block; color: #83E509; margin-bottom: 5px; font-size: 12px; text-transform: uppercase; font-weight: 800; }
+    .info-card span { font-size: 16px; color: #1f2937; font-weight: 600; }
+    .items-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .items-section h2 { color: #83E509; margin-bottom: 15px; font-size: 18px; font-weight: 800; }
+    .items-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .items-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 700; font-size: 13px; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
+    .items-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+    .items-table tr:hover { background: #f9fafb; }
+    .total-row { background: #dcfce7 !important; font-weight: 700; }
+    .total-row td { color: #166534; font-size: 16px; padding: 15px 12px; }
+    .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📦 PEDIDO DE COMPRA</h1>
+      <p>Pedido #${pedido.id.substring(0, 8)}</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-card"><strong>Fornecedor</strong><span>${selectedSupplier?.name || '-'}</span></div>
+      <div class="info-card"><strong>Data de Entrega</strong><span>${formatDate(dataEntrega)}</span></div>
+      <div class="info-card"><strong>Total de Itens</strong><span>${itens.length} produto${itens.length !== 1 ? 's' : ''}</span></div>
+      <div class="info-card"><strong>Gerado em</strong><span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span></div>
+    </div>
+    <div class="items-section">
+      <h2>📋 Itens do Pedido</h2>
+      <table class="items-table">
+        <thead><tr><th>Produto</th><th style="text-align: center;">Quantidade</th><th style="text-align: right;">Valor Unit.</th><th style="text-align: right;">Subtotal</th></tr></thead>
+        <tbody>
+          ${itens.map((item, idx) => `<tr><td>${idx + 1}. ${item.produto}${item.marca ? `<br/><small style="color: #666; font-size: 11px;">Marca: ${item.marca}</small>` : ''}</td><td style="text-align: center;">${item.quantidade} ${item.unidade}</td><td style="text-align: right;">R$ ${formatCurrency(item.valorUnitario)}</td><td style="text-align: right;"><strong>R$ ${formatCurrency(item.quantidade * item.valorUnitario)}</strong></td></tr>`).join('')}
+          <tr class="total-row"><td colspan="3" style="text-align: right;">TOTAL DO PEDIDO</td><td style="text-align: right;">R$ ${formatCurrency(total)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid #83E509; margin-bottom: 30px;"><h3 style="color: #83E509; margin-bottom: 10px; font-size: 16px; font-weight: 800;">📝 Observações</h3><p style="color: #18181b; white-space: pre-wrap;">${observacoes}</p></div>` : ''}
+    <div class="footer"><p>Sistema CotaJá - Pedido de Compra</p></div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `pedido-${pedido.id.substring(0, 8)}-${new Date().toISOString().split('T')[0]}.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    
+    toast({ title: "Pedido exportado com sucesso!" });
+  }, [pedido, itens, fornecedor, dataEntrega, observacoes, suppliers, toast]);
 
   const handleSubmit = async () => {
     if (!user || !fornecedor || !dataEntrega) {
@@ -501,7 +580,20 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             ds.colors.surface.section,
             ds.colors.border.default
           )}>
-            {headerContent}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {headerContent}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDownloadHtml}
+                className={cn(ds.components.button.ghost, "h-9 w-9 text-[#83E509] hover:text-[#83E509] hover:bg-[#83E509]/10")}
+                title="Exportar pedido"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            </div>
           </DrawerHeader>
           
           {/* Tabs com design refinado para mobile */}
@@ -509,19 +601,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             <div className="px-4 pt-4 flex-shrink-0">
               <TabsList className={cn(
                 ds.components.tabs.clean.list,
-                "grid grid-cols-4 gap-1 h-12 p-1"
+                "grid grid-cols-2 gap-1 h-12 p-1"
               )}>
                 <TabsTrigger value="itens" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
                   <Package className="h-3.5 w-3.5" />Itens
                 </TabsTrigger>
-                <TabsTrigger value="detalhes" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
-                  <FileText className="h-3.5 w-3.5" />Info
-                </TabsTrigger>
                 <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
                   <ClipboardList className="h-3.5 w-3.5" />Resumo
-                </TabsTrigger>
-                <TabsTrigger value="exportar" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
-                  <Download className="h-3.5 w-3.5" />Export
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -794,93 +880,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               </div>
             </TabsContent>
 
-            {/* Tab: Detalhes (Edição) */}
-            <TabsContent value="detalhes" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
-              <div className="space-y-4">
-                <div className={ds.components.input.group}>
-                  <Label className={ds.components.input.label}>Fornecedor</Label>
-                  <Select value={fornecedor} onValueChange={setFornecedor}>
-                    <SelectTrigger className={ds.components.input.root}>
-                      <div className="flex items-center gap-2">
-                        <Building2 className="h-4 w-4 text-[#83E509]" />
-                        <SelectValue placeholder="Selecione o fornecedor" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className={cn(
-                      ds.colors.surface.card,
-                      ds.colors.border.default,
-                      "border rounded-xl"
-                    )}>
-                      {suppliers.map(s => (
-                        <SelectItem 
-                          key={s.id} 
-                          value={s.id} 
-                          className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            "py-2"
-                          )}
-                        >
-                          {s.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className={ds.components.input.group}>
-                  <Label className={ds.components.input.label}>Data de Entrega</Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
-                    <Input 
-                      type="date" 
-                      value={dataEntrega} 
-                      onChange={e => setDataEntrega(e.target.value)} 
-                      className={cn(ds.components.input.root, "pl-10")} 
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <Label className={ds.components.input.label}>Status</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {statusOptions.map(opt => (
-                      <button
-                        key={opt.value}
-                        onClick={() => setStatus(opt.value)}
-                        className={cn(
-                          "px-4 py-3 rounded-xl transition-all border-2",
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "uppercase tracking-wider",
-                          status === opt.value 
-                            ? `${opt.color} ring-2 ring-current/20` 
-                            : cn(
-                                ds.colors.surface.card,
-                                ds.colors.text.secondary,
-                                ds.colors.border.default
-                              )
-                        )}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className={ds.components.input.group}>
-                  <Label className={ds.components.input.label}>Observações</Label>
-                  <Textarea
-                    placeholder="Notas internas..."
-                    value={observacoes}
-                    onChange={e => setObservacoes(e.target.value)}
-                    onFocus={handleInputFocus}
-                    className={cn(ds.components.input.root, "min-h-[120px] resize-none")}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
             {/* Tab: Resumo (Visualização) */}
             <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
               <div className="space-y-4">
@@ -1015,18 +1014,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 )}
               </div>
             </TabsContent>
-
-            {/* Tab: Exportar */}
-            <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
-              <OrderExportTab
-                pedido={pedido}
-                itens={itens}
-                fornecedor={fornecedor}
-                dataEntrega={dataEntrega}
-                observacoes={observacoes}
-                suppliers={suppliers}
-              />
-            </TabsContent>
           </Tabs>
 
           <DrawerFooter className={cn(
@@ -1077,25 +1064,33 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
                     <ClipboardList className="h-4 w-4" />Resumo
                   </TabsTrigger>
-                  <TabsTrigger value="exportar" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
-                    <Download className="h-4 w-4" />Exportar
-                  </TabsTrigger>
                 </TabsList>
               </div>
 
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => onOpenChange(false)} 
-                className={cn(
-                  ds.components.button.ghost,
-                  ds.components.button.size.icon,
-                  "ml-4"
-                )}
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Fechar</span>
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownloadHtml}
+                  className={cn(ds.components.button.ghost, "h-9 w-9 text-[#83E509] hover:text-[#83E509] hover:bg-[#83E509]/10")}
+                  title="Exportar pedido"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => onOpenChange(false)} 
+                  className={cn(
+                    ds.components.button.ghost,
+                    ds.components.button.size.icon
+                  )}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Fechar</span>
+                </Button>
+              </div>
             </div>
           </div>
 
@@ -1610,18 +1605,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </div>
               </div>
             </ScrollArea>
-          </TabsContent>
-
-          {/* Tab: Exportar */}
-          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0">
-            <OrderExportTab
-              pedido={pedido}
-              itens={itens}
-              fornecedor={fornecedor}
-              dataEntrega={dataEntrega}
-              observacoes={observacoes}
-              suppliers={suppliers}
-            />
           </TabsContent>
         </Tabs>
 

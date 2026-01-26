@@ -695,81 +695,147 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {/* Step: Fornecedor */}
         {activeStep === "fornecedor" && (
-          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start">
+          <div className="h-full p-6 overflow-visible">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start overflow-visible">
               
               {/* Selecionar Fornecedor */}
-              <Card className={ds.components.card.root}>
+              <Card className={cn(ds.components.card.root, "overflow-visible")}>
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
                     <Building2 className="h-4 w-4 text-[#83E509] flex-shrink-0" />
                     <span>Selecionar Fornecedor</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Buscar</Label>
+                <CardContent className={cn(ds.components.card.body, "space-y-4 overflow-visible")}>
+                  <div className={cn(ds.components.input.group, "relative z-50")}>
+                    <Label className={ds.components.input.label}>Buscar Fornecedor *</Label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors z-10" />
                       <Input 
                         ref={supplierSearchRef}
-                        placeholder="Buscar fornecedor..." 
+                        placeholder="Digite para buscar..." 
                         value={supplierSearch}
                         onChange={(e) => setSupplierSearch(e.target.value)}
                         onFocus={handleInputFocus}
                         className={cn(ds.components.input.root, "pl-10")} 
                       />
+                      
+                      {/* Dropdown de resultados - posicionado absolutamente */}
+                      {supplierSearch && filteredSuppliers.length > 0 && (
+                        <div className={cn(
+                          "absolute top-full left-0 right-0 mt-2 z-[100] rounded-xl border shadow-xl max-h-[280px] overflow-y-auto custom-scrollbar",
+                          ds.colors.surface.card,
+                          ds.colors.border.default
+                        )}>
+                          <div className="p-2 space-y-1.5">
+                            {filteredSuppliers.map(s => (
+                              <button
+                                key={s.id}
+                                onClick={() => {
+                                  setFornecedor(s.id);
+                                  setSupplierSearch("");
+                                }}
+                                className={cn(
+                                  "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 group",
+                                  fornecedor === s.id 
+                                    ? "bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/20" 
+                                    : cn(
+                                        ds.colors.surface.hover,
+                                        ds.colors.text.primary
+                                      )
+                                )}
+                              >
+                                <div className={cn(
+                                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                                  fornecedor === s.id 
+                                    ? "bg-zinc-950/10 text-zinc-950" 
+                                    : cn(ds.colors.surface.section, ds.colors.text.secondary)
+                                )}>
+                                  <Building2 className="h-4 w-4" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={cn(
+                                    ds.typography.size.sm,
+                                    ds.typography.weight.bold,
+                                    "truncate",
+                                    fornecedor === s.id && "text-zinc-950"
+                                  )}>{s.name}</p>
+                                  {s.contact && (
+                                    <p className={cn(
+                                      ds.typography.size.xs,
+                                      "truncate opacity-70 mt-0.5",
+                                      fornecedor === s.id ? "text-zinc-950" : ds.colors.text.secondary
+                                    )}>{s.contact}</p>
+                                  )}
+                                </div>
+                                {fornecedor === s.id && <Check className="h-4 w-4 text-zinc-950 flex-shrink-0" />}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Mensagem quando não há resultados */}
+                      {supplierSearch && filteredSuppliers.length === 0 && (
+                        <div className={cn(
+                          "absolute top-full left-0 right-0 mt-2 z-[100] p-8 rounded-xl border text-center",
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "shadow-xl"
+                        )}>
+                          <Building2 className={cn("h-10 w-10 mx-auto mb-3 opacity-20", ds.colors.text.secondary)} />
+                          <p className={cn(
+                            ds.typography.size.sm,
+                            ds.typography.weight.medium,
+                            ds.colors.text.secondary
+                          )}>Nenhum fornecedor encontrado</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
-                  <ScrollArea className={cn(
-                    "h-[280px] rounded-xl border",
-                    ds.colors.surface.section,
-                    ds.colors.border.default
-                  )}>
-                    <div className="p-2 space-y-1.5">
-                      {filteredSuppliers.map(s => (
-                        <button
-                          key={s.id}
-                          onClick={() => setFornecedor(s.id)}
-                          className={cn(
-                            "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 group",
-                            fornecedor === s.id 
-                              ? "bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/20" 
-                              : cn(
-                                  ds.colors.surface.hover,
-                                  ds.colors.text.primary
-                                )
-                          )}
-                        >
-                          <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                            fornecedor === s.id 
-                              ? "bg-zinc-950/10 text-zinc-950" 
-                              : cn(ds.colors.surface.section, ds.colors.text.secondary)
-                          )}>
-                            <Building2 className="h-4 w-4" />
+                  {/* Mostrar fornecedor selecionado */}
+                  {fornecedor && !supplierSearch && (
+                    <div className={cn(
+                      "p-4 rounded-xl border",
+                      "bg-[#83E509]/5 border-[#83E509]/20"
+                    )}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-[#83E509]/20 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="h-4 w-4 text-[#83E509]" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className={cn(
+                              ds.typography.size.xs,
+                              ds.typography.weight.bold,
+                              "text-[#83E509]",
+                              "uppercase tracking-wider mb-1"
+                            )}>Fornecedor Selecionado</p>
+                            <p className={cn(
                               ds.typography.size.sm,
                               ds.typography.weight.bold,
-                              "truncate",
-                              fornecedor === s.id && "text-zinc-950"
-                            )}>{s.name}</p>
-                            {s.contact && (
-                              <p className={cn(
-                                ds.typography.size.xs,
-                                "truncate opacity-70 mt-0.5",
-                                fornecedor === s.id ? "text-zinc-950" : ds.colors.text.secondary
-                              )}>{s.contact}</p>
-                            )}
+                              ds.colors.text.primary,
+                              "truncate"
+                            )}>{suppliers.find(s => s.id === fornecedor)?.name}</p>
                           </div>
-                          {fornecedor === s.id && <Check className="h-4 w-4 text-zinc-950 flex-shrink-0" />}
-                        </button>
-                      ))}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setFornecedor("");
+                            setSupplierSearch("");
+                            setTimeout(() => supplierSearchRef.current?.focus(), 50);
+                          }}
+                          className={cn(ds.components.button.ghost, "h-8 w-8 text-[#83E509] hover:text-[#83E509] hover:bg-[#83E509]/10")}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </ScrollArea>
+                  )}
                 </CardContent>
               </Card>
 
@@ -782,29 +848,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </CardTitle>
                 </CardHeader>
                 <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                  {fornecedor && (
-                    <div className={cn(
-                      "p-4 rounded-xl border",
-                      ds.colors.surface.section,
-                      ds.colors.border.default
-                    )}>
-                      <span className={cn(
-                        ds.typography.size.xs,
-                        ds.typography.weight.bold,
-                        ds.colors.text.secondary,
-                        "uppercase tracking-wider"
-                      )}>Fornecedor Selecionado</span>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary,
-                        "mt-1.5"
-                      )}>
-                        {suppliers.find(s => s.id === fornecedor)?.name}
-                      </p>
-                    </div>
-                  )}
-
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Data de Entrega *</Label>
                     <Popover>
