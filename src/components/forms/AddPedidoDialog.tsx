@@ -39,6 +39,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { parseDecimalInput } from "@/lib/text-utils";
 import { useDebounce } from "@/hooks/useDebounce";
+import { designSystem as ds } from "@/styles/design-system";
 
 interface PedidoItem {
   produto: string;
@@ -397,76 +398,74 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const content = (
     <>
       {/* Header */}
-      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
-        <div className="flex items-center justify-between relative z-10">
+      <div className={cn(ds.components.modal.header, "flex-shrink-0")}>
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
-              <ShoppingCart className="h-4 w-4" />
+            <div className="w-10 h-10 rounded-xl bg-[#83E509] flex items-center justify-center shadow-lg shadow-[#83E509]/20 flex-shrink-0">
+              <ShoppingCart className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitleComponent className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+              <DialogTitleComponent className={cn(ds.components.modal.title, "truncate")}>
                 Novo Pedido
               </DialogTitleComponent>
-              <DialogDescriptionComponent className="text-gray-500 dark:text-gray-400 text-xs font-medium truncate">
+              <DialogDescriptionComponent className={cn(ds.typography.size.xs, ds.typography.weight.medium, ds.colors.text.secondary, "truncate mt-1")}>
                 Etapa {currentStepIndex + 1}/{STEPS.length}
               </DialogDescriptionComponent>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            {currentStepIndex > 0 && (
-              <Button type="button" variant="outline" size="sm" onClick={handlePrevious}
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
-                <ChevronLeft className="h-3 w-3 sm:mr-1.5" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
-            )}
-            
-            {currentStepIndex < STEPS.length - 1 ? (
-              <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
-                className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                <span className="hidden sm:inline">Próximo</span>
-                <ChevronRight className="h-3 w-3 ml-1.5" />
-              </Button>
-            ) : (
-              <Button type="button" size="sm" onClick={handleSubmit} disabled={loading}
-                className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                {loading ? (
-                  <><Loader2 className="h-3 w-3 animate-spin mr-1.5" /><span className="hidden sm:inline">Criando...</span></>
-                ) : (
-                  <><Check className="h-3 w-3 mr-1.5" /><span className="hidden sm:inline">Criar</span></>
-                )}
-              </Button>
-            )}
-          </div>
-          
-          <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-            className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg ml-2">
-            <X className="h-4 w-4" />
+          <Button 
+            type="button" 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => handleOpenChange(false)}
+            className={cn(ds.components.button.ghost, ds.components.button.size.icon, "ml-2")}
+          >
+            <X className="h-5 w-5" />
           </Button>
         </div>
         
-        <div className="mt-3">
-          <Progress value={progress} className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-gray-900 dark:[&>div]:bg-white rounded-full" />
+        <div className="mt-4">
+          <Progress 
+            value={progress} 
+            className={cn(
+              "h-1.5 rounded-full",
+              ds.colors.surface.section,
+              "[&>div]:bg-[#83E509]"
+            )} 
+          />
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className={cn(
+        "flex-shrink-0 px-6 border-b bg-transparent",
+        ds.colors.border.default
+      )}>
+        <div className={ds.components.tabs.clean.list}>
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             const status = index < currentStepIndex ? "completed" : index === currentStepIndex ? "current" : "pending";
+            const isActive = index === currentStepIndex;
+            
             return (
-              <button key={step.id} type="button" onClick={() => setActiveStep(step.id)}
+              <button 
+                key={step.id} 
+                type="button" 
+                onClick={() => setActiveStep(step.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 flex-1 justify-center",
-                  status === "current" && "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-gray-700",
-                  status === "completed" && "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer shadow-sm",
-                  status === "pending" && "text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400"
-                )}>
+                  ds.components.tabs.clean.trigger,
+                  "flex items-center gap-2",
+                  isActive && "data-[state=active]"
+                )}
+                data-state={isActive ? "active" : "inactive"}
+              >
                 <div className="flex items-center justify-center w-4 h-4">
-                  {status === "completed" ? <Check className="h-3 w-3" /> : <Icon className="h-3 w-3" />}
+                  {status === "completed" ? (
+                    <Check className="h-4 w-4 text-[#83E509]" />
+                  ) : (
+                    <Icon className="h-4 w-4" />
+                  )}
                 </div>
                 <span className="hidden sm:inline">{step.title}</span>
               </button>
