@@ -57,6 +57,21 @@ export default function ListaCompras() {
   return (
     <PageWrapper>
       <div className="page-container space-y-4 sm:space-y-6">
+        {/* Page Header */}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+            <ShoppingBasket className="h-6 w-6 text-brand" />
+          </div>
+          <div>
+            <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+              Lista de Compras
+            </h1>
+            <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+              Organize produtos para comprar no futuro
+            </p>
+          </div>
+        </div>
+
         {/* Stats Cards - Cores Sólidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {/* Total de Itens - Azul (informação) */}
@@ -119,22 +134,8 @@ export default function ListaCompras() {
           </div>
         </div>
 
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-              <ShoppingBasket className="h-6 w-6 text-brand" />
-            </div>
-            <div>
-              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
-                Lista de Compras
-              </h1>
-              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
-                Organize produtos para comprar no futuro
-              </p>
-            </div>
-          </div>
-
+        {/* Actions Bar */}
+        <div className="flex items-center justify-end mb-4">
           <Button
             onClick={() => setShowAddDialog(true)}
             className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}

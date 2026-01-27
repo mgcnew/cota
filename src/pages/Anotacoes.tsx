@@ -55,8 +55,8 @@ export default function Anotacoes() {
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="w-full sm:max-w-md">
+          <div className="flex flex-col lg:flex-row-reverse lg:items-center justify-between gap-4">
+            <div className="w-full lg:max-w-md">
               <ExpandableSearch
                 value={searchQuery}
                 onChange={setSearchQuery}
