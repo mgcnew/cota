@@ -159,18 +159,21 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
       {/* Search Bar & Header */}
       <div className="relative">
         <div className={cn(
-          "flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300",
           designSystem.components.card.root,
-          designSystem.colors.border.subtle
+          "p-6 bg-brand/5 border-brand/10"
         )}>
-          <div className="p-3 rounded-xl bg-brand/10 border border-brand/20 shadow-[0_0_15px_hsl(var(--brand)/0.1)]">
-            <BarChart3 className="h-6 w-6 text-brand" />
-          </div>
-          <div className="flex-1">
-            <h3 className={cn("text-lg font-bold", designSystem.colors.text.primary)}>Central de Inteligência</h3>
-            <p className={cn("text-sm opacity-70", designSystem.colors.text.secondary)}>
-              Consulte históricos e tendências de produtos ou fornecedores
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-brand/10 border border-brand/20">
+              <BarChart3 className="h-6 w-6 text-brand" />
+            </div>
+            <div className="flex-1">
+              <h3 className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+                Central de Inteligência
+              </h3>
+              <p className={cn(designSystem.typography.size.sm, designSystem.colors.text.secondary, "opacity-70")}>
+                Consulte históricos e tendências de produtos ou fornecedores
+              </p>
+            </div>
           </div>
         </div>
 
@@ -182,64 +185,84 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
             onChange={(e) => { setSearchTerm(e.target.value); setHighlightedIndex(-1); }}
             onKeyDown={handleSearchKeyDown}
             className={cn(
-              "pl-12 h-14 text-base rounded-2xl shadow-sm transition-all border-2",
-              "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800",
+              designSystem.components.input.root,
+              "pl-12 h-14 text-base rounded-2xl",
               "focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none"
             )}
             data-search-input
           />
 
           {searchResults.length > 0 && (
-            <div className="absolute z-50 w-full mt-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-              <div className="px-4 py-2 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-100 dark:border-zinc-800">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Sugestões encontradas</span>
+            <div className={cn(
+              "absolute z-50 w-full mt-3 border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200",
+              designSystem.colors.surface.card,
+              designSystem.colors.border.subtle
+            )}>
+              <div className="px-5 py-3 bg-muted/30 border-b border-border">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">Sugestões encontradas</span>
               </div>
-              {searchResults.map((item, index) => (
-                <button
-                  key={`${item.type}-${item.id}`}
-                  onClick={() => selectItem(item)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                  className={cn(
-                    "w-full px-5 py-4 flex items-center gap-4 text-left transition-all",
-                    highlightedIndex === index
-                      ? "bg-brand/10 border-l-4 border-l-brand"
-                      : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50 border-l-4 border-l-transparent"
-                  )}
-                >
-                  <div className={cn(
-                    "p-2.5 rounded-xl flex-shrink-0",
-                    item.type === "product"
-                      ? "bg-emerald-500/10 text-emerald-500"
-                      : "bg-blue-500/10 text-blue-500"
-                  )}>
-                    {item.type === "product"
-                      ? <Package className="h-5 w-5" />
-                      : <Building2 className="h-5 w-5" />
-                    }
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={cn("font-bold text-sm truncate", designSystem.colors.text.primary)}>{item.name}</p>
-                    <p className={cn("text-xs opacity-60 flex items-center gap-2", designSystem.colors.text.secondary)}>
-                      {item.type === "product" ? "📦 Produto" : (
-                        <>
-                          <span>🏢 Fornecedor</span>
-                          {item.contact && (
-                            <span className="text-blue-500 font-medium">
-                              • 👤 {item.contact}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  <ArrowRight className={cn("h-4 w-4 transition-transform", highlightedIndex === index ? "translate-x-1 text-brand" : "text-zinc-300")} />
-                </button>
-              ))}
-              <div className="px-5 py-3 text-[10px] font-medium text-zinc-400 bg-zinc-50 dark:bg-zinc-800/30 border-t border-zinc-100 dark:border-zinc-800 flex justify-between">
+              <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                {searchResults.map((item, index) => (
+                  <button
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => selectItem(item)}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    className={cn(
+                      "w-full px-5 py-4 flex items-center gap-4 text-left transition-all relative group",
+                      highlightedIndex === index
+                        ? "bg-brand/5"
+                        : "hover:bg-muted/30"
+                    )}
+                  >
+                    {/* Active Indicator */}
+                    {highlightedIndex === index && (
+                      <div className="absolute left-0 top-0 w-1 h-full bg-brand" />
+                    )}
+
+                    <div className={cn(
+                      "p-2.5 rounded-xl flex-shrink-0 transition-colors",
+                      item.type === "product"
+                        ? (highlightedIndex === index ? "bg-brand text-white" : "bg-brand/10 text-brand")
+                        : (highlightedIndex === index ? "bg-blue-500 text-white" : "bg-blue-500/10 text-blue-500")
+                    )}>
+                      {item.type === "product"
+                        ? <Package className="h-5 w-5" />
+                        : <Building2 className="h-5 w-5" />
+                      }
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("font-bold text-sm truncate", designSystem.colors.text.primary)}>{item.name}</p>
+                      <p className={cn("text-xs flex items-center gap-2", designSystem.colors.text.secondary, "opacity-60")}>
+                        {item.type === "product" ? (
+                          <span className="flex items-center gap-1"><Package className="h-3 w-3" /> Produto</span>
+                        ) : (
+                          <>
+                            <span className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Fornecedor</span>
+                            {item.contact && (
+                              <span className="text-brand font-medium">
+                                • 👤 {item.contact}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <ArrowRight className={cn(
+                      "h-4 w-4 transition-all",
+                      highlightedIndex === index ? "translate-x-1 text-brand opacity-100" : "text-muted-foreground opacity-0"
+                    )} />
+                  </button>
+                ))}
+              </div>
+              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border flex justify-between uppercase tracking-widest">
                 <div>DICA: Use as setas para navegar</div>
-                <div className="flex gap-3">
-                  <span><kbd className="px-1.5 py-0.5 bg-white dark:bg-zinc-700 rounded border border-zinc-200 dark:border-zinc-600">↑↓</kbd> Mudar</span>
-                  <span><kbd className="px-1.5 py-0.5 bg-white dark:bg-zinc-700 rounded border border-zinc-200 dark:border-zinc-600">Enter</kbd> Abrir</span>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">↑↓</kbd> Mudar
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">Enter</kbd> Abrir
+                  </span>
                 </div>
               </div>
             </div>
@@ -264,16 +287,28 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
-      <div className="w-24 h-24 rounded-full bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mb-8 animate-pulse">
+    <div className={cn(
+      "flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed",
+      designSystem.colors.border.subtle,
+      "bg-muted/20"
+    )}>
+      <div className={cn(
+        "w-24 h-24 rounded-full flex items-center justify-center mb-8 animate-pulse",
+        designSystem.colors.surface.card,
+        "shadow-xl"
+      )}>
         <Target className="h-12 w-12 text-brand" />
       </div>
-      <h3 className={cn("text-xl font-bold mb-3", designSystem.colors.text.primary)}>Pronto para o próximo insight?</h3>
-      <p className={cn("text-sm max-w-sm mx-auto opacity-70 mb-8", designSystem.colors.text.secondary)}>
+      <h3 className={cn(designSystem.typography.size.xl, designSystem.typography.weight.bold, designSystem.colors.text.primary, "mb-3")}>
+        Pronto para o próximo insight?
+      </h3>
+      <p className={cn(designSystem.typography.size.sm, designSystem.colors.text.secondary, "max-w-sm mx-auto opacity-70 mb-8")}>
         Analise o desempenho de qualquer item ou parceiro comercial em tempo real para tomar decisões baseadas em dados.
       </p>
       <div className="flex gap-4">
-        <div className="px-4 py-2 rounded-full bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Powered by Data Intelligence</div>
+        <div className="px-4 py-2 rounded-full bg-muted text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+          Powered by Data Intelligence
+        </div>
       </div>
     </div>
   );
@@ -366,40 +401,56 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between p-6 rounded-2xl bg-zinc-900 text-white shadow-xl">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-white/10">
+      <div className={cn(
+        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative",
+        "bg-zinc-900 text-white"
+      )}>
+        {/* Background Accent */}
+        <div className="absolute right-0 top-0 w-32 h-full bg-brand/10 skew-x-[-20deg] translate-x-16 pointer-events-none" />
+
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
             <Package className="h-8 w-8 text-brand" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">{productName}</h2>
-            <p className="text-zinc-400 text-sm">Visão analítica do produto</p>
+            <h2 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, "tracking-tight")}>
+              {productName}
+            </h2>
+            <p className="text-zinc-400 text-sm font-medium">Visão analítica do produto</p>
           </div>
         </div>
-        <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={onClear}>
+        <Button 
+          variant="outline" 
+          className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" 
+          onClick={onClear}
+        >
           Fechar Análise
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard title="Preço Médio" value={`R$ ${metrics.avgPrice.toFixed(2)}`} icon={DollarSign} />
-        <MetricCard title="Melhor Preço" value={`R$ ${metrics.minPrice.toFixed(2)}`} icon={Award} />
-        <MetricCard title="Cotações" value={metrics.totalQuotes.toString()} icon={FileText} />
-        <MetricCard title="Pedidos" value={metrics.totalOrders.toString()} icon={ShoppingCart} />
+        <MetricCard title="Preço Médio" value={`R$ ${metrics.avgPrice.toFixed(2)}`} icon={DollarSign} variant="default" />
+        <MetricCard title="Melhor Preço" value={`R$ ${metrics.minPrice.toFixed(2)}`} icon={Award} variant="success" />
+        <MetricCard title="Cotações" value={metrics.totalQuotes.toString()} icon={FileText} variant="info" />
+        <MetricCard title="Pedidos" value={metrics.totalOrders.toString()} icon={ShoppingCart} variant="warning" />
       </div>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl">
-          <TabsTrigger value="overview" className="rounded-lg">Histórico</TabsTrigger>
-          <TabsTrigger value="details" className="rounded-lg">Fornecedores</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="mt-6">
-          <PriceHistoryList quotes={quotes} orders={orders} />
-        </TabsContent>
-        <TabsContent value="details" className="mt-6">
-          <SupplierStats orders={orders} quotes={quotes} />
-        </TabsContent>
-      </Tabs>
+      <div className={cn(designSystem.components.card.root, "p-1")}>
+        <Tabs defaultValue="overview" className="w-full">
+          <div className="px-4 pt-4">
+            <TabsList className={designSystem.components.tabs.clean.list}>
+              <TabsTrigger value="overview" className={designSystem.components.tabs.clean.trigger}>Histórico de Preços</TabsTrigger>
+              <TabsTrigger value="details" className={designSystem.components.tabs.clean.trigger}>Comparativo de Fornecedores</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="overview" className="mt-0 p-4">
+            <PriceHistoryList quotes={quotes} orders={orders} />
+          </TabsContent>
+          <TabsContent value="details" className="mt-0 p-4">
+            <SupplierStats orders={orders} quotes={quotes} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
@@ -441,33 +492,47 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
 
   return (
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between p-6 rounded-2xl bg-zinc-900 text-white shadow-xl">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-white/10">
+      <div className={cn(
+        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative",
+        "bg-zinc-900 text-white"
+      )}>
+        {/* Background Accent */}
+        <div className="absolute right-0 top-0 w-32 h-full bg-brand/10 skew-x-[-20deg] translate-x-16 pointer-events-none" />
+
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
             <Building2 className="h-8 w-8 text-brand" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">{supplierName}</h2>
-            <p className="text-zinc-400 text-sm">Histórico do parceiro comercial</p>
+            <h2 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, "tracking-tight")}>
+              {supplierName}
+            </h2>
+            <p className="text-zinc-400 text-sm font-medium">Histórico do parceiro comercial</p>
           </div>
         </div>
-        <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={onClear}>
+        <Button 
+          variant="outline" 
+          className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" 
+          onClick={onClear}
+        >
           Fechar Análise
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricCard title="Total de Pedidos" value={metrics.count.toString()} icon={Package} />
-        <MetricCard title="Volume Total" value={`R$ ${metrics.totalSpent.toLocaleString('pt-BR')}`} icon={DollarSign} />
-        <MetricCard title="Ticket Médio" value={`R$ ${metrics.avgOrder.toFixed(2)}`} icon={TrendingUp} />
+        <MetricCard title="Total de Pedidos" value={metrics.count.toString()} icon={Package} variant="default" />
+        <MetricCard title="Volume Total" value={`R$ ${metrics.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={DollarSign} variant="success" />
+        <MetricCard title="Ticket Médio" value={`R$ ${metrics.avgOrder.toFixed(2)}`} icon={TrendingUp} variant="info" />
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6">
+      <div className={cn(designSystem.components.card.root, "p-6")}>
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-brand/10 text-brand">
+          <div className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20">
             <ShoppingCart className="h-5 w-5" />
           </div>
-          <h3 className="text-lg font-bold">Pedidos Recentes</h3>
+          <h3 className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+            Pedidos Recentes
+          </h3>
         </div>
         <OrderHistoryList orders={orders} />
       </div>
@@ -485,19 +550,29 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
 
   return (
     <ScrollArea className="h-[400px] pr-4">
-      <div className="space-y-3">
+      <div className="space-y-2">
         {combined.map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-brand/30 transition-all">
+          <div key={idx} className={cn(
+            "flex items-center justify-between p-4 rounded-xl border transition-all",
+            "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+          )}>
             <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", item.type === 'order' ? 'bg-brand/10 text-brand' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500')}>
+              <div className={cn(
+                "p-2 rounded-lg",
+                item.type === 'order' ? 'bg-brand/10 text-brand' : 'bg-muted text-muted-foreground'
+              )}>
                 {item.type === 'order' ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
               </div>
               <div>
-                <p className="font-bold text-sm">{item.supplier}</p>
-                <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">{item.date.toLocaleDateString('pt-BR')} • {item.type === 'order' ? 'Pedido' : 'Cotação'}</p>
+                <p className={cn("font-bold text-sm", designSystem.colors.text.primary)}>{item.supplier}</p>
+                <p className={cn("text-[10px] uppercase font-black tracking-widest", designSystem.colors.text.secondary, "opacity-50")}>
+                  {item.date.toLocaleDateString('pt-BR')} • {item.type === 'order' ? 'Pedido' : 'Cotação'}
+                </p>
               </div>
             </div>
-            <span className="font-black text-zinc-900 dark:text-zinc-100 italic">R$ {item.price.toFixed(2)}</span>
+            <span className={cn("font-black italic text-base", designSystem.colors.text.primary)}>
+              R$ {item.price.toFixed(2)}
+            </span>
           </div>
         ))}
       </div>
@@ -509,22 +584,27 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
   return (
     <div className="space-y-3">
       {orders.map((order) => (
-        <div key={order.id} className="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-brand/30 transition-all bg-white dark:bg-zinc-950/20">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">#ORD-{order.id.substring(0, 8)}</span>
-            <Badge variant="secondary" className="text-[10px] uppercase font-black tracking-widest bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-0">{order.status}</Badge>
+        <div key={order.id} className={cn(
+          "p-5 rounded-2xl border transition-all",
+          "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+        )}>
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">#ORD-{order.id.substring(0, 8)}</span>
+            <Badge variant="secondary" className="text-[10px] uppercase font-black tracking-widest bg-muted/50 text-muted-foreground border-border/50">{order.status}</Badge>
           </div>
           <div className="flex justify-between items-end">
             <div>
-              <p className="text-xl font-black tracking-tight text-zinc-900 dark:text-zinc-100">R$ {Number(order.total_value).toFixed(2)}</p>
-              <p className="text-[11px] font-bold text-zinc-500 flex items-center gap-1.5 mt-1">
+              <p className={cn("text-2xl font-black tracking-tight", designSystem.colors.text.primary)}>
+                R$ {Number(order.total_value).toFixed(2)}
+              </p>
+              <p className={cn("text-[11px] font-bold flex items-center gap-1.5 mt-1 opacity-60", designSystem.colors.text.secondary)}>
                 <Calendar className="h-3 w-3" />
                 {new Date(order.order_date).toLocaleDateString('pt-BR')}
               </p>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
-              <Package className="h-3 w-3 text-zinc-400" />
-              <span className="text-[11px] font-black text-zinc-500">{order.order_items?.length} itens</span>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+              <Package className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">{order.order_items?.length} itens</span>
             </div>
           </div>
         </div>
@@ -546,16 +626,33 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
   }, [orders, quotes]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {stats.map((s, idx) => (
-        <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-brand/30 transition-all">
+        <div key={idx} className={cn(
+          "flex items-center justify-between p-4 rounded-xl border transition-all",
+          "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+        )}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-black text-[10px] text-zinc-500">{idx + 1}</div>
-            <span className="font-bold text-sm">{s.name}</span>
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] border transition-colors",
+              idx === 0 ? "bg-brand text-white border-brand" : "bg-muted text-muted-foreground border-border/50"
+            )}>
+              {idx + 1}
+            </div>
+            <div>
+              <span className={cn("font-bold text-sm", designSystem.colors.text.primary)}>{s.name}</span>
+              {idx === 0 && (
+                <p className="text-[10px] font-black text-brand uppercase tracking-widest">Melhor preço médio</p>
+              )}
+            </div>
           </div>
           <div className="text-right">
-            <p className="font-black text-zinc-900 dark:text-zinc-100">R$ {s.avg.toFixed(2)}</p>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">{s.count} interações</p>
+            <p className={cn("font-black text-base italic", designSystem.colors.text.primary)}>
+              R$ {s.avg.toFixed(2)}
+            </p>
+            <p className={cn("text-[10px] font-black uppercase tracking-widest", designSystem.colors.text.secondary, "opacity-50")}>
+              {s.count} interações
+            </p>
           </div>
         </div>
       ))}

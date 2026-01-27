@@ -25,6 +25,7 @@ import {
   Zap, Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 
 interface Props {
@@ -395,7 +396,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                                   <p className="font-medium text-sm truncate">{item.packagingName}</p>
                                   {best && (
                                     <p className="text-xs text-muted-foreground">
-                                      Melhor: {best.supplierName} (R$ {best.costPerUnit.toFixed(4)}/un)
+                                      Melhor: {best.supplierName} ({formatCurrency(best.costPerUnit)}/un)
                                     </p>
                                   )}
                                 </div>
@@ -416,7 +417,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                                             {isBest && <Award className="h-3 w-3 text-green-600" />}
                                             <span className="truncate">{f.supplierName}</span>
                                             <span className="text-muted-foreground ml-1">
-                                              R$ {supplierItem?.valorTotal?.toFixed(2)}
+                                              {formatCurrency(supplierItem?.valorTotal)}
                                             </span>
                                           </div>
                                         </SelectItem>
@@ -457,7 +458,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                                   <span className="font-medium text-sm">{orderData.supplierName}</span>
                                 </div>
                                 <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                                  R$ {orderTotal.toFixed(2)}
+                                  {formatCurrency(orderTotal)}
                                 </Badge>
                               </div>
                               <div className="space-y-1">
@@ -473,7 +474,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                                         className="w-14 h-6 text-center text-xs"
                                       />
                                       <span className="text-muted-foreground w-20 text-right">
-                                        R$ {item.valorTotal?.toFixed(2)}
+                                        {formatCurrency(item.valorTotal)}
                                       </span>
                                     </div>
                                   </div>
@@ -545,7 +546,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                       </span>
                     </div>
                     <span className="text-lg font-bold text-purple-600">
-                      R$ {totalGeral.toFixed(2)}
+                      {formatCurrency(totalGeral)}
                     </span>
                   </div>
                   
@@ -559,7 +560,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                         </span>
                       </div>
                       <span className="text-lg font-bold text-green-600">
-                        R$ {economiaTotal.toFixed(2)}
+                        {formatCurrency(economiaTotal)}
                       </span>
                     </div>
                   )}

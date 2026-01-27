@@ -6,6 +6,7 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 
 interface PackagingOrderDetailsDialogProps {
   open: boolean;
@@ -84,8 +85,8 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
                       </TableCell>
                       <TableCell className="text-center">{item.quantidade}</TableCell>
                       <TableCell className="text-center">{item.unidadeCompra || '-'}</TableCell>
-                      <TableCell className="text-right">R$ {item.valorUnitario?.toFixed(2) || '0.00'}</TableCell>
-                      <TableCell className="text-right font-semibold">R$ {item.valorTotal?.toFixed(2) || '0.00'}</TableCell>
+                      <TableCell className="text-right">{formatCurrency(item.valorUnitario)}</TableCell>
+                      <TableCell className="text-right font-semibold">{formatCurrency(item.valorTotal)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -99,7 +100,7 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
               <p className="text-sm text-muted-foreground">Valor Total do Pedido</p>
               <p className="text-2xl font-bold text-emerald-600 flex items-center gap-1">
                 <DollarSign className="h-5 w-5" />
-                R$ {order.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                {formatCurrency(order.totalValue)}
               </p>
             </div>
           </div>

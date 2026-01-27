@@ -1,7 +1,7 @@
 import { useState, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow, TableHeader } from "@/components/ui/table";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePagination } from "@/hooks/usePagination";
@@ -26,6 +26,8 @@ import {
 import type { PackagingOrderDisplay } from "@/types/packaging";
 import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
+import { designSystem as ds } from "@/styles/design-system";
 
 interface Props {
   onCreateOrder: () => void;
@@ -61,22 +63,23 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
       total: orders.length,
       pendentes,
       confirmados,
-      totalValue: `R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+      totalValue: formatCurrency(totalValue)
     };
   }, [orders]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig = PACKAGING_ORDER_STATUS.find(s => s.value === status);
-    const colorClasses: Record<string, string> = {
-      amber: "bg-amber-100 text-amber-700 border-amber-200",
-      blue: "bg-blue-100 text-blue-700 border-blue-200",
-      green: "bg-emerald-100 text-emerald-700 border-emerald-200",
-      red: "bg-red-100 text-red-700 border-red-200",
-    };
+    
+    let badgeClass = ds.components.badge.outline;
+    if (status === "confirmado") badgeClass = ds.components.badge.active;
+    if (status === "entregue") badgeClass = ds.components.badge.success;
+    if (status === "cancelado") badgeClass = ds.components.badge.destructive;
+
     const IconComponent = status === "pendente" ? Clock : status === "confirmado" ? CheckCircle2 : status === "entregue" ? Truck : Clock;
+    
     return (
-      <Badge variant="outline" className={cn("text-xs", colorClasses[statusConfig?.color || ""] || "")}>
-        <IconComponent className="h-3 w-3 mr-1" />
+      <Badge className={cn(badgeClass, "gap-1.5")}>
+        <IconComponent className="h-3 w-3" />
         {statusConfig?.label || status}
       </Badge>
     );
@@ -98,13 +101,13 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-brand" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
         <MetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
         <MetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
@@ -112,36 +115,47 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         <MetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
       </ResponsiveGrid>
 
-      <div className="flex flex-col sm:flex-row items-stretch gap-2">
-        <ExpandableSearch value={searchTerm} onChange={setSearchTerm} placeholder="Buscar..." accentColor="gray" expandedWidth="w-full sm:w-48" />
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] h-10 rounded-xl">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos</SelectItem>
-            {PACKAGING_ORDER_STATUS.map(s => (
-              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <div className="flex gap-2 ml-auto">
-          <Button onClick={onCreateOrder} className="h-10 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-950 font-bold uppercase tracking-wider text-xs shadow-lg">
-            <Plus className="h-4 w-4 mr-1" />Novo Pedido
+      <div className="flex flex-col sm:flex-row items-stretch gap-3">
+        <div className="flex-1 flex flex-col sm:flex-row gap-2">
+          <ExpandableSearch 
+            value={searchTerm} 
+            onChange={setSearchTerm} 
+            placeholder="Buscar pedidos..." 
+            accentColor="brand" 
+            expandedWidth="w-full sm:w-64" 
+          />
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className={cn("w-full sm:w-[180px] h-11 rounded-2xl", ds.components.input.root)}>
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os Status</SelectItem>
+              {PACKAGING_ORDER_STATUS.map(s => (
+                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={onCreateOrder} 
+            className={ds.components.button.primary}
+          >
+            <Plus className="h-4 w-4 mr-2" />Novo Pedido
           </Button>
         </div>
       </div>
 
       {paginatedData.items.length === 0 ? (
-        <div className="text-center py-12 bg-white dark:bg-gray-800/50 rounded-xl border">
-          <ShoppingCart className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground">Nenhum pedido de embalagem encontrado</p>
-          <Button variant="outline" className="mt-4" onClick={onCreateOrder}>
-            <Plus className="h-4 w-4 mr-1" />Criar primeiro pedido
+        <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+          <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
+          <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
+          <Button variant="outline" className="mt-6 rounded-xl" onClick={onCreateOrder}>
+            <Plus className="h-4 w-4 mr-2" />Criar Primeiro Pedido
           </Button>
         </div>
       ) : isMobile ? (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {paginatedData.items.map((order, index) => {
             const numero = paginatedData.pagination.startIndex + index + 1;
             return (
@@ -157,106 +171,99 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
           })}
         </div>
       ) : (
-        <Table>
-          <thead>
-            <tr>
-              <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                <div className="flex items-center bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/60 rounded-lg shadow-sm px-4 py-3">
-                  <div className="w-[14%] flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center text-gray-500">
+        <Table className={ds.components.table.root}>
+          <TableHeader className={ds.components.table.header}>
+            <TableRow className="border-none hover:bg-transparent">
+              <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+                <div className={ds.components.table.headerContainer}>
+                  <div className="w-[14%] flex items-center gap-3">
+                    <div className={ds.components.table.headerIcon}>
                       <ShoppingCart className="h-4 w-4" />
                     </div>
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Pedido</span>
+                    <span className={ds.components.table.headerLabel}>Pedido</span>
                   </div>
-                  <div className="w-[18%] pl-2 flex items-center gap-1.5">
-                    <Building2 className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Fornecedor</span>
+                  <div className="w-[18%] pl-2 flex items-center gap-2">
+                    <span className={ds.components.table.headerLabel}>Fornecedor</span>
                   </div>
-                  <div className="w-[20%] pl-2 flex items-center gap-1.5">
-                    <Package className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Itens</span>
+                  <div className="w-[20%] pl-2 flex items-center gap-2">
+                    <span className={ds.components.table.headerLabel}>Itens</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Entrega</span>
+                  <div className="w-[12%] pl-2 flex items-center gap-2">
+                    <span className={ds.components.table.headerLabel}>Entrega</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex justify-center items-center gap-1.5">
-                    <CircleDot className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Status</span>
+                  <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
+                    <span className={ds.components.table.headerLabel}>Status</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <DollarSign className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Valor</span>
+                  <div className="w-[12%] pl-2 flex items-center gap-2">
+                    <span className={ds.components.table.headerLabel}>Valor</span>
                   </div>
-                  <div className="w-[12%] pl-2 flex justify-end items-center gap-1.5">
-                    <MoreVertical className="h-3.5 w-3.5 text-gray-400" />
-                    <span className="uppercase text-[11px] font-semibold text-gray-700 dark:text-gray-300">Ações</span>
+                  <div className="w-[12%] flex justify-end items-center px-2">
+                    <span className={ds.components.table.headerLabel}>Ações</span>
                   </div>
                 </div>
-              </td>
-            </tr>
-          </thead>
+              </TableCell>
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {paginatedData.items.map((order, index) => {
               const numero = paginatedData.pagination.startIndex + index + 1;
               const isEntregue = order.status === "entregue";
               
               return (
-                <TableRow key={order.id} className="group border-none">
-                  <TableCell colSpan={7} className="px-1 py-2">
+                <TableRow key={order.id} className="group border-none hover:bg-transparent">
+                  <TableCell colSpan={7} className={ds.components.table.cell}>
                     <div className={cn(
-                      "flex items-center px-3 py-2.5 bg-white dark:bg-gray-800/50 rounded-lg border transition-colors",
-                      isEntregue 
-                        ? "border-emerald-300/50 hover:border-emerald-400/70 dark:border-emerald-700/50" 
-                        : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                      "flex items-center px-4 py-3 mb-1",
+                      ds.components.table.row,
+                      isEntregue && ds.components.table.rowActive
                     )}>
                       {/* Pedido */}
                       <div className="w-[14%] flex items-center gap-3">
                         <div className={cn(
-                          "w-8 h-8 rounded-lg flex items-center justify-center border",
+                          "w-9 h-9 rounded-xl flex items-center justify-center border transition-colors",
                           isEntregue 
-                            ? "bg-emerald-500/10 border-emerald-200/50" 
-                            : "bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600/30"
+                            ? "bg-brand/10 border-brand/20" 
+                            : "bg-muted/50 border-border/50"
                         )}>
                           {isEntregue ? (
-                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                            <CheckCircle2 className="h-4 w-4 text-brand" />
                           ) : (
-                            <ShoppingCart className="h-4 w-4 text-gray-500" />
+                            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
                           )}
                         </div>
                         <div>
-                          <span className="font-semibold text-sm">#{numero.toString().padStart(4, '0')}</span>
-                          <p className="text-xs text-muted-foreground">{order.orderDate}</p>
+                          <span className={cn("font-bold text-sm", ds.colors.text.primary)}>#{numero.toString().padStart(4, '0')}</span>
+                          <p className={cn("text-[11px]", ds.colors.text.muted)}>{order.orderDate}</p>
                         </div>
                       </div>
 
                       {/* Fornecedor */}
                       <div className="w-[18%] pl-2">
-                        <CapitalizedText className="font-medium text-sm truncate block max-w-[140px]">
+                        <CapitalizedText className={cn("font-bold text-sm truncate block max-w-[140px]", ds.colors.text.primary)}>
                           {order.supplierName}
                         </CapitalizedText>
-                        <p className="text-xs text-muted-foreground">{order.itens.length} item(ns)</p>
+                        <p className={cn("text-[11px]", ds.colors.text.muted)}>{order.itens.length} item(ns)</p>
                       </div>
                       
                       {/* Itens */}
                       <div className="w-[20%] pl-2">
-                        <CapitalizedText className="font-medium text-sm truncate block max-w-[160px]">
+                        <CapitalizedText className={cn("font-bold text-sm truncate block max-w-[160px]", ds.colors.text.primary)}>
                           {order.itens.slice(0, 2).map(i => i.packagingName).join(', ')}
                         </CapitalizedText>
                         {order.itens.length > 2 && (
-                          <p className="text-xs text-muted-foreground">+{order.itens.length - 2} mais</p>
+                          <p className={cn("text-[11px]", ds.colors.text.muted)}>+{order.itens.length - 2} mais</p>
                         )}
                       </div>
                       
                       {/* Entrega */}
-                      <div className="w-[12%] pl-2 text-sm text-muted-foreground">
+                      <div className={cn("w-[12%] pl-2 text-xs", ds.colors.text.secondary)}>
                         {order.deliveryDate ? (
-                          <div className="flex items-center gap-1">
-                            <Truck className="h-3 w-3 text-gray-400" />
+                          <div className="flex items-center gap-1.5">
+                            <Truck className="h-3.5 w-3.5 opacity-50" />
                             <span>{order.deliveryDate}</span>
                           </div>
                         ) : (
-                          <span>-</span>
+                          <span className="opacity-50">-</span>
                         )}
                       </div>
                       
@@ -267,8 +274,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                       
                       {/* Valor */}
                       <div className="w-[12%] pl-2">
-                        <span className="font-bold text-green-600">
-                          R$ {order.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <span className="font-bold text-sm text-brand">
+                          {formatCurrency(order.totalValue)}
                         </span>
                       </div>
                       
@@ -276,28 +283,28 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                       <div className="w-[12%] pl-2 flex justify-end">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-purple-50 dark:hover:bg-purple-900/20">
+                            <Button variant="ghost" size="icon" className={ds.components.button.size.icon}>
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewDetails(order)}>
-                              <Eye className="h-4 w-4 mr-2" />Ver Detalhes
+                          <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
+                            <DropdownMenuItem onClick={() => handleViewDetails(order)} className="rounded-lg gap-2">
+                              <Eye className="h-4 w-4" />Ver Detalhes
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
+                            <DropdownMenuSeparator className={ds.components.separator.horizontal} />
                             {order.status === "pendente" && (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')}>
-                                <CheckCircle2 className="h-4 w-4 mr-2 text-blue-600" />Confirmar
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')} className="rounded-lg gap-2 text-brand">
+                                <CheckCircle2 className="h-4 w-4" />Confirmar
                               </DropdownMenuItem>
                             )}
                             {(order.status === "pendente" || order.status === "confirmado") && (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'entregue')} className="text-emerald-600">
-                                <Truck className="h-4 w-4 mr-2" />Marcar Entregue
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'entregue')} className="rounded-lg gap-2 text-brand">
+                                <Truck className="h-4 w-4" />Marcar Entregue
                               </DropdownMenuItem>
                             )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleDelete(order.id)} className="text-red-600">
-                              <Trash2 className="h-4 w-4 mr-2" />Excluir
+                            <DropdownMenuSeparator className={ds.components.separator.horizontal} />
+                            <DropdownMenuItem onClick={() => handleDelete(order.id)} className="rounded-lg gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                              <Trash2 className="h-4 w-4" />Excluir
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

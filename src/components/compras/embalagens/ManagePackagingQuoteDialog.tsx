@@ -29,6 +29,7 @@ import {
   TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 import type { PackagingItem } from "@/types/packaging";
 import type { Supplier } from "@/hooks/useSuppliers";
@@ -741,7 +742,7 @@ export function ManagePackagingQuoteDialog({
                                         ? "bg-muted text-foreground border-border hover:bg-muted/80" 
                                         : "bg-background text-muted-foreground hover:bg-muted/50")}
                                     onClick={() => handleEditItem(price.supplierId, item.packagingId)}>
-                                    {price.supplierName}: R$ {price.custoPorUnidade.toFixed(4)}/un
+                                    {price.supplierName}: {formatCurrency(price.custoPorUnidade)}/un
                                   </Badge>
                                 ))}
                               </div>
@@ -752,13 +753,13 @@ export function ManagePackagingQuoteDialog({
                               <>
                                 <div className="flex items-center gap-2 justify-end">
                                   <Award className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-lg font-black text-foreground tracking-tight">R$ {item.bestPrice.toFixed(4)}<span className="text-xs font-medium text-muted-foreground ml-0.5">/un</span></span>
+                                  <span className="text-lg font-black text-foreground tracking-tight">{formatCurrency(item.bestPrice)}<span className="text-xs font-medium text-muted-foreground ml-0.5">/un</span></span>
                                 </div>
                                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mt-0.5">{item.bestSupplierName}</p>
                                 {item.savings > 0 && (
                                   <Badge className="mt-1 bg-primary text-primary-foreground border-0 text-[10px] font-bold">
                                     <TrendingDown className="h-2.5 w-2.5 mr-1" />
-                                    Economia: R$ {item.savings.toFixed(4)}/un
+                                    Economia: {formatCurrency(item.savings)}/un
                                   </Badge>
                                 )}
                               </>
@@ -982,7 +983,7 @@ export function ManagePackagingQuoteDialog({
                                             <p className="font-bold mb-1">Última Compra:</p>
                                             <p>Data: {lastPurchase.date}</p>
                                             <p>Fornecedor: {lastPurchase.supplierName}</p>
-                                            <p>Preço: R$ {lastPurchase.price.toFixed(4)}</p>
+                                            <p>Preço: {formatCurrency(lastPurchase.price)}</p>
                                           </TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
@@ -1005,7 +1006,7 @@ export function ManagePackagingQuoteDialog({
                                 <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Gramatura</Label><Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 0.08" className="h-8 bg-background border-input" /></div>
                                 <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Dimensões</Label><Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 30x40cm" className="h-8 bg-background border-input" /></div>
                               </div>
-                              {custoPorUnidadePreview && <div className="bg-background p-2.5 rounded-lg border border-border flex justify-between items-center"><span className="text-xs text-muted-foreground font-medium">Custo calculado:</span><span className="text-sm font-bold text-foreground">R$ {custoPorUnidadePreview}/un</span></div>}
+                              {custoPorUnidadePreview && <div className="bg-background p-2.5 rounded-lg border border-border flex justify-between items-center"><span className="text-xs text-muted-foreground font-medium">Custo calculado:</span><span className="text-sm font-bold text-foreground">{formatCurrency(custoPorUnidadePreview)}/un</span></div>}
                               <div className="flex items-center justify-between pt-2 border-t border-border">
                                 <p className="text-[10px] text-muted-foreground font-medium"><kbd className="px-1 py-0.5 rounded bg-background border border-border font-sans">Enter</kbd> salvar</p>
                                 <div className="flex gap-2">
@@ -1016,10 +1017,10 @@ export function ManagePackagingQuoteDialog({
                             </div>
                           ) : supplierItem?.valorTotal ? (
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border">
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Valor Total</span><p className="font-bold text-foreground">R$ {supplierItem.valorTotal.toFixed(2)}</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Valor Total</span><p className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</p></div>
                               <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Venda</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
                               <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Unidades</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeUnidadesEstimada}</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Custo/un</span><p className={cn("font-black text-base", isBestPrice ? "text-emerald-600" : "text-foreground")}>R$ {supplierItem.custoPorUnidade?.toFixed(4) || '-'}</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Custo/un</span><p className={cn("font-black text-base", isBestPrice ? "text-emerald-600" : "text-foreground")}>{formatCurrency(supplierItem.custoPorUnidade)}</p></div>
                             </div>
                           ) : <div className="p-4 rounded-lg border-2 border-dashed border-border bg-muted/50 text-center"><p className="text-xs text-muted-foreground font-medium">Nenhum valor informado</p></div>}
                         </Card>
@@ -1059,10 +1060,10 @@ export function ManagePackagingQuoteDialog({
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-foreground text-sm">{f.supplierName}</p>
-                              <p className="text-[10px] text-muted-foreground font-medium mt-0.5">R$ {f.valorTotal.toFixed(2)} ({f.quantidadeVenda} {f.unidadeVenda} / {f.quantidadeUnidades} un)</p>
+                              <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{formatCurrency(f.valorTotal)} ({f.quantidadeVenda} {f.unidadeVenda} / {f.quantidadeUnidades} un)</p>
                             </div>
                             <div className="text-right flex-shrink-0">
-                              <p className={cn("font-black text-sm", f.isMelhorPreco ? "text-foreground" : "text-foreground")}>R$ {f.custoPorUnidade.toFixed(4)}/un</p>
+                              <p className={cn("font-black text-sm", f.isMelhorPreco ? "text-foreground" : "text-foreground")}>{formatCurrency(f.custoPorUnidade)}/un</p>
                               {!f.isMelhorPreco ? <p className="text-[10px] font-bold text-red-500 mt-0.5">+{f.diferencaPercentual.toFixed(1)}%</p> : <Badge className="bg-primary text-primary-foreground border-0 text-[9px] mt-0.5 h-4">Melhor</Badge>}
                             </div>
                           </div>

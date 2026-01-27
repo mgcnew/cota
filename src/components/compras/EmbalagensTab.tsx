@@ -16,6 +16,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 import {
   Package, Plus, Trash2, DollarSign,
   Building2, MoreVertical, Eye, CheckCircle2,
@@ -247,7 +248,7 @@ function EmbalagensTab() {
             />
             <MetricCard
               title="Economia Acumulada"
-              value={`R$ ${stats.economiaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`}
+              value={formatCurrency(stats.economiaTotal)}
               icon={TrendingDown}
               variant="success"
             />
@@ -326,7 +327,7 @@ function EmbalagensTab() {
               })}
             </div>
           ) : (
-            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+            <div className="bg-transparent overflow-hidden">
               <PackagingQuotesTable
                 quotes={paginatedData.items}
                 startIndex={paginatedData.pagination.startIndex}

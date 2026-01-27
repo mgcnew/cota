@@ -1,11 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow, TableHeader } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Package, Calendar, DollarSign, Building2, MoreVertical, Eye, Trash2, ShoppingCart, CheckCircle2, CircleDot, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
+import { designSystem as ds } from "@/styles/design-system";
 
 interface PackagingQuotesTableProps {
   quotes: PackagingQuoteDisplay[];
@@ -35,111 +36,111 @@ export function PackagingQuotesTable({
     
     if (isPronta) {
       return (
-        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700">
-          <CheckCircle2 className="h-3 w-3 mr-1" />
+        <Badge className={cn(ds.components.badge.success, "gap-1.5")}>
+          <CheckCircle2 className="h-3 w-3" />
           Pronta
         </Badge>
       );
     }
     
     if (quote.status === "concluida") {
-      return <Badge variant="secondary">Concluída</Badge>;
+      return <Badge className={ds.components.badge.secondary}>Concluída</Badge>;
     }
     
     if (quote.status === "cancelada") {
-      return <Badge variant="destructive">Cancelada</Badge>;
+      return <Badge className={ds.components.badge.destructive}>Cancelada</Badge>;
     }
     
-    return <Badge className="bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700">Ativa</Badge>;
+    return <Badge className={ds.components.badge.outline}>Ativa</Badge>;
   };
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-            <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
+    <Table className={ds.components.table.root}>
+      <TableHeader className={ds.components.table.header}>
+        <TableRow className="border-none hover:bg-transparent">
+          <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+            <div className={ds.components.table.headerContainer}>
               <div className="w-[12%] flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                  <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <div className={ds.components.table.headerIcon}>
+                  <Package className="h-4 w-4" />
                 </div>
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Cotação</span>
+                <span className={ds.components.table.headerLabel}>Cotação</span>
               </div>
               <div className="w-[22%] pl-2 flex items-center gap-2">
-                <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Embalagens</span>
+                <span className={ds.components.table.headerLabel}>Embalagens</span>
               </div>
               <div className="w-[14%] pl-2 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Período</span>
+                <span className={ds.components.table.headerLabel}>Período</span>
               </div>
               <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                <CircleDot className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Status</span>
+                <span className={ds.components.table.headerLabel}>Status</span>
               </div>
               <div className="w-[16%] pl-2 flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Melhor Preço</span>
+                <span className={ds.components.table.headerLabel}>Melhor Preço</span>
               </div>
               <div className="w-[12%] pl-2 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Fornec.</span>
+                <span className={ds.components.table.headerLabel}>Fornec.</span>
               </div>
-              <div className="w-[12%] pl-2 flex justify-end items-center">
-                <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
+              <div className="w-[12%] flex justify-end items-center px-2">
+                <span className={ds.components.table.headerLabel}>Ações</span>
               </div>
             </div>
-          </td>
-        </tr>
-      </thead>
+          </TableCell>
+        </TableRow>
+      </TableHeader>
       <TableBody>
         {quotes.map((quote, index) => {
           const { respondidos, total, isPronta } = getQuoteStatus(quote);
           const numero = startIndex + index + 1;
           
           return (
-            <TableRow key={quote.id} className="group border-none">
-              <TableCell colSpan={7} className="px-1 py-1.5">
+            <TableRow key={quote.id} className="group border-none hover:bg-transparent">
+              <TableCell colSpan={7} className={ds.components.table.cell}>
                 <div className={cn(
-                  "flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border transition-colors duration-150",
-                  isPronta 
-                    ? "border-emerald-300 dark:border-emerald-700 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/20" 
-                    : "border-gray-200 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-800/70"
+                  "flex items-center px-4 py-3 mb-1",
+                  ds.components.table.row,
+                  isPronta && ds.components.table.rowActive
                 )}>
                   {/* Cotação */}
                   <div className="w-[12%] flex items-center gap-3">
                     <div className={cn(
-                      "w-9 h-9 rounded-xl flex items-center justify-center border",
+                      "w-9 h-9 rounded-xl flex items-center justify-center border transition-colors",
                       isPronta 
-                        ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700" 
-                        : "bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600/30"
+                        ? "bg-brand/10 border-brand/20" 
+                        : "bg-muted/50 border-border/50"
                     )}>
                       {isPronta ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        <CheckCircle2 className="h-4 w-4 text-brand" />
                       ) : (
-                        <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                        <Package className="h-4 w-4 text-muted-foreground" />
                       )}
                     </div>
                     <div>
-                      <span className="font-semibold text-sm text-gray-900 dark:text-gray-100">#{numero.toString().padStart(4, '0')}</span>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{quote.itens.length} item(ns)</p>
+                      <span className={cn("font-bold text-sm", ds.colors.text.primary)}>#{numero.toString().padStart(4, '0')}</span>
+                      <p className={cn("text-[11px]", ds.colors.text.muted)}>{quote.itens.length} item(ns)</p>
                     </div>
                   </div>
 
                   {/* Embalagens */}
                   <div className="w-[22%] pl-2">
-                    <CapitalizedText className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate block max-w-[180px]">
+                    <CapitalizedText className={cn("font-bold text-sm truncate block max-w-[180px]", ds.colors.text.primary)}>
                       {quote.itens.slice(0, 2).map(i => i.packagingName).join(', ') || 'Sem itens'}
                     </CapitalizedText>
                     {quote.itens.length > 2 && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400">+{quote.itens.length - 2} mais</p>
+                      <p className={cn("text-[11px]", ds.colors.text.muted)}>+{quote.itens.length - 2} mais</p>
                     )}
                   </div>
                   
                   {/* Período */}
-                  <div className="w-[14%] pl-2 text-sm text-gray-500 dark:text-gray-400">
-                    <div>{quote.dataInicio}</div>
-                    <div>{quote.dataFim}</div>
+                  <div className={cn("w-[14%] pl-2 text-xs", ds.colors.text.secondary)}>
+                    <div className="flex items-center gap-1">
+                      <Calendar className="h-3 w-3 opacity-50" />
+                      {quote.dataInicio}
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <Calendar className="h-3 w-3 opacity-50" />
+                      {quote.dataFim}
+                    </div>
                   </div>
                   
                   {/* Status */}
@@ -150,13 +151,13 @@ export function PackagingQuotesTable({
                   {/* Melhor Preço */}
                   <div className="w-[16%] pl-2">
                     <span className={cn(
-                      "font-bold",
-                      quote.melhorPreco !== '-' ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400 dark:text-gray-500"
+                      "font-bold text-sm",
+                      quote.melhorPreco !== '-' ? "text-brand" : ds.colors.text.muted
                     )}>
                       {quote.melhorPreco}
                     </span>
                     {quote.melhorFornecedor !== '-' && (
-                      <CapitalizedText as="p" className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
+                      <CapitalizedText as="p" className={cn("text-[11px] truncate max-w-[120px]", ds.colors.text.muted)}>
                         {quote.melhorFornecedor}
                       </CapitalizedText>
                     )}
@@ -165,23 +166,13 @@ export function PackagingQuotesTable({
                   {/* Fornecedores */}
                   <div className="w-[12%] pl-2">
                     <div className={cn(
-                      "flex items-center gap-1 px-2 py-0.5 rounded-full w-fit",
+                      "flex items-center gap-1.5 px-2 py-1 rounded-lg w-fit border transition-colors",
                       respondidos === total && total > 0
-                        ? "bg-emerald-50 dark:bg-emerald-900/20"
-                        : "bg-gray-100 dark:bg-gray-800/50"
+                        ? "bg-brand/5 border-brand/20 text-brand"
+                        : "bg-muted/30 border-border/50 text-muted-foreground"
                     )}>
-                      <Building2 className={cn(
-                        "h-3 w-3",
-                        respondidos === total && total > 0
-                          ? "text-emerald-500 dark:text-emerald-400"
-                          : "text-gray-400 dark:text-gray-500"
-                      )} />
-                      <span className={cn(
-                        "font-semibold text-xs",
-                        respondidos === total && total > 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-gray-600 dark:text-gray-400"
-                      )}>
+                      <Building2 className="h-3.5 w-3.5" />
+                      <span className="font-bold text-xs">
                         {respondidos}/{total}
                       </span>
                     </div>
@@ -191,22 +182,22 @@ export function PackagingQuotesTable({
                   <div className="w-[12%] pl-2 flex justify-end">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700/70 rounded-lg">
+                        <Button variant="ghost" size="icon" className={ds.components.button.size.icon}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
-                        <DropdownMenuItem onClick={() => onManage(quote)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70">
-                          <Eye className="h-4 w-4 mr-2" />Gerenciar
+                      <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
+                        <DropdownMenuItem onClick={() => onManage(quote)} className="rounded-lg gap-2">
+                          <Eye className="h-4 w-4" />Gerenciar
                         </DropdownMenuItem>
                         {isPronta && (
-                          <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30">
-                            <ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido
+                          <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="rounded-lg gap-2 text-brand">
+                            <ShoppingCart className="h-4 w-4" />Converter em Pedido
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
-                        <DropdownMenuItem onClick={() => onDelete(quote)} className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30">
-                          <Trash2 className="h-4 w-4 mr-2" />Excluir
+                        <DropdownMenuSeparator className={ds.components.separator.horizontal} />
+                        <DropdownMenuItem onClick={() => onDelete(quote)} className="rounded-lg gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                          <Trash2 className="h-4 w-4" />Excluir
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

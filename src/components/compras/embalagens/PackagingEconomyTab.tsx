@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
@@ -9,6 +8,8 @@ import {
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
+import { designSystem as ds } from "@/styles/design-system";
 
 export function PackagingEconomyTab() {
   const { quotes } = usePackagingQuotes();
@@ -74,7 +75,7 @@ export function PackagingEconomyTab() {
         const custoUnitario = supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0
           ? supplierItem.custoPorUnidade
           : (supplierItem.quantidadeUnidadesEstimada && supplierItem.quantidadeUnidadesEstimada > 0
-              ? supplierItem.valorTotal! / supplierItem.quantidadeUnidadesEstimada
+              ? (supplierItem.valorTotal || 0) / supplierItem.quantidadeUnidadesEstimada
               : supplierItem.valorTotal || 0);
 
         const total = custoUnitario * quantidadePedido;
@@ -113,149 +114,171 @@ export function PackagingEconomyTab() {
   }, [selectedQuoteId, quotes, orders]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header */}
-      <Card className="border-purple-200 dark:border-purple-800 bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20">
-        <CardHeader className="pb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-              <Calculator className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">Análise de Economia</CardTitle>
-              <p className="text-sm text-muted-foreground">Compare o vencedor com os concorrentes</p>
-            </div>
+      <div className={cn(
+        ds.components.card.root,
+        "p-6 bg-brand/5 border-brand/10"
+      )}>
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-xl bg-brand/10 border border-brand/20">
+            <Calculator className="h-6 w-6 text-brand" />
           </div>
-        </CardHeader>
-      </Card>
+          <div className="flex-1">
+            <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>
+              Análise de Economia
+            </h3>
+            <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "opacity-70")}>
+              Compare o vencedor com os concorrentes e visualize a poupança real
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Seletor de Cotação */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Target className="h-4 w-4 text-purple-600" />
+      <div className={cn(ds.components.card.root, "p-6")}>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20">
+            <Target className="h-5 w-5" />
+          </div>
+          <h3 className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>
             Selecione uma Cotação
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {completedQuotesWithOrders.length === 0 ? (
-            <div className="text-center py-8">
-              <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-sm text-muted-foreground">Nenhuma cotação concluída com pedido encontrada</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Complete uma cotação e converta em pedido para ver a análise de economia
-              </p>
+          </h3>
+        </div>
+        
+        {completedQuotesWithOrders.length === 0 ? (
+          <div className="text-center py-16 bg-muted/20 rounded-3xl border-2 border-dashed border-border flex flex-col items-center justify-center">
+            <div className="p-4 rounded-full bg-muted/30 mb-4">
+              <AlertCircle className="h-10 w-10 text-muted-foreground/40" />
             </div>
-          ) : (
-            <Select value={selectedQuoteId} onValueChange={setSelectedQuoteId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Escolha uma cotação para analisar..." />
-              </SelectTrigger>
-              <SelectContent>
-                {completedQuotesWithOrders.map(quote => (
-                  <SelectItem key={quote.id} value={quote.id}>
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <span>Cotação #{quote.id.substring(0, 8)}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {quote.itens?.length || 0} itens
-                      </Badge>
+            <p className={cn("text-base font-bold", ds.colors.text.primary)}>Nenhuma cotação concluída</p>
+            <p className={cn("text-sm mt-1 max-w-xs mx-auto opacity-60 text-center", ds.colors.text.secondary)}>
+              Complete uma cotação e converta em pedido para ver a análise de economia detalhada aqui.
+            </p>
+          </div>
+        ) : (
+          <Select value={selectedQuoteId} onValueChange={setSelectedQuoteId}>
+            <SelectTrigger className={cn("w-full h-14 rounded-2xl transition-all hover:border-brand/50", ds.components.input.root)}>
+              <SelectValue placeholder="Escolha uma cotação para analisar..." />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-border/50 shadow-2xl">
+              {completedQuotesWithOrders.map(quote => (
+                <SelectItem key={quote.id} value={quote.id} className="py-4 px-4 rounded-xl focus:bg-brand/5 focus:text-brand cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center border border-brand/20">
+                      <CheckCircle2 className="h-5 w-5 text-brand" />
                     </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </CardContent>
-      </Card>
+                    <div>
+                      <p className="font-bold text-sm">Cotação #{quote.id.substring(0, 8)}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
+                        {quote.itens?.length || 0} itens cotados • Finalizada em {new Date(quote.updatedAt || "").toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
 
       {/* Análise de Economia */}
       {analysisData && (
-        <>
+        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
           {/* Card do Vencedor */}
-          <Card className="border-green-200 dark:border-green-800 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Award className="h-5 w-5 text-green-600" />
-                <CardTitle className="text-base">🏆 Fornecedor Vencedor</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className={cn(
+            "p-8 rounded-3xl shadow-2xl overflow-hidden relative",
+            "bg-zinc-900 text-white"
+          )}>
+            {/* Background Decoration */}
+            <div className="absolute right-0 top-0 w-48 h-full bg-brand/10 skew-x-[-25deg] translate-x-24 pointer-events-none" />
+            <div className="absolute -left-12 -top-12 w-32 h-32 bg-brand/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="flex items-center justify-between flex-wrap gap-6 relative z-10">
+              <div className="flex items-center gap-5">
+                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-inner">
+                  <Award className="h-10 w-10 text-brand animate-bounce-subtle" />
+                </div>
                 <div>
-                  <p className="font-bold text-lg text-green-900 dark:text-green-100">
+                  <p className="text-brand text-[10px] font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">🏆 Fornecedor Vencedor</p>
+                  <h2 className={cn(ds.typography.size["3xl"], ds.typography.weight.black, "tracking-tighter")}>
                     {analysisData.vencedor.nome}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {analysisData.vencedor.itens.length} itens cotados
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    R$ {analysisData.vencedor.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
-                  <Badge className="bg-green-600 text-white mt-1">Melhor Preço</Badge>
+                  </h2>
+                  <div className="flex items-center gap-3 mt-2">
+                    <Badge className="bg-brand/20 text-brand border-brand/30 text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
+                      {analysisData.vencedor.itens.length} Itens Ganhos
+                    </Badge>
+                    <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Melhor custo-benefício</span>
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="text-right">
+                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">Valor Total do Pedido</p>
+                <p className="text-4xl font-black text-brand italic tracking-tighter">
+                  {formatCurrency(analysisData.vencedor.totalGeral)}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {/* Comparação por Fornecedor */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-purple-600" />
-                Comparação Detalhada
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 px-2">
+              <div className="p-1.5 rounded-lg bg-brand/10 border border-brand/20">
+                <Building2 className="h-4 w-4 text-brand" />
+              </div>
+              <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
+                Comparativo Real de Mercado
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-4">
               {analysisData.suppliers.map((supplier, index) => (
                 <div
                   key={supplier.id}
                   className={cn(
-                    "rounded-xl border-2 overflow-hidden",
-                    supplier.isVencedor
-                      ? "border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-950/20"
-                      : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50"
+                    ds.components.card.root,
+                    "overflow-hidden transition-all duration-300 hover:shadow-xl",
+                    supplier.isVencedor ? "border-brand/40 bg-brand/[0.02] ring-1 ring-brand/10" : "border-border/40"
                   )}
                 >
                   {/* Header do Fornecedor */}
                   <div className={cn(
-                    "p-3 sm:p-4",
-                    supplier.isVencedor
-                      ? "bg-green-100 dark:bg-green-900/30"
-                      : "bg-gray-50 dark:bg-gray-800/70"
+                    "p-5 border-b transition-colors",
+                    ds.colors.border.subtle,
+                    supplier.isVencedor ? "bg-brand/10" : "bg-muted/30"
                   )}>
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
                         <div className={cn(
-                          "w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm flex-shrink-0",
+                          "w-12 h-12 rounded-2xl flex items-center justify-center font-black text-base flex-shrink-0 border shadow-sm transition-transform group-hover:scale-105",
                           supplier.isVencedor
-                            ? "bg-green-600 text-white"
-                            : "bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+                            ? "bg-brand text-white border-brand shadow-brand/20"
+                            : "bg-background text-muted-foreground border-border/60"
                         )}>
                           {index + 1}º
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-sm sm:text-base truncate">{supplier.nome}</p>
-                          <p className="text-xs text-muted-foreground">{supplier.itens.length} itens</p>
+                          <p className={cn("font-black text-lg tracking-tight truncate", ds.colors.text.primary)}>{supplier.nome}</p>
+                          <p className={cn("text-[10px] font-black uppercase tracking-[0.1em] opacity-50 mt-0.5", ds.colors.text.secondary)}>
+                            {supplier.itens.length} itens cotados nesta rodada
+                          </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className={cn(
-                          "text-lg sm:text-xl font-bold",
-                          supplier.isVencedor ? "text-green-600 dark:text-green-400" : ""
+                          "text-2xl font-black italic tracking-tighter",
+                          supplier.isVencedor ? "text-brand" : ds.colors.text.primary
                         )}>
-                          R$ {supplier.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          {formatCurrency(supplier.totalGeral)}
                         </p>
                         {!supplier.isVencedor && supplier.economia > 0 && (
-                          <Badge variant="destructive" className="mt-1 text-xs">
-                            +R$ {supplier.economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          <Badge variant="destructive" className="mt-1 text-[10px] font-black uppercase tracking-widest border-none px-2 h-5">
+                            + {formatCurrency(supplier.economia)}
                           </Badge>
                         )}
                         {supplier.isVencedor && (
-                          <Badge className="bg-green-600 text-white mt-1 text-xs">
-                            <Award className="h-3 w-3 mr-1" />
+                          <Badge className="bg-brand text-white mt-1 text-[10px] font-black uppercase tracking-widest px-2 h-5 shadow-sm shadow-brand/20">
                             Vencedor
                           </Badge>
                         )}
@@ -264,17 +287,17 @@ export function PackagingEconomyTab() {
                   </div>
 
                   {/* Itens do Fornecedor */}
-                  <div className="p-3 sm:p-4 space-y-2">
+                  <div className="p-5 space-y-3 bg-card/40 backdrop-blur-sm">
                     {supplier.itens.map((item, idx) => (
-                      <div key={idx} className="flex items-center justify-between text-sm py-2 border-b border-gray-100 dark:border-gray-700/50 last:border-0 gap-3">
+                      <div key={idx} className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 group/item transition-all hover:px-2 hover:bg-brand/[0.02] rounded-lg">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate text-xs sm:text-sm">{item.nome}</p>
-                          <p className="text-xs text-muted-foreground">
-                            R$ {item.custoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}/un × {item.quantidade}
+                          <p className={cn("font-bold truncate text-[15px] tracking-tight", ds.colors.text.primary)}>{item.nome}</p>
+                          <p className={cn("text-[11px] font-black uppercase tracking-widest opacity-50 mt-0.5", ds.colors.text.secondary)}>
+                            {formatCurrency(item.custoUnitario)}/un × {item.quantidade}
                           </p>
                         </div>
-                        <p className="font-semibold whitespace-nowrap text-xs sm:text-sm">
-                          R$ {item.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <p className={cn("font-black whitespace-nowrap text-base italic transition-transform group-hover/item:scale-105", ds.colors.text.primary)}>
+                          {formatCurrency(item.total)}
                         </p>
                       </div>
                     ))}
@@ -282,22 +305,27 @@ export function PackagingEconomyTab() {
 
                   {/* Economia */}
                   {!supplier.isVencedor && supplier.economia > 0 && (
-                    <div className="px-3 sm:px-4 pb-3 sm:pb-4">
-                      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                        <div className="flex items-start sm:items-center justify-between gap-2 flex-col sm:flex-row">
-                          <div className="flex items-center gap-2">
-                            <TrendingDown className="h-4 w-4 text-red-600 flex-shrink-0" />
-                            <span className="text-xs sm:text-sm font-medium text-red-900 dark:text-red-100">
-                              Economia ao escolher {analysisData.vencedor.nome}:
-                            </span>
+                    <div className="p-5 border-t border-border/30 bg-red-500/[0.02]">
+                      <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-5 shadow-sm">
+                        <div className="flex items-center justify-between gap-6 flex-wrap">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 rounded-xl bg-red-500/10 shadow-inner">
+                              <TrendingDown className="h-5 w-5 text-red-500" />
+                            </div>
+                            <div className="space-y-1">
+                              <span className={cn("text-[11px] font-black uppercase tracking-widest", ds.colors.text.primary)}>
+                                Potencial de Poupança:
+                              </span>
+                              <p className="text-[10px] font-medium opacity-60">Economia real ao optar pelo vencedor</p>
+                            </div>
                           </div>
-                          <div className="text-left sm:text-right">
-                            <p className="text-base sm:text-lg font-bold text-red-600 dark:text-red-400">
-                              R$ {supplier.economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          <div className="text-right">
+                            <p className="text-2xl font-black text-red-500 italic tracking-tighter">
+                              - {formatCurrency(supplier.economia)}
                             </p>
-                            <p className="text-xs text-red-600 dark:text-red-400">
-                              ({supplier.economiaPercent.toFixed(1)}%)
-                            </p>
+                            <Badge className="bg-red-500 text-white border-none mt-1 text-[10px] font-black uppercase tracking-widest px-2">
+                              {supplier.economiaPercent.toFixed(1)}% mais caro
+                            </Badge>
                           </div>
                         </div>
                       </div>
@@ -305,39 +333,64 @@ export function PackagingEconomyTab() {
                   )}
                 </div>
               ))}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Resumo Final */}
-          <Card className="border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Package className="h-4 w-4 text-blue-600" />
-                📊 Resumo da Economia
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
+          <div className={cn(
+            "rounded-[32px] border-2 border-dashed p-10 relative overflow-hidden",
+            ds.colors.border.subtle,
+            "bg-brand/[0.02]"
+          )}>
+            <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+              <Calculator size={120} strokeWidth={1} className="text-brand" />
+            </div>
+
+            <div className="flex items-center gap-4 mb-10 relative z-10">
+              <div className="p-3 rounded-2xl bg-brand/10 text-brand border border-brand/20 shadow-sm">
+                <Package className="h-7 w-7" />
+              </div>
+              <div>
+                <h3 className={cn(ds.typography.size.xl, ds.typography.weight.black, ds.colors.text.primary, "tracking-tighter")}>
+                  Resumo Estratégico de Economia
+                </h3>
+                <p className={cn("text-xs font-bold uppercase tracking-widest opacity-50 mt-1", ds.colors.text.secondary)}>Análise comparativa direta de performance</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
               {analysisData.suppliers.filter(s => !s.isVencedor && s.economia > 0).map(supplier => (
-                <div key={supplier.id} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800/50 rounded-lg gap-3">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">vs {supplier.nome}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Custaria R$ {supplier.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-base sm:text-lg font-bold text-green-600 whitespace-nowrap">
-                      -R$ {supplier.economia.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
-                    <Badge variant="outline" className="text-xs mt-1">
-                      {supplier.economiaPercent.toFixed(1)}%
+                <div key={supplier.id} className={cn(
+                  "p-6 rounded-[24px] border transition-all duration-300 group",
+                  ds.colors.surface.card,
+                  ds.colors.border.subtle,
+                  "hover:border-brand/40 hover:shadow-2xl hover:-translate-y-1"
+                )}>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="space-y-1">
+                      <p className={cn("text-[10px] font-black uppercase tracking-[0.2em] opacity-40", ds.colors.text.secondary)}>vs Concorrente</p>
+                      <p className={cn("font-black text-base truncate max-w-[120px]", ds.colors.text.primary)}>{supplier.nome}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] font-black border-brand/40 text-brand bg-brand/5 px-2 py-0.5 h-6">
+                      {supplier.economiaPercent.toFixed(1)}% OFF
                     </Badge>
+                  </div>
+                  <div className="space-y-1 relative">
+                    <p className={cn("text-3xl font-black text-emerald-600 dark:text-brand italic tracking-tighter group-hover:scale-110 transition-transform origin-left")}>
+                      -{formatCurrency(supplier.economia)}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <div className="w-1 h-1 rounded-full bg-brand animate-pulse" />
+                      <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-40", ds.colors.text.muted)}>
+                        Poupança Efetiva
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
-            </CardContent>
-          </Card>
-        </>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

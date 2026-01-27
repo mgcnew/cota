@@ -12,6 +12,7 @@ import {
   CollapsibleTrigger 
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 
@@ -87,7 +88,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
           {getStatusBadge(order.status)}
           <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
             <DollarSign className="h-3 w-3 mr-1" />
-            R$ {order.totalValue.toFixed(2)}
+            {formatCurrency(order.totalValue)}
           </Badge>
           {order.deliveryDate && (
             <Badge variant="outline" className="text-xs">

@@ -238,9 +238,14 @@ export const designSystem = {
             headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
             row: "bg-card border border-border/40 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.002]",
             rowCompact: "group py-1.5 px-5 rounded-xl border transition-all duration-300 relative overflow-hidden",
-            rowActive: "bg-brand/10 border-brand/40 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)] ring-1 ring-brand/20",
+            rowActive: "bg-brand/5 border-brand/20 ring-1 ring-brand/10", // Removido shadow neon
             cell: "p-0 align-middle", // Padrão 0 para que o container interno da linha controle o padding
-            caption: "mt-4 text-sm text-muted-foreground"
+            caption: "mt-4 text-sm text-muted-foreground",
+            
+            // Novos utilitários para padronização de cabeçalhos internos (Header de tabelas sem scroll)
+            headerContainer: "flex items-center shadow-sm px-4 py-4 border bg-zinc-50/50 dark:bg-card/50 rounded-xl mb-2",
+            headerLabel: "uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400",
+            headerIcon: "w-8 h-8 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0 text-zinc-500 dark:text-zinc-400"
         },
 
         // Inputs & Forms

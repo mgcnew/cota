@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { formatCurrency } from '@/utils/formatters';
 import type { 
   PackagingQuoteDisplay, 
   PackagingSupplierDisplay,
@@ -108,7 +109,7 @@ export function usePackagingQuotes() {
             quantidadeNecessaria: item.quantidade_necessaria,
           })),
           fornecedores,
-          melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : '-',
+          melhorPreco: melhorValor > 0 ? formatCurrency(melhorValor) : '-',
           melhorFornecedor: melhorFornecedor?.supplierName || '-',
           economia,
         };

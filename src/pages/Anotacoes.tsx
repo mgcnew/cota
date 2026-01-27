@@ -8,10 +8,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PageHeader } from "@/components/ui/page-header";
 import { useAnotacoes } from "@/hooks/useAnotacoes";
 import { NoteCard } from "@/components/notes/NoteCard";
 import { CreateNoteDialog } from "@/components/notes/CreateNoteDialog";
+import { ds } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 
 export default function Anotacoes() {
   const {
@@ -37,31 +39,42 @@ export default function Anotacoes() {
 
   return (
     <PageWrapper>
-      <div className="page-container max-w-[1600px] mx-auto p-4 md:p-6 lg:p-8 space-y-8">
-        <PageHeader
-          title="Anotações"
-          description="Gerencie suas tarefas e lembretes de forma simples"
-          icon={StickyNote}
-          actions={
+      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12")}>
+        {/* Page Header */}
+        <div className="flex flex-col gap-6 mb-10">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+              <StickyNote className="h-6 w-6 text-brand" />
+            </div>
+            <div>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                Anotações
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                Gerencie suas tarefas e lembretes de forma simples
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="w-full sm:max-w-md">
+              <ExpandableSearch
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Pesquisar anotações..."
+                accentColor="gray"
+                expandedWidth="w-full"
+              />
+            </div>
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 shadow-sm transition-all"
+              className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
             >
               <Plus className="h-4 w-4 mr-2" />
               Nova Anotação
             </Button>
-          }
-        >
-          <div className="w-full sm:w-auto">
-            <ExpandableSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Pesquisar..."
-              accentColor="gray"
-              expandedWidth="w-full sm:w-64"
-            />
           </div>
-        </PageHeader>
+        </div>
 
         {/* Create/Edit Dialog */}
         <CreateNoteDialog
@@ -87,7 +100,7 @@ export default function Anotacoes() {
 
         {/* Notes Grid */}
         {filteredNotes && filteredNotes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+          <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3, wide: 4 }}>
             {filteredNotes.map((note, index) => (
               <NoteCard
                 key={note.id}
@@ -98,59 +111,71 @@ export default function Anotacoes() {
                 onDelete={handleDeleteNote}
               />
             ))}
-          </div>
+          </ResponsiveGrid>
         ) : (
           !isLoading && (
-            <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500">
-              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
-                <StickyNote className="h-8 w-8 text-muted-foreground" />
+            <div className={cn(ds.components.card.root, "p-12 border-dashed")}>
+              <div className="flex flex-col items-center justify-center gap-4 text-center">
+                <div className="w-20 h-20 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center ring-8 ring-zinc-50/50 dark:ring-zinc-900/30">
+                  <StickyNote className="w-10 h-10 text-zinc-300 dark:text-zinc-600" />
+                </div>
+                <div className="max-w-md space-y-2">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {searchQuery ? "Nenhum resultado encontrado" : "Tudo limpo por aqui"}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {searchQuery 
+                      ? "Tente buscar por outro termo ou limpe o filtro." 
+                      : "Crie uma nova anotação para começar a organizar suas tarefas."}
+                  </p>
+                </div>
+                {!searchQuery && (
+                  <Button
+                    onClick={() => setShowCreateDialog(true)}
+                    variant="outline"
+                    className="mt-4"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Anotação
+                  </Button>
+                )}
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-1">
-                {searchQuery ? "Nenhum resultado encontrado" : "Tudo limpo por aqui"}
-              </h3>
-              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                {searchQuery 
-                  ? "Tente buscar por outro termo ou limpe o filtro." 
-                  : "Crie uma nova anotação para começar a organizar suas tarefas."}
-              </p>
             </div>
           )
         )}
 
         {/* Resolved Section */}
         {resolvedNotes && resolvedNotes.length > 0 && (
-          <div className="pt-8 border-t border-border">
+          <div className="pt-12 mt-12 border-t border-border">
             <div className="flex items-center gap-3 mb-6">
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h2 className="text-base font-semibold text-foreground">
+              <h2 className={cn(ds.typography.size.lg, "font-semibold text-foreground")}>
                 Concluídas ({resolvedNotes.length})
               </h2>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3, wide: 4 }} className="opacity-60 hover:opacity-100 transition-opacity duration-300">
               {resolvedNotes.map((note) => (
-                <Card key={note.id} className="group bg-muted/50 border-border shadow-none hover:border-muted-foreground/30 transition-all">
-                  <CardContent className="p-5">
-                    <div className="flex justify-between items-start gap-4">
-                      <div className="space-y-1 min-w-0">
-                        <h3 className="font-medium text-muted-foreground line-through truncate">{note.title}</h3>
-                        <p className="text-sm text-muted-foreground/80 line-clamp-2">{note.content}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteNote(note.id)}
-                        className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-500/10 rounded-lg -mr-2 -mt-2"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                <div key={note.id} className={cn(ds.components.card.root, "bg-muted/30 border-dashed hover:bg-muted/50 transition-all p-5")}>
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="space-y-1 min-w-0">
+                      <h3 className="font-semibold text-muted-foreground line-through truncate">{note.title}</h3>
+                      <p className="text-sm text-muted-foreground/80 line-clamp-2">{note.content}</p>
                     </div>
-                  </CardContent>
-                </Card>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteNote(note.id)}
+                      className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-500/10 rounded-lg shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               ))}
-            </div>
+            </ResponsiveGrid>
           </div>
         )}
       </div>

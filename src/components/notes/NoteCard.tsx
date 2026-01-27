@@ -1,10 +1,10 @@
 import { memo } from "react";
 import { CSSSlideIn } from "@/components/ui/css-animation";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, MessageSquare, Clock, Edit, Trash2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Note, Importance } from "@/hooks/useNotes";
+import { ds } from "@/styles/design-system";
 
 const importanceConfig = {
   low: {
@@ -46,24 +46,29 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
 
   return (
     <CSSSlideIn direction="up" duration={300} delay={index * 50}>
-      <Card className="group relative flex flex-col h-full bg-card border border-border hover:border-border/80 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 rounded-xl overflow-hidden">
+      <div className={cn(
+        ds.components.card.root,
+        "group relative flex flex-col h-full hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+      )}>
         
-        {/* Header Minimalista */}
-        <CardHeader className="p-5 pb-3 flex flex-row items-start justify-between space-y-0 gap-3">
-          <CardTitle className="text-base font-semibold text-foreground leading-tight line-clamp-2">
+        {/* Header */}
+        <div className="p-5 pb-3 flex items-start justify-between gap-3">
+          <h3 className={cn(ds.typography.size.base, "font-bold text-foreground leading-tight line-clamp-2")}>
             {note.title}
-          </CardTitle>
+          </h3>
           
           {/* Indicador de Status (Exclamação) */}
           <div className={cn(
-            "flex items-center justify-center w-6 h-6 rounded-full shrink-0 transition-colors",
-            config.bg
+            "flex items-center justify-center w-7 h-7 rounded-xl shrink-0 transition-colors border",
+            config.bg,
+            config.border
           )}>
-            <AlertCircle className={cn("h-3.5 w-3.5", config.color)} />
+            <AlertCircle className={cn("h-4 w-4", config.color)} />
           </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="p-5 pt-2 flex-1">
+        {/* Content */}
+        <div className="px-5 py-2 flex-1">
           <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-5">
             {note.content}
           </p>
@@ -71,54 +76,54 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
           {note.observation && (
             <div className="mt-4 pt-3 border-t border-border/50">
               <div className="flex items-center gap-1.5 mb-1.5">
-                <MessageSquare className="h-3 w-3 text-muted-foreground/70" />
-                <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Observação</span>
+                <MessageSquare className="h-3 w-3 text-brand" />
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Observação</span>
               </div>
               <p className="text-xs text-muted-foreground italic line-clamp-2">
                 {note.observation}
               </p>
             </div>
           )}
-        </CardContent>
+        </div>
 
-        {/* Footer com Ações e Data */}
-        <CardFooter className="p-4 pt-0 mt-auto flex items-center justify-between border-t border-transparent group-hover:border-border/50 transition-colors">
-          <div className="flex items-center text-[11px] font-medium text-muted-foreground/70">
-            <Clock className="h-3 w-3 mr-1.5" />
+        {/* Footer */}
+        <div className="p-4 flex items-center justify-between mt-auto border-t border-transparent group-hover:border-border/50 transition-colors">
+          <div className="flex items-center text-[11px] font-semibold text-muted-foreground/70">
+            <Clock className="h-3.5 w-3.5 mr-1.5 text-brand/70" />
             {new Date(note.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
           </div>
 
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 translate-y-2 group-hover:translate-y-0">
+          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onEdit(note)}
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-brand hover:bg-brand/10"
               title="Editar"
             >
-              <Edit className="h-3.5 w-3.5" />
+              <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onDelete(note.id)}
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-500/10"
               title="Excluir"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onResolve(note.id)}
-              className="h-8 w-8 rounded-lg text-green-600 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/40"
+              className="h-8 w-8 rounded-lg text-emerald-600 bg-emerald-500/5 dark:bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
               title="Concluir"
             >
-              <CheckCircle2 className="h-3.5 w-3.5" />
+              <CheckCircle2 className="h-4 w-4" />
             </Button>
           </div>
-        </CardFooter>
-      </Card>
+        </div>
+      </div>
     </CSSSlideIn>
   );
 });

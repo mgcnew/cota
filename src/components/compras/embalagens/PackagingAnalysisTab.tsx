@@ -8,11 +8,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 import {
   Search, Package, Building2, TrendingUp, TrendingDown, Minus,
   DollarSign, ShoppingCart, FileText, Calendar, Award,
-  ArrowRight, BarChart3, Target, Clock, CheckCircle, Loader2
+  ArrowRight, BarChart3, Target, Clock, CheckCircle, Loader2, AlertCircle
 } from "lucide-react";
+import { designSystem as ds } from "@/styles/design-system";
 
 type SearchType = "packaging" | "supplier";
 type SelectedItem = { type: SearchType; id: string; name: string };
@@ -67,46 +69,104 @@ export default function PackagingAnalysisTab() {
   const selectItem = (item: SelectedItem) => { setSelectedItem(item); setSearchTerm(""); setHighlightedIndex(-1); };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Barra de busca */}
       <div className="relative">
-        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
-          <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/40">
-            <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-purple-900 dark:text-purple-100">Análise de Embalagens</p>
-            <p className="text-xs text-purple-600 dark:text-purple-400">Busque por embalagem ou fornecedor</p>
+        <div className={cn(
+          ds.components.card.root,
+          "p-6 bg-brand/5 border-brand/10"
+        )}>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-brand/10 border border-brand/20">
+              <BarChart3 className="h-6 w-6 text-brand" />
+            </div>
+            <div className="flex-1">
+              <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>
+                Análise de Embalagens
+              </h3>
+              <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "opacity-70")}>
+                Busque por embalagem ou fornecedor para insights detalhados
+              </p>
+            </div>
           </div>
         </div>
-        <div className="mt-3 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+
+        <div className="mt-6 relative group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-brand transition-colors" />
           <Input
             placeholder="Digite o nome da embalagem ou fornecedor..."
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setHighlightedIndex(-1); }}
             onKeyDown={handleSearchKeyDown}
-            className="pl-12 h-12 text-base bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl shadow-sm"
+            className={cn(
+              ds.components.input.root,
+              "pl-12 h-14 text-base rounded-2xl",
+              "focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none"
+            )}
           />
           {searchResults.length > 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden">
-              {searchResults.map((item, index) => (
-                <button
-                  key={`${item.type}-${item.id}`}
-                  onClick={() => selectItem(item)}
-                  onMouseEnter={() => setHighlightedIndex(index)}
-                  className={cn("w-full px-4 py-3 flex items-center gap-3 text-left transition-colors", highlightedIndex === index ? "bg-purple-50 dark:bg-purple-900/30" : "hover:bg-gray-50 dark:hover:bg-gray-700/50")}
-                >
-                  <div className={cn("p-2 rounded-lg", item.type === "packaging" ? "bg-purple-100 dark:bg-purple-900/30" : "bg-blue-100 dark:bg-blue-900/30")}>
-                    {item.type === "packaging" ? <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" /> : <Building2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 dark:text-white">{item.name}</p>
-                    <p className="text-xs text-gray-500">{item.type === "packaging" ? "Embalagem" : "Fornecedor"}</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-gray-400" />
-                </button>
-              ))}
+            <div className={cn(
+              "absolute z-50 w-full mt-3 border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200",
+              ds.colors.surface.card,
+              ds.colors.border.subtle
+            )}>
+              <div className="px-5 py-3 bg-muted/30 border-b border-border">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">Sugestões encontradas</span>
+              </div>
+              <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                {searchResults.map((item, index) => (
+                  <button
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => selectItem(item)}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    className={cn(
+                      "w-full px-5 py-4 flex items-center gap-4 text-left transition-all relative group",
+                      highlightedIndex === index
+                        ? "bg-brand/5"
+                        : "hover:bg-muted/30"
+                    )}
+                  >
+                    {/* Active Indicator */}
+                    {highlightedIndex === index && (
+                      <div className="absolute left-0 top-0 w-1 h-full bg-brand" />
+                    )}
+
+                    <div className={cn(
+                      "p-2.5 rounded-xl flex-shrink-0 transition-colors",
+                      item.type === "packaging"
+                        ? (highlightedIndex === index ? "bg-brand text-white" : "bg-brand/10 text-brand")
+                        : (highlightedIndex === index ? "bg-blue-500 text-white" : "bg-blue-500/10 text-blue-500")
+                    )}>
+                      {item.type === "packaging" ? <Package className="h-5 w-5" /> : <Building2 className="h-5 w-5" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn("font-bold text-sm truncate", ds.colors.text.primary)}>{item.name}</p>
+                      <p className={cn("text-xs flex items-center gap-2", ds.colors.text.secondary, "opacity-60")}>
+                        {item.type === "packaging" ? (
+                          <span className="flex items-center gap-1"><Package className="h-3 w-3" /> Embalagem</span>
+                        ) : (
+                          <span className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Fornecedor</span>
+                        )}
+                      </p>
+                    </div>
+                    <ArrowRight className={cn(
+                      "h-4 w-4 transition-all",
+                      highlightedIndex === index ? "translate-x-1 text-brand opacity-100" : "text-muted-foreground opacity-0"
+                    )} />
+                  </button>
+                ))}
+              </div>
+              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border flex justify-between uppercase tracking-widest">
+                <div>DICA: Use as setas para navegar</div>
+                <div className="flex gap-4">
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">↑↓</kbd> Mudar
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">Enter</kbd> Abrir
+                  </span>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -126,13 +186,23 @@ export default function PackagingAnalysisTab() {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-100 to-violet-100 dark:from-purple-900/30 dark:to-violet-900/30 flex items-center justify-center mb-4">
-        <BarChart3 className="h-10 w-10 text-purple-500" />
+    <div className={cn(
+      "flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed",
+      ds.colors.border.subtle,
+      "bg-muted/20"
+    )}>
+      <div className={cn(
+        "w-24 h-24 rounded-full flex items-center justify-center mb-8 animate-pulse",
+        ds.colors.surface.card,
+        "shadow-xl"
+      )}>
+        <Target className="h-12 w-12 text-brand" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Selecione um item para análise</h3>
-      <p className="text-sm text-gray-500 dark:text-gray-400 max-w-md">
-        Use a barra de busca acima para encontrar uma embalagem ou fornecedor e visualizar métricas detalhadas, histórico de preços e insights.
+      <h3 className={cn(ds.typography.size.xl, ds.typography.weight.bold, ds.colors.text.primary, "mb-3")}>
+        Pronto para analisar?
+      </h3>
+      <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "max-w-sm mx-auto opacity-70 mb-8")}>
+        Selecione uma embalagem ou fornecedor para visualizar métricas detalhadas e histórico de preços.
       </p>
     </div>
   );
@@ -200,33 +270,66 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
   }, [quotes, orders]);
 
   const isLoading = quotesLoading || ordersLoading;
-  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-purple-600" /></div>;
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-900/20 dark:to-violet-900/20 rounded-xl border border-purple-200/50 dark:border-purple-800/50">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-900/40"><Package className="h-6 w-6 text-purple-600 dark:text-purple-400" /></div>
-          <div><h2 className="text-lg font-bold text-gray-900 dark:text-white break-all sm:break-normal">{packagingName}</h2><p className="text-sm text-gray-500">Análise de Embalagem</p></div>
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+      <div className={cn(
+        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative",
+        "bg-zinc-900 text-white"
+      )}>
+        {/* Background Accent */}
+        <div className="absolute right-0 top-0 w-32 h-full bg-brand/10 skew-x-[-20deg] translate-x-16 pointer-events-none" />
+
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+            <Package className="h-8 w-8 text-brand" />
+          </div>
+          <div>
+            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "tracking-tight")}>
+              {packagingName}
+            </h2>
+            <p className="text-zinc-400 text-sm font-medium">Análise detalhada de embalagem</p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={onClear} className="w-full sm:w-auto">Nova busca</Button>
+        <Button 
+          variant="outline" 
+          className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" 
+          onClick={onClear}
+        >
+          Fechar Análise
+        </Button>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard icon={<FileText className="h-4 w-4" />} label="Cotações" value={metrics.totalQuotes.toString()} color="blue" />
         <MetricCard icon={<ShoppingCart className="h-4 w-4" />} label="Pedidos" value={metrics.totalOrders.toString()} color="green" />
-        <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Preço Médio" value={metrics.avgPrice > 0 ? `R$ ${metrics.avgPrice.toFixed(2)}` : "-"} color="violet" />
+        <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Preço Médio" value={formatCurrency(metrics.avgPrice)} color="violet" />
         <MetricCard icon={metrics.trend === "up" ? <TrendingUp className="h-4 w-4" /> : metrics.trend === "down" ? <TrendingDown className="h-4 w-4" /> : <Minus className="h-4 w-4" />} label="Tendência" value={metrics.trend === "stable" ? "Estável" : `${metrics.trendPercent > 0 ? "+" : ""}${metrics.trendPercent.toFixed(1)}%`} color={metrics.trend === "up" ? "red" : metrics.trend === "down" ? "green" : "gray"} />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <InsightCard icon={<Target className="h-5 w-5" />} title="Melhor Fornecedor" value={metrics.bestSupplier.name} subtitle={metrics.bestSupplier.avgPrice > 0 ? `Média: R$ ${metrics.bestSupplier.avgPrice.toFixed(2)}` : "Sem dados"} color="emerald" />
-        <InsightCard icon={<DollarSign className="h-5 w-5" />} title="Faixa de Preço" value={metrics.minPrice > 0 ? `R$ ${metrics.minPrice.toFixed(2)} - R$ ${metrics.maxPrice.toFixed(2)}` : "-"} subtitle={`Variação: ${metrics.maxPrice > 0 && metrics.minPrice > 0 ? ((metrics.maxPrice - metrics.minPrice) / metrics.minPrice * 100).toFixed(0) : 0}%`} color="amber" />
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <InsightCard icon={<Target className="h-5 w-5" />} title="Melhor Fornecedor" value={metrics.bestSupplier.name} subtitle={metrics.bestSupplier.avgPrice > 0 ? `Média: ${formatCurrency(metrics.bestSupplier.avgPrice)}` : "Sem dados"} color="emerald" />
+        <InsightCard icon={<DollarSign className="h-5 w-5" />} title="Faixa de Preço" value={metrics.minPrice > 0 ? `${formatCurrency(metrics.minPrice)} - ${formatCurrency(metrics.maxPrice)}` : "-"} subtitle={`Variação: ${metrics.maxPrice > 0 && metrics.minPrice > 0 ? ((metrics.maxPrice - metrics.minPrice) / metrics.minPrice * 100).toFixed(0) : 0}%`} color="amber" />
         <InsightCard icon={<Building2 className="h-5 w-5" />} title="Fornecedores" value={metrics.uniqueSuppliers.toString()} subtitle="Fornecedores diferentes" color="blue" />
       </div>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-        <TabsList className="w-full grid grid-cols-2"><TabsTrigger value="overview">Histórico de Preços</TabsTrigger><TabsTrigger value="suppliers">Por Fornecedor</TabsTrigger></TabsList>
-        <TabsContent value="overview" className="mt-4"><PriceHistoryList history={priceHistory} /></TabsContent>
-        <TabsContent value="suppliers" className="mt-4"><SupplierComparison orders={orders} quotes={quotes} /></TabsContent>
-      </Tabs>
+
+      <div className={cn(ds.components.card.root, "p-1")}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="px-4 pt-4">
+            <TabsList className={ds.components.tabs.clean.list}>
+              <TabsTrigger value="overview" className={ds.components.tabs.clean.trigger}>Histórico de Preços</TabsTrigger>
+              <TabsTrigger value="suppliers" className={ds.components.tabs.clean.trigger}>Por Fornecedor</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="overview" className="mt-0 p-4">
+            <PriceHistoryList history={priceHistory} />
+          </TabsContent>
+          <TabsContent value="suppliers" className="mt-0 p-4">
+            <SupplierComparison orders={orders} quotes={quotes} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
@@ -271,63 +374,157 @@ function SupplierPackagingAnalysis({ supplierId, supplierName, onClear }: { supp
   }, [orders]);
 
   const isLoading = quotesLoading || ordersLoading;
-  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-purple-600" /></div>;
+  if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200/50 dark:border-blue-800/50">
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-xl bg-blue-100 dark:bg-blue-900/40"><Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" /></div>
-          <div><h2 className="text-lg font-bold text-gray-900 dark:text-white break-all sm:break-normal">{supplierName}</h2><p className="text-sm text-gray-500">Análise de Fornecedor (Embalagens)</p></div>
+    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+      <div className={cn(
+        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative",
+        "bg-zinc-900 text-white"
+      )}>
+        {/* Background Accent */}
+        <div className="absolute right-0 top-0 w-32 h-full bg-brand/10 skew-x-[-20deg] translate-x-16 pointer-events-none" />
+
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+            <Building2 className="h-8 w-8 text-brand" />
+          </div>
+          <div>
+            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "tracking-tight")}>
+              {supplierName}
+            </h2>
+            <p className="text-zinc-400 text-sm font-medium">Histórico do parceiro comercial (Embalagens)</p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" onClick={onClear} className="w-full sm:w-auto">Nova busca</Button>
+        <Button 
+          variant="outline" 
+          className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" 
+          onClick={onClear}
+        >
+          Fechar Análise
+        </Button>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard icon={<FileText className="h-4 w-4" />} label="Cotações" value={`${metrics.wonQuotes}/${metrics.totalQuotes}`} subtitle={`${metrics.winRate.toFixed(0)}% vitórias`} color="blue" />
         <MetricCard icon={<ShoppingCart className="h-4 w-4" />} label="Pedidos" value={metrics.totalOrders.toString()} subtitle={`${metrics.deliveredOrders} entregues`} color="green" />
-        <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Total Comprado" value={`R$ ${metrics.totalValue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`} color="violet" />
-        <MetricCard icon={<Target className="h-4 w-4" />} label="Ticket Médio" value={metrics.avgOrderValue > 0 ? `R$ ${metrics.avgOrderValue.toFixed(2)}` : "-"} color="amber" />
+        <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Total Comprado" value={formatCurrency(metrics.totalValue)} color="violet" />
+        <MetricCard icon={<Target className="h-4 w-4" />} label="Ticket Médio" value={formatCurrency(metrics.avgOrderValue)} color="amber" />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <InsightCard icon={<Award className="h-5 w-5" />} title="Taxa de Vitória" value={`${metrics.winRate.toFixed(0)}%`} subtitle={`${metrics.wonQuotes} de ${metrics.totalQuotes} cotações`} color={metrics.winRate >= 50 ? "emerald" : metrics.winRate >= 25 ? "amber" : "red"} />
         <InsightCard icon={<CheckCircle className="h-5 w-5" />} title="Taxa de Entrega" value={`${metrics.deliveryRate.toFixed(0)}%`} subtitle={`${metrics.deliveredOrders} de ${metrics.totalOrders} pedidos`} color={metrics.deliveryRate >= 80 ? "emerald" : metrics.deliveryRate >= 50 ? "amber" : "red"} />
         <InsightCard icon={<Package className="h-5 w-5" />} title="Embalagens" value={metrics.uniquePackaging.toString()} subtitle="Embalagens diferentes" color="blue" />
       </div>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-        <TabsList className="w-full grid grid-cols-2"><TabsTrigger value="overview">Pedidos Recentes</TabsTrigger><TabsTrigger value="packaging">Embalagens Compradas</TabsTrigger></TabsList>
-        <TabsContent value="overview" className="mt-4"><OrderHistoryList orders={orders} /></TabsContent>
-        <TabsContent value="packaging" className="mt-4"><TopPackagingList packaging={topPackaging} /></TabsContent>
-      </Tabs>
+
+      <div className={cn(ds.components.card.root, "p-1")}>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="px-4 pt-4">
+            <TabsList className={ds.components.tabs.clean.list}>
+              <TabsTrigger value="overview" className={ds.components.tabs.clean.trigger}>Pedidos Recentes</TabsTrigger>
+              <TabsTrigger value="packaging" className={ds.components.tabs.clean.trigger}>Embalagens Compradas</TabsTrigger>
+            </TabsList>
+          </div>
+          <TabsContent value="overview" className="mt-0 p-4">
+            <OrderHistoryList orders={orders} />
+          </TabsContent>
+          <TabsContent value="packaging" className="mt-0 p-4">
+            <TopPackagingList packaging={topPackaging} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
 
 // Componentes auxiliares
-function MetricCard({ icon, label, value, subtitle, color }: { icon: React.ReactNode; label: string; value: string; subtitle?: string; color: "blue" | "green" | "violet" | "amber" | "red" | "gray" | "emerald" }) {
-  const colors = { blue: "bg-blue-50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400", green: "bg-green-50 dark:bg-green-900/20 border-green-200/50 dark:border-green-800/50 text-green-600 dark:text-green-400", violet: "bg-violet-50 dark:bg-violet-900/20 border-violet-200/50 dark:border-violet-800/50 text-violet-600 dark:text-violet-400", amber: "bg-amber-50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/50 text-amber-600 dark:text-amber-400", red: "bg-red-50 dark:bg-red-900/20 border-red-200/50 dark:border-red-800/50 text-red-600 dark:text-red-400", gray: "bg-gray-50 dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-800/50 text-gray-600 dark:text-gray-400", emerald: "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200/50 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400" };
-  return (<div className={cn("p-3 rounded-xl border", colors[color])}><div className="flex items-center gap-2 mb-1">{icon}<span className="text-xs font-medium opacity-80">{label}</span></div><p className="text-lg font-bold text-gray-900 dark:text-white truncate" title={value}>{value}</p>{subtitle && <p className="text-xs opacity-70 mt-0.5 truncate" title={subtitle}>{subtitle}</p>}</div>);
-}
-
-function InsightCard({ icon, title, value, subtitle, color }: { icon: React.ReactNode; title: string; value: string; subtitle: string; color: "emerald" | "amber" | "blue" | "red" }) {
-  const colors = { emerald: "from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-800/50", amber: "from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border-amber-200/50 dark:border-amber-800/50", blue: "from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50", red: "from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200/50 dark:border-red-800/50" };
-  const iconColors = { emerald: "text-emerald-600 dark:text-emerald-400", amber: "text-amber-600 dark:text-amber-400", blue: "text-blue-600 dark:text-blue-400", red: "text-red-600 dark:text-red-400" };
-  return (<div className={cn("p-4 rounded-xl border bg-gradient-to-br", colors[color])}><div className={cn("mb-2", iconColors[color])}>{icon}</div><p className="text-xs font-medium text-gray-500 dark:text-gray-400">{title}</p><p className="text-lg font-bold text-gray-900 dark:text-white truncate" title={value}>{value}</p><p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate" title={subtitle}>{subtitle}</p></div>);
-}
-
-function PriceHistoryList({ history }: { history: Array<{ date: string; price: number; supplier: string; type: "quote" | "order" }> }) {
-  if (history.length === 0) return <div className="text-center py-8 text-gray-500"><Clock className="h-8 w-8 mx-auto mb-2 opacity-50" /><p>Nenhum histórico de preços encontrado</p></div>;
+function MetricCard({ icon, label, value, subtitle, color }: any) {
+  const colorMap: any = {
+    blue: "text-blue-600 bg-blue-50/50 dark:bg-blue-900/20 border-blue-200/50 dark:border-blue-800/50",
+    green: "text-emerald-600 bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-200/50 dark:border-emerald-800/50",
+    violet: "text-violet-600 bg-violet-50/50 dark:bg-violet-900/20 border-violet-200/50 dark:border-violet-800/50",
+    amber: "text-amber-600 bg-amber-50/50 dark:bg-amber-900/20 border-amber-200/50 dark:border-amber-800/50",
+    red: "text-red-600 bg-red-50/50 dark:bg-red-900/20 border-red-200/50 dark:border-red-800/50",
+    gray: "text-gray-600 bg-gray-50/50 dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-800/50",
+  };
   return (
-    <ScrollArea className="h-[300px]">
+    <div className={cn(ds.components.card.root, "p-5 relative overflow-hidden group hover:scale-[1.02] transition-all", colorMap[color])}>
+      <div className="flex items-center gap-3 mb-3 relative z-10">
+        <div className={cn("p-2 rounded-xl bg-white/50 dark:bg-black/20 backdrop-blur-sm shadow-sm transition-transform group-hover:rotate-12", colorMap[color])}>
+          {icon}
+        </div>
+        <span className={cn(ds.typography.size.xs, ds.typography.weight.black, "uppercase tracking-widest opacity-70")}>{label}</span>
+      </div>
+      <p className={cn(ds.typography.size.xl, ds.typography.weight.black, ds.colors.text.primary, "relative z-10 tracking-tight")}>{value}</p>
+      {subtitle && <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-50 mt-1 relative z-10")}>{subtitle}</p>}
+      
+      {/* Decoration */}
+      <div className="absolute -right-2 -bottom-2 opacity-[0.03] transition-opacity group-hover:opacity-[0.08]">
+        {icon && typeof icon !== 'string' ? <div className="scale-[4]">{icon}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+function InsightCard({ icon, title, value, subtitle, color }: any) {
+  const colorMap: any = {
+    emerald: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    amber: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    blue: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+    red: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
+  };
+  return (
+    <div className={cn(ds.components.card.flat, "p-5 relative overflow-hidden group hover:shadow-md transition-all", colorMap[color])}>
+      <div className="flex items-start justify-between relative z-10">
+        <div className="space-y-1">
+          <p className={cn(ds.typography.size.xs, ds.typography.weight.black, "uppercase tracking-widest opacity-60")}>{title}</p>
+          <p className={cn(ds.typography.size.lg, ds.typography.weight.black, ds.colors.text.primary, "tracking-tight")}>{value}</p>
+          <p className={cn("text-[11px] font-bold opacity-60", ds.colors.text.secondary)}>{subtitle}</p>
+        </div>
+        <div className={cn("p-3 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm shadow-sm transition-all group-hover:scale-110 group-hover:rotate-6", colorMap[color])}>
+          {icon}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PriceHistoryList({ history }: { history: any[] }) {
+  return (
+    <ScrollArea className="h-[400px] pr-4">
       <div className="space-y-2">
-        {history.map((item, index) => (
-          <div key={index} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-            <div className={cn("p-2 rounded-lg", item.type === "order" ? "bg-green-100 dark:bg-green-900/30" : "bg-blue-100 dark:bg-blue-900/30")}>
-              {item.type === "order" ? <ShoppingCart className="h-4 w-4 text-green-600 dark:text-green-400" /> : <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />}
-            </div>
-            <div className="flex-1 min-w-0"><p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.supplier}</p><p className="text-xs text-gray-500">{new Date(item.date).toLocaleDateString("pt-BR")} • {item.type === "order" ? "Pedido" : "Cotação"}</p></div>
-            <div className="text-right"><p className="font-bold text-gray-900 dark:text-white">R$ {item.price.toFixed(2)}</p></div>
+        {history.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground italic gap-3">
+            <div className="p-3 rounded-full bg-muted/30"><AlertCircle className="h-6 w-6 opacity-30" /></div>
+            <span className="text-sm font-medium">Sem histórico disponível</span>
           </div>
-        ))}
+        ) : (
+          history.map((item, idx) => (
+            <div key={idx} className={cn(
+              "flex items-center justify-between p-4 rounded-xl border transition-all",
+              "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+            )}>
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg transition-colors",
+                  item.type === "order" ? "bg-brand/10 text-brand" : "bg-muted text-muted-foreground"
+                )}>
+                  {item.type === "order" ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                </div>
+                <div>
+                  <p className={cn("font-bold text-sm", ds.colors.text.primary)}>{item.supplier}</p>
+                  <p className={cn("text-[10px] uppercase font-black tracking-widest", ds.colors.text.secondary, "opacity-50")}>
+                    {new Date(item.date).toLocaleDateString("pt-BR")} • {item.type === "order" ? "Pedido" : "Cotação"}
+                  </p>
+                </div>
+              </div>
+              <span className={cn("font-black italic text-base", ds.colors.text.primary)}>
+                {formatCurrency(item.price)}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </ScrollArea>
   );
@@ -340,16 +537,40 @@ function SupplierComparison({ orders, quotes }: { orders: any[]; quotes: any[] }
     quotes.forEach((q: any) => { const name = q.supplier?.name; if (name && q.custo_por_unidade > 0) { if (!data[name]) data[name] = { name, avgPrice: 0, count: 0, prices: [] }; data[name].prices.push(q.custo_por_unidade); data[name].count += 1; } });
     return Object.values(data).map(d => ({ ...d, avgPrice: d.prices.reduce((a, b) => a + b, 0) / d.prices.length })).sort((a, b) => a.avgPrice - b.avgPrice);
   }, [orders, quotes]);
-  if (supplierData.length === 0) return <div className="text-center py-8 text-gray-500"><Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" /><p>Nenhum fornecedor encontrado</p></div>;
+  
+  if (supplierData.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground italic gap-3">
+      <div className="p-3 rounded-full bg-muted/30"><Building2 className="h-6 w-6 opacity-30" /></div>
+      <span className="text-sm font-medium">Nenhum fornecedor encontrado</span>
+    </div>
+  );
+  
   const minPrice = Math.min(...supplierData.map(s => s.avgPrice));
   return (
-    <ScrollArea className="h-[300px]">
+    <ScrollArea className="h-[400px]">
       <div className="space-y-2">
         {supplierData.map((supplier, index) => (
-          <div key={supplier.name} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold", index === 0 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400")}>{index + 1}</div>
-            <div className="flex-1 min-w-0"><div className="flex items-center gap-2"><p className="text-sm font-medium text-gray-900 dark:text-white truncate">{supplier.name}</p>{index === 0 && <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">Melhor preço</Badge>}</div><p className="text-xs text-gray-500">{supplier.count} registro(s)</p></div>
-            <div className="text-right"><p className="font-bold text-gray-900 dark:text-white">R$ {supplier.avgPrice.toFixed(2)}</p>{index > 0 && <p className="text-xs text-red-500">+{((supplier.avgPrice - minPrice) / minPrice * 100).toFixed(0)}%</p>}</div>
+          <div key={supplier.name} className={cn(
+            "flex items-center gap-4 p-4 rounded-xl border transition-all",
+            "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+          )}>
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] border transition-colors",
+              index === 0 ? "bg-brand text-white border-brand" : "bg-muted text-muted-foreground border-border/50"
+            )}>
+              {index + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <p className={cn("font-bold text-sm truncate", ds.colors.text.primary)}>{supplier.name}</p>
+                {index === 0 && <Badge className="bg-brand text-white border-none text-[9px] font-black uppercase tracking-widest px-1.5 h-4">Melhor preço</Badge>}
+              </div>
+              <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-50", ds.colors.text.secondary)}>{supplier.count} registro(s)</p>
+            </div>
+            <div className="text-right">
+              <p className={cn("font-black text-base italic", ds.colors.text.primary)}>{formatCurrency(supplier.avgPrice)}</p>
+              {index > 0 && <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">+{((supplier.avgPrice - minPrice) / minPrice * 100).toFixed(0)}%</p>}
+            </div>
           </div>
         ))}
       </div>
@@ -358,34 +579,77 @@ function SupplierComparison({ orders, quotes }: { orders: any[]; quotes: any[] }
 }
 
 function OrderHistoryList({ orders }: { orders: any[] }) {
-  if (orders.length === 0) return <div className="text-center py-8 text-gray-500"><ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" /><p>Nenhum pedido encontrado</p></div>;
   return (
-    <ScrollArea className="h-[300px]">
-      <div className="space-y-2">
-        {orders.slice(0, 15).map((order: any) => (
-          <div key={order.id} className="p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2"><span className="text-xs text-gray-500">#{order.id.substring(0, 8)}</span><Badge variant="outline" className={cn("text-xs", order.status === "entregue" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : order.status === "pendente" ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-gray-50 text-gray-700 border-gray-200")}>{order.status}</Badge></div>
-              <span className="font-bold text-gray-900 dark:text-white">R$ {(order.total_value || 0).toFixed(2)}</span>
+    <div className="space-y-3">
+      {orders.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground italic gap-3">
+          <div className="p-3 rounded-full bg-muted/30"><ShoppingCart className="h-6 w-6 opacity-30" /></div>
+          <span className="text-sm font-medium">Nenhum pedido realizado</span>
+        </div>
+      ) : (
+        orders.map((order) => (
+          <div key={order.id} className={cn(
+            "p-5 rounded-2xl border transition-all",
+            "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+          )}>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">#ORD-{order.id.substring(0, 8)}</span>
+              <Badge variant="secondary" className="text-[10px] uppercase font-black tracking-widest bg-muted/50 text-muted-foreground border-border/50">{order.status}</Badge>
             </div>
-            <div className="flex items-center gap-4 text-xs text-gray-500"><span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(order.order_date).toLocaleDateString("pt-BR")}</span><span>{order.packaging_order_items?.length || 0} item(s)</span></div>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className={cn("text-2xl font-black tracking-tight", ds.colors.text.primary)}>
+                  {formatCurrency(order.total_value)}
+                </p>
+                <p className={cn("text-[11px] font-bold flex items-center gap-1.5 mt-1 opacity-60", ds.colors.text.secondary)}>
+                  <Calendar className="h-3 w-3" />
+                  {new Date(order.order_date).toLocaleDateString("pt-BR")}
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+                <Package className="h-3 w-3 text-muted-foreground" />
+                <span className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">{order.packaging_order_items?.length} itens</span>
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-    </ScrollArea>
+        ))
+      )}
+    </div>
   );
 }
 
 function TopPackagingList({ packaging }: { packaging: Array<{ name: string; quantity: number; totalSpent: number; count: number }> }) {
-  if (packaging.length === 0) return <div className="text-center py-8 text-gray-500"><Package className="h-8 w-8 mx-auto mb-2 opacity-50" /><p>Nenhuma embalagem encontrada</p></div>;
+  if (packaging.length === 0) return (
+    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground italic gap-3">
+      <div className="p-3 rounded-full bg-muted/30"><Package className="h-6 w-6 opacity-30" /></div>
+      <span className="text-sm font-medium">Nenhuma embalagem encontrada</span>
+    </div>
+  );
   return (
-    <ScrollArea className="h-[300px]">
+    <ScrollArea className="h-[400px]">
       <div className="space-y-2">
         {packaging.map((item, index) => (
-          <div key={item.name} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
-            <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold", index < 3 ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400" : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400")}>{index + 1}</div>
-            <div className="flex-1 min-w-0"><p className="text-sm font-medium text-gray-900 dark:text-white truncate">{item.name}</p><p className="text-xs text-gray-500">{item.count} pedido(s) • {item.quantity} unidades</p></div>
-            <div className="text-right"><p className="font-bold text-emerald-600">R$ {item.totalSpent.toFixed(2)}</p></div>
+          <div key={item.name} className={cn(
+            "flex items-center gap-4 p-4 rounded-xl border transition-all",
+            "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
+          )}>
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] border transition-colors",
+              index < 3 ? "bg-brand text-white border-brand" : "bg-muted text-muted-foreground border-border/50"
+            )}>
+              {index + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className={cn("font-bold text-sm truncate", ds.colors.text.primary)}>{item.name}</p>
+              <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-50", ds.colors.text.secondary)}>
+                {item.count} pedido(s) • {item.quantity} unidades
+              </p>
+            </div>
+            <div className="text-right">
+              <p className={cn("font-black text-base italic text-emerald-600 dark:text-emerald-400")}>
+                {formatCurrency(item.totalSpent)}
+              </p>
+            </div>
           </div>
         ))}
       </div>

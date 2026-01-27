@@ -35,33 +35,33 @@ export const CotacoesListDesktop = memo(({
         <TableHeader className={designSystem.components.table.header}>
           <TableRow className="hover:bg-transparent border-none">
             <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className={cn("flex items-center shadow-sm px-4 py-4 border", designSystem.components.card.flat, designSystem.colors.border.subtle)}>
+              <div className={designSystem.components.table.headerContainer}>
                 <div className="w-[15%] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0">
-                    <ClipboardList className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                  <div className={designSystem.components.table.headerIcon}>
+                    <ClipboardList className="h-4 w-4" />
                   </div>
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Cotação</span>
+                  <span className={designSystem.components.table.headerLabel}>Cotação</span>
                 </div>
                 <div className="w-[18%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Produto</span>
+                  <span className={designSystem.components.table.headerLabel}>Produto</span>
                 </div>
                 <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Status</span>
+                  <span className={designSystem.components.table.headerLabel}>Status</span>
                 </div>
                 <div className="w-[14%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Melhor Preço</span>
+                  <span className={designSystem.components.table.headerLabel}>Melhor Preço</span>
                 </div>
                 <div className="w-[12%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Fornec.</span>
+                  <span className={designSystem.components.table.headerLabel}>Fornec.</span>
                 </div>
                 <div className="w-[8%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Itens</span>
+                  <span className={designSystem.components.table.headerLabel}>Itens</span>
                 </div>
                 <div className="w-[11%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Prazo</span>
+                  <span className={designSystem.components.table.headerLabel}>Prazo</span>
                 </div>
-                <div className="w-[10%] flex justify-end items-center gap-2 px-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Ações</span>
+                <div className="w-[10%] flex justify-end items-center px-2">
+                  <span className={designSystem.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
             </TableCell>

@@ -12,8 +12,20 @@ const currencyFormatter = new Intl.NumberFormat('pt-BR', {
 
 const dateFormatter = new Intl.DateTimeFormat('pt-BR');
 
-export const formatCurrency = (value: number): string => {
-  return currencyFormatter.format(value);
+export const formatCurrency = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined || value === '' || value === '-') return '-';
+  
+  let num: number;
+  if (typeof value === 'string') {
+    // Remove R$, spaces and thousands separator, then replace comma with dot
+    const cleanValue = value.replace(/[R$\s.]/g, '').replace(',', '.');
+    num = parseFloat(cleanValue);
+  } else {
+    num = value;
+  }
+
+  if (isNaN(num)) return '-';
+  return currencyFormatter.format(num);
 };
 
 export const formatDate = (date: string | Date): string => {
