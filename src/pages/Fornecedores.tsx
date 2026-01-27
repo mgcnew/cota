@@ -272,7 +272,7 @@ function Fornecedores() {
               title="Limite Total"
               value={stats.totalLimit}
               icon={DollarSign}
-              trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
+              trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
               variant="default"
               className="hover:scale-[1.02] transition-transform"
             />

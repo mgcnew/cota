@@ -57,3 +57,75 @@ export const formatCurrencyCompact = (value: number): string => {
   return formatCurrency(value);
 };
 
+/**
+ * Formata valor monetário de forma amigável e legível
+ * Ex: 30000 -> R$ 30 mil | 1500000 -> R$ 1,5 milhão
+ */
+export const formatCurrencyFriendly = (value: number | string | null | undefined): string => {
+  if (value === null || value === undefined || value === '' || value === '-') return '-';
+  
+  let num: number;
+  if (typeof value === 'string') {
+    // Remove currency symbols and common separators
+    let cleanValue = value.replace(/[R$\s.]/g, '').replace(',', '.');
+    
+    // Handle 'k' or 'K' suffix (e.g., "1k" -> 1000)
+    if (cleanValue.toLowerCase().endsWith('k')) {
+      num = parseFloat(cleanValue.slice(0, -1)) * 1000;
+    } else {
+      num = parseFloat(cleanValue);
+    }
+  } else {
+    num = value;
+  }
+
+  if (isNaN(num)) return '-';
+  
+  const absValue = Math.abs(num);
+  const sign = num < 0 ? '-' : '';
+
+  if (absValue >= 1_000_000_000) {
+    const val = absValue / 1_000_000_000;
+    return `${sign}R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} bilh${val === 1 ? 'ão' : 'ões'}`;
+  }
+  if (absValue >= 1_000_000) {
+    const val = absValue / 1_000_000;
+    return `${sign}R$ ${val.toLocaleString('pt-BR', { maximumFractionDigits: 1 })} milh${val === 1 ? 'ão' : 'ões'}`;
+  }
+  if (absValue >= 1_000) {
+    const val = absValue / 1_000;
+    // Check if it's a whole number to avoid "30,0 mil"
+    const formattedVal = val % 1 === 0 
+      ? val.toString() 
+      : val.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
+    return `${sign}R$ ${formattedVal} mil`;
+  }
+  
+  return formatCurrency(num);
+};
+
+/**
+ * Converte uma string formatada (ex: "R$ 30 mil", "1.5k") de volta para número
+ */
+export const parseCurrencyFriendly = (value: string | number | null | undefined): number => {
+  if (value === null || value === undefined || value === '') return 0;
+  if (typeof value === 'number') return value;
+
+  const cleanValue = value.toLowerCase()
+    .replace(/[r$\s.]/g, '')
+    .replace(',', '.');
+
+  if (cleanValue.includes('bilh')) {
+    return parseFloat(cleanValue) * 1_000_000_000;
+  }
+  if (cleanValue.includes('milh')) {
+    return parseFloat(cleanValue) * 1_000_000;
+  }
+  if (cleanValue.includes('mil') || cleanValue.endsWith('k')) {
+    return parseFloat(cleanValue) * 1_000;
+  }
+
+  const num = parseFloat(cleanValue);
+  return isNaN(num) ? 0 : num;
+};
+

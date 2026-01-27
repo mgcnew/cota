@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
+import { formatCurrency, formatCurrencyFriendly } from '@/utils/formatters';
 
 export interface Supplier {
   id: string;
@@ -189,10 +190,10 @@ export function useSuppliers() {
           id: s.id,
           name: s.name,
           contact: s.contact || "",
-          limit: totalLimit > 0 ? `R$ ${(totalLimit / 1000).toFixed(0)}k` : "R$ 0",
+          limit: formatCurrencyFriendly(s.limit || "0"),
           activeQuotes,
           totalQuotes,
-          avgPrice: avgPrice > 0 ? `R$ ${avgPrice.toFixed(2)}` : "R$ 0,00",
+          avgPrice: formatCurrency(avgPrice),
           lastOrder: lastOrderDate,
           rating: rating || 0,
           status: "active" as const,

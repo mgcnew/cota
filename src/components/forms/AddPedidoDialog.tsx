@@ -265,15 +265,46 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
   const canProceed = () => {
     switch (activeStep) {
-      case "produtos": return itens.length > 0;
-      case "fornecedor": return !!fornecedor && !!dataEntrega;
-      default: return true;
+      case "produtos": 
+        return itens.length > 0;
+      case "fornecedor": 
+        return !!fornecedor && !!dataEntrega;
+      case "confirmar":
+        return itens.length > 0 && !!fornecedor && !!dataEntrega;
+      default: 
+        return true;
     }
   };
 
+  const handleStepChange = (stepId: string) => {
+    const targetIndex = STEPS.findIndex(s => s.id === stepId);
+    
+    // Se estiver tentando ir para um passo à frente, validar os anteriores
+    if (targetIndex > currentStepIndex) {
+      if (!canProceed()) {
+        toast({
+          title: "Campos obrigatórios",
+          description: "Por favor, preencha todos os campos obrigatórios antes de prosseguir.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
+    setActiveStep(stepId);
+  };
+
   const handleNext = () => {
-    if (currentStepIndex < STEPS.length - 1 && canProceed()) {
-      setActiveStep(STEPS[currentStepIndex + 1].id);
+    if (currentStepIndex < STEPS.length - 1) {
+      if (canProceed()) {
+        setActiveStep(STEPS[currentStepIndex + 1].id);
+      } else {
+        toast({
+          title: "Campos obrigatórios",
+          description: "Por favor, preencha todos os campos obrigatórios desta etapa.",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -284,7 +315,28 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   };
 
   const handleSubmit = async () => {
-    if (!user || !fornecedor || !dataEntrega || itens.length === 0) return;
+    if (!user) {
+      toast({ title: "Erro", description: "Usuário não autenticado", variant: "destructive" });
+      return;
+    }
+    
+    if (itens.length === 0) {
+      toast({ title: "Erro", description: "Adicione pelo menos um item ao pedido", variant: "destructive" });
+      setActiveStep("produtos");
+      return;
+    }
+
+    if (!fornecedor) {
+      toast({ title: "Erro", description: "Selecione um fornecedor", variant: "destructive" });
+      setActiveStep("fornecedor");
+      return;
+    }
+
+    if (!dataEntrega) {
+      toast({ title: "Erro", description: "Selecione uma data de entrega", variant: "destructive" });
+      setActiveStep("fornecedor");
+      return;
+    }
     
     setLoading(true);
     try {
@@ -473,7 +525,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <button 
                 key={step.id} 
                 type="button" 
-                onClick={() => setActiveStep(step.id)}
+                onClick={() => handleStepChange(step.id)}
                 className={cn(
                   ds.components.tabs.clean.trigger,
                   "flex items-center gap-2",
