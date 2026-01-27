@@ -21,7 +21,6 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
-import { BrandManagementDialog } from "@/components/products/BrandManagementDialog";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import { ProductListDesktop } from "@/components/products/ProductListDesktop";
 import { useProductStats } from "@/hooks/useProductStats";
@@ -62,7 +61,6 @@ function Produtos() {
   const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = useProducts();
@@ -189,7 +187,7 @@ function Produtos() {
       <PageWrapper>
         <div className={designSystem.layout.container.page}>
           {/* Page Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div className="flex flex-col mb-8">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
                 <Package className="h-6 w-6 text-brand" />
@@ -203,49 +201,10 @@ function Produtos() {
                 </p>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBrandDialogOpen(true)}
-                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-              >
-                <Award className="h-4 w-4 mr-2" /> Marcas
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportProducts}
-                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-              >
-                <Download className="h-4 w-4 mr-2" /> Exportar
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span>Adicionar</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[180px]">
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
-                    <Award className="h-4 w-4 mr-2 text-zinc-500" /> Marcas
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
           </div>
 
           {/* Métricas essenciais */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-8">
             <MetricCard
               title="Produtos"
               value={stats.totalProducts}
@@ -276,19 +235,20 @@ function Produtos() {
             />
           </ResponsiveGrid>
 
-          {/* Filters & Actions */}
-          <div className={designSystem.layout.container.section}>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <div className="flex-1 sm:flex-shrink-0">
-                <ExpandableSearch
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Buscar produtos..."
-                  accentColor="gray" // Neutral accent matching Design System
-                  expandedWidth="w-full sm:w-64"
-                />
-              </div>
-              <div className="flex-1 sm:flex-initial sm:w-[180px]">
+          {/* Toolbar de Ações e Filtros */}
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
+            <div className="flex-1 sm:flex-initial sm:min-w-[400px]">
+              <ExpandableSearch
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar produtos..."
+                accentColor="gray"
+                expandedWidth="w-full"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-end">
+              <div className="w-full sm:w-[200px]">
                 <CategorySelect
                   categories={safeCategories}
                   products={safeProducts}
@@ -296,6 +256,30 @@ function Produtos() {
                   onCategoryChange={setSelectedCategory}
                 />
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportProducts}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6")}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Adicionar</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
@@ -420,11 +404,6 @@ function Produtos() {
 
         </div>
       </PageWrapper>
-
-      <BrandManagementDialog
-        open={brandDialogOpen}
-        onOpenChange={setBrandDialogOpen}
-      />
     </>
   );
 }

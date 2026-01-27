@@ -234,7 +234,7 @@ function Fornecedores() {
       <PageWrapper>
         <div className={designSystem.layout.container.page}>
           {/* Page Header */}
-          <div className="flex items-center justify-between gap-6 mb-8">
+          <div className="flex flex-col mb-8">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
                 <Building2 className="h-6 w-6 text-brand" />
@@ -248,30 +248,10 @@ function Fornecedores() {
                 </p>
               </div>
             </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => importSuppliersRef.current?.click()}
-                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => addSupplierRef.current?.click()}
-                className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Fornecedor
-              </Button>
-            </div>
           </div>
 
           {/* Metrics Grid */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-8">
             <MetricCard
               title="Fornecedores"
               value={stats.total}
@@ -306,21 +286,22 @@ function Fornecedores() {
             />
           </ResponsiveGrid>
 
-          {/* Filters & Actions */}
-          <div className={designSystem.layout.container.section}>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <div className="flex-1 sm:flex-shrink-0">
-                <ExpandableSearch
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Buscar fornecedores..."
-                  accentColor="gray"
-                  expandedWidth="w-full sm:w-64"
-                />
-              </div>
-              <div className="flex gap-2">
+          {/* Toolbar de Ações e Filtros */}
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
+            <div className="flex-1 sm:flex-initial sm:min-w-[400px]">
+              <ExpandableSearch
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar fornecedores..."
+                accentColor="gray"
+                expandedWidth="w-full"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-end">
+              <div className="w-full sm:w-[150px]">
                 <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                  <SelectTrigger className={cn(designSystem.components.input.root, "w-[150px]")}>
+                  <SelectTrigger className={cn(designSystem.components.input.root, "h-11")}>
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -330,8 +311,25 @@ function Fornecedores() {
                     <SelectItem value="pending">Pendentes</SelectItem>
                   </SelectContent>
                 </Select>
-                <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => importSuppliersRef.current?.click()}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => addSupplierRef.current?.click()}
+                className={cn(designSystem.components.button.primary, "h-11 px-6")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Fornecedor
+              </Button>
+              <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
             </div>
           </div>
 
