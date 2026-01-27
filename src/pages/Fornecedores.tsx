@@ -30,7 +30,6 @@ import { useSupplierStats } from "@/hooks/useSupplierStats";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
-import { formatCurrency } from "@/utils/formatters";
 
 // Lazy load dialogs for better initial load performance
 const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog"));
@@ -51,22 +50,20 @@ interface Supplier {
   id: string;
   name: string;
   contact: string;
-  limit: number;
+  limit: string;
   activeQuotes: number;
   totalQuotes: number;
-  avgPrice: number;
+  avgPrice: string;
   lastOrder: string;
   rating: number;
   status: "active" | "inactive" | "pending";
   phone?: string;
   email?: string;
   address?: string;
-  cnpj?: string;
 }
 
 type SupplierFormData = {
   name: string;
-  cnpj?: string;
   contact: string;
   phone?: string;
   email?: string;
@@ -124,15 +121,9 @@ function Fornecedores() {
   };
 
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
-    // Convert limit string to number before sending to hook
-    const numericLimit = parseFloat(data.limit.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-    
     updateSupplier({
       supplierId: id,
-      data: {
-        ...data,
-        limit: numericLimit
-      }
+      data
     });
   };
 
@@ -243,7 +234,7 @@ function Fornecedores() {
       <PageWrapper>
         <div className={designSystem.layout.container.page}>
           {/* Page Header */}
-          <div className="flex flex-col mb-8">
+          <div className="flex items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
                 <Building2 className="h-6 w-6 text-brand" />
@@ -257,10 +248,30 @@ function Fornecedores() {
                 </p>
               </div>
             </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => importSuppliersRef.current?.click()}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => addSupplierRef.current?.click()}
+                className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Fornecedor
+              </Button>
+            </div>
           </div>
 
           {/* Metrics Grid */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-8">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-4">
             <MetricCard
               title="Fornecedores"
               value={stats.total}
@@ -281,7 +292,7 @@ function Fornecedores() {
               title="Limite Total"
               value={stats.totalLimit}
               icon={DollarSign}
-              trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
+              trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
               variant="default"
               className="hover:scale-[1.02] transition-transform"
             />
@@ -295,22 +306,21 @@ function Fornecedores() {
             />
           </ResponsiveGrid>
 
-          {/* Toolbar de Ações e Filtros */}
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 mb-8">
-            <div className="flex-1 sm:flex-initial sm:min-w-[400px]">
-              <ExpandableSearch
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Buscar fornecedores..."
-                accentColor="gray"
-                expandedWidth="w-full"
-              />
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-end">
-              <div className="w-full sm:w-[150px]">
+          {/* Filters & Actions */}
+          <div className={designSystem.layout.container.section}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="flex-1 sm:flex-shrink-0">
+                <ExpandableSearch
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Buscar fornecedores..."
+                  accentColor="gray"
+                  expandedWidth="w-full sm:w-64"
+                />
+              </div>
+              <div className="flex gap-2">
                 <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                  <SelectTrigger className={cn(designSystem.components.input.root, "h-11")}>
+                  <SelectTrigger className={cn(designSystem.components.input.root, "w-[150px]")}>
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -320,25 +330,8 @@ function Fornecedores() {
                     <SelectItem value="pending">Pendentes</SelectItem>
                   </SelectContent>
                 </Select>
+                <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => importSuppliersRef.current?.click()}
-                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => addSupplierRef.current?.click()}
-                className={cn(designSystem.components.button.primary, "h-11 px-6")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Fornecedor
-              </Button>
-              <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
             </div>
           </div>
 
@@ -407,14 +400,14 @@ function Fornecedores() {
                           <DollarSign className="h-3.5 w-3.5" />
                           <span className="text-xs">Limite</span>
                         </div>
-                        <span className="text-sm font-medium">{formatCurrency(supplier.limit)}</span>
+                        <span className="text-sm font-medium">{supplier.limit}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <TrendingUp className="h-3.5 w-3.5" />
                           <span className="text-xs">Preço Médio</span>
                         </div>
-                        <span className="text-sm font-medium">{formatCurrency(supplier.avgPrice)}</span>
+                        <span className="text-sm font-medium">{supplier.avgPrice}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">

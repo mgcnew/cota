@@ -14,7 +14,7 @@ export interface Product {
   brand_score?: number;
   barcode?: string;
   image_url?: string;
-  lastOrderPrice: number;
+  lastOrderPrice: string;
   bestSupplier: string;
   quotesCount: number;
   lastUpdate: string;
@@ -156,14 +156,14 @@ export function useProducts() {
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
 
-        let lastOrderPrice = 0;
+        let lastOrderPrice = "R$ 0,00";
         let bestSupplier = "-";
         let trend: "up" | "down" | "stable" = "stable";
         let lastOrderTimestamp: number | null = null;
 
         if (orderPrices.length > 0) {
           const latestOrderPrice = orderPrices[0];
-          lastOrderPrice = latestOrderPrice.price;
+          lastOrderPrice = `R$ ${latestOrderPrice.price.toFixed(2)}`;
           bestSupplier = latestOrderPrice.supplierName;
           lastOrderTimestamp = new Date(latestOrderPrice.created_at).getTime();
 

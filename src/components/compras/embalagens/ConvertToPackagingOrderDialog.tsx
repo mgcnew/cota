@@ -27,7 +27,6 @@ import {
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
-import { designSystem } from "@/styles/design-system";
 
 interface Props {
   open: boolean;
@@ -553,17 +552,17 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                   
                   {economiaTotal > 0 && (
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-purple-200">
-                        <div className="flex items-center gap-2">
-                          <Award className="h-4 w-4 text-green-600" />
-                          <span className="font-medium text-sm text-green-700">Economia Estimada</span>
-                          <span className="text-xs text-muted-foreground">
-                            (vs maior preço cotado)
-                          </span>
-                        </div>
-                        <span className={cn("text-lg font-bold", designSystem.colors.text.price)}>
-                          {formatCurrency(economiaTotal)}
+                      <div className="flex items-center gap-2">
+                        <Award className="h-4 w-4 text-green-600" />
+                        <span className="font-medium text-sm text-green-700">Economia Estimada</span>
+                        <span className="text-xs text-muted-foreground">
+                          (vs maior preço cotado)
                         </span>
                       </div>
+                      <span className="text-lg font-bold text-green-600">
+                        {formatCurrency(economiaTotal)}
+                      </span>
+                    </div>
                   )}
                 </div>
               </>

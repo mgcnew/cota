@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import type { Product } from '@/hooks/useProducts';
-import { formatCurrency } from '@/utils/formatters';
 
 export interface ProductStats {
   totalProducts: number;
@@ -49,8 +48,8 @@ export function useProductStats(products: Product[], categories: string[]): Prod
     const produtosPorStatus = {
       ativos: products.filter((p) => (p.quotesCount || 0) >= 3).length,
       cotados: products.filter((p) => (p.quotesCount || 0) > 0 && (p.quotesCount || 0) < 3).length,
-      pendentes: products.filter((p) => (p.quotesCount || 0) === 0 && (p.lastOrderPrice || 0) > 0).length,
-      semCotacao: products.filter((p) => (p.quotesCount || 0) === 0 && (p.lastOrderPrice || 0) === 0).length
+      pendentes: products.filter((p) => (p.quotesCount || 0) === 0 && p.lastOrderPrice !== "R$ 0,00").length,
+      semCotacao: products.filter((p) => (p.quotesCount || 0) === 0 && p.lastOrderPrice === "R$ 0,00").length
     };
 
     const produtosComCotacao = produtosPorStatus.ativos + produtosPorStatus.cotados;
@@ -70,7 +69,7 @@ export function useProductStats(products: Product[], categories: string[]): Prod
       ? (activeQuotes / produtosComCotacaoParaMedia.length).toFixed(1)
       : "0.0";
 
-    const productsWithPrices = products.filter((p) => (p.lastOrderPrice || 0) > 0);
+    const productsWithPrices = products.filter((p) => p.lastOrderPrice !== "R$ 0,00");
     let averageValue = "R$ 0,00";
     let averageValueNumeric = 0;
     let economiaMediaPorProduto = "0";
@@ -79,11 +78,12 @@ export function useProductStats(products: Product[], categories: string[]): Prod
 
     if (productsWithPrices.length > 0) {
       const total = productsWithPrices.reduce((sum, p) => {
-        const price = Number(p.lastOrderPrice || 0);
+        const priceStr = p.lastOrderPrice || "R$ 0,00";
+        const price = parseFloat(priceStr.replace(/[^\d,]/g, '').replace(',', '.'));
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
       averageValueNumeric = total / productsWithPrices.length;
-      averageValue = formatCurrency(averageValueNumeric);
+      averageValue = `R$ ${averageValueNumeric.toFixed(2)}`;
 
       const produtosComMultiplasCotacoes = products.filter((p) => (p.quotesCount || 0) >= 2);
       if (produtosComMultiplasCotacoes.length > 0) {

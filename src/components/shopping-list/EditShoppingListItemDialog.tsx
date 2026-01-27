@@ -6,7 +6,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -209,7 +208,7 @@ export function EditShoppingListItemDialog({
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            const currentVal = parseFloat(field.value) || 0;
+                            const currentVal = Number(field.value) || 0;
                             field.onChange(Math.max(0.5, currentVal - 1));
                           }}
                           className="h-14 w-14 rounded-2xl bg-white/60 dark:bg-gray-800/60 border border-white/40 dark:border-white/10 text-blue-600 hover:bg-blue-500/10 hover:text-blue-700 hover:border-blue-500/20 transition-all shadow-sm active:scale-90"
@@ -228,7 +227,7 @@ export function EditShoppingListItemDialog({
                           variant="ghost"
                           size="icon"
                           onClick={() => {
-                            const currentVal = parseFloat(field.value) || 0;
+                            const currentVal = Number(field.value) || 0;
                             field.onChange(currentVal + 1);
                           }}
                           className="h-14 w-14 rounded-2xl bg-white/60 dark:bg-gray-800/60 border border-white/40 dark:border-white/10 text-blue-600 hover:bg-blue-500/10 hover:text-blue-700 hover:border-blue-500/20 transition-all shadow-sm active:scale-90"

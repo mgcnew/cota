@@ -42,11 +42,10 @@ import { Building2, X } from "lucide-react";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
-  cnpj: z.string().trim().max(18, "CNPJ muito longo").optional().or(z.literal("")),
   contact: z.string().trim().min(1, "Contato é obrigatório").max(100, "Contato muito longo"),
-  phone: z.string().trim().max(20, "Telefone muito longo").optional().or(z.literal("")),
+  phone: z.string().trim().max(20, "Telefone muito longo").optional(),
   email: z.string().trim().email("Email inválido").max(255, "Email muito longo").optional().or(z.literal("")),
-  address: z.string().trim().max(200, "Endereço muito longo").optional().or(z.literal("")),
+  address: z.string().trim().max(200, "Endereço muito longo").optional(),
   limit: z.string().trim().min(1, "Limite é obrigatório"),
   status: z.enum(["active", "inactive", "pending"]),
 });
@@ -56,12 +55,11 @@ type SupplierFormData = z.infer<typeof supplierSchema>;
 interface Supplier {
   id: string;
   name: string;
-  cnpj?: string;
   contact: string;
   phone?: string;
   email?: string;
   address?: string;
-  limit: number;
+  limit: string;
   status: "active" | "inactive" | "pending";
 }
 
@@ -85,7 +83,6 @@ export default function EditSupplierDialog({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
       name: "",
-      cnpj: "",
       contact: "",
       phone: "",
       email: "",
@@ -99,12 +96,11 @@ export default function EditSupplierDialog({
     if (supplier) {
       form.reset({
         name: supplier.name,
-        cnpj: supplier.cnpj || "",
         contact: supplier.contact,
         phone: supplier.phone || "",
         email: supplier.email || "",
         address: supplier.address || "",
-        limit: String(supplier.limit),
+        limit: supplier.limit,
         status: supplier.status,
       });
     }
@@ -113,10 +109,10 @@ export default function EditSupplierDialog({
   const onSubmit = (data: SupplierFormData) => {
     if (supplier) {
       onEdit(supplier.id, data);
-      // O fechamento e o toast de sucesso agora devem ser controlados pelo componente pai ou pelo hook
-      // para garantir que a operação foi concluída no banco de dados.
-      // No entanto, para manter a compatibilidade imediata, vamos apenas fechar o modal
-      // e confiar que o hook useSuppliers mostrará o erro se falhar.
+      toast({
+        title: "Fornecedor atualizado",
+        description: `${data.name} foi atualizado com sucesso.`,
+      });
       onOpenChange(false);
     }
   };
@@ -166,45 +162,24 @@ export default function EditSupplierDialog({
 
             {/* Seção: Informações Principais */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Nome do Fornecedor*</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Ex: Holambra"
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="cnpj"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>CNPJ</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="00.000.000/0000-00"
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={designSystem.typography.size.sm}>Nome do Fornecedor*</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Ex: Holambra"
+                        className={designSystem.components.input.root}
+                        onFocus={handleInputFocus}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

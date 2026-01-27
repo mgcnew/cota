@@ -6,23 +6,21 @@ import { TableActionGroup } from "@/components/ui/table-action-group";
 import { capitalize } from "@/lib/text-utils";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
 
 interface Supplier {
   id: string;
   name: string;
   contact: string;
-  limit: number;
+  limit: string;
   activeQuotes: number;
   totalQuotes: number;
-  avgPrice: number;
+  avgPrice: string;
   lastOrder: string;
   rating: number;
   status: "active" | "inactive" | "pending";
   phone?: string;
   email?: string;
   address?: string;
-  cnpj?: string;
 }
 
 interface SupplierListDesktopProps {
@@ -51,7 +49,7 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                 <div className="w-[15%] px-2 flex justify-center items-center gap-2">
                   <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Status</span>
                 </div>
-                <div className="w-[15%] px-2 flex justify-end items-center gap-2">
+                <div className="w-[15%] px-2 flex justify-center items-center gap-2">
                   <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Limite</span>
                 </div>
                 <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-2">
@@ -92,14 +90,12 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                     <StatusBadge status={supplier.status} />
                   </div>
 
-                  <div className="w-[15%] px-2 flex justify-end items-center">
-                    <span className={cn("text-sm font-medium", designSystem.colors.text.primary)}>{formatCurrency(supplier.limit)}</span>
+                  <div className="w-[15%] px-2 flex justify-center items-center">
+                    <span className={cn("text-sm font-medium", designSystem.colors.text.primary)}>{supplier.limit}</span>
                   </div>
 
                   <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
-                    <div className="flex items-center gap-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 px-3 py-1 rounded-lg">
-                      <span className={cn("text-sm font-bold", designSystem.colors.text.price)}>{formatCurrency(supplier.avgPrice)}</span>
-                    </div>
+                    <span className={cn("text-sm font-medium", designSystem.colors.text.primary)}>{supplier.avgPrice}</span>
                   </div>
 
                   <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">

@@ -7,18 +7,16 @@ export interface Supplier {
   id: string;
   name: string;
   contact: string;
-  limit: number;
-  availableLimit: number;
+  limit: string;
   activeQuotes: number;
   totalQuotes: number;
-  avgPrice: number;
+  avgPrice: string;
   lastOrder: string;
   rating: number;
   status: "active" | "inactive" | "pending";
   phone?: string;
   email?: string;
   address?: string;
-  cnpj?: string;
 }
 
 export function useSuppliers() {
@@ -87,8 +85,8 @@ export function useSuppliers() {
           ? new Date(supplierOrders[0].order_date).toLocaleDateString('pt-BR')
           : new Date(s.created_at).toLocaleDateString('pt-BR');
 
-        // Total spent from orders
-        const totalSpent = supplierOrders.reduce((sum, o) => sum + Number(o.total_value || 0), 0);
+        // Total limit from orders
+        const totalLimit = supplierOrders.reduce((sum, o) => sum + Number(o.total_value || 0), 0);
 
         // ===== RATING CALCULATION (0-5 stars) =====
         let rating = 0;
@@ -187,33 +185,20 @@ export function useSuppliers() {
           ? new Date(completedOrdersList[0].order_date).getTime()
           : null;
         
-        // Normalize status
-        let normalizedStatus: "active" | "inactive" | "pending" = "active";
-        const rawStatus = (s.status || "").toLowerCase();
-        if (rawStatus === "active" || rawStatus === "ativo" || rawStatus === "ativa") {
-          normalizedStatus = "active";
-        } else if (rawStatus === "inactive" || rawStatus === "inativo" || rawStatus === "inativa") {
-          normalizedStatus = "inactive";
-        } else if (rawStatus === "pending" || rawStatus === "pendente") {
-          normalizedStatus = "pending";
-        }
-
         return {
           id: s.id,
           name: s.name,
           contact: s.contact || "",
-          limit: Number(s.limit || 0),
-          availableLimit: Number(s.limit || 0) - totalSpent,
+          limit: totalLimit > 0 ? `R$ ${(totalLimit / 1000).toFixed(0)}k` : "R$ 0",
           activeQuotes,
           totalQuotes,
-          avgPrice: avgPrice,
+          avgPrice: avgPrice > 0 ? `R$ ${avgPrice.toFixed(2)}` : "R$ 0,00",
           lastOrder: lastOrderDate,
           rating: rating || 0,
-          status: normalizedStatus,
+          status: "active" as const,
           phone: maskSensitiveData ? undefined : (s.phone || undefined),
           email: maskSensitiveData ? undefined : (s.email || undefined),
           address: maskSensitiveData ? undefined : (s.address || undefined),
-          cnpj: maskSensitiveData ? undefined : (s.cnpj || undefined),
           _lastCompletedOrderTimestamp: lastCompletedOrderTimestamp, // Internal field for sorting
         };
       });
@@ -277,36 +262,18 @@ export function useSuppliers() {
         phone?: string,
         email?: string,
         address?: string,
-        limit?: number,
-        status?: "active" | "inactive" | "pending",
-        cnpj?: string,
       } 
     }) => {
-      // Usar os valores de status diretamente (English) pois o banco de dados
-      // geralmente segue o padrão do sistema (active, inactive, pending)
-      // O mapeamento anterior para português (ativo, inativo, pendente) pode estar causando erros de constraint
-      const dbStatus = data.status;
-
-      // Construir objeto de update apenas com campos definidos para evitar sobrescrever dados mascarados
-      const updateData: any = {
-        name: data.name,
-        contact: data.contact,
-      };
-
-      // Se o usuário não puder ver dados sensíveis, evitamos atualizar campos que venham vazios do formulário,
-      // pois eles provavelmente são os valores mascarados (undefined -> "").
-      const canUpdateSensitive = canViewSensitiveData;
-
-      if (data.phone !== undefined && (canUpdateSensitive || data.phone !== "")) updateData.phone = data.phone || null;
-      if (data.email !== undefined && (canUpdateSensitive || data.email !== "")) updateData.email = data.email || null;
-      if (data.address !== undefined && (canUpdateSensitive || data.address !== "")) updateData.address = data.address || null;
-      if (data.limit !== undefined) updateData.limit = data.limit;
-      if (dbStatus !== undefined) updateData.status = dbStatus;
-      if (data.cnpj !== undefined && (canUpdateSensitive || data.cnpj !== "")) updateData.cnpj = data.cnpj || null;
-
       const { error } = await supabase
         .from('suppliers')
-        .update(updateData)
+        .update({
+          name: data.name,
+          contact: data.contact,
+          phone: data.phone || null,
+          email: data.email || null,
+          address: data.address || null,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', supplierId);
 
       if (error) throw error;
@@ -319,10 +286,9 @@ export function useSuppliers() {
       });
     },
     onError: (error) => {
-      console.error("Erro ao atualizar fornecedor:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o fornecedor no banco de dados.",
+        description: "Não foi possível atualizar o fornecedor",
         variant: "destructive",
       });
     },

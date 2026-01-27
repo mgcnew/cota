@@ -5,25 +5,22 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { capitalize } from "@/lib/text-utils";
-import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
 
 interface Supplier {
   id: string;
   name: string;
   contact: string;
-  limit: number;
+  limit: string;
   activeQuotes: number;
   totalQuotes: number;
-  avgPrice: number;
+  avgPrice: string;
   lastOrder: string;
   rating: number;
   status: "active" | "inactive" | "pending";
   phone?: string;
   email?: string;
   address?: string;
-  cnpj?: string;
 }
 
 interface ExpandableSupplierCardProps {
@@ -107,7 +104,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
           <div className="flex items-center gap-2">
             <DollarSign className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
             <span className="text-gray-500 dark:text-gray-400">Limite:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(supplier.limit)}</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
           </div>
           <div className="flex items-center gap-2">
             <FileText className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
@@ -142,11 +139,9 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
           {/* Additional Stats */}
           <div className="grid grid-cols-1 gap-2 text-xs pt-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+              <TrendingUp className="h-3.5 w-3.5 text-purple-600 flex-shrink-0" />
               <span className="text-gray-500 dark:text-gray-400">Preço Médio:</span>
-              <div className="bg-emerald-50/50 dark:bg-emerald-900/10 px-2 py-0.5 rounded-md">
-                <span className={cn("font-bold", designSystem.colors.text.price)}>{formatCurrency(supplier.avgPrice)}</span>
-              </div>
+              <span className="font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
             </div>
             {supplier.lastOrder && (
               <div className="flex items-center gap-2">

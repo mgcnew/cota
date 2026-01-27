@@ -27,13 +27,13 @@
        PREMIUM MINIMALIST LIGHT MODE
        ============================================ */
     
-    /* Background Colors - Modern Slate/Stone tone for better depth */
-    --background: 220 16% 92%; /* #E9EBF0 */
-    --foreground: 220 20% 10%; /* #14171A - Ligeiramente mais escuro para contraste */
+    /* Background Colors */
+    --background: 216 20% 95.1%; /* #F0F2F5 */
+    --foreground: 216 8.2% 12%; /* #1C1E21 */
     
-    /* Card System - Pure White to pop against the new background */
+    /* Card System */
     --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 216 8.2% 12%;
     
     /* Cor Primária: Verde Neon (#83E509) */
     --primary: 88 92% 47%; 
@@ -41,9 +41,9 @@
     --primary-light: 88 92% 57%;
     --primary-lighter: 88 92% 77%;
     
-    /* Secondary Colors - Coordinated with Background */
-    --secondary: 220 16% 88%; /* #DEE1E7 */
-    --secondary-foreground: 220 20% 10%;
+    /* Secondary Colors */
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
     
     /* Utility Colors */
     --success: 142 76% 36%;
@@ -54,15 +54,15 @@
     --error-light: 0 84% 70%;
     --info: 199 89% 48%;
     
-    /* Neutral Palette - Consistent with Slate Theme */
-    --muted: 220 16% 88%; /* #DEE1E7 */
-    --muted-foreground: 220 12% 40%; /* #5A6370 */
-    --accent: 220 16% 88%; /* #DEE1E7 */
-    --accent-foreground: 220 20% 10%;
+    /* Neutral Palette */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
     
-    /* Interactive Elements - Defined Contrast */
-    --border: 220 16% 84%; /* #D1D6DE */
-    --input: 220 16% 84%; /* #D1D6DE */
+    /* Interactive Elements */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
     --ring: 88 92% 47%;
     
     --destructive: 0 84.2% 60.2%;
@@ -1655,9 +1655,9 @@
 
 @layer utilities {
   /* Motion-reduce utility classes */
-  .motion-reduce {
-    /* Base class for elements that should respect reduced motion */
-  }
+  /* .motion-reduce {
+    Base class for elements that should respect reduced motion
+  } */
   
   /* Disable transitions when reduced motion is preferred */
   @media (prefers-reduced-motion: reduce) {

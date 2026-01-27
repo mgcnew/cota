@@ -18,6 +18,7 @@ interface QuoteValuesTabProps {
   isMobile: boolean;
   safeStr: (val: any) => string;
   getBestPriceInfoForProduct: (productId: string) => { bestPrice: number; bestSupplierId: string | null };
+  readOnly?: boolean;
 }
 
 export function QuoteValuesTab({
@@ -29,7 +30,8 @@ export function QuoteValuesTab({
   onRefresh,
   isMobile,
   safeStr,
-  getBestPriceInfoForProduct
+  getBestPriceInfoForProduct,
+  readOnly = false
 }: QuoteValuesTabProps) {
   const { toast } = useToast();
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
@@ -333,10 +335,12 @@ export function QuoteValuesTab({
                             {!isMobile && isBest && <p className="text-[8px] font-black text-brand uppercase tracking-tighter mt-0.5">🏆 MELHOR PREÇO</p>}
                           </div>
                         </div>
-                        <div className="flex-shrink-0">
-                          <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-brand hover:bg-brand/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
+                        <div className="flex-shrink-0 min-w-[40px] flex justify-end">
+                          {!readOnly && (
+                            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-brand hover:bg-brand/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )}

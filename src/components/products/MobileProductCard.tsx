@@ -11,9 +11,6 @@ import {
 import { capitalize } from "@/lib/text-utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Product } from "@/hooks/useProducts";
-import { designSystem } from "@/styles/design-system";
-import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
 
 interface MobileProductCardProps {
   product: Product;
@@ -46,7 +43,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
 
   const getProductStatus = (product: Product) => {
     if (product.quotesCount === 0) return "sem_cotacao";
-    if (!product.lastOrderPrice || product.lastOrderPrice === 0) return "pendente";
+    if (product.lastOrderPrice === "R$ 0,00") return "pendente";
     if (product.quotesCount >= 3) return "ativo";
     return "cotado";
   };
@@ -110,8 +107,8 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
         
         {/* Info compacta em linha */}
         <div className="flex items-center justify-between text-xs px-1">
-          <div className="flex items-center gap-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 px-2 py-0.5 rounded-md">
-            <span className={cn("font-bold", designSystem.colors.text.price)}>{formatCurrency(product.lastOrderPrice)}</span>
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-green-700 dark:text-green-400">{product.lastOrderPrice}</span>
             {getTrendIcon(product.trend)}
           </div>
           <div className="flex items-center gap-1 text-gray-500">

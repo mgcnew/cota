@@ -15,19 +15,19 @@ export const designSystem = {
         brand: BRAND_COLOR,
         brandHover: "#72cc00",
         white: "#FFFFFF",
-        black: "#09090b", // Slate 950 feel
-        slate: {
-            50: "#f8fafc",
-            100: "#f1f5f9",
-            200: "#e2e8f0",
-            300: "#cbd5e1",
-            400: "#94a3b8",
-            500: "#64748b",
-            600: "#475569",
-            700: "#334155",
-            800: "#1e293b",
-            900: "#0f172a",
-            950: "#020617",
+        black: "#09090b", // Zinc 950
+        zinc: {
+            50: "#fafafa",
+            100: "#f4f4f5",
+            200: "#e4e4e7",
+            300: "#d4d4d8",
+            400: "#a1a1aa",
+            500: "#71717a",
+            600: "#52525b",
+            700: "#3f3f46",
+            800: "#27272a",
+            900: "#18181b",
+            950: "#09090b",
         }
     },
 
@@ -41,23 +41,22 @@ export const designSystem = {
             light: "rgba(131,229,9,0.1)"
         },
         text: {
-            primary: "text-foreground dark:text-slate-50", // Sincronizado com index.css
-            secondary: "text-slate-500 dark:text-slate-400",
-            muted: "text-slate-400 dark:text-slate-500",
+            primary: "text-[#1C1E21] dark:text-zinc-50", // Azul Marinho Escuro no modo claro
+            secondary: "text-zinc-500 dark:text-zinc-400",
+            muted: "text-zinc-400 dark:text-zinc-500",
             onBrand: "text-white",
-            inverted: "text-slate-50 dark:text-slate-900",
-            price: "text-emerald-600 dark:text-emerald-400"
+            inverted: "text-zinc-50 dark:text-zinc-900"
         },
         surface: {
             page: "bg-background", // Sincronizado com index.css
             card: "bg-card",       // Sincronizado com index.css
-            section: "bg-secondary/50 dark:bg-card/50",
-            hover: "hover:bg-accent dark:hover:bg-slate-800",
-            active: "active:bg-accent/80 dark:active:bg-slate-700"
+            section: "bg-muted/30 dark:bg-card/50",
+            hover: "hover:bg-accent dark:hover:bg-zinc-800",
+            active: "active:bg-accent/80 dark:active:bg-zinc-700"
         },
         border: {
             default: "border-border", // Sincronizado com index.css
-            subtle: "border-border/50 dark:border-slate-900",
+            subtle: "border-border/50 dark:border-zinc-900",
             active: "border-primary",
             brand: "border-primary"
         }
@@ -129,11 +128,11 @@ export const designSystem = {
 
             // Sidebar Secundária (Painéis Internos de Modais/Dashboard)
             secondary: {
-                wrapper: "w-full md:w-72 flex-shrink-0 flex flex-col bg-slate-50/30 dark:bg-background/20 border-r border-slate-100 dark:border-slate-800",
-                header: "p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-background/40",
+                wrapper: "w-full md:w-72 flex-shrink-0 flex flex-col bg-zinc-50/30 dark:bg-background/20 border-r border-zinc-100 dark:border-zinc-800",
+                header: "p-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-background/40",
                 item: "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
-                itemActive: "bg-white dark:bg-card border-slate-200 dark:border-slate-800 shadow-md ring-1 ring-brand/20",
-                itemInactive: "bg-transparent border-transparent hover:bg-slate-100 dark:hover:bg-card/50"
+                itemActive: "bg-white dark:bg-card border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-brand/20",
+                itemInactive: "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-card/50"
             }
         }
     },
@@ -144,18 +143,18 @@ export const designSystem = {
     components: {
         // Header/Navbar Superior
         header: {
-            wrapper: "sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 flex items-center justify-between shadow-sm"
+            wrapper: "sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-6 flex items-center justify-between shadow-sm"
         },
 
         // Cartões (Cards)
         card: {
-            root: "bg-white dark:bg-card/80 border border-slate-200 dark:border-slate-800 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200",
-            flat: "bg-slate-50 dark:bg-card border border-slate-200 dark:border-slate-800 rounded-xl",
+            root: "bg-white dark:bg-card/80 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200",
+            flat: "bg-zinc-50 dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl",
             interactive: "cursor-pointer active:scale-[0.99] transition-transform",
-            header: "px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between",
-            title: "text-lg font-semibold text-slate-900 dark:text-slate-50",
+            header: "px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between",
+            title: "text-lg font-semibold text-zinc-900 dark:text-zinc-50",
             body: "p-6",
-            footer: "px-6 py-4 bg-slate-50/50 dark:bg-card/50 border-t border-slate-100 dark:border-slate-800 rounded-b-xl text-sm text-slate-500"
+            footer: "px-6 py-4 bg-zinc-50/50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-sm text-zinc-500"
         },
 
         // Cartões de Estatísticas (Metrics)
@@ -172,7 +171,7 @@ export const designSystem = {
                     info: "bg-blue-500 text-white border-blue-500 shadow-blue-200/40"
                 },
                 dark: {
-                    base: "dark:bg-card/80 dark:text-slate-50 dark:border-slate-800",
+                    base: "dark:bg-card/80 dark:text-zinc-50 dark:border-zinc-800",
                     accent: "dark:hover:border-brand/30"
                 }
             }
@@ -186,8 +185,8 @@ export const designSystem = {
             // Variantes de Estilo
             variants: {
                 primary: "bg-brand hover:bg-brand/90 text-white shadow-sm",
-                secondary: "bg-white dark:bg-background border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-card hover:text-slate-900 dark:hover:text-white",
-                ghost: "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-card",
+                secondary: "bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-card hover:text-zinc-900 dark:hover:text-white",
+                ghost: "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-card",
                 danger: "text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 border border-transparent hover:border-red-200"
             },
 
@@ -209,12 +208,12 @@ export const designSystem = {
         // Modais (Dialogs) & Drawers
         modal: {
             overlay: "fixed inset-0 z-50 bg-background/60 backdrop-blur-[2px] animate-in fade-in duration-200",
-            content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-card border border-slate-200 dark:border-slate-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]",
+            content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]",
             // Padrão para Modais de Alta Densidade (Scroll Global)
-            header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-transparent rounded-t-xl",
-            title: "text-lg font-semibold leading-none tracking-tight text-slate-900 dark:text-slate-50",
+            header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
+            title: "text-lg font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
             body: "p-6 overflow-y-auto flex-1 custom-scrollbar",
-            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-slate-50 dark:bg-card/50 border-t border-slate-100 dark:border-slate-800 rounded-b-xl",
+            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
 
             // Layout de Scroll Unificado (Uso Recomendado)
             layout: {
@@ -236,7 +235,7 @@ export const designSystem = {
             root: "w-full text-sm text-left border-separate border-spacing-y-2", // Espaçamento vertical entre linhas
             container: "bg-background w-full", // Fundo do sistema para as linhas flutuarem
             header: "bg-transparent",
-            headerCell: "h-12 px-6 text-left align-middle font-bold text-slate-500 dark:text-slate-400 text-[10px] uppercase tracking-wider",
+            headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
             row: "bg-card border border-border/40 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.002]",
             rowCompact: "group py-1.5 px-5 rounded-xl border transition-all duration-300 relative overflow-hidden",
             rowActive: "bg-brand/5 border-brand/20 ring-1 ring-brand/10", // Removido shadow neon
@@ -244,62 +243,62 @@ export const designSystem = {
             caption: "mt-4 text-sm text-muted-foreground",
             
             // Novos utilitários para padronização de cabeçalhos internos (Header de tabelas sem scroll)
-            headerContainer: "flex items-center shadow-sm px-4 py-4 border bg-slate-50/50 dark:bg-card/50 rounded-xl mb-2",
-            headerLabel: "uppercase tracking-wide text-[10px] font-bold text-slate-500 dark:text-slate-400",
-            headerIcon: "w-8 h-8 rounded-lg bg-slate-100/50 dark:bg-slate-800/50 flex items-center justify-center flex-shrink-0 text-slate-500 dark:text-slate-400"
+            headerContainer: "flex items-center shadow-sm px-4 py-4 border bg-zinc-50/50 dark:bg-card/50 rounded-xl mb-2",
+            headerLabel: "uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400",
+            headerIcon: "w-8 h-8 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0 text-zinc-500 dark:text-zinc-400"
         },
 
         // Inputs & Forms
         input: {
-            root: "flex w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
-            label: "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-slate-900 dark:text-slate-200 mb-2 block",
+            root: "flex w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+            label: "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-900 dark:text-zinc-200 mb-2 block",
             group: "space-y-2"
         },
 
         // Badges/Status Indicators
         badge: {
             base: "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            active: "border-transparent bg-brand text-slate-950 hover:bg-brand/80", // Brand
-            outline: "text-slate-500 border-slate-200 dark:border-slate-800 dark:text-slate-400",
-            secondary: "border-transparent bg-slate-100 text-slate-900 hover:bg-slate-200/80 dark:bg-slate-800 dark:text-slate-50",
+            active: "border-transparent bg-brand text-zinc-950 hover:bg-brand/80", // Brand
+            outline: "text-zinc-500 border-zinc-200 dark:border-zinc-800 dark:text-zinc-400",
+            secondary: "border-transparent bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-50",
             destructive: "border-transparent bg-red-50 text-red-600 hover:bg-red-100 border border-red-100",
             success: "border-transparent bg-emerald-50 text-emerald-600 border border-emerald-100"
         },
 
         // Abas (Tabs) 
         tabs: {
-            list: "inline-flex h-10 items-center justify-center rounded-xl bg-slate-100/50 dark:bg-slate-800/40 p-1 text-muted-foreground w-full sm:w-auto backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/30",
-            trigger: "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-slate-950 dark:data-[state=active]:text-slate-50 data-[state=active]:shadow-md text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
+            list: "inline-flex h-10 items-center justify-center rounded-xl bg-zinc-100/50 dark:bg-zinc-800/40 p-1 text-muted-foreground w-full sm:w-auto backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/30",
+            trigger: "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-950 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-md text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
             content: "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             // Variante "Clean" para Navegação de Topo (100% transparente SEMPRE)
             clean: {
                 list: "inline-flex h-auto items-center justify-start !bg-transparent !bg-none p-0 gap-4 md:gap-8 w-full border-none !border-0 shadow-none !shadow-none backdrop-blur-none !bg-opacity-0",
-                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
+                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
             }
         },
 
         // Tooltips
         tooltip: {
-            content: "z-50 overflow-hidden rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-100 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 shadow-md"
+            content: "z-50 overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs text-zinc-700 dark:text-zinc-100 animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 shadow-md"
         },
 
         // Separadores/Divisores
         separator: {
-            horizontal: "h-[1px] w-full bg-slate-200 dark:bg-slate-800 my-4",
-            vertical: "h-full w-[1px] bg-slate-200 dark:bg-slate-800 mx-4"
+            horizontal: "h-[1px] w-full bg-zinc-200 dark:bg-zinc-800 my-4",
+            vertical: "h-full w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-4"
         },
 
         // Paginação
         pagination: {
             wrapper: "flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-6 mt-2",
-            results: "text-[13px] font-medium text-slate-500 dark:text-slate-400 order-2 sm:order-1",
+            results: "text-[13px] font-medium text-zinc-500 dark:text-zinc-400 order-2 sm:order-1",
             controls: "flex items-center gap-3 order-1 sm:order-2",
             item: "flex items-center justify-center min-w-[36px] h-9 rounded-lg border text-[13px] font-semibold transition-all duration-200",
-            active: "bg-brand border-brand text-slate-950",
-            inactive: "bg-white dark:bg-card border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700 hover:bg-slate-50 dark:hover:bg-card/50",
+            active: "bg-brand border-brand text-zinc-950",
+            inactive: "bg-white dark:bg-card border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-card/50",
             disabled: "opacity-40 pointer-events-none",
             nav: "flex items-center gap-1.5",
-            navButton: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-card text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
+            navButton: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-card text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
         }
     },
 
@@ -312,9 +311,9 @@ export const designSystem = {
             card: "shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]"
         },
         // Efeitos de vidro
-        glass: "backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border border-white/20 shadow-xl",
+        glass: "backdrop-blur-md bg-white/70 dark:bg-zinc-900/70 border border-white/20 shadow-xl",
         // Scrollbar customizada
-        scrollbar: "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800 hover:scrollbar-thumb-slate-300 dark:hover:scrollbar-thumb-slate-700"
+        scrollbar: "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 hover:scrollbar-thumb-zinc-300 dark:hover:scrollbar-thumb-zinc-700"
     }
 } as const;
 

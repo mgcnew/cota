@@ -7,9 +7,6 @@ import { capitalize } from "@/lib/text-utils";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import type { Product } from "@/hooks/useProducts";
-import { designSystem } from "@/styles/design-system";
-import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
 
 interface ProductCardProps {
   product: Product;
@@ -183,11 +180,11 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
         ) : (
           <>
             {/* Desktop: Layout completo */}
-            <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-emerald-50/80 to-green-50/80 dark:from-emerald-900/20 dark:to-green-900/20 border border-emerald-200/60 dark:border-emerald-700/30">
+            <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/80 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200/60 dark:border-green-700/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={cn("text-xs sm:text-sm font-medium mb-1", designSystem.colors.text.price)}>Última Compra</p>
-                  <p className={cn("text-xl sm:text-2xl font-bold", designSystem.colors.text.price)}>{formatCurrency(product.lastOrderPrice)}</p>
+                  <p className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-400 mb-1">Última Compra</p>
+                  <p className="text-xl sm:text-2xl font-bold text-green-800 dark:text-green-300">{product.lastOrderPrice || "R$ 0,00"}</p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1 mb-1">

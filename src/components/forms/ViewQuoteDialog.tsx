@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1496,23 +1496,25 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
                       <TabsContent value="atualizacao" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0 mt-0">
                         <QuoteValuesTab
-                          readOnly={readOnly}
                           products={products}
-                          currentQuote={currentQuote}
-                          selectedSupplier={selectedSupplier}
-                          setSelectedSupplier={setSelectedSupplier}
-                          getCurrentProductValue={getCurrentProductValue}
-                          getSupplierItemPricingMetadata={getSupplierItemPricingMetadata}
+                          fornecedores={currentQuote?.fornecedoresParticipantes || []}
+                          quoteId={currentQuote?.id || ""}
+                          supplierItems={currentQuote?._supplierItems || currentQuote?._raw?.quote_supplier_items || []}
+                          onUpdateSupplierProductValue={async (params) => {
+                            if (onUpdateSupplierProductValue && currentQuote) {
+                              await onUpdateSupplierProductValue(
+                                currentQuote.id,
+                                params.supplierId,
+                                params.productId,
+                                params.value
+                              );
+                            }
+                          }}
+                          onRefresh={() => {}}
+                          isMobile={isMobile}
+                          safeStr={(val) => val || ""}
                           getBestPriceInfoForProduct={getBestPriceInfoForProduct}
-                          editingProductId={editingProductId}
-                          editedValues={editedValues}
-                          setEditedValues={setEditedValues}
-                          editedPricingMetadata={editedPricingMetadata}
-                          setEditedPricingMetadata={setEditedPricingMetadata}
-                          handleSaveEdit={handleSaveEdit}
-                          handleCancelEdit={handleCancelEdit}
-                          handleStartEdit={handleStartEdit}
-                          editInputRef={editInputRef}
+                          readOnly={readOnly}
                         />
                       </TabsContent>
 

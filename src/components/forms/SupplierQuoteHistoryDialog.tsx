@@ -1,17 +1,15 @@
 import { useState, useMemo, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Package, Search, ClipboardList } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 import { useSupplierOrderHistory } from "@/hooks/useSupplierOrderHistory";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { designSystem } from "@/styles/design-system";
-import { capitalize } from "@/lib/text-utils";
 
 interface SupplierQuoteHistoryDialogProps {
   supplierName: string;

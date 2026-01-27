@@ -46,7 +46,6 @@ const supplierSchema = z.object({
   phone: z.string().trim().max(20, "Telefone muito longo").optional().or(z.literal("")),
   email: z.string().trim().email("Email inválido").max(255, "Email muito longo").optional().or(z.literal("")),
   address: z.string().trim().max(200, "Endereço muito longo").optional().or(z.literal("")),
-  limit: z.string().trim().min(1, "Limite é obrigatório"),
 });
 
 type SupplierFormData = z.infer<typeof supplierSchema>;
@@ -80,7 +79,6 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
       phone: "",
       email: "",
       address: "",
-      limit: "",
     },
   });
 
@@ -138,9 +136,6 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
         return;
       }
 
-      // Convert limit string to number
-      const numericLimit = parseFloat(data.limit.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-
       const { error } = await supabase
         .from('suppliers')
         .insert({
@@ -151,7 +146,6 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           phone: data.phone || null,
           email: data.email || null,
           address: data.address || null,
-          limit: numericLimit,
         });
 
       if (error) throw error;
@@ -292,45 +286,24 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="limit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Limite de Crédito *</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="R$ 0,00"
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Endereço Completo</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Rua das Flores, 123..."
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={designSystem.typography.size.sm}>Endereço Completo</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Rua das Flores, 123, Centro, São Paulo - SP"
+                        className={designSystem.components.input.root}
+                        onFocus={handleInputFocus}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Seção: Informações de Contato */}

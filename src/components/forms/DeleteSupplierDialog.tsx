@@ -13,7 +13,6 @@ import { toast } from "@/hooks/use-toast";
 interface Supplier {
   id: string;
   name: string;
-  cnpj?: string;
 }
 
 interface DeleteSupplierDialogProps {
