@@ -9,6 +9,7 @@ import { capitalize } from "@/lib/text-utils";
 import type { Product } from "@/hooks/useProducts";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 
 interface ProductListDesktopProps {
   products: Product[];
@@ -19,7 +20,7 @@ interface ProductListDesktopProps {
 
 const getProductStatus = (product: Product) => {
   if (product.quotesCount === 0) return "sem_cotacao";
-  if (product.lastOrderPrice === "R$ 0,00") return "pendente";
+  if (!product.lastOrderPrice || product.lastOrderPrice === 0) return "pendente";
   if (product.quotesCount >= 3) return "ativo";
   return "cotado";
 };
@@ -132,7 +133,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                   </div>
 
                   <div className="w-[10%] px-2 flex justify-center items-center gap-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 py-1 rounded-lg mx-1">
-                    <span className={cn("font-bold text-sm", designSystem.colors.text.price)}>{product.lastOrderPrice}</span>
+                    <span className={cn("font-bold text-sm", designSystem.colors.text.price)}>{formatCurrency(product.lastOrderPrice)}</span>
                     {getTrendIcon(product.trend)}
                   </div>
 

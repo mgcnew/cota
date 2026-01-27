@@ -30,6 +30,7 @@ import { useSupplierStats } from "@/hooks/useSupplierStats";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { formatCurrency } from "@/utils/formatters";
 
 // Lazy load dialogs for better initial load performance
 const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog"));
@@ -50,20 +51,22 @@ interface Supplier {
   id: string;
   name: string;
   contact: string;
-  limit: string;
+  limit: number;
   activeQuotes: number;
   totalQuotes: number;
-  avgPrice: string;
+  avgPrice: number;
   lastOrder: string;
   rating: number;
   status: "active" | "inactive" | "pending";
   phone?: string;
   email?: string;
   address?: string;
+  cnpj?: string;
 }
 
 type SupplierFormData = {
   name: string;
+  cnpj?: string;
   contact: string;
   phone?: string;
   email?: string;
@@ -121,9 +124,15 @@ function Fornecedores() {
   };
 
   const handleEditSupplier = (id: string, data: SupplierFormData) => {
+    // Convert limit string to number before sending to hook
+    const numericLimit = parseFloat(data.limit.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    
     updateSupplier({
       supplierId: id,
-      data
+      data: {
+        ...data,
+        limit: numericLimit
+      }
     });
   };
 
@@ -272,7 +281,7 @@ function Fornecedores() {
               title="Limite Total"
               value={stats.totalLimit}
               icon={DollarSign}
-              trend={{ value: `R$ ${stats.limiteMedioPorAtivo}k`, label: "média por ativo", type: "neutral" }}
+              trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
               variant="default"
               className="hover:scale-[1.02] transition-transform"
             />
@@ -398,14 +407,14 @@ function Fornecedores() {
                           <DollarSign className="h-3.5 w-3.5" />
                           <span className="text-xs">Limite</span>
                         </div>
-                        <span className="text-sm font-medium">{supplier.limit}</span>
+                        <span className="text-sm font-medium">{formatCurrency(supplier.limit)}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <TrendingUp className="h-3.5 w-3.5" />
                           <span className="text-xs">Preço Médio</span>
                         </div>
-                        <span className="text-sm font-medium">{supplier.avgPrice}</span>
+                        <span className="text-sm font-medium">{formatCurrency(supplier.avgPrice)}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">

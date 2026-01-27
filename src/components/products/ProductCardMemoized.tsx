@@ -9,6 +9,7 @@ import { LazyImage } from "@/components/responsive/LazyImage";
 import type { Product } from "@/hooks/useProducts";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 
 interface ProductCardProps {
   product: Product;
@@ -186,7 +187,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
               <div className="flex items-center justify-between">
                 <div>
                   <p className={cn("text-xs sm:text-sm font-medium mb-1", designSystem.colors.text.price)}>Última Compra</p>
-                  <p className={cn("text-xl sm:text-2xl font-bold", designSystem.colors.text.price)}>{product.lastOrderPrice || "R$ 0,00"}</p>
+                  <p className={cn("text-xl sm:text-2xl font-bold", designSystem.colors.text.price)}>{formatCurrency(product.lastOrderPrice)}</p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-1 mb-1">

@@ -1,11 +1,13 @@
 import { useMemo } from 'react';
+import { formatCurrency } from '@/utils/formatters';
 
 interface Supplier {
   id: string;
   status: "active" | "inactive" | "pending";
-  limit: string;
+  limit: number;
   activeQuotes: number;
   totalQuotes: number;
+  cnpj?: string;
 }
 
 export interface SupplierStats {
@@ -37,7 +39,7 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
     };
 
     const totalLimit = suppliers.reduce((sum, s) => {
-      const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
+      const limitValue = Number(s.limit || 0);
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
     const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
@@ -53,8 +55,8 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
       : 0;
 
     const limiteMedioPorAtivo = porStatus.active > 0
-      ? (totalLimit / porStatus.active).toFixed(1)
-      : "0.0";
+      ? formatCurrency(totalLimit / porStatus.active)
+      : "R$ 0,00";
 
     const fornecedoresComCotacoes = suppliers.filter(s => ((s as any).activeQuotes || 0) > 0 || ((s as any).totalQuotes || 0) > 0);
     const totalQuotes = suppliers.reduce((sum, s) => sum + ((s as any).totalQuotes || 0), 0);
@@ -80,7 +82,7 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
       inactive: porStatus.inactive,
       pending: porStatus.pending,
       percentualAtivos,
-      totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
+      totalLimit: formatCurrency(totalLimit),
       limiteMedioPorAtivo,
       activeQuotes: activeQuotesTotal,
       mediaCotacoesPorFornecedor,
