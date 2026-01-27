@@ -11,6 +11,8 @@ import {
 import { capitalize } from "@/lib/text-utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Product } from "@/hooks/useProducts";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 interface MobileProductCardProps {
   product: Product;
@@ -107,8 +109,8 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
         
         {/* Info compacta em linha */}
         <div className="flex items-center justify-between text-xs px-1">
-          <div className="flex items-center gap-1">
-            <span className="font-semibold text-green-700 dark:text-green-400">{product.lastOrderPrice}</span>
+          <div className="flex items-center gap-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 px-2 py-0.5 rounded-md">
+            <span className={cn("font-bold", designSystem.colors.text.price)}>{product.lastOrderPrice}</span>
             {getTrendIcon(product.trend)}
           </div>
           <div className="flex items-center gap-1 text-gray-500">

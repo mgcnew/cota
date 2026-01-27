@@ -17,6 +17,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { designSystem } from "@/styles/design-system";
 import { 
   Collapsible, 
   CollapsibleContent, 
@@ -188,16 +189,21 @@ export const ShoppingListCard = memo(function ShoppingListCard({
               </div>
               <div className="bg-muted/50 rounded-lg p-2.5">
                 <p className="text-xs text-muted-foreground mb-0.5">Preço Est.</p>
-                <p
-                  className={cn(
-                    "font-semibold",
-                    item.estimated_price
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-muted-foreground"
-                  )}
-                >
-                  {item.estimated_price ? `R$ ${item.estimated_price.toFixed(2)}` : "-"}
-                </p>
+                <div className={cn(
+                  "px-2 py-0.5 rounded-md inline-block",
+                  item.estimated_price ? "bg-emerald-50/50 dark:bg-emerald-900/10" : ""
+                )}>
+                  <p
+                    className={cn(
+                      "font-bold",
+                      item.estimated_price
+                        ? designSystem.colors.text.price
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {item.estimated_price ? `R$ ${item.estimated_price.toFixed(2)}` : "-"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

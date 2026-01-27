@@ -6,6 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 interface ProductPriceInfoTooltipProps {
   productId: string;
@@ -79,7 +81,7 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
               <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
                 {/* Preço Principal */}
                 <div className="text-center">
-                  <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">
+                  <p className={cn("text-2xl font-black tracking-tighter", designSystem.colors.text.price)}>
                     {formatCurrency(bestOrderEntry.price)}
                   </p>
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">

@@ -45,7 +45,8 @@ export const designSystem = {
             secondary: "text-zinc-500 dark:text-zinc-400",
             muted: "text-zinc-400 dark:text-zinc-500",
             onBrand: "text-white",
-            inverted: "text-zinc-50 dark:text-zinc-900"
+            inverted: "text-zinc-50 dark:text-zinc-900",
+            price: "text-emerald-600 dark:text-emerald-400"
         },
         surface: {
             page: "bg-background", // Sincronizado com index.css

@@ -95,7 +95,9 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                   </div>
 
                   <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
-                    <span className={cn("text-sm font-medium", designSystem.colors.text.primary)}>{supplier.avgPrice}</span>
+                    <div className="flex items-center gap-1.5 bg-emerald-50/50 dark:bg-emerald-900/10 px-3 py-1 rounded-lg">
+                      <span className={cn("text-sm font-bold", designSystem.colors.text.price)}>{supplier.avgPrice}</span>
+                    </div>
                   </div>
 
                   <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
