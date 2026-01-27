@@ -39,9 +39,9 @@ export default function Anotacoes() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12")}>
+      <div className={ds.layout.container.page}>
         {/* Page Header */}
-        <div className="flex flex-col gap-6 mb-10">
+        <div className="flex flex-col gap-6 mb-8">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
               <StickyNote className="h-6 w-6 text-brand" />

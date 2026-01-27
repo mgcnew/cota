@@ -233,14 +233,41 @@ function Fornecedores() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className={designSystem.layout.container.page}>
-          {/* Page Title */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
-              <Building2 className="h-6 w-6 text-brand" />
+          {/* Page Header */}
+          <div className="flex items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+                <Building2 className="h-6 w-6 text-brand" />
+              </div>
+              <div>
+                <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
+                  Fornecedores
+                </h1>
+                <p className={cn(designSystem.colors.text.secondary, "text-sm mt-0.5")}>
+                  Gerencie sua base de parceiros e contatos
+                </p>
+              </div>
             </div>
-            <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
-              Fornecedores
-            </h1>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => importSuppliersRef.current?.click()}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Importar
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => addSupplierRef.current?.click()}
+                className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Novo Fornecedor
+              </Button>
+            </div>
           </div>
 
           {/* Metrics Grid */}
@@ -304,25 +331,6 @@ function Fornecedores() {
                   </SelectContent>
                 </Select>
                 <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
-              </div>
-              <div className="flex gap-2 ml-auto">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => importSuppliersRef.current?.click()}
-                  className={cn(designSystem.components.button.secondary, "h-10 hidden sm:flex")}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Importar
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => addSupplierRef.current?.click()}
-                  className={cn(designSystem.components.button.primary, "h-11 sm:h-10")}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Fornecedor
-                </Button>
               </div>
             </div>
           </div>

@@ -1,5 +1,4 @@
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PageHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +21,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 import { useListaComprasLogic } from "@/hooks/useListaComprasLogic";
+
+import { ds } from "@/styles/design-system";
 
 export default function ListaCompras() {
   const { toast } = useToast();
@@ -55,7 +56,7 @@ export default function ListaCompras() {
 
   return (
     <PageWrapper>
-      <div className="page-container space-y-4 sm:space-y-6">
+      <div className={ds.layout.container.page}>
         {/* Stats Cards - Cores Sólidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {/* Total de Itens - Azul (informação) */}
@@ -118,22 +119,31 @@ export default function ListaCompras() {
           </div>
         </div>
 
-        {/* Header */}
-        <PageHeader
-          title="Lista de Compras"
-          description="Organize produtos para comprar no futuro"
-          icon={ShoppingBasket}
-          actions={
-            <Button
-              onClick={() => setShowAddDialog(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/25 h-10 text-sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Adicionar Produto</span>
-              <span className="sm:hidden">Adicionar</span>
-            </Button>
-          }
-        />
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+              <ShoppingBasket className="h-6 w-6 text-brand" />
+            </div>
+            <div>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                Lista de Compras
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                Organize produtos para comprar no futuro
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Adicionar Produto</span>
+            <span className="sm:hidden">Adicionar</span>
+          </Button>
+        </div>
 
         {/* Search and Controls */}
         <div className="flex flex-col gap-3 items-stretch sm:items-center sm:justify-between">

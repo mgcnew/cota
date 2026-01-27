@@ -188,14 +188,60 @@ function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className={designSystem.layout.container.page}>
-          {/* Header & Title */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
-              <Package className="h-6 w-6 text-brand" />
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+                <Package className="h-6 w-6 text-brand" />
+              </div>
+              <div>
+                <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
+                  Produtos
+                </h1>
+                <p className={cn(designSystem.colors.text.secondary, "text-sm mt-0.5")}>
+                  Gerencie seu catálogo de itens e categorias
+                </p>
+              </div>
             </div>
-            <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
-              Produtos
-            </h1>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBrandDialogOpen(true)}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Award className="h-4 w-4 mr-2" /> Marcas
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportProducts}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Adicionar</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
+                    <Award className="h-4 w-4 mr-2 text-zinc-500" /> Marcas
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {/* Métricas essenciais */}
@@ -249,44 +295,6 @@ function Produtos() {
                   selectedCategory={selectedCategory}
                   onCategoryChange={setSelectedCategory}
                 />
-              </div>
-              <div className="flex items-center gap-2 ml-auto">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setBrandDialogOpen(true)}
-                  className={cn(designSystem.components.button.secondary, "h-10 hidden sm:flex")}
-                >
-                  <Award className="h-4 w-4 mr-2" /> Marcas
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExportProducts}
-                  className={cn(designSystem.components.button.secondary, "h-10 hidden sm:flex")}
-                >
-                  <Download className="h-4 w-4 mr-2" /> Exportar
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className={cn(designSystem.components.button.primary, "h-11 sm:h-10 min-w-[44px] px-3 sm:px-4 text-sm touch-target")}>
-                      <Plus className="h-4 w-4 sm:mr-2" />
-                      <span className="hidden sm:inline">Adicionar</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[180px]">
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                      <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
-                      <Award className="h-4 w-4 mr-2 text-zinc-500" /> Marcas
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
           </div>

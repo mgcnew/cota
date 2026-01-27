@@ -146,7 +146,7 @@ export default function ContagemEstoque() {
     <PageWrapper>
       <div className={ds.layout.container.page}>
         {/* Page Title */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
               <ClipboardList className="h-6 w-6 text-brand" />

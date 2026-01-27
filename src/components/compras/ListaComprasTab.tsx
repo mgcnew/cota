@@ -20,7 +20,6 @@ import { ShoppingListCards } from "@/components/shopping-list/ShoppingListCards"
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
-import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
@@ -199,7 +198,6 @@ export default function ListaComprasTab() {
             <Plus className="h-4 w-4 mr-2" />
             Adicionar à Lista
           </Button>
-          <ViewToggle view={viewMode} onViewChange={setViewMode} className="hidden md:flex" />
         </div>
       </div>
 

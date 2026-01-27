@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart3, FileText, History, Loader2, DollarSign, Building2, Package } from "lucide-react";
+import { BarChart3, FileText, History, Loader2 } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
@@ -22,9 +22,8 @@ import { useReports } from "@/hooks/useReports";
 import { useDatePeriod } from "@/hooks/useDatePeriod";
 
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { PageHeader } from "@/components/ui/page-header";
-import { MetricCard } from "@/components/ui/metric-card";
-import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { designSystem as ds } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
 
 // Layout components
 import { ReportsHeader, PeriodDialog, FiltersDialog } from "@/components/reports/layout";
@@ -33,25 +32,23 @@ import { ReportsHeader, PeriodDialog, FiltersDialog } from "@/components/reports
 const AnalyticsTab = lazy(() => 
   import("@/components/reports/analytics/AnalyticsTab").then(mod => ({ default: mod.AnalyticsTab }))
 );
-const ReportsTab = lazy(() => 
-  import("@/components/reports/tabs/ReportsTab").then(mod => ({ default: mod.ReportsTab }))
-);
 const HistoryTab = lazy(() => 
   import("@/components/reports/tabs/HistoryTab").then(mod => ({ default: mod.HistoryTab }))
 );
-
-import type { Estatisticas } from "@/types/reports";
 
 /**
  * Loading skeleton for tabs
  */
 function TabSkeleton() {
   return (
-    <div className="space-y-4">
-      <Skeleton className="h-8 w-48" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Skeleton className="h-64 w-full" />
-        <Skeleton className="h-64 w-full" />
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-center gap-4">
+        <Skeleton className="h-10 w-48 rounded-xl" />
+        <Skeleton className="h-10 w-48 rounded-xl" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Skeleton className="h-[400px] w-full rounded-2xl" />
+        <Skeleton className="h-[400px] w-full rounded-2xl" />
       </div>
     </div>
   );
@@ -62,21 +59,28 @@ function TabSkeleton() {
  */
 function PageSkeleton() {
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-64" />
+    <div className={cn("p-6 space-y-8 animate-pulse", ds.layout.container.page)}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-12 w-12 rounded-xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-48 rounded-lg" />
+            <Skeleton className="h-4 w-64 rounded-lg" />
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-40" />
-          <Skeleton className="h-10 w-32" />
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-40 rounded-xl" />
+          <Skeleton className="h-10 w-32 rounded-xl" />
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-32 w-full" />
-        ))}
+      <div className="space-y-6">
+        <div className="flex justify-center">
+          <Skeleton className="h-12 w-64 rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-80 w-full rounded-2xl" />
+          <Skeleton className="h-80 w-full rounded-2xl" />
+        </div>
       </div>
     </div>
   );
@@ -96,7 +100,6 @@ export default function Relatorios() {
     setEndDate,
     applyPreset,
     dateRangeText,
-    estatisticas,
     loading,
     refreshing,
     refresh
@@ -113,7 +116,7 @@ export default function Relatorios() {
   // Active tab state - reads from query string
   const [activeTab, setActiveTab] = useState(() => {
     const tabFromQuery = searchParams.get('tab');
-    return tabFromQuery && ['analytics', 'relatorios', 'historico'].includes(tabFromQuery) 
+    return tabFromQuery && ['analytics', 'historico'].includes(tabFromQuery) 
       ? tabFromQuery 
       : 'analytics';
   });
@@ -172,31 +175,6 @@ export default function Relatorios() {
     setIsPeriodDialogOpen(true);
   }, []);
 
-  // Memoized metric card trends to prevent unnecessary re-renders (Requirement 6.5)
-  const economiaCardTrend = useMemo(() => ({
-    value: estatisticas.economiaPercentual,
-    label: "do total",
-    type: "positive" as const
-  }), [estatisticas.economiaPercentual]);
-
-  const cotacoesCardTrend = useMemo(() => ({
-    value: `${estatisticas.pedidosGerados}`,
-    label: "pedidos gerados",
-    type: "neutral" as const
-  }), [estatisticas.pedidosGerados]);
-
-  const fornecedoresCardTrend = useMemo(() => ({
-    value: `${estatisticas.fornecedoresAtivos}`,
-    label: "ativos no período",
-    type: "neutral" as const
-  }), [estatisticas.fornecedoresAtivos]);
-
-  const produtosCardTrend = useMemo(() => ({
-    value: `${estatisticas.produtosCotados}`,
-    label: "cotados no período",
-    type: "neutral" as const
-  }), [estatisticas.produtosCotados]);
-
   // Memoized check for history tab active state
   const isHistoryTabActive = useMemo(() => activeTab === "historico", [activeTab]);
 
@@ -206,45 +184,24 @@ export default function Relatorios() {
 
   return (
     <PageWrapper>
-      <div className="page-container">
-        {/* Metric Cards com ResponsiveGrid */}
-        <ResponsiveGrid gap="md" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-6 overflow-visible">
-          <MetricCard
-            title="Economia Total"
-            value={estatisticas.economiaTotal}
-            icon={DollarSign}
-            variant="success"
-            trend={economiaCardTrend}
-          />
-          <MetricCard
-            title="Cotações"
-            value={estatisticas.cotacoesRealizadas}
-            icon={FileText}
-            variant="info"
-            trend={cotacoesCardTrend}
-          />
-          <MetricCard
-            title="Fornecedores"
-            value={estatisticas.fornecedoresAtivos}
-            icon={Building2}
-            variant="default"
-            trend={fornecedoresCardTrend}
-          />
-          <MetricCard
-            title="Produtos"
-            value={estatisticas.produtosCotados}
-            icon={Package}
-            variant="warning"
-            trend={produtosCardTrend}
-          />
-        </ResponsiveGrid>
+      <div className={ds.layout.container.page}>
+        {/* Page Header */}
+        <div className="flex flex-col mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+              <FileText className="h-6 w-6 text-brand" />
+            </div>
+            <div>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                Relatórios
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                Geração e análise estratégica de performance e economia do sistema
+              </p>
+            </div>
+          </div>
 
-        {/* Page Header with Actions */}
-        <PageHeader
-          title="Relatórios"
-          description="Geração e análise de relatórios do sistema"
-          icon={FileText}
-          actions={
+          <div className="flex justify-end mt-6 md:mt-12">
             <ReportsHeader
               dateRangeText={dateRangeText}
               onOpenPeriodDialog={handleOpenPeriodDialog}
@@ -253,106 +210,102 @@ export default function Relatorios() {
               isRefreshing={refreshing}
               isExporting={isGenerating}
             />
-          }
-        />
-
-        {/* Period Dialog */}
-        <PeriodDialog
-          isOpen={isPeriodDialogOpen}
-          onOpenChange={setIsPeriodDialogOpen}
-          startDate={startDate}
-          endDate={endDate}
-          onStartDateChange={setStartDate}
-          onEndDateChange={setEndDate}
-          onApplyPreset={handleApplyPreset}
-        />
-
-        {/* Filters Dialog */}
-        <FiltersDialog
-          isOpen={isFiltersDialogOpen}
-          onOpenChange={setIsFiltersDialogOpen}
-          selectedFornecedores={selectedFornecedores}
-          selectedProdutos={selectedProdutos}
-          onFornecedoresChange={setSelectedFornecedores}
-          onProdutosChange={setSelectedProdutos}
-          onReset={handleResetFilters}
-        />
+          </div>
+        </div>
 
         {/* Progress Bar */}
         {isGenerating && (
-          <Card className="border-blue-200/50 bg-blue-500/10 mb-6">
-            <CardContent className="pt-4">
-              <div className="flex items-center gap-3">
-                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-blue-700 dark:text-blue-400 font-medium">Gerando relatórios...</span>
-                    <span className="text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
+          <Card className="overflow-hidden border-brand/20 bg-brand/[0.02] shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-brand/10 text-brand">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                </div>
+                <div className="flex-1 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={cn("text-sm font-black uppercase tracking-widest", ds.colors.text.primary)}>
+                      Processando Inteligência de Dados
+                    </span>
+                    <span className="text-brand font-black text-sm italic">{Math.round(progress)}%</span>
                   </div>
-                  <Progress value={progress} className="w-full h-2" />
+                  <Progress value={progress} className="h-2 bg-brand/10" />
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        {/* Tabs with smooth transitions (Requirement 5.2) */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted h-auto p-1.5 rounded-xl">
-            <TabsTrigger 
-              value="analytics" 
-              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground"
-            >
-              <BarChart3 className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-              <span className="font-medium">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="relatorios" 
-              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground"
-            >
-              <FileText className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-              <span className="font-medium">Relatórios</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="historico" 
-              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground"
-            >
-              <History className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
-              <span className="font-medium">Histórico</span>
-            </TabsTrigger>
-          </TabsList>
+        {/* Tabs Premium */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-8">
+          <div className="flex items-center justify-center">
+            <TabsList className={cn(ds.components.tabs.list, "h-14 p-1.5 bg-muted/50 backdrop-blur-md border-border/40")}>
+              <TabsTrigger 
+                value="analytics" 
+                className={cn(
+                  ds.components.tabs.trigger,
+                  "h-11 px-8 gap-2.5 rounded-lg transition-all duration-300",
+                  "data-[state=active]:bg-background data-[state=active]:text-brand data-[state=active]:shadow-xl"
+                )}
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="font-black uppercase tracking-widest text-[11px]">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="historico" 
+                className={cn(
+                  ds.components.tabs.trigger,
+                  "h-11 px-8 gap-2.5 rounded-lg transition-all duration-300",
+                  "data-[state=active]:bg-background data-[state=active]:text-brand data-[state=active]:shadow-xl"
+                )}
+              >
+                <History className="h-4 w-4" />
+                <span className="font-black uppercase tracking-widest text-[11px]">Histórico</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          {/* Analytics Tab - Lazy loaded with smooth transition */}
-          <TabsContent value="analytics" className="space-y-6 mt-0 tab-content-animated">
-            <Suspense fallback={<TabSkeleton />}>
-              <AnalyticsTab
-                startDate={startDate}
-                endDate={endDate}
-                selectedFornecedores={selectedFornecedores}
-                selectedProdutos={selectedProdutos}
-              />
-            </Suspense>
-          </TabsContent>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <TabsContent value="analytics" className="m-0 outline-none">
+              <Suspense fallback={<TabSkeleton />}>
+                <AnalyticsTab
+                  startDate={startDate}
+                  endDate={endDate}
+                  selectedFornecedores={selectedFornecedores}
+                  selectedProdutos={selectedProdutos}
+                />
+              </Suspense>
+            </TabsContent>
 
-          {/* Reports Tab - Lazy loaded with smooth transition */}
-          <TabsContent value="relatorios" className="mt-0 tab-content-animated">
-            <Suspense fallback={<TabSkeleton />}>
-              <ReportsTab
-                startDate={startDate}
-                endDate={endDate}
-                onOpenPeriodDialog={handleOpenPeriodDialog}
-              />
-            </Suspense>
-          </TabsContent>
-
-          {/* History Tab - Lazy loaded with smooth transition */}
-          <TabsContent value="historico" className="mt-0 tab-content-animated">
-            <Suspense fallback={<TabSkeleton />}>
-              <HistoryTab isActive={isHistoryTabActive} />
-            </Suspense>
-          </TabsContent>
+            <TabsContent value="historico" className="m-0 outline-none">
+              <Suspense fallback={<TabSkeleton />}>
+                <HistoryTab isActive={isHistoryTabActive} />
+              </Suspense>
+            </TabsContent>
+          </div>
         </Tabs>
       </div>
+
+      {/* Period Dialog */}
+      <PeriodDialog
+        isOpen={isPeriodDialogOpen}
+        onOpenChange={setIsPeriodDialogOpen}
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        onApplyPreset={handleApplyPreset}
+      />
+
+      {/* Filters Dialog */}
+      <FiltersDialog
+        isOpen={isFiltersDialogOpen}
+        onOpenChange={setIsFiltersDialogOpen}
+        selectedFornecedores={selectedFornecedores}
+        selectedProdutos={selectedProdutos}
+        onFornecedoresChange={setSelectedFornecedores}
+        onProdutosChange={setSelectedProdutos}
+        onReset={handleResetFilters}
+      />
     </PageWrapper>
   );
 }

@@ -16,6 +16,7 @@ import { Shield, CreditCard } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ds } from "@/styles/design-system";
 
 // Lazy load heavy settings components
 const CompanyInfo = lazy(() => import("@/components/settings/CompanyInfo").then(m => ({ default: m.CompanyInfo })));
@@ -552,30 +553,32 @@ export default function Configuracoes() {
 
   return (
     <PageWrapper>
-      <div className="page-container" ref={contentRef}>
-        {/* Header */}
-        <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/30 dark:to-purple-950/30 rounded-2xl p-6 border border-violet-100 dark:border-violet-800 shadow-sm mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Settings className="h-6 w-6 text-white" />
+      <div className={ds.layout.container.page} ref={contentRef}>
+        {/* Page Header */}
+        <div className="flex flex-col gap-6 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+                <Settings className="h-6 w-6 text-brand" />
+              </div>
+              <div>
+                <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                  Configurações
+                </h1>
+                <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                  Gerencie as preferências e configurações do sistema
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-bold text-3xl bg-gradient-to-r from-violet-900 to-purple-700 dark:from-violet-300 dark:to-purple-300 bg-clip-text text-transparent">
-                Configurações
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Gerencie as preferências e configurações do sistema
-              </p>
-            </div>
+
+            {/* Saving indicator */}
+            {isSaving && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in">
+                <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                <span>Salvando...</span>
+              </div>
+            )}
           </div>
-          
-          {/* Saving indicator */}
-          {isSaving && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Salvando...</span>
-            </div>
-          )}
         </div>
 
         {/* Mobile: Accordion layout / Desktop: Sidebar layout */}

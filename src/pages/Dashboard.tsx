@@ -115,17 +115,17 @@ function Dashboard() {
   return (
     <PageWrapper>
       <div className={designSystem.layout.container.page}>
-        {/* Header - Alinhado com Topbar */}
-        <div className="flex items-center justify-between mb-6">
+        {/* Header - Alinhado com Padrão de Sistema */}
+        <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl border border-border/50 bg-accent/10">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
               <TrendingUp className="h-6 w-6 text-brand" />
             </div>
             <div>
-              <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+              <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
                 Dashboard
               </h1>
-              <p className={cn(designSystem.typography.size.sm, designSystem.colors.text.secondary)}>
+              <p className={cn(designSystem.colors.text.secondary, "text-sm mt-0.5")}>
                 Visão geral das suas operações
               </p>
             </div>
