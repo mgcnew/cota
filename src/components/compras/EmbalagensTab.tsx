@@ -35,6 +35,7 @@ import { MobilePackagingQuoteCard } from "./embalagens/MobilePackagingQuoteCard"
 // Dialogs e componentes
 import {
   AddPackagingQuoteDialog,
+  AddPackagingOrderDialog,
   ManagePackagingQuoteDialog,
   DeletePackagingQuoteDialog,
   PackagingItemsDialog,
@@ -54,6 +55,7 @@ function EmbalagensTab() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [addOrderDialogOpen, setAddOrderDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
@@ -359,7 +361,7 @@ function EmbalagensTab() {
       {/* Other Content - Persistent ForceMount */}
       <TabsContent value="pedidos" className="mt-0" forceMount>
         <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
+          <PackagingOrdersTab onCreateOrder={() => setAddOrderDialogOpen(true)} />
         </div>
       </TabsContent>
 
@@ -379,6 +381,13 @@ function EmbalagensTab() {
       <AddPackagingQuoteDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
+        packagingItems={packagingItems}
+        suppliers={suppliers}
+      />
+
+      <AddPackagingOrderDialog
+        open={addOrderDialogOpen}
+        onOpenChange={setAddOrderDialogOpen}
         packagingItems={packagingItems}
         suppliers={suppliers}
       />
