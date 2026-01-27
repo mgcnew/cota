@@ -286,7 +286,7 @@ function Fornecedores() {
             />
           </ResponsiveGrid>
 
-          {/* Unified Actions Bar */}
+          {/* Unified Actions Bar - Aligned to the Right */}
           <div className="flex justify-end mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               {/* Search Field */}
@@ -300,7 +300,7 @@ function Fornecedores() {
                 />
               </div>
 
-              {/* Filters & Actions Group */}
+              {/* Actions & Filters Group */}
               <div className="flex items-center gap-2">
                 <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
                   <SelectTrigger className={cn(designSystem.components.input.root, "w-[150px] h-11")}>
@@ -329,7 +329,7 @@ function Fornecedores() {
                 <Button
                   size="sm"
                   onClick={() => addSupplierRef.current?.click()}
-                  className={cn(designSystem.components.button.primary, "h-11 flex-1 sm:flex-initial px-6 shadow-lg shadow-brand/10")}
+                  className={cn(designSystem.components.button.primary, "h-11 flex-1 sm:flex-initial px-6")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   <span>Novo Fornecedor</span>

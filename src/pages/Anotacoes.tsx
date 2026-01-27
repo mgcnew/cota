@@ -40,23 +40,25 @@ export default function Anotacoes() {
     <PageWrapper>
       <div className={cn(ds.layout.container.page, "pt-8 md:pt-12")}>
         {/* Page Header */}
-        <div className="flex flex-col gap-6 mb-10">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-              <StickyNote className="h-6 w-6 text-brand" />
-            </div>
-            <div>
-              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
-                Anotações
-              </h1>
-              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
-                Gerencie suas tarefas e lembretes de forma simples
-              </p>
-            </div>
+        <div className="flex items-center gap-3 mb-10">
+          <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+            <StickyNote className="h-6 w-6 text-brand" />
           </div>
+          <div>
+            <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+              Anotações
+            </h1>
+            <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+              Gerencie suas tarefas e lembretes de forma simples
+            </p>
+          </div>
+        </div>
           
-          <div className="flex flex-col lg:flex-row-reverse lg:items-center justify-between gap-4">
-            <div className="w-full lg:max-w-md">
+        {/* Unified Actions Bar - Aligned to the Right */}
+        <div className="flex justify-end mb-6">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            {/* Search Field */}
+            <div className="w-full sm:w-64">
               <ExpandableSearch
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -65,13 +67,17 @@ export default function Anotacoes() {
                 expandedWidth="w-full"
               />
             </div>
-            <Button
+
+            {/* Actions Block */}
+            <div className="flex items-center gap-2">
+              <Button
               onClick={() => setShowCreateDialog(true)}
-              className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
+              className={cn(ds.components.button.primary, "h-11 px-6 flex-1 sm:flex-initial")}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Nova Anotação
+              <span>Nova Anotação</span>
             </Button>
+            </div>
           </div>
         </div>
 

@@ -235,10 +235,10 @@ function Produtos() {
             />
           </ResponsiveGrid>
 
-          {/* Unified Actions Bar */}
+          {/* Unified Actions Bar - Aligned to the Right */}
           <div className="flex justify-end mb-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              {/* Search Field */}
+              {/* Search Field - Contained within the actions group */}
               <div className="w-full sm:w-64">
                 <ExpandableSearch
                   value={searchQuery}
@@ -273,10 +273,10 @@ function Produtos() {
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button className={cn(designSystem.components.button.primary, "h-11 flex-1 sm:flex-initial px-6 shadow-lg shadow-brand/10")}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      <span>Adicionar</span>
-                    </Button>
+                    <Button className={cn(designSystem.components.button.primary, "h-11 flex-1 sm:flex-initial px-6")}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Adicionar</span>
+                  </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-[180px]">
                     <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
