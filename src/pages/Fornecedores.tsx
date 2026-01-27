@@ -236,7 +236,7 @@ function Fornecedores() {
           {/* Page Title */}
           <div className="flex items-center gap-3 mb-6">
             <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
-              <Building2 className="h-6 w-6 text-[#83E509]" />
+              <Building2 className="h-6 w-6 text-brand" />
             </div>
             <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
               Fornecedores

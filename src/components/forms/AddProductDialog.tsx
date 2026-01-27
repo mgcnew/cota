@@ -602,14 +602,14 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               </div>
 
               {productImage ? (
-                <div className="relative w-full h-32 bg-white rounded-lg overflow-hidden border border-zinc-200 flex items-center justify-center">
+                <div className="relative w-full h-32 bg-muted/50 rounded-lg overflow-hidden border border-border flex items-center justify-center">
                   <img src={productImage} alt="Preview" className="h-full object-contain" />
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-200 rounded-lg cursor-pointer hover:bg-zinc-50 transition-colors">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 text-zinc-400 mb-2" />
-                    <p className="text-xs text-zinc-500">Clique para selecionar (max 5MB)</p>
+                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                    <p className="text-xs text-muted-foreground">Clique para selecionar (max 5MB)</p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
@@ -646,7 +646,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',

@@ -47,7 +47,7 @@ export default function Landing() {
       <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#83E509] flex items-center justify-center text-zinc-950 font-bold">
+            <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-zinc-950 font-bold">
               C
             </div>
             <span className="text-lg sm:text-xl font-bold tracking-tight">CotaJá</span>
@@ -59,7 +59,7 @@ export default function Landing() {
               <Button variant="ghost" className="font-medium">Entrar</Button>
             </Link>
             <Link to="/auth?mode=login">
-              <Button className="bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 font-bold border-none">
+              <Button className="bg-brand hover:bg-brand-hover text-zinc-950 font-bold border-none">
                 Acessar Sistema
               </Button>
             </Link>
@@ -83,7 +83,7 @@ export default function Landing() {
               <Button variant="outline" className="w-full justify-center">Entrar</Button>
             </Link>
             <Link to="/auth?mode=login" className="block">
-              <Button className="bg-[#83E509] text-zinc-950 w-full font-bold">Acessar Sistema</Button>
+              <Button className="bg-brand text-zinc-950 w-full font-bold">Acessar Sistema</Button>
             </Link>
           </div>
         )}
@@ -100,14 +100,14 @@ export default function Landing() {
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-[1.1]">
               Gestão de Cotações de Forma
-              <span className="block text-[#83E509]"> Totalmente Inteligente</span>
+              <span className="block text-brand"> Totalmente Inteligente</span>
             </h1>
             <p className="text-lg sm:text-xl md:text-2xl text-zinc-500 dark:text-zinc-400 max-w-2xl mx-auto px-4 leading-relaxed font-medium">
               A plataforma centralizada para controle total de produtos, fornecedores e processos de compras da empresa.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center px-4 pt-4">
               <Link to="/auth?mode=login" className="w-full sm:w-auto">
-                <Button size="lg" className="bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 text-base sm:text-lg px-8 sm:px-12 w-full sm:w-auto font-bold h-14 transition-all transform hover:-translate-y-1">
+                <Button size="lg" className="bg-brand hover:bg-brand-hover text-zinc-950 text-base sm:text-lg px-8 sm:px-12 w-full sm:w-auto font-bold h-14 transition-all transform hover:-translate-y-1">
                   Acessar Plataforma
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>

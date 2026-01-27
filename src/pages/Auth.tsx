@@ -116,7 +116,7 @@ export default function Auth() {
         <div className="relative z-10 flex flex-col justify-between p-16 text-white w-full">
           <div>
             <div className="flex items-center gap-3 mb-12">
-              <div className="w-10 h-10 rounded-xl bg-[#83E509] flex items-center justify-center text-zinc-950 font-bold">
+              <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center text-zinc-950 font-bold">
                 C
               </div>
               <span className="text-2xl font-extrabold tracking-tighter">CotaJá</span>
@@ -124,7 +124,7 @@ export default function Auth() {
 
             <h1 className="text-5xl font-extrabold leading-[1.1] tracking-tight mb-6">
               O futuro da <br />
-              <span className="text-[#83E509]">Gestão de Compras</span>
+              <span className="text-brand">Gestão de Compras</span>
             </h1>
             <p className="text-zinc-400 text-xl font-medium max-w-md leading-relaxed">
               Sistema exclusivo de alta performance para cotações estratégicas e automação de suprimentos.
@@ -134,18 +134,18 @@ export default function Auth() {
           <div className="space-y-8">
             <div className="grid grid-cols-2 gap-8">
               <div className="space-y-2">
-                <div className="text-[#83E509] font-bold text-2xl">30%</div>
+                <div className="text-brand font-bold text-2xl">30%</div>
                 <p className="text-zinc-500 text-sm font-medium">Economia média em compras</p>
               </div>
               <div className="space-y-2">
-                <div className="text-[#83E509] font-bold text-2xl">10x</div>
+                <div className="text-brand font-bold text-2xl">10x</div>
                 <p className="text-zinc-500 text-sm font-medium">Mais agilidade no processo</p>
               </div>
             </div>
 
             <div className="pt-8 border-t border-zinc-800">
               <div className="flex items-center gap-2 text-zinc-500 text-sm font-bold">
-                <Shield className="h-4 w-4 text-[#83E509]" />
+                <Shield className="h-4 w-4 text-brand" />
                 SISTEMA DE USO RESTRITO
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function Auth() {
                           ref={loginEmailRef}
                           type="email"
                           placeholder="nome@empresa.com.br"
-                          className="bg-zinc-900 border-zinc-800 text-white h-12 focus:ring-[#83E509] focus:border-[#83E509] transition-all"
+                          className="bg-zinc-900 border-zinc-800 text-white h-12 focus:ring-brand focus:border-brand transition-all"
                           {...field}
                           disabled={isLoading}
                         />
@@ -197,7 +197,7 @@ export default function Auth() {
                         <Input
                           type="password"
                           placeholder="••••••••"
-                          className="bg-zinc-900 border-zinc-800 text-white h-12 focus:ring-[#83E509] focus:border-[#83E509] transition-all"
+                          className="bg-zinc-900 border-zinc-800 text-white h-12 focus:ring-brand focus:border-brand transition-all"
                           {...field}
                           disabled={isLoading}
                         />
@@ -210,7 +210,7 @@ export default function Auth() {
                 <div className="pt-2">
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-[#83E509] hover:bg-[#72cc00] text-zinc-950 font-extrabold text-base transition-all transform active:scale-[0.98]"
+                    className="w-full h-12 bg-brand hover:bg-brand/90 text-zinc-950 font-extrabold text-base transition-all transform active:scale-[0.98]"
                     disabled={isLoading}
                   >
                     {isLoading ? (

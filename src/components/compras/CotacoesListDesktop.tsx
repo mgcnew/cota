@@ -79,7 +79,7 @@ export const CotacoesListDesktop = memo(({
                   )}>
                     <div className="w-[15%] flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-border/40">
-                        <ClipboardList className="h-4 w-4 text-[#83E509]" />
+                        <ClipboardList className="h-4 w-4 text-brand" />
                       </div>
                       <span className={cn("font-bold text-sm", designSystem.colors.text.primary)}>
                         #{cotacaoNumero.toString().padStart(4, '0')}

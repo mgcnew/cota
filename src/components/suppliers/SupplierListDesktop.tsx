@@ -78,7 +78,7 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                 )}>
                   <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 border border-border/40">
-                      <Building2 className="h-4 w-4 text-[#83E509]" />
+                      <Building2 className="h-4 w-4 text-brand" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className={cn("font-semibold text-sm truncate", designSystem.colors.text.primary)}>{capitalize(supplier.name)}</div>

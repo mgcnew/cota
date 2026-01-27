@@ -96,16 +96,16 @@ function Dashboard() {
     return (
       <PageWrapper>
         <div className={cn(designSystem.layout.container.page, "animate-pulse")}>
-          <div className="h-8 w-40 bg-zinc-200 dark:bg-zinc-800 rounded" />
+          <div className="h-8 w-40 bg-muted rounded" />
           <div className={designSystem.layout.container.grid}>
-            {[1, 2, 3, 4].map(i => <div key={i} className="h-28 bg-zinc-200 dark:bg-zinc-800 rounded-xl" />)}
+            {[1, 2, 3, 4].map(i => <div key={i} className="h-28 bg-muted rounded-xl" />)}
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <ChartSkeleton />
               <ChartSkeleton />
             </div>
-            <div className="h-[680px] bg-zinc-200 dark:bg-zinc-800 rounded-xl" />
+            <div className="h-[680px] bg-muted rounded-xl" />
           </div>
         </div>
       </PageWrapper>
@@ -118,8 +118,8 @@ function Dashboard() {
         {/* Header - Alinhado com Topbar */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl border border-white/10 bg-white/5">
-              <TrendingUp className="h-6 w-6 text-[#83E509]" />
+            <div className="p-2.5 rounded-xl border border-border/50 bg-accent/10">
+              <TrendingUp className="h-6 w-6 text-brand" />
             </div>
             <div>
               <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
@@ -148,7 +148,7 @@ function Dashboard() {
             <Card className={designSystem.components.card.root}>
               <div className={designSystem.components.card.header}>
                 <h2 className={cn(designSystem.typography.size.sm, designSystem.typography.weight.semibold, "flex items-center gap-2")}>
-                  <Bell className="w-4 h-4 text-[#83E509]" />
+                  <Bell className="w-4 h-4 text-brand" />
                   Ações Rápidas
                 </h2>
               </div>
@@ -159,7 +159,7 @@ function Dashboard() {
                     className={cn(designSystem.components.button.secondary, "h-auto py-3 flex-col gap-2 font-normal")}
                     onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
                   >
-                    <ClipboardList className="h-5 w-5 text-[#83E509]" />
+                    <ClipboardList className="h-5 w-5 text-brand" />
                     <span>Nova Cotação</span>
                   </Button>
                   <Button
@@ -199,7 +199,7 @@ function Dashboard() {
                 </h2>
                 <button
                   onClick={() => setActivityOpen(true)}
-                  className={cn(designSystem.typography.size.xs, "text-[#83E509] font-medium hover:underline")}
+                  className={cn(designSystem.typography.size.xs, "text-brand font-medium hover:underline")}
                 >
                   Ver todas
                 </button>
@@ -208,16 +208,16 @@ function Dashboard() {
               <div className="p-3 space-y-2">
                 {/* Cotações Recentes */}
                 {recentQuotes.slice(0, 3).map((quote: any) => (
-                  <div key={`q-${quote.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50">
-                    <div className="p-2 rounded-lg bg-[#83E509]/10">
-                      <ClipboardList className="w-3.5 h-3.5 text-[#83E509]" />
+                  <div key={`q-${quote.id}`} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
+                    <div className="p-2 rounded-lg bg-brand/10">
+                      <ClipboardList className="w-3.5 h-3.5 text-brand" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.medium, "truncate")}>{quote.product}</p>
                       <p className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary, "truncate")}>{quote.supplier} • {quote.bestPrice}</p>
                     </div>
                     {/* Status Dot */}
-                    <div className={cn("w-2 h-2 rounded-full", quote.status === 'ativa' ? "bg-[#83E509]" : "bg-zinc-300")} />
+                    <div className={cn("w-2 h-2 rounded-full", quote.status === 'ativa' ? "bg-brand" : "bg-muted-foreground/30")} />
                   </div>
                 ))}
 
@@ -239,7 +239,7 @@ function Dashboard() {
                 <EconomyChart data={economyData} period={chartPeriod} onPeriodChange={setChartPeriod} isLoading={false} />
               </Suspense>
             </div>
-
+            
             {/* Coluna de Atividades */}
             <div className="lg:col-span-1">
               <DashboardActivities
@@ -266,8 +266,8 @@ function Dashboard() {
               </h3>
               <div className="space-y-2">
                 {recentQuotes.map((quote: any) => (
-                  <div key={quote.id} className={cn("flex items-start gap-3 p-3 rounded-lg border", designSystem.colors.border.subtle, "hover:border-[#83E509]/30 transition-colors")}>
-                    <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", quote.status === 'ativa' ? "bg-[#83E509]" : "bg-zinc-300")} />
+                  <div key={quote.id} className={cn("flex items-start gap-3 p-3 rounded-lg border", designSystem.colors.border.subtle, "hover:border-brand/30 transition-colors")}>
+                    <div className={cn("w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0", quote.status === 'ativa' ? "bg-brand" : "bg-muted-foreground/30")} />
                     <div className="flex-1 min-w-0">
                       <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.medium)}>{quote.product}</p>
                       <p className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary)}>{quote.supplier} • {quote.bestPrice}</p>

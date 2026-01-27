@@ -111,7 +111,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
       open={isExpanded}
       onOpenChange={setIsExpanded}
       className={cn(
-        "group relative rounded-xl border-l-4 bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 overflow-hidden transition-all duration-200 hover:shadow-md",
+        "group relative rounded-xl border-l-4 bg-card border border-border overflow-hidden transition-all duration-200 hover:shadow-md",
         config.accent,
         isSelected && "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900"
       )}
@@ -132,15 +132,15 @@ export const ShoppingListCard = memo(function ShoppingListCard({
             {/* Header */}
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                   <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  <h3 className="font-semibold text-foreground truncate">
                     {item.product_name}
                   </h3>
                   {item.category && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {item.category}
                     </p>
                   )}
@@ -155,45 +155,45 @@ export const ShoppingListCard = memo(function ShoppingListCard({
             {/* Details Grid with Touch-Friendly Stepper */}
             <div className="grid grid-cols-2 gap-3 mb-3">
               {/* Touch-friendly quantity stepper - min 44x44px touch targets */}
-              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2.5">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Quantidade</p>
+              <div className="bg-muted/50 rounded-lg p-2.5">
+                <p className="text-xs text-muted-foreground mb-1.5">Quantidade</p>
                 <div className="flex items-center justify-between gap-1">
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={handleDecrement}
                     disabled={localQuantity <= 1 || isUpdating}
-                    className="h-11 w-11 min-w-[44px] min-h-[44px] rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-transform touch-manipulation"
+                    className="h-11 w-11 min-w-[44px] min-h-[44px] rounded-lg border-border hover:bg-muted active:scale-95 transition-transform touch-manipulation"
                     aria-label="Diminuir quantidade"
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
                   <div className="flex-1 text-center">
-                    <span className="font-bold text-lg text-gray-900 dark:text-gray-100">
+                    <span className="font-bold text-lg text-foreground">
                       {localQuantity}
                     </span>
-                    <span className="text-gray-400 font-normal text-xs ml-1">{item.unit}</span>
+                    <span className="text-muted-foreground font-normal text-xs ml-1">{item.unit}</span>
                   </div>
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={handleIncrement}
                     disabled={isUpdating}
-                    className="h-11 w-11 min-w-[44px] min-h-[44px] rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 active:scale-95 transition-transform touch-manipulation"
+                    className="h-11 w-11 min-w-[44px] min-h-[44px] rounded-lg border-border hover:bg-muted active:scale-95 transition-transform touch-manipulation"
                     aria-label="Aumentar quantidade"
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-2.5">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">Preço Est.</p>
+              <div className="bg-muted/50 rounded-lg p-2.5">
+                <p className="text-xs text-muted-foreground mb-0.5">Preço Est.</p>
                 <p
                   className={cn(
                     "font-semibold",
                     item.estimated_price
                       ? "text-green-600 dark:text-green-400"
-                      : "text-gray-400"
+                      : "text-muted-foreground"
                   )}
                 >
                   {item.estimated_price ? `R$ ${item.estimated_price.toFixed(2)}` : "-"}
@@ -207,7 +207,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
       {/* Expand/Collapse Button */}
       <CollapsibleTrigger asChild>
         <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-muted/30 border-t border-border text-xs text-muted-foreground active:bg-muted/50 touch-target min-h-[44px]"
         >
           {isExpanded ? (
             <>
@@ -225,18 +225,18 @@ export const ShoppingListCard = memo(function ShoppingListCard({
 
       {/* Expandable Actions */}
       <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50/50 dark:bg-gray-900/20">
+        <div className="p-4 pt-0 space-y-3 border-t border-border bg-muted/20">
           
           {/* Notes */}
           {item.notes && (
-            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-lg">
+            <div className="p-2.5 bg-amber-500/10 border border-amber-200/50 rounded-lg">
               <p className="text-xs text-amber-800 dark:text-amber-200">
                 {item.notes}
               </p>
             </div>
           )}
 
-          <div className="flex items-center gap-1.5 text-xs text-gray-400 pb-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground pb-2">
             <Calendar className="w-3 h-3" />
             Criado em {new Date(item.created_at).toLocaleDateString("pt-BR")}
           </div>
@@ -259,7 +259,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
                   onDelete(item.id);
                 }
               }}
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
+              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-500/10 border-red-200/50 active:scale-95 transition-transform"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Remover

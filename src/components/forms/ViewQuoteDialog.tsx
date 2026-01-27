@@ -769,14 +769,14 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
         </div>
       ) : (
         <>
-          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-gray-200/60 dark:border-gray-700/40 bg-white dark:bg-gray-900`}>
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-border bg-background`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-white flex-shrink-0`}>
+                <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0`}>
                   {isEditMode ? <Edit3 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />}
                 </div>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className={`${isMobile ? 'text-lg font-bold' : 'text-base sm:text-lg font-semibold'} text-gray-900 dark:text-white truncate`}>
+                  <div className={`${isMobile ? 'text-lg font-bold' : 'text-base sm:text-lg font-semibold'} text-foreground truncate`}>
                     {isEditMode ? `Editar Cotação #${currentQuote?.id?.substring(0, 8) || '...'}` : `Cotação #${currentQuote?.id?.substring(0, 8) || '...'}`}
                   </div>
                   <div className="hidden sm:block">
@@ -796,9 +796,9 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                             variant="outline"
                             size="sm"
                             onClick={() => setWhatsappSendOpen(true)}
-                            className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'} bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800`}
+                            className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'} bg-green-500/10 hover:bg-green-500/20 border-green-200/50 text-green-700 dark:text-green-400`}
                           >
-                            <MessageSquare className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5 text-green-600 dark:text-green-400`} />
+                            <MessageSquare className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5`} />
                             {!isMobile && 'WhatsApp'}
                           </Button>
                         </TooltipTrigger>
@@ -829,7 +829,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                     setIsEditMode(false);
                     setOpen(false);
                   }}
-                  className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                 >
                   <X className="h-4 w-4" />
                   <span className="sr-only">Fechar</span>
@@ -841,14 +841,14 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
           <div className="flex flex-col flex-1 overflow-hidden min-h-0">
             {!currentQuote ? (
               <div className="flex items-center justify-center h-full">
-                <Loader2 className="h-8 w-8 animate-spin text-teal-600 dark:text-teal-400" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : isEditMode ? (
               // Modo de Edição (similar ao PedidoDialog)
                 <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 overflow-hidden`}>
                   {/* Menu Lateral Esquerdo - Desktop | Tabs - Mobile */}
                   {isMobile ? (
-                    <div className="flex-shrink-0 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <div className="flex-shrink-0 border-b border-border bg-muted/50">
                       <div className="flex overflow-x-auto">
                         {menuItems.map((item) => {
                           const Icon = item.icon;
@@ -859,8 +859,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                               className={cn(
                                 "flex-shrink-0 px-4 py-3 flex items-center gap-2 border-b-2 transition-colors",
                                 activeSection === item.id
-                                  ? "border-primary dark:border-primary text-primary dark:text-primary bg-white dark:bg-gray-900"
-                                  : "border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                                  ? "border-primary text-primary bg-background"
+                                  : "border-transparent text-muted-foreground hover:text-foreground"
                               )}
                             >
                               <Icon className="h-4 w-4" />
@@ -871,7 +871,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                       </div>
                     </div>
                   ) : (
-                    <div className="w-56 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex flex-col shadow-sm">
+                    <div className="w-56 flex-shrink-0 border-r border-border bg-muted/30 flex flex-col shadow-sm">
                       <ScrollArea className="flex-1">
                         <div className="p-2 space-y-1">
                           {menuItems.map((item) => {
@@ -883,8 +883,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                 className={cn(
                                   "w-full px-3 py-2.5 flex items-center gap-3 rounded-lg text-sm font-medium transition-colors",
                                   activeSection === item.id
-                                    ? "bg-primary dark:bg-primary text-white shadow-sm"
-                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                                    ? "bg-primary text-primary-foreground shadow-sm"
+                                    : "text-muted-foreground hover:bg-muted"
                                 )}
                               >
                                 <Icon className="h-4 w-4 flex-shrink-0" />
@@ -898,12 +898,12 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                   )}
 
                   {/* Conteúdo Principal de Edição */}
-                  <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
+                  <ScrollArea className="flex-1 bg-background min-h-0 h-full">
                     <div className={`${isMobile ? 'p-4' : 'p-4 sm:p-6'} pb-8`}>
                       {editLoading ? (
                         <div className="flex items-center justify-center h-full min-h-[400px]">
                           <div className="text-center space-y-4">
-                            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mx-auto" />
+                            <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                             <div className="space-y-2">
                               <Skeleton className="h-4 w-3/4 mx-auto" />
                               <Skeleton className="h-4 w-1/2 mx-auto" />
@@ -914,8 +914,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                         <>
                           {activeSection === "detalhes" && (
                             <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
-                              <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
-                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
+                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border`}>
+                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border`}>
                                   Detalhes da Cotação
                                 </h3>
                                 <Form {...editForm}>
@@ -923,11 +923,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                     {/* Seção 1: Campos Essenciais - Grid Compacto */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                       {/* Período */}
-                                      <Card className="border border-blue-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-blue-200/60 dark:border-gray-700/40 bg-blue-50/50 dark:bg-gray-800">
+                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border bg-muted/50">
                                           <div className="flex items-center gap-2">
-                                            <Calendar className="h-4 w-4 text-primary dark:text-primary" />
-                                            <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Período*</h4>
+                                            <Calendar className="h-4 w-4 text-primary" />
+                                            <h4 className="text-xs font-semibold text-foreground">Período*</h4>
                                           </div>
                                         </div>
                                         <div className="p-2.5 space-y-2.5">
@@ -937,7 +937,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                               name="dataInicio"
                                               render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                  <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Início*</FormLabel>
+                                                  <FormLabel className="text-[10px] text-muted-foreground mb-1">Início*</FormLabel>
                                                   <Popover>
                                                     <PopoverTrigger asChild>
                                                       <FormControl>
@@ -945,7 +945,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                           variant="outline"
                                                           size="sm"
                                                           className={cn(
-                                                            "pl-2.5 pr-2 text-left font-normal h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
+                                                            "pl-2.5 pr-2 text-left font-normal h-8 text-xs bg-background border-input",
                                                             !field.value && "text-muted-foreground"
                                                           )}
                                                         >
@@ -1066,11 +1066,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </Card>
 
                                       {/* Status */}
-                                      <Card className="border border-indigo-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-indigo-200/60 dark:border-gray-700/40 bg-indigo-50/50 dark:bg-gray-800">
+                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border bg-muted/50">
                                           <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-primary dark:text-primary" />
-                                            <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Status*</h4>
+                                            <FileText className="h-4 w-4 text-primary" />
+                                            <h4 className="text-xs font-semibold text-foreground">Status*</h4>
                                           </div>
                                         </div>
                                         <div className="p-2.5">
@@ -1081,16 +1081,16 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                               <FormItem>
                                                 <Select onValueChange={field.onChange} value={field.value}>
                                                   <FormControl>
-                                                    <SelectTrigger className="h-9 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                                                    <SelectTrigger className="h-9 text-xs bg-background border-input">
                                                       <SelectValue placeholder="Selecione o status" />
                                                     </SelectTrigger>
                                                   </FormControl>
-                                                  <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                                                    <SelectItem value="ativa" className="dark:hover:bg-gray-700 dark:text-white">Ativa</SelectItem>
-                                                    <SelectItem value="planejada" className="dark:hover:bg-gray-700 dark:text-white">Planejada</SelectItem>
-                                                    <SelectItem value="pendente" className="dark:hover:bg-gray-700 dark:text-white">Pendente</SelectItem>
-                                                    <SelectItem value="concluida" className="dark:hover:bg-gray-700 dark:text-white">Concluída</SelectItem>
-                                                    <SelectItem value="expirada" className="dark:hover:bg-gray-700 dark:text-white">Expirada</SelectItem>
+                                                  <SelectContent>
+                                                    <SelectItem value="ativa">Ativa</SelectItem>
+                                                    <SelectItem value="planejada">Planejada</SelectItem>
+                                                    <SelectItem value="pendente">Pendente</SelectItem>
+                                                    <SelectItem value="concluida">Concluída</SelectItem>
+                                                    <SelectItem value="expirada">Expirada</SelectItem>
                                                   </SelectContent>
                                                 </Select>
                                                 <FormMessage className="text-[10px]" />
@@ -1102,12 +1102,12 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                     </div>
 
                                     {/* Seção 2: Produtos - Layout Compacto em Tabela */}
-                                    <Card className="border border-orange-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                      <div className="p-2.5 border-b border-orange-200/60 dark:border-gray-700/40 bg-orange-50/50 dark:bg-gray-800 flex items-center justify-between">
+                                    <Card className="border border-border bg-card rounded-lg shadow-sm">
+                                      <div className="p-2.5 border-b border-border bg-muted/50 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                           <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                                          <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Produtos*</h4>
-                                          <Badge variant="secondary" className="text-[10px] h-5 px-1.5 dark:bg-gray-700 dark:text-gray-300">
+                                          <h4 className="text-xs font-semibold text-foreground">Produtos*</h4>
+                                          <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
                                             {editFields.length}
                                           </Badge>
                                         </div>
@@ -1116,7 +1116,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                           variant="outline"
                                           size="sm"
                                           onClick={() => editAppend({ produtoId: "", produtoNome: "", quantidade: "", unidade: "kg" })}
-                                          className="h-7 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700"
+                                          className="h-7 text-xs"
                                         >
                                           <Plus className="h-3 w-3 mr-1" />
                                           Adicionar
@@ -1124,7 +1124,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </div>
                                       <div className="p-2.5 space-y-2">
                                         {editFields.map((field, index) => (
-                                          <div key={field.id} className="border border-orange-200/60 dark:border-gray-700/40 rounded-md p-2.5 bg-orange-50/30 dark:bg-gray-800/50">
+                                          <div key={field.id} className="border border-border rounded-md p-2.5 bg-muted/30">
                                             <div className="grid grid-cols-12 gap-2 items-start">
                                               <div className="col-span-12 sm:col-span-6 lg:col-span-5">
                                                 <FormField
@@ -1136,7 +1136,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
                                                     return (
                                                       <FormItem className="flex flex-col">
-                                                        <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Produto*</FormLabel>
+                                                        <FormLabel className="text-[10px] text-muted-foreground mb-1">Produto*</FormLabel>
                                                         <Popover>
                                                           <PopoverTrigger asChild>
                                                             <FormControl>
@@ -1145,7 +1145,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                                 role="combobox"
                                                                 size="sm"
                                                                 className={cn(
-                                                                  "justify-between h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700",
+                                                                  "justify-between h-8 text-xs bg-background border-input",
                                                                   !displayName && "text-muted-foreground"
                                                                 )}
                                                               >
@@ -1154,11 +1154,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                               </Button>
                                                             </FormControl>
                                                           </PopoverTrigger>
-                                                          <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                                            <Command className="dark:bg-gray-800">
-                                                              <CommandInput placeholder="Buscar produto..." className="dark:bg-gray-800 dark:text-white dark:border-gray-700" />
+                                                          <PopoverContent className="w-full sm:w-[400px] p-0" align="start">
+                                                            <Command>
+                                                              <CommandInput placeholder="Buscar produto..." />
                                                               <CommandList className="max-h-[200px]">
-                                                                <CommandEmpty className="dark:text-gray-400">Nenhum produto encontrado.</CommandEmpty>
+                                                                <CommandEmpty>Nenhum produto encontrado.</CommandEmpty>
                                                                 <CommandGroup>
                                                                   {editProducts.map((product) => (
                                                                     <CommandItem
@@ -1168,7 +1168,6 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                                         editForm.setValue(`produtos.${index}.produtoId`, product.id);
                                                                         editForm.setValue(`produtos.${index}.produtoNome`, product.name);
                                                                       }}
-                                                                      className="dark:hover:bg-gray-700 dark:text-white"
                                                                     >
                                                                       <Check
                                                                         className={cn(
@@ -1196,13 +1195,13 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                   name={`produtos.${index}.quantidade`}
                                                   render={({ field: formField }) => (
                                                     <FormItem>
-                                                      <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Quantidade*</FormLabel>
+                                                      <FormLabel className="text-[10px] text-muted-foreground mb-1">Quantidade*</FormLabel>
                                                       <FormControl>
                                                         <Input
                                                           placeholder="Ex: 500"
                                                           type="number"
                                                           {...formField}
-                                                          className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                                                          className="h-8 text-xs bg-background border-input"
                                                         />
                                                       </FormControl>
                                                       <FormMessage className="text-[10px]" />
@@ -1216,21 +1215,21 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                   name={`produtos.${index}.unidade`}
                                                   render={({ field: formField }) => (
                                                     <FormItem>
-                                                      <FormLabel className="text-[10px] text-gray-600 dark:text-gray-400 mb-1">Unidade*</FormLabel>
+                                                      <FormLabel className="text-[10px] text-muted-foreground mb-1">Unidade*</FormLabel>
                                                       <Select onValueChange={formField.onChange} value={formField.value}>
                                                         <FormControl>
-                                                          <SelectTrigger className="h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                                                          <SelectTrigger className="h-8 text-xs bg-background border-input">
                                                             <SelectValue placeholder="Un" />
                                                           </SelectTrigger>
                                                         </FormControl>
-                                                        <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
-                                                          <SelectItem value="kg" className="dark:hover:bg-gray-700 dark:text-white">Kg</SelectItem>
-                                                          <SelectItem value="un" className="dark:hover:bg-gray-700 dark:text-white">Unidade</SelectItem>
-                                                          <SelectItem value="cx" className="dark:hover:bg-gray-700 dark:text-white">Caixa</SelectItem>
-                                                          <SelectItem value="g" className="dark:hover:bg-gray-700 dark:text-white">Grama</SelectItem>
-                                                          <SelectItem value="l" className="dark:hover:bg-gray-700 dark:text-white">Litro</SelectItem>
-                                                          <SelectItem value="ml" className="dark:hover:bg-gray-700 dark:text-white">Mililitro</SelectItem>
-                                                          <SelectItem value="pct" className="dark:hover:bg-gray-700 dark:text-white">Pacote</SelectItem>
+                                                        <SelectContent>
+                                                          <SelectItem value="kg">Kg</SelectItem>
+                                                          <SelectItem value="un">Unidade</SelectItem>
+                                                          <SelectItem value="cx">Caixa</SelectItem>
+                                                          <SelectItem value="g">Grama</SelectItem>
+                                                          <SelectItem value="l">Litro</SelectItem>
+                                                          <SelectItem value="ml">Mililitro</SelectItem>
+                                                          <SelectItem value="pct">Pacote</SelectItem>
                                                         </SelectContent>
                                                       </Select>
                                                       <FormMessage className="text-[10px]" />
@@ -1245,7 +1244,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                     variant="ghost"
                                                     size="sm"
                                                     onClick={() => editRemove(index)}
-                                                    className="h-8 w-8 p-0 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                                                    className="h-8 w-8 p-0 text-red-600 dark:text-red-400 hover:bg-red-500/10"
                                                   >
                                                     <Trash2 className="h-3.5 w-3.5" />
                                                   </Button>
@@ -1260,43 +1259,41 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                     {/* Seção 3: Opcionais - Grid Horizontal */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                       {/* Fornecedores */}
-                                      <Card className="border border-teal-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-teal-200/60 dark:border-gray-700/40 bg-teal-50/50 dark:bg-gray-800">
+                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border bg-muted/50">
                                           <div className="flex items-center gap-2">
-                                            <Users className="h-4 w-4 text-primary dark:text-primary" />
-                                            <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Fornecedores (Opcional)</h4>
+                                            <Users className="h-4 w-4 text-primary" />
+                                            <h4 className="text-xs font-semibold text-foreground">Fornecedores (Opcional)</h4>
                                           </div>
                                         </div>
                                         <div className="p-2.5 space-y-2">
                                           <Popover>
                                             <PopoverTrigger asChild>
-                                              <Button variant="outline" size="sm" className="w-full justify-between h-8 text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700">
+                                              <Button variant="outline" size="sm" className="w-full justify-between h-8 text-xs bg-background border-input">
                                                 Adicionar Fornecedor
                                                 <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
                                               </Button>
                                             </PopoverTrigger>
-                                            <PopoverContent className="w-full sm:w-[400px] p-0 dark:bg-gray-800 dark:border-gray-700" align="start">
-                                              <Command className="dark:bg-gray-800">
+                                            <PopoverContent className="w-full sm:w-[400px] p-0" align="start">
+                                              <Command>
                                                 <CommandInput
                                                   placeholder="Buscar por nome ou vendedor..."
                                                   value={editSupplierSearch}
                                                   onValueChange={setEditSupplierSearch}
-                                                  className="dark:bg-gray-800 dark:text-white dark:border-gray-700"
                                                 />
                                                 <CommandList className="max-h-[200px]">
-                                                  <CommandEmpty className="dark:text-gray-400">Nenhum fornecedor encontrado.</CommandEmpty>
+                                                  <CommandEmpty>Nenhum fornecedor encontrado.</CommandEmpty>
                                                   <CommandGroup>
                                                     {filteredEditSuppliers.map((supplier) => (
                                                       <CommandItem
                                                         key={supplier.id}
                                                         value={`${supplier.name} ${supplier.contact || ''}`}
                                                         onSelect={() => handleEditSupplierSelect(supplier)}
-                                                        className="dark:hover:bg-gray-700 dark:text-white"
                                                       >
                                                         <div className="flex flex-col">
                                                           <span>{supplier.name}</span>
                                                           {supplier.contact && (
-                                                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                                                            <span className="text-xs text-muted-foreground">
                                                               Vendedor: {supplier.contact}
                                                             </span>
                                                           )}
@@ -1315,7 +1312,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                 {editSelectedSuppliers.map((supplier) => (
                                                   <div
                                                     key={supplier.id}
-                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 text-[10px] border border-teal-200 dark:border-teal-800"
+                                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-700 dark:text-teal-400 text-[10px] border border-teal-200/50"
                                                   >
                                                     {supplier.name}
                                                     <button
@@ -1334,11 +1331,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </Card>
 
                                       {/* Observações */}
-                                      <Card className="border border-slate-200/80 dark:border-gray-700/60 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-slate-200/60 dark:border-gray-700/40 bg-slate-50/50 dark:bg-gray-800">
+                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border bg-muted/50">
                                           <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                                            <h4 className="text-xs font-semibold text-gray-900 dark:text-white">Observações</h4>
+                                            <FileText className="h-4 w-4 text-muted-foreground" />
+                                            <h4 className="text-xs font-semibold text-foreground">Observações</h4>
                                           </div>
                                         </div>
                                         <div className="p-2.5">
@@ -1350,7 +1347,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                 <FormControl>
                                                   <Textarea
                                                     placeholder="Adicione observações (opcional)..."
-                                                    className="resize-none text-xs dark:bg-gray-800 dark:text-white dark:border-gray-700 min-h-[80px]"
+                                                    className="resize-none text-xs bg-background border-input min-h-[80px]"
                                                     rows={3}
                                                     {...field}
                                                   />
@@ -1364,7 +1361,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                     </div>
 
                                     {/* Botões de ação */}
-                                    <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                    <div className="flex justify-end gap-2 pt-4 border-t border-border">
                                       <Button
                                         type="button"
                                         variant="outline"
@@ -1382,7 +1379,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                         type="submit"
                                         disabled={isSavingEdit || !editForm.formState.isDirty}
                                         size="sm"
-                                        className={`${isMobile ? 'h-10 px-4' : 'h-9 px-3'} text-sm bg-primary hover:bg-primary/90 text-white`}
+                                        className={`${isMobile ? 'h-10 px-4' : 'h-9 px-3'} text-sm bg-primary hover:bg-primary/90 text-primary-foreground`}
                                       >
                                         {isSavingEdit ? (
                                           <>
@@ -1405,22 +1402,22 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
                           {activeSection === "fornecedores" && (
                             <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
-                              <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
-                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
+                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border`}>
+                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border`}>
                                   Fornecedores
                                 </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Seção de fornecedores em construção</p>
+                                <p className="text-sm text-muted-foreground">Seção de fornecedores em construção</p>
                               </div>
                             </div>
                           )}
 
                           {activeSection === "observacoes" && (
                             <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
-                              <div className={`bg-white dark:bg-gray-800 rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-gray-200 dark:border-gray-700`}>
-                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-200 dark:border-gray-700`}>
+                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border`}>
+                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border`}>
                                   Observações
                                 </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">Seção de observações em construção</p>
+                                <p className="text-sm text-muted-foreground">Seção de observações em construção</p>
                               </div>
                             </div>
                           )}
@@ -1431,19 +1428,19 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 </div>
               ) : (
                 // Modo de Visualização
-                <ScrollArea className="flex-1 bg-gray-50 dark:bg-gray-900 min-h-0 h-full">
+                <ScrollArea className="flex-1 bg-muted/30 min-h-0 h-full">
                   <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                      <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-gray-200/60 dark:border-gray-700 bg-gradient-to-r from-gray-50/80 to-slate-50/60 dark:from-gray-800/50 dark:to-gray-900/50 backdrop-blur-sm flex-shrink-0">
-                        <TabsList className={`grid w-full ${!readOnly ? "grid-cols-5" : "grid-cols-4"} bg-white/70 dark:bg-gray-800/95 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-gray-200/50 dark:border-gray-700 gap-1 h-8 sm:h-9 transition-colors`}>
+                      <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-border bg-muted/30 backdrop-blur-sm flex-shrink-0">
+                        <TabsList className={`grid w-full ${!readOnly ? "grid-cols-5" : "grid-cols-4"} bg-background/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-border gap-1 h-8 sm:h-9 transition-colors`}>
                           <TabsTrigger
                             value="detalhes"
-                            className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary dark:data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-primary/10 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-primary/90 dark:data-[state=active]:hover:bg-primary/90 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                            className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-primary/10 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-muted-foreground"
                           >
                             <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                             <span className="hidden xs:inline">Detalhes</span>
                             {currentQuote && currentQuote.fornecedoresParticipantes.length > 0 && (
-                              <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary data-[state=active]:bg-primary/20 dark:data-[state=active]:bg-primary/20 data-[state=active]:text-white dark:data-[state=active]:text-white">
+                              <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-primary/10 text-primary data-[state=active]:bg-primary/20 data-[state=active]:text-white">
                                 {currentQuote.fornecedoresParticipantes.length}
                               </Badge>
                             )}

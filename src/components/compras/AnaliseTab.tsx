@@ -163,8 +163,8 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
           designSystem.components.card.root,
           designSystem.colors.border.subtle
         )}>
-          <div className="p-3 rounded-xl bg-[#83E509]/10 border border-[#83E509]/20 shadow-[0_0_15px_rgba(131,229,9,0.1)]">
-            <BarChart3 className="h-6 w-6 text-[#83E509]" />
+          <div className="p-3 rounded-xl bg-brand/10 border border-brand/20 shadow-[0_0_15px_hsl(var(--brand)/0.1)]">
+            <BarChart3 className="h-6 w-6 text-brand" />
           </div>
           <div className="flex-1">
             <h3 className={cn("text-lg font-bold", designSystem.colors.text.primary)}>Central de Inteligência</h3>
@@ -175,7 +175,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
         </div>
 
         <div className="mt-6 relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-brand transition-colors" />
           <Input
             placeholder="O que você deseja analisar hoje? (Produto, fornecedor ou vendedor)"
             value={searchTerm}
@@ -184,7 +184,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
             className={cn(
               "pl-12 h-14 text-base rounded-2xl shadow-sm transition-all border-2",
               "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800",
-              "focus:border-[#83E509] focus:ring-4 focus:ring-[#83E509]/10 outline-none"
+              "focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none"
             )}
             data-search-input
           />
@@ -202,7 +202,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
                   className={cn(
                     "w-full px-5 py-4 flex items-center gap-4 text-left transition-all",
                     highlightedIndex === index
-                      ? "bg-[#83E509]/10 border-l-4 border-l-[#83E509]"
+                      ? "bg-brand/10 border-l-4 border-l-brand"
                       : "hover:bg-zinc-50 dark:hover:bg-zinc-800/50 border-l-4 border-l-transparent"
                   )}
                 >
@@ -232,7 +232,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
                       )}
                     </p>
                   </div>
-                  <ArrowRight className={cn("h-4 w-4 transition-transform", highlightedIndex === index ? "translate-x-1 text-[#83E509]" : "text-zinc-300")} />
+                  <ArrowRight className={cn("h-4 w-4 transition-transform", highlightedIndex === index ? "translate-x-1 text-brand" : "text-zinc-300")} />
                 </button>
               ))}
               <div className="px-5 py-3 text-[10px] font-medium text-zinc-400 bg-zinc-50 dark:bg-zinc-800/30 border-t border-zinc-100 dark:border-zinc-800 flex justify-between">
@@ -266,7 +266,7 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20">
       <div className="w-24 h-24 rounded-full bg-white dark:bg-zinc-800 shadow-xl flex items-center justify-center mb-8 animate-pulse">
-        <Target className="h-12 w-12 text-[#83E509]" />
+        <Target className="h-12 w-12 text-brand" />
       </div>
       <h3 className={cn("text-xl font-bold mb-3", designSystem.colors.text.primary)}>Pronto para o próximo insight?</h3>
       <p className={cn("text-sm max-w-sm mx-auto opacity-70 mb-8", designSystem.colors.text.secondary)}>
@@ -359,7 +359,7 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-10 w-10 animate-spin text-[#83E509]" />
+        <Loader2 className="h-10 w-10 animate-spin text-brand" />
       </div>
     );
   }
@@ -369,7 +369,7 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
       <div className="flex items-center justify-between p-6 rounded-2xl bg-zinc-900 text-white shadow-xl">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-white/10">
-            <Package className="h-8 w-8 text-[#83E509]" />
+            <Package className="h-8 w-8 text-brand" />
           </div>
           <div>
             <h2 className="text-2xl font-bold">{productName}</h2>
@@ -434,7 +434,7 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
   if (ordersLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="h-10 w-10 animate-spin text-[#83E509]" />
+        <Loader2 className="h-10 w-10 animate-spin text-brand" />
       </div>
     );
   }
@@ -444,7 +444,7 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
       <div className="flex items-center justify-between p-6 rounded-2xl bg-zinc-900 text-white shadow-xl">
         <div className="flex items-center gap-4">
           <div className="p-3 rounded-2xl bg-white/10">
-            <Building2 className="h-8 w-8 text-[#83E509]" />
+            <Building2 className="h-8 w-8 text-brand" />
           </div>
           <div>
             <h2 className="text-2xl font-bold">{supplierName}</h2>
@@ -464,7 +464,7 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
 
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 p-6">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-[#83E509]/10 text-[#83E509]">
+          <div className="p-2 rounded-lg bg-brand/10 text-brand">
             <ShoppingCart className="h-5 w-5" />
           </div>
           <h3 className="text-lg font-bold">Pedidos Recentes</h3>
@@ -487,9 +487,9 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
     <ScrollArea className="h-[400px] pr-4">
       <div className="space-y-3">
         {combined.map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-[#83E509]/30 transition-all">
+          <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-brand/30 transition-all">
             <div className="flex items-center gap-3">
-              <div className={cn("p-2 rounded-lg", item.type === 'order' ? 'bg-[#83E509]/10 text-[#83E509]' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500')}>
+              <div className={cn("p-2 rounded-lg", item.type === 'order' ? 'bg-brand/10 text-brand' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500')}>
                 {item.type === 'order' ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
               </div>
               <div>
@@ -509,7 +509,7 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
   return (
     <div className="space-y-3">
       {orders.map((order) => (
-        <div key={order.id} className="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-[#83E509]/30 transition-all bg-white dark:bg-zinc-950/20">
+        <div key={order.id} className="p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-brand/30 transition-all bg-white dark:bg-zinc-950/20">
           <div className="flex justify-between items-center mb-3">
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">#ORD-{order.id.substring(0, 8)}</span>
             <Badge variant="secondary" className="text-[10px] uppercase font-black tracking-widest bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-0">{order.status}</Badge>
@@ -548,7 +548,7 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
   return (
     <div className="space-y-3">
       {stats.map((s, idx) => (
-        <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-[#83E509]/30 transition-all">
+        <div key={idx} className="flex items-center justify-between p-4 rounded-xl border border-zinc-100 dark:border-zinc-800 hover:border-brand/30 transition-all">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center font-black text-[10px] text-zinc-500">{idx + 1}</div>
             <span className="font-bold text-sm">{s.name}</span>

@@ -475,17 +475,17 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
         {/* Header - Compacto e Responsivo */}
-        <div className="flex items-center justify-between py-3 px-5 border-b bg-white dark:bg-zinc-950 min-h-[64px]">
+        <div className="flex items-center justify-between py-3 px-5 border-b bg-card min-h-[64px]">
 
           <div className="flex items-center gap-4 relative z-10 flex-1 min-w-0">
             {/* Título - Mais compacto */}
             <div className="flex items-center gap-2.5 min-w-max">
-              <div className="p-1.5 rounded-lg bg-[#83E509]/10">
-                <ClipboardList className="h-4 w-4 text-[#83E509]" />
+              <div className="p-1.5 rounded-lg bg-brand/10">
+                <ClipboardList className="h-4 w-4 text-brand" />
               </div>
               <div className="hidden sm:block">
-                <DialogTitle className="text-base font-black text-zinc-900 dark:text-zinc-50 tracking-tight leading-none mb-1">Gerenciar Cotação</DialogTitle>
-                <p className="text-[10px] font-bold text-zinc-500 leading-none">ID #{safeStr(quote.id).substring(0, 8)}</p>
+                <DialogTitle className="text-base font-black text-foreground tracking-tight leading-none mb-1">Gerenciar Cotação</DialogTitle>
+                <p className="text-[10px] font-bold text-muted-foreground leading-none">ID #{safeStr(quote.id).substring(0, 8)}</p>
               </div>
             </div>
 
@@ -528,7 +528,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     >
                       {tab.label}
                       {activeTab === tab.id && (
-                        <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-[#83E509] shadow-[0_0_8px_#83E509] rounded-full" />
+                        <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-brand shadow-[0_0_8px_hsl(var(--brand))] rounded-full" />
                       )}
                     </TabsTrigger>
                   ))}
@@ -539,13 +539,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
           <div className="flex items-center gap-1.5 ml-2">
             {!isMobile && (
-              <div className="flex items-center gap-1 border-r border-zinc-100 dark:border-zinc-800 pr-2 mr-1">
+              <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
 
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleExportHtml}
-                  className="text-zinc-400 hover:text-[#83E509] hover:bg-[#83E509]/5 h-8 w-8 rounded-lg transition-all"
+                  className="text-muted-foreground hover:text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
                   title="Exportar"
                 >
                   <Download className="h-4 w-4" />
@@ -556,15 +556,15 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               variant="ghost"
               size="icon"
               onClick={() => onOpenChange(false)}
-              className="h-8 w-8 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              className="h-8 w-8 rounded-lg hover:bg-accent transition-colors"
             >
-              <X className="h-4 w-4 text-zinc-400" />
+              <X className="h-4 w-4 text-muted-foreground" />
               <span className="sr-only">Fechar</span>
             </Button>
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 relative bg-white dark:bg-zinc-950 flex flex-col">
+        <div className="flex-1 min-h-0 relative bg-background flex flex-col">
           <Suspense fallback={<TabSkeleton type={activeTab} />}>
             <TabsContent value="resumo" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'resumo' && (
@@ -637,13 +637,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
       {/* Footer */}
       {isMobile && (
-        <div className="flex items-center justify-end gap-2 p-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+        <div className="flex items-center justify-end gap-2 p-4 border-t border-border bg-card">
 
           <Button
             variant="ghost"
             size="icon"
             onClick={handleExportHtml}
-            className="text-zinc-500 hover:text-[#83E509] hover:bg-[#83E509]/10 h-10 w-10 rounded-xl transition-all"
+            className="text-muted-foreground hover:text-brand hover:bg-brand/10 h-10 w-10 rounded-xl transition-all"
             title="Exportar"
           >
             <Download className="h-5 w-5" />
@@ -659,7 +659,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800"
+          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background border-t border-border"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',

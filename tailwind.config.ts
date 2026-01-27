@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 import plugin from "tailwindcss/plugin";
+import { designSystem } from "./src/styles/design-system";
 
 export default {
   darkMode: ["class"],
@@ -18,6 +19,13 @@ export default {
         inter: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // Integrate Design System Colors
+        brand: {
+          DEFAULT: designSystem.colors.brand.primary,
+          primary: designSystem.colors.brand.primary,
+          hover: designSystem.colors.brand.hover,
+          light: designSystem.colors.brand.light,
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

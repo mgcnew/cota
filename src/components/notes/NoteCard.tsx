@@ -46,11 +46,11 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
 
   return (
     <CSSSlideIn direction="up" duration={300} delay={index * 50}>
-      <Card className="group relative flex flex-col h-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-black/20 transition-all duration-300 rounded-xl overflow-hidden">
+      <Card className="group relative flex flex-col h-full bg-card border border-border hover:border-border/80 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 rounded-xl overflow-hidden">
         
         {/* Header Minimalista */}
         <CardHeader className="p-5 pb-3 flex flex-row items-start justify-between space-y-0 gap-3">
-          <CardTitle className="text-base font-semibold text-gray-900 dark:text-gray-100 leading-tight line-clamp-2">
+          <CardTitle className="text-base font-semibold text-foreground leading-tight line-clamp-2">
             {note.title}
           </CardTitle>
           
@@ -64,17 +64,17 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
         </CardHeader>
 
         <CardContent className="p-5 pt-2 flex-1">
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-wrap line-clamp-5">
+          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-5">
             {note.content}
           </p>
           
           {note.observation && (
-            <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-800">
+            <div className="mt-4 pt-3 border-t border-border/50">
               <div className="flex items-center gap-1.5 mb-1.5">
-                <MessageSquare className="h-3 w-3 text-gray-400" />
-                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wider">Observação</span>
+                <MessageSquare className="h-3 w-3 text-muted-foreground/70" />
+                <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider">Observação</span>
               </div>
-              <p className="text-xs text-gray-500 italic line-clamp-2">
+              <p className="text-xs text-muted-foreground italic line-clamp-2">
                 {note.observation}
               </p>
             </div>
@@ -82,8 +82,8 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
         </CardContent>
 
         {/* Footer com Ações e Data */}
-        <CardFooter className="p-4 pt-0 mt-auto flex items-center justify-between border-t border-transparent group-hover:border-gray-100 dark:group-hover:border-gray-800 transition-colors">
-          <div className="flex items-center text-[11px] font-medium text-gray-400">
+        <CardFooter className="p-4 pt-0 mt-auto flex items-center justify-between border-t border-transparent group-hover:border-border/50 transition-colors">
+          <div className="flex items-center text-[11px] font-medium text-muted-foreground/70">
             <Clock className="h-3 w-3 mr-1.5" />
             {new Date(note.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
           </div>
@@ -93,7 +93,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
               variant="ghost"
               size="icon"
               onClick={() => onEdit(note)}
-              className="h-8 w-8 rounded-lg text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent"
               title="Editar"
             >
               <Edit className="h-3.5 w-3.5" />
@@ -102,7 +102,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
               variant="ghost"
               size="icon"
               onClick={() => onDelete(note.id)}
-              className="h-8 w-8 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               title="Excluir"
             >
               <Trash2 className="h-3.5 w-3.5" />

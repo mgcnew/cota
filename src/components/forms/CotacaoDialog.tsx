@@ -281,9 +281,9 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
       <DialogContent hideClose className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-white dark:bg-gray-900">
+          <div className="flex items-center justify-between p-4 border-b bg-background">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-teal-100"><ClipboardList className="h-5 w-5 text-teal-600" /></div>
+              <div className="p-2 rounded-xl bg-teal-500/10"><ClipboardList className="h-5 w-5 text-teal-600 dark:text-teal-400" /></div>
               <div>
                 <DialogTitle className="text-lg font-bold">Cotação #{cotacaoId}</DialogTitle>
                 <DialogDescription className="text-sm text-muted-foreground">{cotacaoProduto}</DialogDescription>
@@ -295,7 +295,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
               variant="ghost" 
               size="icon" 
               onClick={() => onOpenChange(false)} 
-              className="h-6 w-6 text-gray-400 hover:text-gray-900 dark:hover:text-white !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="h-6 w-6 text-muted-foreground hover:text-foreground !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Fechar</span>
@@ -315,48 +315,48 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
               {/* Tab Detalhes */}
               <TabsContent value="detalhes" className="p-4 m-0 space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-3 rounded-xl bg-teal-50 border border-teal-200">
-                    <div className="flex items-center gap-2 mb-1"><Users className="h-4 w-4 text-teal-600" /><span className="text-xs text-teal-700">Fornecedores</span></div>
-                    <p className="text-xl font-bold text-teal-800">{stats.totalFornecedores}</p>
-                    <p className="text-xs text-teal-600">{stats.fornecedoresRespondidos} responderam</p>
+                  <div className="p-3 rounded-xl bg-teal-500/10 border border-teal-200/50">
+                    <div className="flex items-center gap-2 mb-1"><Users className="h-4 w-4 text-teal-600 dark:text-teal-400" /><span className="text-xs text-teal-700 dark:text-teal-300">Fornecedores</span></div>
+                    <p className="text-xl font-bold text-teal-800 dark:text-teal-200">{stats.totalFornecedores}</p>
+                    <p className="text-xs text-teal-600 dark:text-teal-400">{stats.fornecedoresRespondidos} responderam</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-green-50 border border-green-200">
-                    <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-green-600" /><span className="text-xs text-green-700">Melhor Valor</span></div>
-                    <p className="text-xl font-bold text-green-800">R$ {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    <p className="text-xs text-green-600">{cotacaoMelhorFornecedor}</p>
+                  <div className="p-3 rounded-xl bg-green-500/10 border border-green-200/50">
+                    <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" /><span className="text-xs text-green-700 dark:text-green-300">Melhor Valor</span></div>
+                    <p className="text-xl font-bold text-green-800 dark:text-green-200">R$ {stats.melhorValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    <p className="text-xs text-green-600 dark:text-green-400">{cotacaoMelhorFornecedor}</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-blue-50 border border-blue-200">
-                    <div className="flex items-center gap-2 mb-1"><TrendingDown className="h-4 w-4 text-blue-600" /><span className="text-xs text-blue-700">Economia</span></div>
-                    <p className="text-xl font-bold text-blue-800">{stats.economia}</p>
-                    <p className="text-xs text-blue-600">vs maior preço</p>
+                  <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-200/50">
+                    <div className="flex items-center gap-2 mb-1"><TrendingDown className="h-4 w-4 text-blue-600 dark:text-blue-400" /><span className="text-xs text-blue-700 dark:text-blue-300">Economia</span></div>
+                    <p className="text-xl font-bold text-blue-800 dark:text-blue-200">{stats.economia}</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">vs maior preço</p>
                   </div>
-                  <div className="p-3 rounded-xl bg-purple-50 border border-purple-200">
-                    <div className="flex items-center gap-2 mb-1"><Package className="h-4 w-4 text-purple-600" /><span className="text-xs text-purple-700">Quantidade</span></div>
-                    <p className="text-xl font-bold text-purple-800">{cotacaoQuantidade}</p>
-                    <p className="text-xs text-purple-600">itens</p>
+                  <div className="p-3 rounded-xl bg-purple-500/10 border border-purple-200/50">
+                    <div className="flex items-center gap-2 mb-1"><Package className="h-4 w-4 text-purple-600 dark:text-purple-400" /><span className="text-xs text-purple-700 dark:text-purple-300">Quantidade</span></div>
+                    <p className="text-xl font-bold text-purple-800 dark:text-purple-200">{cotacaoQuantidade}</p>
+                    <p className="text-xs text-purple-600 dark:text-purple-400">itens</p>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-gray-50 border">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2"><Calendar className="h-4 w-4 text-gray-600" />Período da Cotação</h4>
+                <div className="p-4 rounded-xl bg-muted/30 border">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2"><Calendar className="h-4 w-4 text-muted-foreground" />Período da Cotação</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div><p className="text-xs text-muted-foreground">Data Início</p><p className="font-medium">{cotacaoDataInicio}</p></div>
                     <div><p className="text-xs text-muted-foreground">Data Fim</p><p className="font-medium">{cotacaoDataFim}</p></div>
                   </div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-gray-50 border">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4 text-gray-600" />Fornecedores Participantes</h4>
+                <div className="p-4 rounded-xl bg-muted/30 border">
+                  <h4 className="font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" />Fornecedores Participantes</h4>
                   <div className="space-y-2">
                     {fornecedores.map(f => (
-                      <div key={f.id} className="flex items-center justify-between p-2 rounded-lg bg-white border">
+                      <div key={f.id} className="flex items-center justify-between p-2 rounded-lg bg-card border">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-semibold text-sm">{safeStr(f.nome).charAt(0)}</div>
+                          <div className="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-700 dark:text-teal-300 font-semibold text-sm">{safeStr(f.nome).charAt(0)}</div>
                           <span className="font-medium">{safeStr(f.nome)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {f.valorOferecido > 0 && <span className="text-sm font-semibold text-green-600">R$ {f.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>}
-                          <Badge variant="outline" className={cn("text-xs", f.status === "respondido" ? "bg-green-50 text-green-700 border-green-200" : "bg-amber-50 text-amber-700 border-amber-200")}>{f.status === "respondido" ? "Respondido" : "Pendente"}</Badge>
+                          {f.valorOferecido > 0 && <span className="text-sm font-semibold text-green-600 dark:text-green-400">R$ {f.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>}
+                          <Badge variant="outline" className={cn("text-xs", f.status === "respondido" ? "bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/50" : "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200/50")}>{f.status === "respondido" ? "Respondido" : "Pendente"}</Badge>
                         </div>
                       </div>
                     ))}
@@ -387,7 +387,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
                       const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(productId);
                       const isBest = bestSupplierId === selectedSupplier && currentValue > 0;
                       return (
-                        <div key={productId} className={cn("flex items-center justify-between p-3 rounded-lg border", isBest ? "bg-green-50 border-green-200" : "bg-white")}>
+                        <div key={productId} className={cn("flex items-center justify-between p-3 rounded-lg border", isBest ? "bg-green-500/10 border-green-200/50" : "bg-card")}>
                           <div className="flex-1">
                             <p className="font-medium">{productName}</p>
                             <p className="text-xs text-muted-foreground">Qtd: {quantidade}</p>
@@ -401,8 +401,8 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
                               </>
                             ) : (
                               <>
-                                <span className={cn("font-semibold", isBest ? "text-green-600" : "text-gray-700")}>R$ {currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                {isBest && <Badge className="bg-green-100 text-green-700 border-green-200">Melhor</Badge>}
+                                <span className={cn("font-semibold", isBest ? "text-green-600 dark:text-green-400" : "text-foreground")}>R$ {currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                {isBest && <Badge className="bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/50">Melhor</Badge>}
                                 <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleStartEdit(productId, currentValue)}><Edit2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Editar valor</TooltipContent></Tooltip></TooltipProvider>
                               </>
                             )}
@@ -420,18 +420,18 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
               <TabsContent value="converter" className="p-4 m-0 space-y-4">
                 {bestSupplier ? (
                   <div className="space-y-4">
-                    <div className="p-4 rounded-xl bg-green-50 border border-green-200">
-                      <h4 className="font-semibold text-green-800 mb-2 flex items-center gap-2"><Building2 className="h-4 w-4" />Melhor Fornecedor</h4>
-                      <p className="text-2xl font-bold text-green-700">{safeStr(bestSupplier.nome)}</p>
-                      <p className="text-sm text-green-600">Total: R$ {bestSupplier.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                    <div className="p-4 rounded-xl bg-green-500/10 border border-green-200/50">
+                      <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2 flex items-center gap-2"><Building2 className="h-4 w-4" />Melhor Fornecedor</h4>
+                      <p className="text-2xl font-bold text-green-700 dark:text-green-300">{safeStr(bestSupplier.nome)}</p>
+                      <p className="text-sm text-green-600 dark:text-green-400">Total: R$ {bestSupplier.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-gray-50 border">
+                    <div className="p-4 rounded-xl bg-muted/30 border">
                       <h4 className="font-semibold mb-3">Produtos incluídos</h4>
                       <div className="space-y-2">
                         {getConversionProducts().map(p => (
-                          <div key={p.id} className="flex justify-between items-center p-2 bg-white rounded border">
+                          <div key={p.id} className="flex justify-between items-center p-2 bg-card rounded border">
                             <span>{p.name} (x{p.quantity})</span>
-                            <span className="font-semibold text-green-600">R$ {p.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                            <span className="font-semibold text-green-600 dark:text-green-400">R$ {p.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                           </div>
                         ))}
                       </div>

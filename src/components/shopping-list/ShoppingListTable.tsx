@@ -109,10 +109,10 @@ export function ShoppingListTable({
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 p-12">
+      <div className="rounded-xl border border-border bg-card p-12">
         <div className="flex flex-col items-center justify-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Carregando lista...</p>
+          <p className="text-sm text-muted-foreground">Carregando lista...</p>
         </div>
       </div>
     );
@@ -120,16 +120,16 @@ export function ShoppingListTable({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 p-12">
+      <div className="rounded-xl border border-border bg-card p-12">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
             <ShoppingBasket className="w-8 h-8 text-blue-500 dark:text-blue-400" />
           </div>
           <div>
-            <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            <p className="text-lg font-semibold text-foreground">
               Lista vazia
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Adicione produtos para começar sua lista de compras
             </p>
           </div>
@@ -145,7 +145,7 @@ export function ShoppingListTable({
         <thead>
           <tr>
             <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className="flex items-center bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700/60 rounded-xl shadow-sm px-4 py-4">
+              <div className="flex items-center bg-card border border-border rounded-xl shadow-sm px-4 py-4">
                 <div className="w-[5%] flex items-center">
                   <Checkbox
                     checked={selectedItems.size === items.length && items.length > 0}
@@ -153,25 +153,25 @@ export function ShoppingListTable({
                   />
                 </div>
                 <div className="w-[25%] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0">
-                    <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                    <Package className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Produto</span>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Produto</span>
                 </div>
                 <div className="w-[12%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Qtd</span>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Qtd</span>
                 </div>
                 <div className="w-[15%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Prioridade</span>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Prioridade</span>
                 </div>
                 <div className="w-[13%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Preço Est.</span>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Preço Est.</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Observações</span>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Observações</span>
                 </div>
                 <div className="w-[10%] pl-2 flex justify-end items-center">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-gray-700 dark:text-gray-300">Ações</span>
+                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Ações</span>
                 </div>
               </div>
             </td>
@@ -187,10 +187,10 @@ export function ShoppingListTable({
               <TableRow key={item.id} className="group border-none">
                 <TableCell colSpan={7} className="px-1 py-1.5">
                   <div className={cn(
-                    "flex items-center px-4 py-3 bg-white dark:bg-gray-800/50 rounded-xl border transition-colors duration-150",
+                    "flex items-center px-4 py-3 bg-card rounded-xl border transition-colors duration-150",
                     selectedItems.has(item.id) 
                       ? "border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-950/20" 
-                      : "border-gray-200 dark:border-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-800/70"
+                      : "border-border hover:bg-muted/50"
                   )}>
                     <div className="w-[5%] flex items-center">
                       <Checkbox
@@ -199,15 +199,15 @@ export function ShoppingListTable({
                       />
                     </div>
                     <div className="w-[25%] flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-700/50 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-600/30">
-                        <Package className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 border border-border">
+                        <Package className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                        <p className="font-medium text-sm text-foreground truncate">
                           {item.product_name}
                         </p>
                         {item.category && (
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          <p className="text-xs text-muted-foreground truncate">
                             {item.category}
                           </p>
                         )}
@@ -223,12 +223,12 @@ export function ShoppingListTable({
                           onChange={(e) =>
                             setEditData({ ...editData, quantity: Number(e.target.value) })
                           }
-                          className="w-20 h-8"
+                          className="w-20 h-8 bg-background"
                         />
                       ) : (
-                        <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
+                        <span className="font-medium text-sm text-foreground">
                           {item.quantity}{" "}
-                          <span className="text-gray-400 font-normal">{item.unit}</span>
+                          <span className="text-muted-foreground font-normal">{item.unit}</span>
                         </span>
                       )}
                     </div>
@@ -240,7 +240,7 @@ export function ShoppingListTable({
                             setEditData({ ...editData, priority: value })
                           }
                         >
-                          <SelectTrigger className="w-28 h-8">
+                          <SelectTrigger className="w-28 h-8 bg-background">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -273,7 +273,7 @@ export function ShoppingListTable({
                               estimated_price: Number(e.target.value),
                             })
                           }
-                          className="w-24 h-8"
+                          className="w-24 h-8 bg-background"
                           placeholder="R$ 0,00"
                         />
                       ) : item.estimated_price ? (
@@ -281,11 +281,11 @@ export function ShoppingListTable({
                           R$ {item.estimated_price.toFixed(2)}
                         </span>
                       ) : (
-                        <span className="text-gray-400 text-sm">-</span>
+                        <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </div>
                     <div className="w-[20%] pl-2">
-                      <p className="max-w-[180px] truncate text-sm text-gray-500 dark:text-gray-400">
+                      <p className="max-w-[180px] truncate text-sm text-muted-foreground">
                         {item.notes || "-"}
                       </p>
                     </div>
@@ -304,7 +304,7 @@ export function ShoppingListTable({
                             size="sm"
                             variant="ghost"
                             onClick={handleCancelEdit}
-                            className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-lg"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -315,7 +315,7 @@ export function ShoppingListTable({
                             size="sm"
                             variant="ghost"
                             onClick={() => handleStartEdit(item)}
-                            className="h-8 w-8 p-0 text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 rounded-lg"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -327,7 +327,7 @@ export function ShoppingListTable({
                                 onDelete(item.id);
                               }
                             }}
-                            className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
+                            className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

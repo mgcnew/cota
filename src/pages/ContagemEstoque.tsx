@@ -27,40 +27,45 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ds } from "@/styles/design-system";
 
 // Hooks & Components
 import { useContagemEstoque } from "@/hooks/useContagemEstoque";
 import { StockCountListDesktop } from "@/components/stock/StockCountListDesktop";
 import { CreateStockCountDialog } from "@/components/stock/CreateStockCountDialog";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { MetricCard } from "@/components/ui/metric-card";
 
-// Status configuration for Mobile Cards
+// Status configuration using Design System tokens
 const statusConfig = {
   pendente: {
     label: "Pendente",
     icon: Clock,
-    badge: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800",
+    badge: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800",
   },
   em_andamento: {
     label: "Em Andamento",
     icon: Activity,
-    badge: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800",
+    badge: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800",
   },
   finalizada: {
     label: "Finalizada",
     icon: CheckCircle,
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800",
+    badge: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800",
   },
   cancelada: {
     label: "Cancelada",
     icon: XCircle,
-    badge: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800",
+    badge: "bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800",
   },
 };
 
 const getStatusBadge = (status: string) => {
   const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.pendente;
+  const Icon = config.icon;
   return (
-    <Badge variant="outline" className={cn("gap-1", config.badge)}>
+    <Badge variant="outline" className={cn("gap-1.5 px-2.5 py-0.5", config.badge)}>
+      <Icon className="w-3.5 h-3.5" />
       {config.label}
     </Badge>
   );
@@ -91,10 +96,6 @@ export default function ContagemEstoque() {
 
   // Handlers
   const handleCreateCount = async ({ orderId, notes }: { orderId?: string; notes?: string }) => {
-    if (!orderId && !notes && orderId === undefined) {
-      // Basic check, though logic handles "from_scratch" via undefined orderId
-    }
-
     try {
       const newCount = await createStockCount.mutateAsync({
         order_id: orderId,
@@ -143,83 +144,84 @@ export default function ContagemEstoque() {
 
   return (
     <PageWrapper>
-      <div className="page-container space-y-4 sm:space-y-6">
+      <div className={ds.layout.container.page}>
         {/* Page Title */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 shadow-lg">
-            <ClipboardList className="h-6 w-6 text-white" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+              <ClipboardList className="h-6 w-6 text-brand" />
+            </div>
+            <div>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                Contagem de Estoque
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                Gerencie conferências de entrada e contagens avulsas
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Contagem de Estoque</h1>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 text-white">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2.5 rounded-xl bg-white/20">
-                <ClipboardList className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.total}</p>
-              <p className="text-sm font-medium text-white/90">Total</p>
-            </div>
-          </div>
+        <ResponsiveGrid gap="sm" config={{ mobile: 1, tablet: 2, desktop: 4 }} className="mb-4">
+          {/* Total */}
+          <MetricCard
+            title="Total"
+            value={stats.total}
+            icon={ClipboardList}
+            trend={{ value: "Registros", label: "totais", type: "neutral" }}
+            variant="info"
+            className="hover:scale-[1.02] transition-transform w-full"
+          />
 
-          <div className="bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl p-4 text-white">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2.5 rounded-xl bg-white/20">
-                <Clock className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.pendentes}</p>
-              <p className="text-sm font-medium text-white/90">Pendentes</p>
-            </div>
-          </div>
+          {/* Pendentes */}
+          <MetricCard
+            title="Pendentes"
+            value={stats.pendentes}
+            icon={Clock}
+            trend={{ value: "Aguardando", label: "início", type: "neutral" }}
+            variant="warning"
+            className="hover:scale-[1.02] transition-transform w-full"
+          />
 
-          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-4 text-white">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2.5 rounded-xl bg-white/20">
-                <Activity className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.emAndamento}</p>
-              <p className="text-sm font-medium text-white/90">Em Andamento</p>
-            </div>
-          </div>
+          {/* Em Andamento */}
+          <MetricCard
+            title="Em Andamento"
+            value={stats.emAndamento}
+            icon={Activity}
+            trend={{ value: "Sendo", label: "conferidas", type: "neutral" }}
+            variant="default"
+            className="hover:scale-[1.02] transition-transform w-full"
+          />
 
-          <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl p-4 text-white">
-            <div className="flex items-start justify-between mb-3">
-              <div className="p-2.5 rounded-xl bg-white/20">
-                <CheckCircle className="w-5 h-5" />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-2xl lg:text-3xl font-bold tracking-tight">{stats.finalizadas}</p>
-              <p className="text-sm font-medium text-white/90">Finalizadas</p>
-            </div>
-          </div>
-        </div>
+          {/* Finalizadas */}
+          <MetricCard
+            title="Finalizadas"
+            value={stats.finalizadas}
+            icon={CheckCircle}
+            trend={{ value: "Concluídas", label: "com sucesso", type: "positive" }}
+            variant="success"
+            className="hover:scale-[1.02] transition-transform w-full"
+          />
+        </ResponsiveGrid>
 
         {/* Filters & Actions */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-1">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar contagens..."
+              placeholder="Buscar por fornecedor, data ou observação..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-10"
+              className={cn(ds.components.input.root, "pl-9 h-11 bg-card")}
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[160px] h-10">
-              <SelectValue placeholder="Status" />
+            <SelectTrigger className="w-full sm:w-[200px] h-11 bg-card">
+              <SelectValue placeholder="Filtrar por Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="all">Todos os status</SelectItem>
               <SelectItem value="pendente">Pendente</SelectItem>
               <SelectItem value="em_andamento">Em Andamento</SelectItem>
               <SelectItem value="finalizada">Finalizada</SelectItem>
@@ -228,7 +230,7 @@ export default function ContagemEstoque() {
           </Select>
           <Button
             onClick={() => setCreateDialogOpen(true)}
-            className="w-full sm:w-auto bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"
+            className={cn(ds.components.button.primary, "w-full sm:w-auto h-11")}
           >
             <Plus className="h-4 w-4 mr-2" />
             Nova Contagem
@@ -237,26 +239,28 @@ export default function ContagemEstoque() {
 
         {/* Content */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <Loader2 className="h-10 w-10 animate-spin text-brand mb-4" />
+            <p className="text-muted-foreground animate-pulse">Carregando contagens...</p>
           </div>
         ) : filteredCounts.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 p-8 sm:p-12">
-            <div className="flex flex-col items-center justify-center gap-3 text-center">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center">
-                <ClipboardList className="w-7 h-7 sm:w-8 sm:h-8 text-orange-500" />
+          <div className={cn(ds.components.card.root, "p-12 border-dashed")}>
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <div className="w-20 h-20 rounded-full bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center ring-8 ring-zinc-50/50 dark:ring-zinc-900/30">
+                <ClipboardList className="w-10 h-10 text-zinc-300 dark:text-zinc-600" />
               </div>
-              <div>
-                <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <div className="max-w-md space-y-2">
+                <h3 className="text-lg font-semibold text-foreground">
                   Nenhuma contagem encontrada
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                  Crie uma nova contagem para começar
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Não encontramos registros com os filtros atuais. Tente alterar a busca ou crie uma nova contagem.
                 </p>
               </div>
               <Button
                 onClick={() => setCreateDialogOpen(true)}
-                className="bg-gradient-to-r from-orange-600 to-amber-600"
+                variant="outline"
+                className="mt-4"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Contagem
@@ -266,73 +270,73 @@ export default function ContagemEstoque() {
         ) : (
           <>
             {/* Cards Mobile */}
-            <div className="block lg:hidden space-y-3">
+            <div className="block lg:hidden space-y-4">
               {filteredCounts.map((count) => (
                 <div
                   key={count.id}
-                  className="rounded-xl border border-gray-200 dark:border-gray-700/50 bg-white dark:bg-gray-800/50 p-4"
+                  className={cn(ds.components.card.root, "p-4 active:scale-[0.99] transition-transform")}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-100 to-amber-100 dark:from-orange-900/30 dark:to-amber-900/30 flex items-center justify-center flex-shrink-0">
-                        <ClipboardList className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 border border-zinc-200 dark:border-zinc-700">
+                        <ClipboardList className="w-5 h-5 text-zinc-500" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                        <p className="font-semibold text-foreground truncate">
                           {(count as any).order?.supplier_name || "Contagem Livre"}
                         </p>
-                        <p className="text-xs text-gray-500">
-                          {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {format(new Date(count.count_date), "dd 'de' MMM, yyyy", { locale: ptBR })}
                         </p>
                       </div>
                     </div>
                     {getStatusBadge(count.status)}
                   </div>
 
-                  {count.notes && (
-                    <p className="text-xs text-gray-500 mt-2 line-clamp-2">{count.notes}</p>
-                  )}
-
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "text-xs",
-                        (count as any).order
-                          ? "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/50 dark:text-orange-300"
-                          : "bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400"
-                      )}
-                    >
-                      {(count as any).order ? "Com Pedido" : "Livre"}
-                    </Badge>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleViewCount(count.id)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      {count.status !== "finalizada" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleFinalizeCount(count.id)}
-                          className="h-8 w-8 p-0 text-emerald-600"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleDeleteCount(count.id)}
-                        className="h-8 w-8 p-0 text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                      <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Tipo</span>
+                      <span className="text-xs font-medium">{(count as any).order ? "Pedido" : "Avulso"}</span>
                     </div>
+                    {count.notes && (
+                      <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Obs</span>
+                        <span className="text-xs font-medium truncate block">{count.notes}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewCount(count.id)}
+                      className="flex-1 h-9"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Detalhes
+                    </Button>
+                    
+                    {count.status !== "finalizada" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleFinalizeCount(count.id)}
+                        className="h-9 w-9 p-0 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteCount(count.id)}
+                      className="h-9 w-9 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}

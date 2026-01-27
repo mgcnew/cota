@@ -1,6 +1,6 @@
 import { useEffect, useState, startTransition } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./AuthContext";
 import { useSubscriptionGuard } from "@/hooks/useSubscriptionGuard";
 import { SubscriptionBlocked } from "@/components/billing/SubscriptionBlocked";
 import { Loader2 } from "lucide-react";

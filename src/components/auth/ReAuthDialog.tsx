@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Shield, Clock, RefreshCw, AlertTriangle } from "lucide-react";
-import { useAuth } from "./AuthProvider";
+import { useAuth } from "./AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface ReAuthDialogProps {

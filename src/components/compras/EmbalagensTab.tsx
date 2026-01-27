@@ -177,15 +177,15 @@ function EmbalagensTab() {
                 value={tab.value}
                 className={designSystem.components.tabs.clean.trigger}
               >
-                <tab.icon className={cn("h-4 w-4 mr-2", activeSubTab === tab.value ? "text-[#83E509]" : "opacity-70")} />
+                <tab.icon className={cn("h-4 w-4 mr-2", activeSubTab === tab.value ? "text-brand" : "opacity-70")} />
                 {tab.label}
                 {tab.badge ? (
-                  <span className="ml-2 px-1.5 py-0.5 bg-[#83E509] text-black text-[10px] font-black rounded-full animate-bounce">
+                  <span className="ml-2 px-1.5 py-0.5 bg-brand text-black text-[10px] font-black rounded-full animate-bounce">
                     {tab.badge}
                   </span>
                 ) : null}
                 {activeSubTab === tab.value && (
-                  <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-[#83E509] shadow-[0_0_10px_rgba(131,229,9,0.5)] rounded-full transition-all" />
+                  <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-brand shadow-[0_0_10px_hsl(var(--brand)/0.5)] rounded-full transition-all" />
                 )}
               </TabsTrigger>
             ))}
@@ -279,9 +279,9 @@ function EmbalagensTab() {
 
           {/* Alerta de prontas */}
           {stats.prontasParaDecisao > 0 && (
-            <div className="bg-[#83E509]/5 border border-[#83E509]/20 rounded-2xl p-4 flex items-center gap-4 animate-in zoom-in-95 duration-500">
-              <div className="w-10 h-10 rounded-full bg-[#83E509]/10 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="h-5 w-5 text-[#83E509]" />
+            <div className="bg-brand/5 border border-brand/20 rounded-2xl p-4 flex items-center gap-4 animate-in zoom-in-95 duration-500">
+              <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-brand" />
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
@@ -292,7 +292,7 @@ function EmbalagensTab() {
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-xl border-[#83E509]/30 text-[#83E509] hover:bg-[#83E509]/10"
+                className="rounded-xl border-brand/30 text-brand hover:bg-brand/10"
                 onClick={() => setStatusFilter("prontas")}
               >
                 Analisar agora

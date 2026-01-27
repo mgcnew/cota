@@ -90,14 +90,14 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       {/* 2. TOOLBAR & FILTROS */}
       <div className="bg-white dark:bg-zinc-950 px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-3 sticky top-0 z-20">
         <div className="relative w-full sm:flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors z-20 pointer-events-none" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors z-20 pointer-events-none" />
           <Input
             placeholder="Pesquisar por item ou empresa..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
               designSystem.components.input.root,
-              "pl-12 h-11 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-[#83E509] transition-all"
+              "pl-12 h-11 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-brand transition-all"
             )}
           />
         </div>
@@ -166,11 +166,11 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1.5">
                         {item.savings > 0 && (
-                          <span className="px-1 py-0.5 bg-[#83E509]/10 text-[#83E509] text-[8px] font-black rounded border border-[#83E509]/20">
+                          <span className="px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
                             -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
                           </span>
                         )}
-                        <span className="text-sm font-black text-[#83E509] tracking-tight">
+                        <span className="text-sm font-black text-brand tracking-tight">
                           R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
                       </div>

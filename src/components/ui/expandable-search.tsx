@@ -52,12 +52,12 @@ const accentColors = {
     bgHover: "hover:bg-gray-50 dark:hover:bg-gray-900/20",
   },
   brand: {
-    border: "border-[#83E509]/30 dark:border-[#83E509]/20",
-    focusBorder: "focus-within:border-[#83E509] dark:focus-within:border-[#83E509]",
-    focusRing: "focus-within:ring-[#83E509]/20 dark:focus-within:ring-[#83E509]/10",
-    hoverBorder: "hover:border-[#83E509]/50 dark:hover:border-[#83E509]/40",
-    iconColor: "text-[#83E509]",
-    bgHover: "hover:bg-[#83E509]/5 dark:hover:bg-[#83E509]/10",
+    border: "border-brand/30 dark:border-brand/20",
+    focusBorder: "focus-within:border-brand dark:focus-within:border-brand",
+    focusRing: "focus-within:ring-brand/20 dark:focus-within:ring-brand/10",
+    hoverBorder: "hover:border-brand/50 dark:hover:border-brand/40",
+    iconColor: "text-brand",
+    bgHover: "hover:bg-brand/5 dark:hover:bg-brand/10",
   },
 };
 

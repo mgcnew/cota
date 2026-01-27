@@ -96,11 +96,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #f9fafb; padding: 20px; }
     .container { max-width: 900px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; }
-    .header { background: linear-gradient(135deg, #83E509 0%, #6bc109 100%); color: #18181b; padding: 30px; border-radius: 8px; margin-bottom: 30px; text-align: center; }
+    .header { background: linear-gradient(135deg, ${ds.colors.brand.primary} 0%, ${ds.colors.brand.hover} 100%); color: #18181b; padding: 30px; border-radius: 8px; margin-bottom: 30px; text-align: center; }
     .header h1 { font-size: 24px; font-weight: 800; }
     .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .info-card { background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #83E509; }
-    .info-card strong { display: block; color: #83E509; font-size: 12px; text-transform: uppercase; font-weight: 800; }
+    .info-card { background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid ${ds.colors.brand.primary}; }
+    .info-card strong { display: block; color: ${ds.colors.brand.primary}; font-size: 12px; text-transform: uppercase; font-weight: 800; }
     table { width: 100%; border-collapse: collapse; margin: 20px 0; }
     th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 700; border-bottom: 2px solid #e5e7eb; }
     td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
@@ -124,7 +124,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         <tr class="total-row"><td colspan="3" style="text-align: right;">TOTAL</td><td style="text-align: right;">R$ ${formatCurrency(total)}</td></tr>
       </tbody>
     </table>
-    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid #83E509;"><strong style="color: #83E509;">Observações:</strong><p>${observacoes}</p></div>` : ''}
+    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid ${ds.colors.brand.primary};"><strong style="color: ${ds.colors.brand.primary};">Observações:</strong><p>${observacoes}</p></div>` : ''}
   </div>
 </body>
 </html>`;
@@ -143,7 +143,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     { value: "pendente", label: "Pendente", color: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30" },
     { value: "processando", label: "Processando", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/30" },
     { value: "confirmado", label: "Confirmado", color: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/30" },
-    { value: "entregue", label: "Entregue", color: "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/30" },
+    { value: "entregue", label: "Entregue", color: "bg-brand/10 text-brand border-brand/30" },
     { value: "cancelado", label: "Cancelado", color: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30" }
   ];
 
@@ -345,7 +345,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     <div className="flex items-center gap-3">
       <div className={cn(
         "w-10 h-10 rounded-xl flex items-center justify-center shadow-lg",
-        "bg-[#83E509]"
+        "bg-brand"
       )}>
         <ShoppingCart className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
       </div>
@@ -437,7 +437,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 variant="ghost"
                 size="icon"
                 onClick={handleDownloadHtml}
-                className={cn(ds.components.button.ghost, "h-9 w-9 text-[#83E509] hover:text-[#83E509] hover:bg-[#83E509]/10")}
+                className={cn(ds.components.button.ghost, "h-9 w-9 text-brand hover:text-brand hover:bg-brand/10")}
                 title="Exportar pedido"
               >
                 <Download className="h-4 w-4" />
@@ -513,10 +513,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     )}>
                       <Label className={cn(
                         ds.components.input.label,
-                        "text-[#83E509]"
+                        "text-brand"
                       )}>Adicionar Produto</Label>
                       <div className="relative group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                         <Input
                           ref={newProductInputRef}
                           placeholder="Buscar produto..."
@@ -540,7 +540,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                 className={cn(
                                   "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
                                   highlightedIndex === idx 
-                                    ? "bg-[#83E509]/10 text-[#83E509]" 
+                                    ? "bg-brand/10 text-brand" 
                                     : ds.colors.surface.hover,
                                   ds.colors.border.default,
                                   "border-b last:border-none"
@@ -572,12 +572,12 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                   )}
                                 </div>
                                 {p.brand_score > 0 && (
-                                  <div className="flex items-center gap-1 bg-[#83E509]/10 px-2 py-1 rounded-lg flex-shrink-0">
-                                    <Trophy className="h-3 w-3 text-[#83E509]" />
+                                  <div className="flex items-center gap-1 bg-brand/10 px-2 py-1 rounded-lg flex-shrink-0">
+                                    <Trophy className="h-3 w-3 text-brand" />
                                     <span className={cn(
                                       ds.typography.size.xs,
                                       ds.typography.weight.bold,
-                                      "text-[#83E509]"
+                                      "text-brand"
                                     )}>{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
                                   </div>
                                 )}
@@ -625,7 +625,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   )}>Itens do Pedido</span>
                   <Badge className={cn(
                     ds.components.badge.base,
-                    "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                    "bg-brand/10 text-brand border-brand/20"
                   )}>
                     {itens.length}
                   </Badge>
@@ -660,7 +660,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             <span className={cn(
                               ds.typography.size.xs,
                               ds.typography.weight.bold,
-                              "text-[#83E509]"
+                              "text-brand"
                             )}>R$ {item.valorUnitario.toFixed(2)}</span>
                             <span className={cn(
                               ds.typography.size.xs,
@@ -692,14 +692,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 {/* Total Mobile */}
                 <Card className={cn(
                   ds.components.card.root,
-                  "bg-[#83E509]/5 border-[#83E509]/20"
+                  "bg-brand/5 border-brand/20"
                 )}>
                   <CardContent className={cn(ds.components.card.body, "flex justify-between items-center")}>
                     <div className="flex flex-col">
                       <span className={cn(
                         ds.typography.size.xs,
                         ds.typography.weight.bold,
-                        "text-[#83E509]",
+                        "text-brand",
                         "uppercase tracking-wider mb-1"
                       )}>Total do Pedido</span>
                       <div className="flex items-baseline gap-1">
@@ -720,7 +720,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     </div>
                     <div className={cn(
                       "w-12 h-12 rounded-xl flex items-center justify-center",
-                      "bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/20"
+                      "bg-brand text-zinc-950 shadow-lg shadow-brand/20"
                     )}>
                       <DollarSign className="h-6 w-6" />
                     </div>
@@ -737,8 +737,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <Card className={ds.components.card.root}>
                     <CardContent className={cn(ds.components.card.body, "space-y-2")}>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-[#83E509]" />
+                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+                          <Building2 className="h-4 w-4 text-brand" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
@@ -800,24 +800,24 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   
                   <Card className={cn(
                     ds.components.card.root,
-                    "bg-[#83E509]/5 border-[#83E509]/20"
+                    "bg-brand/5 border-brand/20"
                   )}>
                     <CardContent className={cn(ds.components.card.body, "space-y-2")}>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/20 flex items-center justify-center">
-                          <DollarSign className="h-4 w-4 text-[#83E509]" />
+                        <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
+                          <DollarSign className="h-4 w-4 text-brand" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
                           ds.typography.weight.bold,
-                          "text-[#83E509]",
+                          "text-brand",
                           "uppercase tracking-wider"
                         )}>Total</span>
                       </div>
                       <p className={cn(
                         ds.typography.size.base,
                         ds.typography.weight.bold,
-                        "text-[#83E509]"
+                        "text-brand"
                       )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                     </CardContent>
                   </Card>
@@ -844,8 +844,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <Card className={ds.components.card.root}>
                     <CardContent className={cn(ds.components.card.body, "space-y-3")}>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-[#83E509]/10 flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-[#83E509]" />
+                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+                          <FileText className="h-4 w-4 text-brand" />
                         </div>
                         <span className={cn(
                           ds.typography.size.sm,
@@ -920,7 +920,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   variant="ghost"
                   size="icon"
                   onClick={handleDownloadHtml}
-                  className={cn(ds.components.button.ghost, "h-9 w-9 text-[#83E509] hover:text-[#83E509] hover:bg-[#83E509]/10")}
+                  className={cn(ds.components.button.ghost, "h-9 w-9 text-brand hover:text-brand hover:bg-brand/10")}
                   title="Exportar pedido"
                 >
                   <Download className="h-4 w-4" />
@@ -1045,14 +1045,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <h3 className={cn(
                     ds.typography.size.sm,
                     ds.typography.weight.bold,
-                    "text-[#83E509]",
+                    "text-brand",
                     "uppercase tracking-wider"
                   )}>Adicionar Produto</h3>
                   
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Produto</Label>
                     <div className="relative group">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                       <Input
                         ref={newProductInputRef}
                         placeholder="Buscar produto..."
@@ -1075,7 +1075,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               className={cn(
                                 "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
                                 highlightedIndex === idx 
-                                  ? "bg-[#83E509]/10 text-[#83E509]" 
+                                  ? "bg-brand/10 text-brand" 
                                   : ds.colors.surface.hover,
                                 ds.colors.border.default,
                                 "border-b last:border-none"
@@ -1153,7 +1153,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     )}>Itens do Pedido</h3>
                     <Badge className={cn(
                       ds.components.badge.base,
-                      "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                      "bg-brand/10 text-brand border-brand/20"
                     )}>
                       {itens.length}
                     </Badge>
@@ -1168,7 +1168,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     <span className={cn(
                       ds.typography.size.base,
                       ds.typography.weight.bold,
-                      "text-[#83E509]"
+                      "text-brand"
                     )}>
                       R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
@@ -1196,7 +1196,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <CardContent className={cn(ds.components.card.body, "flex items-center gap-4 py-4")}>
                           <div className={cn(
                             "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-                            "bg-[#83E509]/10 text-[#83E509]",
+                            "bg-brand/10 text-brand",
                             ds.typography.size.sm,
                             ds.typography.weight.bold
                           )}>
@@ -1222,7 +1222,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               <span className={cn(
                                 ds.typography.size.xs,
                                 ds.typography.weight.bold,
-                                "text-[#83E509]"
+                                "text-brand"
                               )}>R$ {item.valorUnitario.toFixed(2)}</span>
                             </div>
                           </div>
@@ -1262,8 +1262,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <Card className={ds.components.card.root}>
                     <CardContent className={cn(ds.components.card.body, "space-y-3")}>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#83E509]/10 flex items-center justify-center">
-                          <Building2 className="h-5 w-5 text-[#83E509]" />
+                        <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+                          <Building2 className="h-5 w-5 text-brand" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
@@ -1325,24 +1325,24 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
                   <Card className={cn(
                     ds.components.card.root,
-                    "bg-[#83E509]/5 border-[#83E509]/20"
+                    "bg-brand/5 border-brand/20"
                   )}>
                     <CardContent className={cn(ds.components.card.body, "space-y-3")}>
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#83E509]/20 flex items-center justify-center">
-                          <DollarSign className="h-5 w-5 text-[#83E509]" />
+                        <div className="w-10 h-10 rounded-xl bg-brand/20 flex items-center justify-center">
+                          <DollarSign className="h-5 w-5 text-brand" />
                         </div>
                         <span className={cn(
                           ds.typography.size.xs,
                           ds.typography.weight.bold,
-                          "text-[#83E509]",
+                          "text-brand",
                           "uppercase tracking-wider"
                         )}>Total</span>
                       </div>
                       <p className={cn(
                         ds.typography.size.lg,
                         ds.typography.weight.bold,
-                        "text-[#83E509]"
+                        "text-brand"
                       )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                     </CardContent>
                   </Card>
@@ -1352,7 +1352,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 <Card className={ds.components.card.root}>
                   <CardContent className={cn(ds.components.card.body, "space-y-4")}>
                     <div className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-[#83E509]" />
+                      <Package className="h-5 w-5 text-brand" />
                       <h3 className={cn(
                         ds.typography.size.sm,
                         ds.typography.weight.bold,
@@ -1373,7 +1373,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           <div className="flex items-center gap-3 flex-1 min-w-0">
                             <div className={cn(
                               "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                              "bg-[#83E509]/10 text-[#83E509]",
+                              "bg-brand/10 text-brand",
                               ds.typography.size.xs,
                               ds.typography.weight.bold
                             )}>
@@ -1398,7 +1398,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                 <span className={cn(
                                   ds.typography.size.xs,
                                   ds.typography.weight.bold,
-                                  "text-[#83E509]"
+                                  "text-brand"
                                 )}>R$ {item.valorUnitario.toFixed(2)}</span>
                               </div>
                             </div>
@@ -1435,7 +1435,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     <Card className={ds.components.card.root}>
                       <CardContent className={cn(ds.components.card.body, "space-y-3")}>
                         <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-[#83E509]" />
+                          <FileText className="h-4 w-4 text-brand" />
                           <span className={cn(
                             ds.typography.size.sm,
                             ds.typography.weight.bold,

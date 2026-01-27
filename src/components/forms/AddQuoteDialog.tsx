@@ -668,7 +668,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       {/* Header - Design System */}
       <div className={ds.components.modal.header}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#83E509] flex items-center justify-center shadow-lg shadow-[#83E509]/20">
+          <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shadow-lg shadow-brand/20">
             <Plus className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
           </div>
           <div>
@@ -745,7 +745,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               <Card className={ds.components.card.root}>
                                 <CardHeader className={ds.components.card.header}>
                                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                    <Plus className="h-5 w-5 text-[#83E509] flex-shrink-0" />
+                                    <Plus className="h-5 w-5 text-brand flex-shrink-0" />
                                     <span className="truncate">Adicionar Produto</span>
                                   </CardTitle>
                                 </CardHeader>
@@ -754,7 +754,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <div className={ds.components.input.group}>
                                     <label className={ds.components.input.label}>Produto *</label>
                                     <div className="relative group">
-                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                                       <Input
                                         ref={productSearchRef}
                                         placeholder="Digite o nome do produto..."
@@ -807,7 +807,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 className={cn(
                                                   "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
                                                   (highlightedProductIndex === index)
-                                                    ? "bg-[#83E509]/10 text-[#83E509]" 
+                                                    ? "bg-brand/10 text-brand" 
                                                     : cn(
                                                         ds.colors.surface.hover,
                                                         ds.colors.text.primary
@@ -817,7 +817,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 <div className={cn(
                                                   "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
                                                   highlightedProductIndex === index 
-                                                    ? "bg-[#83E509]/20 text-[#83E509]" 
+                                                    ? "bg-brand/20 text-brand" 
                                                     : cn(
                                                         ds.colors.surface.section,
                                                         ds.colors.text.secondary
@@ -837,7 +837,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       {/* Indicador de Carregamento Dinâmico */}
                                       {isSearchingProducts && (
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                          <Loader2 className="h-4 w-4 animate-spin text-[#83E509]" />
+                                          <Loader2 className="h-4 w-4 animate-spin text-brand" />
                                         </div>
                                       )}
 
@@ -931,7 +931,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     ds.colors.text.secondary,
                                     ds.colors.border.subtle
                                   )}>
-                                    <p className={cn(ds.typography.weight.medium, "text-[#83E509]")}>⌨️ Atalhos de Teclado</p>
+                                    <p className={cn(ds.typography.weight.medium, "text-brand")}>⌨️ Atalhos de Teclado</p>
                                     <div className="flex justify-center gap-4">
                                         <span className="flex items-center gap-1.5">
                                           <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Tab</kbd> 
@@ -967,9 +967,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         {fields.map((field, index) => (
                                           <Card key={field.id} className={cn(
                                             ds.components.card.root,
-                                            "transition-all group hover:border-[#83E509]/30"
+                                            "transition-all group hover:border-brand/30"
                                           )}>
-                                            <div className="h-1 bg-zinc-200 dark:bg-zinc-700 group-hover:bg-[#83E509] transition-colors rounded-t-xl"></div>
+                                            <div className="h-1 bg-zinc-200 dark:bg-zinc-700 group-hover:bg-brand transition-colors rounded-t-xl"></div>
                                             <CardContent className="p-3">
                                               <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1 min-w-0">
@@ -1014,7 +1014,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           <Card className={ds.components.card.root}>
                             <CardHeader className={ds.components.card.header}>
                               <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2 sm:gap-3")}>
-                                <div className="p-2 rounded-lg bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/25 flex-shrink-0">
+                                <div className="p-2 rounded-lg bg-brand text-zinc-950 shadow-lg shadow-brand/25 flex-shrink-0">
                                   <Clock className="h-4 w-4" />
                                 </div>
                                 <div className="flex flex-col min-w-0">
@@ -1389,7 +1389,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       variant="ghost"
                                       size="sm"
                                       onClick={handleSelectAllSuppliers}
-                                      className={cn(ds.components.button.ghost, "text-[#83E509] hover:text-[#72cc00]")}
+                                      className={cn(ds.components.button.ghost, "text-brand hover:text-brand/80")}
                                     >
                                       <Check className="h-3 w-3 mr-1.5" />
                                       {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id)) 
@@ -1400,7 +1400,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </div>
                                 
                                 <div className="relative group">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                                   <Input
                                     placeholder="Buscar por nome, contato ou e-mail..."
                                     value={supplierSearch}
@@ -1469,7 +1469,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 "group flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
                                                 isFocused 
                                                   ? cn(
-                                                      "border-[#83E509]/30 shadow-sm",
+                                                      "border-brand/30 shadow-sm",
                                                       ds.colors.surface.section
                                                     )
                                                   : cn(
@@ -1481,7 +1481,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             >
                                               {/* Selection Indicator Bar */}
                                               {isFocused && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#83E509]" />
+                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />
                                               )}
 
                                               <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
@@ -1489,11 +1489,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                   className={cn(
                                                     "w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all cursor-pointer",
                                                     isSelected
-                                                      ? "bg-[#83E509] border-[#83E509] text-zinc-950"
+                                                      ? "bg-brand border-brand text-zinc-950"
                                                       : cn(
                                                           ds.colors.border.default,
                                                           ds.colors.surface.card,
-                                                          "hover:border-[#83E509]/50"
+                                                          "hover:border-brand/50"
                                                         )
                                                   )}
                                                   onClick={() => handleSupplierSelect(supplier)}
@@ -1517,7 +1517,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                       ds.typography.size.xs,
                                                       ds.typography.weight.bold,
                                                       "uppercase tracking-wider px-2 py-0.5 rounded-md",
-                                                      "bg-[#83E509]/10 text-[#83E509]"
+                                                      "bg-brand/10 text-brand"
                                                     )}>
                                                       Selecionado
                                                     </span>
@@ -1540,7 +1540,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               <ChevronRight className={cn(
                                                 "h-5 w-5 transition-transform lg:hidden",
                                                 ds.colors.text.muted,
-                                                isFocused && "text-[#83E509] translate-x-1"
+                                                isFocused && "text-brand translate-x-1"
                                               )} />
                                             </div>
                                           );
@@ -1557,7 +1557,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       <h3 className={cn(
                                         ds.typography.size.xs,
                                         ds.typography.weight.bold,
-                                        "text-[#83E509] uppercase tracking-widest"
+                                        "text-brand uppercase tracking-widest"
                                       )}>
                                         Selecionados ({selectedSuppliers.length})
                                       </h3>
@@ -1581,19 +1581,19 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             onClick={() => setFocusedSupplierId(supplier.id)}
                                             className={cn(
                                               "group flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
-                                              "bg-[#83E509]/5",
+                                              "bg-brand/5",
                                               isFocused 
-                                                ? "border-[#83E509]/40 shadow-sm" 
+                                                ? "border-brand/40 shadow-sm" 
                                                 : cn(
-                                                    "border-[#83E509]/20",
-                                                    "hover:bg-[#83E509]/10"
+                                                    "border-brand/20",
+                                                    "hover:bg-brand/10"
                                                   )
                                             )}
                                           >
                                             <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
                                               <div 
                                                 className={cn(
-                                                  "w-6 h-6 rounded-md border-2 bg-[#83E509] border-[#83E509] text-zinc-950 flex items-center justify-center transition-all cursor-pointer",
+                                                  "w-6 h-6 rounded-md border-2 bg-brand border-brand text-zinc-950 flex items-center justify-center transition-all cursor-pointer",
                                                   "hover:bg-red-500 hover:border-red-500 hover:text-white"
                                                 )}
                                                 onClick={() => handleSupplierRemove(supplier.id)}
@@ -1631,7 +1631,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             <ChevronRight className={cn(
                                               "h-5 w-5 transition-transform lg:hidden",
                                               ds.colors.text.muted,
-                                              isFocused && "text-[#83E509] translate-x-1"
+                                              isFocused && "text-brand translate-x-1"
                                             )} />
                                           </div>
                                         );
@@ -1682,7 +1682,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           <div className="flex items-center gap-3">
                                             <div className={cn(
                                               "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
-                                              "bg-[#83E509] text-zinc-950",
+                                              "bg-brand text-zinc-950",
                                               ds.typography.weight.bold,
                                               ds.typography.size.sm
                                             )}>
@@ -1872,7 +1872,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 <Card className={ds.components.card.root}>
                                   <CardHeader className={ds.components.card.header}>
                                     <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                      <FileText className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                      <FileText className="h-4 w-4 text-brand flex-shrink-0" />
                                       <span className="truncate">Detalhes Adicionais</span>
                                     </CardTitle>
                                   </CardHeader>
@@ -1908,7 +1908,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 <Card className={ds.components.card.root}>
                                   <CardHeader className={ds.components.card.header}>
                                     <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                      <LayoutList className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                      <LayoutList className="h-4 w-4 text-brand flex-shrink-0" />
                                       <span className="truncate">Estatísticas</span>
                                     </CardTitle>
                                   </CardHeader>
@@ -1919,7 +1919,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         ds.colors.border.subtle,
                                         "border rounded-lg p-4 text-center"
                                       )}>
-                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-[#83E509] mb-1")}>{fields.length}</div>
+                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-brand mb-1")}>{fields.length}</div>
                                         <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.medium)}>Produtos</div>
                                       </div>
                                       <div className={cn(
@@ -1927,7 +1927,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         ds.colors.border.subtle,
                                         "border rounded-lg p-4 text-center"
                                       )}>
-                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-[#83E509] mb-1")}>{selectedSuppliers.length}</div>
+                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-brand mb-1")}>{selectedSuppliers.length}</div>
                                         <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.medium)}>Fornecedores</div>
                                       </div>
                                     </div>
@@ -1938,7 +1938,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 <Card className={ds.components.card.root}>
                                   <CardHeader className={ds.components.card.header}>
                                     <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                      <Clock className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                      <Clock className="h-4 w-4 text-brand flex-shrink-0" />
                                       <span className="truncate">Período da Cotação</span>
                                     </CardTitle>
                                   </CardHeader>
@@ -1960,7 +1960,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <Card className={ds.components.card.root}>
                                     <CardHeader className={ds.components.card.header}>
                                       <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                        <Package className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                        <Package className="h-4 w-4 text-brand flex-shrink-0" />
                                         <span className="truncate">Produtos Selecionados</span>
                                       </CardTitle>
                                     </CardHeader>
@@ -1999,7 +1999,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <Card className={ds.components.card.root}>
                                     <CardHeader className={ds.components.card.header}>
                                       <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                        <Building2 className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                                        <Building2 className="h-4 w-4 text-brand flex-shrink-0" />
                                         <span className="truncate">Fornecedores Participantes</span>
                                       </CardTitle>
                                     </CardHeader>
@@ -2012,7 +2012,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               ds.colors.surface.section,
                                               ds.colors.border.subtle
                                             )}>
-                                              <div className="w-2 h-2 bg-[#83E509] rounded-full flex-shrink-0"></div>
+                                              <div className="w-2 h-2 bg-brand rounded-full flex-shrink-0"></div>
                                               <CapitalizedText className={cn(
                                                 ds.typography.size.sm,
                                                 ds.typography.weight.semibold,
@@ -2093,7 +2093,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               <div className={cn(
                 "animate-spin h-12 w-12 border-4 rounded-full mx-auto",
                 "border-zinc-200 dark:border-zinc-700",
-                "border-t-[#83E509]"
+                "border-t-brand"
               )}></div>
               <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
             </div>

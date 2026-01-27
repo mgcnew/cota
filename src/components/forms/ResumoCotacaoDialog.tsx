@@ -104,9 +104,9 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-10 h-10 rounded-xl flex items-center justify-center",
-              "bg-[#83E509]/10 border border-[#83E509]/20"
+              "bg-brand/10 border border-brand/20"
             )}>
-              <ClipboardList className="h-5 w-5 text-[#83E509]" />
+              <ClipboardList className="h-5 w-5 text-brand" />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className={cn(
@@ -170,7 +170,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 ds.typography.weight.bold,
                 "text-blue-700 dark:text-blue-300"
               )}>
-                <span className="text-[#83E509]">{fornecedoresRespondidos}</span>
+                <span className="text-brand">{fornecedoresRespondidos}</span>
                 <span className={ds.colors.text.secondary}>/{fornecedores.length}</span>
               </p>
             </CardContent>
@@ -182,21 +182,21 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
               <div className="flex items-center gap-2">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center",
-                  "bg-[#83E509]/10"
+                  "bg-brand/10"
                 )}>
-                  <DollarSign className="h-4 w-4 text-[#83E509]" />
+                  <DollarSign className="h-4 w-4 text-brand" />
                 </div>
                 <span className={cn(
                   ds.typography.size.xs,
                   ds.typography.weight.bold,
-                  "text-[#83E509]",
+                  "text-brand",
                   "uppercase tracking-wider"
                 )}>Melhor Total</span>
               </div>
               <p className={cn(
                 ds.typography.size.xl,
                 ds.typography.weight.bold,
-                "text-[#83E509]"
+                "text-brand"
               )}>R$ {totalMelhorPreco.toFixed(2)}</p>
             </CardContent>
           </Card>
@@ -277,11 +277,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         <Card className={ds.components.card.root}>
           <CardHeader className={ds.components.card.header}>
             <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-              <Package className="h-4 w-4 text-[#83E509]" />
+              <Package className="h-4 w-4 text-brand" />
               <span>Produtos</span>
               <Badge className={cn(
                 ds.components.badge.base,
-                "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20 ml-auto"
+                "bg-brand/10 text-brand border-brand/20 ml-auto"
               )}>{products.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -326,7 +326,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                       <p className={cn(
                         ds.typography.size.sm,
                         ds.typography.weight.bold,
-                        "text-[#83E509]",
+                        "text-brand",
                         "flex items-center justify-end gap-1"
                       )}>
                         <TrendingDown className="h-3.5 w-3.5" />
@@ -349,11 +349,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         <Card className={ds.components.card.root}>
           <CardHeader className={ds.components.card.header}>
             <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-              <Building2 className="h-4 w-4 text-[#83E509]" />
+              <Building2 className="h-4 w-4 text-brand" />
               <span>Fornecedores</span>
               <Badge className={cn(
                 ds.components.badge.base,
-                "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20 ml-auto"
+                "bg-brand/10 text-brand border-brand/20 ml-auto"
               )}>{fornecedores.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -380,11 +380,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     <div className={cn(
                       "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
                       isRespondido 
-                        ? "bg-[#83E509]/10" 
+                        ? "bg-brand/10" 
                         : "bg-amber-500/10"
                     )}>
                       {isRespondido ? (
-                        <CheckCircle2 className="h-4 w-4 text-[#83E509]" />
+                        <CheckCircle2 className="h-4 w-4 text-brand" />
                       ) : (
                         <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                       )}
@@ -403,7 +403,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                             ds.typography.size.xs,
                             "h-5 uppercase tracking-wider",
                             isRespondido 
-                              ? "text-[#83E509] border-[#83E509]/30 bg-[#83E509]/5" 
+                              ? "text-brand border-brand/30 bg-brand/5" 
                               : "text-amber-600 border-amber-500/30 bg-amber-500/5 dark:text-amber-400"
                           )}
                         >
@@ -444,9 +444,9 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
               <div className="flex items-center gap-2">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center",
-                  "bg-[#83E509]/10"
+                  "bg-brand/10"
                 )}>
-                  <FileText className="h-4 w-4 text-[#83E509]" />
+                  <FileText className="h-4 w-4 text-brand" />
                 </div>
                 <span className={cn(
                   ds.typography.size.sm,

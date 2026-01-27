@@ -147,7 +147,7 @@ export function QuoteValuesTab({
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
           </div>
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-brand transition-colors" />
             <Input
               placeholder="Filtro rápido..."
               value={supplierSearch}
@@ -174,21 +174,21 @@ export function QuoteValuesTab({
                   className={cn(
                     "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
                     isSelected
-                      ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-[#83E509]/20"
+                      ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-brand/20"
                       : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
                   )}
                 >
-                  {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#83E509]" />}
+                  {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />}
                   <div className="flex items-center gap-2 mb-1.5">
-                    <div className={cn("w-2 h-2 rounded-full", fornecedor.status === 'respondido' ? "bg-[#83E509] shadow-[0_0_8px_#83E509]" : "bg-zinc-300 dark:bg-zinc-700")} />
+                    <div className={cn("w-2 h-2 rounded-full", fornecedor.status === 'respondido' ? "bg-brand shadow-[0_0_8px_hsl(var(--brand))]" : "bg-zinc-300 dark:bg-zinc-700")} />
                     <span className={cn("text-xs font-bold truncate", isSelected ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-500")} title={fornecedor.nome}>{safeStr(fornecedor.nome)}</span>
                   </div>
                   <div className="flex items-center justify-between pl-4">
-                    <span className={cn("text-[11px] font-black", isSelected ? "text-[#83E509]" : "text-zinc-400")}>
+                    <span className={cn("text-[11px] font-black", isSelected ? "text-brand" : "text-zinc-400")}>
                       {formatCurrency(total)}
                     </span>
                     {fornecedor.status === 'respondido' && isSelected && (
-                      <div className="h-4 px-1.5 rounded bg-[#83E509]/10 text-[#83E509] text-[9px] font-black tracking-tighter">RESPONDEU</div>
+                      <div className="h-4 px-1.5 rounded bg-brand/10 text-brand text-[9px] font-black tracking-tighter">RESPONDEU</div>
                     )}
                   </div>
                 </button>
@@ -221,8 +221,8 @@ export function QuoteValuesTab({
           <>
             <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/20 flex-shrink-0">
               <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
-                <div className="p-3 rounded-2xl bg-[#83E509]/10 flex-shrink-0">
-                  <Building2 className="h-5 w-5 text-[#83E509]" />
+                <div className="p-3 rounded-2xl bg-brand/10 flex-shrink-0">
+                  <Building2 className="h-5 w-5 text-brand" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Gerenciando Valores:</p>
@@ -232,7 +232,7 @@ export function QuoteValuesTab({
               <div className="text-right flex flex-col items-end flex-shrink-0">
                 <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Valor Proposto</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-xs font-bold text-[#83E509]">R$</span>
+                  <span className="text-xs font-bold text-brand">R$</span>
                   <p className="text-2xl font-black text-zinc-900 dark:text-zinc-50">
                     {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
@@ -265,7 +265,7 @@ export function QuoteValuesTab({
                     className={cn(
                       "group py-1.5 px-5 rounded-xl border transition-all duration-300",
                       isBest
-                        ? "bg-[#83E509]/5 border-[#83E509]/20 shadow-sm"
+                        ? "bg-brand/5 border-brand/20 shadow-sm"
                         : "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
                     )}
                   >
@@ -277,7 +277,7 @@ export function QuoteValuesTab({
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="relative group/input">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 group-focus-within/input:text-[#83E509] transition-colors">R$</span>
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 group-focus-within/input:text-brand transition-colors">R$</span>
                             <Input
                               ref={editInputRef}
                               type="text"
@@ -290,12 +290,12 @@ export function QuoteValuesTab({
                               }}
                               className={cn(
                                 designSystem.components.input.root,
-                                "w-36 h-10 pl-9 rounded-xl text-center font-black text-sm border-[#83E509]/30 focus:border-[#83E509] focus:ring-1 focus:ring-[#83E509]/20"
+                                "w-36 h-10 pl-9 rounded-xl text-center font-black text-sm border-brand/30 focus:border-brand focus:ring-1 focus:ring-brand/20"
                               )}
                             />
                           </div>
                           <div className="flex gap-1">
-                            <Button size="icon" className="h-10 w-10 rounded-xl bg-[#83E509] hover:bg-[#72cc00] text-black shadow-lg shadow-[#83E509]/10" onClick={() => handleSaveEdit(product.product_id)}>
+                            <Button size="icon" className="h-10 w-10 rounded-xl bg-brand hover:bg-brand/90 text-black shadow-lg shadow-brand/10" onClick={() => handleSaveEdit(product.product_id)}>
                               <Check className="h-5 w-5 stroke-[3px]" />
                             </Button>
                             <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-500/10" onClick={handleCancelEdit}>
@@ -311,7 +311,7 @@ export function QuoteValuesTab({
                           {isMobile && (
                             <p className="text-[10px] font-bold text-zinc-500 uppercase mt-0.5">
                               {product.quantidade} {product.unidade}
-                              {isBest && <span className="ml-2 text-[#83E509] font-black">🏆 MELHOR PREÇO</span>}
+                              {isBest && <span className="ml-2 text-brand font-black">🏆 MELHOR PREÇO</span>}
                             </p>
                           )}
                         </div>
@@ -327,14 +327,14 @@ export function QuoteValuesTab({
                         )}
                         <div className="text-right pr-2">
                           <div className="flex flex-col items-end">
-                            <p className={cn("text-base font-black tracking-tight", isBest ? "text-[#83E509]" : "text-zinc-900 dark:text-zinc-100")}>
+                            <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
                               {formatCurrency(currentValue)}
                             </p>
-                            {!isMobile && isBest && <p className="text-[8px] font-black text-[#83E509] uppercase tracking-tighter mt-0.5">🏆 MELHOR PREÇO</p>}
+                            {!isMobile && isBest && <p className="text-[8px] font-black text-brand uppercase tracking-tighter mt-0.5">🏆 MELHOR PREÇO</p>}
                           </div>
                         </div>
                         <div className="flex-shrink-0">
-                          <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-[#83E509] hover:bg-[#83E509]/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
+                          <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-brand hover:bg-brand/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
                             <Edit2 className="h-4 w-4" />
                           </Button>
                         </div>

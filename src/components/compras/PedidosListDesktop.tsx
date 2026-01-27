@@ -72,7 +72,7 @@ export const PedidosListDesktop = memo(({
                 )}>
                   <div className="w-[15%] flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-border/40">
-                      <ShoppingCart className="h-4 w-4 text-[#83E509]" />
+                      <ShoppingCart className="h-4 w-4 text-brand" />
                     </div>
                     <div>
                       <span className={cn("font-bold text-sm block", designSystem.colors.text.primary)}>
@@ -97,7 +97,7 @@ export const PedidosListDesktop = memo(({
                     />
                   </div>
                   <div className="w-[15%] pl-2">
-                    <span className={cn("font-bold text-sm text-[#83E509]")}>{pedido.total}</span>
+                    <span className={cn("font-bold text-sm text-brand")}>{pedido.total}</span>
                   </div>
                   <div className="w-[12%] pl-2 flex items-center gap-1.5">
                     <div className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20">

@@ -99,7 +99,7 @@ function Compras() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
-              <ShoppingBag className="h-6 w-6 text-[#83E509]" />
+              <ShoppingBag className="h-6 w-6 text-brand" />
             </div>
             <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
               Compras
@@ -150,10 +150,10 @@ function Compras() {
                   value={tab.value}
                   className={designSystem.components.tabs.clean.trigger}
                 >
-                  <tab.icon className={cn("h-4 w-4 mr-2", activeTab === tab.value ? "text-[#83E509]" : "opacity-70")} />
+                  <tab.icon className={cn("h-4 w-4 mr-2", activeTab === tab.value ? "text-brand" : "opacity-70")} />
                   {tab.label}
                   {activeTab === tab.value && (
-                    <div className="absolute bottom-[-2px] left-0 right-0 h-[2.5px] bg-[#83E509] shadow-[0_0_12px_rgba(131,229,9,0.5)] rounded-full transition-all" />
+                    <div className="absolute bottom-[-2px] left-0 right-0 h-[2.5px] bg-brand shadow-[0_0_12px_hsl(var(--brand)/0.5)] rounded-full transition-all" />
                   )}
                 </TabsTrigger>
               ))}

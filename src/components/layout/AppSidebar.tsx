@@ -173,7 +173,7 @@ export function AppSidebar() {
           showStatus
           clickable
           onClick={() => setProfileDialogOpen(true)}
-          className="ring-2 ring-white/10 shadow-lg"
+          className="ring-2 ring-border/10 shadow-lg"
         />
         {expanded && (
           <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
@@ -198,7 +198,7 @@ export function AppSidebar() {
                 >
                   <span className="opacity-70 group-hover:opacity-100 transition-opacity">{category.title}</span>
                   {isCollapsed ? (
-                    <ChevronRight className="w-3 h-3 opacity-50 text-[#83E509]" />
+                    <ChevronRight className="w-3 h-3 opacity-50 text-brand" />
                   ) : (
                     <ChevronDown className="w-3 h-3 opacity-50" />
                   )}
@@ -260,12 +260,12 @@ export function AppSidebar() {
                         className={cn(
                           "relative flex items-center justify-center w-10 h-10 mx-auto transition-all duration-300 group rounded-none",
                           isActive
-                            ? "text-[#83E509] shadow-[inset_0_-2px_0_0_#83E509] bg-transparent"
+                            ? "text-brand shadow-[inset_0_-2px_0_0_hsl(var(--brand))] bg-transparent"
                             : "text-muted-foreground hover:text-foreground hover:bg-transparent"
                         )}
                       >
                         <Icon
-                          className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "text-[#83E509]")}
+                          className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "text-brand")}
                         />
                       </NavLink>
                     </TooltipTrigger>
@@ -377,7 +377,7 @@ export function AppSidebar() {
                         : designSystem.layout.sidebar.item.inactive
                     )}
                   >
-                    <Icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-[#83E509]" : "opacity-70")} />
+                    <Icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-brand" : "opacity-70")} />
                     <span className="text-sm font-medium">{item.title}</span>
                   </NavLink>
                 );
@@ -385,13 +385,13 @@ export function AppSidebar() {
             </nav>
 
             {/* Mobile Footer */}
-            <div className="p-4 border-t border-white/5 space-y-2">
+            <div className="p-4 border-t border-border space-y-2">
               <button
                 onClick={() => {
                   navigate('/dashboard/configuracoes');
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
               >
                 <Settings className="w-5 h-5" />
                 <span className="text-sm font-medium">Configurações</span>

@@ -208,13 +208,13 @@ export default function ListaComprasTab() {
         <div
           className={cn(
             "p-5 rounded-2xl border-2 transition-all animate-in slide-in-from-top-4 duration-300",
-            "bg-zinc-900 border-[#83E509]/30 text-white shadow-2xl shadow-[#83E509]/10"
+            "bg-zinc-900 border-brand/30 text-white shadow-2xl shadow-brand/10"
           )}
         >
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#83E509]/20 flex items-center justify-center border border-[#83E509]/40">
-                <span className="text-lg font-black text-[#83E509]">
+              <div className="w-12 h-12 rounded-xl bg-brand/20 flex items-center justify-center border border-brand/40">
+                <span className="text-lg font-black text-brand">
                   {selectedItems.size}
                 </span>
               </div>
@@ -224,7 +224,7 @@ export default function ListaComprasTab() {
                 </p>
                 <button
                   onClick={clearSelection}
-                  className="text-xs text-[#83E509] hover:underline font-medium"
+                  className="text-xs text-brand hover:underline font-medium"
                 >
                   Desmarcar todos
                 </button>

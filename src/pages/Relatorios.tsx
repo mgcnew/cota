@@ -280,14 +280,14 @@ export default function Relatorios() {
 
         {/* Progress Bar */}
         {isGenerating && (
-          <Card className="border-blue-200 bg-blue-50 mb-6">
+          <Card className="border-blue-200/50 bg-blue-500/10 mb-6">
             <CardContent className="pt-4">
               <div className="flex items-center gap-3">
                 <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-blue-700 font-medium">Gerando relatórios...</span>
-                    <span className="text-blue-600">{Math.round(progress)}%</span>
+                    <span className="text-blue-700 dark:text-blue-400 font-medium">Gerando relatórios...</span>
+                    <span className="text-blue-600 dark:text-blue-400">{Math.round(progress)}%</span>
                   </div>
                   <Progress value={progress} className="w-full h-2" />
                 </div>
@@ -298,24 +298,24 @@ export default function Relatorios() {
 
         {/* Tabs with smooth transitions (Requirement 5.2) */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6 bg-gray-100 dark:bg-gray-800 h-auto p-1.5 rounded-xl">
+          <TabsList className="grid w-full grid-cols-3 mb-6 bg-muted h-auto p-1.5 rounded-xl">
             <TabsTrigger 
               value="analytics" 
-              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground"
             >
               <BarChart3 className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               <span className="font-medium">Analytics</span>
             </TabsTrigger>
             <TabsTrigger 
               value="relatorios" 
-              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground"
             >
               <FileText className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               <span className="font-medium">Relatórios</span>
             </TabsTrigger>
             <TabsTrigger 
               value="historico" 
-              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white data-[state=active]:shadow-md text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              className="tab-trigger-enhanced flex items-center gap-2 rounded-lg py-3 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-md text-muted-foreground hover:text-foreground"
             >
               <History className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
               <span className="font-medium">Histórico</span>

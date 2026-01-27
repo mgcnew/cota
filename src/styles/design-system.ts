@@ -1,16 +1,18 @@
 /**
  * CotaJá Design System
- * SISTEMA COMPLETO: Premium Minimalista & Neon Accent (#83E509)
+ * SISTEMA COMPLETO: Premium Minimalista & Neon Accent
  * 
  * Abrangência: TODO o sistema (Sidebar, Modais, Cards, Tabelas, etc.)
  */
+
+const BRAND_COLOR = "#83E509"; // Neon Green Principal
 
 export const designSystem = {
     // ============================================
     // VARIAVEIS BASE (Primitivos)
     // ============================================
     primitives: {
-        brand: "#83E509", // Neon Green Principal
+        brand: BRAND_COLOR,
         brandHover: "#72cc00",
         white: "#FFFFFF",
         black: "#09090b", // Zinc 950
@@ -34,21 +36,21 @@ export const designSystem = {
     // ============================================
     colors: {
         brand: {
-            primary: "#83E509",
+            primary: BRAND_COLOR,
             hover: "#72cc00",
             light: "rgba(131,229,9,0.1)"
         },
         text: {
-            primary: "text-zinc-700 dark:text-zinc-50", // Cinza no modo claro
+            primary: "text-[#1C1E21] dark:text-zinc-50", // Azul Marinho Escuro no modo claro
             secondary: "text-zinc-500 dark:text-zinc-400",
             muted: "text-zinc-400 dark:text-zinc-500",
-            onBrand: "text-zinc-950",
+            onBrand: "text-white",
             inverted: "text-zinc-50 dark:text-zinc-900"
         },
         surface: {
             page: "bg-background", // Sincronizado com index.css
             card: "bg-card",       // Sincronizado com index.css
-            section: "bg-muted/30 dark:bg-zinc-900/50",
+            section: "bg-muted/30 dark:bg-card/50",
             hover: "hover:bg-accent dark:hover:bg-zinc-800",
             active: "active:bg-accent/80 dark:active:bg-zinc-700"
         },
@@ -93,7 +95,7 @@ export const designSystem = {
     layout: {
         // Container Principal da Aplicação
         app: {
-            wrapper: "min-h-screen bg-background text-foreground font-sans antialiased selection:bg-[#83E509]/30",
+            wrapper: "min-h-screen bg-background text-foreground font-sans antialiased selection:bg-brand/30",
             main: "flex-1 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
         },
         // Containers Comuns
@@ -113,24 +115,24 @@ export const designSystem = {
             // Itens de Menu
             item: {
                 base: "flex items-center gap-3 px-3 py-3 transition-colors duration-200 group relative text-sm font-medium select-none cursor-pointer rounded-none",
-                active: "text-[#83E509] border-b-2 border-[#83E509] bg-transparent shadow-none",
+                active: "text-brand border-b-2 border-brand bg-transparent shadow-none",
                 inactive: "text-muted-foreground hover:text-foreground hover:bg-transparent", // Removido bg no hover também para limpeza total
                 icon: {
-                    active: "text-[#83E509]",
-                    inactive: "opacity-70 group-hover:opacity-100 group-hover:text-[#83E509]"
+                    active: "text-brand",
+                    inactive: "opacity-70 group-hover:opacity-100 group-hover:text-brand"
                 }
             },
 
             // Indicadores
-            activeIndicator: "absolute left-0 top-1/2 -translate-x-1/2 w-1 h-6 bg-[#83E509] rounded-r-full",
+            activeIndicator: "absolute left-0 top-1/2 -translate-x-1/2 w-1 h-6 bg-brand rounded-r-full",
 
             // Sidebar Secundária (Painéis Internos de Modais/Dashboard)
             secondary: {
-                wrapper: "w-full md:w-72 flex-shrink-0 flex flex-col bg-zinc-50/30 dark:bg-zinc-950/20 border-r border-zinc-100 dark:border-zinc-800",
-                header: "p-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40",
+                wrapper: "w-full md:w-72 flex-shrink-0 flex flex-col bg-zinc-50/30 dark:bg-background/20 border-r border-zinc-100 dark:border-zinc-800",
+                header: "p-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-background/40",
                 item: "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
-                itemActive: "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-[#83E509]/20",
-                itemInactive: "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
+                itemActive: "bg-white dark:bg-card border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-brand/20",
+                itemInactive: "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-card/50"
             }
         }
     },
@@ -141,68 +143,77 @@ export const designSystem = {
     components: {
         // Header/Navbar Superior
         header: {
-            wrapper: "sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-6 flex items-center justify-between shadow-sm"
+            wrapper: "sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-6 flex items-center justify-between shadow-sm"
         },
 
         // Cartões (Cards)
         card: {
-            root: "bg-white dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200",
-            flat: "bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl",
+            root: "bg-white dark:bg-card/80 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200",
+            flat: "bg-zinc-50 dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl",
             interactive: "cursor-pointer active:scale-[0.99] transition-transform",
             header: "px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between",
             title: "text-lg font-semibold text-zinc-900 dark:text-zinc-50",
             body: "p-6",
-            footer: "px-6 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-sm text-zinc-500"
+            footer: "px-6 py-4 bg-zinc-50/50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-sm text-zinc-500"
         },
 
         // Cartões de Estatísticas (Metrics)
         metricCard: {
             root: "group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 border",
-            hover: "hover:shadow-2xl hover:scale-[1.04] hover:border-white/40 dark:hover:border-[#83E509]/30",
+            hover: "hover:shadow-2xl hover:scale-[1.04] hover:border-white/40 dark:hover:border-brand/30",
             silhouette: "absolute -right-6 -bottom-6 opacity-0 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.07] transition-all duration-700 transform group-hover:-translate-y-4 group-hover:-translate-x-2 pointer-events-none rotate-6",
             variants: {
                 light: {
-                    default: "bg-[#83E509] text-white border-[#83E509] shadow-[#83E509]/20",
+                    default: "bg-brand text-white border-brand shadow-brand/20",
                     success: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200/40",
                     warning: "bg-amber-500 text-white border-amber-500 shadow-amber-200/40",
                     error: "bg-red-500 text-white border-red-500 shadow-red-200/40",
                     info: "bg-blue-500 text-white border-blue-500 shadow-blue-200/40"
                 },
                 dark: {
-                    base: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
-                    accent: "dark:hover:border-[#83E509]/30"
+                    base: "dark:bg-card/80 dark:text-zinc-50 dark:border-zinc-800",
+                    accent: "dark:hover:border-brand/30"
                 }
             }
         },
 
         // Botões
         button: {
-            // Primário "Brand" (Ação principal)
-            primary: "inline-flex items-center justify-center gap-2 bg-[#83E509] hover:bg-[#72cc00] text-white shadow-lg shadow-[#83E509]/20 active:scale-[0.98] transition-all rounded-lg text-sm font-bold px-4 py-2.5 disabled:opacity-50 disabled:pointer-events-none tracking-tight",
-            // Secundário (Outline)
-            secondary: "inline-flex items-center justify-center gap-2 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white active:scale-[0.98] transition-all rounded-lg text-sm font-medium px-4 py-2.5",
-            // Ghost (Link/Ação sutil)
-            ghost: "inline-flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg text-sm font-medium px-3 py-2 transition-colors",
-            // Destructive (Apagar/Erro)
-            danger: "inline-flex items-center justify-center gap-2 text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 border border-transparent hover:border-red-200 rounded-lg text-sm font-medium px-4 py-2.5 transition-all",
+            // Estilos Base (Comuns a todos)
+            base: "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 tracking-tight active:scale-[0.98]",
+            
+            // Variantes de Estilo
+            variants: {
+                primary: "bg-brand hover:bg-brand/90 text-white shadow-sm",
+                secondary: "bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-card hover:text-zinc-900 dark:hover:text-white",
+                ghost: "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-card",
+                danger: "text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 border border-transparent hover:border-red-200"
+            },
+
             // Tamanhos
             size: {
                 sm: "h-8 px-3 text-xs",
                 default: "h-10 px-4 py-2",
                 lg: "h-12 px-8 text-base",
                 icon: "h-9 w-9 p-0 flex items-center justify-center rounded-lg"
-            }
+            },
+
+            // Composições (Para retrocompatibilidade e uso direto)
+            get primary() { return `${this.base} ${this.variants.primary} ${this.size.default}` },
+            get secondary() { return `${this.base} ${this.variants.secondary} ${this.size.default}` },
+            get ghost() { return `${this.base} ${this.variants.ghost} ${this.size.default}` },
+            get danger() { return `${this.base} ${this.variants.danger} ${this.size.default}` }
         },
 
         // Modais (Dialogs) & Drawers
         modal: {
-            overlay: "fixed inset-0 z-50 bg-zinc-950/60 backdrop-blur-[2px] animate-in fade-in duration-200",
-            content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]",
+            overlay: "fixed inset-0 z-50 bg-background/60 backdrop-blur-[2px] animate-in fade-in duration-200",
+            content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]",
             // Padrão para Modais de Alta Densidade (Scroll Global)
             header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
             title: "text-lg font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
             body: "p-6 overflow-y-auto flex-1 custom-scrollbar",
-            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
+            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
 
             // Layout de Scroll Unificado (Uso Recomendado)
             layout: {
@@ -214,7 +225,7 @@ export const designSystem = {
             // Layout de Duplo Scroll (Sidebar + List)
             splitView: {
                 container: "flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden",
-                main: "flex-1 flex flex-col bg-white dark:bg-zinc-950 overflow-hidden",
+                main: "flex-1 flex flex-col bg-white dark:bg-background overflow-hidden",
                 content: "flex-1 overflow-y-auto custom-scrollbar p-6"
             }
         },
@@ -227,14 +238,14 @@ export const designSystem = {
             headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
             row: "bg-card border border-border/40 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.002]",
             rowCompact: "group py-1.5 px-5 rounded-xl border transition-all duration-300 relative overflow-hidden",
-            rowActive: "bg-[#83E509]/10 border-[#83E509]/40 shadow-[0_0_20px_-5px_rgba(131,229,9,0.15)] ring-1 ring-[#83E509]/20",
+            rowActive: "bg-brand/10 border-brand/40 shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)] ring-1 ring-brand/20",
             cell: "p-0 align-middle", // Padrão 0 para que o container interno da linha controle o padding
             caption: "mt-4 text-sm text-muted-foreground"
         },
 
         // Inputs & Forms
         input: {
-            root: "flex w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#83E509] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
+            root: "flex w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all",
             label: "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-900 dark:text-zinc-200 mb-2 block",
             group: "space-y-2"
         },
@@ -242,7 +253,7 @@ export const designSystem = {
         // Badges/Status Indicators
         badge: {
             base: "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            active: "border-transparent bg-[#83E509] text-zinc-950 hover:bg-[#83E509]/80", // Brand
+            active: "border-transparent bg-brand text-zinc-950 hover:bg-brand/80", // Brand
             outline: "text-zinc-500 border-zinc-200 dark:border-zinc-800 dark:text-zinc-400",
             secondary: "border-transparent bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-50",
             destructive: "border-transparent bg-red-50 text-red-600 hover:bg-red-100 border border-red-100",
@@ -257,7 +268,7 @@ export const designSystem = {
             // Variante "Clean" para Navegação de Topo (100% transparente SEMPRE)
             clean: {
                 list: "inline-flex h-auto items-center justify-start !bg-transparent !bg-none p-0 gap-4 md:gap-8 w-full border-none !border-0 shadow-none !shadow-none backdrop-blur-none !bg-opacity-0",
-                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 data-[state=active]:border-[#83E509] data-[state=active]:text-[#83E509] data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
+                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
             }
         },
 
@@ -278,11 +289,11 @@ export const designSystem = {
             results: "text-[13px] font-medium text-zinc-500 dark:text-zinc-400 order-2 sm:order-1",
             controls: "flex items-center gap-3 order-1 sm:order-2",
             item: "flex items-center justify-center min-w-[36px] h-9 rounded-lg border text-[13px] font-semibold transition-all duration-200",
-            active: "bg-[#83E509] border-[#83E509] text-zinc-950",
-            inactive: "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50",
+            active: "bg-brand border-brand text-zinc-950",
+            inactive: "bg-white dark:bg-card border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-card/50",
             disabled: "opacity-40 pointer-events-none",
             nav: "flex items-center gap-1.5",
-            navButton: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
+            navButton: "inline-flex items-center justify-center w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-card text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
         }
     },
 
@@ -291,11 +302,11 @@ export const designSystem = {
     // ============================================
     utils: {
         shadows: {
-            highlight: "ring-2 ring-[#83E509] ring-offset-2", // Focus ring effect
+            highlight: "ring-2 ring-brand ring-offset-2", // Focus ring effect
             card: "shadow-[0_2px_10px_-2px_rgba(0,0,0,0.05)]"
         },
         // Efeitos de vidro
-        glass: "backdrop-blur-md bg-white/70 dark:bg-zinc-950/70 border border-white/20 shadow-xl",
+        glass: "backdrop-blur-md bg-white/70 dark:bg-zinc-900/70 border border-white/20 shadow-xl",
         // Scrollbar customizada
         scrollbar: "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800 hover:scrollbar-thumb-zinc-300 dark:hover:scrollbar-thumb-zinc-700"
     }

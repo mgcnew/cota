@@ -364,7 +364,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       className={cn(
         "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all rounded-lg",
         highlightedProductIndex === index 
-          ? "bg-[#83E509]/10 text-[#83E509]" 
+          ? "bg-brand/10 text-brand" 
           : cn(
               ds.colors.surface.hover,
               ds.colors.text.primary
@@ -375,7 +375,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         <div className={cn(
           "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
           highlightedProductIndex === index
-            ? "bg-[#83E509]/20 text-[#83E509]"
+            ? "bg-brand/20 text-brand"
             : cn(ds.colors.surface.section, ds.colors.text.secondary)
         )}>
           <Package className="h-4 w-4" />
@@ -422,8 +422,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       <div className={cn(ds.components.modal.header, "flex-shrink-0")}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-10 h-10 rounded-xl bg-[#83E509] flex items-center justify-center shadow-lg shadow-[#83E509]/20 flex-shrink-0">
-              <ShoppingCart className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
+            <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shadow-lg shadow-brand/20 flex-shrink-0">
+              <ShoppingCart className="h-5 w-5 text-brand-foreground stroke-[2.5]" />
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitleComponent className={cn(ds.components.modal.title, "truncate")}>
@@ -452,7 +452,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             className={cn(
               "h-1.5 rounded-full",
               ds.colors.surface.section,
-              "[&>div]:bg-[#83E509]"
+              "[&>div]:bg-brand"
             )} 
           />
         </div>
@@ -483,7 +483,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               >
                 <div className="flex items-center justify-center w-4 h-4">
                   {status === "completed" ? (
-                    <Check className="h-4 w-4 text-[#83E509]" />
+                    <Check className="h-4 w-4 text-brand" />
                   ) : (
                     <Icon className="h-4 w-4" />
                   )}
@@ -507,7 +507,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <Card className={ds.components.card.root}>
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                    <Plus className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                    <Plus className="h-4 w-4 text-brand flex-shrink-0" />
                     <span>Adicionar Produto</span>
                   </CardTitle>
                 </CardHeader>
@@ -516,7 +516,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Produto *</Label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                       <Input 
                         ref={productSearchRef}
                         placeholder="Buscar produto..." 
@@ -593,12 +593,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <CardHeader className={cn(ds.components.card.header, "flex-shrink-0")}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
                     <span className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-[#83E509]" />
+                      <ShoppingCart className="h-4 w-4 text-brand" />
                       Itens do Pedido
                     </span>
                     <Badge className={cn(
                       ds.components.badge.base,
-                      "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                      "bg-brand/10 text-brand border-brand/20"
                     )}>
                       {itens.length}
                     </Badge>
@@ -626,7 +626,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                               "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
                               ds.typography.size.xs,
                               ds.typography.weight.bold,
-                              "bg-[#83E509]/10 text-[#83E509]"
+                              "bg-brand/10 text-brand"
                             )}>
                               {index + 1}
                             </div>
@@ -683,7 +683,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <span className={cn(
                     ds.typography.size.lg,
                     ds.typography.weight.bold,
-                    "text-[#83E509]"
+                    "text-brand"
                   )}>
                     R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
                   </span>
@@ -702,7 +702,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <Card className={cn(ds.components.card.root, "overflow-visible")}>
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                    <Building2 className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                    <Building2 className="h-4 w-4 text-brand flex-shrink-0" />
                     <span>Selecionar Fornecedor</span>
                   </CardTitle>
                 </CardHeader>
@@ -710,7 +710,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <div className={cn(ds.components.input.group, "relative z-50")}>
                     <Label className={ds.components.input.label}>Buscar Fornecedor *</Label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-[#83E509] transition-colors z-10" />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors z-10" />
                       <Input 
                         ref={supplierSearchRef}
                         placeholder="Digite para buscar..." 
@@ -721,7 +721,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       />
                       
                       {/* Dropdown de resultados - posicionado absolutamente */}
-                      {supplierSearch && filteredSuppliers.length > 0 && (
+                      {debouncedSupplierSearch && filteredSuppliers.length > 0 && (
                         <div className={cn(
                           "absolute top-full left-0 right-0 mt-2 z-[100] rounded-xl border shadow-xl max-h-[280px] overflow-y-auto custom-scrollbar",
                           ds.colors.surface.card,
@@ -738,7 +738,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 className={cn(
                                   "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 group",
                                   fornecedor === s.id 
-                                    ? "bg-[#83E509] text-zinc-950 shadow-lg shadow-[#83E509]/20" 
+                                    ? "bg-brand text-brand-foreground shadow-lg shadow-brand/20" 
                                     : cn(
                                         ds.colors.surface.hover,
                                         ds.colors.text.primary
@@ -748,7 +748,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 <div className={cn(
                                   "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
                                   fornecedor === s.id 
-                                    ? "bg-zinc-950/10 text-zinc-950" 
+                                    ? "bg-brand-foreground/10 text-brand-foreground" 
                                     : cn(ds.colors.surface.section, ds.colors.text.secondary)
                                 )}>
                                   <Building2 className="h-4 w-4" />
@@ -758,17 +758,17 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                     ds.typography.size.sm,
                                     ds.typography.weight.bold,
                                     "truncate",
-                                    fornecedor === s.id && "text-zinc-950"
+                                    fornecedor === s.id && "text-brand-foreground"
                                   )}>{s.name}</p>
                                   {s.contact && (
                                     <p className={cn(
                                       ds.typography.size.xs,
                                       "truncate opacity-70 mt-0.5",
-                                      fornecedor === s.id ? "text-zinc-950" : ds.colors.text.secondary
+                                      fornecedor === s.id ? "text-brand-foreground" : ds.colors.text.secondary
                                     )}>{s.contact}</p>
                                   )}
                                 </div>
-                                {fornecedor === s.id && <Check className="h-4 w-4 text-zinc-950 flex-shrink-0" />}
+                                {fornecedor === s.id && <Check className="h-4 w-4 text-brand-foreground flex-shrink-0" />}
                               </button>
                             ))}
                           </div>
@@ -798,18 +798,18 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   {fornecedor && !supplierSearch && (
                     <div className={cn(
                       "p-4 rounded-xl border",
-                      "bg-[#83E509]/5 border-[#83E509]/20"
+                      "bg-brand/5 border-brand/20"
                     )}>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-[#83E509]/20 flex items-center justify-center flex-shrink-0">
-                            <Building2 className="h-4 w-4 text-[#83E509]" />
+                          <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="h-4 w-4 text-brand" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className={cn(
                               ds.typography.size.xs,
                               ds.typography.weight.bold,
-                              "text-[#83E509]",
+                              "text-brand",
                               "uppercase tracking-wider mb-1"
                             )}>Fornecedor Selecionado</p>
                             <p className={cn(
@@ -829,7 +829,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                             setSupplierSearch("");
                             setTimeout(() => supplierSearchRef.current?.focus(), 50);
                           }}
-                          className={cn(ds.components.button.ghost, "h-8 w-8 text-[#83E509] hover:text-[#83E509] hover:bg-[#83E509]/10")}
+                          className={cn(ds.components.button.ghost, "h-8 w-8 text-brand hover:text-brand hover:bg-brand/10")}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -843,7 +843,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <Card className={ds.components.card.root}>
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                    <FileText className="h-4 w-4 text-[#83E509] flex-shrink-0" />
+                    <FileText className="h-4 w-4 text-brand flex-shrink-0" />
                     <span>Detalhes da Entrega</span>
                   </CardTitle>
                 </CardHeader>
@@ -909,9 +909,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     <div className="flex items-center gap-2">
                       <div className={cn(
                         "w-8 h-8 rounded-lg flex items-center justify-center",
-                        "bg-[#83E509]/10"
+                        "bg-brand/10"
                       )}>
-                        <Building2 className="h-4 w-4 text-[#83E509]" />
+                        <Building2 className="h-4 w-4 text-brand" />
                       </div>
                       <span className={cn(
                         ds.typography.size.xs,
@@ -937,9 +937,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     <div className="flex items-center gap-2">
                       <div className={cn(
                         "w-8 h-8 rounded-lg flex items-center justify-center",
-                        "bg-[#83E509]/10"
+                        "bg-brand/10"
                       )}>
-                        <CalendarIcon className="h-4 w-4 text-[#83E509]" />
+                        <CalendarIcon className="h-4 w-4 text-brand" />
                       </div>
                       <span className={cn(
                         ds.typography.size.xs,
@@ -965,12 +965,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
                     <span className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-[#83E509]" />
+                      <ShoppingCart className="h-4 w-4 text-brand" />
                       Itens do Pedido
                     </span>
                     <Badge className={cn(
                       ds.components.badge.base,
-                      "bg-[#83E509]/10 text-[#83E509] border-[#83E509]/20"
+                      "bg-brand/10 text-brand border-brand/20"
                     )}>{itens.length}</Badge>
                   </CardTitle>
                 </CardHeader>
@@ -1019,7 +1019,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     <span className={cn(
                       ds.typography.size.xl,
                       ds.typography.weight.bold,
-                      "text-[#83E509]"
+                      "text-brand"
                     )}>
                       R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
                     </span>
@@ -1034,9 +1034,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     <div className="flex items-center gap-2">
                       <div className={cn(
                         "w-8 h-8 rounded-lg flex items-center justify-center",
-                        "bg-[#83E509]/10"
+                        "bg-brand/10"
                       )}>
-                        <FileText className="h-4 w-4 text-[#83E509]" />
+                        <FileText className="h-4 w-4 text-brand" />
                       </div>
                       <span className={cn(
                         ds.typography.size.xs,

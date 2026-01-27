@@ -269,7 +269,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
                     className={cn(
                       "flex items-center justify-between p-4 rounded-xl border transition-all group hover:shadow-md",
                       editingBrand?.id === brand.id
-                        ? "bg-[#83E509]/5 border-[#83E509]/30"
+                        ? "bg-brand/5 border-brand/30"
                         : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
                     )}
                   >
@@ -303,7 +303,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-9 w-9 text-zinc-400 hover:text-[#83E509] hover:bg-[#83E509]/10"
+                        className="h-9 w-9 text-zinc-400 hover:text-brand hover:bg-brand/10"
                         onClick={() => {
                           setEditingBrand(brand);
                           setNewBrandName(brand.name);

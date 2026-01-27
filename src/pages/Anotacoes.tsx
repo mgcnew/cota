@@ -45,7 +45,7 @@ export default function Anotacoes() {
           actions={
             <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 h-10 px-4 shadow-sm transition-all"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 shadow-sm transition-all"
             >
               <Plus className="h-4 w-4 mr-2" />
               Nova Anotação
@@ -102,13 +102,13 @@ export default function Anotacoes() {
         ) : (
           !isLoading && (
             <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500">
-              <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
-                <StickyNote className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
+                <StickyNote className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-1">
+              <h3 className="text-lg font-medium text-foreground mb-1">
                 {searchQuery ? "Nenhum resultado encontrado" : "Tudo limpo por aqui"}
               </h3>
-              <p className="text-sm text-gray-500 max-w-xs mx-auto">
+              <p className="text-sm text-muted-foreground max-w-xs mx-auto">
                 {searchQuery 
                   ? "Tente buscar por outro termo ou limpe o filtro." 
                   : "Crie uma nova anotação para começar a organizar suas tarefas."}
@@ -119,30 +119,30 @@ export default function Anotacoes() {
 
         {/* Resolved Section */}
         {resolvedNotes && resolvedNotes.length > 0 && (
-          <div className="pt-8 border-t border-gray-100 dark:border-gray-800">
+          <div className="pt-8 border-t border-border">
             <div className="flex items-center gap-3 mb-6">
-              <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <h2 className="text-base font-semibold text-gray-900 dark:text-white">
+              <h2 className="text-base font-semibold text-foreground">
                 Concluídas ({resolvedNotes.length})
               </h2>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 opacity-60 hover:opacity-100 transition-opacity duration-300">
               {resolvedNotes.map((note) => (
-                <Card key={note.id} className="group bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 shadow-none hover:border-gray-300 dark:hover:border-gray-700 transition-all">
+                <Card key={note.id} className="group bg-muted/50 border-border shadow-none hover:border-muted-foreground/30 transition-all">
                   <CardContent className="p-5">
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-1 min-w-0">
-                        <h3 className="font-medium text-gray-500 line-through truncate">{note.title}</h3>
-                        <p className="text-sm text-gray-400 line-clamp-2">{note.content}</p>
+                        <h3 className="font-medium text-muted-foreground line-through truncate">{note.title}</h3>
+                        <p className="text-sm text-muted-foreground/80 line-clamp-2">{note.content}</p>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeleteNote(note.id)}
-                        className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg -mr-2 -mt-2"
+                        className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-500/10 rounded-lg -mr-2 -mt-2"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

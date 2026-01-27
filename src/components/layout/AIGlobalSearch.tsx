@@ -364,24 +364,24 @@ export function AIGlobalSearchTrigger({ onClick, compact }: { onClick: () => voi
         "relative transition-all duration-300 active:scale-95 touch-manipulation group",
         compact ? "h-9 px-3 w-auto min-w-[180px]" : "w-full h-10 px-4 justify-start",
         "bg-white/5 dark:bg-white/5 backdrop-blur-md overflow-hidden",
-        "border border-[#83E509]/20 hover:border-[#83E509]/50",
-        "shadow-[0_2px_10px_-3px_rgba(131,229,9,0.05)] hover:shadow-[0_4px_20px_-5px_rgba(131,229,9,0.15)]"
+        "border border-brand/20 hover:border-brand/50",
+        "shadow-[0_2px_10px_-3px_hsl(var(--primary)/0.05)] hover:shadow-[0_4px_20px_-5px_hsl(var(--primary)/0.15)]"
       )}
     >
       <div className="flex items-center w-full gap-2 relative z-10">
         <div className="relative">
-          <Sparkles className="h-4 w-4 shrink-0 text-[#83E509] group-hover:scale-110 transition-transform duration-300" />
-          <div className="absolute inset-0 blur-sm bg-[#83E509]/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <Sparkles className="h-4 w-4 shrink-0 text-brand group-hover:scale-110 transition-transform duration-300" />
+          <div className="absolute inset-0 blur-sm bg-brand/20 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
         <span className="text-muted-foreground font-medium flex-1 text-left text-sm truncate group-hover:text-foreground transition-colors">
           Assistente de IA
         </span>
         {!compact && (
           <div className="hidden lg:flex items-center gap-1">
-            <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-[#83E509]/20 bg-[#83E509]/5 font-mono text-[10px] font-medium text-[#83E509]">
+            <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-brand/20 bg-brand/5 font-mono text-[10px] font-medium text-brand">
               ⌘
             </kbd>
-            <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-[#83E509]/20 bg-[#83E509]/5 font-mono text-[10px] font-medium text-[#83E509]">
+            <kbd className="h-5 px-1.5 flex items-center justify-center rounded border border-brand/20 bg-brand/5 font-mono text-[10px] font-medium text-brand">
               K
             </kbd>
           </div>
@@ -389,7 +389,7 @@ export function AIGlobalSearchTrigger({ onClick, compact }: { onClick: () => voi
       </div>
 
       {/* Subtle shine effect on hover */}
-      <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 dark:via-white/5 to-transparent" />
+      <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 bg-gradient-to-r from-transparent via-foreground/5 to-transparent" />
     </Button>
   );
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, startTransition } from "react";
+import { useEffect, useState, startTransition } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -6,18 +6,7 @@ import { useInactivityDetector } from "@/hooks/useInactivityDetector";
 import { useUpdateDetector } from "@/hooks/useUpdateDetector";
 import { ReAuthDialog } from "./ReAuthDialog";
 import { Loader2 } from "lucide-react";
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: any | null }>;
-  signOut: () => Promise<void>;
-  forceReAuth: (reason: 'inactivity' | 'update' | 'security') => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContext } from "./AuthContext";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -241,10 +230,4 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+export { useAuth } from './AuthContext';

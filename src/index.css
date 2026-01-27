@@ -28,12 +28,12 @@
        ============================================ */
     
     /* Background Colors */
-    --background: 210 20% 98%; /* Gray-50/100 - Limpo */
-    --foreground: 240 10% 3.9%; /* Zinc-950 */
+    --background: 216 20% 95.1%; /* #F0F2F5 */
+    --foreground: 216 8.2% 12%; /* #1C1E21 */
     
     /* Card System */
-    --card: 0 0% 100%; /* Branco Puro */
-    --card-foreground: 240 10% 3.9%;
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 216 8.2% 12%;
     
     /* Cor Primária: Verde Neon (#83E509) */
     --primary: 88 92% 47%; 
@@ -73,6 +73,9 @@
     --popover-foreground: 240 10% 3.9%;
     
     --radius: 0.75rem;
+    
+    /* Transitions */
+    --transition-smooth: transform 0.2s ease-out, box-shadow 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out;
   }
 
   .dark {
@@ -80,16 +83,16 @@
        PREMIUM DARK MODE
        ============================================ */
     
-    /* Background - Zinc 950 */
-    --background: 240 10% 3.9%; 
+    /* Background - Premium Dark (#141416) */
+    --background: 240 5% 8.2%; 
     --foreground: 0 0% 98%;
     
-    /* Cards - Zinc 900 */
-    --card: 240 10% 10%; 
+    /* Cards - Surface Elevada (#1E1E20) */
+    --card: 240 5% 12%; 
     --card-foreground: 0 0% 98%;
     
-    /* Popovers/Dropdowns - Zinc 800 */
-    --popover: 240 10% 15%; 
+    /* Popovers/Dropdowns - Surface Overlay (#252528) */
+    --popover: 240 5% 15%; 
     --popover-foreground: 0 0% 98%;
     
     /* Cor Primária - Verde Neon (Mantém mas levemente mais saturado para tela) */
@@ -394,38 +397,8 @@
   .fade-in-up {
     animation: fadeInUp 0.6s ease-out;
   }
-  /* Card variants - solid colors in light mode, gradients in dark mode */
-  .card-gradient-primary {
-    @apply border-2 border-primary/30 bg-card;
-    @apply hover:shadow-lg hover:border-primary/50;
-    @apply dark:bg-gradient-to-br dark:from-primary/10 dark:to-transparent;
-    @apply dark:hover:shadow-[0_8px_30px_rgba(59,130,246,0.25)];
-    @apply transition-all duration-300;
-  }
-
-  .card-gradient-success {
-    @apply border-2 border-success/30 bg-card;
-    @apply hover:shadow-lg hover:border-success/50;
-    @apply dark:bg-gradient-to-br dark:from-success/10 dark:to-transparent;
-    @apply dark:hover:shadow-[0_8px_30px_rgba(16,185,129,0.25)];
-    @apply transition-all duration-300;
-  }
-
-  .card-gradient-warning {
-    @apply border-2 border-warning/30 bg-card;
-    @apply hover:shadow-lg hover:border-warning/50;
-    @apply dark:bg-gradient-to-br dark:from-warning/10 dark:to-transparent;
-    @apply dark:hover:shadow-[0_8px_30px_rgba(245,158,11,0.25)];
-    @apply transition-all duration-300;
-  }
-
-  .card-gradient-info {
-    @apply border-2 border-info/30 bg-card;
-    @apply hover:shadow-lg hover:border-info/50;
-    @apply dark:bg-gradient-to-br dark:from-info/10 dark:to-transparent;
-    @apply dark:hover:shadow-[0_8px_30px_rgba(139,92,246,0.25)];
-    @apply transition-all duration-300;
-  }
+  
+  /* Duplicate card definitions removed */
   
   /* Status-based card variants */
   .card-status-active {
@@ -663,7 +636,7 @@
 /* Enhanced tab trigger styles */
 .tab-trigger-enhanced {
   @apply relative overflow-hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tab-trigger-enhanced::after {
@@ -689,23 +662,29 @@
    ============================================ */
 
 /* Base card with consistent styling */
-.card-standard {
-  @apply rounded-xl border bg-card text-card-foreground;
-  @apply border-gray-200 dark:border-gray-700/30;
-  @apply shadow-sm hover:shadow-md;
-  @apply transition-all duration-300 ease-out;
-}
+  .card-standard {
+    @apply rounded-xl border bg-card text-card-foreground;
+    @apply border-gray-200 dark:border-gray-700/30;
+    @apply shadow-sm hover:shadow-md;
+    transition: box-shadow 0.3s ease-out, border-color 0.3s ease-out, background-color 0.3s ease-out;
+  }
 
-.card-standard:hover {
-  @apply border-gray-300 dark:border-gray-600/40;
-}
+  .card-standard:hover {
+    @apply border-gray-300 dark:border-gray-600/40;
+  }
 
-/* Interactive card with hover effects */
-.card-interactive {
-  @apply card-standard cursor-pointer;
-  @apply hover:scale-[1.01] hover:-translate-y-0.5;
-  @apply active:scale-[0.99];
-}
+  /* Interactive card with hover effects */
+  .card-interactive {
+    @apply card-standard cursor-pointer;
+  }
+  
+  .card-interactive:hover {
+    transform: translateY(-2px) scale(1.01);
+  }
+  
+  .card-interactive:active {
+    transform: scale(0.99);
+  }
 
 /* Panel with subtle background */
 .panel-standard {
@@ -840,31 +819,28 @@
   @apply opacity-100;
 }
 
-/* Primary button with gradient and glow */
+/* Primary button aligned with Design System */
 .btn-primary-enhanced {
   @apply btn-enhanced;
-  @apply bg-gradient-to-r from-purple-600 to-violet-600;
-  @apply hover:from-purple-700 hover:to-violet-700;
-  @apply hover:shadow-lg hover:shadow-purple-500/25;
-  @apply text-white font-medium;
+  @apply bg-primary text-primary-foreground;
+  @apply hover:bg-primary/90;
+  @apply font-bold;
 }
 
 .btn-primary-enhanced:active {
-  @apply from-purple-800 to-violet-800;
+  @apply bg-primary/80;
 }
 
 /* Secondary/outline button with subtle hover */
 .btn-outline-enhanced {
   @apply btn-enhanced;
-  @apply border border-gray-200 dark:border-gray-700;
-  @apply bg-white dark:bg-gray-900;
-  @apply hover:border-purple-300 dark:hover:border-purple-700;
-  @apply hover:bg-purple-50 dark:hover:bg-purple-900/20;
-  @apply hover:text-purple-700 dark:hover:text-purple-300;
+  @apply border border-input bg-background;
+  @apply hover:bg-accent hover:text-accent-foreground;
+  @apply hover:border-primary/50;
 }
 
 .btn-outline-enhanced:active {
-  @apply bg-purple-100 dark:bg-purple-900/30;
+  @apply bg-accent/80;
 }
 
 /* Ghost button with subtle feedback */
@@ -888,7 +864,6 @@
   @apply btn-enhanced;
   @apply bg-gradient-to-r from-green-500 to-emerald-500;
   @apply hover:from-green-600 hover:to-emerald-600;
-  @apply hover:shadow-lg hover:shadow-green-500/25;
   @apply text-white font-medium;
 }
 
@@ -897,7 +872,6 @@
   @apply btn-enhanced;
   @apply bg-gradient-to-r from-red-500 to-rose-500;
   @apply hover:from-red-600 hover:to-rose-600;
-  @apply hover:shadow-lg hover:shadow-red-500/25;
   @apply text-white font-medium;
 }
 
@@ -928,7 +902,7 @@
 
 /* Focus ring enhancement */
 .btn-focus-ring {
-  @apply focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2;
+  @apply focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 }
 
 /* Custom Scrollbar - Elegant & Invisible */
@@ -2542,37 +2516,7 @@
 }
 
 /* Override para bg-white em light mode - torna mais suave */
-@layer base {
-  /* Ajuste global para elementos com bg-white - APENAS light mode */
-  /* Usando :where() para manter especificidade baixa e permitir overrides */
-  :root :where(.bg-white) {
-    background-color: hsl(220 20% 98%);
-  }
-  
-  /* Ajuste para bg-gray-50 - mais quente - APENAS light mode */
-  :root :where(.bg-gray-50) {
-    background-color: hsl(220 18% 94%);
-  }
-  
-  /* Ajuste para bg-gray-100 - APENAS light mode */
-  :root :where(.bg-gray-100) {
-    background-color: hsl(220 16% 91%);
-  }
-  
-  /* Dark mode - usar cores escuras apropriadas */
-  /* :where() garante que classes dark: do Tailwind tenham precedência */
-  .dark :where(.bg-white) {
-    background-color: hsl(var(--card));
-  }
-  
-  .dark :where(.bg-gray-50) {
-    background-color: hsl(220 13% 14%);
-  }
-  
-  .dark :where(.bg-gray-100) {
-    background-color: hsl(220 13% 16%);
-  }
-}
+
 
 /* ============================================
    CARD & PANEL SOFT THEME ADJUSTMENTS

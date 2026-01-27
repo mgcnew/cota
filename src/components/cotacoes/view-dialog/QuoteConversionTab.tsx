@@ -111,12 +111,12 @@ export function QuoteConversionTab({
   }
 
   return (
-    <div className="flex flex-col w-full bg-white dark:bg-zinc-950">
+    <div className="flex flex-col w-full bg-background">
       <div className="p-6 space-y-6 pb-20">
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50">
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50">
           <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#83E509] mb-0.5">ESTRATÉGIA</span>
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Montagem do pedido</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-brand mb-0.5">ESTRATÉGIA</span>
+            <span className="text-sm font-bold text-foreground">Montagem do pedido</span>
           </div>
           <Tabs value={pedidoSubTab} onValueChange={(val) => {
             setPedidoSubTab(val);
@@ -141,7 +141,7 @@ export function QuoteConversionTab({
               }
             }
           }}>
-            <TabsList className="bg-zinc-200 dark:bg-zinc-950 p-1 rounded-xl h-10 border border-zinc-300 dark:border-zinc-800">
+            <TabsList className="bg-muted p-1 rounded-xl h-10 border border-border">
               <TabsTrigger value="melhores" className="rounded-lg px-3 text-xs font-bold transition-all">Melhores Preços</TabsTrigger>
               <TabsTrigger value="unico" className="rounded-lg px-3 text-xs font-bold transition-all">Forn. Único</TabsTrigger>
             </TabsList>
@@ -150,8 +150,8 @@ export function QuoteConversionTab({
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-2 p-1">
-            <ShoppingCart className="h-4 w-4 text-[#83E509]" />
-            <h4 className="text-xs font-black uppercase tracking-widest text-zinc-500">Itens e Atribuições</h4>
+            <ShoppingCart className="h-4 w-4 text-brand" />
+            <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Itens e Atribuições</h4>
           </div>
           <div className="space-y-3">
             {products.map((product: any) => {
@@ -161,25 +161,25 @@ export function QuoteConversionTab({
               const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
 
               return (
-                <div key={product.product_id} className={cn("flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border transition-all duration-200 gap-4", isBest ? "bg-white dark:bg-zinc-900/40 border-[#83E509]/30" : "bg-white dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-800")}>
+                <div key={product.product_id} className={cn("flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border transition-all duration-200 gap-4", isBest ? "bg-card/50 border-brand/30" : "bg-card border-border")}>
                   <div className="flex-1 min-w-0 pr-4">
-                    <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate">{safeStr(product.product_name)}</p>
-                    <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-black uppercase text-zinc-500 mt-1">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
+                    <p className="font-bold text-foreground truncate">{safeStr(product.product_name)}</p>
+                    <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-black uppercase text-muted-foreground mt-1">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
                   </div>
                   <div className="flex items-center gap-4">
                     <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
                       <SelectTrigger className={cn("w-full md:w-52 h-10 rounded-xl font-bold text-xs", designSystem.components.input.root)}>
                         <SelectValue placeholder="Selecione Fornecedor" />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-zinc-800">
+                      <SelectContent className="rounded-xl border-border">
                         {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
                           <SelectItem key={f.id} value={f.id} className="text-xs font-bold">{safeStr(f.nome)}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     <div className="text-right min-w-[120px] pr-2">
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Valor</p>
-                      <p className={cn("text-base font-black", isBest ? "text-[#83E509]" : "text-zinc-900 dark:text-zinc-100")}>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Valor</p>
+                      <p className={cn("text-base font-black", isBest ? "text-brand" : "text-foreground")}>
                         R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
@@ -190,29 +190,29 @@ export function QuoteConversionTab({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 shadow-sm relative overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-2xl bg-muted/30 border border-border/50 shadow-sm relative overflow-hidden">
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Entrega *</label>
+            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Entrega *</label>
             <Input
               type="date"
               value={deliveryDate}
               onChange={(e) => setDeliveryDate(e.target.value)}
-              className={cn("h-11 rounded-xl font-bold bg-white dark:bg-zinc-950", designSystem.components.input.root)}
+              className={cn("h-11 rounded-xl font-bold bg-background", designSystem.components.input.root)}
               min={new Date().toISOString().split('T')[0]}
             />
           </div>
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block">Observações</label>
+            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Observações</label>
             <Input
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               placeholder="Ex: Entregar após as 14h..."
-              className={cn("h-11 rounded-xl font-bold bg-white dark:bg-zinc-950", designSystem.components.input.root)}
+              className={cn("h-11 rounded-xl font-bold bg-background", designSystem.components.input.root)}
             />
           </div>
         </div>
 
-        <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-14 rounded-2xl bg-[#83E509] hover:bg-[#83E509]/80 text-black font-black text-base shadow-xl transition-all">
+        <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-14 rounded-2xl bg-brand hover:bg-brand/80 text-black font-black text-base shadow-xl transition-all">
           <ShoppingCart className="h-5 w-5 mr-3" />
           Converter em Pedido
         </Button>
