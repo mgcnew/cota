@@ -101,7 +101,7 @@ export const designSystem = {
         // Containers Comuns
         container: {
             glass: "bg-card/80 backdrop-blur-xl border border-white/5 shadow-sm", // Token Mestre para Sidebar/Header
-            page: "container mx-auto px-4 pt-6 pb-8 md:px-6 md:pt-6 md:pb-8 max-w-7xl space-y-6", // Balanced padding
+            page: "container mx-auto px-4 pt-20 pb-8 md:px-6 md:pt-6 md:pb-8 max-w-7xl space-y-6", // Adjusted pt-20 for mobile to clear hamburger
             section: "space-y-4",
             grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         },
