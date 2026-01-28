@@ -60,26 +60,26 @@ export const MetricCard = memo(function MetricCard({
       </div>
 
       <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
           <div className={cn(
-            "p-2 rounded-xl transition-all duration-300",
+            "p-1.5 sm:p-2 rounded-xl transition-all duration-300",
             "bg-white/20 dark:bg-accent",
             "text-white dark:text-foreground"
           )}>
-            <Icon className="w-5 h-5" />
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <span className={cn(
-            "text-[10px] font-black uppercase tracking-widest transition-opacity duration-300",
+            "text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-opacity duration-300",
             "text-white/90 dark:text-muted-foreground"
           )}>
             {title}
           </span>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline gap-2">
+        <div className="flex flex-col gap-0.5 sm:gap-1">
+          <div className="flex flex-wrap items-baseline gap-1.5 sm:gap-2">
             <h3 className={cn(
-              "text-2xl lg:text-3xl font-black tracking-tight",
+              "text-lg sm:text-2xl lg:text-3xl font-black tracking-tight break-words",
               "text-white dark:text-foreground"
             )}>
               {value}
@@ -87,11 +87,11 @@ export const MetricCard = memo(function MetricCard({
 
             {trend && (
               <div className={cn(
-                "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold transition-all",
+                "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold transition-all whitespace-nowrap",
                 "bg-white/20 text-white dark:bg-accent dark:text-foreground"
               )}>
-                {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
-                  trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
+                {trend.type === "positive" ? <TrendingUp className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} /> :
+                  trend.type === "negative" ? <TrendingDown className="w-3 h-3 sm:w-3.5 sm:h-3.5" strokeWidth={3} /> : null}
                 {trend.value}
               </div>
             )}
@@ -99,7 +99,7 @@ export const MetricCard = memo(function MetricCard({
 
           {trend?.label && (
             <p className={cn(
-              "text-[11px] font-medium transition-colors",
+              "text-[10px] sm:text-[11px] font-medium transition-colors line-clamp-1 sm:line-clamp-none",
               "text-white/70 dark:text-muted-foreground"
             )}>
               {trend.label}
