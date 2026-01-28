@@ -313,8 +313,6 @@ function Fornecedores() {
                     <SelectItem value="pending">Pendentes</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
 
                 <Button
                   variant="outline"

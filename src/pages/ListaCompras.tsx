@@ -154,7 +154,6 @@ export default function ListaCompras() {
                   {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
                 </Badge>
               )}
-              <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
               <Button
                 onClick={() => setShowAddDialog(true)}
                 className={cn(ds.components.button.primary, "h-11 px-6 flex-1 sm:flex-initial")}
