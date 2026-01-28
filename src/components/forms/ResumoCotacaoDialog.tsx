@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Package, Building2, DollarSign, Calendar, ClipboardList, TrendingDown, Award, Users, FileText, X, CheckCircle2, Clock } from "lucide-react";
+import { Package, Building2, DollarSign, Calendar, ClipboardList, TrendingDown, Award, Users, FileText, CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 import type { Quote } from "@/hooks/useCotacoes";
@@ -67,7 +67,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       description={`#${safeStr(quote.id).slice(0, 8)}`}
       desktopMaxWidth="lg"
       className={cn(
-        "backdrop-blur-xl shadow-2xl [&>button]:hidden flex flex-col overflow-hidden",
+        "backdrop-blur-xl shadow-2xl [&>button]:hidden flex flex-col",
         ds.colors.surface.page
       )}
       footer={
@@ -80,26 +80,8 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         </Button>
       }
     >
-      {/* Close Button */}
-      <div className="absolute right-4 top-4 z-50">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => onOpenChange(false)} 
-          className={cn(
-            ds.components.button.ghost,
-            ds.components.button.size.icon,
-            "!bg-transparent"
-          )}
-        >
-          <X className="h-4 w-4" />
-          <span className="sr-only">Fechar</span>
-        </Button>
-      </div>
-
       {/* Scrollable Content */}
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="space-y-6 pt-2 pb-4">
+      <div className="space-y-6 pt-2 pb-4">
           {/* Header com Status */}
           <div className="flex items-center gap-3">
             <div className={cn(
@@ -287,7 +269,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           </CardHeader>
           <CardContent className="p-0">
             <div className={cn(
-              "divide-y max-h-[280px] overflow-y-auto custom-scrollbar",
+              "divide-y sm:max-h-[280px] sm:overflow-y-auto custom-scrollbar",
               ds.colors.border.default
             )}>
               {products.map((p: any, i: number) => {
@@ -359,7 +341,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           </CardHeader>
           <CardContent className="p-0">
             <div className={cn(
-              "divide-y max-h-[240px] overflow-y-auto custom-scrollbar",
+              "divide-y sm:max-h-[240px] sm:overflow-y-auto custom-scrollbar",
               ds.colors.border.default
             )}>
               {fornecedores.map((f) => {
@@ -462,7 +444,6 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             </CardContent>
           </Card>
         )}
-        </div>
       </div>
     </ResponsiveModal>
   );
