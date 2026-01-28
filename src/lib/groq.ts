@@ -70,14 +70,18 @@ Ajudar o usuário a gerir o negócio de forma eficiente, fornecendo análises pr
 Você pode solicitar a execução de ações como criar cotações ou registrar contagens de estoque. Sempre que o usuário pedir para "fazer" algo, use a ferramenta apropriada.
 
 📋 REGRAS DE OURO:
+- Você recebeu um CONTEXTO detalhado abaixo com listas de Pedidos, Cotações e Itens.
+- SEMPRE consulte as datas nestas listas para responder perguntas sobre períodos (ex: "novembro de 2025", "esta semana").
+- Se o usuário perguntar "quanto gastei", some os valores dos pedidos no período solicitado.
+- Se o usuário perguntar "quantas cotações", conte as cotações na lista que estão no período.
 - Respostas SEMPRE estruturadas e profissionais.
 - Use tabelas Markdown para comparações e listas de dados.
 - Valores em R$ (formato brasileiro).
 - Datas em DD/MM/AAAA.
 - Sempre termine com um **💡 Insight Estratégico** ou **🚀 Recomendação de Ação**.
-- Se faltar dados para uma ação, peça os dados específicos (ex: "Para criar a cotação, preciso saber quais produtos e fornecedores incluir").
+- Se faltar dados para uma ação, peça os dados específicos.
 
-NÃO invente dados. Se não souber, diga que não encontrou nos registros atuais.`;
+NÃO invente dados. Se não houver registros no período solicitado, informe claramente.`;
 
 export const AI_TOOLS = [
   {
@@ -169,59 +173,96 @@ function prepareContext(query: string, context: QueryContext): string {
   const queryLower = query.toLowerCase();
   let contextStr = "";
 
+  // 0. RESUMO GERAL (Sempre presente)
+  contextStr += `📅 Data Atual: ${new Date().toLocaleDateString('pt-BR')}\n`;
+  contextStr += `📊 Resumo do Sistema:\n`;
+  contextStr += `- Produtos: ${context.products.length}\n`;
+  contextStr += `- Fornecedores: ${context.suppliers.length}\n`;
+  contextStr += `- Cotações Totais: ${context.quotes.length}\n`;
+  contextStr += `- Pedidos Totais: ${context.orders.length}\n`;
+  contextStr += `- Contagens de Estoque: ${context.stockCounts?.length || 0}\n`;
+
   // 1. DADOS DE ESTOQUE
-  if (queryLower.includes("estoque") || queryLower.includes("contagem") || queryLower.includes("inventário") || queryLower.includes("giro")) {
-    contextStr += `\n📦 === ESTOQUE E CONTAGENS ===\n`;
+  if (queryLower.includes("estoque") || queryLower.includes("contagem") || queryLower.includes("inventário") || queryLower.includes("giro") || queryLower.includes("reposição")) {
+    contextStr += `\n📦 === DETALHES DE ESTOQUE ===\n`;
     if (context.stockCounts && context.stockCounts.length > 0) {
-      contextStr += `Total de contagens: ${context.stockCounts.length}\n`;
-      context.stockCounts.slice(0, 5).forEach(c => {
+      context.stockCounts.slice(0, 10).forEach(c => {
         contextStr += `- [${new Date(c.count_date).toLocaleDateString('pt-BR')}] Status: ${c.status}, Notas: ${c.notes || 'N/A'}\n`;
       });
     }
   }
 
-  // 2. PRODUTOS E PREÇOS (Contexto mais rico)
-  if (queryLower.includes("produto") || queryLower.includes("preço") || queryLower.includes("preco") || queryLower.includes("estoque")) {
-    contextStr += `\n🍎 === PRODUTOS E ESTOQUE ===\n`;
+  // 2. PRODUTOS E PREÇOS
+  if (queryLower.includes("produto") || queryLower.includes("preço") || queryLower.includes("preco") || queryLower.includes("arroz") || queryLower.includes("feijão")) {
+    contextStr += `\n🍎 === PRODUTOS (Top 50) ===\n`;
     context.products.slice(0, 50).forEach(p => {
-      contextStr += `- ${p.name} (${p.unit}): Cat: ${p.category || 'N/A'}, Est. Min: ${p.min_stock || 0}, Est. Max: ${p.max_stock || 0}\n`;
+      contextStr += `- ${p.name} (${p.unit}): Cat: ${p.category || 'N/A'}, Est. Min: ${p.min_stock || 0}\n`;
     });
   }
 
-  // 3. LOGS DE ATIVIDADE
+  // 3. COTAÇÕES (Para perguntas sobre "esta semana", etc)
+  if (queryLower.includes("cotação") || queryLower.includes("cotacao") || queryLower.includes("semana") || queryLower.includes("mês") || queryLower.includes("mes")) {
+    contextStr += `\n📝 === ÚLTIMAS COTAÇÕES ===\n`;
+    context.quotes.slice(0, 30).forEach(q => {
+      const date = q.created_at || q._raw?.created_at || q.dataInicio;
+      const status = q.status || q.statusReal;
+      const itemsCount = q.quote_items?.length || q.produtosLista?.length || 0;
+      contextStr += `- [${new Date(date).toLocaleDateString('pt-BR')}] Status: ${status}, Itens: ${itemsCount}\n`;
+    });
+  }
+
+  // 4. LOGS DE ATIVIDADE
   if (queryLower.includes("quem") || queryLower.includes("quando") || queryLower.includes("histórico") || queryLower.includes("log") || queryLower.includes("atividade")) {
     contextStr += `\n🔍 === LOGS DE ATIVIDADE ===\n`;
     if (context.activityLogs && context.activityLogs.length > 0) {
       context.activityLogs.slice(0, 15).forEach(log => {
-        contextStr += `- [${new Date(log.created_at).toLocaleString('pt-BR')}] ${log.tipo}: ${log.acao} - ${log.detalhes}\n`;
+        const date = log.created_at;
+        const type = log.tipo || log.action_type || "Ação";
+        const desc = log.acao || log.description || "Sem descrição";
+        contextStr += `- [${new Date(date).toLocaleString('pt-BR')}] ${type}: ${desc}\n`;
       });
     }
   }
 
-  // Detectar tipo de consulta financeira
-  const isFinancialQuery = queryLower.includes("gast") || queryLower.includes("valor") || 
-                          queryLower.includes("preço") || queryLower.includes("preco") ||
-                          queryLower.includes("custo") || queryLower.includes("total") ||
-                          queryLower.includes("economiz");
-
-  if (isFinancialQuery) {
-    const totalGasto = context.orders.reduce((sum, o) => sum + (o.total_value || 0), 0);
-    contextStr += `\n💰 Financeiro:\n- Total Gasto: R$ ${totalGasto.toFixed(2)}\n`;
+  // 5. FINANCEIRO (PEDIDOS E GASTOS) - SEMPRE FORNECER RESUMO MENSAL SE HOUVER PEDIDOS
+  if (context.orders && context.orders.length > 0) {
+    contextStr += `\n💰 === RESUMO FINANCEIRO MENSAL ===\n`;
+    const gastosPorMes: Record<string, number> = {};
     
-    // Top fornecedores por gasto
-    const supplierTotals: Record<string, number> = {};
     context.orders.forEach(o => {
-      supplierTotals[o.supplier_name] = (supplierTotals[o.supplier_name] || 0) + (o.total_value || 0);
+      const date = new Date(o.created_at || o.order_date);
+      const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+      gastosPorMes[monthYear] = (gastosPorMes[monthYear] || 0) + (Number(o.total_value) || 0);
     });
-    
-    contextStr += `Maiores gastos por fornecedor:\n`;
-    Object.entries(supplierTotals)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
-      .forEach(([name, total]) => {
-        contextStr += `- ${name}: R$ ${total.toFixed(2)}\n`;
+
+    Object.entries(gastosPorMes).forEach(([mes, total]) => {
+      contextStr += `- Mês ${mes}: R$ ${total.toFixed(2)}\n`;
+    });
+
+    const isFinancialQuery = queryLower.includes("gast") || queryLower.includes("valor") || 
+                            queryLower.includes("preço") || queryLower.includes("preco") ||
+                            queryLower.includes("custo") || queryLower.includes("total") ||
+                            queryLower.includes("economiz") || queryLower.includes("pag") ||
+                            queryLower.includes("dezembro") || queryLower.includes("novembro") || 
+                            queryLower.includes("2025") || queryLower.includes("quanto");
+
+    if (isFinancialQuery) {
+      contextStr += `\nLista de Pedidos Recentes (Últimos 100):\n`;
+      context.orders.slice(0, 100).forEach(o => {
+        const date = o.created_at || o.order_date;
+        const supplier = o.supplier_name || "Fornecedor Desconhecido";
+        const val = Number(o.total_value) || 0;
+        contextStr += `- [${new Date(date).toLocaleDateString('pt-BR')}] ${supplier}: R$ ${val.toFixed(2)} (Status: ${o.status})\n`;
       });
+
+      if (context.orderItems && context.orderItems.length > 0) {
+        contextStr += `\nDetalhamento de Itens Comprados (Recentes):\n`;
+        context.orderItems.slice(0, 50).forEach(item => {
+          contextStr += `- ${item.product_name}: R$ ${item.unit_price} x ${item.quantity} = R$ ${item.total_price} (${new Date(item.created_at).toLocaleDateString('pt-BR')})\n`;
+        });
+      }
+    }
   }
 
-  return contextStr || "Nenhum dado relevante encontrado para esta consulta.";
+  return contextStr;
 }
