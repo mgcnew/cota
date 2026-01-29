@@ -441,7 +441,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
         <Button
           variant="outline"
           onClick={handleBack}
-          className="flex-1 h-12 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl"
+          className="flex-1 h-11 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
         >
           Voltar
         </Button>
@@ -451,14 +451,14 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
            <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 h-12 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl"
+            className="flex-1 h-11 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
           >
             Cancelar
           </Button>
           <Button
             onClick={handleNext}
             disabled={selectedItems.length === 0}
-            className="flex-[2] h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md disabled:opacity-50 disabled:shadow-none transition-all rounded-xl"
+            className="flex-[2] h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md disabled:opacity-50 disabled:shadow-none transition-all"
           >
             {selectedItems.length > 0 ? `Continuar (${selectedItems.length})` : "Selecione..."}
           </Button>
@@ -467,7 +467,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
         <Button
           onClick={handleSubmit}
           disabled={addItem.isPending}
-          className="flex-[2] h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all rounded-xl"
+          className="flex-[2] h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold shadow-lg shadow-blue-500/20 transition-all"
         >
           {addItem.isPending ? (
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />

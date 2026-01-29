@@ -2,7 +2,7 @@ import { useState, useEffect, memo, useCallback } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { AppSidebar } from "./AppSidebar";
 import { SmoothPageTransition } from "./SmoothPageTransition";
-import { Settings, LogOut, Sparkles } from "lucide-react";
+import { Settings, LogOut } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -89,23 +89,6 @@ export function AppLayout() {
                   </div>
 
                   <Separator orientation="vertical" className="h-6 bg-border/50 hidden md:flex" />
-
-                  {/* AI Search - Mobile Only Icon (Requested next to Theme Toggle) */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setAiSearchOpen(true)}
-                        className="lg:hidden p-0 rounded-lg h-9 w-9 hover:bg-accent transition-all duration-200 text-brand"
-                      >
-                        <Sparkles className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      <p>Assistente de IA</p>
-                    </TooltipContent>
-                  </Tooltip>
 
                   <Tooltip>
                     <TooltipTrigger asChild>

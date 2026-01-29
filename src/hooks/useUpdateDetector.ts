@@ -26,7 +26,7 @@ export function useUpdateDetector({
     try {
       // Verifica se há uma nova versão através do service worker ou manifest
       // Em desenvolvimento, vamos simular a detecção de atualizações
-      if (process.env.NODE_ENV === 'development') {
+      if (import.meta.env.MODE === 'development') {
         // Em desenvolvimento, não fazemos verificação real de atualizações
         return;
       }

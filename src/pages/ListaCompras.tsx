@@ -6,10 +6,11 @@ import {
   Plus,
   ShoppingBasket,
   PackagePlus,
+  Search,
   Trash2,
   Package,
+  X,
 } from "lucide-react";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { AddProductToListDialog } from "@/components/shopping-list/AddProductToListDialog";
 import { EditShoppingListItemDialog } from "@/components/shopping-list/EditShoppingListItemDialog";
 import { ShoppingListTable } from "@/components/shopping-list/ShoppingListTable";
@@ -56,21 +57,6 @@ export default function ListaCompras() {
   return (
     <PageWrapper>
       <div className="page-container space-y-4 sm:space-y-6">
-        {/* Page Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-            <ShoppingBasket className="h-6 w-6 text-brand" />
-          </div>
-          <div>
-            <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
-              Lista de Compras
-            </h1>
-            <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
-              Organize produtos para comprar no futuro
-            </p>
-          </div>
-        </div>
-
         {/* Stats Cards - Cores Sólidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {/* Total de Itens - Azul (informação) */}
@@ -133,36 +119,59 @@ export default function ListaCompras() {
           </div>
         </div>
 
-        {/* Unified Actions Bar - Aligned to the Right */}
-        <div className="flex justify-end mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            {/* Search Field */}
-            <div className="w-full sm:w-64">
-              <ExpandableSearch
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Buscar produtos..."
-                accentColor="gray"
-                expandedWidth="w-full"
-              />
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+              <ShoppingBasket className="h-6 w-6 text-brand" />
             </div>
+            <div>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                Lista de Compras
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                Organize produtos para comprar no futuro
+              </p>
+            </div>
+          </div>
 
-            {/* Actions Block */}
-            <div className="flex items-center gap-2">
-              {filteredItems.length > 0 && (
-                <Badge variant="secondary" className="text-xs hidden sm:flex">
-                  {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
-                </Badge>
-              )}
-              <Button
-                onClick={() => setShowAddDialog(true)}
-                className={cn(ds.components.button.primary, "h-11 px-6 flex-1 sm:flex-initial")}
+          <Button
+            onClick={() => setShowAddDialog(true)}
+            className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Adicionar Produto</span>
+            <span className="sm:hidden">Adicionar</span>
+          </Button>
+        </div>
+
+        {/* Search and Controls */}
+        <div className="flex flex-col gap-3 items-stretch sm:items-center sm:justify-between">
+          <div className="relative w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar produtos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 h-10 text-sm"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Adicionar Produto</span>
-                <span className="sm:hidden">Adicionar</span>
-              </Button>
-            </div>
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+            {filteredItems.length > 0 && (
+              <Badge variant="secondary" className="text-xs">
+                {filteredItems.length} {filteredItems.length === 1 ? "item" : "itens"}
+              </Badge>
+            )}
+            <ViewToggle view={viewMode} onViewChange={setViewMode} className="md:hidden" />
           </div>
         </div>
 

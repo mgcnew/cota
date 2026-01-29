@@ -11,9 +11,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { usePedidos } from "@/hooks/usePedidos";
-import { useStockCounts } from "@/hooks/useStockCounts";
 import { queryGroqAssistant } from "@/lib/groq";
-import { AIDataService } from "@/lib/ai-data-service";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -144,23 +142,8 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
   // Dados só são carregados quando o modal está aberto
   const { products } = useProducts();
   const { suppliers } = useSuppliers();
-  const { cotacoes, addQuoteItem, addQuoteSupplier } = useCotacoes();
+  const { cotacoes } = useCotacoes();
   const { pedidos } = usePedidos();
-  const { stockCounts, createStockCount } = useStockCounts();
-
-  // Buscar logs de atividade
-  const { data: activityLogs = [] } = useQuery({
-    queryKey: ["activity-logs-for-ai"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("activity_log")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      return data || [];
-    },
-    enabled: open,
-  });
 
   // Buscar dados financeiros apenas quando aberto
   const { data: orderItems = [] } = useQuery({
@@ -294,41 +277,9 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
         packagingOrders: packagingOrders || [],
         packagingOrderItems: packagingOrderItems || [],
         packagingSupplierItems: packagingSupplierItems || [],
-        stockCounts: stockCounts || [],
-        activityLogs: activityLogs || [],
       });
 
-      // Processar Tool Calls (Ações)
-      if (response.toolCalls && response.toolCalls.length > 0) {
-        for (const toolCall of response.toolCalls) {
-          const { name, arguments: argsString } = toolCall.function;
-          const args = JSON.parse(argsString);
-
-          if (name === "create_stock_count") {
-            await createStockCount.mutateAsync({
-              notes: args.notes,
-              order_id: args.orderId
-            });
-            setConversationHistory(prev => [...prev, { 
-              role: "assistant", 
-              content: `✅ **Ação Executada:** Iniciei uma nova contagem de estoque conforme solicitado.\n\n${args.notes ? `*Notas: ${args.notes}*` : ""}` 
-            }]);
-          } 
-          
-          else if (name === "create_quote") {
-            // Lógica simplificada de criação de cotação via IA
-            toast({ title: "IA solicitou criação de cotação", description: "Esta funcionalidade requer confirmação manual no módulo de compras." });
-            setConversationHistory(prev => [...prev, { 
-              role: "assistant", 
-              content: `Entendi que você deseja criar uma cotação para ${args.productIds.length} produtos. Por segurança, preparei o rascunho mas a finalização deve ser feita no módulo de Compras.` 
-            }]);
-          }
-        }
-      }
-
-      if (response.content) {
-        setConversationHistory(prev => [...prev, { role: "assistant", content: response.content }]);
-      }
+      setConversationHistory(prev => [...prev, { role: "assistant", content: response }]);
     } catch (error) {
       toast({
         title: "Erro ao processar pergunta",
@@ -338,7 +289,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [searchQuery, isLoading, products, suppliers, cotacoes, pedidos, orderItems, quoteSupplierItems, packagingQuotes, packagingOrders, packagingOrderItems, packagingSupplierItems, stockCounts, activityLogs, createStockCount, toast]);
+  }, [searchQuery, isLoading, products, suppliers, cotacoes, pedidos, orderItems, quoteSupplierItems, packagingQuotes, packagingOrders, packagingOrderItems, packagingSupplierItems, toast]);
 
   // Mobile: Drawer
   if (isMobile) {

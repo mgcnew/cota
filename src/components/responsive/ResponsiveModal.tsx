@@ -17,8 +17,6 @@ import {
   DrawerDescription,
 } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 export interface ResponsiveModalProps {
   /**
@@ -127,21 +125,10 @@ export function ResponsiveModal({
             className
           )}
         >
-          {!hideClose && (
-            <div className="absolute right-4 top-4 z-50">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-                className="h-8 w-8 rounded-full bg-muted/50 hover:bg-muted"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Fechar</span>
-              </Button>
-            </div>
-          )}
+          {/* Drag indicator is included by default in DrawerContent */}
+          {/* The DrawerContent already has a drag indicator built-in */}
           
-          <DrawerHeader className="text-left flex-shrink-0 pr-12">
+          <DrawerHeader className="text-left flex-shrink-0">
             <DrawerTitle>{title}</DrawerTitle>
             {description && (
               <DrawerDescription>{description}</DrawerDescription>
@@ -149,7 +136,7 @@ export function ResponsiveModal({
           </DrawerHeader>
           
           {/* Scrollable content area (Requirement 1.4) */}
-          <div className="flex-1 overflow-y-auto min-h-0 px-4 pb-6" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div className="flex-1 overflow-y-auto overscroll-contain px-4 pb-4" style={{ WebkitOverflowScrolling: 'touch' }}>
             {children}
           </div>
           
@@ -180,7 +167,7 @@ export function ResponsiveModal({
           )}
         </DialogHeader>
         
-        <div className="overflow-y-auto overscroll-contain max-h-[70vh] pr-2 custom-scrollbar">
+        <div className="overflow-y-auto overscroll-contain">
           {children}
         </div>
         

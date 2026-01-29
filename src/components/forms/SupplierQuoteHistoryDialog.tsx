@@ -1,16 +1,17 @@
 import { useState, useMemo, useRef } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Search, ClipboardList } from "lucide-react";
+import { Calendar, Package, Award, Search, DollarSign, ClipboardList, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
 import { useSupplierQuoteHistory } from "@/hooks/useSupplierQuoteHistory";
 import { useSupplierOrderHistory } from "@/hooks/useSupplierOrderHistory";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { designSystem } from "@/styles/design-system";
+import { capitalize } from "@/lib/text-utils";
 
 interface SupplierQuoteHistoryDialogProps {
   supplierName: string;
@@ -201,7 +202,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className={designSystem.colors.text.secondary}>Preço médio</span>
-                    <span className={cn("font-bold", designSystem.colors.text.primary)}>{quoteStats.totalQuotes ? formatCurrency(quoteStats.avgPrice) : '-'}</span>
+                    <span className={cn("font-bold", designSystem.colors.text.primary)}>{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
                   </div>
                 </div>
               </div>
@@ -253,7 +254,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                           <p className={cn("text-xs", designSystem.colors.text.secondary)}>{formatDate(String(quote.date))}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-sm text-primary">{formatCurrency(quote.price)}</p>
+                          <p className="font-bold text-sm text-primary">R$ {quote.price.toFixed(2)}</p>
                           <Badge
                             variant={quote.isWinner ? "success" : "secondary"}
                             className="mt-1"
@@ -288,7 +289,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className={designSystem.colors.text.secondary}>Valor total</span>
-                    <span className={cn("font-bold text-emerald-500")}>{formatCurrency(orderStats.totalValue)}</span>
+                    <span className={cn("font-bold text-emerald-500")}>R$ {orderStats.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className={designSystem.colors.text.secondary}>Último pedido</span>
@@ -324,7 +325,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                           <div className="flex items-center gap-4">
                             <div className="text-right">
                               <p className="text-[10px] uppercase font-bold text-muted-foreground">Valor Total</p>
-                              <p className="font-bold text-primary">{formatCurrency(order.totalValue)}</p>
+                              <p className="font-bold text-primary">R$ {order.totalValue.toFixed(2)}</p>
                             </div>
                             <Badge variant={order.status === "entregue" || order.status === "completed" ? "success" : "warning"}>
                               {order.status}
@@ -340,9 +341,9 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                               <div key={index} className="flex items-center justify-between gap-4 text-sm">
                                 <div className="flex-1 min-w-0">
                                   <p className={cn("font-medium truncate", designSystem.colors.text.primary)}>{item.productName}</p>
-                                  <p className={cn("text-xs", designSystem.colors.text.secondary)}>{item.quantity} un. x {formatCurrency(item.unitPrice)}</p>
+                                  <p className={cn("text-xs", designSystem.colors.text.secondary)}>{item.quantity} un. x R$ {item.unitPrice.toFixed(2)}</p>
                                 </div>
-                                <p className={cn("font-bold", designSystem.colors.text.primary)}>{formatCurrency(item.totalPrice)}</p>
+                                <p className={cn("font-bold", designSystem.colors.text.primary)}>R$ {item.totalPrice.toFixed(2)}</p>
                               </div>
                             ))}
                           </div>

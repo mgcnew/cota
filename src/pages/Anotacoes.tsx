@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import {
   Plus,
@@ -38,27 +39,25 @@ export default function Anotacoes() {
 
   return (
     <PageWrapper>
-      <div className={ds.layout.container.page}>
+      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12")}>
         {/* Page Header */}
-        <div className="flex items-center gap-3 mb-10">
-          <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-            <StickyNote className="h-6 w-6 text-brand" />
+        <div className="flex flex-col gap-6 mb-10">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+              <StickyNote className="h-6 w-6 text-brand" />
+            </div>
+            <div>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
+                Anotações
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
+                Gerencie suas tarefas e lembretes de forma simples
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
-              Anotações
-            </h1>
-            <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
-              Gerencie suas tarefas e lembretes de forma simples
-            </p>
-          </div>
-        </div>
           
-        {/* Unified Actions Bar - Aligned to the Right */}
-        <div className="flex justify-end mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            {/* Search Field */}
-            <div className="w-full sm:w-64">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="w-full sm:max-w-md">
               <ExpandableSearch
                 value={searchQuery}
                 onChange={setSearchQuery}
@@ -67,17 +66,13 @@ export default function Anotacoes() {
                 expandedWidth="w-full"
               />
             </div>
-
-            {/* Actions Block */}
-            <div className="flex items-center gap-2">
-              <Button
+            <Button
               onClick={() => setShowCreateDialog(true)}
-              className={cn(ds.components.button.primary, "h-11 px-6 flex-1 sm:flex-initial")}
+              className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
             >
               <Plus className="h-4 w-4 mr-2" />
-              <span>Nova Anotação</span>
+              Nova Anotação
             </Button>
-            </div>
           </div>
         </div>
 
@@ -105,7 +100,7 @@ export default function Anotacoes() {
 
         {/* Notes Grid */}
         {filteredNotes && filteredNotes.length > 0 ? (
-          <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 4 }}>
+          <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3, wide: 4 }}>
             {filteredNotes.map((note, index) => (
               <NoteCard
                 key={note.id}
@@ -161,7 +156,7 @@ export default function Anotacoes() {
               </h2>
             </div>
             
-            <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 4 }} className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3, wide: 4 }} className="opacity-60 hover:opacity-100 transition-opacity duration-300">
               {resolvedNotes.map((note) => (
                 <div key={note.id} className={cn(ds.components.card.root, "bg-muted/30 border-dashed hover:bg-muted/50 transition-all p-5")}>
                   <div className="flex justify-between items-start gap-4">

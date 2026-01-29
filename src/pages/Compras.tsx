@@ -135,7 +135,7 @@ function Compras() {
           <div className={cn(
             "pb-1 border-b !bg-transparent !bg-none",
             designSystem.colors.border.subtle,
-            isMobile ? "sticky top-[76px] z-10 bg-background/95 backdrop-blur-sm -mx-4 px-4 overflow-x-auto scrollbar-none" : ""
+            isMobile ? "sticky top-0 z-10 bg-background/95 backdrop-blur-sm -mx-4 px-4 overflow-x-auto scrollbar-none" : ""
           )}>
             <TabsList className={designSystem.components.tabs.clean.list}>
               {[

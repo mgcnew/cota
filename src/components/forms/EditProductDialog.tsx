@@ -1,5 +1,5 @@
 // EditProductDialog - Formulário de edição de produtos com upload de imagem e código de barras
-import { useState, useEffect, memo, useCallback, useMemo } from "react";
+import { useState, useEffect, memo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -147,6 +147,12 @@ function EditProductDialogInternal({
     }
   }, [open]);
 
+  if (!open) return null;
+
+  const isLoading = false;
+
+  if (!currentProduct && !isLoading) return null;
+
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !currentProduct) return;
@@ -230,31 +236,22 @@ function EditProductDialogInternal({
     setTimeout(() => onOpenChange(false), 50);
   };
 
-  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
-    
-    const target = e.target;
-    // Pequeno delay para esperar o teclado começar a subir
     setTimeout(() => {
-      const rect = target.getBoundingClientRect();
-      const offset = 120; // Espaço para o Header fixo + margem de segurança
-      
-      // Se o campo estiver muito alto ou muito baixo, ajustamos
-      if (rect.top < offset || rect.bottom > window.innerHeight - 100) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 200);
-  }, [isMobile]);
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
-  // Header Component memoized
-  const Header = useMemo(() => (
-    <div className={cn(designSystem.components.modal.header, "border-b border-muted")}>
+  // Header Component
+  const Header = (
+    <div className={designSystem.components.modal.header}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
         </div>
         <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
-          {currentProduct ? 'Editar Produto' : 'Carregando...'}
+          {isLoading ? 'Carregando...' : 'Editar Produto'}
         </DialogTitle>
       </div>
 
@@ -263,186 +260,181 @@ function EditProductDialogInternal({
         <X className="h-4 w-4" />
       </Button>
     </div>
-  ), [currentProduct, onOpenChange]);
+  );
 
-  const renderContent = () => {
-    if (!currentProduct) return <div className="p-8 text-center text-muted-foreground">Carregando...</div>;
-
-    return (
-      <>
-        {Header}
-        <div className={cn("flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4", designSystem.colors.surface.page)}>
-          {/* Imagem */}
-          <div className={cn(designSystem.components.card.flat, "p-4")}>
-            <div className="flex items-center justify-between mb-3">
-              <Label className={designSystem.typography.size.sm}>Foto do Produto</Label>
-              {(newImageUrl || currentProduct?.image_url) && (
-                <Button type="button" variant="ghost" size="sm" onClick={handleRemoveNewImage} className={cn(designSystem.components.button.ghost, "h-8 px-3 text-xs")}>
-                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remover
-                </Button>
-              )}
-            </div>
-
-            {(newImageUrl || currentProduct?.image_url) ? (
-              <div className="relative w-full h-40 bg-muted/30 rounded-xl overflow-hidden border border-border flex items-center justify-center">
-                {isUploadingImage ? (
-                  <div className="flex items-center justify-center w-full h-full bg-zinc-50">
-                    <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
-                  </div>
-                ) : (
-                  <LazyImage
-                    src={newImageUrl || currentProduct?.image_url}
-                    alt={currentProduct?.name || "Produto"}
-                    className="h-full object-contain"
-                    containerClassName="w-full h-full flex items-center justify-center"
-                  />
-                )}
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors active:bg-muted/50">
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                  <div className="p-3 rounded-full bg-muted/50 mb-3">
-                    <Upload className="w-6 h-6 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground">Toque para selecionar</p>
-                  <p className="text-xs text-muted-foreground mt-1">Imagens de até 10MB (serão comprimidas)</p>
-                </div>
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} disabled={isUploadingImage} />
-              </label>
+  const formContent = (
+    <>
+      <div className={cn("flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4", designSystem.colors.surface.page)}>
+        {/* Imagem */}
+        <div className={cn(designSystem.components.card.flat, "p-4")}>
+          <div className="flex items-center justify-between mb-3">
+            <Label className={designSystem.typography.size.sm}>Foto do Produto</Label>
+            {(newImageUrl || currentProduct?.image_url) && (
+              <Button type="button" variant="ghost" size="sm" onClick={handleRemoveNewImage} className={cn(designSystem.components.button.ghost, "h-6 px-2 text-xs")}>
+                <Trash2 className="h-3 w-3 mr-1" /> Remover
+              </Button>
             )}
           </div>
 
-          {/* Form Fields */}
-          <Form {...form}>
-            <form id="edit-product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className={cn(designSystem.components.card.flat, "p-4 space-y-4")}>
-                <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-2 flex items-center gap-2", designSystem.colors.text.muted)}>
-                  Detalhes
-                </h3>
+          {(newImageUrl || currentProduct?.image_url) ? (
+            <div className="relative w-full h-32 bg-white rounded-lg overflow-hidden border border-zinc-200 flex items-center justify-center">
+              {isUploadingImage ? (
+                <div className="flex items-center justify-center w-full h-full bg-zinc-50">
+                  <Loader2 className="h-6 w-6 text-zinc-400 animate-spin" />
+                </div>
+              ) : (
+                <LazyImage
+                  src={newImageUrl || currentProduct?.image_url}
+                  alt={currentProduct?.name || "Produto"}
+                  className="h-full object-contain"
+                  containerClassName="w-full h-full flex items-center justify-center"
+                />
+              )}
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-200 rounded-lg cursor-pointer hover:bg-zinc-50 transition-colors">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                {isUploadingImage ? (
+                  <Loader2 className="w-8 h-8 text-zinc-400 animate-spin mb-2" />
+                ) : (
+                  <Upload className="w-8 h-8 text-zinc-400 mb-2" />
+                )}
+                <p className="text-xs text-zinc-500">Clique para selecionar</p>
+              </div>
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} disabled={isUploadingImage} />
+            </label>
+          )}
+        </div>
 
+        {/* Form Fields */}
+        <Form {...form}>
+          <form id="edit-product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className={cn(designSystem.components.card.flat, "p-4 space-y-4")}>
+              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-2 flex items-center gap-2", designSystem.colors.text.muted)}>
+                Detalhes
+              </h3>
+
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={designSystem.typography.size.sm}>Nome do Produto</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Coxa com Sobrecoxa" className={designSystem.components.input.root} onFocus={handleInputFocus} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="unit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Nome do Produto</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Unidade</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className={designSystem.components.input.root}>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="un">Unidade (un)</SelectItem>
+                          <SelectItem value="kg">Quilograma (kg)</SelectItem>
+                          <SelectItem value="cx">Caixa (cx)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Categoria</FormLabel>
+                      <CategorySelectForm
+                        value={field.value}
+                        onChange={field.onChange}
+                        categories={categories}
+                        onCategoryAdded={onCategoryAdded}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="brand_id"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Marca</FormLabel>
+                      <BrandSelect value={field.value} onChange={field.onChange} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="barcode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Coxa com Sobrecoxa" className={cn(designSystem.components.input.root, "h-11")} onFocus={handleInputFocus} {...field} />
+                        <Input {...field} placeholder="EAN-13..." className={designSystem.components.input.root} maxLength={13} onFocus={handleInputFocus} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={designSystem.typography.size.sm}>Unidade</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger className={cn(designSystem.components.input.root, "h-11")}>
-                              <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent className="z-[100]">
-                            <SelectItem value="un">Unidade (un)</SelectItem>
-                            <SelectItem value="kg">Quilograma (kg)</SelectItem>
-                            <SelectItem value="cx">Caixa (cx)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={designSystem.typography.size.sm}>Categoria</FormLabel>
-                        <CategorySelectForm
-                          value={field.value}
-                          onChange={field.onChange}
-                          categories={categories}
-                          onCategoryAdded={onCategoryAdded}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="brand_id"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={designSystem.typography.size.sm}>Marca</FormLabel>
-                        <BrandSelect value={field.value} onChange={field.onChange} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="barcode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="EAN-13..." className={cn(designSystem.components.input.root, "h-11")} maxLength={13} onFocus={handleInputFocus} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
               </div>
-            </form>
-          </Form>
-        </div>
+            </div>
+          </form>
+        </Form>
+      </div>
 
-        {/* Footer */}
-        <div className={cn(designSystem.components.modal.footer, "p-4 border-t border-muted bg-background/80 backdrop-blur-sm")}>
-          <div className="flex w-full gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isUploadingImage}
-              className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl")}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              form="edit-product-form"
-              className={cn(designSystem.components.button.primary, "flex-[1.5] h-12 rounded-xl")}
-            >
-              Salvar Alterações
-            </Button>
-          </div>
-        </div>
-      </>
-    );
-  };
+      {/* Footer */}
+      <div className={designSystem.components.modal.footer}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(false)}
+          disabled={isUploadingImage}
+          className={designSystem.components.button.secondary}
+        >
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          form="edit-product-form"
+          className={designSystem.components.button.primary}
+        >
+          Salvar Alterações
+        </Button>
+      </div>
+    </>
+  );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {Header}
+          {formContent}
         </DrawerContent>
       </Drawer>
     );
@@ -450,10 +442,9 @@ function EditProductDialogInternal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn(designSystem.components.modal.content, "h-[85vh] max-h-[700px] p-0 overflow-hidden flex flex-col")}>
-        <div className="flex flex-col h-full overflow-hidden">
-          {renderContent()}
-        </div>
+      <DialogContent hideClose className={cn(designSystem.components.modal.content, "max-h-[85vh] p-0 overflow-hidden flex flex-col")}>
+        {Header}
+        {formContent}
       </DialogContent>
     </Dialog>
   );

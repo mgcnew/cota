@@ -11,6 +11,7 @@ import {
 import {
   ClipboardList,
   Plus,
+  Search,
   CheckCircle,
   Clock,
   Trash2,
@@ -19,7 +20,6 @@ import {
   Eye,
   XCircle,
 } from "lucide-react";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
 import { ViewStockCountDialog } from "@/components/stock/ViewStockCountDialog";
@@ -205,43 +205,36 @@ export default function ContagemEstoque() {
           />
         </ResponsiveGrid>
 
-        {/* Unified Actions Bar - Aligned to the Right */}
-        <div className="flex justify-end mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            {/* Search Field */}
-            <div className="w-full sm:w-64">
-              <ExpandableSearch
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Buscar por fornecedor, data ou observação..."
-                accentColor="gray"
-                expandedWidth="w-full"
-              />
-            </div>
-
-            {/* Actions Block */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[200px] h-11 bg-card">
-                  <SelectValue placeholder="Filtrar por Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os status</SelectItem>
-                  <SelectItem value="pendente">Pendente</SelectItem>
-                  <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                  <SelectItem value="finalizada">Finalizada</SelectItem>
-                  <SelectItem value="cancelada">Cancelada</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={() => setCreateDialogOpen(true)}
-                className={cn(ds.components.button.primary, "h-11 px-6")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                <span>Nova Contagem</span>
-              </Button>
-            </div>
+        {/* Filters & Actions */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-1">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por fornecedor, data ou observação..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={cn(ds.components.input.root, "pl-9 h-11 bg-card")}
+            />
           </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-[200px] h-11 bg-card">
+              <SelectValue placeholder="Filtrar por Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os status</SelectItem>
+              <SelectItem value="pendente">Pendente</SelectItem>
+              <SelectItem value="em_andamento">Em Andamento</SelectItem>
+              <SelectItem value="finalizada">Finalizada</SelectItem>
+              <SelectItem value="cancelada">Cancelada</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => setCreateDialogOpen(true)}
+            className={cn(ds.components.button.primary, "w-full sm:w-auto h-11")}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Contagem
+          </Button>
         </div>
 
         {/* Content */}

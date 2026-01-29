@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { formatCurrency, formatCurrencyFriendly, parseCurrencyFriendly } from '@/utils/formatters';
 
 interface Supplier {
   id: string;
@@ -38,7 +37,8 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
     };
 
     const totalLimit = suppliers.reduce((sum, s) => {
-      return sum + parseCurrencyFriendly((s as any).limit);
+      const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
+      return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
     const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
 
@@ -80,8 +80,8 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
       inactive: porStatus.inactive,
       pending: porStatus.pending,
       percentualAtivos,
-      totalLimit: formatCurrencyFriendly(totalLimit),
-      limiteMedioPorAtivo: formatCurrencyFriendly(porStatus.active > 0 ? totalLimit / porStatus.active : 0),
+      totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
+      limiteMedioPorAtivo,
       activeQuotes: activeQuotesTotal,
       mediaCotacoesPorFornecedor,
       distribuicaoCotacoes

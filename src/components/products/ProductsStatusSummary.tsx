@@ -91,7 +91,7 @@ export const ProductsStatusSummary = memo(function ProductsStatusSummary({
             return (
               <div key={key} className={cn("rounded-lg p-2 sm:p-3 text-center", styles.bg, styles.border)}>
                 <Icon className={cn("w-4 h-4 mx-auto mb-1", styles.icon)} />
-                <p className="text-base sm:text-2xl font-extrabold text-gray-900 dark:text-gray-100 break-all">{value}</p>
+                <p className="text-lg sm:text-2xl font-extrabold text-gray-900 dark:text-gray-100">{value}</p>
                 <p className="text-[8px] sm:text-[10px] font-semibold text-gray-700 dark:text-gray-400 leading-tight">{label}</p>
               </div>
             );

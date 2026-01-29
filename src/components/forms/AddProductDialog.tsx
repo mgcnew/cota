@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -133,11 +133,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   }, [open]);
 
-  // Carregar categorias dinamicamente do banco de dados - Otimizado para carregar apenas uma vez por montagem
+  // Carregar categorias dinamicamente do banco de dados
   useEffect(() => {
     const loadCategories = async () => {
-      if (categories.length > 0) return; // Evita recarregamento desnecessário
-      
       try {
         setLoadingCategories(true);
         const { data, error } = await supabase
@@ -147,12 +145,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         if (error) throw error;
 
         const uniqueCategories = Array.from(new Set(data.map(p => p.category)))
-          .filter(category => category && category.trim() !== '')
-          .sort();
+          .filter(category => category && category.trim() !== '') // Remove categorias vazias
+          .sort(); // Ordena alfabeticamente
 
         setCategories(uniqueCategories);
       } catch (error) {
         console.error('Erro ao carregar categorias:', error);
+        // Fallback para categorias padrão em caso de erro
         setCategories(["Frango", "Embutidos", "Frios", "Bovino", "Suíno"]);
       } finally {
         setLoadingCategories(false);
@@ -162,7 +161,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     if (open) {
       loadCategories();
     }
-  }, [open, categories.length]);
+  }, [open]);
 
   const handleGenerateImage = async () => {
     const productName = form.getValues("name");
@@ -454,25 +453,16 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   };
 
-  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     if (!isMobile) return;
-    
-    const target = e.target;
-    // Pequeno delay para esperar o teclado começar a subir
     setTimeout(() => {
-      const rect = target.getBoundingClientRect();
-      const offset = 120; // Espaço para o Header fixo + margem de segurança
-      
-      // Se o campo estiver muito alto ou muito baixo, ajustamos
-      if (rect.top < offset || rect.bottom > window.innerHeight - 100) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 200);
-  }, [isMobile]);
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
-  // Header Component memoized
-  const Header = useMemo(() => (
-    <div className={cn(designSystem.components.modal.header, "border-b border-muted")}>
+  // Header Component
+  const Header = (
+    <div className={designSystem.components.modal.header}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
@@ -481,15 +471,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           Novo Produto
         </DialogTitle>
       </div>
-
-      <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-        className={cn(designSystem.components.button.ghost, "h-8 w-8")}>
-        <X className="h-4 w-4" />
-      </Button>
+      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
-  ), []);
+  );
 
-  const renderContent = () => (
+  const content = (
     <>
       {Header}
       <Form {...form}>
@@ -502,7 +488,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               max={subscriptionLimits.maxProducts}
             />
             {/* Seção: Informações Básicas */}
-            <div className={cn(designSystem.components.card.flat, "p-4")}>
+            <div className={designSystem.components.card.flat + " p-4"}>
               <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-4 flex items-center gap-2", designSystem.colors.text.muted)}>
                 Informações
               </h3>
@@ -515,19 +501,14 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                     <FormItem>
                       <FormLabel className={designSystem.typography.size.sm}>Nome do Produto *</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Ex: Coxa com Sobrecoxa"
-                          className={cn(designSystem.components.input.root, "h-11")}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
+                        <Input placeholder="Ex: Coxa com Sobrecoxa" className={designSystem.components.input.root} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="unit"
@@ -536,11 +517,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                         <FormLabel className={designSystem.typography.size.sm}>Unidade *</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className={cn(designSystem.components.input.root, "h-11")}>
+                            <SelectTrigger className={designSystem.components.input.root}>
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="z-[100]">
+                          <SelectContent>
                             <SelectItem value="un">Unidade (un)</SelectItem>
                             <SelectItem value="kg">Quilograma (kg)</SelectItem>
                             <SelectItem value="cx">Caixa (cx)</SelectItem>
@@ -578,7 +559,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="brand_id"
@@ -599,13 +580,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                       <FormItem>
                         <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            placeholder="EAN-13, EAN-8..."
-                            className={cn(designSystem.components.input.root, "h-11")}
-                            maxLength={13}
-                            onFocus={handleInputFocus}
-                          />
+                          <Input {...field} placeholder="EAN-13, EAN-8..." className={designSystem.components.input.root} maxLength={13} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -616,28 +591,25 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             </div>
 
             {/* Upload de Imagem Simplificado */}
-            <div className={cn(designSystem.components.card.flat, "p-4")}>
+            <div className={designSystem.components.card.flat + " p-4"}>
               <div className="flex items-center justify-between mb-3">
                 <Label className={designSystem.typography.size.sm}>Foto do Produto</Label>
                 {productImage && (
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setProductImage(null)} className={cn(designSystem.components.button.ghost, "h-8 px-3 text-xs")}>
-                    <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remover
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setProductImage(null)} className={cn(designSystem.components.button.ghost, "h-6 px-2 text-xs")}>
+                    <Trash2 className="h-3 w-3 mr-1" /> Remover
                   </Button>
                 )}
               </div>
 
               {productImage ? (
-                <div className="relative w-full h-40 bg-muted/30 rounded-xl overflow-hidden border border-border flex items-center justify-center">
+                <div className="relative w-full h-32 bg-muted/50 rounded-lg overflow-hidden border border-border flex items-center justify-center">
                   <img src={productImage} alt="Preview" className="h-full object-contain" />
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors active:bg-muted/50">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                    <div className="p-3 rounded-full bg-muted/50 mb-3">
-                      <Upload className="w-6 h-6 text-muted-foreground" />
-                    </div>
-                    <p className="text-sm font-medium text-foreground">Toque para selecionar</p>
-                    <p className="text-xs text-muted-foreground mt-1">Imagens de até 10MB (serão comprimidas)</p>
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                    <p className="text-xs text-muted-foreground">Clique para selecionar (max 5MB)</p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
@@ -646,25 +618,23 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           </div>
 
           {/* Footer */}
-          <div className={cn(designSystem.components.modal.footer, "p-4 border-t border-muted bg-background/80 backdrop-blur-sm")}>
-            <div className="flex w-full gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-                className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl")}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
-                className={cn(designSystem.components.button.primary, "flex-[1.5] h-12 rounded-xl")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar
-              </Button>
-            </div>
+          <div className={cn(designSystem.components.modal.footer, "py-3")}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleOpenChange(false)}
+              className={designSystem.components.button.secondary}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
+              className={designSystem.components.button.primary}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar
+            </Button>
           </div>
         </form>
       </Form>
@@ -676,14 +646,14 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
-          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -697,7 +667,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </DialogTrigger>
       )}
       <DialogContent className={designSystem.components.modal.content}>
-        {renderContent()}
+        {content}
       </DialogContent>
     </Dialog>
   );

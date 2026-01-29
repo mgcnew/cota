@@ -9,14 +9,14 @@ export default defineConfig(({ mode }) => ({
   // base: process.env.NODE_ENV === 'production' ? '/cotaja/' : '/',
   server: {
     host: "localhost", // Mudado para localhost para melhor compatibilidade
-    port: 8084,
-    strictPort: false, // Permite usar outra porta se 8098 estiver ocupada
+    port: 8087,
+    strictPort: true, // Permite usar outra porta se 8098 estiver ocupada
     open: true, // Abre automaticamente no navegador
   },
   preview: {
     host: "localhost",
-    port: 8084,
-    strictPort: false,
+    port: 8087,
+    strictPort: true,
     open: true,
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),

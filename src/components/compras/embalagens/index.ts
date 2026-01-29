@@ -1,5 +1,4 @@
 export { AddPackagingQuoteDialog } from './AddPackagingQuoteDialog';
-export { AddPackagingOrderDialog } from './AddPackagingOrderDialog';
 export { ManagePackagingQuoteDialog } from './ManagePackagingQuoteDialog';
 export { DeletePackagingQuoteDialog } from './DeletePackagingQuoteDialog';
 export { PackagingItemsDialog } from './PackagingItemsDialog';

@@ -70,7 +70,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
   const getStatusBadge = (status: string) => {
     const statusConfig = PACKAGING_ORDER_STATUS.find(s => s.value === status);
     
-    let badgeClass: string = ds.components.badge.outline;
+    let badgeClass = ds.components.badge.outline;
     if (status === "confirmado") badgeClass = ds.components.badge.active;
     if (status === "entregue") badgeClass = ds.components.badge.success;
     if (status === "cancelado") badgeClass = ds.components.badge.destructive;

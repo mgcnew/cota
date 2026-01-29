@@ -1655,9 +1655,9 @@
 
 @layer utilities {
   /* Motion-reduce utility classes */
-  /* .motion-reduce {
-    Base class for elements that should respect reduced motion
-  } */
+  .motion-reduce {
+    /* Base class for elements that should respect reduced motion */
+  }
   
   /* Disable transitions when reduced motion is preferred */
   @media (prefers-reduced-motion: reduce) {

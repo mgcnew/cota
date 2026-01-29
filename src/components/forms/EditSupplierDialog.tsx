@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -79,37 +79,20 @@ export default function EditSupplierDialog({
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const scrollPositionRef = useRef<number>(0);
+  const form = useForm<SupplierFormData>({
+    resolver: zodResolver(supplierSchema),
+    defaultValues: {
+      name: "",
+      contact: "",
+      phone: "",
+      email: "",
+      address: "",
+      limit: "",
+      status: "active",
+    },
+  });
 
-  // Salvar posição de scroll quando abrir o modal
-   useEffect(() => {
-     if (open) {
-       scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-     } else {
-       // Restaurar posição de scroll quando fechar o modal
-       // Usar setTimeout para garantir que o DOM foi atualizado
-       setTimeout(() => {
-         window.scrollTo({
-           top: scrollPositionRef.current,
-           behavior: 'instant' as ScrollBehavior
-         });
-       }, 0);
-     }
-   }, [open]);
-
-   const form = useForm<SupplierFormData>({
-     resolver: zodResolver(supplierSchema),
-     defaultValues: {
-       name: "",
-       contact: "",
-       phone: "",
-       email: "",
-       address: "",
-       limit: "",
-       status: "active",
-     },
-   });
-
-    useEffect(() => {
+  useEffect(() => {
     if (supplier) {
       form.reset({
         name: supplier.name,
@@ -134,23 +117,29 @@ export default function EditSupplierDialog({
     }
   };
 
-  // Função para gerenciar abertura/fechamento
+  // Função para gerenciar abertura/fechamento e manter scroll
   const handleOpenChange = (newOpen: boolean) => {
+    if (newOpen) {
+      scrollPositionRef.current = window.scrollY;
+    } else {
+      setTimeout(() => {
+        window.scrollTo(0, scrollPositionRef.current);
+      }, 100);
+    }
     onOpenChange(newOpen);
   };
 
   // Scroll into view helper para inputs
-  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
-    // Reduzido o delay para resposta mais rápida
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'auto', block: 'center' });
-    }, 150);
-  }, [isMobile]);
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
-  // Shared Header Component memoized
-  const Header = useMemo(() => (
-    <div className={cn(designSystem.components.modal.header, "border-b border-muted")}>
+  // Shared Header Component
+  const Header = (
+    <div className={designSystem.components.modal.header}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Building2 className={cn("h-4 w-4", designSystem.colors.text.primary)} />
@@ -159,15 +148,12 @@ export default function EditSupplierDialog({
           Editar Fornecedor
         </DialogTitle>
       </div>
-      <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)}
-        className={cn(designSystem.components.button.ghost, "h-8 w-8")}>
-        <X className="h-4 w-4" />
-      </Button>
+      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
-  ), [onOpenChange]);
+  );
 
   // Conteúdo do formulário (reutilizado em mobile e desktop)
-  const renderContent = () => (
+  const content = (
     <>
       {Header}
       <Form {...form}>
@@ -176,21 +162,16 @@ export default function EditSupplierDialog({
 
             {/* Seção: Informações Principais */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
-                <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
-                Identificação
-              </h3>
-
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>Nome do Fornecedor *</FormLabel>
+                    <FormLabel className={designSystem.typography.size.sm}>Nome do Fornecedor*</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ex: Holambra"
-                        className={cn(designSystem.components.input.root, "h-11")}
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -205,11 +186,11 @@ export default function EditSupplierDialog({
                 name="contact"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>Nome do Contato *</FormLabel>
+                    <FormLabel className={designSystem.typography.size.sm}>Nome do Contato*</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Ex: João Silva"
-                        className={cn(designSystem.components.input.root, "h-11")}
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -222,11 +203,6 @@ export default function EditSupplierDialog({
 
             {/* Seção: Contato & Localização */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
-                <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
-                Contato & Endereço
-              </h3>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -237,7 +213,7 @@ export default function EditSupplierDialog({
                       <FormControl>
                         <Input
                           placeholder="(11) 99999-9999"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -257,7 +233,7 @@ export default function EditSupplierDialog({
                         <Input
                           placeholder="contato@empresa.com"
                           type="email"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -277,7 +253,7 @@ export default function EditSupplierDialog({
                     <FormControl>
                       <Input
                         placeholder="Rua, número, bairro, cidade"
-                        className={cn(designSystem.components.input.root, "h-11")}
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -290,22 +266,17 @@ export default function EditSupplierDialog({
 
             {/* Seção: Status & Limites */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
-                <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
-                Administrativo
-              </h3>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="limit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Limite de Crédito *</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Limite de Crédito*</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="R$ 25.000"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -320,14 +291,14 @@ export default function EditSupplierDialog({
                   name="status"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Status *</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Status*</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className={cn(designSystem.components.input.root, "h-11")}>
+                          <SelectTrigger className={designSystem.components.input.root}>
                             <SelectValue placeholder="Selecione o status" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-[100]">
+                        <SelectContent className="z-50">
                           <SelectItem value="active">Ativo</SelectItem>
                           <SelectItem value="pending">Pendente</SelectItem>
                           <SelectItem value="inactive">Inativo</SelectItem>
@@ -342,20 +313,20 @@ export default function EditSupplierDialog({
           </div>
 
           {/* Footer com botões */}
-          <div className={cn(designSystem.components.modal.footer, "p-4 border-t border-muted bg-background/80 backdrop-blur-sm")}>
-            <div className={cn("flex w-full gap-3", isMobile ? "flex-col" : "justify-end")}>
+          <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
+            <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
-                className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl")}
+                className={designSystem.components.button.secondary}
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 form="edit-supplier-form"
-                className={cn(designSystem.components.button.primary, "flex-[1.5] h-12 rounded-xl")}
+                className={designSystem.components.button.primary}
               >
                 Salvar Alterações
               </Button>
@@ -371,14 +342,14 @@ export default function EditSupplierDialog({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -389,7 +360,7 @@ export default function EditSupplierDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className={cn(designSystem.components.modal.content, "h-[85vh] max-h-[700px] p-0 overflow-hidden flex flex-col")}>
         <div className="flex flex-col h-full overflow-hidden">
-          {renderContent()}
+          {content}
         </div>
       </DialogContent>
     </Dialog>

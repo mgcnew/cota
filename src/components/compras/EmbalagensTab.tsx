@@ -35,7 +35,6 @@ import { MobilePackagingQuoteCard } from "./embalagens/MobilePackagingQuoteCard"
 // Dialogs e componentes
 import {
   AddPackagingQuoteDialog,
-  AddPackagingOrderDialog,
   ManagePackagingQuoteDialog,
   DeletePackagingQuoteDialog,
   PackagingItemsDialog,
@@ -55,7 +54,6 @@ function EmbalagensTab() {
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [addOrderDialogOpen, setAddOrderDialogOpen] = useState(false);
   const [manageDialogOpen, setManageDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
@@ -155,6 +153,14 @@ function EmbalagensTab() {
     return { respondidos, total, isPronta };
   };
 
+  if (quotesLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className={cn("h-10 w-10 animate-spin", designSystem.colors.text.primary)} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Sub-tabs & Actions Container */}
@@ -221,11 +227,7 @@ function EmbalagensTab() {
         </Button>
       )}
 
-      {quotesLoading ? (
-        <div className="flex items-center justify-center py-24">
-          <Loader2 className={cn("h-10 w-10 animate-spin", designSystem.colors.text.primary)} />
-        </div>
-      ) : activeSubTab === "cotacoes" && (
+      {activeSubTab === "cotacoes" && (
         <div className="space-y-6 animate-in fade-in duration-500">
           {/* Métricas */}
           <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
@@ -355,39 +357,28 @@ function EmbalagensTab() {
       )}
 
       {/* Other Content - Persistent ForceMount */}
-      {!quotesLoading && (
-        <>
-          <TabsContent value="pedidos" className="mt-0" forceMount>
-            <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-              <PackagingOrdersTab onCreateOrder={() => setAddOrderDialogOpen(true)} />
-            </div>
-          </TabsContent>
+      <TabsContent value="pedidos" className="mt-0" forceMount>
+        <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+          <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
+        </div>
+      </TabsContent>
 
-          <TabsContent value="analise" className="mt-0" forceMount>
-            <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-              <PackagingAnalysisTab />
-            </div>
-          </TabsContent>
+      <TabsContent value="analise" className="mt-0" forceMount>
+        <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+          <PackagingAnalysisTab />
+        </div>
+      </TabsContent>
 
-          <TabsContent value="economia" className="mt-0" forceMount>
-            <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-              <PackagingEconomyTab />
-            </div>
-          </TabsContent>
-        </>
-      )}
+      <TabsContent value="economia" className="mt-0" forceMount>
+        <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+          <PackagingEconomyTab />
+        </div>
+      </TabsContent>
 
       {/* Dialogs */}
       <AddPackagingQuoteDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        packagingItems={packagingItems}
-        suppliers={suppliers}
-      />
-
-      <AddPackagingOrderDialog
-        open={addOrderDialogOpen}
-        onOpenChange={setAddOrderDialogOpen}
         packagingItems={packagingItems}
         suppliers={suppliers}
       />

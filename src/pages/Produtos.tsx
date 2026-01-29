@@ -21,16 +21,18 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
+import { BrandManagementDialog } from "@/components/products/BrandManagementDialog";
 import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
 import { ProductListDesktop } from "@/components/products/ProductListDesktop";
 import { useProductStats } from "@/hooks/useProductStats";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 
-import { AddProductDialog } from "@/components/forms/AddProductDialog";
-import { EditProductDialog } from "@/components/forms/EditProductDialog";
-import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
-import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
+// Lazy load dialogs for better initial load performance
+const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
+const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
+const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
+const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
 
 // Dialog loading fallback
 const DialogLoader = () => (
@@ -60,6 +62,7 @@ function Produtos() {
   const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [brandDialogOpen, setBrandDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = useProducts();
@@ -200,10 +203,49 @@ function Produtos() {
                 </p>
               </div>
             </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setBrandDialogOpen(true)}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Award className="h-4 w-4 mr-2" /> Marcas
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportProducts}
+                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+              >
+                <Download className="h-4 w-4 mr-2" /> Exportar
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Adicionar</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px]">
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
+                    <Award className="h-4 w-4 mr-2 text-zinc-500" /> Marcas
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           {/* Métricas essenciais */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-6">
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
             <MetricCard
               title="Produtos"
               value={stats.totalProducts}
@@ -234,58 +276,25 @@ function Produtos() {
             />
           </ResponsiveGrid>
 
-          {/* Unified Actions Bar - Aligned to the Right */}
-          <div className="flex justify-end mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-              {/* Search Field - Contained within the actions group */}
-              <div className="w-full sm:w-64">
+          {/* Filters & Actions */}
+          <div className={designSystem.layout.container.section}>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+              <div className="flex-1 sm:flex-shrink-0">
                 <ExpandableSearch
                   value={searchQuery}
                   onChange={setSearchQuery}
                   placeholder="Buscar produtos..."
-                  accentColor="gray"
-                  expandedWidth="w-full"
+                  accentColor="gray" // Neutral accent matching Design System
+                  expandedWidth="w-full sm:w-64"
                 />
               </div>
-
-              {/* Category Filter */}
-              <div className="w-full sm:w-[200px]">
+              <div className="flex-1 sm:flex-initial sm:w-[180px]">
                 <CategorySelect
                   categories={safeCategories}
                   products={safeProducts}
                   selectedCategory={selectedCategory}
                   onCategoryChange={setSelectedCategory}
                 />
-              </div>
-              
-              {/* Buttons Group */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExportProducts}
-                  className={cn(designSystem.components.button.secondary, "h-11 flex-1 sm:flex-initial px-6")}
-                >
-                  <Download className="h-4 w-4 mr-2" /> 
-                  <span>Exportar</span>
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button className={cn(designSystem.components.button.primary, "h-11 flex-1 sm:flex-initial px-6")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span>Adicionar</span>
-                  </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-[180px]">
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                      <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -346,52 +355,60 @@ function Produtos() {
           </div>
 
           {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank when opening */}
-          <AddProductDialog
-            onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
-            onCategoryAdded={invalidateCache}
-            open={addDialogOpen}
-            onOpenChange={setAddDialogOpen}
-          />
+          <Suspense fallback={null}>
+            <AddProductDialog
+              onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
+              onCategoryAdded={invalidateCache}
+              open={addDialogOpen}
+              onOpenChange={setAddDialogOpen}
+            />
+          </Suspense>
 
-          <ImportProductsDialog
-            onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
-            onCategoryAdded={invalidateCache}
-            open={importDialogOpen}
-            onOpenChange={setImportDialogOpen}
-          />
+          <Suspense fallback={null}>
+            <ImportProductsDialog
+              onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
+              onCategoryAdded={invalidateCache}
+              open={importDialogOpen}
+              onOpenChange={setImportDialogOpen}
+            />
+          </Suspense>
 
-          <EditProductDialog
-            product={editingProduct}
-            open={!!editingProduct}
-            onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
-            onProductUpdated={(updatedProduct) => {
-              if (typeof updateProduct === 'function') {
-                updateProduct({
-                  productId: updatedProduct.id,
-                  data: {
-                    name: updatedProduct.name,
-                    category: updatedProduct.category,
-                    unit: updatedProduct.unit,
-                    barcode: updatedProduct.barcode,
-                    brand_id: updatedProduct.brand_id
-                  }
-                });
-              }
-              setEditingProduct(null);
-            }}
-            onCategoryAdded={invalidateCache}
-            categories={safeCategories}
-          />
+          <Suspense fallback={null}>
+            <EditProductDialog
+              product={editingProduct}
+              open={!!editingProduct}
+              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+              onProductUpdated={(updatedProduct) => {
+                if (typeof updateProduct === 'function') {
+                  updateProduct({
+                    productId: updatedProduct.id,
+                    data: {
+                      name: updatedProduct.name,
+                      category: updatedProduct.category,
+                      unit: updatedProduct.unit,
+                      barcode: updatedProduct.barcode,
+                      brand_id: updatedProduct.brand_id
+                    }
+                  });
+                }
+                setEditingProduct(null);
+              }}
+              onCategoryAdded={invalidateCache}
+              categories={safeCategories}
+            />
+          </Suspense>
 
-          <DeleteProductDialog
-            product={deletingProduct}
-            open={!!deletingProduct}
-            onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
-            onProductDeleted={(id) => {
-              if (typeof deleteProduct === 'function') { deleteProduct(id); }
-              setDeletingProduct(null);
-            }}
-          />
+          <Suspense fallback={null}>
+            <DeleteProductDialog
+              product={deletingProduct}
+              open={!!deletingProduct}
+              onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
+              onProductDeleted={(id) => {
+                if (typeof deleteProduct === 'function') { deleteProduct(id); }
+                setDeletingProduct(null);
+              }}
+            />
+          </Suspense>
 
           {/* Product Price History Dialog - controlled by state */}
           <ProductPriceHistoryDialog
@@ -403,6 +420,11 @@ function Produtos() {
 
         </div>
       </PageWrapper>
+
+      <BrandManagementDialog
+        open={brandDialogOpen}
+        onOpenChange={setBrandDialogOpen}
+      />
     </>
   );
 }

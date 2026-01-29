@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -188,26 +188,31 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
     }
   };
 
-  // Função para gerenciar abertura/fechamento
+  // Função para gerenciar abertura/fechamento e manter scroll
   const handleOpenChange = (newOpen: boolean) => {
     handleSetOpen(newOpen);
     if (!newOpen) {
+      setTimeout(() => {
+        window.scrollTo({
+          top: scrollPositionRef.current,
+          behavior: 'instant' as ScrollBehavior
+        });
+      }, 0);
       form.reset();
     }
   };
 
   // Scroll into view helper para inputs
-  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
-    // Reduzido o delay para resposta mais rápida
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'auto', block: 'center' });
-    }, 150);
-  }, [isMobile]);
+      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+  };
 
-  // Shared Header Component memoized
-  const Header = useMemo(() => (
-    <div className={cn(designSystem.components.modal.header, "border-b border-muted")}>
+  // Shared Header Component
+  const Header = (
+    <div className={designSystem.components.modal.header}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Building2 className={cn("h-4 w-4", designSystem.colors.text.primary)} />
@@ -216,15 +221,12 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           Novo Fornecedor
         </DialogTitle>
       </div>
-      <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-        className={cn(designSystem.components.button.ghost, "h-8 w-8")}>
-        <X className="h-4 w-4" />
-      </Button>
+      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
-  ), []);
+  );
 
   // Conteúdo do formulário (reutilizado em mobile e desktop)
-  const renderContent = () => (
+  const content = (
     <>
       {Header}
       <Form {...form}>
@@ -254,7 +256,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                       <FormControl>
                         <Input
                           placeholder="Ex: Holambra Distribuidora"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -273,7 +275,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                       <FormControl>
                         <Input
                           placeholder="00.000.000/0000-00"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -293,7 +295,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                     <FormControl>
                       <Input
                         placeholder="Rua das Flores, 123, Centro, São Paulo - SP"
-                        className={cn(designSystem.components.input.root, "h-11")}
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -320,7 +322,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                     <FormControl>
                       <Input
                         placeholder="Ex: João Silva Santos"
-                        className={cn(designSystem.components.input.root, "h-11")}
+                        className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -340,7 +342,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                       <FormControl>
                         <Input
                           placeholder="(11) 99999-9999"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -360,7 +362,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                         <Input
                           placeholder="comercial@empresa.com"
                           type="email"
-                          className={cn(designSystem.components.input.root, "h-11")}
+                          className={designSystem.components.input.root}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -391,13 +393,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           </div>
 
           {/* Footer com botões */}
-          <div className={cn(designSystem.components.modal.footer, "p-4 border-t border-muted bg-background/80 backdrop-blur-sm")}>
-            <div className={cn("flex w-full gap-3", isMobile ? "flex-col" : "justify-end")}>
+          <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
+            <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
-                className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl")}
+                className={designSystem.components.button.secondary}
               >
                 Cancelar
               </Button>
@@ -407,7 +409,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                   type="button"
                   onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
                   variant="outline"
-                  className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl border-primary/50 text-primary hover:bg-primary/10")}
+                  className={cn(designSystem.components.button.secondary, "border-primary/50 text-primary hover:bg-primary/10")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Criar Mais
@@ -417,7 +419,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
               <Button
                 type="submit"
                 form="add-supplier-form"
-                className={cn(designSystem.components.button.primary, "flex-[1.5] h-12 rounded-xl")}
+                className={designSystem.components.button.primary}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar
@@ -432,21 +434,21 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
   // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && (
           <DrawerTrigger asChild>
             {trigger}
           </DrawerTrigger>
         )}
         <DrawerContent
-          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-all duration-200"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {content}
         </DrawerContent>
       </Drawer>
     );
@@ -461,7 +463,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
         </DialogTrigger>
       )}
       <DialogContent className={designSystem.components.modal.content}>
-        {renderContent()}
+        {content}
       </DialogContent>
     </Dialog>
   );
