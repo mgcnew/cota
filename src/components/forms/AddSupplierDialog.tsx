@@ -207,7 +207,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
 
   // Shared Header Component memoized
   const Header = useMemo(() => (
-    <div className={designSystem.components.modal.header}>
+    <div className={cn(designSystem.components.modal.header, "border-b border-muted")}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Building2 className={cn("h-4 w-4", designSystem.colors.text.primary)} />
@@ -216,6 +216,10 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           Novo Fornecedor
         </DialogTitle>
       </div>
+      <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+        className={cn(designSystem.components.button.ghost, "h-8 w-8")}>
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   ), []);
 
@@ -250,7 +254,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                       <FormControl>
                         <Input
                           placeholder="Ex: Holambra Distribuidora"
-                          className={designSystem.components.input.root}
+                          className={cn(designSystem.components.input.root, "h-11")}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -269,7 +273,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                       <FormControl>
                         <Input
                           placeholder="00.000.000/0000-00"
-                          className={designSystem.components.input.root}
+                          className={cn(designSystem.components.input.root, "h-11")}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -289,7 +293,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                     <FormControl>
                       <Input
                         placeholder="Rua das Flores, 123, Centro, São Paulo - SP"
-                        className={designSystem.components.input.root}
+                        className={cn(designSystem.components.input.root, "h-11")}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -316,7 +320,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                     <FormControl>
                       <Input
                         placeholder="Ex: João Silva Santos"
-                        className={designSystem.components.input.root}
+                        className={cn(designSystem.components.input.root, "h-11")}
                         onFocus={handleInputFocus}
                         {...field}
                       />
@@ -336,7 +340,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                       <FormControl>
                         <Input
                           placeholder="(11) 99999-9999"
-                          className={designSystem.components.input.root}
+                          className={cn(designSystem.components.input.root, "h-11")}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -356,7 +360,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                         <Input
                           placeholder="comercial@empresa.com"
                           type="email"
-                          className={designSystem.components.input.root}
+                          className={cn(designSystem.components.input.root, "h-11")}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -387,13 +391,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           </div>
 
           {/* Footer com botões */}
-          <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
-            <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
+          <div className={cn(designSystem.components.modal.footer, "p-4 border-t border-muted bg-background/80 backdrop-blur-sm")}>
+            <div className={cn("flex w-full gap-3", isMobile ? "flex-col" : "justify-end")}>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => handleOpenChange(false)}
-                className={designSystem.components.button.secondary}
+                className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl")}
               >
                 Cancelar
               </Button>
@@ -403,7 +407,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                   type="button"
                   onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
                   variant="outline"
-                  className={cn(designSystem.components.button.secondary, "border-primary/50 text-primary hover:bg-primary/10")}
+                  className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl border-primary/50 text-primary hover:bg-primary/10")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Criar Mais
@@ -413,7 +417,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
               <Button
                 type="submit"
                 form="add-supplier-form"
-                className={designSystem.components.button.primary}
+                className={cn(designSystem.components.button.primary, "flex-[1.5] h-12 rounded-xl")}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar

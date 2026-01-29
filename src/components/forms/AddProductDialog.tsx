@@ -481,6 +481,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           Novo Produto
         </DialogTitle>
       </div>
+
+      <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+        className={cn(designSystem.components.button.ghost, "h-8 w-8")}>
+        <X className="h-4 w-4" />
+      </Button>
     </div>
   ), []);
 
