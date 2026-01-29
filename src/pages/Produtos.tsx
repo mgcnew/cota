@@ -299,20 +299,13 @@ function Produtos() {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 hidden md:flex")}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        <span>Adicionar</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[200px]">
-                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                        <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                      </DropdownMenuItem>
-                      
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <Button
+                    onClick={handleAddProduct}
+                    className={cn(designSystem.components.button.primary, "h-11 px-6 hidden md:flex")}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Adicionar</span>
+                  </Button>
                 </div>
               </div>
             </div>
