@@ -256,10 +256,7 @@ function Produtos() {
           </ResponsiveGrid>
 
           {/* Grupo coeso de ações abaixo da topbar: Adicionar + Categorias + Busca */}
-          <div className={cn(
-            "mt-2 mb-4 rounded-xl border border-border bg-card/80 backdrop-blur-md shadow-sm",
-            "p-3 md:p-4"
-          )}>
+          <div className={cn("mt-2 mb-4")}>
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
               <div className="w-full md:w-[320px]">
                 <ExpandableSearch

@@ -285,11 +285,11 @@ function Fornecedores() {
             />
           </ResponsiveGrid>
 
-          {/* Unified Actions Bar - Aligned to the Right */}
-          <div className="flex justify-end mb-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          {/* Unified Actions Bar */}
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
               {/* Search Field */}
-              <div className="w-full sm:w-64">
+              <div className="w-full md:w-[320px]">
                 <ExpandableSearch
                   value={searchQuery}
                   onChange={setSearchQuery}
@@ -300,7 +300,7 @@ function Fornecedores() {
               </div>
 
               {/* Actions & Filters Group */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 md:justify-end md:ml-auto">
                 <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
                   <SelectTrigger className={cn(designSystem.components.input.root, "w-[150px] h-11")}>
                     <SelectValue placeholder="Status" />

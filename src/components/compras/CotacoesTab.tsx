@@ -194,8 +194,11 @@ function CotacoesTab() {
             expandedWidth="w-full sm:w-64"
             data-search-input
           />
+        </div>
+
+        <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn("w-full sm:w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
+            <SelectTrigger className={cn("w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -207,9 +210,6 @@ function CotacoesTab() {
               <SelectItem value="concluida">🔵 Concluídas</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
