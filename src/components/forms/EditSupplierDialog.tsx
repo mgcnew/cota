@@ -79,20 +79,37 @@ export default function EditSupplierDialog({
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const scrollPositionRef = useRef<number>(0);
-  const form = useForm<SupplierFormData>({
-    resolver: zodResolver(supplierSchema),
-    defaultValues: {
-      name: "",
-      contact: "",
-      phone: "",
-      email: "",
-      address: "",
-      limit: "",
-      status: "active",
-    },
-  });
 
-  useEffect(() => {
+  // Salvar posição de scroll quando abrir o modal
+   useEffect(() => {
+     if (open) {
+       scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+     } else {
+       // Restaurar posição de scroll quando fechar o modal
+       // Usar setTimeout para garantir que o DOM foi atualizado
+       setTimeout(() => {
+         window.scrollTo({
+           top: scrollPositionRef.current,
+           behavior: 'instant' as ScrollBehavior
+         });
+       }, 0);
+     }
+   }, [open]);
+
+   const form = useForm<SupplierFormData>({
+     resolver: zodResolver(supplierSchema),
+     defaultValues: {
+       name: "",
+       contact: "",
+       phone: "",
+       email: "",
+       address: "",
+       limit: "",
+       status: "active",
+     },
+   });
+
+    useEffect(() => {
     if (supplier) {
       form.reset({
         name: supplier.name,
@@ -117,15 +134,8 @@ export default function EditSupplierDialog({
     }
   };
 
-  // Função para gerenciar abertura/fechamento e manter scroll
+  // Função para gerenciar abertura/fechamento
   const handleOpenChange = (newOpen: boolean) => {
-    if (newOpen) {
-      scrollPositionRef.current = window.scrollY;
-    } else {
-      setTimeout(() => {
-        window.scrollTo(0, scrollPositionRef.current);
-      }, 100);
-    }
     onOpenChange(newOpen);
   };
 
@@ -342,7 +352,7 @@ export default function EditSupplierDialog({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-700 transition-all duration-200"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
