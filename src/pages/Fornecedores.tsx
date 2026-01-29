@@ -31,13 +31,12 @@ import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
-// Lazy load dialogs for better initial load performance
-const AddSupplierDialog = lazy(() => import("@/components/forms/AddSupplierDialog"));
-const EditSupplierDialog = lazy(() => import("@/components/forms/EditSupplierDialog"));
-const DeleteSupplierDialog = lazy(() => import("@/components/forms/DeleteSupplierDialog"));
-const AddQuoteDialog = lazy(() => import("@/components/forms/AddQuoteDialog"));
-const ImportSuppliersDialog = lazy(() => import("@/components/forms/ImportSuppliersDialog").then(m => ({ default: m.ImportSuppliersDialog })));
-const SupplierQuoteHistoryDialog = lazy(() => import("@/components/forms/SupplierQuoteHistoryDialog").then(m => ({ default: m.SupplierQuoteHistoryDialog })));
+import AddSupplierDialog from "@/components/forms/AddSupplierDialog";
+import EditSupplierDialog from "@/components/forms/EditSupplierDialog";
+import { DeleteSupplierDialog } from "@/components/forms/DeleteSupplierDialog";
+import { AddQuoteDialog } from "@/components/forms/AddQuoteDialog";
+import { ImportSuppliersDialog } from "@/components/forms/ImportSuppliersDialog";
+import { SupplierQuoteHistoryDialog } from "@/components/forms/SupplierQuoteHistoryDialog";
 
 // Dialog loading fallback
 const DialogLoader = () => (
@@ -498,43 +497,33 @@ function Fornecedores() {
             />
           )}
 
-          {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank */}
-          <Suspense fallback={null}>
-            <EditSupplierDialog
-              supplier={editingSupplier}
-              open={!!editingSupplier}
-              onOpenChange={open => { if (!open) setEditingSupplier(null); }}
-              onEdit={handleEditSupplier}
-            />
-          </Suspense>
+          {/* Permanent rendering for better performance */}
+          <EditSupplierDialog
+            supplier={editingSupplier}
+            open={!!editingSupplier}
+            onOpenChange={open => { if (!open) setEditingSupplier(null); }}
+            onEdit={handleEditSupplier}
+          />
 
-          <Suspense fallback={null}>
-            <DeleteSupplierDialog
-              supplier={deletingSupplier}
-              open={!!deletingSupplier}
-              onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
-              onDelete={handleDeleteSupplier}
-            />
-          </Suspense>
+          <DeleteSupplierDialog
+            supplier={deletingSupplier}
+            open={!!deletingSupplier}
+            onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
+            onDelete={handleDeleteSupplier}
+          />
 
           {/* Supplier History Dialog */}
-          <Suspense fallback={null}>
-            <SupplierQuoteHistoryDialog
-              supplierName={historySupplier?.name || ""}
-              supplierId={historySupplier?.id || ""}
-              open={!!historySupplier}
-              onOpenChange={open => { if (!open) setHistorySupplier(null); }}
-            />
-          </Suspense>
+          <SupplierQuoteHistoryDialog
+            supplierName={historySupplier?.name || ""}
+            supplierId={historySupplier?.id || ""}
+            open={!!historySupplier}
+            onOpenChange={open => { if (!open) setHistorySupplier(null); }}
+          />
 
-          {/* Hidden triggers for dialogs - lazy loaded */}
+          {/* Hidden triggers for dialogs */}
           <div className="hidden">
-            <Suspense fallback={null}>
-              <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
-            </Suspense>
-            <Suspense fallback={null}>
-              <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
-            </Suspense>
+            <AddSupplierDialog onAdd={handleAddSupplier} trigger={<button ref={addSupplierRef} />} />
+            <ImportSuppliersDialog onSuppliersImported={handleSuppliersImported} trigger={<button ref={importSuppliersRef} />} />
           </div>
         </div>
       </PageWrapper>

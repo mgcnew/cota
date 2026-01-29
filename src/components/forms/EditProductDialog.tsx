@@ -261,6 +261,7 @@ function EditProductDialogInternal({
 
     return (
       <>
+        {Header}
         <div className={cn("flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4", designSystem.colors.surface.page)}>
           {/* Imagem */}
           <div className={cn(designSystem.components.card.flat, "p-4")}>
@@ -420,21 +421,18 @@ function EditProductDialogInternal({
     );
   };
 
-  const formContent = renderContent();
-
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {Header}
-          {formContent}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     );
@@ -442,9 +440,10 @@ function EditProductDialogInternal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className={cn(designSystem.components.modal.content, "max-h-[85vh] p-0 overflow-hidden flex flex-col")}>
-        {Header}
-        {formContent}
+      <DialogContent className={cn(designSystem.components.modal.content, "h-[85vh] max-h-[700px] p-0 overflow-hidden flex flex-col")}>
+        <div className="flex flex-col h-full overflow-hidden">
+          {renderContent()}
+        </div>
       </DialogContent>
     </Dialog>
   );

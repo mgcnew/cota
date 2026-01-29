@@ -27,11 +27,10 @@ import { useProductStats } from "@/hooks/useProductStats";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 
-// Lazy load dialogs for better initial load performance
-const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
-const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
-const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
-const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
+import { AddProductDialog } from "@/components/forms/AddProductDialog";
+import { EditProductDialog } from "@/components/forms/EditProductDialog";
+import { DeleteProductDialog } from "@/components/forms/DeleteProductDialog";
+import { ImportProductsDialog } from "@/components/forms/ImportProductsDialog";
 
 // Dialog loading fallback
 const DialogLoader = () => (
@@ -347,60 +346,52 @@ function Produtos() {
           </div>
 
           {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank when opening */}
-          <Suspense fallback={null}>
-            <AddProductDialog
-              onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
-              onCategoryAdded={invalidateCache}
-              open={addDialogOpen}
-              onOpenChange={setAddDialogOpen}
-            />
-          </Suspense>
+          <AddProductDialog
+            onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
+            onCategoryAdded={invalidateCache}
+            open={addDialogOpen}
+            onOpenChange={setAddDialogOpen}
+          />
 
-          <Suspense fallback={null}>
-            <ImportProductsDialog
-              onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
-              onCategoryAdded={invalidateCache}
-              open={importDialogOpen}
-              onOpenChange={setImportDialogOpen}
-            />
-          </Suspense>
+          <ImportProductsDialog
+            onProductsImported={() => { invalidateCache(); setImportDialogOpen(false); }}
+            onCategoryAdded={invalidateCache}
+            open={importDialogOpen}
+            onOpenChange={setImportDialogOpen}
+          />
 
-          <Suspense fallback={null}>
-            <EditProductDialog
-              product={editingProduct}
-              open={!!editingProduct}
-              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
-              onProductUpdated={(updatedProduct) => {
-                if (typeof updateProduct === 'function') {
-                  updateProduct({
-                    productId: updatedProduct.id,
-                    data: {
-                      name: updatedProduct.name,
-                      category: updatedProduct.category,
-                      unit: updatedProduct.unit,
-                      barcode: updatedProduct.barcode,
-                      brand_id: updatedProduct.brand_id
-                    }
-                  });
-                }
-                setEditingProduct(null);
-              }}
-              onCategoryAdded={invalidateCache}
-              categories={safeCategories}
-            />
-          </Suspense>
+          <EditProductDialog
+            product={editingProduct}
+            open={!!editingProduct}
+            onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+            onProductUpdated={(updatedProduct) => {
+              if (typeof updateProduct === 'function') {
+                updateProduct({
+                  productId: updatedProduct.id,
+                  data: {
+                    name: updatedProduct.name,
+                    category: updatedProduct.category,
+                    unit: updatedProduct.unit,
+                    barcode: updatedProduct.barcode,
+                    brand_id: updatedProduct.brand_id
+                  }
+                });
+              }
+              setEditingProduct(null);
+            }}
+            onCategoryAdded={invalidateCache}
+            categories={safeCategories}
+          />
 
-          <Suspense fallback={null}>
-            <DeleteProductDialog
-              product={deletingProduct}
-              open={!!deletingProduct}
-              onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
-              onProductDeleted={(id) => {
-                if (typeof deleteProduct === 'function') { deleteProduct(id); }
-                setDeletingProduct(null);
-              }}
-            />
-          </Suspense>
+          <DeleteProductDialog
+            product={deletingProduct}
+            open={!!deletingProduct}
+            onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
+            onProductDeleted={(id) => {
+              if (typeof deleteProduct === 'function') { deleteProduct(id); }
+              setDeletingProduct(null);
+            }}
+          />
 
           {/* Product Price History Dialog - controlled by state */}
           <ProductPriceHistoryDialog

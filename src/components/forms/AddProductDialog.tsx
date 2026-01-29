@@ -653,11 +653,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     </>
   );
 
-  const formContent = useMemo(() => renderContent(), [form, categories, loadingCategories, productImage, subscriptionLimits]);
-
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
           className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
@@ -667,7 +665,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {formContent}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     );
@@ -681,7 +679,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </DialogTrigger>
       )}
       <DialogContent className={designSystem.components.modal.content}>
-        {formContent}
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );

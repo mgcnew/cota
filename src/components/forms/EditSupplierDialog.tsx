@@ -162,194 +162,10 @@ export default function EditSupplierDialog({
     </div>
   ), []);
 
-  const formContent = useMemo(() => (
-    <>
-      {Header}
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className={cn("flex flex-col h-full overflow-hidden", designSystem.colors.surface.page)} id="edit-supplier-form">
-          <div className={cn(designSystem.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4 sm:p-6")}>
-
-            {/* Seção: Informações Principais */}
-            <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>Nome do Fornecedor*</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: Holambra"
-                        className={designSystem.components.input.root}
-                        onFocus={handleInputFocus}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="contact"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>Nome do Contato*</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Ex: João Silva"
-                        className={designSystem.components.input.root}
-                        onFocus={handleInputFocus}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Seção: Contato & Localização */}
-            <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Telefone</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="(11) 99999-9999"
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="contato@empresa.com"
-                          type="email"
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>Endereço</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Rua, número, bairro, cidade"
-                        className={designSystem.components.input.root}
-                        onFocus={handleInputFocus}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Seção: Status & Limites */}
-            <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="limit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Limite de Crédito*</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="R$ 25.000"
-                          className={designSystem.components.input.root}
-                          onFocus={handleInputFocus}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Status*</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className={designSystem.components.input.root}>
-                            <SelectValue placeholder="Selecione o status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="z-50">
-                          <SelectItem value="active">Ativo</SelectItem>
-                          <SelectItem value="pending">Pendente</SelectItem>
-                          <SelectItem value="inactive">Inativo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Footer com botões */}
-          <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
-            <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => handleOpenChange(false)}
-                className={designSystem.components.button.secondary}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                form="edit-supplier-form"
-                className={designSystem.components.button.primary}
-              >
-                Salvar Alterações
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
-    </>
-  ), [Header, form, isMobile, handleInputFocus, onSubmit]);
-
   // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
+      <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerContent
           className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
           style={{
@@ -358,7 +174,7 @@ export default function EditSupplierDialog({
             paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {formContent}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     );
@@ -369,7 +185,7 @@ export default function EditSupplierDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className={cn(designSystem.components.modal.content, "h-[85vh] max-h-[700px] p-0 overflow-hidden flex flex-col")}>
         <div className="flex flex-col h-full overflow-hidden">
-          {formContent}
+          {renderContent()}
         </div>
       </DialogContent>
     </Dialog>
