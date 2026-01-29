@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ExpandableSearch } from "@/components/ui/expandable-search";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp } from "lucide-react";
+import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { CategorySelect } from "@/components/ui/category-select";
 import { DataPagination } from "@/components/ui/data-pagination";
@@ -270,28 +270,35 @@ function Produtos() {
                   expandedWidth="w-full"
                 />
               </div>
-
-              {/* Centro: Dropdown de Categorias */}
-              <div className="md:w-[220px]">
-                <CategorySelect
-                  categories={safeCategories}
-                  products={safeProducts}
-                  selectedCategory={selectedCategory}
-                  onCategoryChange={setSelectedCategory}
-                />
-              </div>
-
-              {/* Direita: Exportar + Adicionar */}
               <div className="flex-1 md:flex md:justify-end">
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleExportProducts}
-                    className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-                  >
-                    <Download className="h-4 w-4 mr-2" /> Exportar
-                  </Button>
+                  <div className="md:w-[220px]">
+                    <CategorySelect
+                      categories={safeCategories}
+                      products={safeProducts}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                    />
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-3")}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[200px]">
+                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
+                        <Download className="h-4 w-4 mr-2" /> Exportar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                        <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 hidden md:flex")}>
@@ -303,15 +310,13 @@ function Produtos() {
                       <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
                         <Plus className="h-4 w-4 mr-2" /> Novo Produto
                       </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                        <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                      </DropdownMenuItem>
+                      
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </div>
             </div>
-          </div>
+              </div>
 
           <div className="w-full">
             <div>
