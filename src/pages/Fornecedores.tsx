@@ -220,7 +220,6 @@ function Fornecedores() {
     <div style={style} className="pb-3">
       <ExpandableSupplierCard
         supplier={supplier}
-        onEdit={setEditingSupplier}
         onDelete={setDeletingSupplier}
         onWhatsApp={openWhatsApp}
         renderRating={renderNumericRating}
@@ -327,7 +326,7 @@ function Fornecedores() {
                 <Button
                   size="sm"
                   onClick={() => addSupplierRef.current?.click()}
-                  className={cn(designSystem.components.button.primary, "h-11 flex-1 sm:flex-initial px-6")}
+                  className={cn(designSystem.components.button.primary, "h-11 hidden md:flex px-6")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   <span>Novo Fornecedor</span>
@@ -378,10 +377,12 @@ function Fornecedores() {
                               </DropdownMenuItem>
                             }
                           />
-                          <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
+                          {!isMobile && (
+                            <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             className="text-destructive focus:text-destructive"
                             onClick={() => setDeletingSupplier(supplier)}
@@ -451,7 +452,6 @@ function Fornecedores() {
                         <ExpandableSupplierCard
                           key={supplier.id}
                           supplier={supplier}
-                          onEdit={setEditingSupplier}
                           onDelete={setDeletingSupplier}
                           onWhatsApp={openWhatsApp}
                           onViewHistory={setHistorySupplier}
@@ -494,19 +494,21 @@ function Fornecedores() {
               description="Tente ajustar os filtros ou adicione novos fornecedores"
               actionLabel="Adicionar Fornecedor"
               actionIcon={Plus}
-              onAction={() => addSupplierRef.current?.click()}
+              onAction={!isMobile ? () => addSupplierRef.current?.click() : undefined}
             />
           )}
 
           {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank */}
-          <Suspense fallback={null}>
-            <EditSupplierDialog
-              supplier={editingSupplier}
-              open={!!editingSupplier}
-              onOpenChange={open => { if (!open) setEditingSupplier(null); }}
-              onEdit={handleEditSupplier}
-            />
-          </Suspense>
+          {!isMobile && (
+            <Suspense fallback={null}>
+              <EditSupplierDialog
+                supplier={editingSupplier}
+                open={!!editingSupplier}
+                onOpenChange={open => { if (!open) setEditingSupplier(null); }}
+                onEdit={handleEditSupplier}
+              />
+            </Suspense>
+          )}
 
           <Suspense fallback={null}>
             <DeleteSupplierDialog

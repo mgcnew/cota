@@ -138,10 +138,9 @@ export function AppLayout() {
           </div>
         </header>
 
-        {/* Main Content - Título sobe ao máximo (pt-0) conforme solicitado */}
         <main
           className={cn(
-            "flex-1 w-full pb-20 md:pb-0 pt-0 overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+            "flex-1 w-full pb-20 md:pb-0 pt-20 md:pt-24 overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
             isSidebarExpanded ? "md:pl-[17.25rem]" : "md:pl-[6.25rem]"
           )}
         >

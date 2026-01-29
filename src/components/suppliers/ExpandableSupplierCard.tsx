@@ -25,7 +25,6 @@ interface Supplier {
 
 interface ExpandableSupplierCardProps {
   supplier: Supplier;
-  onEdit: (supplier: Supplier) => void;
   onDelete: (supplier: Supplier) => void;
   onWhatsApp: (supplier: Supplier) => void;
   onViewHistory?: (supplier: Supplier) => void;
@@ -45,17 +44,12 @@ interface ExpandableSupplierCardProps {
  */
 export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   supplier,
-  onEdit,
   onDelete,
   onWhatsApp,
   onViewHistory,
   renderRating,
 }: ExpandableSupplierCardProps): JSX.Element {
   const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleEdit = useCallback(() => {
-    onEdit(supplier);
-  }, [onEdit, supplier]);
 
   const handleDelete = useCallback(() => {
     onDelete(supplier);
@@ -179,16 +173,6 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
 
           {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-2 pt-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target active:scale-95 transition-transform"
-              onClick={handleEdit}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-            
             <Button 
               size="sm" 
               variant="outline" 

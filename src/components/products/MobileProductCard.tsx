@@ -144,18 +144,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
       <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
         <div className="p-3 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30">
           
-          {/* Quick Actions */}
           <div className="grid grid-cols-2 gap-2 pt-3">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target active:scale-95 transition-transform"
-              onClick={handleEdit}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-            
             {onHistory && (
               <Button 
                 size="sm" 
@@ -167,11 +156,10 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
                 Histórico
               </Button>
             )}
-
             <Button 
               size="sm" 
               variant="outline" 
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform col-span-2"
+              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
               onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4 mr-2" />
