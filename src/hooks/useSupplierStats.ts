@@ -37,7 +37,10 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
     };
 
     const totalLimit = suppliers.reduce((sum, s) => {
-      const limitValue = parseFloat((s as any).limit?.replace(/[^\d,]/g, '').replace(',', '.') || '0');
+      const rawLimit = (s as any).limit as string | undefined;
+      if (!rawLimit) return sum;
+      const normalized = rawLimit.replace(/[R$\s\.]/g, '').replace(',', '.');
+      const limitValue = parseFloat(normalized || '0');
       return sum + (isNaN(limitValue) ? 0 : limitValue);
     }, 0);
     const activeQuotesTotal = suppliers.reduce((sum, s) => sum + ((s as any).activeQuotes || 0), 0);
@@ -80,7 +83,9 @@ export function useSupplierStats(suppliers: Supplier[] | undefined): SupplierSta
       inactive: porStatus.inactive,
       pending: porStatus.pending,
       percentualAtivos,
-      totalLimit: totalLimit > 0 ? `R$ ${totalLimit.toFixed(0)}k` : "R$ 0",
+      totalLimit: totalLimit > 0
+        ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalLimit)
+        : "R$ 0,00",
       limiteMedioPorAtivo,
       activeQuotes: activeQuotesTotal,
       mediaCotacoesPorFornecedor,

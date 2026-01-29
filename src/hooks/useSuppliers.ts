@@ -189,7 +189,7 @@ export function useSuppliers() {
           id: s.id,
           name: s.name,
           contact: s.contact || "",
-          limit: totalLimit > 0 ? `R$ ${(totalLimit / 1000).toFixed(0)}k` : "R$ 0",
+          limit: totalLimit > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalLimit) : "R$ 0,00",
           activeQuotes,
           totalQuotes,
           avgPrice: avgPrice > 0 ? `R$ ${avgPrice.toFixed(2)}` : "R$ 0,00",

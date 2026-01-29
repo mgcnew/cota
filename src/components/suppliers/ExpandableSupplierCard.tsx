@@ -49,6 +49,13 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   onViewHistory,
   renderRating,
 }: ExpandableSupplierCardProps): JSX.Element {
+  const formatLimitBRL = (input: string) => {
+    if (!input) return "R$ 0,00";
+    const hasK = /k/i.test(input);
+    const numeric = parseFloat(input.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    const value = hasK ? numeric * 1000 : numeric;
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleDelete = useCallback(() => {
@@ -98,7 +105,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
           <div className="flex items-center gap-2">
             <DollarSign className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
             <span className="text-gray-500 dark:text-gray-400">Limite:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{supplier.limit}</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{formatLimitBRL(supplier.limit)}</span>
           </div>
           <div className="flex items-center gap-2">
             <FileText className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />

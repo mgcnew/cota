@@ -33,6 +33,13 @@ interface SupplierListDesktopProps {
 }
 
 export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistory, onWhatsApp, renderRating }: SupplierListDesktopProps) => {
+  const formatLimitBRL = (input: string) => {
+    if (!input) return "R$ 0,00";
+    const hasK = /k/i.test(input);
+    const numeric = parseFloat(input.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+    const value = hasK ? numeric * 1000 : numeric;
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  };
   return (
     <div className="hidden md:block overflow-x-auto w-full custom-scrollbar">
       <Table className={designSystem.components.table.root}>
@@ -91,7 +98,7 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                   </div>
 
                   <div className="w-[15%] px-2 flex justify-center items-center">
-                    <span className={cn("text-sm font-medium", designSystem.colors.text.primary)}>{supplier.limit}</span>
+                    <span className={cn("text-sm font-medium", designSystem.colors.text.primary)}>{formatLimitBRL(supplier.limit)}</span>
                   </div>
 
                   <div className="hidden lg:flex w-[15%] px-2 justify-center items-center">
