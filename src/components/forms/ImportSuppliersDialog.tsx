@@ -243,6 +243,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         email: s.email || null,
         address: s.address || null,
         cnpj: null, // CNPJ não está no template, mas pode ser adicionado
+        limit: s.limit || null,
       }));
 
       // 4. Inserir fornecedores no banco de dados

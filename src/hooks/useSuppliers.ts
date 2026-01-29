@@ -85,8 +85,17 @@ export function useSuppliers() {
           ? new Date(supplierOrders[0].order_date).toLocaleDateString('pt-BR')
           : new Date(s.created_at).toLocaleDateString('pt-BR');
 
-        // Total limit from orders
-        const totalLimit = supplierOrders.reduce((sum, o) => sum + Number(o.total_value || 0), 0);
+        // Declared credit limit (from supplier record), independent of orders
+        const declaredLimitRaw = (s as any).limit;
+        const declaredLimitNumber = (() => {
+          if (typeof declaredLimitRaw === 'number') return declaredLimitRaw;
+          if (typeof declaredLimitRaw === 'string') {
+            const normalized = declaredLimitRaw.replace(/[R$\s\.]/g, '').replace(',', '.');
+            const parsed = parseFloat(normalized || '0');
+            return isNaN(parsed) ? 0 : parsed;
+          }
+          return 0;
+        })();
 
         // ===== RATING CALCULATION (0-5 stars) =====
         let rating = 0;
@@ -189,7 +198,7 @@ export function useSuppliers() {
           id: s.id,
           name: s.name,
           contact: s.contact || "",
-          limit: totalLimit > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalLimit) : "R$ 0,00",
+          limit: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(declaredLimitNumber || 0),
           activeQuotes,
           totalQuotes,
           avgPrice: avgPrice > 0 ? `R$ ${avgPrice.toFixed(2)}` : "R$ 0,00",
@@ -262,6 +271,8 @@ export function useSuppliers() {
         phone?: string,
         email?: string,
         address?: string,
+        limit?: string,
+        status?: "active" | "inactive" | "pending",
       } 
     }) => {
       const { error } = await supabase
@@ -272,6 +283,8 @@ export function useSuppliers() {
           phone: data.phone || null,
           email: data.email || null,
           address: data.address || null,
+          limit: data.limit ?? null,
+          status: data.status ?? undefined,
           updated_at: new Date().toISOString()
         })
         .eq('id', supplierId);
