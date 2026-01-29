@@ -220,24 +220,7 @@ function Produtos() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setBrandDialogOpen(true)}
-                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-              >
-                <Award className="h-4 w-4 mr-2" /> Marcas
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleExportProducts}
-                className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-              >
-                <Download className="h-4 w-4 mr-2" /> Exportar
-              </Button>
-            </div>
+            <div />
           </div>
 
           {/* Métricas essenciais */}
@@ -278,8 +261,23 @@ function Produtos() {
             "p-3 md:p-4"
           )}>
             <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-              {/* Esquerda: Botão Adicionar (desktop) */}
-              <div className="order-1 md:order-none">
+              <div className="order-1 md:order-none flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBrandDialogOpen(true)}
+                  className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+                >
+                  <Award className="h-4 w-4 mr-2" /> Marcas
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExportProducts}
+                  className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
+                >
+                  <Download className="h-4 w-4 mr-2" /> Exportar
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 hidden md:flex")}>
