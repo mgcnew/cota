@@ -272,45 +272,53 @@ function Produtos() {
             />
           </ResponsiveGrid>
 
-          {/* Botões de criação posicionados abaixo das métricas (desktop) */}
-          <div className="hidden md:flex justify-end mb-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span>Adicionar</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                  <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                  <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Filters & Actions */}
-          <div className={designSystem.layout.container.section}>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-              <div className="flex-1 sm:flex-shrink-0">
-                <ExpandableSearch
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Buscar produtos..."
-                  accentColor="gray" // Neutral accent matching Design System
-                  expandedWidth="w-full sm:w-64"
-                />
+          {/* Grupo coeso de ações abaixo da topbar: Adicionar + Categorias + Busca */}
+          <div className={cn(
+            "mt-2 mb-4 rounded-xl border border-border bg-card/80 backdrop-blur-md shadow-sm",
+            "p-3 md:p-4"
+          )}>
+            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
+              {/* Esquerda: Botão Adicionar (desktop) */}
+              <div className="order-1 md:order-none">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 hidden md:flex")}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span>Adicionar</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-[200px]">
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                      <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <div className="flex-1 sm:flex-initial sm:w-[180px]">
+
+              {/* Centro: Dropdown de Categorias */}
+              <div className="md:w-[220px]">
                 <CategorySelect
                   categories={safeCategories}
                   products={safeProducts}
                   selectedCategory={selectedCategory}
                   onCategoryChange={setSelectedCategory}
                 />
+              </div>
+
+              {/* Direita: Campo de Busca (ocupa espaço e fica à direita) */}
+              <div className="flex-1 md:flex md:justify-end">
+                <div className="w-full md:w-[320px]">
+                  <ExpandableSearch
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Buscar produtos..."
+                    accentColor="gray"
+                    expandedWidth="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
