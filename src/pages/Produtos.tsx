@@ -146,10 +146,18 @@ function Produtos() {
   }, [safeFilteredProducts, toast, exportToCSV]);
 
   const handleAddProduct = useCallback(() => {
+    if (isMobile) {
+      toast({
+        title: "Função disponível no desktop",
+        description: "Adicionar produto só pode ser feito no desktop.",
+        variant: "destructive",
+      });
+      return;
+    }
     startTransition(() => {
       setAddDialogOpen(true);
     });
-  }, []);
+  }, [isMobile, toast]);
 
   const handleImportProducts = useCallback(() => {
     startTransition(() => {
@@ -158,10 +166,18 @@ function Produtos() {
   }, []);
 
   const handleEditProduct = useCallback((product: Product) => {
+    if (isMobile) {
+      toast({
+        title: "Função disponível no desktop",
+        description: "Editar produto só pode ser feito no desktop.",
+        variant: "destructive",
+      });
+      return;
+    }
     startTransition(() => {
       setEditingProduct(product);
     });
-  }, []);
+  }, [isMobile, toast]);
 
   const handleDeleteProduct = useCallback((product: Product) => {
     startTransition(() => {
@@ -223,7 +239,7 @@ function Produtos() {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}>
+                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 hidden md:flex")}>
                     <Plus className="h-4 w-4 mr-2" />
                     <span>Adicionar</span>
                   </Button>
@@ -354,15 +370,17 @@ function Produtos() {
             </div>
           </div>
 
-          {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank when opening */}
-          <Suspense fallback={null}>
-            <AddProductDialog
-              onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
-              onCategoryAdded={invalidateCache}
-              open={addDialogOpen}
-              onOpenChange={setAddDialogOpen}
-            />
-          </Suspense>
+          {/* Lazy loaded dialogs desktop-only */}
+          {!isMobile && (
+            <Suspense fallback={null}>
+              <AddProductDialog
+                onProductAdded={() => { invalidateCache(); setAddDialogOpen(false); }}
+                onCategoryAdded={invalidateCache}
+                open={addDialogOpen}
+                onOpenChange={setAddDialogOpen}
+              />
+            </Suspense>
+          )}
 
           <Suspense fallback={null}>
             <ImportProductsDialog
@@ -373,30 +391,32 @@ function Produtos() {
             />
           </Suspense>
 
-          <Suspense fallback={null}>
-            <EditProductDialog
-              product={editingProduct}
-              open={!!editingProduct}
-              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
-              onProductUpdated={(updatedProduct) => {
-                if (typeof updateProduct === 'function') {
-                  updateProduct({
-                    productId: updatedProduct.id,
-                    data: {
-                      name: updatedProduct.name,
-                      category: updatedProduct.category,
-                      unit: updatedProduct.unit,
-                      barcode: updatedProduct.barcode,
-                      brand_id: updatedProduct.brand_id
-                    }
-                  });
-                }
-                setEditingProduct(null);
-              }}
-              onCategoryAdded={invalidateCache}
-              categories={safeCategories}
-            />
-          </Suspense>
+          {!isMobile && (
+            <Suspense fallback={null}>
+              <EditProductDialog
+                product={editingProduct}
+                open={!!editingProduct}
+                onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+                onProductUpdated={(updatedProduct) => {
+                  if (typeof updateProduct === 'function') {
+                    updateProduct({
+                      productId: updatedProduct.id,
+                      data: {
+                        name: updatedProduct.name,
+                        category: updatedProduct.category,
+                        unit: updatedProduct.unit,
+                        barcode: updatedProduct.barcode,
+                        brand_id: updatedProduct.brand_id
+                      }
+                    });
+                  }
+                  setEditingProduct(null);
+                }}
+                onCategoryAdded={invalidateCache}
+                categories={safeCategories}
+              />
+            </Suspense>
+          )}
 
           <Suspense fallback={null}>
             <DeleteProductDialog
