@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -453,15 +453,16 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   };
 
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     if (!isMobile) return;
+    // Reduzido o delay para resposta mais rápida
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300);
-  };
+      e.target.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }, 150);
+  }, [isMobile]);
 
-  // Header Component
-  const Header = (
+  // Header Component memoized
+  const Header = useMemo(() => (
     <div className={designSystem.components.modal.header}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
@@ -471,11 +472,10 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           Novo Produto
         </DialogTitle>
       </div>
-      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
-  );
+  ), []);
 
-  const content = (
+  const renderContent = () => (
     <>
       {Header}
       <Form {...form}>
@@ -501,7 +501,12 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                     <FormItem>
                       <FormLabel className={designSystem.typography.size.sm}>Nome do Produto *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Ex: Coxa com Sobrecoxa" className={designSystem.components.input.root} {...field} />
+                        <Input
+                          placeholder="Ex: Coxa com Sobrecoxa"
+                          className={designSystem.components.input.root}
+                          onFocus={handleInputFocus}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -580,7 +585,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                       <FormItem>
                         <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="EAN-13, EAN-8..." className={designSystem.components.input.root} maxLength={13} />
+                          <Input
+                            {...field}
+                            placeholder="EAN-13, EAN-8..."
+                            className={designSystem.components.input.root}
+                            maxLength={13}
+                            onFocus={handleInputFocus}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -643,17 +654,17 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange}>
+      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {content}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     );
@@ -667,7 +678,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </DialogTrigger>
       )}
       <DialogContent className={designSystem.components.modal.content}>
-        {content}
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );

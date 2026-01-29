@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -197,15 +197,16 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
   };
 
   // Scroll into view helper para inputs
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
+    // Reduzido o delay para resposta mais rápida
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300);
-  };
+      e.target.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }, 150);
+  }, [isMobile]);
 
-  // Shared Header Component
-  const Header = (
+  // Shared Header Component memoized
+  const Header = useMemo(() => (
     <div className={designSystem.components.modal.header}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
@@ -215,12 +216,11 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           Novo Fornecedor
         </DialogTitle>
       </div>
-      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
-  );
+  ), []);
 
   // Conteúdo do formulário (reutilizado em mobile e desktop)
-  const content = (
+  const renderContent = () => (
     <>
       {Header}
       <Form {...form}>
@@ -435,14 +435,14 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           </DrawerTrigger>
         )}
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl flex flex-col p-0 bg-background border-t border-border"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {content}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     );
@@ -457,7 +457,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
         </DialogTrigger>
       )}
       <DialogContent className={designSystem.components.modal.content}>
-        {content}
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );

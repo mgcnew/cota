@@ -226,78 +226,78 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
   };
 
   // Scroll into view helper para inputs
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (!isMobile) return;
+    // Reduzido o delay para resposta mais rápida
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 300);
-  };
+      e.target.scrollIntoView({ behavior: 'auto', block: 'center' });
+    }, 150);
+  }, [isMobile]);
 
-  const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
-  const DialogHeaderComponent = isMobile ? DrawerHeader : DialogHeader;
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
   const DialogDescriptionComponent = isMobile ? DrawerDescription : DialogDescription;
 
-  // Se estiver no mobile e teclado aberto, ajustamos o container para garantir visibilidade
-  // O container principal flex-1 precisa encolher
-  
-  const content = (
-    <>
-      {/* Header otimizado */}
-      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
-              <Package className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <DialogTitleComponent className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
-                Nova Cotação
-              </DialogTitleComponent>
-              <DialogDescriptionComponent className="text-gray-500 dark:text-gray-400 text-xs font-medium truncate">
-                Etapa {currentStepIndex + 1}/{STEPS.length}
-              </DialogDescriptionComponent>
-            </div>
+  // Step Header memoized
+  const StepHeader = useMemo(() => (
+    <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
+      <div className="flex items-center justify-between relative z-10">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <Package className="h-4 w-4" />
           </div>
+          <div className="flex-1 min-w-0">
+            <DialogTitleComponent className="text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+              Nova Cotação
+            </DialogTitleComponent>
+            <DialogDescriptionComponent className="text-gray-500 dark:text-gray-400 text-xs font-medium truncate">
+              Etapa {currentStepIndex + 1}/{STEPS.length}
+            </DialogDescriptionComponent>
+          </div>
+        </div>
 
-          {/* Navigation */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {currentStepIndex > 0 && (
-              <Button type="button" variant="outline" size="sm" onClick={handlePrevious}
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
-                <ChevronLeft className="h-3 w-3 sm:mr-1.5" />
-                <span className="hidden sm:inline">Voltar</span>
-              </Button>
-            )}
-            
-            {currentStepIndex < STEPS.length - 1 ? (
-              <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
-                className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                <span className="hidden sm:inline">Próximo</span>
-                <ChevronRight className="h-3 w-3 ml-1.5" />
-              </Button>
-            ) : (
-              <Button type="button" size="sm" onClick={handleSubmit} disabled={addQuote.isPending}
-                className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                {addQuote.isPending ? (
-                  <><Loader2 className="h-3 w-3 animate-spin mr-1.5" /><span className="hidden sm:inline">Criando...</span></>
-                ) : (
-                  <><Check className="h-3 w-3 mr-1.5" /><span className="hidden sm:inline">Criar</span></>
-                )}
-              </Button>
-            )}
-          </div>
+        {/* Navigation */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {currentStepIndex > 0 && (
+            <Button type="button" variant="outline" size="sm" onClick={handlePrevious}
+              className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
+              <ChevronLeft className="h-3 w-3 sm:mr-1.5" />
+              <span className="hidden sm:inline">Voltar</span>
+            </Button>
+          )}
           
-          <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
-            className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg ml-2">
-            <X className="h-4 w-4" />
-          </Button>
+          {currentStepIndex < STEPS.length - 1 ? (
+            <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
+              className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
+              <span className="hidden sm:inline">Próximo</span>
+              <ChevronRight className="h-3 w-3 ml-1.5" />
+            </Button>
+          ) : (
+            <Button type="button" size="sm" onClick={handleSubmit} disabled={addQuote.isPending}
+              className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
+              {addQuote.isPending ? (
+                <><Loader2 className="h-3 w-3 animate-spin mr-1.5" /><span className="hidden sm:inline">Criando...</span></>
+              ) : (
+                <><Check className="h-3 w-3 mr-1.5" /><span className="hidden sm:inline">Criar</span></>
+              )}
+            </Button>
+          )}
         </div>
         
-        <div className="mt-3">
-          <Progress value={progress} className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-gray-900 dark:[&>div]:bg-white rounded-full" />
-        </div>
+        <Button type="button" variant="ghost" size="icon" onClick={() => handleOpenChange(false)}
+          className="h-9 w-9 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg ml-2">
+          <X className="h-4 w-4" />
+        </Button>
       </div>
+      
+      <div className="mt-3">
+        <Progress value={progress} className="h-1 bg-gray-100 dark:bg-gray-800 [&>div]:bg-gray-900 dark:[&>div]:bg-white rounded-full" />
+      </div>
+    </div>
+  ), [currentStepIndex, canProceed(), addQuote.isPending, progress]);
+
+  const renderContent = () => (
+    <>
+      {StepHeader}
 
       {/* Tab Navigation */}
       <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
@@ -696,16 +696,16 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange}>
+      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
         <DrawerContent 
-          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
+          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950"
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
+            paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {content}
+          {renderContent()}
         </DrawerContent>
       </Drawer>
     );
@@ -717,7 +717,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
         className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
         onKeyDown={handleKeyDown}
       >
-        {content}
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );
