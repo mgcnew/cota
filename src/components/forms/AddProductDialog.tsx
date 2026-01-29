@@ -456,15 +456,23 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
   const handleInputFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     if (!isMobile) return;
-    // Reduzido o delay para resposta mais rápida
+    
+    const target = e.target;
+    // Pequeno delay para esperar o teclado começar a subir
     setTimeout(() => {
-      e.target.scrollIntoView({ behavior: 'auto', block: 'center' });
-    }, 150);
+      const rect = target.getBoundingClientRect();
+      const offset = 120; // Espaço para o Header fixo + margem de segurança
+      
+      // Se o campo estiver muito alto ou muito baixo, ajustamos
+      if (rect.top < offset || rect.bottom > window.innerHeight - 100) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 200);
   }, [isMobile]);
 
   // Header Component memoized
   const Header = useMemo(() => (
-    <div className={designSystem.components.modal.header}>
+    <div className={cn(designSystem.components.modal.header, "border-b border-muted")}>
       <div className="flex items-center gap-3">
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
@@ -489,7 +497,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               max={subscriptionLimits.maxProducts}
             />
             {/* Seção: Informações Básicas */}
-            <div className={designSystem.components.card.flat + " p-4"}>
+            <div className={cn(designSystem.components.card.flat, "p-4")}>
               <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-4 flex items-center gap-2", designSystem.colors.text.muted)}>
                 Informações
               </h3>
@@ -504,7 +512,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                       <FormControl>
                         <Input
                           placeholder="Ex: Coxa com Sobrecoxa"
-                          className={designSystem.components.input.root}
+                          className={cn(designSystem.components.input.root, "h-11")}
                           onFocus={handleInputFocus}
                           {...field}
                         />
@@ -514,7 +522,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="unit"
@@ -523,11 +531,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                         <FormLabel className={designSystem.typography.size.sm}>Unidade *</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className={designSystem.components.input.root}>
+                            <SelectTrigger className={cn(designSystem.components.input.root, "h-11")}>
                               <SelectValue placeholder="Selecione" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="z-[100]">
                             <SelectItem value="un">Unidade (un)</SelectItem>
                             <SelectItem value="kg">Quilograma (kg)</SelectItem>
                             <SelectItem value="cx">Caixa (cx)</SelectItem>
@@ -565,7 +573,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="brand_id"
@@ -589,7 +597,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                           <Input
                             {...field}
                             placeholder="EAN-13, EAN-8..."
-                            className={designSystem.components.input.root}
+                            className={cn(designSystem.components.input.root, "h-11")}
                             maxLength={13}
                             onFocus={handleInputFocus}
                           />
@@ -603,25 +611,28 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             </div>
 
             {/* Upload de Imagem Simplificado */}
-            <div className={designSystem.components.card.flat + " p-4"}>
+            <div className={cn(designSystem.components.card.flat, "p-4")}>
               <div className="flex items-center justify-between mb-3">
                 <Label className={designSystem.typography.size.sm}>Foto do Produto</Label>
                 {productImage && (
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setProductImage(null)} className={cn(designSystem.components.button.ghost, "h-6 px-2 text-xs")}>
-                    <Trash2 className="h-3 w-3 mr-1" /> Remover
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setProductImage(null)} className={cn(designSystem.components.button.ghost, "h-8 px-3 text-xs")}>
+                    <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Remover
                   </Button>
                 )}
               </div>
 
               {productImage ? (
-                <div className="relative w-full h-32 bg-muted/50 rounded-lg overflow-hidden border border-border flex items-center justify-center">
+                <div className="relative w-full h-40 bg-muted/30 rounded-xl overflow-hidden border border-border flex items-center justify-center">
                   <img src={productImage} alt="Preview" className="h-full object-contain" />
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                    <p className="text-xs text-muted-foreground">Clique para selecionar (max 5MB)</p>
+                <label className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-border rounded-xl cursor-pointer hover:bg-muted/30 transition-colors active:bg-muted/50">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
+                    <div className="p-3 rounded-full bg-muted/50 mb-3">
+                      <Upload className="w-6 h-6 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">Toque para selecionar</p>
+                    <p className="text-xs text-muted-foreground mt-1">Imagens de até 10MB (serão comprimidas)</p>
                   </div>
                   <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                 </label>
@@ -630,23 +641,25 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           </div>
 
           {/* Footer */}
-          <div className={cn(designSystem.components.modal.footer, "py-3")}>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              className={designSystem.components.button.secondary}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="button"
-              onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
-              className={designSystem.components.button.primary}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar
-            </Button>
+          <div className={cn(designSystem.components.modal.footer, "p-4 border-t border-muted bg-background/80 backdrop-blur-sm")}>
+            <div className="flex w-full gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+                className={cn(designSystem.components.button.secondary, "flex-1 h-12 rounded-xl")}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
+                className={cn(designSystem.components.button.primary, "flex-[1.5] h-12 rounded-xl")}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Adicionar
+              </Button>
+            </div>
           </div>
         </form>
       </Form>
