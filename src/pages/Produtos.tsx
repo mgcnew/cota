@@ -237,26 +237,6 @@ function Produtos() {
               >
                 <Download className="h-4 w-4 mr-2" /> Exportar
               </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 hidden md:flex")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span>Adicionar</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[180px]">
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
-                    <Plus className="h-4 w-4 mr-2" /> Novo Produto
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                    <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setBrandDialogOpen(true); }} className="min-h-[44px] sm:hidden">
-                    <Award className="h-4 w-4 mr-2 text-zinc-500" /> Marcas
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </div>
           </div>
 
@@ -291,6 +271,26 @@ function Produtos() {
               className="hover:scale-[1.02] transition-transform"
             />
           </ResponsiveGrid>
+
+          {/* Botões de criação posicionados abaixo das métricas (desktop) */}
+          <div className="hidden md:flex justify-end mb-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className={cn(designSystem.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10")}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  <span>Adicionar</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[200px]">
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleAddProduct(); }} className="min-h-[44px]">
+                  <Plus className="h-4 w-4 mr-2" /> Novo Produto
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                  <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           {/* Filters & Actions */}
           <div className={designSystem.layout.container.section}>
