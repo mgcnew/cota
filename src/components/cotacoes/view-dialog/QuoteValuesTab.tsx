@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { designSystem } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
+import { LastPaidPricesTooltip } from "./LastPaidPricesTooltip";
 
 interface QuoteValuesTabProps {
   products: any[];
@@ -327,9 +328,12 @@ export function QuoteValuesTab({
                         )}
                         <div className="text-right pr-2">
                           <div className="flex flex-col items-end">
-                            <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
-                              {formatCurrency(currentValue)}
-                            </p>
+                            <div className="flex items-center gap-1">
+                              <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
+                                {formatCurrency(currentValue)}
+                              </p>
+                              <LastPaidPricesTooltip productId={product.product_id} />
+                            </div>
                             {!isMobile && isBest && <p className="text-[8px] font-black text-brand uppercase tracking-tighter mt-0.5">🏆 MELHOR PREÇO</p>}
                           </div>
                         </div>
