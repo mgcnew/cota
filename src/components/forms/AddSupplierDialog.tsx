@@ -428,7 +428,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
   // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange}>
+      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
         {trigger && (
           <DrawerTrigger asChild>
             {trigger}

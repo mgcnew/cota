@@ -350,7 +350,7 @@ export default function EditSupplierDialog({
   // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange}>
+      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
         <DrawerContent
           className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
           style={{
