@@ -163,7 +163,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     onOpenChange(false);
   };
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     setActiveStep("embalagens");
     setSelectedItems([]);
     setSelectedSuppliers([]);
@@ -172,12 +172,12 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     setDataInicio(new Date());
     setDataFim(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
     setObservacoes("");
-  };
+  }, []);
 
-  const handleOpenChange = (isOpen: boolean) => {
+  const handleOpenChange = useCallback((isOpen: boolean) => {
     if (!isOpen) handleReset();
     onOpenChange(isOpen);
-  };
+  }, [onOpenChange, handleReset]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.altKey && e.key === 'ArrowRight' && canProceed() && currentStepIndex < STEPS.length - 1) {
@@ -295,7 +295,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     </div>
   ), [currentStepIndex, canProceed(), addQuote.isPending, progress]);
 
-  const renderContent = () => (
+  const formContent = useMemo(() => (
     <>
       {StepHeader}
 
@@ -692,11 +692,15 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
         )}
       </div>
     </>
-  );
+  ), [StepHeader, activeStep, isMobile, searchItem, isLoadingSearch, searchResults, selectedItems, filteredSuppliers, selectedSuppliers, selectedSuppliersData, dataInicio, dataFim, observacoes, addQuote.isPending]);
+
+  const handleOpenChangeInternal = useCallback((isOpen: boolean) => {
+    handleOpenChange(isOpen);
+  }, [handleOpenChange]);
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
+      <Drawer open={open} onOpenChange={handleOpenChangeInternal} repositionInputs={false}>
         <DrawerContent 
           className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950"
           style={{ 
@@ -705,19 +709,19 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
             paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {formContent}
         </DrawerContent>
       </Drawer>
     );
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChangeInternal}>
       <DialogContent 
         className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950 [&>button]:hidden"
         onKeyDown={handleKeyDown}
       >
-        {renderContent()}
+        {formContent}
       </DialogContent>
     </Dialog>
   );

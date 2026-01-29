@@ -162,8 +162,7 @@ export default function EditSupplierDialog({
     </div>
   ), []);
 
-  // Conteúdo do formulário (reutilizado em mobile e desktop)
-  const renderContent = () => (
+  const formContent = useMemo(() => (
     <>
       {Header}
       <Form {...form}>
@@ -345,7 +344,7 @@ export default function EditSupplierDialog({
         </form>
       </Form>
     </>
-  );
+  ), [Header, form, isMobile, handleInputFocus, onSubmit]);
 
   // Mobile: Usar Drawer (bottom sheet)
   if (isMobile) {
@@ -359,7 +358,7 @@ export default function EditSupplierDialog({
             paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {formContent}
         </DrawerContent>
       </Drawer>
     );
@@ -370,7 +369,7 @@ export default function EditSupplierDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className={cn(designSystem.components.modal.content, "h-[85vh] max-h-[700px] p-0 overflow-hidden flex flex-col")}>
         <div className="flex flex-col h-full overflow-hidden">
-          {renderContent()}
+          {formContent}
         </div>
       </DialogContent>
     </Dialog>

@@ -498,40 +498,34 @@ function Fornecedores() {
             />
           )}
 
-          {/* Lazy loaded dialogs with Suspense for better performance */}
-          {editingSupplier && (
-            <Suspense fallback={<DialogLoader />}>
-              <EditSupplierDialog
-                supplier={editingSupplier}
-                open={!!editingSupplier}
-                onOpenChange={open => { if (!open) setEditingSupplier(null); }}
-                onEdit={handleEditSupplier}
-              />
-            </Suspense>
-          )}
+          {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank */}
+          <Suspense fallback={null}>
+            <EditSupplierDialog
+              supplier={editingSupplier}
+              open={!!editingSupplier}
+              onOpenChange={open => { if (!open) setEditingSupplier(null); }}
+              onEdit={handleEditSupplier}
+            />
+          </Suspense>
 
-          {deletingSupplier && (
-            <Suspense fallback={<DialogLoader />}>
-              <DeleteSupplierDialog
-                supplier={deletingSupplier}
-                open={!!deletingSupplier}
-                onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
-                onDelete={handleDeleteSupplier}
-              />
-            </Suspense>
-          )}
+          <Suspense fallback={null}>
+            <DeleteSupplierDialog
+              supplier={deletingSupplier}
+              open={!!deletingSupplier}
+              onOpenChange={open => { if (!open) setDeletingSupplier(null); }}
+              onDelete={handleDeleteSupplier}
+            />
+          </Suspense>
 
           {/* Supplier History Dialog */}
-          {historySupplier && (
-            <Suspense fallback={<DialogLoader />}>
-              <SupplierQuoteHistoryDialog
-                supplierName={historySupplier.name}
-                supplierId={historySupplier.id}
-                open={!!historySupplier}
-                onOpenChange={open => { if (!open) setHistorySupplier(null); }}
-              />
-            </Suspense>
-          )}
+          <Suspense fallback={null}>
+            <SupplierQuoteHistoryDialog
+              supplierName={historySupplier?.name || ""}
+              supplierId={historySupplier?.id || ""}
+              open={!!historySupplier}
+              onOpenChange={open => { if (!open) setHistorySupplier(null); }}
+            />
+          </Suspense>
 
           {/* Hidden triggers for dialogs - lazy loaded */}
           <div className="hidden">

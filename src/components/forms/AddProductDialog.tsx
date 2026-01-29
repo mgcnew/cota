@@ -133,9 +133,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     }
   }, [open]);
 
-  // Carregar categorias dinamicamente do banco de dados
+  // Carregar categorias dinamicamente do banco de dados - Otimizado para carregar apenas uma vez por montagem
   useEffect(() => {
     const loadCategories = async () => {
+      if (categories.length > 0) return; // Evita recarregamento desnecessário
+      
       try {
         setLoadingCategories(true);
         const { data, error } = await supabase
@@ -145,13 +147,12 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         if (error) throw error;
 
         const uniqueCategories = Array.from(new Set(data.map(p => p.category)))
-          .filter(category => category && category.trim() !== '') // Remove categorias vazias
-          .sort(); // Ordena alfabeticamente
+          .filter(category => category && category.trim() !== '')
+          .sort();
 
         setCategories(uniqueCategories);
       } catch (error) {
         console.error('Erro ao carregar categorias:', error);
-        // Fallback para categorias padrão em caso de erro
         setCategories(["Frango", "Embutidos", "Frios", "Bovino", "Suíno"]);
       } finally {
         setLoadingCategories(false);
@@ -161,7 +162,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     if (open) {
       loadCategories();
     }
-  }, [open]);
+  }, [open, categories.length]);
 
   const handleGenerateImage = async () => {
     const productName = form.getValues("name");
@@ -652,6 +653,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     </>
   );
 
+  const formContent = useMemo(() => renderContent(), [form, categories, loadingCategories, productImage, subscriptionLimits]);
+
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
@@ -664,7 +667,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
             paddingBottom: 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          {renderContent()}
+          {formContent}
         </DrawerContent>
       </Drawer>
     );
@@ -678,7 +681,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         </DialogTrigger>
       )}
       <DialogContent className={designSystem.components.modal.content}>
-        {renderContent()}
+        {formContent}
       </DialogContent>
     </Dialog>
   );

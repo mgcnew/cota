@@ -155,14 +155,6 @@ function EmbalagensTab() {
     return { respondidos, total, isPronta };
   };
 
-  if (quotesLoading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 className={cn("h-10 w-10 animate-spin", designSystem.colors.text.primary)} />
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Sub-tabs & Actions Container */}
@@ -229,7 +221,11 @@ function EmbalagensTab() {
         </Button>
       )}
 
-      {activeSubTab === "cotacoes" && (
+      {quotesLoading ? (
+        <div className="flex items-center justify-center py-24">
+          <Loader2 className={cn("h-10 w-10 animate-spin", designSystem.colors.text.primary)} />
+        </div>
+      ) : activeSubTab === "cotacoes" && (
         <div className="space-y-6 animate-in fade-in duration-500">
           {/* Métricas */}
           <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
@@ -359,23 +355,27 @@ function EmbalagensTab() {
       )}
 
       {/* Other Content - Persistent ForceMount */}
-      <TabsContent value="pedidos" className="mt-0" forceMount>
-        <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingOrdersTab onCreateOrder={() => setAddOrderDialogOpen(true)} />
-        </div>
-      </TabsContent>
+      {!quotesLoading && (
+        <>
+          <TabsContent value="pedidos" className="mt-0" forceMount>
+            <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+              <PackagingOrdersTab onCreateOrder={() => setAddOrderDialogOpen(true)} />
+            </div>
+          </TabsContent>
 
-      <TabsContent value="analise" className="mt-0" forceMount>
-        <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingAnalysisTab />
-        </div>
-      </TabsContent>
+          <TabsContent value="analise" className="mt-0" forceMount>
+            <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+              <PackagingAnalysisTab />
+            </div>
+          </TabsContent>
 
-      <TabsContent value="economia" className="mt-0" forceMount>
-        <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingEconomyTab />
-        </div>
-      </TabsContent>
+          <TabsContent value="economia" className="mt-0" forceMount>
+            <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
+              <PackagingEconomyTab />
+            </div>
+          </TabsContent>
+        </>
+      )}
 
       {/* Dialogs */}
       <AddPackagingQuoteDialog
