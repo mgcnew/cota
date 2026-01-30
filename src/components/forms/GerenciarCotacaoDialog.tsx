@@ -471,6 +471,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   if (!initialQuote || !quote) return null;
 
+  const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
+  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
+
   const modalContent = (
     <>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
@@ -483,8 +486,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               <div className="p-1.5 rounded-lg bg-brand/10">
                 <ClipboardList className="h-4 w-4 text-brand" />
               </div>
-              <div className="hidden sm:block">
-                <DialogTitle className="text-base font-black text-foreground tracking-tight leading-none mb-1">Gerenciar Cotação</DialogTitle>
+              <div>
+                <DialogTitleComponent className="text-base font-black text-foreground tracking-tight leading-none mb-1">Gerenciar Cotação</DialogTitleComponent>
                 <p className="text-[10px] font-bold text-muted-foreground leading-none">ID #{safeStr(quote.id).substring(0, 8)}</p>
               </div>
             </div>

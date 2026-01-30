@@ -122,11 +122,10 @@ export function useCotacoes() {
               quantidade_por_embalagem,
               brand_id,
               brands(name, manual_rating),
-              created_at,
-              updated_at
+              created_at
             `)
             .in('quote_id', quoteIds)
-            .order('updated_at', { ascending: false });
+            .order('created_at', { ascending: false });
           supplierItemsData = result.data;
           supplierItemsError = result.error;
         } catch (e) {
@@ -145,11 +144,10 @@ export function useCotacoes() {
               product_id,
               product_name,
               valor_oferecido,
-              created_at,
-              updated_at
+              created_at
             `)
             .in('quote_id', quoteIds)
-            .order('updated_at', { ascending: false });
+            .order('created_at', { ascending: false });
           
           if (fallbackResult.error) {
             console.error("❌ Error fetching supplier items (fallback):", fallbackResult.error);

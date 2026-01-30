@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,14 +36,32 @@ export function QuoteConversionTab({
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
 
-  useMemo(() => {
+  useEffect(() => {
+    // Inicializa as seleções apenas uma vez quando os produtos carregarem
+    // e se ainda não houver seleções feitas pelo usuário
     if (Object.keys(productSelections).length === 0 && products.length > 0) {
       const initialSelections: Record<string, string> = {};
+      let hasSelections = false;
+
       products.forEach((product: any) => {
         const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
-        if (bestSupplierId) initialSelections[product.product_id] = bestSupplierId;
+        if (bestSupplierId) {
+          initialSelections[product.product_id] = bestSupplierId;
+          hasSelections = true;
+        }
       });
-      setProductSelections(initialSelections);
+
+      if (hasSelections) {
+        setProductSelections(initialSelections);
+      } else {
+        // Se nenhum produto tem melhor fornecedor (ex: sem preços), 
+        // marcamos como inicializado com um objeto vazio mas evitamos o loop
+        // definindo um valor que impeça a re-execução desta lógica se necessário,
+        // mas aqui o products.length > 0 e Object.keys(productSelections).length === 0
+        // continuaria sendo verdade. 
+        // Vamos usar uma marcação interna ou apenas aceitar que se não há fornecedores,
+        // não fazemos o set.
+      }
     }
   }, [products, getBestPriceInfoForProduct, productSelections]);
 

@@ -57,8 +57,13 @@ export function QuoteValuesTab({
   };
 
   useEffect(() => {
+    // Seleciona o primeiro fornecedor apenas se não houver um selecionado
+    // e se a lista de fornecedores estiver disponível
     if (fornecedores.length > 0 && !selectedSupplier) {
-      setSelectedSupplier(fornecedores[0].id);
+      const firstId = fornecedores[0]?.id;
+      if (firstId) {
+        setSelectedSupplier(firstId);
+      }
     }
   }, [fornecedores, selectedSupplier]);
 

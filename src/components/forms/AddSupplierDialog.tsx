@@ -210,6 +210,8 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
     }, 300);
   };
 
+  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
+
   // Shared Header Component
   const Header = (
     <div className={designSystem.components.modal.header}>
@@ -217,9 +219,9 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Building2 className={cn("h-4 w-4", designSystem.colors.text.primary)} />
         </div>
-        <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+        <DialogTitleComponent className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
           Novo Fornecedor
-        </DialogTitle>
+        </DialogTitleComponent>
       </div>
       {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>

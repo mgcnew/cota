@@ -63,7 +63,7 @@ export function useProductPriceHistory(productId: string) {
             id,
             supplier_name,
             status,
-            created_at,
+            order_date,
             quote_id
           )
         `)
@@ -120,7 +120,7 @@ export function useProductPriceHistory(productId: string) {
       orderItems?.forEach(item => {
         orderHistory.push({
           id: `order-${item.order_id}`,
-          date: item.orders?.created_at || item.created_at,
+          date: item.orders?.order_date || item.orders?.created_at || item.created_at,
           supplier: item.orders?.supplier_name || 'Fornecedor Desconhecido',
           supplierId: '', // We don't have supplier_id directly in order_items
           price: Number(item.unit_price),

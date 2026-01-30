@@ -243,6 +243,8 @@ function EditProductDialogInternal({
     }, 300);
   };
 
+  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
+
   // Header Component
   const Header = (
     <div className={designSystem.components.modal.header}>
@@ -250,9 +252,9 @@ function EditProductDialogInternal({
         <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
           <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
         </div>
-        <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+        <DialogTitleComponent className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
           {isLoading ? 'Carregando...' : 'Editar Produto'}
-        </DialogTitle>
+        </DialogTitleComponent>
       </div>
 
       <Button type="button" variant="ghost" size="icon" onClick={() => onOpenChange(false)}

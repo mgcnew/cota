@@ -194,6 +194,9 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
     }
   };
 
+  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
+  const DialogDescriptionComponent = isMobile ? DrawerDescription : DialogDescription;
+
   // Shared content for Drawer and Dialog
   const renderHeader = () => (
     <div className="flex-shrink-0 px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/40 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md">
@@ -203,14 +206,14 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
             <ShoppingBasket className="h-5 w-5" />
           </div>
           <div>
-            <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
+            <DialogTitleComponent className="text-lg font-bold text-gray-900 dark:text-white">
               {step === "select" ? "Selecionar Produtos" : "Configurar Itens"}
-            </DialogTitle>
-            <DialogDescription className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            </DialogTitleComponent>
+            <DialogDescriptionComponent className="text-xs text-gray-500 dark:text-gray-400 font-medium">
               {step === "select"
                 ? "Busque e selecione os itens"
                 : `Configurando ${selectedItems.length} itens`}
-            </DialogDescription>
+            </DialogDescriptionComponent>
           </div>
         </div>
         {!isMobile && (

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +55,8 @@ export function CreateStockCountDialog({
     });
   };
 
+  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
+
   // Header Component (Shared)
   const Header = (
     <div className={ds.components.modal.header}>
@@ -62,9 +64,9 @@ export function CreateStockCountDialog({
         <div className={cn("p-2 rounded-lg border", ds.colors.surface.card, ds.colors.border.subtle)}>
           <ClipboardList className={cn("h-4 w-4", ds.colors.text.primary)} />
         </div>
-        <DialogTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>
+        <DialogTitleComponent className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>
           Nova Contagem
-        </DialogTitle>
+        </DialogTitleComponent>
       </div>
     </div>
   );
