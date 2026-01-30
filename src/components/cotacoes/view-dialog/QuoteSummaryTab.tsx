@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
+import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -161,7 +162,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                   </span>
                 </div>
 
-                <div className="text-right">
+                <div className="text-right flex items-center justify-end gap-2">
                   {item.bestPrice > 0 ? (
                     <div className="flex flex-col items-end">
                       <div className="flex items-center gap-1.5">
@@ -173,6 +174,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                         <span className="text-sm font-black text-brand tracking-tight">
                           R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </span>
+                        <CurrentPricesTooltip prices={item.allPrices} />
                       </div>
                     </div>
                   ) : (
