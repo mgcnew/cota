@@ -309,11 +309,16 @@ export default function Etiquetas() {
           onOpenChange={(open) => !open && setPreviewBarcode(null)}
           title="Visualizar Código de Barras"
         >
-          <div className="flex items-center justify-center p-4">
+          <div className="flex flex-col items-center justify-center p-4 gap-4">
              {previewBarcode && (
-                 <div className="w-full max-w-2xl">
-                    <BarcodeGenerator value={previewBarcode} width={3} height={150} />
-                 </div>
+                 <>
+                   <div className="w-full max-w-2xl bg-white p-8 rounded-lg shadow-sm flex justify-center items-center overflow-x-auto">
+                      <BarcodeGenerator value={previewBarcode} width={4} height={150} />
+                   </div>
+                   <p className="text-sm text-muted-foreground text-center">
+                     Se o leitor não conseguir ler, aumente o brilho da tela.
+                   </p>
+                 </>
              )}
           </div>
         </ResponsiveModal>
