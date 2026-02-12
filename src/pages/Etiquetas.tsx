@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { designSystem } from "@/styles/design-system";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,11 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScannerModal } from "@/components/etiquetas/ScannerModal";
 import { BarcodeGenerator } from "@/components/etiquetas/BarcodeGenerator";
-import { Scan, Printer, Trash2 } from "lucide-react";
+import { Scan, Printer, Trash2, Eye, EyeOff } from "lucide-react";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface ProductLabel {
   id: string;
@@ -20,13 +23,44 @@ interface ProductLabel {
 }
 
 export default function Etiquetas() {
-  const [products, setProducts] = useState<ProductLabel[]>([]);
+  // Products State with Persistence
+  const [products, setProducts] = useState<ProductLabel[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('etiquetas_products');
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { console.error(e); }
+      }
+    }
+    return [];
+  });
+
+  // Hidden Labels State with Persistence
+  const [hiddenLabelIds, setHiddenLabelIds] = useState<Set<string>>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('etiquetas_hidden');
+      if (saved) {
+        try { return new Set(JSON.parse(saved)); } catch (e) { console.error(e); }
+      }
+    }
+    return new Set();
+  });
+
   const [name, setName] = useState("");
   const [barcode, setBarcode] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [previewBarcode, setPreviewBarcode] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("all");
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Persist effects
+  useEffect(() => {
+    localStorage.setItem('etiquetas_products', JSON.stringify(products));
+  }, [products]);
+
+  useEffect(() => {
+    localStorage.setItem('etiquetas_hidden', JSON.stringify(Array.from(hiddenLabelIds)));
+  }, [hiddenLabelIds]);
 
   const handleAddProduct = () => {
     if (!name || !barcode) return;
@@ -37,14 +71,66 @@ export default function Etiquetas() {
 
   const handleDelete = (id: string) => {
     setProducts(products.filter(p => p.id !== id));
+    // Also remove from hidden set to clean up
+    if (hiddenLabelIds.has(id)) {
+      setHiddenLabelIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
+
+  const toggleLabelVisibility = (id: string) => {
+    setHiddenLabelIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const handleScan = (result: string) => {
     setBarcode(result);
   };
 
+  // Filter and Sort Logic
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const isHidden = hiddenLabelIds.has(product.id);
+      if (activeTab === 'active') return !isHidden;
+      if (activeTab === 'hidden') return isHidden;
+      return true;
+    }).sort((a, b) => {
+      // Sort by visibility first (active first, hidden last) when showing All
+      if (activeTab === 'all') {
+        const aHidden = hiddenLabelIds.has(a.id);
+        const bHidden = hiddenLabelIds.has(b.id);
+        if (aHidden !== bHidden) return aHidden ? 1 : -1;
+      }
+      return 0; // Maintain insertion order otherwise
+    });
+  }, [products, hiddenLabelIds, activeTab]);
+
+  const counts = useMemo(() => {
+    const total = products.length;
+    const hidden = products.filter(p => hiddenLabelIds.has(p.id)).length;
+    const active = total - hidden;
+    return { total, active, hidden };
+  }, [products, hiddenLabelIds]);
+
   const handleExportPDF = async () => {
-    if (!printRef.current || products.length === 0) return;
+    if (!printRef.current || filteredProducts.length === 0) {
+      toast({
+        title: "Atenção",
+        description: "Não há etiquetas visíveis para exportar.",
+        variant: "warning",
+      });
+      return;
+    }
 
     try {
       const canvas = await html2canvas(printRef.current, {
@@ -67,7 +153,7 @@ export default function Etiquetas() {
       
       toast({
         title: "Sucesso",
-        description: "PDF gerado com sucesso!",
+        description: `PDF gerado com ${filteredProducts.length} etiquetas!`,
       });
     } catch (error) {
       console.error("Error exporting PDF:", error);
@@ -82,10 +168,14 @@ export default function Etiquetas() {
   return (
     <PageWrapper>
       <div className={designSystem.layout.container.page}>
-        <div className="flex items-center justify-between mb-6">
-           <h1 className="text-2xl font-bold">Gerador de Etiquetas</h1>
-           <Button onClick={handleExportPDF} disabled={products.length === 0}>
-             <Printer className="mr-2 h-4 w-4" /> Exportar PDF
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+           <div>
+             <h1 className="text-2xl font-bold">Gerador de Etiquetas</h1>
+             <p className="text-sm text-muted-foreground">Crie e imprima etiquetas personalizadas</p>
+           </div>
+           <Button onClick={handleExportPDF} disabled={filteredProducts.length === 0}>
+             <Printer className="mr-2 h-4 w-4" /> 
+             Exportar PDF ({filteredProducts.length})
            </Button>
         </div>
 
@@ -122,35 +212,79 @@ export default function Etiquetas() {
           </CardContent>
         </Card>
 
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+            <TabsList className="bg-muted/50 p-1 w-full sm:w-auto flex justify-start overflow-x-auto">
+              <TabsTrigger value="all" className="flex items-center gap-2">
+                Todos
+                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold">{counts.total}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="active" className="flex items-center gap-2">
+                Ativos
+                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{counts.active}</Badge>
+              </TabsTrigger>
+              <TabsTrigger value="hidden" className="flex items-center gap-2">
+                Ocultos
+                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400">{counts.hidden}</Badge>
+              </TabsTrigger>
+            </TabsList>
+        </Tabs>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {products.map((product) => (
-            <Card key={product.id} className="relative group">
-              <CardContent className="pt-6 flex flex-col items-center">
-                <div 
-                    className="cursor-pointer mb-2 w-full flex justify-center"
-                    onClick={() => setPreviewBarcode(product.barcode)}
-                >
-                  <BarcodeGenerator value={product.barcode} className="w-full" />
-                </div>
-                <p className="font-medium text-center truncate w-full">{product.name}</p>
-                <p className="text-sm text-muted-foreground">{product.barcode}</p>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleDelete(product.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {filteredProducts.map((product) => {
+            const isHidden = hiddenLabelIds.has(product.id);
+            return (
+              <Card 
+                key={product.id} 
+                className={cn(
+                  "relative group transition-all duration-300",
+                  isHidden && "opacity-50 grayscale bg-gray-50 dark:bg-gray-900/50"
+                )}
+              >
+                <CardContent className="pt-6 flex flex-col items-center">
+                  <div 
+                      className="cursor-pointer mb-2 w-full flex justify-center"
+                      onClick={() => setPreviewBarcode(product.barcode)}
+                  >
+                    <BarcodeGenerator value={product.barcode} className="w-full" />
+                  </div>
+                  <p className="font-medium text-center truncate w-full">{product.name}</p>
+                  <p className="text-sm text-muted-foreground">{product.barcode}</p>
+                  
+                  {/* Action Buttons */}
+                  <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 hover:bg-muted"
+                      onClick={() => toggleLabelVisibility(product.id)}
+                      title={isHidden ? "Mostrar etiqueta" : "Ocultar etiqueta"}
+                    >
+                      {isHidden ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 hover:bg-destructive/10"
+                      onClick={() => handleDelete(product.id)}
+                      title="Excluir etiqueta"
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
         
-        {/* Hidden Container for PDF Generation */}
+        {/* Hidden Container for PDF Generation - Uses filteredProducts */}
         <div className="absolute top-[-9999px] left-[-9999px] w-[210mm] bg-white p-4" ref={printRef}>
             <div className="grid grid-cols-3 gap-4">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                     <div key={product.id} className="border p-4 flex flex-col items-center justify-center h-[40mm]">
                         <p className="font-bold text-sm mb-1 truncate w-full text-center">{product.name}</p>
                         <BarcodeGenerator value={product.barcode} width={1.5} height={40} displayValue={true} />
