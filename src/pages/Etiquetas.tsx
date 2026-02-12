@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useIsMobileDevice } from "@/hooks/use-mobile-device";
 
 interface ProductLabel {
   id: string;
@@ -23,6 +24,8 @@ interface ProductLabel {
 }
 
 export default function Etiquetas() {
+  const isMobile = useIsMobileDevice();
+  
   // Products State with Persistence
   const [products, setProducts] = useState<ProductLabel[]>(() => {
     if (typeof window !== 'undefined') {
@@ -200,9 +203,11 @@ export default function Etiquetas() {
                     onChange={(e) => setBarcode(e.target.value)} 
                     placeholder="Ex: 789..."
                   />
-                  <Button variant="outline" onClick={() => setScannerOpen(true)}>
-                    <Scan className="h-4 w-4" />
-                  </Button>
+                  {isMobile && (
+                    <Button variant="outline" onClick={() => setScannerOpen(true)}>
+                      <Scan className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
