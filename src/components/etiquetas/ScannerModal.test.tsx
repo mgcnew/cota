@@ -1,8 +1,18 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-
 import { ScannerModal } from './ScannerModal';
+import { Html5Qrcode } from 'html5-qrcode';
 
+// Define mocks using vi.hoisted to ensure they are available in the mock factory
+const { mockStart, mockStop, mockClear } = vi.hoisted(() => {
+  return {
+    mockStart: vi.fn(),
+    mockStop: vi.fn(),
+    mockClear: vi.fn(),
+  };
+});
+
+// Mock dependencies
 vi.mock('@/hooks/use-mobile-device', () => ({
   useIsMobileDevice: () => true,
 }));
@@ -17,71 +27,116 @@ vi.mock('@/components/responsive/ResponsiveModal', () => ({
     ) : null,
 }));
 
-const decodeFromConstraints = vi.fn();
-const reset = vi.fn();
-
-vi.mock('@zxing/library', async () => {
-  const actual: any = await vi.importActual('@zxing/library');
-
-  class MockReader {
-    timeBetweenDecodingAttempts = 0;
-    decodeFromConstraints = decodeFromConstraints;
-    reset = reset;
-
-    constructor(_hints?: any, _timeBetweenScansMillis?: number) {}
-  }
-
+// Mock html5-qrcode
+vi.mock('html5-qrcode', () => {
   return {
-    ...actual,
-    BrowserMultiFormatReader: MockReader,
-  };
-});
-
-beforeEach(() => {
-  decodeFromConstraints.mockReset();
-  reset.mockReset();
-  (globalThis as any).navigator.mediaDevices = {
-    getUserMedia: vi.fn().mockResolvedValue({
-      getTracks: () => [{ stop: vi.fn() }],
-    }),
+    Html5Qrcode: class {
+      start = mockStart;
+      stop = mockStop;
+      clear = mockClear;
+    },
+    Html5QrcodeSupportedFormats: {
+      EAN_13: 0,
+      EAN_8: 1,
+      UPC_A: 2,
+      UPC_E: 3,
+      CODE_128: 4,
+      CODE_39: 5,
+      QR_CODE: 6
+    }
   };
 });
 
 describe('ScannerModal', () => {
-  it('renders when open on mobile', () => {
-    decodeFromConstraints.mockResolvedValue(undefined);
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockStart.mockResolvedValue(undefined);
+    mockStop.mockResolvedValue(undefined);
+    mockClear.mockResolvedValue(undefined);
+  });
 
+  it('renders and attempts to start scanner when open', async () => {
     render(
       <ScannerModal open={true} onOpenChange={() => {}} onScan={() => {}} />
     );
 
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByText('Escanear Código de Barras')).toBeInTheDocument();
+    
+    await waitFor(() => {
+      expect(mockStart).toHaveBeenCalled();
+    }, { timeout: 1000 });
+
+    expect(mockStart).toHaveBeenCalledWith(
+      { facingMode: "environment" },
+      expect.objectContaining({
+        fps: 10,
+        qrbox: { width: 250, height: 250 }
+      }),
+      expect.any(Function),
+      expect.any(Function)
+    );
   });
 
-  it('falls back when first strategy fails with OverconstrainedError', async () => {
-    decodeFromConstraints
-      .mockRejectedValueOnce({ name: 'OverconstrainedError', message: 'no rear cam' })
-      .mockResolvedValueOnce(undefined);
+  it('handles start error correctly', async () => {
+    mockStart.mockRejectedValueOnce('Some error');
 
     render(
       <ScannerModal open={true} onOpenChange={() => {}} onScan={() => {}} />
     );
 
     await waitFor(() => {
-      expect(decodeFromConstraints).toHaveBeenCalledTimes(2);
+      expect(screen.getByText('Some error')).toBeInTheDocument();
     });
   });
 
-  it('shows permission error when getUserMedia is denied', async () => {
-    decodeFromConstraints.mockRejectedValue({ name: 'NotAllowedError', message: 'denied' });
+  it('handles permission denied error', async () => {
+    const error = new Error('Permission denied');
+    error.name = 'NotAllowedError';
+    mockStart.mockRejectedValueOnce(error);
 
     render(
       <ScannerModal open={true} onOpenChange={() => {}} onScan={() => {}} />
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Acesso à câmera negado/i)).toBeInTheDocument();
+      expect(screen.getByText('Permissão da câmera negada.')).toBeInTheDocument();
+    });
+  });
+
+  it('stops scanner when modal closes', async () => {
+    const { rerender } = render(
+      <ScannerModal open={true} onOpenChange={() => {}} onScan={() => {}} />
+    );
+
+    await waitFor(() => {
+      expect(mockStart).toHaveBeenCalled();
+    });
+
+    rerender(
+      <ScannerModal open={false} onOpenChange={() => {}} onScan={() => {}} />
+    );
+
+    await waitFor(() => {
+      expect(mockStop).toHaveBeenCalled();
+    });
+  });
+
+  it('calls onScan when code is detected', async () => {
+    const onScan = vi.fn();
+    const onOpenChange = vi.fn();
+
+    mockStart.mockImplementation((_config, _opts, onSuccess, _onError) => {
+      onSuccess('123456789');
+      return Promise.resolve();
+    });
+
+    render(
+      <ScannerModal open={true} onOpenChange={onOpenChange} onScan={onScan} />
+    );
+
+    await waitFor(() => {
+      expect(onScan).toHaveBeenCalledWith('123456789');
+      expect(onOpenChange).toHaveBeenCalledWith(false);
     });
   });
 });
