@@ -37,20 +37,18 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
         const videoInputs = devices.filter((device) => device.kind === 'videoinput');
         setVideoDevices(videoInputs);
         
-        // Se já tiver um selecionado, mantém. Se não, tenta encontrar a traseira.
+        // Tenta encontrar a câmera traseira explicitamente pelo label
         if (!selectedDeviceId && videoInputs.length > 0) {
             const backCamera = videoInputs.find(d => 
                 d.label.toLowerCase().includes('back') || 
                 d.label.toLowerCase().includes('traseira') || 
                 d.label.toLowerCase().includes('environment')
             );
+            
+            // Se encontrar explicitamente, usa o ID. 
+            // Se não, deixa vazio para o facingMode: 'environment' (constraint) decidir a melhor câmera.
             if (backCamera) {
                 setSelectedDeviceId(backCamera.deviceId);
-            } else {
-                // Se for mobile e tiver mais de uma, geralmente a última é a traseira em alguns browsers, 
-                // mas a primeira é a padrão. Vamos na última se tiver 'facingMode' environment nas constraints, 
-                // mas aqui estamos selecionando por ID. Vamos na última como tentativa de pegar a traseira se não tiver label.
-                setSelectedDeviceId(videoInputs[videoInputs.length - 1].deviceId);
             }
         }
       } catch (err: any) {
@@ -81,7 +79,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
     constraints: {
         video: selectedDeviceId 
             ? { deviceId: { exact: selectedDeviceId } } 
-            : { facingMode: 'environment' }
+            : { facingMode: { ideal: 'environment' } }
     },
     timeBetweenDecodingAttempts: 300,
   });
