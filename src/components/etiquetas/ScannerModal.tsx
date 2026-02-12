@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useZxing } from 'react-zxing';
 import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Camera, Loader2 } from 'lucide-react';
+import { AlertCircle, Camera, Loader2, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useIsMobileDevice } from "@/hooks/use-mobile-device";
 
@@ -29,6 +29,19 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
     }
   }, [open]);
 
+  // Timeout de segurança para não ficar carregando infinitamente
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    if (open && isLoading) {
+      timeout = setTimeout(() => {
+        setIsLoading(false);
+        // Só define erro se ainda não tiver um erro definido
+        setError((prev) => prev || "A câmera demorou muito para iniciar. Verifique se você concedeu permissão de acesso e se está usando HTTPS.");
+      }, 10000); // 10 segundos
+    }
+    return () => clearTimeout(timeout);
+  }, [open, isLoading]);
+
   const { ref } = useZxing({
     onDecodeResult(result) {
       onScan(result.getText());
@@ -40,20 +53,28 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
       
       console.warn("Erro no scan:", err);
       
+      setIsLoading(false); // Parar loading em caso de erro
+      
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
           setError("Acesso à câmera negado. Por favor, permita o acesso nas configurações do seu navegador.");
-          setIsLoading(false);
       } else if (err.name === "NotFoundError") {
           setError("Nenhuma câmera encontrada neste dispositivo.");
-          setIsLoading(false);
       } else if (err.name === "NotReadableError") {
           setError("A câmera está sendo usada por outro aplicativo ou não está acessível.");
-          setIsLoading(false);
+      } else if (err.name === "OverconstrainedError") {
+          // Se não encontrar a câmera traseira específica, tenta qualquer uma
+          setError("Câmera traseira não disponível. Tente usar outro dispositivo.");
+      } else {
+          setError(`Erro na câmera: ${err.message || "Desconhecido"}`);
       }
     },
     paused: !open || !isMobile,
     constraints: {
-        video: { facingMode: 'environment' }
+        video: { 
+            facingMode: 'environment', // Tenta traseira
+            width: { min: 640, ideal: 1280, max: 1920 },
+            height: { min: 480, ideal: 720, max: 1080 }
+        }
     },
     timeBetweenDecodingAttempts: 300,
   });
@@ -72,11 +93,17 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
     >
       <div className="flex flex-col items-center justify-center space-y-4 p-4">
         {error ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Erro</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <div className="w-full space-y-4">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Erro</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            <Button onClick={() => window.location.reload()} variant="secondary" className="w-full">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Tentar Novamente (Recarregar)
+            </Button>
+          </div>
         ) : (
           <div className="w-full space-y-4">
               <div className="relative w-full max-w-sm mx-auto aspect-square bg-black rounded-lg overflow-hidden flex items-center justify-center shadow-lg ring-1 ring-border">
@@ -88,7 +115,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
                      playsInline 
                      muted 
                      onPlaying={() => setIsLoading(false)}
-                     onLoadStart={() => setIsLoading(true)}
                    />
                  )}
                  
