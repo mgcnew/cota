@@ -23,7 +23,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [strategy, setStrategy] = useState<InitStrategy>('exact-env');
   const isMobile = useIsMobileDevice();
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoEl, setVideoEl] = useState<HTMLVideoElement | null>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const startedRef = useRef(false);
   const initAttemptRef = useRef(0);
@@ -83,7 +83,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
         console.debug('[SCANNER] init timeout');
         setIsLoading(false);
         setError('A câmera demorou para iniciar. Verifique permissões e se está em HTTPS.');
-      }, 15000);
+      }, 20000);
     }
     return () => {
       if (timeout) clearTimeout(timeout);
@@ -115,14 +115,8 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
 
     console.debug('[SCANNER] start init', { attemptId });
 
-    try {
-      if (navigator?.mediaDevices?.getUserMedia) {
-        const warmup = await navigator.mediaDevices.getUserMedia({ video: true });
-        warmup.getTracks().forEach(t => t.stop());
-      }
-    } catch (e) {
-      console.debug('[SCANNER] warmup failed', e);
-    }
+    // Remove warmup to prevent double-request issues on some Androids
+    // const warmup = await navigator.mediaDevices.getUserMedia({ video: true }); ...
 
     const reader = new BrowserMultiFormatReader(hints, 500);
     reader.timeBetweenDecodingAttempts = 100;
@@ -134,8 +128,10 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
 
       setStrategy(strat);
       console.debug('[SCANNER] trying strategy', strat);
+      
       try {
-        await reader.decodeFromConstraints(getConstraints(strat), videoEl, (result, err) => {
+        // Create a promise that rejects after X seconds to prevent hanging
+        const startPromise = reader.decodeFromConstraints(getConstraints(strat), videoEl, (result, err) => {
           if (result) {
             const text = result.getText();
             console.debug('[SCANNER] decoded', { text });
@@ -145,22 +141,47 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
             return;
           }
           if (err && err.name !== 'NotFoundException') {
-            console.debug('[SCANNER] decode error', err);
+            // console.debug('[SCANNER] decode error', err);
           }
         });
 
-        return;
-      } catch (e: any) {
-        console.debug('[SCANNER] start failed', { strat, name: e?.name, message: e?.message, e });
-        stopScanner();
-        startedRef.current = true;
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('TIMEOUT')), 5000)
+        );
+
+        await Promise.race([startPromise, timeoutPromise]);
         
+        // If we got here, decodeFromConstraints started successfully (promise resolved)
+        // But note: decodeFromConstraints resolves when the *setup* is done, not when scanning finishes.
+        // It keeps running in background via the callback.
+        return;
+
+      } catch (e: any) {
+        console.debug('[SCANNER] start failed', { strat, error: e });
+        stopScanner();
+        
+        // If it was a timeout or constraint error, try next strategy
+        if (e.message === 'TIMEOUT') {
+             console.debug('[SCANNER] strategy timed out, trying next...');
+             continue;
+        }
+
+        startedRef.current = true; // Mark as started so we clean up properly
+        
+        if (e?.name === 'OverconstrainedError') {
+             console.debug('[SCANNER] overconstrained, trying next...');
+             continue;
+        }
+
         if (e?.name === 'NotAllowedError' || e?.name === 'PermissionDeniedError') {
           setIsLoading(false);
           setError('Acesso à câmera negado. Verifique as permissões do navegador.');
           return;
         }
         if (e?.name === 'NotFoundError') {
+          // If exact env not found, try next
+          if (strat === 'exact-env') continue;
+          
           setIsLoading(false);
           setError('Nenhuma câmera encontrada neste dispositivo.');
           return;
@@ -188,7 +209,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
     }
 
     const attemptId = initAttemptRef.current;
-    const videoEl = videoRef.current;
+    
     if (!videoEl) return;
 
     const onCanPlay = () => {
@@ -252,7 +273,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
               <div className="relative w-full max-w-sm mx-auto aspect-square bg-black rounded-lg overflow-hidden flex items-center justify-center shadow-lg ring-1 ring-border">
                  {open && (
                    <video 
-                     ref={videoRef}
+                     ref={setVideoEl}
                      className="w-full h-full object-cover" 
                      autoPlay 
                      playsInline 
