@@ -125,11 +125,15 @@ export default function Etiquetas() {
     return { total, active, hidden };
   }, [products, hiddenLabelIds]);
 
+  const productsToExport = useMemo(() => {
+    return products.filter(product => !hiddenLabelIds.has(product.id));
+  }, [products, hiddenLabelIds]);
+
   const handleExportPDF = async () => {
-    if (!printRef.current || filteredProducts.length === 0) {
+    if (!printRef.current || productsToExport.length === 0) {
       toast({
         title: "Atenção",
-        description: "Não há etiquetas visíveis para exportar.",
+        description: "Não há etiquetas ativas para exportar.",
         variant: "warning",
       });
       return;
@@ -156,7 +160,7 @@ export default function Etiquetas() {
       
       toast({
         title: "Sucesso",
-        description: `PDF gerado com ${filteredProducts.length} etiquetas!`,
+        description: `PDF gerado com ${productsToExport.length} etiquetas!`,
       });
     } catch (error) {
       console.error("Error exporting PDF:", error);
@@ -176,9 +180,9 @@ export default function Etiquetas() {
              <h1 className="text-2xl font-bold">Gerador de Etiquetas</h1>
              <p className="text-sm text-muted-foreground">Crie e imprima etiquetas personalizadas</p>
            </div>
-           <Button onClick={handleExportPDF} disabled={filteredProducts.length === 0}>
+           <Button onClick={handleExportPDF} disabled={productsToExport.length === 0}>
              <Printer className="mr-2 h-4 w-4" /> 
-             Exportar PDF ({filteredProducts.length})
+             Exportar PDF ({productsToExport.length})
            </Button>
         </div>
 
@@ -286,13 +290,15 @@ export default function Etiquetas() {
           })}
         </div>
         
-        {/* Hidden Container for PDF Generation - Uses filteredProducts */}
-        <div className="absolute top-[-9999px] left-[-9999px] w-[210mm] bg-white p-4" ref={printRef}>
-            <div className="grid grid-cols-3 gap-4">
-                {filteredProducts.map((product) => (
-                    <div key={product.id} className="border p-4 flex flex-col items-center justify-center h-[40mm]">
-                        <p className="font-bold text-sm mb-1 truncate w-full text-center">{product.name}</p>
-                        <BarcodeGenerator value={product.barcode} width={1.5} height={40} displayValue={true} />
+        {/* Hidden Container for PDF Generation - Uses productsToExport (Active Only) */}
+        <div className="absolute top-[-9999px] left-[-9999px] w-[210mm] bg-white p-2" ref={printRef}>
+            <div className="grid grid-cols-5 gap-2">
+                {productsToExport.map((product) => (
+                    <div key={product.id} className="border p-2 flex flex-col items-center justify-center h-[35mm] overflow-hidden">
+                        <p className="font-bold text-[10px] mb-0.5 truncate w-full text-center leading-tight">{product.name}</p>
+                        <div className="w-full flex justify-center overflow-hidden">
+                             <BarcodeGenerator value={product.barcode} width={1.2} height={30} displayValue={true} />
+                        </div>
                     </div>
                 ))}
             </div>
