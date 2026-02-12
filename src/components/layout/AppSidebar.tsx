@@ -14,6 +14,7 @@ import {
   BarChart3,
   ClipboardList,
   StickyNote,
+  ScanLine,
   ChevronDown,
   ChevronRight,
   PanelLeftClose,
@@ -75,7 +76,10 @@ const menuCategories: MenuCategory[] = [
   },
   {
     title: "Ferramentas",
-    items: [{ title: "Anotações", url: "/dashboard/anotacoes", icon: StickyNote }]
+    items: [
+      { title: "Anotações", url: "/dashboard/anotacoes", icon: StickyNote },
+      { title: "Etiquetas", url: "/dashboard/etiquetas", icon: ScanLine }
+    ]
   },
   {
     title: "Análises",

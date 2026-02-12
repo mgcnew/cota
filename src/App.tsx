@@ -35,6 +35,7 @@ const Fornecedores = lazy(() => import("./pages/Fornecedores"));
 const Compras = lazy(() => import("./pages/Compras"));
 const ContagemEstoque = lazy(() => import("./pages/ContagemEstoque"));
 const Anotacoes = lazy(() => import("./pages/Anotacoes"));
+const Etiquetas = lazy(() => import("./pages/Etiquetas"));
 const Relatorios = lazy(() => import("./pages/Relatorios"));
 
 // Páginas secundárias - lazy load com prioridade baixa
@@ -97,6 +98,7 @@ const App = () => {
                   <Route path="relatorios" element={<PageWrapper><Relatorios /></PageWrapper>} />
                   <Route path="analytics" element={<Navigate to="/dashboard/relatorios?tab=analytics" replace />} />
                   <Route path="contagem-estoque" element={<PageWrapper><ContagemEstoque /></PageWrapper>} />
+                  <Route path="etiquetas" element={<PageWrapper><Etiquetas /></PageWrapper>} />
                   <Route path="anotacoes" element={<PageWrapper><Anotacoes /></PageWrapper>} />
                   <Route path="configuracoes" element={<PageWrapper><Configuracoes /></PageWrapper>} />
                 </Route>
