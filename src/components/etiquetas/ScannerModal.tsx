@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useZxing } from 'react-zxing';
 import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,8 @@ interface ScannerModalProps {
   onScan: (result: string) => void;
 }
 
+type InitStrategy = 'exact-env' | 'ideal-env' | 'any' | 'user';
+
 export const ScannerModal: React.FC<ScannerModalProps> = ({
   open,
   onOpenChange,
@@ -19,30 +21,51 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
+  const [strategy, setStrategy] = useState<InitStrategy>('exact-env');
   const isMobile = useIsMobileDevice();
+  const retryCount = useRef(0);
+
+  // Initial constraints based on strategy
+  const getConstraints = (strat: InitStrategy): MediaStreamConstraints => {
+    const baseVideo: MediaTrackConstraints = {
+      width: { min: 640, ideal: 1280, max: 1920 },
+      height: { min: 480, ideal: 720, max: 1080 },
+      // @ts-ignore - focusMode is supported in some browsers
+      focusMode: 'continuous', 
+    };
+
+    switch (strat) {
+      case 'exact-env':
+        return { video: { ...baseVideo, facingMode: { exact: 'environment' } } };
+      case 'ideal-env':
+        return { video: { ...baseVideo, facingMode: 'environment' } };
+      case 'user':
+        return { video: { ...baseVideo, facingMode: 'user' } };
+      case 'any':
+      default:
+        return { video: baseVideo };
+    }
+  };
 
   // Reset state when opening
   useEffect(() => {
     if (open) {
         setIsLoading(true);
         setError(null);
-        setFacingMode('environment'); // Reset to back camera
+        setStrategy('exact-env'); // Start with best possible
+        retryCount.current = 0;
     }
   }, [open]);
 
-  // Timeout de segurança para não ficar carregando infinitamente
+  // Timeout watchdog
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     if (open && isLoading && !error) {
       timeout = setTimeout(() => {
-        // Se passar 10s e ainda estiver carregando, mostra erro/ajuda
-        // Não forçamos isLoading(false) aqui para permitir que a câmera ainda tente abrir, 
-        // mas mostramos um aviso visual ou erro.
-        // Na verdade, é melhor mostrar o erro e permitir retry.
+        // Only show error if we are still loading and haven't failed yet
         setIsLoading(false);
         setError("A câmera está demorando para responder. Tente inverter a câmera ou recarregar.");
-      }, 10000); // 10 segundos
+      }, 15000); // 15 seconds
     }
     return () => clearTimeout(timeout);
   }, [open, isLoading, error]);
@@ -53,40 +76,43 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
       onOpenChange(false);
     },
     onError(err) {
-      // Ignore silent errors
       if (err.name === "NotFoundException") return;
       
-      console.warn("Erro no scan:", err);
-      
-      // Se for erro de permissão ou não encontrado, paramos o loading imediatamente.
-      // Outros erros podem ser transitórios.
-      
+      console.warn(`Scan Error (${strategy}):`, err);
+
+      // Handle Initialization/Constraint Errors by downgrading strategy
+      if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
+        if (strategy === 'exact-env') {
+          console.log("Downgrading to ideal-env...");
+          setStrategy('ideal-env');
+          return;
+        } else if (strategy === 'ideal-env') {
+          console.log("Downgrading to any...");
+          setStrategy('any');
+          return;
+        }
+      }
+
+      // If we are here, we ran out of strategies or hit a permission/hardware error
+      setIsLoading(false);
+
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-          setIsLoading(false);
           setError("Acesso à câmera negado. Verifique as permissões.");
       } else if (err.name === "NotFoundError") {
-          setIsLoading(false);
           setError("Nenhuma câmera encontrada.");
       } else if (err.name === "NotReadableError") {
-          setIsLoading(false);
-          setError("Câmera em uso ou inacessível.");
-      } else if (err.name === "OverconstrainedError") {
-          // Se a constraint falhar, tenta inverter automaticamente ou avisa
-          console.log("OverconstrainedError, tentando inverter...");
-          // Não vamos inverter auto para não criar loop, mas avisamos
-          setIsLoading(false);
-          setError("Câmera solicitada não disponível. Tente inverter.");
+          setError("Câmera em uso ou inacessível. Feche outros apps.");
+      } else {
+          setError(`Erro na câmera: ${err.message || "Desconhecido"}. Tente recarregar.`);
       }
     },
     paused: !open || !isMobile,
-    constraints: {
-        video: { facingMode: facingMode }
-    },
+    constraints: getConstraints(strategy),
     timeBetweenDecodingAttempts: 300,
   });
 
   const toggleCamera = () => {
-      setFacingMode(prev => prev === 'environment' ? 'user' : 'environment');
+      setStrategy(prev => prev === 'user' ? 'exact-env' : 'user');
       setIsLoading(true);
       setError(null);
   };
@@ -140,11 +166,12 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
                         <div className="flex flex-col items-center gap-2">
                             <Loader2 className="h-8 w-8 text-white animate-spin" />
                             <span className="text-white text-xs">Iniciando câmera...</span>
+                            <span className="text-white/50 text-[10px] opacity-50">{strategy}</span>
                         </div>
                     </div>
                  )}
 
-                 {/* Overlay for aiming - Only show when ready */}
+                 {/* Overlay for aiming */}
                  {!isLoading && (
                      <>
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
@@ -163,7 +190,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
               <div className="flex justify-center">
                   <Button variant="ghost" size="sm" onClick={toggleCamera} className="text-xs gap-2" disabled={isLoading}>
                       <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
-                      {facingMode === 'environment' ? 'Usar Câmera Frontal' : 'Usar Câmera Traseira'}
+                      {strategy === 'user' ? 'Usar Câmera Traseira' : 'Usar Câmera Frontal'}
                   </Button>
               </div>
           </div>
@@ -171,6 +198,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
         
         <p className="text-sm text-muted-foreground text-center px-4">
             Posicione o código de barras dentro da área demarcada.
+            <br/><span className="text-xs opacity-70">Mantenha o foco estável.</span>
         </p>
         <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full max-w-sm">
           Cancelar
