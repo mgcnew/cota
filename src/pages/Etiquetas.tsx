@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { ScannerModal } from "@/components/etiquetas/ScannerModal";
 import { BarcodeGenerator } from "@/components/etiquetas/BarcodeGenerator";
-import { Scan, Printer, Trash2, Eye, EyeOff } from "lucide-react";
+import { Scan, Printer, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -16,28 +16,26 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useIsMobileDevice } from "@/hooks/use-mobile-device";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/auth/AuthContext";
 
 interface ProductLabel {
   id: string;
   name: string;
   barcode: string;
+  created_at?: string;
+  user_id?: string;
 }
 
 export default function Etiquetas() {
   const isMobile = useIsMobileDevice();
+  const { user } = useAuth();
+  const { toast } = useToast();
   
-  // Products State with Persistence
-  const [products, setProducts] = useState<ProductLabel[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('etiquetas_products');
-      if (saved) {
-        try { return JSON.parse(saved); } catch (e) { console.error(e); }
-      }
-    }
-    return [];
-  });
+  const [products, setProducts] = useState<ProductLabel[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Hidden Labels State with Persistence
+  // Hidden Labels State with Persistence (UI Preference - LocalStorage)
   const [hiddenLabelIds, setHiddenLabelIds] = useState<Set<string>>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('etiquetas_hidden');
@@ -54,33 +52,122 @@ export default function Etiquetas() {
   const [previewBarcode, setPreviewBarcode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const printRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
 
-  // Persist effects
+  // Fetch products
   useEffect(() => {
-    localStorage.setItem('etiquetas_products', JSON.stringify(products));
-  }, [products]);
+    if (!user) {
+        setLoading(false);
+        return;
+    }
 
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('product_labels')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        setProducts(data || []);
+      } catch (error) {
+        console.error('Error fetching labels:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar etiquetas.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+
+    // Subscribe to changes
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'product_labels'
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+             setProducts(prev => [...prev, payload.new as ProductLabel]);
+          } else if (payload.eventType === 'DELETE') {
+             setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE') {
+             setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new as ProductLabel : p));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, toast]);
+
+  // Persist hidden state
   useEffect(() => {
     localStorage.setItem('etiquetas_hidden', JSON.stringify(Array.from(hiddenLabelIds)));
   }, [hiddenLabelIds]);
 
-  const handleAddProduct = () => {
-    if (!name || !barcode) return;
-    setProducts([...products, { id: Date.now().toString(), name, barcode }]);
-    setName("");
-    setBarcode("");
+  const handleAddProduct = async () => {
+    if (!name || !barcode || !user) return;
+    
+    try {
+        const { error } = await supabase.from('product_labels').insert({
+            name,
+            barcode,
+            user_id: user.id
+        });
+
+        if (error) throw error;
+
+        setName("");
+        setBarcode("");
+        toast({
+            title: "Sucesso",
+            description: "Etiqueta adicionada.",
+        });
+    } catch (error) {
+        console.error('Error adding label:', error);
+        toast({
+            title: "Erro",
+            description: "Erro ao adicionar etiqueta.",
+            variant: "destructive",
+        });
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
-    // Also remove from hidden set to clean up
-    if (hiddenLabelIds.has(id)) {
-      setHiddenLabelIds(prev => {
-        const next = new Set(prev);
-        next.delete(id);
-        return next;
-      });
+  const handleDelete = async (id: string) => {
+    try {
+        const { error } = await supabase.from('product_labels').delete().eq('id', id);
+        if (error) throw error;
+        
+        // Also remove from hidden set
+        if (hiddenLabelIds.has(id)) {
+            setHiddenLabelIds(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        }
+        
+        toast({
+            title: "Sucesso",
+            description: "Etiqueta removida.",
+        });
+    } catch (error) {
+        console.error('Error deleting label:', error);
+        toast({
+            title: "Erro",
+            description: "Erro ao remover etiqueta.",
+            variant: "destructive",
+        });
     }
   };
 
@@ -215,7 +302,7 @@ export default function Etiquetas() {
                 </div>
               </div>
             </div>
-            <Button className="w-full" onClick={handleAddProduct} disabled={!name || !barcode}>
+            <Button className="w-full" onClick={handleAddProduct} disabled={!name || !barcode || !user}>
               Adicionar à Lista
             </Button>
           </CardContent>
@@ -238,57 +325,69 @@ export default function Etiquetas() {
             </TabsList>
         </Tabs>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {filteredProducts.map((product) => {
-            const isHidden = hiddenLabelIds.has(product.id);
-            return (
-              <Card 
-                key={product.id} 
-                className={cn(
-                  "relative group transition-all duration-300",
-                  isHidden && "opacity-50 grayscale bg-gray-50 dark:bg-gray-900/50"
-                )}
-              >
-                <CardContent className="pt-6 flex flex-col items-center">
-                  <div 
-                      className="cursor-pointer mb-2 w-full flex justify-center"
-                      onClick={() => setPreviewBarcode(product.barcode)}
+        {loading ? (
+             <div className="flex justify-center py-12">
+                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+             </div>
+        ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {filteredProducts.map((product) => {
+                const isHidden = hiddenLabelIds.has(product.id);
+                return (
+                  <Card 
+                    key={product.id} 
+                    className={cn(
+                      "relative group transition-all duration-300",
+                      isHidden && "opacity-50 grayscale bg-gray-50 dark:bg-gray-900/50"
+                    )}
                   >
-                    <BarcodeGenerator value={product.barcode} className="w-full" />
+                    <CardContent className="pt-6 flex flex-col items-center">
+                      <div 
+                          className="cursor-pointer mb-2 w-full flex justify-center"
+                          onClick={() => setPreviewBarcode(product.barcode)}
+                      >
+                        <BarcodeGenerator value={product.barcode} className="w-full" />
+                      </div>
+                      <p className="font-medium text-center truncate w-full">{product.name}</p>
+                      <p className="text-sm text-muted-foreground">{product.barcode}</p>
+                      
+                      {/* Action Buttons */}
+                      <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 hover:bg-muted"
+                          onClick={() => toggleLabelVisibility(product.id)}
+                          title={isHidden ? "Mostrar etiqueta" : "Ocultar etiqueta"}
+                        >
+                          {isHidden ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 hover:bg-destructive/10"
+                          onClick={() => handleDelete(product.id)}
+                          title="Excluir etiqueta"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+              
+              {filteredProducts.length === 0 && (
+                  <div className="col-span-full text-center py-12 text-muted-foreground">
+                      Nenhuma etiqueta encontrada.
                   </div>
-                  <p className="font-medium text-center truncate w-full">{product.name}</p>
-                  <p className="text-sm text-muted-foreground">{product.barcode}</p>
-                  
-                  {/* Action Buttons */}
-                  <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 hover:bg-muted"
-                      onClick={() => toggleLabelVisibility(product.id)}
-                      title={isHidden ? "Mostrar etiqueta" : "Ocultar etiqueta"}
-                    >
-                      {isHidden ? (
-                        <EyeOff className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <Eye className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 hover:bg-destructive/10"
-                      onClick={() => handleDelete(product.id)}
-                      title="Excluir etiqueta"
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+              )}
+            </div>
+        )}
         
         {/* Hidden Container for PDF Generation - Uses productsToExport (Active Only) */}
         <div className="absolute top-[-9999px] left-[-9999px] w-[210mm] bg-white p-2" ref={printRef}>
