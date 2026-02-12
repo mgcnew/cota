@@ -19,6 +19,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
 }) => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [facingMode, setFacingMode] = useState<'environment' | 'user'>('environment');
   const isMobile = useIsMobileDevice();
 
   // Reset state when opening
@@ -26,21 +27,25 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
     if (open) {
         setIsLoading(true);
         setError(null);
+        setFacingMode('environment'); // Reset to back camera
     }
   }, [open]);
 
   // Timeout de segurança para não ficar carregando infinitamente
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    if (open && isLoading) {
+    if (open && isLoading && !error) {
       timeout = setTimeout(() => {
+        // Se passar 10s e ainda estiver carregando, mostra erro/ajuda
+        // Não forçamos isLoading(false) aqui para permitir que a câmera ainda tente abrir, 
+        // mas mostramos um aviso visual ou erro.
+        // Na verdade, é melhor mostrar o erro e permitir retry.
         setIsLoading(false);
-        // Só define erro se ainda não tiver um erro definido
-        setError((prev) => prev || "A câmera demorou muito para iniciar. Verifique se você concedeu permissão de acesso e se está usando HTTPS.");
+        setError("A câmera está demorando para responder. Tente inverter a câmera ou recarregar.");
       }, 10000); // 10 segundos
     }
     return () => clearTimeout(timeout);
-  }, [open, isLoading]);
+  }, [open, isLoading, error]);
 
   const { ref } = useZxing({
     onDecodeResult(result) {
@@ -53,33 +58,40 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
       
       console.warn("Erro no scan:", err);
       
-      setIsLoading(false); // Parar loading em caso de erro
+      // Se for erro de permissão ou não encontrado, paramos o loading imediatamente.
+      // Outros erros podem ser transitórios.
       
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-          setError("Acesso à câmera negado. Por favor, permita o acesso nas configurações do seu navegador.");
+          setIsLoading(false);
+          setError("Acesso à câmera negado. Verifique as permissões.");
       } else if (err.name === "NotFoundError") {
-          setError("Nenhuma câmera encontrada neste dispositivo.");
+          setIsLoading(false);
+          setError("Nenhuma câmera encontrada.");
       } else if (err.name === "NotReadableError") {
-          setError("A câmera está sendo usada por outro aplicativo ou não está acessível.");
+          setIsLoading(false);
+          setError("Câmera em uso ou inacessível.");
       } else if (err.name === "OverconstrainedError") {
-          // Se não encontrar a câmera traseira específica, tenta qualquer uma
-          setError("Câmera traseira não disponível. Tente usar outro dispositivo.");
-      } else {
-          setError(`Erro na câmera: ${err.message || "Desconhecido"}`);
+          // Se a constraint falhar, tenta inverter automaticamente ou avisa
+          console.log("OverconstrainedError, tentando inverter...");
+          // Não vamos inverter auto para não criar loop, mas avisamos
+          setIsLoading(false);
+          setError("Câmera solicitada não disponível. Tente inverter.");
       }
     },
     paused: !open || !isMobile,
     constraints: {
-        video: { 
-            facingMode: 'environment', // Tenta traseira
-            width: { min: 640, ideal: 1280, max: 1920 },
-            height: { min: 480, ideal: 720, max: 1080 }
-        }
+        video: { facingMode: facingMode }
     },
     timeBetweenDecodingAttempts: 300,
   });
 
-  // If accessed on desktop (fallback safety), don't render or show warning
+  const toggleCamera = () => {
+      setFacingMode(prev => prev === 'environment' ? 'user' : 'environment');
+      setIsLoading(true);
+      setError(null);
+  };
+
+  // If accessed on desktop (fallback safety), don't render
   if (!isMobile) {
       return null;
   }
@@ -89,7 +101,7 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
       open={open}
       onOpenChange={onOpenChange}
       title="Escanear Código de Barras"
-      description="Aponte a câmera traseira para o código."
+      description="Aponte a câmera para o código."
     >
       <div className="flex flex-col items-center justify-center space-y-4 p-4">
         {error ? (
@@ -99,10 +111,15 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
               <AlertTitle>Erro</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-            <Button onClick={() => window.location.reload()} variant="secondary" className="w-full">
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Tentar Novamente (Recarregar)
-            </Button>
+            <div className="flex gap-2">
+                <Button onClick={toggleCamera} variant="outline" className="flex-1">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Inverter Câmera
+                </Button>
+                <Button onClick={() => window.location.reload()} variant="secondary" className="flex-1">
+                    Recarregar
+                </Button>
+            </div>
           </div>
         ) : (
           <div className="w-full space-y-4">
@@ -140,6 +157,14 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
                         </div>
                      </>
                  )}
+              </div>
+
+              {/* Camera Controls */}
+              <div className="flex justify-center">
+                  <Button variant="ghost" size="sm" onClick={toggleCamera} className="text-xs gap-2" disabled={isLoading}>
+                      <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
+                      {facingMode === 'environment' ? 'Usar Câmera Frontal' : 'Usar Câmera Traseira'}
+                  </Button>
               </div>
           </div>
         )}
