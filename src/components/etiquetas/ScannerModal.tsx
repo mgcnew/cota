@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useZxing } from 'react-zxing';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Camera, Loader2, RefreshCw } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useIsMobileDevice } from "@/hooks/use-mobile-device";
+import { BarcodeFormat, BrowserMultiFormatReader, DecodeHintType } from '@zxing/library';
 
 interface ScannerModalProps {
   open: boolean;
@@ -12,7 +12,7 @@ interface ScannerModalProps {
   onScan: (result: string) => void;
 }
 
-type InitStrategy = 'exact-env' | 'ideal-env' | 'any' | 'user';
+type InitStrategy = 'exact-env' | 'ideal-env' | 'any';
 
 export const ScannerModal: React.FC<ScannerModalProps> = ({
   open,
@@ -23,98 +23,198 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [strategy, setStrategy] = useState<InitStrategy>('exact-env');
   const isMobile = useIsMobileDevice();
-  const retryCount = useRef(0);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const readerRef = useRef<BrowserMultiFormatReader | null>(null);
+  const startedRef = useRef(false);
+  const initAttemptRef = useRef(0);
 
-  // Initial constraints based on strategy
+  const hints = useMemo(() => {
+    const map = new Map();
+    map.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.CODE_39,
+      BarcodeFormat.CODE_93,
+      BarcodeFormat.ITF,
+      BarcodeFormat.QR_CODE,
+      BarcodeFormat.DATA_MATRIX,
+      BarcodeFormat.PDF_417,
+    ]);
+    map.set(DecodeHintType.TRY_HARDER, true);
+    return map as Map<DecodeHintType, unknown>;
+  }, []);
+
   const getConstraints = (strat: InitStrategy): MediaStreamConstraints => {
-    const baseVideo: MediaTrackConstraints = {
-      width: { min: 640, ideal: 1280, max: 1920 },
-      height: { min: 480, ideal: 720, max: 1080 },
-      // @ts-ignore - focusMode is supported in some browsers
-      focusMode: 'continuous', 
+    const base: MediaTrackConstraints = {
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+      // @ts-ignore
+      focusMode: 'continuous',
     };
 
-    switch (strat) {
-      case 'exact-env':
-        return { video: { ...baseVideo, facingMode: { exact: 'environment' } } };
-      case 'ideal-env':
-        return { video: { ...baseVideo, facingMode: 'environment' } };
-      case 'user':
-        return { video: { ...baseVideo, facingMode: 'user' } };
-      case 'any':
-      default:
-        return { video: baseVideo };
+    if (strat === 'exact-env') {
+      return { video: { ...base, facingMode: { exact: 'environment' } } };
     }
+    if (strat === 'ideal-env') {
+      return { video: { ...base, facingMode: { ideal: 'environment' } } };
+    }
+    return { video: base };
   };
 
   // Reset state when opening
   useEffect(() => {
     if (open) {
-        setIsLoading(true);
-        setError(null);
-        setStrategy('exact-env'); // Start with best possible
-        retryCount.current = 0;
+      setIsLoading(true);
+      setError(null);
+      setStrategy('exact-env');
+      initAttemptRef.current += 1;
+      startedRef.current = false;
     }
   }, [open]);
 
   // Timeout watchdog
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout | undefined;
     if (open && isLoading && !error) {
       timeout = setTimeout(() => {
-        // Only show error if we are still loading and haven't failed yet
+        console.debug('[SCANNER] init timeout');
         setIsLoading(false);
-        setError("A câmera está demorando para responder. Tente inverter a câmera ou recarregar.");
-      }, 15000); // 15 seconds
+        setError('A câmera demorou para iniciar. Verifique permissões e se está em HTTPS.');
+      }, 15000);
     }
-    return () => clearTimeout(timeout);
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
   }, [open, isLoading, error]);
 
-  const { ref } = useZxing({
-    onDecodeResult(result) {
-      onScan(result.getText());
-      onOpenChange(false);
-    },
-    onError(err) {
-      if (err.name === "NotFoundException") return;
-      
-      console.warn(`Scan Error (${strategy}):`, err);
+  const stopScanner = () => {
+    const reader = readerRef.current;
+    if (reader) {
+      try {
+        reader.reset();
+      } catch (e) {
+        console.debug('[SCANNER] reset error', e);
+      }
+    }
+    startedRef.current = false;
+  };
 
-      // Handle Initialization/Constraint Errors by downgrading strategy
-      if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
-        if (strategy === 'exact-env') {
-          console.log("Downgrading to ideal-env...");
-          setStrategy('ideal-env');
-          return;
-        } else if (strategy === 'ideal-env') {
-          console.log("Downgrading to any...");
-          setStrategy('any');
+  const startScanner = async (attemptId: number) => {
+    if (!open) return;
+    if (!isMobile) return;
+    if (startedRef.current) return;
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    startedRef.current = true;
+    setIsLoading(true);
+    setError(null);
+
+    console.debug('[SCANNER] start init', { attemptId });
+
+    try {
+      if (navigator?.mediaDevices?.getUserMedia) {
+        const warmup = await navigator.mediaDevices.getUserMedia({ video: true });
+        warmup.getTracks().forEach(t => t.stop());
+      }
+    } catch (e) {
+      console.debug('[SCANNER] warmup failed', e);
+    }
+
+    const reader = new BrowserMultiFormatReader(hints, 500);
+    reader.timeBetweenDecodingAttempts = 100;
+    readerRef.current = reader;
+
+    const strategies: InitStrategy[] = ['exact-env', 'ideal-env', 'any'];
+    for (const strat of strategies) {
+      if (!open || attemptId !== initAttemptRef.current) return;
+
+      setStrategy(strat);
+      console.debug('[SCANNER] trying strategy', strat);
+      try {
+        await reader.decodeFromConstraints(getConstraints(strat), videoEl, (result, err) => {
+          if (result) {
+            const text = result.getText();
+            console.debug('[SCANNER] decoded', { text });
+            onScan(text);
+            onOpenChange(false);
+            stopScanner();
+            return;
+          }
+          if (err && err.name !== 'NotFoundException') {
+            console.debug('[SCANNER] decode error', err);
+          }
+        });
+
+        return;
+      } catch (e: any) {
+        console.debug('[SCANNER] start failed', { strat, name: e?.name, message: e?.message, e });
+        stopScanner();
+        startedRef.current = true;
+        
+        if (e?.name === 'NotAllowedError' || e?.name === 'PermissionDeniedError') {
+          setIsLoading(false);
+          setError('Acesso à câmera negado. Verifique as permissões do navegador.');
           return;
         }
-      }
+        if (e?.name === 'NotFoundError') {
+          setIsLoading(false);
+          setError('Nenhuma câmera encontrada neste dispositivo.');
+          return;
+        }
+        if (e?.name === 'NotReadableError') {
+          setIsLoading(false);
+          setError('Câmera em uso ou inacessível. Feche outros apps que usam câmera.');
+          return;
+        }
 
-      // If we are here, we ran out of strategies or hit a permission/hardware error
+        startedRef.current = false;
+        continue;
+      }
+    }
+
+    setIsLoading(false);
+    setError('Não foi possível iniciar a câmera traseira.');
+    startedRef.current = false;
+  };
+
+  useEffect(() => {
+    if (!open) {
+      stopScanner();
+      return;
+    }
+
+    const attemptId = initAttemptRef.current;
+    const videoEl = videoRef.current;
+    if (!videoEl) return;
+
+    const onCanPlay = () => {
       setIsLoading(false);
+    };
+    videoEl.addEventListener('playing', onCanPlay);
+    videoEl.addEventListener('canplay', onCanPlay);
+    
+    startScanner(attemptId);
 
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-          setError("Acesso à câmera negado. Verifique as permissões.");
-      } else if (err.name === "NotFoundError") {
-          setError("Nenhuma câmera encontrada.");
-      } else if (err.name === "NotReadableError") {
-          setError("Câmera em uso ou inacessível. Feche outros apps.");
-      } else {
-          setError(`Erro na câmera: ${err.message || "Desconhecido"}. Tente recarregar.`);
-      }
-    },
-    paused: !open || !isMobile,
-    constraints: getConstraints(strategy),
-    timeBetweenDecodingAttempts: 300,
-  });
+    return () => {
+      videoEl.removeEventListener('playing', onCanPlay);
+      videoEl.removeEventListener('canplay', onCanPlay);
+      stopScanner();
+    };
+  }, [open, isMobile]);
 
-  const toggleCamera = () => {
-      setStrategy(prev => prev === 'user' ? 'exact-env' : 'user');
-      setIsLoading(true);
-      setError(null);
+  const restartScanner = () => {
+    stopScanner();
+    startedRef.current = false;
+    setIsLoading(true);
+    setError(null);
+    setStrategy('exact-env');
+    const attemptId = initAttemptRef.current + 1;
+    initAttemptRef.current = attemptId;
+    startScanner(attemptId);
   };
 
   // If accessed on desktop (fallback safety), don't render
@@ -138,13 +238,13 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
               <AlertDescription>{error}</AlertDescription>
             </Alert>
             <div className="flex gap-2">
-                <Button onClick={toggleCamera} variant="outline" className="flex-1">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Inverter Câmera
-                </Button>
-                <Button onClick={() => window.location.reload()} variant="secondary" className="flex-1">
-                    Recarregar
-                </Button>
+              <Button onClick={restartScanner} variant="outline" className="flex-1">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Tentar Novamente
+              </Button>
+              <Button onClick={() => window.location.reload()} variant="secondary" className="flex-1">
+                Recarregar
+              </Button>
             </div>
           </div>
         ) : (
@@ -152,12 +252,11 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
               <div className="relative w-full max-w-sm mx-auto aspect-square bg-black rounded-lg overflow-hidden flex items-center justify-center shadow-lg ring-1 ring-border">
                  {open && (
                    <video 
-                     ref={ref} 
+                     ref={videoRef}
                      className="w-full h-full object-cover" 
                      autoPlay 
                      playsInline 
                      muted 
-                     onPlaying={() => setIsLoading(false)}
                    />
                  )}
                  
@@ -184,14 +283,6 @@ export const ScannerModal: React.FC<ScannerModalProps> = ({
                         </div>
                      </>
                  )}
-              </div>
-
-              {/* Camera Controls */}
-              <div className="flex justify-center">
-                  <Button variant="ghost" size="sm" onClick={toggleCamera} className="text-xs gap-2" disabled={isLoading}>
-                      <RefreshCw className={`h-3 w-3 ${isLoading ? 'animate-spin' : ''}`} />
-                      {strategy === 'user' ? 'Usar Câmera Traseira' : 'Usar Câmera Frontal'}
-                  </Button>
               </div>
           </div>
         )}
