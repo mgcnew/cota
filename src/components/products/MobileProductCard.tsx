@@ -6,14 +6,17 @@ import { LazyImage } from "@/components/responsive/LazyImage";
 import { 
   Package, Edit, Trash2,
   ClipboardList, TrendingUp, TrendingDown, Minus, Star,
-  ChevronDown, ChevronUp, History
+  ChevronDown, ChevronUp, History, Eye, EyeOff
 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { Product } from "@/hooks/useProducts";
+import { cn } from "@/lib/utils";
 
 interface MobileProductCardProps {
   product: Product;
+  isHidden: boolean;
+  onToggleVisibility: (id: string) => void;
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   onHistory?: (product: Product) => void;
@@ -30,6 +33,8 @@ interface MobileProductCardProps {
  */
 export const MobileProductCard = memo<MobileProductCardProps>(({
   product,
+  isHidden,
+  onToggleVisibility,
   onEdit,
   onDelete,
   onHistory,
@@ -40,6 +45,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
   const handleEdit = useCallback(() => onEdit(product), [onEdit, product]);
   const handleDelete = useCallback(() => onDelete(product), [onDelete, product]);
   const handleHistory = useCallback(() => onHistory?.(product), [onHistory, product]);
+  const handleToggleVisibility = useCallback(() => onToggleVisibility(product.id), [onToggleVisibility, product.id]);
 
   const getProductStatus = (product: Product) => {
     if (product.quotesCount === 0) return "sem_cotacao";
@@ -59,7 +65,10 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
       open={isExpanded} 
       onOpenChange={setIsExpanded}
       style={style}
-      className="bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/30 overflow-hidden"
+      className={cn(
+        "bg-white dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700/30 overflow-hidden transition-all duration-300",
+        isHidden && "opacity-50 grayscale bg-gray-50 dark:bg-gray-900/50"
+      )}
     >
       <div className="p-2.5">
         {/* Header compacto */}
@@ -145,6 +154,19 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
         <div className="p-3 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30">
           
           <div className="grid grid-cols-2 gap-2 pt-3">
+            <Button
+              size="sm"
+              variant="outline"
+              className={cn(
+                "h-10 touch-target active:scale-95 transition-transform",
+                isHidden ? "text-brand border-brand/50 bg-brand/5" : ""
+              )}
+              onClick={handleToggleVisibility}
+            >
+              {isHidden ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+              {isHidden ? "Mostrar" : "Ocultar"}
+            </Button>
+
             {onHistory && (
               <Button 
                 size="sm" 
@@ -159,7 +181,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
             <Button 
               size="sm" 
               variant="outline" 
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
+              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform col-span-2 sm:col-span-1"
               onClick={handleDelete}
             >
               <Trash2 className="h-4 w-4 mr-2" />
@@ -173,6 +195,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
 }, (prevProps, nextProps) => {
   // Custom comparison for optimal re-render prevention
   return (
+    prevProps.isHidden === nextProps.isHidden &&
     prevProps.product.id === nextProps.product.id &&
     prevProps.product.name === nextProps.product.name &&
     prevProps.product.category === nextProps.product.category &&
