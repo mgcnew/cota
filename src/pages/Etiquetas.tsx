@@ -2,10 +2,8 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { designSystem } from "@/styles/design-system";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { ScannerModal } from "@/components/etiquetas/ScannerModal";
+import { QuickRegistrationModal } from "@/components/etiquetas/QuickRegistrationModal";
 import { BarcodeGenerator } from "@/components/etiquetas/BarcodeGenerator";
 import { Scan, Printer, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
@@ -46,13 +44,10 @@ export default function Etiquetas() {
     return new Set();
   });
 
-  const [name, setName] = useState("");
-  const [barcode, setBarcode] = useState("");
-  const [scannerOpen, setScannerOpen] = useState(false);
+  const [quickModalOpen, setQuickModalOpen] = useState(false);
   const [previewBarcode, setPreviewBarcode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const printRef = useRef<HTMLDivElement>(null);
-  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch products
   useEffect(() => {
@@ -116,24 +111,19 @@ export default function Etiquetas() {
     localStorage.setItem('etiquetas_hidden', JSON.stringify(Array.from(hiddenLabelIds)));
   }, [hiddenLabelIds]);
 
-  const handleAddProduct = async () => {
-    if (!name || !barcode || !user) return;
+  const handleAddProduct = async (productName: string, productBarcode: string) => {
+    if (!productName || !productBarcode || !user) return false;
     
     try {
         const { error } = await supabase.from('product_labels').insert({
-            name,
-            barcode,
+            name: productName,
+            barcode: productBarcode,
             user_id: user.id
         });
 
         if (error) throw error;
-
-        setName("");
-        setBarcode("");
-        toast({
-            title: "Sucesso",
-            description: "Etiqueta adicionada.",
-        });
+        
+        return true;
     } catch (error) {
         console.error('Error adding label:', error);
         toast({
@@ -141,6 +131,7 @@ export default function Etiquetas() {
             description: "Erro ao adicionar etiqueta.",
             variant: "destructive",
         });
+        return false;
     }
   };
 
@@ -182,10 +173,6 @@ export default function Etiquetas() {
       }
       return next;
     });
-  };
-
-  const handleScan = (result: string) => {
-    setBarcode(result);
   };
 
   // Filter and Sort Logic
@@ -268,52 +255,19 @@ export default function Etiquetas() {
              <h1 className="text-2xl font-bold">Gerador de Etiquetas</h1>
              <p className="text-sm text-muted-foreground">Crie e imprima etiquetas personalizadas</p>
            </div>
-           <Button onClick={handleExportPDF} disabled={productsToExport.length === 0}>
-             <Printer className="mr-2 h-4 w-4" /> 
-             Exportar PDF ({productsToExport.length})
-           </Button>
+           <div className="flex gap-2">
+            <Button onClick={handleExportPDF} variant="outline" disabled={productsToExport.length === 0}>
+                <Printer className="mr-2 h-4 w-4" /> 
+                Exportar PDF ({productsToExport.length})
+            </Button>
+            <Button onClick={() => setQuickModalOpen(true)} className={cn(designSystem.components.button.primary)}>
+                <Scan className="mr-2 h-4 w-4" /> 
+                Novo Produto
+            </Button>
+           </div>
         </div>
 
-        <Card className="mb-6">
-          <CardContent className="pt-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome do Produto</Label>
-                <Input 
-                  ref={nameInputRef}
-                  id="name" 
-                  value={name} 
-                  onChange={(e) => setName(e.target.value)} 
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        handleAddProduct();
-                    }
-                  }}
-                  placeholder="Ex: Coca Cola 2L"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="barcode">Código de Barras</Label>
-                <div className="flex gap-2">
-                  <Input 
-                    id="barcode" 
-                    value={barcode} 
-                    onChange={(e) => setBarcode(e.target.value)} 
-                    placeholder="Ex: 789..."
-                  />
-                  {isMobile && (
-                    <Button variant="outline" onClick={() => setScannerOpen(true)}>
-                      <Scan className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
-            <Button className="w-full" onClick={handleAddProduct} disabled={!name || !barcode || !user}>
-              Adicionar à Lista
-            </Button>
-          </CardContent>
-        </Card>
+        {/* Removed Manual Input Card in favor of Modal Workflow */}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
             <TabsList className="bg-muted/50 p-1 w-full sm:w-auto flex justify-start overflow-x-auto">
@@ -410,10 +364,10 @@ export default function Etiquetas() {
             </div>
         </div>
 
-        <ScannerModal 
-          open={scannerOpen} 
-          onOpenChange={setScannerOpen} 
-          onScan={handleScan} 
+        <QuickRegistrationModal
+            open={quickModalOpen}
+            onOpenChange={setQuickModalOpen}
+            onSave={handleAddProduct}
         />
 
         <ResponsiveModal
