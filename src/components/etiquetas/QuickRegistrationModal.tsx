@@ -36,6 +36,8 @@ export function QuickRegistrationModal({
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
+  const [isSearching, setIsSearching] = useState(false);
+
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
@@ -43,10 +45,37 @@ export function QuickRegistrationModal({
       setBarcode("");
       setProductName("");
       setCameraError(null);
+      setIsSearching(false);
     } else {
       stopScanner();
     }
   }, [open]);
+
+  const fetchProductInfo = async (code: string) => {
+    setIsSearching(true);
+    try {
+      // Open Food Facts API (Global)
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+      const data = await response.json();
+
+      if (data.status === 1 && data.product) {
+         // Try to get the Portuguese name first, then generic name
+         const name = data.product.product_name_pt || data.product.product_name || "";
+         if (name) {
+           setProductName(name);
+           toast({ 
+            title: "Produto encontrado!", 
+            description: name,
+            className: "bg-blue-50 border-blue-200 text-blue-800"
+           });
+         }
+      }
+    } catch (e) {
+      console.error("Error fetching product", e);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   // Handle Scanner Lifecycle
   useEffect(() => {
