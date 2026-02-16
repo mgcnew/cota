@@ -198,7 +198,7 @@ function CotacoesTab() {
 
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn("w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
+            <SelectTrigger className={cn("w-[130px] sm:w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -221,7 +221,7 @@ function CotacoesTab() {
           </Button>
           <Button
             onClick={() => setAddDialogOpen(true)}
-            className={designSystem.components.button.primary}
+            className={cn(designSystem.components.button.primary, "shrink-0")}
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Nova Cotação
