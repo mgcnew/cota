@@ -197,6 +197,7 @@ function CotacoesTab() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mobile: reduced width to fit "Nova Cotação" button */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className={cn("w-[130px] sm:w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
               <SelectValue placeholder="Status" />
