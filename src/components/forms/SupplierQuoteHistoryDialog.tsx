@@ -369,9 +369,9 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className={cn(designSystem.components.modal.content, "h-[90vh] flex flex-col p-0 gap-0 overflow-hidden")}>
-          <div className={designSystem.components.modal.header}>
-            <div className="flex items-center gap-3">
+        <DrawerContent className={cn("h-[90vh] flex flex-col p-0 gap-0 overflow-hidden")}>
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center gap-3">
               <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>
                 <Package className={cn("h-4 w-4", designSystem.colors.text.primary)} />
               </div>
@@ -385,7 +385,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
               </div>
             </div>
           </div>
-          <div className="flex flex-col flex-1 overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden bg-background">
             {modalContent}
           </div>
         </DrawerContent>
