@@ -52,6 +52,7 @@ export default function Etiquetas() {
   const [previewBarcode, setPreviewBarcode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
   const printRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch products
   useEffect(() => {
@@ -279,9 +280,15 @@ export default function Etiquetas() {
               <div className="space-y-2">
                 <Label htmlFor="name">Nome do Produto</Label>
                 <Input 
+                  ref={nameInputRef}
                   id="name" 
                   value={name} 
                   onChange={(e) => setName(e.target.value)} 
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        handleAddProduct();
+                    }
+                  }}
                   placeholder="Ex: Coca Cola 2L"
                 />
               </div>
