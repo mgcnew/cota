@@ -13,7 +13,7 @@ export const designSystem = {
     // ============================================
     primitives: {
         brand: BRAND_COLOR,
-        brandHover: "#72cc00",
+        brandHover: "#2563EB",
         white: "#FFFFFF",
         black: "#09090b", // Zinc 950
         zinc: {
@@ -37,8 +37,8 @@ export const designSystem = {
     colors: {
         brand: {
             primary: BRAND_COLOR,
-            hover: "#72cc00",
-            light: "rgba(131,229,9,0.1)"
+            hover: "#2563EB",
+            light: "rgba(59, 130, 246, 0.1)"
         },
         text: {
             primary: "text-[#1C1E21] dark:text-zinc-50", // Azul Marinho Escuro no modo claro

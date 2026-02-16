@@ -35,11 +35,11 @@
     --card: 0 0% 100%; /* #FFFFFF */
     --card-foreground: 216 8.2% 12%;
     
-    /* Cor Primária: Verde Neon (#83E509) */
-    --primary: 88 92% 47%; 
-    --primary-foreground: 240 10% 3.9%; /* Texto escuro no verde neon para contraste */
-    --primary-light: 88 92% 57%;
-    --primary-lighter: 88 92% 77%;
+    /* Cor Primária: Azul Principal (#3B82F6) */
+    --primary: 217 91% 60%; 
+    --primary-foreground: 0 0% 100%; /* Texto branco no azul para contraste */
+    --primary-light: 217 91% 75%;
+    --primary-lighter: 217 91% 90%;
     
     /* Secondary Colors */
     --secondary: 240 4.8% 95.9%;
@@ -114,7 +114,7 @@
     /* Bordas */
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 88 92% 47%;
+    --ring: 217 91% 60%;
     
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
