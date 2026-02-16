@@ -258,7 +258,7 @@ export function QuickRegistrationModal({
               </div>
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Código Detectado</p>
-                <p className="text-lg font-mono font-bold tracking-widest text-foreground">{barcode}</p>
+                <p className="text-2xl font-mono font-bold tracking-widest text-foreground">{barcode}</p>
               </div>
               <Button size="icon" variant="ghost" onClick={handleRescan} title="Escanear novamente">
                 <RotateCcw className="h-4 w-4" />
