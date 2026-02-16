@@ -369,7 +369,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent className={cn("h-[90vh] flex flex-col p-0 gap-0 overflow-hidden")}>
+        <DrawerContent className={cn("mt-0 h-[90vh] flex flex-col p-0 gap-0 overflow-hidden")}>
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div className="flex items-center gap-3">
               <div className={cn("p-2 rounded-lg border", designSystem.colors.surface.card, designSystem.colors.border.subtle)}>

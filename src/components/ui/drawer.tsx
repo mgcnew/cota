@@ -11,8 +11,6 @@ const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps
   return (
     <DrawerPrimitive.Root 
       shouldScaleBackground={shouldScaleBackground}
-      // No mobile, usar modal=false para não bloquear scroll do body
-      modal={!isMobile}
       {...props} 
     />
   );
