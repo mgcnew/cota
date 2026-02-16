@@ -63,7 +63,7 @@
     /* Interactive Elements */
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 88 92% 47%;
+    --ring: 217 91% 60%;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -95,9 +95,9 @@
     --popover: 240 5% 15%; 
     --popover-foreground: 0 0% 98%;
     
-    /* Cor Primária - Verde Neon (Mantém mas levemente mais saturado para tela) */
-    --primary: 88 92% 47%;
-    --primary-foreground: 240 10% 3.9%;
+    /* Cor Primária - Azul Principal */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
     
     /* Secondary */
     --secondary: 240 3.7% 15.9%;

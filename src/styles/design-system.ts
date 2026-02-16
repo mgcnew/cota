@@ -5,7 +5,7 @@
  * Abrangência: TODO o sistema (Sidebar, Modais, Cards, Tabelas, etc.)
  */
 
-const BRAND_COLOR = "#83E509"; // Neon Green Principal
+const BRAND_COLOR = "#3B82F6"; // Azul Principal
 
 export const designSystem = {
     // ============================================
