@@ -55,12 +55,24 @@ export function QuickRegistrationModal({
     setIsSearching(true);
     try {
       // Open Food Facts API (Global)
-      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
-      const data = await response.json();
+      // Try multiple regions if needed
+      let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+      let data = await response.json();
+
+      // If not found in world, try Brazil specific endpoint
+      if (data.status === 0) {
+         response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${code}.json`);
+         data = await response.json();
+      }
 
       if (data.status === 1 && data.product) {
-         // Try to get the Portuguese name first, then generic name
-         const name = data.product.product_name_pt || data.product.product_name || "";
+         // Try to get the Portuguese name first, then generic name, then product name
+         const name = data.product.product_name_pt || 
+                      data.product.product_name || 
+                      data.product.generic_name_pt || 
+                      data.product.generic_name || 
+                      "";
+         
          if (name) {
            setProductName(name);
            toast({ 
@@ -177,6 +189,7 @@ export function QuickRegistrationModal({
 
     await stopScanner();
     setBarcode(decodedText);
+    fetchProductInfo(decodedText);
     setStep('form');
     
     // Auto-focus name input
