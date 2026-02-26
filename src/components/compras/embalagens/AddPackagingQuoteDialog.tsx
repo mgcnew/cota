@@ -48,8 +48,7 @@ interface Props {
 
 const STEPS = [
   { id: "embalagens", title: "Embalagens", icon: Package },
-  { id: "fornecedores", title: "Fornecedores", icon: Building2 },
-  { id: "periodo", title: "Período", icon: Clock },
+  { id: "periodo_fornecedores", title: "Período & Fornecedores", icon: Clock },
   { id: "confirmar", title: "Confirmar", icon: FileText },
 ];
 
@@ -79,7 +78,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     if (open) {
       setTimeout(() => {
         if (activeStep === "embalagens") itemSearchRef.current?.focus();
-        else if (activeStep === "fornecedores") supplierSearchRef.current?.focus();
+        else if (activeStep === "periodo_fornecedores") supplierSearchRef.current?.focus();
       }, 100);
     }
   }, [activeStep, open]);
@@ -125,8 +124,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
   const canProceed = () => {
     switch (activeStep) {
       case "embalagens": return selectedItems.length > 0;
-      case "fornecedores": return selectedSuppliers.length > 0;
-      case "periodo": return dataInicio && dataFim && dataFim > dataInicio;
+      case "periodo_fornecedores": return selectedSuppliers.length > 0 && dataInicio && dataFim && dataFim > dataInicio;
       default: return true;
     }
   };
@@ -453,151 +451,164 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
           </div>
         )}
 
-        {/* Step: Fornecedores */}
-        {activeStep === "fornecedores" && (
+        {/* Step: Período & Fornecedores */}
+        {activeStep === "periodo_fornecedores" && (
           <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 content-start min-h-full">
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-hidden">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                  <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
-                    <Building2 className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                    <span className="truncate">Selecionar Fornecedores</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-                    <Input ref={supplierSearchRef} placeholder="Buscar fornecedor..." value={searchSupplier}
-                      onChange={(e) => setSearchSupplier(e.target.value)}
-                      onFocus={handleInputFocus}
-                      className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" />
-                  </div>
-                  {renderList(
-                    filteredSuppliers,
-                    (supplier) => (
-                      <button key={supplier.id} onClick={() => toggleSupplier(supplier.id)}
-                        className={cn(
-                          "w-full p-2 rounded-md text-left transition-all flex items-center gap-2 group",
-                          selectedSuppliers.includes(supplier.id)
-                            ? "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                            : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-transparent"
-                        )}>
-                        <div className={cn("w-6 h-6 rounded flex items-center justify-center flex-shrink-0 transition-colors",
-                          selectedSuppliers.includes(supplier.id) ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "bg-gray-200 dark:bg-gray-700 text-gray-500")}>
-                          {selectedSuppliers.includes(supplier.id) ? <Check className="h-3 w-3" /> : <Building2 className="h-3 w-3" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className={cn("text-xs font-bold truncate", selectedSuppliers.includes(supplier.id) ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>{supplier.name}</p>
-                          {supplier.phone && <span className="text-[10px] text-gray-400 font-medium">{supplier.phone}</span>}
-                        </div>
-                      </button>
-                    ),
-                    "Nenhum fornecedor encontrado",
-                    Building2
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden h-fit">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                  <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
-                    <span className="flex items-center gap-2 text-gray-900 dark:text-white">
-                      <Building2 className="h-4 w-4 text-gray-500" />
-                      Selecionados
-                    </span>
-                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-bold">
-                      {selectedSuppliers.length}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  {renderList(
-                    selectedSuppliersData,
-                    (supplier) => (
-                      <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-lg shadow-sm">
-                        <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                          <Building2 className="h-3 w-3 text-gray-500" />
-                        </div>
-                        <span className="flex-1 text-xs font-bold text-gray-700 dark:text-gray-300 truncate">{supplier.name}</span>
-                        <Button variant="ghost" size="sm" onClick={() => toggleSupplier(supplier.id)}
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
-                          <X className="h-3 w-3" />
-                        </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full content-start">
+              {/* Left Column: Period & Selected Suppliers */}
+              <div className="lg:col-span-5 space-y-6">
+                {/* Period Card */}
+                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden">
+                  <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
+                      <Clock className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                      <span>Período da Cotação</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6 space-y-5">
+                    <div className="grid grid-cols-1 gap-5">
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data de Início</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline" className="w-full justify-start text-left font-medium h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                              <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                              {format(dataInicio, "dd/MM/yyyy", { locale: ptBR })}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 border-gray-200 dark:border-gray-700" align="start">
+                            <Calendar mode="single" selected={dataInicio}
+                              onSelect={(date) => date && setDataInicio(date)} locale={ptBR} />
+                          </PopoverContent>
+                        </Popover>
                       </div>
-                    ),
-                    "Nenhum fornecedor selecionado",
-                    Building2
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        )}
 
-        {/* Step: Período */}
-        {activeStep === "periodo" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar flex items-center justify-center">
-            <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm w-full max-w-xl rounded-xl overflow-hidden">
-              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-                <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
-                  <Clock className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                  <span>Período da Cotação</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6 space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data de Início</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left font-medium h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
-                          {format(dataInicio, "dd/MM/yyyy", { locale: ptBR })}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-gray-200 dark:border-gray-700" align="start">
-                        <Calendar mode="single" selected={dataInicio}
-                          onSelect={(date) => date && setDataInicio(date)} locale={ptBR} />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data de Fim</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button variant="outline"
+                              className={cn("w-full justify-start text-left font-medium h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800",
+                                dataFim <= dataInicio && "border-red-300 text-red-600 bg-red-50")}>
+                              <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+                              {format(dataFim, "dd/MM/yyyy", { locale: ptBR })}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 border-gray-200 dark:border-gray-700" align="start">
+                            <Calendar mode="single" selected={dataFim}
+                              onSelect={(date) => date && setDataFim(date)} locale={ptBR}
+                              disabled={(date) => date <= dataInicio} />
+                          </PopoverContent>
+                        </Popover>
+                        {dataFim <= dataInicio && (
+                          <p className="text-[10px] font-bold text-red-500 mt-1">Data de fim deve ser posterior à data de início</p>
+                        )}
+                      </div>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Data de Fim</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline"
-                          className={cn("w-full justify-start text-left font-medium h-10 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800",
-                            dataFim <= dataInicio && "border-red-300 text-red-600 bg-red-50")}>
-                          <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
-                          {format(dataFim, "dd/MM/yyyy", { locale: ptBR })}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 border-gray-200 dark:border-gray-700" align="start">
-                        <Calendar mode="single" selected={dataFim}
-                          onSelect={(date) => date && setDataFim(date)} locale={ptBR}
-                          disabled={(date) => date <= dataInicio} />
-                      </PopoverContent>
-                    </Popover>
-                    {dataFim <= dataInicio && (
-                      <p className="text-[10px] font-bold text-red-500 mt-1">Data de fim deve ser posterior à data de início</p>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Observações (opcional)</Label>
+                      <Textarea 
+                        placeholder="Observações sobre a cotação..." 
+                        value={observacoes}
+                        onChange={(e) => setObservacoes(e.target.value)} 
+                        onFocus={handleInputFocus}
+                        rows={3} 
+                        className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm focus:ring-gray-400/20" 
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Selected Suppliers Card */}
+                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm rounded-xl overflow-hidden h-fit">
+                  <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+                    <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
+                      <span className="flex items-center gap-2 text-gray-900 dark:text-white">
+                        <Building2 className="h-4 w-4 text-gray-500" />
+                        Selecionados
+                      </span>
+                      <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-bold">
+                        {selectedSuppliers.length}
+                      </Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    {renderList(
+                      selectedSuppliersData,
+                      (supplier) => (
+                        <div key={supplier.id} className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/50 rounded-lg shadow-sm">
+                          <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                            <Building2 className="h-3 w-3 text-gray-500" />
+                          </div>
+                          <span className="flex-1 text-xs font-bold text-gray-700 dark:text-gray-300 truncate">{supplier.name}</span>
+                          <Button variant="ghost" size="sm" onClick={() => toggleSupplier(supplier.id)}
+                            className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ),
+                      "Nenhum fornecedor selecionado",
+                      Building2
                     )}
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Observações (opcional)</Label>
-                  <Textarea 
-                    placeholder="Observações sobre a cotação..." 
-                    value={observacoes}
-                    onChange={(e) => setObservacoes(e.target.value)} 
-                    onFocus={handleInputFocus}
-                    rows={4} 
-                    className="resize-none bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm focus:ring-gray-400/20" 
-                  />
-                </div>
-              </CardContent>
-            </Card>
+              {/* Right Column: Supplier Search */}
+              <div className="lg:col-span-7">
+                <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-full rounded-xl overflow-hidden flex flex-col">
+                  <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
+                      <Search className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                      <span className="truncate">Selecionar Fornecedores</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-4 flex-1 flex flex-col min-h-0">
+                    <div className="relative mb-3 flex-shrink-0">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                      <Input ref={supplierSearchRef} placeholder="Buscar fornecedor..." value={searchSupplier}
+                        onChange={(e) => setSearchSupplier(e.target.value)}
+                        onFocus={handleInputFocus}
+                        className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" />
+                    </div>
+                    <div className="flex-1 overflow-hidden">
+                       {filteredSuppliers.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center py-8 text-gray-400 h-full">
+                            <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-full mb-2">
+                              <Building2 className="h-6 w-6 opacity-50" />
+                            </div>
+                            <p className="text-xs font-medium text-center">Nenhum fornecedor encontrado</p>
+                          </div>
+                       ) : (
+                          <ScrollArea className="h-full border border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50 dark:bg-gray-950">
+                            <div className="p-1.5 space-y-1">
+                              {filteredSuppliers.map(supplier => (
+                                <button key={supplier.id} onClick={() => toggleSupplier(supplier.id)}
+                                  className={cn(
+                                    "w-full p-2 rounded-md text-left transition-all flex items-center gap-2 group",
+                                    selectedSuppliers.includes(supplier.id)
+                                      ? "bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
+                                      : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border border-transparent"
+                                  )}>
+                                  <div className={cn("w-6 h-6 rounded flex items-center justify-center flex-shrink-0 transition-colors",
+                                    selectedSuppliers.includes(supplier.id) ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "bg-gray-200 dark:bg-gray-700 text-gray-500")}>
+                                    {selectedSuppliers.includes(supplier.id) ? <Check className="h-3 w-3" /> : <Building2 className="h-3 w-3" />}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={cn("text-xs font-bold truncate", selectedSuppliers.includes(supplier.id) ? "text-gray-900 dark:text-white" : "text-gray-600 dark:text-gray-400")}>{supplier.name}</p>
+                                    {supplier.phone && <span className="text-[10px] text-gray-400 font-medium">{supplier.phone}</span>}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                       )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
         )}
 
