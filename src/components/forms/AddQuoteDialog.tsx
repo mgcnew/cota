@@ -66,16 +66,16 @@ import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { 
-  Calendar as CalendarIcon, 
-  Plus, 
-  X, 
-  Check, 
-  ChevronsUpDown, 
-  Trash2, 
-  Package, 
-  Building2, 
-  Clock, 
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  X,
+  Check,
+  ChevronsUpDown,
+  Trash2,
+  Package,
+  Building2,
+  Clock,
   FileText,
   ChevronRight,
   ChevronLeft,
@@ -176,17 +176,17 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [isSubmitting, setIsSubmitting] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
-  
+
   // Estados para o novo formulário de produto único
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
   const [lastUsedUnit, setLastUsedUnit] = useState("kg");
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
   const [focusedSupplierId, setFocusedSupplierId] = useState<string | null>(null);
-  
+
   // Estados para agendamento
   const [isScheduled, setIsScheduled] = useState(false);
-  
+
   // Refs para auto-foco
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productSearchRef = useRef<HTMLInputElement>(null);
@@ -219,26 +219,26 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   const handleAddNewProduct = () => {
     if (selectedProduct && newProductQuantity && newProductUnit) {
-      append({ 
-        produtoId: selectedProduct.id, 
-        produtoNome: selectedProduct.name, 
-        quantidade: newProductQuantity, 
-        unidade: newProductUnit 
+      append({
+        produtoId: selectedProduct.id,
+        produtoNome: selectedProduct.name,
+        quantidade: newProductQuantity,
+        unidade: newProductUnit
       });
-      
+
       // Salvar última unidade usada
       setLastUsedUnit(newProductUnit);
-      
+
       // Limpar o formulário após adicionar
       setSelectedProduct(null);
       setNewProductQuantity("");
       setProductSearch("");
-      
+
       // Auto-foco no campo de busca de produto para continuar adicionando
       setTimeout(() => {
         productSearchRef.current?.focus();
       }, 50);
-      
+
       toast({
         title: "✅ Produto adicionado",
         description: `${selectedProduct.name} foi adicionado à cotação`,
@@ -246,7 +246,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       });
     }
   };
-  
+
   // Handler para Enter key no campo de quantidade
   const handleQuantityKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -261,7 +261,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       // Tab vai para o select de unidade naturalmente
     }
   };
-  
+
   // Handler para busca de produtos e navegação
   const handleProductKeyDown = (e: React.KeyboardEvent) => {
     if (showProductSuggestions && products.length > 0) {
@@ -299,7 +299,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       handleAddNewProduct();
     }
   };
-  
+
   // Handler para atalhos globais do modal
   const handleModalKeyDown = (e: React.KeyboardEvent) => {
     // Ctrl+Enter para criar cotação
@@ -307,7 +307,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       e.preventDefault();
       form.handleSubmit((data) => onSubmit(data, false))();
     }
-    
+
     // Alt+Setas para navegar entre abas
     if (e.altKey && e.key === 'ArrowRight') {
       e.preventDefault();
@@ -317,7 +317,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       e.preventDefault();
       handlePrevious();
     }
-    
+
     // Números 1-5 com Alt para ir direto para a aba
     if (e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
       e.preventDefault();
@@ -352,7 +352,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setProducts([]);
     }
   }, [open]);
-  
+
   // Busca dinâmica de produtos quando o termo de busca muda
   useEffect(() => {
     if (debouncedProductSearch.length >= 2) {
@@ -361,7 +361,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setProducts([]);
     }
   }, [debouncedProductSearch]);
-  
+
   // Auto-foco quando produto é selecionado
   useEffect(() => {
     if (selectedProduct && quantityInputRef.current) {
@@ -412,7 +412,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         toast({
           title: "Erro",
@@ -440,7 +440,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         hoje.setHours(0, 0, 0, 0);
         const planejada = new Date(data.dataPlanejada);
         planejada.setHours(0, 0, 0, 0);
-        
+
         if (planejada > hoje) {
           quoteStatus = 'planejada';
         }
@@ -523,12 +523,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           : "A cotação foi adicionada ao sistema.",
         className: "border-green-200 bg-green-50",
       });
-      
+
       form.reset();
       setSelectedSuppliers([]);
       setSupplierSearch("");
       setActiveTab("produtos");
-      
+
       if (!keepOpen) {
         setOpen(false);
       } else {
@@ -563,63 +563,62 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     const newSuppliers = selectedSuppliers.filter(s => s.id !== supplierId);
     setSelectedSuppliers(newSuppliers);
     form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
-    
+
     if (focusedSupplierId === supplierId) {
-        setFocusedSupplierId(null);
+      setFocusedSupplierId(null);
     }
   };
-  
+
   const handleSelectAllSuppliers = () => {
     if (filteredSuppliers.length === 0) return;
 
     // Check if all currently visible filtered suppliers are selected
-    const allVisibleSelected = filteredSuppliers.every(s => 
-        selectedSuppliers.some(selected => selected.id === s.id)
+    const allVisibleSelected = filteredSuppliers.every(s =>
+      selectedSuppliers.some(selected => selected.id === s.id)
     );
 
     if (allVisibleSelected) {
-        // Remove only the visible/filtered suppliers from selection
-        const newSuppliers = selectedSuppliers.filter(s => 
-            !filteredSuppliers.some(f => f.id === s.id)
-        );
-        setSelectedSuppliers(newSuppliers);
-        form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+      // Remove only the visible/filtered suppliers from selection
+      const newSuppliers = selectedSuppliers.filter(s =>
+        !filteredSuppliers.some(f => f.id === s.id)
+      );
+      setSelectedSuppliers(newSuppliers);
+      form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
     } else {
-        // Add visible/filtered suppliers to selection (avoid duplicates)
-        const newSuppliers = [...selectedSuppliers];
-        filteredSuppliers.forEach(s => {
-            if (!newSuppliers.some(selected => selected.id === s.id)) {
-                newSuppliers.push(s);
-            }
-        });
-        setSelectedSuppliers(newSuppliers);
-        form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
-        
-        toast({
-            title: "✅ Fornecedores selecionados",
-            description: `${filteredSuppliers.length} fornecedores adicionados da busca`,
-            duration: 1500,
-        });
+      // Add visible/filtered suppliers to selection (avoid duplicates)
+      const newSuppliers = [...selectedSuppliers];
+      filteredSuppliers.forEach(s => {
+        if (!newSuppliers.some(selected => selected.id === s.id)) {
+          newSuppliers.push(s);
+        }
+      });
+      setSelectedSuppliers(newSuppliers);
+      form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+
+      toast({
+        title: "✅ Fornecedores selecionados",
+        description: `${filteredSuppliers.length} fornecedores adicionados da busca`,
+        duration: 1500,
+      });
     }
   };
-  
+
   const handleClearAllSuppliers = () => {
     setSelectedSuppliers([]);
     form.setValue("fornecedoresIds", []);
   };
 
   // Filter suppliers only if search has content
-  const filteredSuppliers = supplierSearch.length > 0 
+  const filteredSuppliers = supplierSearch.length > 0
     ? suppliers.filter(supplier =>
-        supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
-        (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase()))
-      )
+      supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
+      (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase()))
+    )
     : [];
 
   const tabs = [
     { id: "produtos", label: "Produtos", icon: Package },
-    { id: "periodo", label: "Período & Agendamento", icon: Clock },
-    { id: "fornecedores", label: "Fornecedores", icon: Building2 },
+    { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Clock },
     { id: "detalhes", label: "Detalhes", icon: FileText }
   ];
 
@@ -631,11 +630,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     switch (activeTab) {
       case "produtos":
         return formValues.produtos.every(p => p.produtoId && p.quantidade && p.unidade);
-      case "periodo":
-        if (isScheduled && !formValues.dataPlanejada) return false;
-        return formValues.dataInicio && formValues.dataFim;
-      case "fornecedores":
-        return selectedSuppliers.length > 0;
+      case "periodo_fornecedores": {
+        const hasPeriod = isScheduled
+          ? !!formValues.dataPlanejada
+          : !!formValues.dataInicio && !!formValues.dataFim;
+        return hasPeriod && selectedSuppliers.length > 0;
+      }
       case "detalhes":
         return true;
       default:
@@ -665,59 +665,40 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
-      {/* Header - Design System */}
-      <div className={ds.components.modal.header}>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand flex items-center justify-center shadow-lg shadow-brand/20">
-            <Plus className="h-5 w-5 text-zinc-950 stroke-[2.5]" />
-          </div>
+      {/* Minimal Header & Stepper */}
+      <div className="px-6 md:px-8 pt-6 pb-2 flex flex-col gap-5 flex-shrink-0 bg-transparent">
+        <div className="flex items-start justify-between">
           <div>
-            <h2 className={ds.components.modal.title}>
+            <h2 className={cn(ds.typography.size["xl"], ds.typography.weight.semibold, ds.colors.text.primary, "tracking-tight")}>
               Nova Cotação
             </h2>
-            <p className={cn(ds.colors.text.secondary, "mt-1")}>
-              Passo {currentTabIndex + 1} de {tabs.length}
+            <p className={cn(ds.colors.text.secondary, "mt-1.5", ds.typography.size.sm)}>
+              Passo {currentTabIndex + 1}: <span className={ds.typography.weight.medium}>{tabs[currentTabIndex]?.label}</span>
             </p>
           </div>
+          <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-8 w-8 rounded-full")}>
+            <X className="h-4 w-4" />
+          </Button>
         </div>
-        
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => setOpen(false)} 
-          className={cn(ds.components.button.ghost, ds.components.button.size.icon)}
-        >
-          <X className="h-5 w-5" />
-          <span className="sr-only">Fechar</span>
-        </Button>
-      </div>
 
-      {/* Tabs Navigation - Design System Clean Style */}
-      <div className="flex-shrink-0 px-6 border-b border-zinc-100 dark:border-zinc-800 bg-transparent">
-        <div className={ds.components.tabs.clean.list}>
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            const TabIcon = tab.icon;
-            
+        <div className="flex items-center gap-2">
+          {tabs.map((tab, idx) => {
+            const isCompleted = currentTabIndex > idx;
+            const isActive = currentTabIndex === idx;
             return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  ds.components.tabs.clean.trigger,
-                  "flex items-center gap-2",
-                  isActive && "data-[state=active]"
-                )}
-                data-state={isActive ? "active" : "inactive"}
-              >
-                <TabIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
+              <div key={tab.id} className="flex-1 flex flex-col gap-2">
+                <div
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300",
+                    isCompleted ? "bg-brand" : isActive ? "bg-brand/60" : "bg-zinc-100 dark:bg-zinc-800/50"
+                  )}
+                />
+              </div>
             );
           })}
         </div>
       </div>
-      
+
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -734,325 +715,426 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 <AnimatedTabContent
                   value={activeTab}
                   activeTab={activeTab}
-                    className="h-full"
-                  >
-                      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
-                        {/* Produtos Tab */}
-                        <TabsContent value="produtos" className="h-full m-0">
-                          <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
-                              {/* Formulário de Adição - Lado Esquerdo */}
-                              <Card className={ds.components.card.root}>
-                                <CardHeader className={ds.components.card.header}>
-                                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                    <Plus className="h-5 w-5 text-brand flex-shrink-0" />
-                                    <span className="truncate">Adicionar Produto</span>
-                                  </CardTitle>
-                                </CardHeader>
-                                 <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                                  {/* Seletor de Produto com Autocomplete Dinâmico */}
-                                  <div className={ds.components.input.group}>
-                                    <label className={ds.components.input.label}>Produto *</label>
-                                    <div className="relative group">
-                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-                                      <Input
-                                        ref={productSearchRef}
-                                        placeholder="Digite o nome do produto..."
-                                        value={selectedProduct ? selectedProduct.name : productSearch}
-                                        onChange={(e) => { 
-                                          setProductSearch(e.target.value); 
-                                          setSelectedProduct(null); 
-                                          setShowProductSuggestions(true);
-                                        }}
-                                        onFocus={(e) => {
-                                            setShowProductSuggestions(true);
-                                            handleInputFocus(e);
-                                        }}
-                                        onBlur={() => {
-                                          // Timeout para permitir o clique nas sugestões
-                                          setTimeout(() => setShowProductSuggestions(false), 200);
-                                        }}
-                                        onKeyDown={handleProductKeyDown}
-                                        className={cn(ds.components.input.root, "pl-10")}
-                                        tabIndex={0}
-                                      />
-                                      
-                                      {/* Lista de Sugestões Autocomplete */}
-                                      {showProductSuggestions && products.length > 0 && !selectedProduct && (
-                                        <div 
-                                          ref={productListRef}
-                                          className={cn(
-                                            "absolute z-[100] w-full mt-2 rounded-2xl shadow-xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar",
-                                            ds.colors.surface.card,
-                                            ds.colors.border.default,
-                                            "border"
-                                          )}
-                                        >
-                                          <div className="p-2 space-y-1">
-                                            {products.map((product, index) => (
-                                              <button
-                                                key={product.id}
-                                                type="button"
-                                                onClick={() => {
-                                                  setSelectedProduct(product);
-                                                  setProductSearch("");
-                                                  setShowProductSuggestions(false);
-                                                  setHighlightedProductIndex(-1);
-                                                  setTimeout(() => {
-                                                    quantityInputRef.current?.focus();
-                                                    quantityInputRef.current?.select();
-                                                  }, 50);
-                                                }}
-                                                onMouseEnter={() => setHighlightedProductIndex(index)}
-                                                className={cn(
-                                                  "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
-                                                  (highlightedProductIndex === index)
-                                                    ? "bg-brand/10 text-brand" 
-                                                    : cn(
-                                                        ds.colors.surface.hover,
-                                                        ds.colors.text.primary
-                                                      ),
-                                                )}
-                                              >
-                                                <div className={cn(
-                                                  "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
-                                                  highlightedProductIndex === index 
-                                                    ? "bg-brand/20 text-brand" 
-                                                    : cn(
-                                                        ds.colors.surface.section,
-                                                        ds.colors.text.secondary
-                                                      )
-                                                )}>
-                                                  <Package className="h-4 w-4" />
-                                                </div>
-                                                <div className="flex flex-col min-w-0">
-                                                  <span className="font-medium truncate">{product.name}</span>
-                                                </div>
-                                              </button>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-
-                                      {/* Indicador de Carregamento Dinâmico */}
-                                      {isSearchingProducts && (
-                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                          <Loader2 className="h-4 w-4 animate-spin text-brand" />
-                                        </div>
-                                      )}
-
-                                      {/* Estado Vazio/Nenhum Resultado */}
-                                      {showProductSuggestions && productSearch.length >= 2 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
-                                        <div className={cn(
-                                          "absolute z-[100] w-full mt-2 rounded-xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2",
-                                          ds.colors.surface.card,
-                                          ds.colors.border.default,
-                                          "border"
-                                        )}>
-                                          <Package className={cn("h-8 w-8 mx-auto mb-2 opacity-50", ds.colors.text.muted)} />
-                                          <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.muted, "uppercase tracking-widest")}>
-                                            Nenhum produto encontrado
-                                          </p>
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  {/* Quantidade e Unidade */}
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div className={ds.components.input.group}>
-                                      <label className={ds.components.input.label}>Quantidade *</label>
-                                      <Input 
-                                        ref={quantityInputRef}
-                                        placeholder="Ex: 500" 
-                                        type="number" 
-                                        value={newProductQuantity}
-                                        onChange={(e) => setNewProductQuantity(e.target.value)}
-                                        onFocus={handleInputFocus}
-                                        onKeyDown={handleQuantityKeyDown}
-                                        className={ds.components.input.root}
-                                        tabIndex={0}
-                                      />
-                                    </div>
-                                    <div className={ds.components.input.group}>
-                                      <label className={ds.components.input.label}>Unidade *</label>
-                                      <Select value={newProductUnit} onValueChange={(value) => {
-                                        setNewProductUnit(value);
-                                        // Auto-foco no botão adicionar após selecionar unidade
-                                        setTimeout(() => {
-                                          if (selectedProduct && newProductQuantity) {
-                                            addButtonRef.current?.focus();
-                                          }
-                                        }, 50);
-                                      }}>
-                                        <SelectTrigger 
-                                          ref={unitSelectRef}
-                                          className={ds.components.input.root}
-                                          tabIndex={0}
-                                        >
-                                          <SelectValue placeholder="Selecione" />
-                                        </SelectTrigger>
-                                        <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border")}>
-                                          <SelectItem value="kg">kg</SelectItem>
-                                          <SelectItem value="g">g</SelectItem>
-                                          <SelectItem value="un">un</SelectItem>
-                                          <SelectItem value="cx">cx</SelectItem>
-                                          <SelectItem value="pct">pct</SelectItem>
-                                          <SelectItem value="l">l</SelectItem>
-                                          <SelectItem value="ml">ml</SelectItem>
-                                        </SelectContent>
-                                      </Select>
-                                    </div>
-                                  </div>
-
-                                  {/* Botão Adicionar */}
-                                  <Button
-                                    ref={addButtonRef}
-                                    type="button"
-                                    onClick={handleAddNewProduct}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        handleAddNewProduct();
-                                      }
+                  className="h-full"
+                >
+                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+                    {/* Produtos Tab */}
+                    <TabsContent value="produtos" className="h-full m-0">
+                      <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
+                          {/* Formulário de Adição - Lado Esquerdo */}
+                          <div className="flex flex-col space-y-4">
+                            <div className="pb-1 border-b border-zinc-100 dark:border-zinc-800/50">
+                              <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
+                                <Plus className="h-5 w-5 text-brand flex-shrink-0" />
+                                <span className="truncate">Adicionar Produto</span>
+                              </h3>
+                            </div>
+                            <div className="space-y-4 pt-2">
+                              {/* Seletor de Produto com Autocomplete Dinâmico */}
+                              <div className={ds.components.input.group}>
+                                <label className={ds.components.input.label}>Produto *</label>
+                                <div className="relative group">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                                  <Input
+                                    ref={productSearchRef}
+                                    placeholder="Digite o nome do produto..."
+                                    value={selectedProduct ? selectedProduct.name : productSearch}
+                                    onChange={(e) => {
+                                      setProductSearch(e.target.value);
+                                      setSelectedProduct(null);
+                                      setShowProductSuggestions(true);
                                     }}
-                                    disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
-                                    className={cn(ds.components.button.primary, "w-full mt-2")}
+                                    onFocus={(e) => {
+                                      setShowProductSuggestions(true);
+                                      handleInputFocus(e);
+                                    }}
+                                    onBlur={() => {
+                                      // Timeout para permitir o clique nas sugestões
+                                      setTimeout(() => setShowProductSuggestions(false), 200);
+                                    }}
+                                    onKeyDown={handleProductKeyDown}
+                                    className={cn(ds.components.input.root, "pl-10")}
                                     tabIndex={0}
-                                  >
-                                    <Plus className="h-4 w-4 mr-2" />
-                                    Adicionar à Lista (Enter)
-                                  </Button>
-                                  
-                                  {/* Dica de atalhos */}
-                                  <div className={cn(
-                                    "text-center space-y-2 pt-4 mt-4 border-t",
-                                    ds.typography.size.xs,
-                                    ds.colors.text.secondary,
-                                    ds.colors.border.subtle
-                                  )}>
-                                    <p className={cn(ds.typography.weight.medium, "text-brand")}>⌨️ Atalhos de Teclado</p>
-                                    <div className="flex justify-center gap-4">
-                                        <span className="flex items-center gap-1.5">
-                                          <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Tab</kbd> 
-                                          <span>Navegar</span>
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                          <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Enter</kbd> 
-                                          <span>Adicionar</span>
-                                        </span>
-                                    </div>
-                                  </div>
-                                </CardContent>
-                              </Card>
+                                  />
 
-                              {/* Lista de Produtos - Lado Direito */}
-                              <Card className={ds.components.card.root}>
-                                <CardHeader className={ds.components.card.header}>
-                                  <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                    <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
-                                    <span className="truncate">Produtos Adicionados ({fields.length})</span>
-                                  </CardTitle>
-                                </CardHeader>
-                                <CardContent className={ds.components.card.body}>
-                                  {fields.length === 0 ? (
-                                    <div className={cn("text-center py-8", ds.colors.text.secondary)}>
-                                      <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                                      <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
-                                      <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
-                                    </div>
-                                  ) : (
-                                    <ScrollArea className="h-[400px] pr-2">
-                                      <div className="space-y-3">
-                                        {fields.map((field, index) => (
-                                          <Card key={field.id} className={cn(
-                                            ds.components.card.root,
-                                            "transition-all group hover:border-brand/30"
-                                          )}>
-                                            <div className="h-1 bg-zinc-200 dark:bg-zinc-700 group-hover:bg-brand transition-colors rounded-t-xl"></div>
-                                            <CardContent className="p-3">
-                                              <div className="flex items-start justify-between gap-2">
-                                                <div className="flex-1 min-w-0">
-                                                  <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, ds.typography.size.sm, "truncate")}>
-                                                    {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
-                                                  </h4>
-                                                  <div className={cn(ds.typography.size.sm, ds.colors.text.secondary, "mt-1 flex items-center gap-2")}>
-                                                    <span className={cn(
-                                                      ds.typography.fontFamily.mono,
-                                                      ds.colors.surface.card,
-                                                      ds.colors.border.default,
-                                                      "px-1.5 rounded border text-xs"
-                                                    )}>
-                                                        {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
-                                                    </span>
-                                                  </div>
-                                                </div>
-                                                <Button
-                                                  type="button"
-                                                  variant="ghost"
-                                                  size="sm"
-                                                  onClick={() => remove(index)}
-                                                  className={cn(ds.components.button.danger, "h-8 w-8 p-0 flex-shrink-0")}
-                                                >
-                                                  <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                              </div>
-                                            </CardContent>
-                                          </Card>
+                                  {/* Lista de Sugestões Autocomplete */}
+                                  {showProductSuggestions && products.length > 0 && !selectedProduct && (
+                                    <div
+                                      ref={productListRef}
+                                      className={cn(
+                                        "absolute z-[100] w-full mt-2 rounded-2xl shadow-xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar",
+                                        ds.colors.surface.card,
+                                        ds.colors.border.default,
+                                        "border"
+                                      )}
+                                    >
+                                      <div className="p-2 space-y-1">
+                                        {products.map((product, index) => (
+                                          <button
+                                            key={product.id}
+                                            type="button"
+                                            onClick={() => {
+                                              setSelectedProduct(product);
+                                              setProductSearch("");
+                                              setShowProductSuggestions(false);
+                                              setHighlightedProductIndex(-1);
+                                              setTimeout(() => {
+                                                quantityInputRef.current?.focus();
+                                                quantityInputRef.current?.select();
+                                              }, 50);
+                                            }}
+                                            onMouseEnter={() => setHighlightedProductIndex(index)}
+                                            className={cn(
+                                              "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
+                                              (highlightedProductIndex === index)
+                                                ? "bg-brand/10 text-brand"
+                                                : cn(
+                                                  ds.colors.surface.hover,
+                                                  ds.colors.text.primary
+                                                ),
+                                            )}
+                                          >
+                                            <div className={cn(
+                                              "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
+                                              highlightedProductIndex === index
+                                                ? "bg-brand/20 text-brand"
+                                                : cn(
+                                                  ds.colors.surface.section,
+                                                  ds.colors.text.secondary
+                                                )
+                                            )}>
+                                              <Package className="h-4 w-4" />
+                                            </div>
+                                            <div className="flex flex-col min-w-0">
+                                              <span className="font-medium truncate">{product.name}</span>
+                                            </div>
+                                          </button>
                                         ))}
                                       </div>
-                                    </ScrollArea>
+                                    </div>
                                   )}
-                                </CardContent>
-                              </Card>
-                            </div>
-                          </div>
-                        </TabsContent>
 
-                        {/* Período Tab */}
-                        <TabsContent value="periodo" className="flex-1 h-full min-h-0 overflow-y-auto p-3 sm:p-4 m-0 pb-20 custom-scrollbar">
-                          <Card className={ds.components.card.root}>
-                            <CardHeader className={ds.components.card.header}>
-                              <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2 sm:gap-3")}>
-                                <div className="p-2 rounded-lg bg-brand text-zinc-950 shadow-lg shadow-brand/25 flex-shrink-0">
-                                  <Clock className="h-4 w-4" />
+                                  {/* Indicador de Carregamento Dinâmico */}
+                                  {isSearchingProducts && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                      <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                                    </div>
+                                  )}
+
+                                  {/* Estado Vazio/Nenhum Resultado */}
+                                  {showProductSuggestions && productSearch.length >= 2 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
+                                    <div className={cn(
+                                      "absolute z-[100] w-full mt-2 rounded-xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2",
+                                      ds.colors.surface.card,
+                                      ds.colors.border.default,
+                                      "border"
+                                    )}>
+                                      <Package className={cn("h-8 w-8 mx-auto mb-2 opacity-50", ds.colors.text.muted)} />
+                                      <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.muted, "uppercase tracking-widest")}>
+                                        Nenhum produto encontrado
+                                      </p>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="truncate">Período da Cotação</span>
-                                  <span className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.regular, "mt-0.5 truncate")}>
-                                    Defina os prazos e agendamento da cotação
+                              </div>
+
+                              {/* Quantidade e Unidade */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className={ds.components.input.group}>
+                                  <label className={ds.components.input.label}>Quantidade *</label>
+                                  <Input
+                                    ref={quantityInputRef}
+                                    placeholder="Ex: 500"
+                                    type="number"
+                                    value={newProductQuantity}
+                                    onChange={(e) => setNewProductQuantity(e.target.value)}
+                                    onFocus={handleInputFocus}
+                                    onKeyDown={handleQuantityKeyDown}
+                                    className={ds.components.input.root}
+                                    tabIndex={0}
+                                  />
+                                </div>
+                                <div className={ds.components.input.group}>
+                                  <label className={ds.components.input.label}>Unidade *</label>
+                                  <Select value={newProductUnit} onValueChange={(value) => {
+                                    setNewProductUnit(value);
+                                    // Auto-foco no botão adicionar após selecionar unidade
+                                    setTimeout(() => {
+                                      if (selectedProduct && newProductQuantity) {
+                                        addButtonRef.current?.focus();
+                                      }
+                                    }, 50);
+                                  }}>
+                                    <SelectTrigger
+                                      ref={unitSelectRef}
+                                      className={ds.components.input.root}
+                                      tabIndex={0}
+                                    >
+                                      <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border")}>
+                                      <SelectItem value="kg">kg</SelectItem>
+                                      <SelectItem value="g">g</SelectItem>
+                                      <SelectItem value="un">un</SelectItem>
+                                      <SelectItem value="cx">cx</SelectItem>
+                                      <SelectItem value="pct">pct</SelectItem>
+                                      <SelectItem value="l">l</SelectItem>
+                                      <SelectItem value="ml">ml</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+
+                              {/* Botão Adicionar */}
+                              <Button
+                                ref={addButtonRef}
+                                type="button"
+                                onClick={handleAddNewProduct}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddNewProduct();
+                                  }
+                                }}
+                                disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
+                                className={cn(ds.components.button.primary, "w-full mt-2")}
+                                tabIndex={0}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Adicionar à Lista (Enter)
+                              </Button>
+
+                              {/* Dica de atalhos */}
+                              <div className={cn(
+                                "text-center space-y-2 pt-4 mt-4 border-t",
+                                ds.typography.size.xs,
+                                ds.colors.text.secondary,
+                                ds.colors.border.subtle
+                              )}>
+                                <p className={cn(ds.typography.weight.medium, "text-brand")}>⌨️ Atalhos de Teclado</p>
+                                <div className="flex justify-center gap-4">
+                                  <span className="flex items-center gap-1.5">
+                                    <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Tab</kbd>
+                                    <span>Navegar</span>
+                                  </span>
+                                  <span className="flex items-center gap-1.5">
+                                    <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Enter</kbd>
+                                    <span>Adicionar</span>
                                   </span>
                                 </div>
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent className={cn(ds.components.card.body, "space-y-6")}>
+                              </div>
+                            </div>
+                          </div>
 
-                              {/* Seção de Datas */}
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                  <FormField
-                                    control={form.control}
-                                    name="dataInicio"
-                                    render={({ field }) => (
-                                      <FormItem className="flex flex-col">
-                                        <FormLabel className={ds.components.input.label}>Data de Início *</FormLabel>
-                                        <Popover>
+                          {/* Lista de Produtos - Lado Direito */}
+                          <div className="flex flex-col space-y-4">
+                            <div className="pb-1 border-b border-zinc-100 dark:border-zinc-800/50">
+                              <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
+                                <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
+                                <span className="truncate">Produtos Adicionados ({fields.length})</span>
+                              </h3>
+                            </div>
+                            <div className="space-y-4 pt-2">
+                              {fields.length === 0 ? (
+                                <div className={cn("text-center py-8", ds.colors.text.secondary)}>
+                                  <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                                  <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
+                                  <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
+                                </div>
+                              ) : (
+                                <ScrollArea className="h-[400px] pr-2">
+                                  <div className="space-y-3">
+                                    {fields.map((field, index) => (
+                                      <div key={field.id} className={cn(
+                                        ds.colors.surface.card,
+                                        ds.colors.border.subtle,
+                                        "border rounded-xl transition-all hover:border-brand/30"
+                                      )}>
+
+                                        <div className="p-3">
+                                          <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1 min-w-0">
+                                              <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, ds.typography.size.sm, "truncate")}>
+                                                {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
+                                              </h4>
+                                              <div className={cn(ds.typography.size.sm, ds.colors.text.secondary, "mt-1 flex items-center gap-2")}>
+                                                <span className={cn(
+                                                  ds.typography.fontFamily.mono,
+                                                  ds.colors.surface.card,
+                                                  ds.colors.border.default,
+                                                  "px-1.5 rounded border text-xs"
+                                                )}>
+                                                  {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                                </span>
+                                              </div>
+                                            </div>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => remove(index)}
+                                              className={cn(ds.components.button.danger, "h-8 w-8 p-0 flex-shrink-0")}
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </TabsContent>
+
+                    {/* Periodo & Fornecedores - Tab Unificada */}
+                    <TabsContent value="periodo_fornecedores" className="flex-1 h-full min-h-0 overflow-hidden m-0 p-0">
+                      <div className="flex flex-col lg:flex-row h-full">
+
+                        {/* Esquerda: Periodo */}
+                        <div className={cn(
+                          "flex flex-col gap-5 p-5 sm:p-6 lg:w-[320px] xl:w-[360px] flex-shrink-0 overflow-y-auto pb-24 custom-scrollbar",
+                          "lg:border-r border-zinc-100 dark:border-zinc-800/50",
+                          ds.colors.surface.card
+                        )}>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-brand flex-shrink-0" />
+                            <span className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                              Prazo da Cotação
+                            </span>
+                          </div>
+
+                          {/* Toggle Agendamento */}
+                          <div className={cn(
+                            "flex items-center justify-between p-3 rounded-xl border",
+                            ds.colors.surface.section,
+                            ds.colors.border.subtle
+                          )}>
+                            <div>
+                              <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>
+                                Agendar cotação
+                              </p>
+                              <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                {isScheduled ? "Será criada como planejada" : "Inicia imediatamente"}
+                              </p>
+                            </div>
+                            <Switch
+                              checked={isScheduled}
+                              onCheckedChange={(checked) => {
+                                setIsScheduled(checked);
+                                if (!checked) form.setValue("dataPlanejada", undefined);
+                              }}
+                              className="data-[state=checked]:bg-brand"
+                            />
+                          </div>
+
+                          {isScheduled ? (
+                            <FormField
+                              control={form.control}
+                              name="dataPlanejada"
+                              render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                  <FormLabel className={ds.components.input.label}>
+                                    Data de Ativação *
+                                  </FormLabel>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <FormControl>
+                                        <Button
+                                          variant="outline"
+                                          className={cn(
+                                            ds.components.button.secondary,
+                                            "w-full justify-start font-normal",
+                                            !field.value && "text-muted-foreground"
+                                          )}
+                                        >
+                                          {field.value
+                                            ? format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                            : <span>Selecione a data</span>}
+                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border")} align="start">
+                                      <Calendar
+                                        mode="single"
+                                        selected={field.value}
+                                        onSelect={field.onChange}
+                                        disabled={(date) => {
+                                          const today = new Date();
+                                          today.setHours(0, 0, 0, 0);
+                                          return date < today;
+                                        }}
+                                        initialFocus
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <FormMessage />
+                                  <p className={cn(ds.typography.size.xs, "text-amber-600 dark:text-amber-400 mt-1")}>
+                                    Cotação ficará inativa até esta data.
+                                  </p>
+                                </FormItem>
+                              )}
+                            />
+                          ) : (
+                            <div className="flex flex-col gap-4">
+                              {/* Atalhos rapidos */}
+                              <div className="grid grid-cols-4 gap-1.5">
+                                {[
+                                  { label: "Hoje", days: 0 },
+                                  { label: "3d", days: 3 },
+                                  { label: "7d", days: 7 },
+                                  { label: "15d", days: 15 },
+                                ].map(({ label, days }) => (
+                                  <button
+                                    key={label}
+                                    type="button"
+                                    onClick={() => {
+                                      const hoje = new Date();
+                                      const fim = new Date(hoje);
+                                      fim.setDate(hoje.getDate() + days);
+                                      form.setValue("dataInicio", hoje);
+                                      form.setValue("dataFim", fim);
+                                    }}
+                                    className={cn(
+                                      "h-8 rounded-lg text-xs font-medium border transition-colors",
+                                      days === 7
+                                        ? "border-brand/50 bg-brand/10 text-brand"
+                                        : cn(ds.colors.surface.section, ds.colors.border.subtle, ds.colors.text.secondary, "hover:border-brand/30 hover:text-brand")
+                                    )}
+                                  >
+                                    {label}
+                                  </button>
+                                ))}
+                              </div>
+
+                              {/* Campos de data */}
+                              <div className="grid grid-cols-2 gap-3">
+                                <FormField
+                                  control={form.control}
+                                  name="dataInicio"
+                                  render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                      <FormLabel className={ds.components.input.label}>Início *</FormLabel>
+                                      <Popover>
                                         <PopoverTrigger asChild>
                                           <FormControl>
                                             <Button
                                               variant="outline"
                                               className={cn(
                                                 ds.components.button.secondary,
-                                                "w-full justify-start",
+                                                "w-full justify-start text-sm font-normal",
                                                 !field.value && "text-muted-foreground"
                                               )}
                                             >
-                                              {field.value ? (
-                                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                              ) : (
-                                                <span>Selecione a data de início</span>
-                                              )}
-                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                              {field.value
+                                                ? format(field.value, "dd/MM/yy", { locale: ptBR })
+                                                : <span>dd/mm</span>}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-40" />
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
@@ -1061,7 +1143,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             mode="single"
                                             selected={field.value}
                                             onSelect={field.onChange}
-                                            disabled={(date) => date < new Date()}
+                                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                                             initialFocus
                                           />
                                         </PopoverContent>
@@ -1070,13 +1152,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     </FormItem>
                                   )}
                                 />
-
                                 <FormField
                                   control={form.control}
                                   name="dataFim"
                                   render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                      <FormLabel className={ds.components.input.label}>Data de Fim *</FormLabel>
+                                      <FormLabel className={ds.components.input.label}>Fim *</FormLabel>
                                       <Popover>
                                         <PopoverTrigger asChild>
                                           <FormControl>
@@ -1084,16 +1165,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               variant="outline"
                                               className={cn(
                                                 ds.components.button.secondary,
-                                                "w-full justify-start",
+                                                "w-full justify-start text-sm font-normal",
                                                 !field.value && "text-muted-foreground"
                                               )}
                                             >
-                                              {field.value ? (
-                                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                              ) : (
-                                                <span>Selecione a data de fim</span>
-                                              )}
-                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                              {field.value
+                                                ? format(field.value, "dd/MM/yy", { locale: ptBR })
+                                                : <span>dd/mm</span>}
+                                              <CalendarIcon className="ml-auto h-4 w-4 opacity-40" />
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
@@ -1103,8 +1182,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             selected={field.value}
                                             onSelect={field.onChange}
                                             disabled={(date) => {
-                                              const startDate = form.getValues("dataInicio");
-                                              return startDate ? date < startDate : date < new Date();
+                                              const dataIn = form.getValues("dataInicio") || new Date();
+                                              const d = new Date(dataIn);
+                                              d.setHours(0, 0, 0, 0);
+                                              return date < d;
                                             }}
                                             initialFocus
                                           />
@@ -1115,992 +1196,290 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   )}
                                 />
                               </div>
-
-                              {/* Presets rápidos */}
-                              <div className="space-y-2">
-                                <div className={cn("flex items-center gap-2", ds.typography.size.xs, ds.colors.text.secondary)}>
-                                  <Zap className="h-3 w-3" />
-                                  <span className={ds.typography.weight.medium}>Atalhos Rápidos:</span>
-                                </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const hoje = new Date();
-                                      form.setValue("dataInicio", hoje);
-                                      form.setValue("dataFim", hoje);
-                                      toast({ title: "✅ Período definido", description: "Hoje (início e fim no mesmo dia)", duration: 1500 });
-                                    }}
-                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
-                                  >
-                                    <Zap className="h-3 w-3 mr-1" />
-                                    Hoje
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const hoje = new Date();
-                                      const fim = new Date(hoje);
-                                      fim.setDate(hoje.getDate() + 3);
-                                      form.setValue("dataInicio", hoje);
-                                      form.setValue("dataFim", fim);
-                                      toast({ title: "✅ Período definido", description: "3 dias", duration: 1500 });
-                                    }}
-                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
-                                  >
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    3 dias
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const hoje = new Date();
-                                      const fim = new Date(hoje);
-                                      fim.setDate(hoje.getDate() + 7);
-                                      form.setValue("dataInicio", hoje);
-                                      form.setValue("dataFim", fim);
-                                      toast({ title: "✅ Período definido", description: "7 dias (recomendado)", duration: 1500 });
-                                    }}
-                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
-                                  >
-                                    <Zap className="h-3 w-3 mr-1" />
-                                    7 dias
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const hoje = new Date();
-                                      const fim = new Date(hoje);
-                                      fim.setDate(hoje.getDate() + 14);
-                                      form.setValue("dataInicio", hoje);
-                                      form.setValue("dataFim", fim);
-                                      toast({ title: "✅ Período definido", description: "14 dias", duration: 1500 });
-                                    }}
-                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
-                                  >
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    14 dias
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => {
-                                      const hoje = new Date();
-                                      const fim = new Date(hoje);
-                                      fim.setDate(hoje.getDate() + 30);
-                                      form.setValue("dataInicio", hoje);
-                                      form.setValue("dataFim", fim);
-                                      toast({ title: "✅ Período definido", description: "30 dias", duration: 1500 });
-                                    }}
-                                    className={cn(ds.components.button.secondary, "h-10 text-xs font-semibold")}
-                                  >
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    30 dias
-                                  </Button>
-                                </div>
-                              </div>
-                              </div>
-
-                              {/* Separator com estilo visual */}
-                              <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                  <span className={cn("w-full border-t", ds.colors.border.default)} />
-                                </div>
-                                <div className={cn("relative flex justify-center", ds.typography.size.xs, "uppercase")}>
-                                  <span className={cn(ds.colors.surface.card, "px-2", ds.colors.text.secondary, ds.typography.weight.medium, "tracking-wider")}>
-                                    Opções Avançadas
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Seção de Agendamento */}
-                              <div className={cn(
-                                "rounded-xl border transition-all duration-300 overflow-hidden",
-                                isScheduled 
-                                  ? "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/60 dark:border-amber-800/30 shadow-sm" 
-                                  : cn(
-                                      ds.colors.surface.section,
-                                      ds.colors.border.subtle,
-                                      "border"
-                                    )
-                              )}>
-                                <div className="p-4">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3">
-                                      <div className={cn(
-                                        "p-2 rounded-lg transition-colors",
-                                        isScheduled 
-                                          ? "bg-amber-100 text-amber-600" 
-                                          : cn(
-                                              ds.colors.surface.section,
-                                              ds.colors.text.secondary
-                                            )
-                                      )}>
-                                        <Zap className="h-4 w-4" />
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <label className={cn(
-                                          "text-sm font-semibold cursor-pointer select-none",
-                                          ds.colors.text.primary
-                                        )} onClick={() => {
-                                            const newValue = !isScheduled;
-                                            setIsScheduled(newValue);
-                                            if (!newValue) {
-                                              form.setValue("dataPlanejada", undefined);
-                                            }
-                                        }}>
-                                          Agendar Cotação
-                                        </label>
-                                        <span className={cn(
-                                          "text-xs",
-                                          ds.colors.text.secondary
-                                        )}>
-                                          Programar ativação automática para uma data futura
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <Switch
-                                      checked={isScheduled}
-                                      onCheckedChange={(checked) => {
-                                        setIsScheduled(checked);
-                                        if (!checked) {
-                                          form.setValue("dataPlanejada", undefined);
-                                        }
-                                      }}
-                                      className="data-[state=checked]:bg-amber-500"
-                                    />
-                                  </div>
-                                  
-                                  {isScheduled && (
-                                    <div className="mt-4 pt-4 border-t border-amber-200/40 dark:border-amber-800/20 animate-in slide-in-from-top-2 fade-in duration-300">
-                                      <div className="grid grid-cols-1 gap-4">
-                                        <FormField
-                                          control={form.control}
-                                          name="dataPlanejada"
-                                          render={({ field }) => (
-                                            <FormItem className="flex flex-col">
-                                              <FormLabel className="text-amber-900 dark:text-amber-200">Data de Ativação</FormLabel>
-                                              <Popover>
-                                                <PopoverTrigger asChild>
-                                                  <FormControl>
-                                                    <Button
-                                                      variant="outline"
-                                                      className={cn(
-                                                        ds.components.button.secondary,
-                                                        "w-full justify-start",
-                                                        !field.value && "text-muted-foreground"
-                                                      )}
-                                                    >
-                                                      {field.value ? (
-                                                        format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                                                      ) : (
-                                                        <span>Selecione a data</span>
-                                                      )}
-                                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-amber-600" />
-                                                    </Button>
-                                                  </FormControl>
-                                                </PopoverTrigger>
-                                                <PopoverContent className={cn(
-                                                  "w-auto p-0 backdrop-blur-xl border-amber-200 dark:border-amber-800",
-                                                  ds.colors.surface.card
-                                                )} align="start">
-                                                  <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) => {
-                                                      const startDate = form.getValues("dataInicio");
-                                                      return startDate ? date < startDate : date < new Date();
-                                                    }}
-                                                    initialFocus
-                                                    className="pointer-events-auto"
-                                                  />
-                                                </PopoverContent>
-                                              </Popover>
-                                              <FormMessage />
-                                              <p className="text-xs text-amber-700 dark:text-amber-300/80 mt-1">
-                                                A cotação ficará visível mas inativa até esta data.
-                                              </p>
-                                            </FormItem>
-                                          )}
-                                        />
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Dicas compactas - Sempre visíveis agora, mas adaptadas */}
-                              <div className="bg-blue-50/30 dark:bg-blue-900/10 border border-blue-200/40 dark:border-blue-800/20 backdrop-blur-sm rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <div className="w-5 h-5 rounded bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                                    <span className="text-white text-xs">💡</span>
-                                  </div>
-                                  <h4 className="font-bold text-blue-900 dark:text-blue-300 text-xs">Dicas de Planejamento</h4>
-                                </div>
-                                <ul className="text-xs text-blue-800 dark:text-blue-300 space-y-1">
-                                  <li>• Cotações urgentes: 3-5 dias de prazo</li>
-                                  <li>• Compras planejadas: Use o agendamento para organizar a semana</li>
-                                  <li>• Grandes volumes: Mínimo de 7 dias para negociação</li>
-                                </ul>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </TabsContent>
-
-                        {/* Fornecedores Tab - Layout Master-Detail Responsivo */}
-                        <TabsContent value="fornecedores" className="flex-1 h-full min-h-0 overflow-hidden p-0 m-0">
-                          <div className={cn("flex flex-col lg:flex-row h-full relative", ds.colors.surface.page)}>
-                            
-                            {/* Lado Esquerdo: Lista de Fornecedores */}
-                            {/* Mobile: Oculta se tiver detalhe aberto. Desktop: Sempre visível (7/12) */}
-                            <div className={cn(
-                              "flex-col h-full overflow-hidden transition-all duration-300",
-                              ds.colors.surface.card,
-                              ds.colors.border.default,
-                              "border-r",
-                              focusedSupplierId ? "hidden lg:flex lg:w-7/12" : "flex w-full lg:w-7/12"
-                            )}>
-                              {/* Header Fixo */}
-                              <div className={cn(
-                                "p-6 space-y-4 z-10",
-                                ds.colors.border.default,
-                                "border-b"
-                              )}>
-                                <div className="flex items-center justify-between">
-                                  <div className={cn("flex items-center gap-3", ds.colors.text.primary)}>
-                                    <Building2 className={cn("h-5 w-5", ds.colors.text.secondary)} />
-                                    <span className={cn(ds.typography.weight.bold, ds.typography.size.base)}>Catálogo de Fornecedores</span>
-                                  </div>
-                                  
-                                  {/* Botão Selecionar Todos - Só visível se houver resultados de busca */}
-                                  {supplierSearch.length > 0 && filteredSuppliers.length > 0 && (
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={handleSelectAllSuppliers}
-                                      className={cn(ds.components.button.ghost, "text-brand hover:text-brand/80")}
-                                    >
-                                      <Check className="h-3 w-3 mr-1.5" />
-                                      {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id)) 
-                                        ? "Desmarcar Resultados" 
-                                        : "Selecionar Resultados"}
-                                    </Button>
-                                  )}
-                                </div>
-                                
-                                <div className="relative group">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-                                  <Input
-                                    placeholder="Buscar por nome, contato ou e-mail..."
-                                    value={supplierSearch}
-                                    onChange={(e) => setSupplierSearch(e.target.value)}
-                                    onFocus={handleInputFocus}
-                                    className={cn(ds.components.input.root, "pl-10")}
-                                  />
-                                </div>
-                              </div>
-
-                              {/* Lista Scrollável */}
-                              <div className="flex-1 overflow-y-auto p-4 custom-scrollbar pb-20">
-                                
-                                {/* Estado Vazio (Sem busca e sem selecionados) */}
-                                {supplierSearch.length === 0 && selectedSuppliers.length === 0 && (
-                                  <div className={cn(
-                                    "flex flex-col items-center justify-center h-full text-center p-8 space-y-4",
-                                    ds.colors.text.secondary
-                                  )}>
-                                    <div className={cn(
-                                      "w-16 h-16 rounded-full flex items-center justify-center",
-                                      ds.colors.surface.section
-                                    )}>
-                                      <Search className="h-8 w-8 opacity-30" />
-                                    </div>
-                                    <div className="space-y-2">
-                                      <p className={cn(ds.typography.size.base, ds.typography.weight.medium)}>Digite para buscar fornecedores</p>
-                                      <p className={cn(ds.typography.size.xs, ds.colors.text.muted)}>Seus fornecedores selecionados também aparecerão aqui</p>
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {/* Resultados da Busca */}
-                                {supplierSearch.length > 0 && (
-                                  <div className="mb-6">
-                                    <h3 className={cn(
-                                      ds.typography.size.xs,
-                                      ds.typography.weight.bold,
-                                      ds.colors.text.muted,
-                                      "uppercase tracking-widest px-3 mb-3"
-                                    )}>
-                                      Resultados da Busca
-                                    </h3>
-                                    
-                                    {filteredSuppliers.length === 0 ? (
-                                      <div className={cn(
-                                        "text-center p-6 rounded-xl mx-2 border border-dashed",
-                                        ds.colors.surface.section,
-                                        ds.colors.border.subtle,
-                                        ds.colors.text.secondary,
-                                        ds.typography.size.sm
-                                      )}>
-                                        Nenhum fornecedor encontrado para "{supplierSearch}"
-                                      </div>
-                                    ) : (
-                                      <div className="space-y-2">
-                                        {filteredSuppliers.map((supplier) => {
-                                          const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
-                                          const isFocused = focusedSupplierId === supplier.id;
-
-                                          return (
-                                            <div
-                                              key={supplier.id}
-                                              onClick={() => setFocusedSupplierId(supplier.id)}
-                                              className={cn(
-                                                "group flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
-                                                isFocused 
-                                                  ? cn(
-                                                      "border-brand/30 shadow-sm",
-                                                      ds.colors.surface.section
-                                                    )
-                                                  : cn(
-                                                      ds.colors.surface.card,
-                                                      ds.colors.border.subtle,
-                                                      ds.colors.surface.hover
-                                                    )
-                                              )}
-                                            >
-                                              {/* Selection Indicator Bar */}
-                                              {isFocused && (
-                                                <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />
-                                              )}
-
-                                              <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
-                                                <div 
-                                                  className={cn(
-                                                    "w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all cursor-pointer",
-                                                    isSelected
-                                                      ? "bg-brand border-brand text-zinc-950"
-                                                      : cn(
-                                                          ds.colors.border.default,
-                                                          ds.colors.surface.card,
-                                                          "hover:border-brand/50"
-                                                        )
-                                                  )}
-                                                  onClick={() => handleSupplierSelect(supplier)}
-                                                >
-                                                  {isSelected && <Check className="h-4 w-4" />}
-                                                </div>
-                                              </div>
-
-                                              <div className="flex-1 min-w-0 z-10">
-                                                <div className="flex items-center justify-between mb-1">
-                                                  <span className={cn(
-                                                    ds.typography.weight.semibold,
-                                                    ds.typography.size.sm,
-                                                    ds.colors.text.primary,
-                                                    "truncate"
-                                                  )}>
-                                                    {supplier.name}
-                                                  </span>
-                                                  {isSelected && (
-                                                    <span className={cn(
-                                                      ds.typography.size.xs,
-                                                      ds.typography.weight.bold,
-                                                      "uppercase tracking-wider px-2 py-0.5 rounded-md",
-                                                      "bg-brand/10 text-brand"
-                                                    )}>
-                                                      Selecionado
-                                                    </span>
-                                                  )}
-                                                </div>
-                                                <div className={cn(
-                                                  "flex items-center gap-3",
-                                                  ds.typography.size.xs,
-                                                  ds.colors.text.secondary
-                                                )}>
-                                                  {supplier.contact && (
-                                                    <span className="flex items-center gap-1.5 truncate">
-                                                      <Phone className="h-3 w-3" />
-                                                      {supplier.contact}
-                                                    </span>
-                                                  )}
-                                                </div>
-                                              </div>
-
-                                              <ChevronRight className={cn(
-                                                "h-5 w-5 transition-transform lg:hidden",
-                                                ds.colors.text.muted,
-                                                isFocused && "text-brand translate-x-1"
-                                              )} />
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    )}
-                                  </div>
-                                )}
-                                
-                                {/* Lista de Selecionados - Sempre visível se houver selecionados */}
-                                {selectedSuppliers.length > 0 && (
-                                  <div className="mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                    <div className="flex items-center justify-between mb-3 px-3">
-                                      <h3 className={cn(
-                                        ds.typography.size.xs,
-                                        ds.typography.weight.bold,
-                                        "text-brand uppercase tracking-widest"
-                                      )}>
-                                        Selecionados ({selectedSuppliers.length})
-                                      </h3>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        onClick={handleClearAllSuppliers}
-                                        className={cn(ds.components.button.danger, "h-7 px-3 text-xs")}
-                                      >
-                                        Limpar
-                                      </Button>
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                      {selectedSuppliers.map((supplier) => {
-                                        const isFocused = focusedSupplierId === supplier.id;
-                                        
-                                        return (
-                                          <div
-                                            key={`selected-${supplier.id}`}
-                                            onClick={() => setFocusedSupplierId(supplier.id)}
-                                            className={cn(
-                                              "group flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer relative overflow-hidden",
-                                              "bg-brand/5",
-                                              isFocused 
-                                                ? "border-brand/40 shadow-sm" 
-                                                : cn(
-                                                    "border-brand/20",
-                                                    "hover:bg-brand/10"
-                                                  )
-                                            )}
-                                          >
-                                            <div className="flex-shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
-                                              <div 
-                                                className={cn(
-                                                  "w-6 h-6 rounded-md border-2 bg-brand border-brand text-zinc-950 flex items-center justify-center transition-all cursor-pointer",
-                                                  "hover:bg-red-500 hover:border-red-500 hover:text-white"
-                                                )}
-                                                onClick={() => handleSupplierRemove(supplier.id)}
-                                              >
-                                                <div className="group-hover:hidden"><Check className="h-4 w-4" /></div>
-                                                <div className="hidden group-hover:block"><X className="h-4 w-4" /></div>
-                                              </div>
-                                            </div>
-
-                                            <div className="flex-1 min-w-0 z-10">
-                                              <div className="flex items-center justify-between mb-1">
-                                                <span className={cn(
-                                                  ds.typography.weight.semibold,
-                                                  ds.typography.size.sm,
-                                                  ds.colors.text.primary,
-                                                  "truncate"
-                                                )}>
-                                                  {supplier.name}
-                                                </span>
-                                              </div>
-                                              <div className={cn(
-                                                "flex items-center gap-3",
-                                                ds.typography.size.xs,
-                                                ds.colors.text.secondary
-                                              )}>
-                                                {supplier.contact && (
-                                                  <span className="flex items-center gap-1.5 truncate">
-                                                    <Phone className="h-3 w-3" />
-                                                    {supplier.contact}
-                                                  </span>
-                                                )}
-                                              </div>
-                                            </div>
-                                            
-                                            <ChevronRight className={cn(
-                                              "h-5 w-5 transition-transform lg:hidden",
-                                              ds.colors.text.muted,
-                                              isFocused && "text-brand translate-x-1"
-                                            )} />
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
                             </div>
+                          )}
+                        </div>
 
-                            {/* Lado Direito: Painel de Detalhes (Desktop & Mobile) */}
-                            {/* Mobile: Visível se tiver detalhe aberto. Desktop: Sempre visível (5/12) */}
-                            <div className={cn(
-                              "flex-col h-full transition-all duration-300",
-                              ds.colors.surface.section,
-                              ds.colors.border.default,
-                              "border-l",
-                              focusedSupplierId ? "flex w-full lg:w-5/12" : "hidden lg:flex lg:w-5/12"
-                            )}>
-                              {focusedSupplierId ? (
-                                (() => {
-                                  const supplier = suppliers.find(s => s.id === focusedSupplierId);
-                                  if (!supplier) return null;
+                        {/* Direita: Fornecedores */}
+                        <div className={cn(
+                          "flex flex-col flex-1 min-h-0 overflow-hidden",
+                          ds.colors.surface.page
+                        )}>
+                          <div className={cn("p-4 sm:p-5 border-b flex-shrink-0", ds.colors.border.default)}>
+                            <div className="flex items-center justify-between mb-3">
+                              <div className="flex items-center gap-2">
+                                <Building2 className="h-4 w-4 text-brand" />
+                                <span className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                                  Fornecedores
+                                </span>
+                                {selectedSuppliers.length > 0 && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand text-zinc-950">
+                                    {selectedSuppliers.length}
+                                  </span>
+                                )}
+                              </div>
+                              {supplierSearch.length > 0 && filteredSuppliers.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={handleSelectAllSuppliers}
+                                  className={cn(ds.typography.size.xs, "text-brand hover:underline")}
+                                >
+                                  {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id))
+                                    ? "Desmarcar todos"
+                                    : "Selecionar todos"}
+                                </button>
+                              )}
+                            </div>
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                              <Input
+                                placeholder="Buscar fornecedor..."
+                                value={supplierSearch}
+                                onChange={(e) => setSupplierSearch(e.target.value)}
+                                className={cn(ds.components.input.root, "pl-10 h-9")}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex-1 overflow-y-auto p-2 custom-scrollbar pb-20">
+                            {supplierSearch.length === 0 && selectedSuppliers.length === 0 ? (
+                              <div className="h-full flex flex-col items-center justify-center gap-2 p-6 text-center">
+                                <Search className={cn("h-8 w-8 opacity-20", ds.colors.text.secondary)} />
+                                <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.secondary)}>
+                                  Digite para buscar
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="space-y-1">
+                                {(supplierSearch.length > 0 ? filteredSuppliers : selectedSuppliers).map((supplier) => {
                                   const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
-
                                   return (
-                                    <div className={cn(
-                                      "flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-300",
-                                      "lg:bg-transparent"
-                                    )}>
-                                      {/* Header do Painel */}
+                                    <div
+                                      key={supplier.id}
+                                      onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
+                                      className={cn(
+                                        "flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all",
+                                        isSelected
+                                          ? "border-brand/30 bg-brand/5 dark:bg-brand/10"
+                                          : cn(ds.colors.surface.card, "border-transparent hover:border-brand/20")
+                                      )}
+                                    >
                                       <div className={cn(
-                                        "p-6 flex items-center gap-4",
-                                        ds.colors.border.default,
-                                        "border-b"
+                                        "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
+                                        isSelected ? "bg-brand border-brand text-zinc-950" : cn(ds.colors.border.default, "bg-transparent")
                                       )}>
-                                        {/* Botão Voltar (Mobile Only) */}
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          className={cn(ds.components.button.ghost, "lg:hidden h-9 w-9")}
-                                          onClick={() => setFocusedSupplierId(null)}
-                                        >
-                                          <ArrowLeft className="h-5 w-5" />
-                                        </Button>
-                                        
-                                        <div className="flex-1 flex items-center justify-between gap-4">
-                                          <div className="flex items-center gap-3">
-                                            <div className={cn(
-                                              "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
-                                              "bg-brand text-zinc-950",
-                                              ds.typography.weight.bold,
-                                              ds.typography.size.sm
-                                            )}>
-                                              {supplier.name.substring(0, 2).toUpperCase()}
-                                            </div>
-                                            <h2 className={cn(
-                                              ds.typography.size.lg,
-                                              ds.typography.weight.bold,
-                                              ds.colors.text.primary,
-                                              "leading-tight truncate"
-                                            )}>
-                                              {supplier.name}
-                                            </h2>
-                                          </div>
-                                        </div>
+                                        {isSelected && <Check className="h-3 w-3" />}
                                       </div>
-                                      
-                                      {/* Ação Principal (Separada para Mobile) */}
-                                      <div className={cn(
-                                        "px-6 py-4",
-                                        ds.colors.border.default,
-                                        "border-b lg:border-0"
-                                      )}>
-                                         <Button
-                                            size="sm"
-                                            variant={isSelected ? "outline" : "default"}
-                                            onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
-                                            className={cn(
-                                              "w-full lg:w-auto",
-                                              isSelected 
-                                                ? ds.components.button.danger
-                                                : ds.components.button.primary
-                                            )}
-                                          >
-                                            {isSelected ? (
-                                              <>
-                                                <X className="h-4 w-4 mr-2" />
-                                                Remover da Cotação
-                                              </>
-                                            ) : (
-                                              <>
-                                                <Plus className="h-4 w-4 mr-2" />
-                                                Adicionar à Cotação
-                                              </>
-                                            )}
-                                          </Button>
-                                      </div>
-
-                                      {/* Corpo do Painel */}
-                                      <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-                                        {/* Info Cards */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                          <div className={cn(
-                                            "p-4 rounded-xl border shadow-sm",
-                                            ds.colors.surface.card,
-                                            ds.colors.border.default
-                                          )}>
-                                            <div className={cn(
-                                              "flex items-center gap-2 mb-2",
-                                              ds.typography.size.xs,
-                                              ds.colors.text.secondary
-                                            )}>
-                                              <History className="h-4 w-4" />
-                                              Última Cotação
-                                            </div>
-                                            <p className={cn(
-                                              ds.typography.weight.semibold,
-                                              ds.typography.size.sm,
-                                              ds.colors.text.primary
-                                            )}>--</p>
-                                          </div>
-                                          <div className={cn(
-                                            "p-4 rounded-xl border shadow-sm",
-                                            ds.colors.surface.card,
-                                            ds.colors.border.default
-                                          )}>
-                                            <div className={cn(
-                                              "flex items-center gap-2 mb-2",
-                                              ds.typography.size.xs,
-                                              ds.colors.text.secondary
-                                            )}>
-                                              <Star className="h-4 w-4 text-amber-500" />
-                                              Avaliação
-                                            </div>
-                                            <p className={cn(
-                                              ds.typography.weight.semibold,
-                                              ds.typography.size.sm,
-                                              ds.colors.text.primary
-                                            )}>Novo</p>
-                                          </div>
-                                        </div>
-
-                                        {/* Contact Info */}
-                                        <div className="space-y-4">
-                                          <h4 className={cn(
-                                            ds.typography.size.xs,
-                                            ds.typography.weight.bold,
-                                            "uppercase tracking-wider",
-                                            ds.colors.text.muted
-                                          )}>
-                                            Informações de Contato
-                                          </h4>
-                                          <div className="space-y-3">
-                                            <div className={cn(
-                                              "flex items-start gap-3 p-4 rounded-xl border transition-colors",
-                                              ds.colors.surface.card,
-                                              ds.colors.border.subtle,
-                                              ds.colors.surface.hover
-                                            )}>
-                                              <Phone className={cn("h-5 w-5 mt-0.5", ds.colors.text.secondary)} />
-                                              <div className="flex-1 min-w-0">
-                                                <p className={cn(
-                                                  ds.typography.size.sm,
-                                                  ds.typography.weight.medium,
-                                                  ds.colors.text.primary
-                                                )}>Telefone / WhatsApp</p>
-                                                <p className={cn(
-                                                  ds.typography.size.sm,
-                                                  ds.colors.text.secondary,
-                                                  "truncate"
-                                                )}>{supplier.contact || "Não informado"}</p>
-                                              </div>
-                                            </div>
-                                            <div className={cn(
-                                              "flex items-start gap-3 p-4 rounded-xl border transition-colors",
-                                              ds.colors.surface.card,
-                                              ds.colors.border.subtle,
-                                              ds.colors.surface.hover
-                                            )}>
-                                              <Mail className={cn("h-5 w-5 mt-0.5", ds.colors.text.secondary)} />
-                                              <div className="flex-1 min-w-0">
-                                                <p className={cn(
-                                                  ds.typography.size.sm,
-                                                  ds.typography.weight.medium,
-                                                  ds.colors.text.primary
-                                                )}>E-mail</p>
-                                                <p className={cn(
-                                                  ds.typography.size.sm,
-                                                  ds.colors.text.secondary,
-                                                  "truncate"
-                                                )}>{"Não informado"}</p>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
+                                          {supplier.name}
+                                        </p>
+                                        {supplier.contact && (
+                                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "truncate")}>
+                                            {supplier.contact}
+                                          </p>
+                                        )}
                                       </div>
                                     </div>
                                   );
-                                })()
-                              ) : (
-                                <div className={cn(
-                                  "flex flex-col items-center justify-center h-full text-center p-8 space-y-4",
-                                  ds.colors.text.secondary
-                                )}>
-                                  <div className={cn(
-                                    "w-20 h-20 rounded-full flex items-center justify-center animate-pulse",
-                                    ds.colors.surface.section
-                                  )}>
-                                    <MousePointerClick className="h-10 w-10 opacity-30" />
-                                  </div>
-                                  <div className="space-y-2">
-                                    <h3 className={cn(
-                                      ds.typography.size.lg,
-                                      ds.typography.weight.semibold,
-                                      ds.colors.text.primary
-                                    )}>Detalhes do Fornecedor</h3>
-                                    <p className={cn(
-                                      ds.typography.size.sm,
-                                      "max-w-[240px] mx-auto"
-                                    )}>
-                                      Clique em um fornecedor da lista para ver informações detalhadas e histórico.
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
+                                })}
+                                {supplierSearch.length > 0 && filteredSuppliers.length === 0 && (
+                                  <p className={cn("p-4 text-center", ds.typography.size.sm, ds.colors.text.secondary)}>
+                                    Nenhum resultado para "{supplierSearch}"
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        </TabsContent>
+                        </div>
 
-
-                        {/* Detalhes Tab */}
-                        <TabsContent value="detalhes" className="flex-1 m-0 min-h-0">
-                          <ScrollArea className={cn("h-full w-full [&>div>div[style]]:!pr-0", ds.colors.surface.page)}>
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 pb-24">
-                              {/* Coluna Esquerda - Formulário de Detalhes */}
-                              <div className="space-y-6">
-                                <Card className={ds.components.card.root}>
-                                  <CardHeader className={ds.components.card.header}>
-                                    <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                      <FileText className="h-4 w-4 text-brand flex-shrink-0" />
-                                      <span className="truncate">Detalhes Adicionais</span>
-                                    </CardTitle>
-                                  </CardHeader>
-                                  <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                                    <FormField
-                                      control={form.control}
-                                      name="observacoes"
-                                      render={({ field }) => (
-                                        <FormItem>
-                                          <FormLabel className={ds.components.input.label}>Observações</FormLabel>
-                                          <FormControl>
-                                            <Textarea 
-                                              placeholder="Adicione observações, especificações técnicas, condições especiais ou qualquer informação relevante para os fornecedores..." 
-                                              className={cn(ds.components.input.root, "resize-none min-h-[160px]")}
-                                              onFocus={handleInputFocus}
-                                              {...field} 
-                                            />
-                                          </FormControl>
-                                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                                            Estas informações serão enviadas junto com a cotação para todos os fornecedores
-                                          </p>
-                                          <FormMessage />
-                                        </FormItem>
-                                      )}
-                                    />
-                                  </CardContent>
-                                </Card>
+                      </div>
+                    </TabsContent>
+                        {/* Detalhes Tab - Resumo Final Minimalista */}
+                        <TabsContent value="detalhes" className="flex-1 h-full min-h-0 overflow-hidden m-0 p-0">
+                          <ScrollArea className="h-full custom-scrollbar">
+                            <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-8 pb-32">
+                              
+                              <div className="text-center space-y-2">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-brand/10 text-brand mb-2">
+                                  <FileText className="h-6 w-6" />
+                                </div>
+                                <h1 className={cn(ds.typography.size.xl, ds.typography.weight.bold, ds.colors.text.primary)}>
+                                  Revise sua Cotação
+                                </h1>
+                                <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+                                  Confira todas as informações antes de enviar para os fornecedores.
+                                </p>
                               </div>
 
-                              {/* Coluna Direita - Resumo da Cotação */}
-                              <div className="space-y-6">
-                                {/* Estatísticas Principais */}
-                                <Card className={ds.components.card.root}>
-                                  <CardHeader className={ds.components.card.header}>
-                                    <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                      <LayoutList className="h-4 w-4 text-brand flex-shrink-0" />
-                                      <span className="truncate">Estatísticas</span>
-                                    </CardTitle>
-                                  </CardHeader>
-                                  <CardContent className={ds.components.card.body}>
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className={cn(
-                                        ds.colors.surface.section,
-                                        ds.colors.border.subtle,
-                                        "border rounded-lg p-4 text-center"
-                                      )}>
-                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-brand mb-1")}>{fields.length}</div>
-                                        <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.medium)}>Produtos</div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                
+                                {/* Resumo de Produtos */}
+                                <div className={cn(
+                                  "p-5 rounded-2xl border bg-white dark:bg-zinc-900/50",
+                                  ds.colors.border.subtle
+                                )}>
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <Package className="h-4 w-4 text-brand" />
+                                    <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                                      Produtos ({fields.length})
+                                    </h3>
+                                  </div>
+                                  <div className="space-y-3">
+                                    {fields.slice(0, 5).map((field, index) => (
+                                      <div key={field.id} className="flex justify-between items-center text-sm">
+                                        <span className={cn(ds.colors.text.secondary, "truncate pr-4")}>
+                                          {form.watch(`produtos.${index}.produtoNome`) || "Produto"}
+                                        </span>
+                                        <span className={cn(ds.typography.weight.medium, ds.colors.text.primary, "flex-shrink-0")}>
+                                          {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                        </span>
                                       </div>
-                                      <div className={cn(
-                                        ds.colors.surface.section,
-                                        ds.colors.border.subtle,
-                                        "border rounded-lg p-4 text-center"
-                                      )}>
-                                        <div className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "text-brand mb-1")}>{selectedSuppliers.length}</div>
-                                        <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, ds.typography.weight.medium)}>Fornecedores</div>
+                                    ))}
+                                    {fields.length > 5 && (
+                                      <p className={cn(ds.typography.size.xs, "text-brand pt-1")}>
+                                        + {fields.length - 5} outros produtos
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Resumo de Configuracao */}
+                                <div className="space-y-6">
+                                  
+                                  {/* Prazos */}
+                                  <div className={cn(
+                                    "p-5 rounded-2xl border bg-white dark:bg-zinc-900/50",
+                                    ds.colors.border.subtle
+                                  )}>
+                                    <div className="flex items-center gap-2 mb-4">
+                                      <Clock className="h-4 w-4 text-brand" />
+                                      <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                                        Prazos
+                                      </h3>
+                                    </div>
+                                    <div className="space-y-3 text-sm">
+                                      <div className="flex justify-between items-center">
+                                        <span className={ds.colors.text.secondary}>Duração:</span>
+                                        <span className={cn(ds.typography.weight.medium, ds.colors.text.primary)}>
+                                          {form.watch("dataInicio") && form.watch("dataFim")
+                                            ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                                            : "Não definida"}
+                                        </span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className={ds.colors.text.secondary}>Agendamento:</span>
+                                        <span className={cn(ds.typography.weight.medium, isScheduled ? "text-brand" : ds.colors.text.primary)}>
+                                          {isScheduled ? "Planejado" : "Imediato"}
+                                        </span>
                                       </div>
                                     </div>
-                                  </CardContent>
-                                </Card>
+                                  </div>
 
-                                {/* Detalhes do Período */}
-                                <Card className={ds.components.card.root}>
-                                  <CardHeader className={ds.components.card.header}>
-                                    <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                      <Clock className="h-4 w-4 text-brand flex-shrink-0" />
-                                      <span className="truncate">Período da Cotação</span>
-                                    </CardTitle>
-                                  </CardHeader>
-                                  <CardContent className={ds.components.card.body}>
-                                    <div className="flex justify-between items-center">
-                                      <span className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>Período:</span>
-                                      <span className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
-                                        {form.watch("dataInicio") && form.watch("dataFim") 
-                                          ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} - ${format(form.watch("dataFim"), "dd/MM/yyyy", { locale: ptBR })}`
-                                          : "Não definido"
-                                        }
-                                      </span>
+                                  {/* Fornecedores */}
+                                  <div className={cn(
+                                    "p-5 rounded-2xl border bg-white dark:bg-zinc-900/50",
+                                    ds.colors.border.subtle
+                                  )}>
+                                    <div className="flex items-center gap-2 mb-4">
+                                      <Building2 className="h-4 w-4 text-brand" />
+                                      <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                                        Fornecedores selecionados
+                                      </h3>
                                     </div>
-                                  </CardContent>
-                                </Card>
+                                    <div className="flex flex-wrap gap-2">
+                                      {selectedSuppliers.map((s) => (
+                                        <span key={s.id} className={cn(
+                                          "px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold border",
+                                          ds.colors.surface.section,
+                                          ds.colors.border.subtle,
+                                          ds.colors.text.secondary
+                                        )}>
+                                          {s.name}
+                                        </span>
+                                      ))}
+                                      {selectedSuppliers.length === 0 && (
+                                        <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>Nenhum selecionado</p>
+                                      )}
+                                    </div>
+                                  </div>
 
-                                {/* Lista de Produtos */}
-                                {fields.length > 0 && (
-                                  <Card className={ds.components.card.root}>
-                                    <CardHeader className={ds.components.card.header}>
-                                      <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                        <Package className="h-4 w-4 text-brand flex-shrink-0" />
-                                        <span className="truncate">Produtos Selecionados</span>
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className={ds.components.card.body}>
-                                      <ScrollArea className="max-h-[200px] [&>div>div[style]]:!pr-0">
-                                        <div className="space-y-3 pr-4">
-                                          {fields.map((field, index) => (
-                                            <div key={field.id} className={cn(
-                                              "flex items-center justify-between p-4 rounded-lg border",
-                                              ds.colors.surface.section,
-                                              ds.colors.border.subtle
-                                            )}>
-                                              <div className="flex-1 min-w-0">
-                                                <p className={cn(
-                                                  ds.typography.size.sm,
-                                                  ds.typography.weight.semibold,
-                                                  ds.colors.text.primary,
-                                                  "truncate mb-1"
-                                                )}>
-                                                  {form.watch(`produtos.${index}.produtoNome`) || "Produto não selecionado"}
-                                                </p>
-                                                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                                                  {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
-                                                </p>
-                                              </div>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </ScrollArea>
-                                    </CardContent>
-                                  </Card>
-                                )}
+                                </div>
 
-                                {/* Lista de Fornecedores */}
-                                {selectedSuppliers.length > 0 && (
-                                  <Card className={ds.components.card.root}>
-                                    <CardHeader className={ds.components.card.header}>
-                                      <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-                                        <Building2 className="h-4 w-4 text-brand flex-shrink-0" />
-                                        <span className="truncate">Fornecedores Participantes</span>
-                                      </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className={ds.components.card.body}>
-                                      <ScrollArea className="max-h-[180px] [&>div>div[style]]:!pr-0">
-                                        <div className="space-y-3 pr-4">
-                                          {selectedSuppliers.map((supplier) => (
-                                            <div key={supplier.id} className={cn(
-                                              "flex items-center gap-3 p-4 rounded-lg border",
-                                              ds.colors.surface.section,
-                                              ds.colors.border.subtle
-                                            )}>
-                                              <div className="w-2 h-2 bg-brand rounded-full flex-shrink-0"></div>
-                                              <CapitalizedText className={cn(
-                                                ds.typography.size.sm,
-                                                ds.typography.weight.semibold,
-                                                ds.colors.text.primary,
-                                                "truncate"
-                                              )}>
-                                                {supplier.name}
-                                              </CapitalizedText>
-                                            </div>
-                                          ))}
-                                        </div>
-                                      </ScrollArea>
-                                    </CardContent>
-                                  </Card>
-                                )}
                               </div>
                             </div>
                           </ScrollArea>
                         </TabsContent>
-                      </Tabs>
-                  </AnimatedTabContent>
-                </div>
 
-                {/* Footer Fixo */}
-                <div className={cn(ds.components.modal.footer, "flex-shrink-0")}>
-                  <div className="flex gap-2 justify-end">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setOpen(false)}
-                      className={ds.components.button.secondary}
+                  </Tabs>
+                </AnimatedTabContent>
+              </div>
+
+              {/* Footer Fixo */}
+              <div className={cn(ds.components.modal.footer, "flex-shrink-0")}>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    className={ds.components.button.secondary}
+                  >
+                    Cancelar
+                  </Button>
+
+                  {currentTabIndex === tabs.length - 1 ? (
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className={ds.components.button.primary}
                     >
-                      Cancelar
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Check className="mr-2 h-4 w-4" />
+                          Finalizar Cotação
+                        </>
+                      )}
                     </Button>
-                    
-                    {currentTabIndex === tabs.length - 1 ? (
-                      <Button 
-                        type="submit"
-                        disabled={isSubmitting}
-                        className={ds.components.button.primary}
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Salvando...
-                          </>
-                        ) : (
-                          <>
-                            <Check className="mr-2 h-4 w-4" />
-                            Finalizar Cotação
-                          </>
-                        )}
-                      </Button>
-                    ) : (
-                      <Button 
-                        type="button"
-                        onClick={handleNext}
-                        disabled={!canProceedToNext()}
-                        className={ds.components.button.primary}
-                      >
-                        Próximo
-                        <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      onClick={handleNext}
+                      disabled={!canProceedToNext()}
+                      className={ds.components.button.primary}
+                    >
+                      Próximo
+                      <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-              </form>
-            </Form>
-          </div>
-        )}
+              </div>
+            </form>
+          </Form>
+        </div>
+      )}
 
-        {isSubmitting && (
-          <div className={cn(
-            "absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl",
-            "bg-background/80"
-          )}>
-            <div className="text-center space-y-3">
-              <div className={cn(
-                "animate-spin h-12 w-12 border-4 rounded-full mx-auto",
-                "border-zinc-200 dark:border-zinc-700",
-                "border-t-brand"
-              )}></div>
-              <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
-            </div>
+      {isSubmitting && (
+        <div className={cn(
+          "absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl",
+          "bg-background/80"
+        )}>
+          <div className="text-center space-y-3">
+            <div className={cn(
+              "animate-spin h-12 w-12 border-4 rounded-full mx-auto",
+              "border-zinc-200 dark:border-zinc-700",
+              "border-t-brand"
+            )}></div>
+            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
           </div>
-        )}
-      </>
-    );
+        </div>
+      )}
+    </>
+  );
 
   // Mobile: Usar Drawer
   if (isMobile) {
@@ -2111,14 +1490,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             {trigger}
           </DrawerTrigger>
         )}
-        <DrawerContent 
+        <DrawerContent
           className={cn(
             "rounded-t-2xl p-0 overflow-hidden flex flex-col",
             ds.colors.surface.card,
             ds.colors.border.default,
             "border-t"
           )}
-          style={{ 
+          style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
@@ -2139,7 +1518,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent 
+      <DialogContent
         hideClose
         className={cn(
           "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden shadow-2xl rounded-xl sm:rounded-2xl flex flex-col [&>button]:hidden",
