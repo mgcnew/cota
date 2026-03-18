@@ -24,23 +24,8 @@ export function AppLayout() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [aiSearchOpen, setAiSearchOpen] = useState(false);
 
-  // Estado para controlar o padding baseado na sidebar
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
-    const saved = localStorage.getItem('sidebarExpanded');
-    return saved !== null ? saved === 'true' : true;
-  });
-
-  // Ouvir mudanças na sidebar
-  useEffect(() => {
-    const handleSidebarToggle = (e: CustomEvent<{ expanded: boolean }>) => {
-      setIsSidebarExpanded(e.detail.expanded);
-    };
-
-    window.addEventListener('sidebarToggle', handleSidebarToggle as EventListener);
-    return () => {
-      window.removeEventListener('sidebarToggle', handleSidebarToggle as EventListener);
-    };
-  }, []);
+  // Sidebar is permanently collapsed on desktop now
+  const isSidebarExpanded = false;
 
   const handleLogout = useCallback(async () => {
     try {

@@ -99,21 +99,12 @@ export function AppSidebar() {
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
-    const saved = localStorage.getItem("sidebarExpanded");
-    return saved !== null ? saved === "true" : true;
-  });
+  // Sidebar is permanently collapsed on desktop
+  const isSidebarExpanded = false;
 
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     () => new Set(menuCategories.map((c) => c.title))
   );
-
-  useEffect(() => {
-    localStorage.setItem("sidebarExpanded", String(isSidebarExpanded));
-    window.dispatchEvent(
-      new CustomEvent("sidebarToggle", { detail: { expanded: isSidebarExpanded } })
-    );
-  }, [isSidebarExpanded]);
 
   const toggleCategory = useCallback((categoryTitle: string) => {
     setCollapsedCategories((prev) => {
@@ -170,15 +161,20 @@ export function AppSidebar() {
           expanded ? "px-2 gap-3" : "justify-center"
         )}
       >
-        <UserAvatar
-          user={user}
-          profile={profile}
-          size="md"
-          showStatus
-          clickable
+        <div 
           onClick={() => setProfileDialogOpen(true)}
-          className="ring-2 ring-border/10 shadow-lg"
-        />
+          className="relative shrink-0 cursor-pointer overflow-hidden rounded-xl ring-2 ring-border/10 shadow-lg w-14 h-14 hover:opacity-80 transition-opacity bg-white flex items-center justify-center p-0.5"
+          title="Abrir Perfil"
+        >
+          <img 
+            src="/logo.png" 
+            alt="Logo Empresa" 
+            className="w-full h-full object-contain drop-shadow-sm scale-[1.05]"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        </div>
         {expanded && (
           <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
             <p className="text-sm font-semibold text-foreground truncate">
@@ -288,27 +284,6 @@ export function AppSidebar() {
         )}
       </div>
 
-      {/* Toggle Button */}
-      {!mobile && (
-        <div className={cn("pt-4 mt-2 border-t border-white/5", expanded ? "px-2" : "flex justify-center")}>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsSidebarExpanded(!expanded)}
-            className={cn(
-              "w-full transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-white/5",
-              expanded ? "justify-between px-3" : "h-10 w-10 p-0 justify-center rounded-xl"
-            )}
-          >
-            {expanded && <span className="text-xs font-medium">Recolher Menu</span>}
-            {expanded ? (
-              <PanelLeftClose className="w-4 h-4 opacity-50" />
-            ) : (
-              <PanelLeftOpen className="w-4 h-4 opacity-50" />
-            )}
-          </Button>
-        </div>
-      )}
     </div>
   );
 
@@ -345,16 +320,22 @@ export function AppSidebar() {
           <div className="w-full h-full flex flex-col">
             {/* Mobile Header */}
             <div className="flex items-center gap-3 h-16 px-4 border-b border-white/5">
-              <UserAvatar
-                user={user}
-                profile={profile}
-                size="sm"
-                clickable
+              <div 
                 onClick={() => {
                   setProfileDialogOpen(true);
                   setMobileMenuOpen(false);
                 }}
-              />
+                className="relative shrink-0 cursor-pointer overflow-hidden rounded-xl ring-2 ring-border/10 shadow-lg w-12 h-12 hover:opacity-80 transition-opacity bg-white flex items-center justify-center p-0.5"
+              >
+                <img 
+                  src="/logo.png" 
+                  alt="Logo Empresa" 
+                  className="w-full h-full object-contain drop-shadow-sm scale-[1.05]"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
               <div className="flex items-center gap-2">
                 <Package className={cn("w-5 h-5", designSystem.colors.brand.primary)} />
                 <span className="font-bold text-white tracking-tight">Cota Aki</span>

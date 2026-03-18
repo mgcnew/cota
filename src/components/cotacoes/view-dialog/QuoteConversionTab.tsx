@@ -129,12 +129,12 @@ export function QuoteConversionTab({
   }
 
   return (
-    <div className="flex flex-col w-full bg-background">
-      <div className="p-6 space-y-6 pb-20">
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/30 border border-border/50">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-black uppercase tracking-widest text-brand mb-0.5">ESTRATÉGIA</span>
-            <span className="text-sm font-bold text-foreground">Montagem do pedido</span>
+    <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-5 pb-20">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50">
+          <div className="flex flex-col gap-0.5">
+            <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
+            <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
           </div>
           <Tabs value={pedidoSubTab} onValueChange={(val) => {
             setPedidoSubTab(val);
@@ -159,81 +159,94 @@ export function QuoteConversionTab({
               }
             }
           }}>
-            <TabsList className="bg-muted p-1 rounded-xl h-10 border border-border">
-              <TabsTrigger value="melhores" className="rounded-lg px-3 text-xs font-bold transition-all">Melhores Preços</TabsTrigger>
-              <TabsTrigger value="unico" className="rounded-lg px-3 text-xs font-bold transition-all">Forn. Único</TabsTrigger>
+            <TabsList className="bg-muted p-1 rounded-lg h-8 border border-border">
+              <TabsTrigger value="melhores" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Melhores</TabsTrigger>
+              <TabsTrigger value="unico" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Unificado</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-2 p-1">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 px-1">
             <ShoppingCart className="h-4 w-4 text-brand" />
-            <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground">Itens e Atribuições</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Itens e Fornecedores</h4>
           </div>
-          <div className="space-y-3">
-            {products.map((product: any) => {
-              const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-              const selectedSupplierId = productSelections[product.product_id];
-              const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
-              const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
+          
+          <div className="bg-card border border-border rounded-xl shadow-sm">
+            <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-3 p-2.5 bg-muted/40 border-b border-border items-center hidden sm:grid">
+               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-2">Produto</span>
+               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor Alocado</span>
+               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-2">Subtotal</span>
+            </div>
+            <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
+              {products.map((product: any) => {
+                const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
+                const selectedSupplierId = productSelections[product.product_id];
+                const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
+                const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
 
-              return (
-                <div key={product.product_id} className={cn("flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border transition-all duration-200 gap-4", isBest ? "bg-card/50 border-brand/30" : "bg-card border-border")}>
-                  <div className="flex-1 min-w-0 pr-4">
-                    <p className="font-bold text-foreground truncate">{safeStr(product.product_name)}</p>
-                    <Badge variant="outline" className="h-5 px-1.5 text-[9px] font-black uppercase text-muted-foreground mt-1">{safeStr(product.quantidade)} {safeStr(product.unidade)}</Badge>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                      <SelectTrigger className={cn("w-full md:w-52 h-10 rounded-xl font-bold text-xs", designSystem.components.input.root)}>
-                        <SelectValue placeholder="Selecione Fornecedor" />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border">
-                        {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
-                          <SelectItem key={f.id} value={f.id} className="text-xs font-bold">{safeStr(f.nome)}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <div className="text-right min-w-[120px] pr-2">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Valor</p>
-                      <p className={cn("text-base font-black", isBest ? "text-brand" : "text-foreground")}>
-                        R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
+                return (
+                  <div key={product.product_id} className={cn("grid grid-cols-1 sm:grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 sm:gap-3 p-3 sm:p-2.5 items-center transition-colors hover:bg-muted/10", isBest ? "bg-brand/5" : "")}>
+                    <div className="min-w-0 pl-1 sm:pl-2">
+                      <p className="font-bold text-[11px] sm:text-xs text-foreground truncate">{safeStr(product.product_name)}</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">{safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
+                    </div>
+                    <div>
+                      <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
+                        <SelectTrigger className="w-full h-8 rounded-lg font-bold text-[11px] sm:text-xs border-border/70 bg-background hover:bg-muted/50 transition-colors">
+                          <SelectValue placeholder="Fornecedor..." />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-border">
+                          {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
+                            <SelectItem key={f.id} value={f.id} className="text-[11px] sm:text-xs font-bold uppercase">{safeStr(f.nome)}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pr-1 sm:pr-2 gap-1">
+                      <p className="text-[9px] font-bold text-muted-foreground uppercase sm:hidden block">Subtotal:</p>
+                      <div className="flex items-center gap-1.5">
+                        {isBest && <Trophy className="h-3 w-3 text-brand" />}
+                        <p className={cn("text-[11px] sm:text-xs font-black", isBest ? "text-brand" : "text-foreground")}>
+                          R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 rounded-2xl bg-muted/30 border border-border/50 shadow-sm relative overflow-hidden">
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Entrega *</label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border/50 shadow-sm relative overflow-hidden">
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Entrega *</label>
             <Input
               type="date"
               value={deliveryDate}
               onChange={(e) => setDeliveryDate(e.target.value)}
-              className={cn("h-11 rounded-xl font-bold bg-background", designSystem.components.input.root)}
+              className="h-9 rounded-lg font-bold text-xs bg-background"
               min={new Date().toISOString().split('T')[0]}
             />
           </div>
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Observações</label>
+          <div className="space-y-1.5">
+            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Observações do Pedido</label>
             <Input
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               placeholder="Ex: Entregar após as 14h..."
-              className={cn("h-11 rounded-xl font-bold bg-background", designSystem.components.input.root)}
+              className="h-9 rounded-lg font-bold text-xs bg-background"
             />
           </div>
         </div>
-
-        <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-14 rounded-2xl bg-brand hover:bg-brand/80 text-black font-black text-base shadow-xl transition-all">
-          <ShoppingCart className="h-5 w-5 mr-3" />
-          Converter em Pedido
-        </Button>
+        
+        <div className="pt-2">
+          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-10 rounded-xl bg-brand hover:bg-brand/80 text-black font-black text-xs shadow-sm shadow-brand/20 transition-all">
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Converter em Pedidos de Compra
+          </Button>
+        </div>
       </div>
     </div>
   );
