@@ -278,28 +278,28 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="max-w-4xl max-h-[90vh] p-0 overflow-hidden [&>button]:hidden">
+      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 bg-white dark:bg-gray-900 [&>button]:hidden">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-background">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-teal-500/10"><ClipboardList className="h-5 w-5 text-teal-600 dark:text-teal-400" /></div>
+          <div className="flex items-center justify-between p-3 border-b bg-background">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 rounded-lg bg-teal-500/10"><ClipboardList className="h-4 w-4 text-teal-600 dark:text-teal-400" /></div>
               <div>
-                <DialogTitle className="text-lg font-bold">Cotação #{cotacaoId}</DialogTitle>
-                <DialogDescription className="text-sm text-muted-foreground">{cotacaoProduto}</DialogDescription>
+                <DialogTitle className="text-base font-bold">Cotação #{cotacaoId}</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground line-clamp-1">{cotacaoProduto}</DialogDescription>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {getStatusBadge(cotacaoStatus)}
+              <div className="scale-90 origin-right">{getStatusBadge(cotacaoStatus)}</div>
               <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => onOpenChange(false)} 
-              className="h-6 w-6 text-muted-foreground hover:text-foreground !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Fechar</span>
-            </Button>
+                variant="ghost" 
+                size="icon" 
+                onClick={() => onOpenChange(false)} 
+                className="h-7 w-7 text-muted-foreground hover:text-foreground !bg-transparent p-0 border-0 shadow-none ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Fechar</span>
+              </Button>
             </div>
           </div>
 
@@ -347,16 +347,16 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
 
                 <div className="p-4 rounded-xl bg-muted/30 border">
                   <h4 className="font-semibold mb-3 flex items-center gap-2"><Building2 className="h-4 w-4 text-muted-foreground" />Fornecedores Participantes</h4>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {fornecedores.map(f => (
-                      <div key={f.id} className="flex items-center justify-between p-2 rounded-lg bg-card border">
+                      <div key={f.id} className="flex items-center justify-between p-1.5 px-2 rounded-lg bg-card border shadow-sm">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-700 dark:text-teal-300 font-semibold text-sm">{safeStr(f.nome).charAt(0)}</div>
-                          <span className="font-medium">{safeStr(f.nome)}</span>
+                          <div className="w-7 h-7 rounded-full bg-teal-500/10 flex items-center justify-center text-teal-700 dark:text-teal-300 font-semibold text-xs">{safeStr(f.nome).charAt(0)}</div>
+                          <span className="text-sm font-medium">{safeStr(f.nome)}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          {f.valorOferecido > 0 && <span className="text-sm font-semibold text-green-600 dark:text-green-400">R$ {f.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>}
-                          <Badge variant="outline" className={cn("text-xs", f.status === "respondido" ? "bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/50" : "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200/50")}>{f.status === "respondido" ? "Respondido" : "Pendente"}</Badge>
+                          {f.valorOferecido > 0 && <span className="text-xs font-semibold text-green-600 dark:text-green-400">R$ {f.valorOferecido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>}
+                          <Badge variant="outline" className={cn("text-[10px] h-5", f.status === "respondido" ? "bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/50" : "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-200/50")}>{f.status === "respondido" ? "Respondido" : "Pendente"}</Badge>
                         </div>
                       </div>
                     ))}
@@ -368,7 +368,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
               <TabsContent value="valores" className="p-4 m-0 space-y-4">
                 <div className="flex items-center gap-4 mb-4">
                   <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
-                    <SelectTrigger className="w-[250px]"><SelectValue placeholder="Selecione um fornecedor" /></SelectTrigger>
+                    <SelectTrigger className="w-[250px] h-9 text-sm"><SelectValue placeholder="Selecione um fornecedor" /></SelectTrigger>
                     <SelectContent>
                       {fornecedores.map(f => <SelectItem key={f.id} value={f.id}>{safeStr(f.nome)}</SelectItem>)}
                     </SelectContent>
@@ -377,7 +377,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
                 </div>
 
                 {selectedSupplier ? (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {products.map((product) => {
                       const p = product as Record<string, unknown>;
                       const productId = safeStr(p.product_id);
@@ -387,23 +387,23 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
                       const { bestPrice, bestSupplierId } = getBestPriceInfoForProduct(productId);
                       const isBest = bestSupplierId === selectedSupplier && currentValue > 0;
                       return (
-                        <div key={productId} className={cn("flex items-center justify-between p-3 rounded-lg border", isBest ? "bg-green-500/10 border-green-200/50" : "bg-card")}>
+                        <div key={productId} className={cn("flex items-center justify-between p-2 px-3 rounded-lg border", isBest ? "bg-green-500/10 border-green-200/50" : "bg-card shadow-sm")}>
                           <div className="flex-1">
-                            <p className="font-medium">{productName}</p>
-                            <p className="text-xs text-muted-foreground">Qtd: {quantidade}</p>
+                            <p className="text-sm font-medium">{productName}</p>
+                            <p className="text-[10px] text-muted-foreground">Qtd: {quantidade}</p>
                           </div>
                           <div className="flex items-center gap-2">
                             {editingProductId === productId ? (
                               <>
-                                <Input ref={editInputRef} type="number" step="0.01" value={editedValues[productId] || 0} onChange={(e) => setEditedValues(prev => ({ ...prev, [productId]: parseFloat(e.target.value) || 0 }))} className="w-32 h-8" />
-                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={() => handleSaveEdit(productId)}><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Salvar</TooltipContent></Tooltip></TooltipProvider>
-                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancelar</TooltipContent></Tooltip></TooltipProvider>
+                                <Input ref={editInputRef} type="number" step="0.01" value={editedValues[productId] || 0} onChange={(e) => setEditedValues(prev => ({ ...prev, [productId]: parseFloat(e.target.value) || 0 }))} className="w-28 h-8 text-sm" />
+                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 text-green-600" onClick={() => handleSaveEdit(productId)}><Check className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Salvar</TooltipContent></Tooltip></TooltipProvider>
+                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7 text-red-600" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Cancelar</TooltipContent></Tooltip></TooltipProvider>
                               </>
                             ) : (
                               <>
-                                <span className={cn("font-semibold", isBest ? "text-green-600 dark:text-green-400" : "text-foreground")}>R$ {currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                                {isBest && <Badge className="bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/50">Melhor</Badge>}
-                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleStartEdit(productId, currentValue)}><Edit2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Editar valor</TooltipContent></Tooltip></TooltipProvider>
+                                <span className={cn("text-sm font-semibold", isBest ? "text-green-600 dark:text-green-400" : "text-foreground")}>R$ {currentValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+                                {isBest && <Badge className="text-[10px] h-5 bg-green-500/10 text-green-700 dark:text-green-300 border-green-200/50">Melhor</Badge>}
+                                <TooltipProvider><Tooltip><TooltipTrigger asChild><Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => handleStartEdit(productId, currentValue)}><Edit2 className="h-4 w-4" /></Button></TooltipTrigger><TooltipContent>Editar valor</TooltipContent></Tooltip></TooltipProvider>
                               </>
                             )}
                           </div>
@@ -425,18 +425,18 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
                       <p className="text-2xl font-bold text-green-700 dark:text-green-300">{safeStr(bestSupplier.nome)}</p>
                       <p className="text-sm text-green-600 dark:text-green-400">Total: R$ {bestSupplier.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-muted/30 border">
-                      <h4 className="font-semibold mb-3">Produtos incluídos</h4>
-                      <div className="space-y-2">
+                    <div className="p-3 rounded-xl bg-muted/30 border">
+                      <h4 className="text-sm font-semibold mb-2">Produtos incluídos</h4>
+                      <div className="space-y-1">
                         {getConversionProducts().map(p => (
-                          <div key={p.id} className="flex justify-between items-center p-2 bg-card rounded border">
+                          <div key={p.id} className="flex justify-between items-center p-1.5 px-2 bg-card rounded border text-sm">
                             <span>{p.name} (x{p.quantity})</span>
                             <span className="font-semibold text-green-600 dark:text-green-400">R$ {p.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
                           </div>
                         ))}
                       </div>
                     </div>
-                    <Button onClick={handleConvertToOrder} className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"><ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido</Button>
+                    <Button onClick={handleConvertToOrder} className="w-full h-9 text-sm bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700"><ShoppingCart className="h-4 w-4 mr-2" />Converter em Pedido</Button>
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground"><ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" /><p>Nenhum fornecedor com valores para converter</p></div>

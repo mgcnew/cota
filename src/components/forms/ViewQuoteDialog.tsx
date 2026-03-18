@@ -769,17 +769,17 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
         </div>
       ) : (
         <>
-          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-4' : 'px-4 sm:px-5 py-3 sm:py-4'} border-b border-border bg-background`}>
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-2.5 sm:py-3'} border-b border-border bg-background`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className={`${isMobile ? 'w-10 h-10 rounded-xl shadow-lg' : 'w-9 h-9 rounded-lg'} bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0`}>
-                  {isEditMode ? <Edit3 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : <Package className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />}
+                <div className={`${isMobile ? 'w-9 h-9 rounded-xl shadow-lg' : 'w-8 h-8 rounded-lg'} bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0`}>
+                  {isEditMode ? <Edit3 className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'}`} /> : <Package className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'}`} />}
                 </div>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className={`${isMobile ? 'text-lg font-bold' : 'text-base sm:text-lg font-semibold'} text-foreground truncate`}>
+                  <div className={`${isMobile ? 'text-base font-bold' : 'text-sm sm:text-base font-semibold'} text-foreground truncate`}>
                     {isEditMode ? `Editar Cotação #${currentQuote?.id?.substring(0, 8) || '...'}` : `Cotação #${currentQuote?.id?.substring(0, 8) || '...'}`}
                   </div>
-                  <div className="hidden sm:block">
+                  <div className="hidden sm:block scale-90 origin-left">
                     {currentQuote && getStatusBadge(currentQuote.status)}
                   </div>
                 </div>
@@ -1496,23 +1496,15 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
                       <TabsContent value="atualizacao" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0 mt-0">
                         <QuoteValuesTab
-                          readOnly={readOnly}
                           products={products}
-                          currentQuote={currentQuote}
-                          selectedSupplier={selectedSupplier}
-                          setSelectedSupplier={setSelectedSupplier}
-                          getCurrentProductValue={getCurrentProductValue}
-                          getSupplierItemPricingMetadata={getSupplierItemPricingMetadata}
+                          fornecedores={currentQuote.fornecedoresParticipantes || []}
+                          quoteId={currentQuote.id}
+                          supplierItems={currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || []}
+                          onUpdateSupplierProductValue={onUpdateSupplierProductValue || (() => Promise.resolve())}
+                          onRefresh={() => {}}
+                          isMobile={isMobile}
+                          safeStr={safeStr}
                           getBestPriceInfoForProduct={getBestPriceInfoForProduct}
-                          editingProductId={editingProductId}
-                          editedValues={editedValues}
-                          setEditedValues={setEditedValues}
-                          editedPricingMetadata={editedPricingMetadata}
-                          setEditedPricingMetadata={setEditedPricingMetadata}
-                          handleSaveEdit={handleSaveEdit}
-                          handleCancelEdit={handleCancelEdit}
-                          handleStartEdit={handleStartEdit}
-                          editInputRef={editInputRef}
                         />
                       </TabsContent>
 
@@ -1683,7 +1675,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[850px] h-[88vh] sm:h-[85vh] max-h-[800px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
         {modalInnerContent}
       </DialogContent>
     </Dialog>

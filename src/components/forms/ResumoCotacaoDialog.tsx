@@ -65,10 +65,10 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       hideClose
       title="Resumo da Cotação"
       description={`#${safeStr(quote.id).slice(0, 8)}`}
-      desktopMaxWidth="lg"
+      desktopMaxWidth="md"
       className={cn(
         "backdrop-blur-xl shadow-2xl [&>button]:hidden flex flex-col overflow-hidden",
-        ds.colors.surface.page
+        ds.colors.surface.card
       )}
       footer={
         <Button 
@@ -99,14 +99,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
       {/* Scrollable Content */}
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="space-y-6 pt-2 pb-4">
+        <div className="space-y-4 pt-1 pb-4">
           {/* Header com Status */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center",
+              "w-8 h-8 rounded-lg flex items-center justify-center",
               "bg-brand/10 border border-brand/20"
             )}>
-              <ClipboardList className="h-5 w-5 text-brand" />
+              <ClipboardList className="h-4 w-4 text-brand" />
             </div>
             <div className="flex-1 min-w-0">
               <h3 className={cn(
@@ -124,14 +124,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         {/* Stats Grid - Melhorado */}
         <div className="grid grid-cols-2 gap-4">
           {/* Produtos */}
-          <Card className={ds.components.card.root}>
-            <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-              <div className="flex items-center gap-2">
+          <Card className={cn(ds.components.card.root, "shadow-sm border-zinc-100 dark:border-zinc-800/50")}>
+            <CardContent className={cn("p-3 space-y-1.5")}>
+              <div className="flex items-center gap-1.5">
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  "w-7 h-7 rounded-lg flex items-center justify-center",
                   "bg-teal-500/10"
                 )}>
-                  <Package className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                  <Package className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" />
                 </div>
                 <span className={cn(
                   ds.typography.size.xs,
@@ -141,22 +141,22 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 )}>Produtos</span>
               </div>
               <p className={cn(
-                ds.typography.size["2xl"],
+                ds.typography.size.xl,
                 ds.typography.weight.bold,
-                "text-teal-700 dark:text-teal-300"
+                "text-teal-700 dark:text-teal-300 pl-8"
               )}>{products.length}</p>
             </CardContent>
           </Card>
           
           {/* Fornecedores */}
-          <Card className={ds.components.card.root}>
-            <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-              <div className="flex items-center gap-2">
+          <Card className={cn(ds.components.card.root, "shadow-sm border-zinc-100 dark:border-zinc-800/50")}>
+            <CardContent className={cn("p-3 space-y-1.5")}>
+              <div className="flex items-center gap-1.5">
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  "w-7 h-7 rounded-lg flex items-center justify-center",
                   "bg-blue-500/10"
                 )}>
-                  <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <Users className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <span className={cn(
                   ds.typography.size.xs,
@@ -166,9 +166,9 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 )}>Fornecedores</span>
               </div>
               <p className={cn(
-                ds.typography.size["2xl"],
+                ds.typography.size.xl,
                 ds.typography.weight.bold,
-                "text-blue-700 dark:text-blue-300"
+                "text-blue-700 dark:text-blue-300 pl-8"
               )}>
                 <span className="text-brand">{fornecedoresRespondidos}</span>
                 <span className={ds.colors.text.secondary}>/{fornecedores.length}</span>
@@ -177,14 +177,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           </Card>
           
           {/* Melhor Total */}
-          <Card className={ds.components.card.root}>
-            <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-              <div className="flex items-center gap-2">
+          <Card className={cn(ds.components.card.root, "shadow-sm border-zinc-100 dark:border-zinc-800/50 bg-brand/5 dark:bg-brand/10")}>
+            <CardContent className={cn("p-3 space-y-1.5")}>
+              <div className="flex items-center gap-1.5">
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  "w-7 h-7 rounded-lg flex items-center justify-center",
                   "bg-brand/10"
                 )}>
-                  <DollarSign className="h-4 w-4 text-brand" />
+                  <DollarSign className="h-3.5 w-3.5 text-brand" />
                 </div>
                 <span className={cn(
                   ds.typography.size.xs,
@@ -194,22 +194,22 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 )}>Melhor Total</span>
               </div>
               <p className={cn(
-                ds.typography.size.xl,
+                ds.typography.size.lg,
                 ds.typography.weight.bold,
-                "text-brand"
+                "text-brand pl-8"
               )}>R$ {totalMelhorPreco.toFixed(2)}</p>
             </CardContent>
           </Card>
           
           {/* Período */}
-          <Card className={ds.components.card.root}>
-            <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-              <div className="flex items-center gap-2">
+          <Card className={cn(ds.components.card.root, "shadow-sm border-zinc-100 dark:border-zinc-800/50")}>
+            <CardContent className={cn("p-3 space-y-1.5")}>
+              <div className="flex items-center gap-1.5">
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  "w-7 h-7 rounded-lg flex items-center justify-center",
                   "bg-purple-500/10"
                 )}>
-                  <Calendar className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <Calendar className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
                 </div>
                 <span className={cn(
                   ds.typography.size.xs,
@@ -218,14 +218,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                   "uppercase tracking-wider"
                 )}>Período</span>
               </div>
-              <div className="space-y-0.5">
+              <div className="pl-8 space-y-0.5">
                 <p className={cn(
-                  ds.typography.size.sm,
+                  "text-xs",
                   ds.typography.weight.bold,
                   "text-purple-700 dark:text-purple-300"
                 )}>{safeStr(quote.dataInicio)}</p>
                 <p className={cn(
-                  ds.typography.size.xs,
+                  "text-[10px]",
                   ds.typography.weight.medium,
                   "text-purple-600 dark:text-purple-400"
                 )}>até {safeStr(quote.dataFim)}</p>
@@ -238,36 +238,37 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         {melhorFornecedor && (
           <Card className={cn(
             ds.components.card.root,
-            "bg-gradient-to-br from-amber-500/10 to-amber-600/5 border-amber-500/20"
+            "bg-gradient-to-br from-amber-500/10 to-amber-600/5 !border-amber-500/20"
           )}>
-            <CardContent className={cn(ds.components.card.body, "flex items-center gap-4")}>
+            <CardContent className={cn("p-3 flex items-center gap-3")}>
               <div className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0",
+                "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
                 "bg-amber-500/20 border-2 border-amber-500/30"
               )}>
-                <Award className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className={cn(
-                  ds.typography.size.xs,
+                  "text-[10px]",
                   ds.typography.weight.bold,
                   "text-amber-700 dark:text-amber-300",
-                  "uppercase tracking-widest mb-1"
+                  "uppercase tracking-widest"
                 )}>🏆 Melhor Fornecedor</p>
-                <p className={cn(
-                  ds.typography.size.base,
-                  ds.typography.weight.bold,
-                  "text-amber-900 dark:text-amber-100",
-                  "truncate"
-                )}>
-                  {safeStr(melhorFornecedor.nome)}
-                </p>
-                <p className={cn(
-                  ds.typography.size.lg,
-                  ds.typography.weight.bold,
-                  "text-amber-600 dark:text-amber-400",
-                  "mt-1"
-                )}>R$ {melhorFornecedor.total.toFixed(2)}</p>
+                <div className="flex items-baseline justify-between gap-2 mt-0.5">
+                  <p className={cn(
+                    ds.typography.size.sm,
+                    ds.typography.weight.bold,
+                    "text-amber-900 dark:text-amber-100",
+                    "truncate"
+                  )}>
+                    {safeStr(melhorFornecedor.nome)}
+                  </p>
+                  <p className={cn(
+                    ds.typography.size.base,
+                    ds.typography.weight.bold,
+                    "text-amber-600 dark:text-amber-400 flex-shrink-0"
+                  )}>R$ {melhorFornecedor.total.toFixed(2)}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -275,13 +276,12 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Lista de Produtos */}
         <Card className={ds.components.card.root}>
-          <CardHeader className={ds.components.card.header}>
-            <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-              <Package className="h-4 w-4 text-brand" />
+          <CardHeader className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800/50">
+            <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2 !text-xs uppercase tracking-wider")}>
+              <Package className="h-3.5 w-3.5 text-brand" />
               <span>Produtos</span>
               <Badge className={cn(
-                ds.components.badge.base,
-                "bg-brand/10 text-brand border-brand/20 ml-auto"
+                "bg-brand/10 text-brand border-brand/20 ml-auto flex items-center justify-center h-5 px-1.5 !text-[10px] font-bold"
               )}>{products.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -296,13 +296,13 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                   <div 
                     key={p.product_id} 
                     className={cn(
-                      "px-4 py-3 flex items-center gap-3 transition-colors",
+                      "px-3.5 py-2 flex items-center gap-2.5 transition-colors",
                       ds.colors.surface.hover
                     )}
                   >
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                      ds.typography.size.xs,
+                      "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
+                      "text-[10px]",
                       ds.typography.weight.bold,
                       ds.colors.surface.section,
                       ds.colors.text.secondary
@@ -311,31 +311,31 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={cn(
-                        ds.typography.size.sm,
+                        "text-xs",
                         ds.typography.weight.bold,
                         ds.colors.text.primary,
                         "truncate"
                       )}>{safeStr(p.product_name)}</p>
                       <p className={cn(
-                        ds.typography.size.xs,
+                        "text-[10px]",
                         ds.colors.text.secondary,
-                        "mt-0.5"
+                        "mt-0.25"
                       )}>{safeStr(p.quantidade)} {safeStr(p.unidade)}</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className={cn(
-                        ds.typography.size.sm,
+                        "text-xs",
                         ds.typography.weight.bold,
                         "text-brand",
                         "flex items-center justify-end gap-1"
                       )}>
-                        <TrendingDown className="h-3.5 w-3.5" />
+                        <TrendingDown className="h-3 w-3" />
                         R$ {best.price.toFixed(2)}
                       </p>
                       <p className={cn(
-                        ds.typography.size.xs,
+                        "text-[10px]",
                         ds.colors.text.secondary,
-                        "truncate max-w-[120px] mt-0.5"
+                        "truncate max-w-[100px] mt-0.25 opacity-70"
                       )}>{best.supplier}</p>
                     </div>
                   </div>
@@ -347,13 +347,12 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Lista de Fornecedores */}
         <Card className={ds.components.card.root}>
-          <CardHeader className={ds.components.card.header}>
-            <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
-              <Building2 className="h-4 w-4 text-brand" />
+          <CardHeader className="px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800/50">
+            <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2 !text-xs uppercase tracking-wider")}>
+              <Building2 className="h-3.5 w-3.5 text-brand" />
               <span>Fornecedores</span>
               <Badge className={cn(
-                ds.components.badge.base,
-                "bg-brand/10 text-brand border-brand/20 ml-auto"
+                "bg-brand/10 text-brand border-brand/20 ml-auto flex items-center justify-center h-5 px-1.5 !text-[10px] font-bold"
               )}>{fornecedores.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -371,37 +370,36 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                   <div 
                     key={f.id} 
                     className={cn(
-                      "px-4 py-3 flex items-center gap-3 transition-colors",
+                      "px-3.5 py-2 flex items-center gap-2.5 transition-colors",
                       isBest 
                         ? "bg-amber-500/10 dark:bg-amber-500/5" 
                         : ds.colors.surface.hover
                     )}
                   >
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                      "w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0",
                       isRespondido 
                         ? "bg-brand/10" 
                         : "bg-amber-500/10"
                     )}>
                       {isRespondido ? (
-                        <CheckCircle2 className="h-4 w-4 text-brand" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-brand" />
                       ) : (
-                        <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className={cn(
-                        ds.typography.size.sm,
+                        "text-xs",
                         ds.typography.weight.bold,
                         ds.colors.text.primary,
                         "truncate"
                       )}>{safeStr(f.nome)}</p>
-                      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <Badge 
                           variant="outline" 
                           className={cn(
-                            ds.typography.size.xs,
-                            "h-5 uppercase tracking-wider",
+                            "text-[9px] px-1 h-4 uppercase tracking-wider",
                             isRespondido 
                               ? "text-brand border-brand/30 bg-brand/5" 
                               : "text-amber-600 border-amber-500/30 bg-amber-500/5 dark:text-amber-400"
@@ -411,17 +409,16 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                         </Badge>
                         {isBest && (
                           <Badge className={cn(
-                            ds.typography.size.xs,
-                            "h-5 bg-amber-500 text-white dark:bg-amber-600 uppercase tracking-wider"
+                            "text-[9px] px-1 h-4 bg-amber-500 text-white dark:bg-amber-600 uppercase tracking-wider"
                           )}>
-                            <Award className="h-3 w-3 mr-1" />
+                            <Award className="h-3 w-3 mr-0.5" />
                             Melhor
                           </Badge>
                         )}
                       </div>
                     </div>
                     <p className={cn(
-                      ds.typography.size.sm,
+                      "text-xs",
                       ds.typography.weight.bold,
                       "shrink-0",
                       total > 0 
@@ -439,25 +436,26 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Observações */}
         {(quote as any).observacoes && (
-          <Card className={ds.components.card.root}>
-            <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-              <div className="flex items-center gap-2">
+          <Card className={cn(ds.components.card.root, "shadow-sm border-zinc-100 dark:border-zinc-800/50")}>
+            <CardContent className={cn("p-3 space-y-2")}>
+              <div className="flex items-center gap-1.5">
                 <div className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center",
+                  "w-7 h-7 rounded-lg flex items-center justify-center",
                   "bg-brand/10"
                 )}>
-                  <FileText className="h-4 w-4 text-brand" />
+                  <FileText className="h-3.5 w-3.5 text-brand" />
                 </div>
                 <span className={cn(
-                  ds.typography.size.sm,
+                  "text-[10px]",
                   ds.typography.weight.bold,
-                  ds.colors.text.primary
+                  "uppercase tracking-wider",
+                  ds.colors.text.secondary
                 )}>Observações</span>
               </div>
               <p className={cn(
-                ds.typography.size.sm,
+                "text-xs",
                 ds.colors.text.primary,
-                "pl-10 leading-relaxed"
+                "pl-8 leading-relaxed opacity-80"
               )}>{safeStr((quote as any).observacoes)}</p>
             </CardContent>
           </Card>
