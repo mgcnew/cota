@@ -15,24 +15,28 @@ export interface StatusOption {
   className: string;
 }
 
+// Helper to normalize status strings for matching (remove accents, lowercase)
+const normalizeStatus = (s: string) => 
+  (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
 // Status para cotações
 export const QUOTE_STATUS_OPTIONS: StatusOption[] = [
-  { value: "ativa", label: "Ativa", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30" },
-  { value: "pendente", label: "Pendente", className: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 border-amber-200 dark:border-amber-500/30" },
-  { value: "planejada", label: "Planejada", className: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-200 dark:border-blue-500/30" },
-  { value: "concluida", label: "Concluída", className: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30" },
-  { value: "finalizada", label: "Finalizada", className: "bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 border-purple-200 dark:border-purple-500/30" },
-  { value: "cancelada", label: "Cancelada", className: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 border-rose-200 dark:border-rose-500/30" },
-  { value: "expirada", label: "Expirada", className: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400 border-red-200 dark:border-red-500/30" },
+  { value: "ativa", label: "Ativa", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/40 dark:text-emerald-200 border-emerald-200 dark:border-emerald-500/50" },
+  { value: "pendente", label: "Pendente", className: "bg-amber-100 text-amber-700 dark:bg-amber-500/40 dark:text-amber-200 border-amber-200 dark:border-amber-500/50" },
+  { value: "planejada", label: "Planejada", className: "bg-cyan-100 text-cyan-700 dark:bg-cyan-500/40 dark:text-cyan-200 border-cyan-200 dark:border-cyan-500/50" },
+  { value: "concluida", label: "Concluída", className: "bg-blue-100 text-blue-700 dark:bg-blue-600/40 dark:text-blue-100 border-blue-200 dark:border-blue-500/50" },
+  { value: "finalizada", label: "Finalizada", className: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-500/40 dark:text-fuchsia-200 border-fuchsia-200 dark:border-fuchsia-500/50" },
+  { value: "cancelada", label: "Cancelada", className: "bg-rose-100 text-rose-700 dark:bg-rose-500/40 dark:text-rose-200 border-rose-200 dark:border-rose-500/50" },
+  { value: "expirada", label: "Expirada", className: "bg-red-100 text-red-700 dark:bg-red-500/40 dark:text-red-200 border-red-200 dark:border-red-500/50" },
 ];
 
 // Status para pedidos
 export const ORDER_STATUS_OPTIONS: StatusOption[] = [
-  { value: "pendente", label: "Pendente", className: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 border-amber-200 dark:border-amber-500/30" },
-  { value: "confirmado", label: "Confirmado", className: "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400 border-blue-200 dark:border-blue-500/30" },
-  { value: "enviado", label: "Enviado", className: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/30" },
-  { value: "entregue", label: "Entregue", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30" },
-  { value: "cancelado", label: "Cancelado", className: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 border-rose-200 dark:border-rose-500/30" },
+  { value: "pendente", label: "Pendente", className: "bg-amber-100 text-amber-700 dark:bg-amber-500/40 dark:text-amber-200 border-amber-200 dark:border-amber-500/50" },
+  { value: "confirmado", label: "Confirmado", className: "bg-blue-100 text-blue-700 dark:bg-blue-500/40 dark:text-blue-100 border-blue-200 dark:border-blue-500/50" },
+  { value: "enviado", label: "Enviado", className: "bg-indigo-100 text-indigo-700 dark:bg-indigo-500/40 dark:text-indigo-200 border-indigo-200 dark:border-indigo-500/50" },
+  { value: "entregue", label: "Entregue", className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/40 dark:text-emerald-200 border-emerald-200 dark:border-emerald-500/50" },
+  { value: "cancelado", label: "Cancelado", className: "bg-rose-100 text-rose-700 dark:bg-rose-500/40 dark:text-rose-200 border-rose-200 dark:border-rose-500/50" },
 ];
 
 interface StatusSelectProps {
@@ -54,7 +58,7 @@ export const StatusSelect = memo(function StatusSelect({
 }: StatusSelectProps) {
   const [open, setOpen] = useState(false);
   
-  const currentOption = options.find(o => o.value === value) || options[0];
+  const currentOption = options.find(o => normalizeStatus(o.value) === normalizeStatus(value || "")) || options[0];
 
   const handleSelect = (newValue: string) => {
     if (newValue !== value) {
