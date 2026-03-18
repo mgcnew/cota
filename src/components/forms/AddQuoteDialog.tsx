@@ -666,17 +666,17 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const modalInnerContent = (
     <>
       {/* Minimal Header & Stepper */}
-      <div className="px-6 md:px-8 pt-6 pb-2 flex flex-col gap-5 flex-shrink-0 bg-transparent">
+      <div className="px-5 md:px-6 pt-5 pb-2 flex flex-col gap-3 flex-shrink-0 bg-transparent">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className={cn(ds.typography.size["xl"], ds.typography.weight.semibold, ds.colors.text.primary, "tracking-tight")}>
+            <h2 className={cn(ds.typography.size["lg"], ds.typography.weight.semibold, ds.colors.text.primary, "tracking-tight")}>
               Nova Cotação
             </h2>
-            <p className={cn(ds.colors.text.secondary, "mt-1.5", ds.typography.size.sm)}>
+            <p className={cn(ds.colors.text.secondary, "mt-1", ds.typography.size.sm)}>
               Passo {currentTabIndex + 1}: <span className={ds.typography.weight.medium}>{tabs[currentTabIndex]?.label}</span>
             </p>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-8 w-8 rounded-full")}>
+          <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-7 w-7 rounded-full")}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -754,7 +754,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       setTimeout(() => setShowProductSuggestions(false), 200);
                                     }}
                                     onKeyDown={handleProductKeyDown}
-                                    className={cn(ds.components.input.root, "pl-10")}
+                                    className={cn(ds.components.input.root, "pl-10 h-9 text-sm")}
                                     tabIndex={0}
                                   />
 
@@ -851,7 +851,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     onChange={(e) => setNewProductQuantity(e.target.value)}
                                     onFocus={handleInputFocus}
                                     onKeyDown={handleQuantityKeyDown}
-                                    className={ds.components.input.root}
+                                    className={cn(ds.components.input.root, "h-9 text-sm")}
                                     tabIndex={0}
                                   />
                                 </div>
@@ -868,7 +868,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   }}>
                                     <SelectTrigger
                                       ref={unitSelectRef}
-                                      className={ds.components.input.root}
+                                      className={cn(ds.components.input.root, "h-9 text-sm")}
                                       tabIndex={0}
                                     >
                                       <SelectValue placeholder="Selecione" />
@@ -898,7 +898,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   }
                                 }}
                                 disabled={!selectedProduct || !newProductQuantity || !newProductUnit}
-                                className={cn(ds.components.button.primary, "w-full mt-2")}
+                                className={cn(ds.components.button.primary, "w-full mt-2 h-9 text-sm")}
                                 tabIndex={0}
                               >
                                 <Plus className="h-4 w-4 mr-2" />
@@ -952,18 +952,17 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         "border rounded-xl transition-all hover:border-brand/30"
                                       )}>
 
-                                        <div className="p-3">
+                                        <div className="p-2 sm:p-2.5">
                                           <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1 min-w-0">
-                                              <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, ds.typography.size.sm, "truncate")}>
+                                              <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-xs sm:text-sm truncate")}>
                                                 {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
                                               </h4>
-                                              <div className={cn(ds.typography.size.sm, ds.colors.text.secondary, "mt-1 flex items-center gap-2")}>
+                                              <div className={cn("text-[11px] sm:text-xs text-muted-foreground mt-0.5 flex items-center gap-2")}>
                                                 <span className={cn(
                                                   ds.typography.fontFamily.mono,
                                                   ds.colors.surface.card,
-                                                  ds.colors.border.default,
-                                                  "px-1.5 rounded border text-xs"
+                                                  "px-1.5 rounded border"
                                                 )}>
                                                   {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
                                                 </span>
@@ -974,9 +973,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                               variant="ghost"
                                               size="sm"
                                               onClick={() => remove(index)}
-                                              className={cn(ds.components.button.danger, "h-8 w-8 p-0 flex-shrink-0")}
+                                              className={cn(ds.components.button.danger, "h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0")}
                                             >
-                                              <Trash2 className="h-4 w-4" />
+                                              <Trash2 className="h-3.5 w-3.5" />
                                             </Button>
                                           </div>
                                         </div>
@@ -1422,7 +1421,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     type="button"
                     variant="outline"
                     onClick={() => setOpen(false)}
-                    className={ds.components.button.secondary}
+                    className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
                   >
                     Cancelar
                   </Button>
@@ -1431,7 +1430,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className={ds.components.button.primary}
+                      className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
                     >
                       {isSubmitting ? (
                         <>
@@ -1450,7 +1449,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       type="button"
                       onClick={handleNext}
                       disabled={!canProceedToNext()}
-                      className={ds.components.button.primary}
+                      className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
                     >
                       Próximo
                       <ChevronRight className="ml-2 h-4 w-4" />
@@ -1521,7 +1520,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       <DialogContent
         hideClose
         className={cn(
-          "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[850px] p-0 gap-0 overflow-hidden shadow-2xl rounded-xl sm:rounded-2xl flex flex-col [&>button]:hidden",
+          "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] p-0 gap-0 overflow-hidden shadow-2xl rounded-xl sm:rounded-2xl flex flex-col [&>button]:hidden",
           ds.colors.surface.card,
           ds.colors.border.default,
           "border backdrop-blur-xl"
