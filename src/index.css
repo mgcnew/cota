@@ -382,11 +382,11 @@
   }
   
   .table-modern th {
-    @apply bg-muted/50 font-semibold text-left p-4 border-b border-border;
+    @apply bg-muted/50 font-semibold text-left px-4 py-3 border-b border-border text-sm;
   }
   
   .table-modern td {
-    @apply p-4 border-b border-border/50;
+    @apply px-4 py-3 border-b border-border/50 text-sm;
   }
   
   .table-modern tbody tr:hover {
@@ -547,31 +547,31 @@
     @apply w-full max-w-full overflow-x-hidden;
   }
   
-  /* Design System Spacing - Boas práticas de espaçamento */
+  /* Design System Spacing - Mais compacto e profissional */
   .content-spacing {
-    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+    @apply space-y-3 sm:space-y-4 lg:space-y-5;
   }
   
   .section-spacing {
-    @apply mb-6 sm:mb-8 lg:mb-12;
+    @apply mb-4 sm:mb-6 lg:mb-8;
   }
   
   .card-spacing {
-    @apply p-4 sm:p-6 lg:p-8;
+    @apply p-4 sm:p-5 lg:p-6;
   }
   
   .button-spacing {
-    @apply px-4 py-2 sm:px-6 sm:py-3 lg:px-8 lg:py-4;
+    @apply px-3 py-1.5 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5;
   }
   
   /* Safe area para elementos interativos */
   .safe-area {
-    @apply mx-2 sm:mx-4 lg:mx-6;
+    @apply mx-2 sm:mx-4 lg:mx-4;
   }
   
-  /* Container com padding interno generoso */
+  /* Container com padding interno mais denso */
   .inner-container {
-    @apply px-4 sm:px-6 lg:px-8 xl:px-12;
+    @apply px-3 sm:px-5 lg:px-6 xl:px-8;
   }
 }
 

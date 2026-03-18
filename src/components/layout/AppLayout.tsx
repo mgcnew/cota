@@ -69,7 +69,7 @@ export function AppLayout() {
         {/* Header Fixo - Apenas Ações (Direita) */}
         <header
           className={cn(
-            "fixed top-3 right-3 z-40 h-16 bg-card/80 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] flex items-center justify-end px-2 sm:px-4 w-auto min-w-fit",
+            "fixed top-3 right-3 z-40 h-14 bg-card/80 backdrop-blur-xl border border-border/40 rounded-2xl shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] flex items-center justify-end px-2 sm:px-4 w-auto min-w-fit",
             designSystem.layout.container.glass
           )}
         >

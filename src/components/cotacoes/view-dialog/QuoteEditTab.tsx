@@ -48,6 +48,13 @@ export function QuoteEditTab({
   const productSearchRef = useRef<HTMLInputElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
 
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
+  const [highlightedSupplierIndex, setHighlightedSupplierIndex] = useState(-1);
+  const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
+  const supplierSearchRef = useRef<HTMLInputElement>(null);
+  const supplierListRef = useRef<HTMLDivElement>(null);
+
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = e.target;
     setTimeout(() => {
@@ -72,15 +79,33 @@ export function QuoteEditTab({
       .slice(0, 30);
   }, [availableProductsNotInQuote, debouncedProductSearch, safeStr]);
 
+  const filteredSuppliers = useMemo(() => {
+    if (!debouncedSupplierSearch || debouncedSupplierSearch.trim().length < 2) return [];
+    return suppliersNotInQuote
+      .filter((s: any) => safeStr(s.name).toLowerCase().includes(debouncedSupplierSearch.toLowerCase()))
+      .slice(0, 30);
+  }, [suppliersNotInQuote, debouncedSupplierSearch, safeStr]);
+
   useEffect(() => {
     setHighlightedProductIndex(-1);
   }, [debouncedProductSearch]);
+
+  useEffect(() => {
+    setHighlightedSupplierIndex(-1);
+  }, [debouncedSupplierSearch]);
 
   const selectProductFromList = (product: any) => {
     setSelectedProduct(product);
     setSelectedProductToAdd(product.id);
     setProductSearch(safeStr(product.name));
     setHighlightedProductIndex(-1);
+  };
+
+  const selectSupplierFromList = (supplier: any) => {
+    setSelectedSupplier(supplier);
+    setSelectedSupplierToAdd(supplier.id);
+    setSupplierSearch(safeStr(supplier.name));
+    setHighlightedSupplierIndex(-1);
   };
 
   const handleProductKeyDown = (e: React.KeyboardEvent) => {
@@ -104,6 +129,32 @@ export function QuoteEditTab({
         e.preventDefault();
         setProductSearch("");
         setHighlightedProductIndex(-1);
+        return;
+      }
+    }
+  };
+
+  const handleSupplierKeyDown = (e: React.KeyboardEvent) => {
+    if (filteredSuppliers.length > 0 && !selectedSupplier) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedSupplierIndex(prev => prev < filteredSuppliers.length - 1 ? prev + 1 : 0);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedSupplierIndex(prev => prev > 0 ? prev - 1 : filteredSuppliers.length - 1);
+        return;
+      }
+      if (e.key === 'Enter' && highlightedSupplierIndex >= 0) {
+        e.preventDefault();
+        selectSupplierFromList(filteredSuppliers[highlightedSupplierIndex]);
+        return;
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSupplierSearch("");
+        setHighlightedSupplierIndex(-1);
         return;
       }
     }
@@ -133,6 +184,8 @@ export function QuoteEditTab({
     try {
       await onAddQuoteSupplier(selectedSupplierToAdd);
       setSelectedSupplierToAdd("");
+      setSelectedSupplier(null);
+      setSupplierSearch("");
       toast({ title: "Fornecedor adicionado!" });
     } catch {
       toast({ title: "Erro ao adicionar fornecedor", variant: "destructive" });
@@ -245,19 +298,42 @@ export function QuoteEditTab({
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</span>
           </div>
 
-          <div className="p-3 bg-muted/30 border border-border rounded-xl shadow-sm flex gap-2">
-            <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-              <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 h-10 rounded-lg font-bold text-xs bg-background border-border")}>
-                <SelectValue placeholder="Convidar fornecedor..." />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-border bg-popover max-h-60 overflow-y-auto custom-scrollbar">
-                {suppliersNotInQuote.map((s: any) => (
-                  <SelectItem key={s.id} value={s.id} className="font-bold text-xs uppercase text-foreground">
-                    {safeStr(s.name)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="p-3 bg-muted/30 border border-border rounded-xl shadow-sm flex gap-2 relative">
+            <div className="flex-1 relative group">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                ref={supplierSearchRef}
+                placeholder="Busque e convide um fornecedor..."
+                value={selectedSupplier ? safeStr(selectedSupplier.name) : supplierSearch}
+                onChange={(e) => {
+                  setSupplierSearch(e.target.value);
+                  setSelectedSupplier(null);
+                  setSelectedSupplierToAdd("");
+                }}
+                onFocus={handleInputFocus}
+                onKeyDown={handleSupplierKeyDown}
+                className={cn(designSystem.components.input.root, "pl-11 h-10 rounded-lg text-xs font-bold bg-background")}
+              />
+
+              {filteredSuppliers.length > 0 && !selectedSupplier && (
+                <div ref={supplierListRef} className="absolute z-50 w-full mt-2 bg-popover border border-border rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                  {filteredSuppliers.map((s: any, index: number) => (
+                    <button
+                      key={s.id}
+                      onClick={() => selectSupplierFromList(s)}
+                      onMouseEnter={() => setHighlightedSupplierIndex(index)}
+                      className={cn(
+                        "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
+                        highlightedSupplierIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
+                      )}
+                    >
+                      <span className="font-black tracking-tight truncate uppercase">{safeStr(s.name)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
             <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd} className="h-10 w-10 rounded-lg bg-brand hover:bg-brand/80 text-black">
               <Plus className="h-5 w-5" />
             </Button>

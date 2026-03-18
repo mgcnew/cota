@@ -78,14 +78,14 @@ export const designSystem = {
             extrabold: "font-extrabold"
         },
         size: {
-            xs: "text-[11px] leading-3",
-            sm: "text-[13px] leading-5",
-            base: "text-[15px] leading-6",
-            lg: "text-[17px] leading-7",
-            xl: "text-[20px] leading-7",
-            "2xl": "text-[24px] leading-8",
-            "3xl": "text-[32px] leading-9",
-            "4xl": "text-[40px] leading-tight"
+            xs: "text-[10px] leading-3",
+            sm: "text-[12px] leading-4",
+            base: "text-[13px] leading-5", // Fonte base menor simula zoom reduzido nos botões/textos
+            lg: "text-[15px] leading-6",
+            xl: "text-[18px] leading-7",
+            "2xl": "text-[22px] leading-8",
+            "3xl": "text-[28px] leading-9",
+            "4xl": "text-[36px] leading-tight"
         }
     },
 
@@ -101,7 +101,7 @@ export const designSystem = {
         // Containers Comuns
         container: {
             glass: "bg-card/80 backdrop-blur-xl border border-white/5 shadow-sm", // Token Mestre para Sidebar/Header
-            page: "container mx-auto px-4 pt-6 pb-8 md:px-6 md:pt-6 md:pb-8 max-w-7xl space-y-6", // Balanced padding
+            page: "container mx-auto px-4 pt-6 pb-8 md:px-6 md:pt-6 md:pb-8 max-w-7xl space-y-6", // Retornado ao padding padrão
             section: "space-y-4",
             grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         },
@@ -143,7 +143,7 @@ export const designSystem = {
     components: {
         // Header/Navbar Superior
         header: {
-            wrapper: "sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-6 flex items-center justify-between shadow-sm"
+            wrapper: "sticky top-0 z-30 w-full h-14 bg-white/80 dark:bg-background/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 md:px-5 flex items-center justify-between shadow-sm"
         },
 
         // Cartões (Cards)
@@ -152,7 +152,7 @@ export const designSystem = {
             flat: "bg-zinc-50 dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl",
             interactive: "cursor-pointer active:scale-[0.99] transition-transform",
             header: "px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between",
-            title: "text-lg font-semibold text-zinc-900 dark:text-zinc-50",
+            title: "text-base font-semibold text-zinc-900 dark:text-zinc-50", // Mantém título um pouco menor
             body: "p-6",
             footer: "px-6 py-4 bg-zinc-50/50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-sm text-zinc-500"
         },
@@ -192,9 +192,9 @@ export const designSystem = {
 
             // Tamanhos
             size: {
-                sm: "h-8 px-3 text-xs",
-                default: "h-10 px-4 py-2",
-                lg: "h-12 px-8 text-base",
+                sm: "h-7 px-3 text-[11px]",
+                default: "h-9 px-4 py-1.5 text-sm", // h-10 reduzido p/ h-9 (menos zoom nos botões)
+                lg: "h-11 px-8 text-base",
                 icon: "h-9 w-9 p-0 flex items-center justify-center rounded-lg"
             },
 
@@ -211,7 +211,7 @@ export const designSystem = {
             content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-200 animate-in zoom-in-95 slide-in-from-left-1/2 slide-in-from-top-[48%] flex flex-col max-h-[90vh]",
             // Padrão para Modais de Alta Densidade (Scroll Global)
             header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
-            title: "text-lg font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
+            title: "text-base font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
             body: "p-6 overflow-y-auto flex-1 custom-scrollbar",
             footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
 
