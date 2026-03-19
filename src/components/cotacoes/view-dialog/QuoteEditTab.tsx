@@ -194,9 +194,9 @@ export function QuoteEditTab({
 
   return (
     <div className="flex flex-col w-full bg-background">
-      <div className="p-5 space-y-6 pb-20">
+      <div className="p-4 space-y-4 pb-16">
         {/* Gestão de Produtos */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
               <div className="p-1 rounded-lg bg-brand/10">
@@ -206,10 +206,10 @@ export function QuoteEditTab({
             </div>
           </div>
 
-          <div className="p-4 bg-muted/30 border border-border rounded-xl shadow-sm space-y-4">
-            <div className="flex flex-col md:flex-row gap-3">
+          <div className="p-3 bg-muted/30 border border-border rounded-xl shadow-sm space-y-3">
+            <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative group">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
                   ref={productSearchRef}
                   placeholder="Adicionar produto..."
@@ -221,7 +221,7 @@ export function QuoteEditTab({
                   }}
                   onFocus={handleInputFocus}
                   onKeyDown={handleProductKeyDown}
-                  className={cn(designSystem.components.input.root, "pl-11 h-10 rounded-lg text-xs font-bold bg-background")}
+                  className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
                 />
 
                 {filteredProducts.length > 0 && !selectedProduct && (
@@ -244,9 +244,9 @@ export function QuoteEditTab({
               </div>
 
               <div className="flex gap-2 min-w-fit">
-                <Input type="number" min="1" value={productQuantity} onChange={(e) => setProductQuantity(Number(e.target.value))} className={cn(designSystem.components.input.root, "w-20 h-10 text-center font-black text-xs bg-background")} />
+                <Input type="number" min="1" value={productQuantity} onChange={(e) => setProductQuantity(Number(e.target.value))} className={cn(designSystem.components.input.root, "w-16 h-9 text-center font-black text-xs bg-background")} />
                 <Select value={productUnit} onValueChange={(val: PricingUnit) => setProductUnit(val)}>
-                  <SelectTrigger className={cn(designSystem.components.input.root, "w-28 h-10 rounded-lg font-bold text-[10px] uppercase bg-background")}>
+                  <SelectTrigger className={cn(designSystem.components.input.root, "w-24 h-9 rounded-lg font-bold text-[10px] uppercase bg-background")}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-border">
@@ -256,8 +256,8 @@ export function QuoteEditTab({
                     <SelectItem value="pct" className="text-xs font-bold">PACOTE</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={handleAddProduct} disabled={!selectedProductToAdd} className="h-10 w-10 rounded-lg bg-brand hover:bg-brand/80 text-black">
-                  <Plus className="h-5 w-5" />
+                <Button onClick={handleAddProduct} disabled={!selectedProductToAdd} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -266,18 +266,18 @@ export function QuoteEditTab({
           <div className="space-y-2">
             {products.length > 0 ? (
               products.map((p: any) => (
-                <div key={p.product_id} className="flex items-center justify-between p-3 bg-muted/20 border border-border rounded-xl group hover:border-brand/30 transition-all">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-background flex items-center justify-center text-muted-foreground border border-border shadow-sm group-hover:text-brand transition-colors">
-                      <Package className="h-4 w-4" />
+                <div key={p.product_id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border rounded-xl group hover:border-brand/30 transition-all">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-7 h-7 rounded-lg bg-background flex items-center justify-center text-muted-foreground border border-border shadow-sm group-hover:text-brand transition-colors">
+                      <Package className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[11px] font-black text-foreground uppercase tracking-tight truncate">{safeStr(p.product_name)}</span>
                       <span className="text-[9px] font-bold text-muted-foreground uppercase">{safeStr(p.quantidade)} {safeStr(p.unidade)}</span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteItem(p.product_id)} className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all">
-                    <Trash2 className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteItem(p.product_id)} className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all">
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               ))
@@ -290,7 +290,7 @@ export function QuoteEditTab({
         </div>
 
         {/* Gestão de Fornecedores */}
-        <div className="space-y-4 pt-6 border-t border-border">
+        <div className="space-y-3 pt-5 border-t border-border">
           <div className="flex items-center gap-2 px-1">
             <div className="p-1 rounded-lg bg-brand/10">
               <Building2 className="h-3.5 w-3.5 text-brand" />
@@ -298,9 +298,9 @@ export function QuoteEditTab({
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</span>
           </div>
 
-          <div className="p-3 bg-muted/30 border border-border rounded-xl shadow-sm flex gap-2 relative">
+          <div className="p-2.5 bg-muted/30 border border-border rounded-xl shadow-sm flex gap-2 relative">
             <div className="flex-1 relative group">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
                 ref={supplierSearchRef}
                 placeholder="Busque e convide um fornecedor..."
@@ -312,7 +312,7 @@ export function QuoteEditTab({
                 }}
                 onFocus={handleInputFocus}
                 onKeyDown={handleSupplierKeyDown}
-                className={cn(designSystem.components.input.root, "pl-11 h-10 rounded-lg text-xs font-bold bg-background")}
+                className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
               />
 
               {filteredSuppliers.length > 0 && !selectedSupplier && (
@@ -334,20 +334,20 @@ export function QuoteEditTab({
               )}
             </div>
             
-            <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd} className="h-10 w-10 rounded-lg bg-brand hover:bg-brand/80 text-black">
-              <Plus className="h-5 w-5" />
+            <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
+              <Plus className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {fornecedores.map((f: any) => (
-              <div key={f.id} className="flex items-center justify-between p-3 bg-muted/20 border border-border rounded-xl group hover:border-brand/30 transition-all">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Building2 className="h-4 w-4 text-muted-foreground group-hover:text-brand" />
+              <div key={f.id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border rounded-xl group hover:border-brand/30 transition-all">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Building2 className="h-3.5 w-3.5 text-muted-foreground group-hover:text-brand" />
                   <span className="text-[10px] font-black text-foreground uppercase truncate">{safeStr(f.nome)}</span>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteSupplier(f.id)} className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 opacity-0 group-hover:opacity-100 transition-all">
-                  <Trash2 className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteSupplier(f.id)} className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 opacity-0 group-hover:opacity-100 transition-all">
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
             ))}

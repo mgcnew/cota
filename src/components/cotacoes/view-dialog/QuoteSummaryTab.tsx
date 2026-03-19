@@ -57,55 +57,55 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     <div className="flex flex-col w-full h-auto bg-transparent">
       {/* 1. SEÇÃO DE STATS */}
       <div className="bg-zinc-50/50 dark:bg-zinc-900/10 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
           <MetricCard
             title="Produtos"
             value={stats.totalProdutos}
             icon={Package}
-            className="h-28 shadow-sm"
+            className="h-20 shadow-sm"
           />
           <MetricCard
             title="Respostas"
             value={`${stats.fornecedoresRespondidos}/${stats.totalFornecedores}`}
             icon={Building2}
             variant="info"
-            className="h-28 shadow-sm"
+            className="h-20 shadow-sm"
           />
           <MetricCard
             title="Melhor Total"
             value={`R$ ${melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
             icon={DollarSign}
             variant="success"
-            className="h-28 shadow-sm"
+            className="h-20 shadow-sm"
           />
           <MetricCard
             title="Ganhadores"
             value={topSuppliersCount}
             icon={Trophy}
             variant="warning"
-            className="h-28 shadow-sm"
+            className="h-20 shadow-sm"
           />
         </div>
       </div>
 
       {/* 2. TOOLBAR & FILTROS */}
-      <div className="bg-white dark:bg-zinc-950 px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-3 sticky top-0 z-20">
+      <div className="bg-white dark:bg-zinc-950 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">
         <div className="relative w-full sm:flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors z-20 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors z-20 pointer-events-none" />
           <Input
             placeholder="Pesquisar por item ou empresa..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={cn(
               designSystem.components.input.root,
-              "pl-12 h-11 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-brand transition-all"
+              "pl-9 h-9 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-brand transition-all"
             )}
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 sm:w-48 h-11 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800")}>
+            <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 sm:w-48 h-9 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800")}>
               <div className="flex items-center gap-2">
                 <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
                 <SelectValue placeholder="Ordenar" />
@@ -124,7 +124,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
       {/* 3. TABELA (Corpo sem scroll interno) */}
       <div className="flex flex-col bg-white dark:bg-zinc-950">
-        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-10 py-3 bg-zinc-50/50 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800">
+        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-6 py-2 bg-zinc-50/50 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800">
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Item Adquirido</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Unid.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Quant.</span>
@@ -132,13 +132,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-4">Melhor Proposta</span>
         </div>
 
-        <div className="p-6 space-y-1 pb-20">
+        <div className="p-4 space-y-1 pb-16">
           {filteredAndSortedData.length > 0 ? (
             filteredAndSortedData.map((item) => (
               <div
                 key={item.productId}
                 className={cn(
-                  "grid md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 items-center p-3 rounded-xl border transition-all duration-200",
+                  "grid md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-2 md:gap-4 items-center px-3 py-2 rounded-xl border transition-all duration-200",
                   item.bestPrice > 0
                     ? "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 hover:shadow-sm"
                     : "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-100 dark:border-zinc-800/50 opacity-40"
@@ -184,8 +184,8 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
                 <div className="flex justify-end items-center pr-2 min-w-0">
                   {item.bestSupplierName ? (
-                    <div className="flex items-center gap-2 max-w-full">
-                      <div className="w-6 h-6 rounded-md bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center justify-end gap-1.5 max-w-full">
+                      <div className="w-5 h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
                         <Building2 className="h-3 w-3 text-zinc-400" />
                       </div>
                       <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>

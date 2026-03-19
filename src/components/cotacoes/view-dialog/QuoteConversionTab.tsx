@@ -130,8 +130,8 @@ export function QuoteConversionTab({
 
   return (
     <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-5 pb-20">
-        <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-border/50">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 pb-16">
+        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border/50">
           <div className="flex flex-col gap-0.5">
             <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
             <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
@@ -173,10 +173,10 @@ export function QuoteConversionTab({
           </div>
           
           <div className="bg-card border border-border rounded-xl shadow-sm">
-            <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-3 p-2.5 bg-muted/40 border-b border-border items-center hidden sm:grid">
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-2">Produto</span>
+            <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 px-3 py-2 bg-muted/40 border-b border-border items-center hidden sm:grid">
+               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1">Produto</span>
                <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor Alocado</span>
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-2">Subtotal</span>
+               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-1">Subtotal</span>
             </div>
             <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
               {products.map((product: any) => {
@@ -186,14 +186,14 @@ export function QuoteConversionTab({
                 const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
 
                 return (
-                  <div key={product.product_id} className={cn("grid grid-cols-1 sm:grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 sm:gap-3 p-3 sm:p-2.5 items-center transition-colors hover:bg-muted/10", isBest ? "bg-brand/5" : "")}>
-                    <div className="min-w-0 pl-1 sm:pl-2">
-                      <p className="font-bold text-[11px] sm:text-xs text-foreground truncate">{safeStr(product.product_name)}</p>
-                      <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">{safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
+                  <div key={product.product_id} className={cn("grid grid-cols-1 sm:grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 p-2 sm:px-3 items-center transition-colors hover:bg-muted/10", isBest ? "bg-brand/5" : "")}>
+                    <div className="min-w-0 pl-1">
+                      <p className="font-bold text-[10px] sm:text-[11px] text-foreground truncate">{safeStr(product.product_name)}</p>
+                      <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">{safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
                     </div>
                     <div>
                       <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                        <SelectTrigger className="w-full h-8 rounded-lg font-bold text-[11px] sm:text-xs border-border/70 bg-background hover:bg-muted/50 transition-colors">
+                        <SelectTrigger className="w-full h-7 rounded-md font-bold text-[10px] border-border/70 bg-background hover:bg-muted/50 transition-colors">
                           <SelectValue placeholder="Fornecedor..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-border">
@@ -203,11 +203,11 @@ export function QuoteConversionTab({
                         </SelectContent>
                       </Select>
                     </div>
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pr-1 sm:pr-2 gap-1">
-                      <p className="text-[9px] font-bold text-muted-foreground uppercase sm:hidden block">Subtotal:</p>
-                      <div className="flex items-center gap-1.5">
-                        {isBest && <Trophy className="h-3 w-3 text-brand" />}
-                        <p className={cn("text-[11px] sm:text-xs font-black", isBest ? "text-brand" : "text-foreground")}>
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pr-1 gap-1">
+                      <p className="text-[8px] font-bold text-muted-foreground uppercase sm:hidden block">Subtotal:</p>
+                      <div className="flex items-center gap-1">
+                        {isBest && <Trophy className="h-2.5 w-2.5 text-brand" />}
+                        <p className={cn("text-[10px] sm:text-[11px] font-black", isBest ? "text-brand" : "text-foreground")}>
                           R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                         </p>
                       </div>
@@ -242,8 +242,8 @@ export function QuoteConversionTab({
         </div>
         
         <div className="pt-2">
-          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-10 rounded-xl bg-brand hover:bg-brand/80 text-black font-black text-xs shadow-sm shadow-brand/20 transition-all">
-            <ShoppingCart className="h-4 w-4 mr-2" />
+          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-9 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
+            <ShoppingCart className="h-3.5 w-3.5 mr-2" />
             Converter em Pedidos de Compra
           </Button>
         </div>

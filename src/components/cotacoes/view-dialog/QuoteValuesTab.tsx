@@ -144,10 +144,10 @@ export function QuoteValuesTab({
     <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
       {/* Sidebar - Lista de Fornecedores */}
       <div className={cn(
-        "w-full md:w-72 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-800 flex flex-col bg-zinc-50/30 dark:bg-zinc-950/20",
+        "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-800 flex flex-col bg-zinc-50/30 dark:bg-zinc-950/20",
         isMobile && showMobileValues ? "hidden" : "flex"
       )}>
-        <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40">
+        <div className="p-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="h-4 w-4 text-zinc-400" />
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
@@ -163,7 +163,7 @@ export function QuoteValuesTab({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1.5">
           {filteredSuppliers.length > 0 ? (
             filteredSuppliers.map((fornecedor: any) => {
               const total = calcularTotalFornecedor(fornecedor.id);
@@ -178,9 +178,9 @@ export function QuoteValuesTab({
                     if (isMobile) setShowMobileValues(true);
                   }}
                   className={cn(
-                    "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
+                    "w-full text-left px-3 py-2 rounded-xl border transition-all duration-200 relative overflow-hidden group",
                     isSelected
-                      ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-brand/20"
+                      ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-sm ring-1 ring-brand/20"
                       : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
                   )}
                 >
@@ -225,9 +225,9 @@ export function QuoteValuesTab({
 
         {selectedSupplier ? (
           <>
-            <div className="flex items-center justify-between p-6 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/20 flex-shrink-0">
-              <div className="flex items-center gap-4 flex-1 min-w-0 pr-4">
-                <div className="p-3 rounded-2xl bg-brand/10 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/20 flex-shrink-0">
+              <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
+                <div className="p-2 rounded-xl bg-brand/10 flex-shrink-0">
                   <Building2 className="h-5 w-5 text-brand" />
                 </div>
                 <div className="min-w-0">
@@ -236,10 +236,10 @@ export function QuoteValuesTab({
                 </div>
               </div>
               <div className="text-right flex flex-col items-end flex-shrink-0">
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Valor Proposto</p>
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Valor Proposto</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-xs font-bold text-brand">R$</span>
-                  <p className="text-2xl font-black text-zinc-900 dark:text-zinc-50">
+                  <span className="text-[10px] font-bold text-brand">R$</span>
+                  <p className="text-xl font-black text-zinc-900 dark:text-zinc-50">
                     {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -258,7 +258,7 @@ export function QuoteValuesTab({
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-1 pb-20">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1 pb-16">
               {products.map((product: any) => {
                 const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                 const isEditing = editingProductId === product.product_id;
@@ -269,7 +269,7 @@ export function QuoteValuesTab({
                   <div
                     key={product.product_id}
                     className={cn(
-                      "group py-1.5 px-5 rounded-xl border transition-all duration-300",
+                      "group py-1 px-4 rounded-xl border transition-all duration-200",
                       isBest
                         ? "bg-brand/5 border-brand/20 shadow-sm"
                         : "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
