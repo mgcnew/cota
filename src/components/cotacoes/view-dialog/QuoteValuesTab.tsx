@@ -272,6 +272,8 @@ export function QuoteValuesTab({
                       "group py-1 px-4 rounded-xl border transition-all duration-200",
                       isBest
                         ? "bg-brand/5 border-brand/20 shadow-sm"
+                        : currentValue === 0
+                        ? "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-100 dark:border-zinc-800/50 opacity-60 hover:opacity-100 grayscale-[0.5]"
                         : "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
                     )}
                   >
@@ -334,9 +336,15 @@ export function QuoteValuesTab({
                         <div className="text-right pr-2">
                           <div className="flex flex-col items-end">
                             <div className="flex items-center gap-1">
-                              <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
-                                {formatCurrency(currentValue)}
-                              </p>
+                              {currentValue > 0 ? (
+                                <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
+                                  {formatCurrency(currentValue)}
+                                </p>
+                              ) : (
+                                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
+                                  Não Cotado
+                                </Badge>
+                              )}
                               <LastPaidPricesTooltip productId={product.product_id} />
                             </div>
                             {!isMobile && isBest && <p className="text-[8px] font-black text-brand uppercase tracking-tighter mt-0.5">🏆 MELHOR PREÇO</p>}
