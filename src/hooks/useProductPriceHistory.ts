@@ -19,22 +19,7 @@ export function useProductPriceHistory(productId: string) {
     queryFn: async () => {
       console.log(`📊 Fetching price history for product: ${productId}`);
       
-      // 1. Fetch Quote History
-      const { data: quoteItems, error: qiError } = await supabase
-        .from('quote_items')
-        .select(`
-          product_id,
-          quote_id,
-          quotes(
-            id,
-            status,
-            created_at
-          )
-        `)
-        .eq('product_id', productId);
-
-      if (qiError) throw qiError;
-
+      // 1. Fetch Quote History (All offers for this product)
       const { data: supplierItems, error: siError } = await supabase
         .from('quote_supplier_items')
         .select(`
@@ -42,7 +27,12 @@ export function useProductPriceHistory(productId: string) {
           quote_id,
           supplier_id,
           valor_oferecido,
-          created_at
+          created_at,
+          quotes!inner(
+            id,
+            status,
+            created_at
+          )
         `)
         .eq('product_id', productId)
         .not('valor_oferecido', 'is', null)
@@ -91,13 +81,13 @@ export function useProductPriceHistory(productId: string) {
       // Process Quote History (Best price per quote)
       const quoteGroups = new Map<string, any>();
       supplierItems?.forEach(item => {
-        const quote = quoteItems?.find(qi => qi.quote_id === item.quote_id);
-        if (!quote || !quote.quotes) return;
+        const quote = (item as any).quotes;
+        if (!quote) return;
 
         const currentBest = quoteGroups.get(item.quote_id);
         if (!currentBest || Number(item.valor_oferecido) < Number(currentBest.bestOffer.valor_oferecido)) {
           quoteGroups.set(item.quote_id, {
-            quote: quote.quotes,
+            quote,
             bestOffer: item
           });
         }
@@ -127,7 +117,7 @@ export function useProductPriceHistory(productId: string) {
           orderId: item.order_id,
           quotationId: item.orders?.quote_id || undefined,
           status: item.orders?.status || 'concluido',
-          type: item.orders?.quote_id ? 'quote' : 'order'
+          type: 'order'
         });
       });
 
