@@ -19,113 +19,179 @@ export function useProductPriceHistory(productId: string) {
     queryFn: async () => {
       console.log(`📊 Fetching price history for product: ${productId}`);
       
-      // 1. Fetch Quote History (All offers for this product)
-      const { data: supplierItems, error: siError } = await supabase
-        .from('quote_supplier_items')
-        .select(`
-          product_id,
-          quote_id,
-          supplier_id,
-          valor_oferecido,
-          created_at,
-          quotes!inner(
-            id,
-            status,
-            created_at
-          )
-        `)
-        .eq('product_id', productId)
-        .not('valor_oferecido', 'is', null)
-        .gt('valor_oferecido', 0);
+      // ============== QUOTE HISTORY ==============
+      // 1. Find all quotes that include this product via quote_items
+      const { data: quoteItems, error: qiError } = await supabase
+        .from('quote_items')
+        .select('quote_id, product_id, product_name')
+        .eq('product_id', productId);
 
-      if (siError) throw siError;
+      if (qiError) {
+        console.error("❌ Error fetching quote_items:", qiError);
+        throw qiError;
+      }
 
-      // 2. Fetch Order History (Confirmed Orders)
-      const { data: orderItems, error: oiError } = await supabase
-        .from('order_items')
-        .select(`
-          id,
-          product_id,
-          order_id,
-          unit_price,
-          created_at,
-          orders!inner(
-            id,
-            supplier_name,
-            status,
-            order_date,
-            quote_id
-          )
-        `)
-        .eq('product_id', productId)
-        .neq('orders.status', 'cancelado')
-        .gt('unit_price', 0);
+      console.log(`📊 Found ${quoteItems?.length || 0} quote_items for product`);
 
-      if (oiError) throw oiError;
-
-      // 3. Fetch all related suppliers for names
-      const quoteSupplierIds = supplierItems?.map(si => si.supplier_id) || [];
-      const supplierIds = [...new Set([...quoteSupplierIds])];
+      const quoteIds = [...new Set(quoteItems?.map(qi => qi.quote_id) || [])];
       
-      const { data: suppliers, error: suppliersError } = await supabase
-        .from('suppliers')
-        .select('id, name')
-        .in('id', supplierIds);
+      // 2. Fetch quote details
+      let quotesMap = new Map<string, { id: string; status: string; created_at: string }>();
+      if (quoteIds.length > 0) {
+        const { data: quotes, error: quotesError } = await supabase
+          .from('quotes')
+          .select('id, status, created_at')
+          .in('id', quoteIds);
 
-      if (suppliersError) throw suppliersError;
-      const supplierMap = new Map(suppliers?.map(s => [s.id, s.name]) || []);
+        if (quotesError) {
+          console.error("❌ Error fetching quotes:", quotesError);
+          throw quotesError;
+        }
+        quotesMap = new Map(quotes?.map(q => [q.id, q]) || []);
+      }
 
+      // 3. Fetch supplier offers (quote_supplier_items) for this product in these quotes
+      let supplierItemsByQuote = new Map<string, Array<{ supplier_id: string; valor_oferecido: number }>>();
+      if (quoteIds.length > 0) {
+        const { data: supplierItems, error: siError } = await supabase
+          .from('quote_supplier_items')
+          .select('quote_id, supplier_id, valor_oferecido')
+          .eq('product_id', productId)
+          .in('quote_id', quoteIds);
+
+        if (siError) {
+          console.error("❌ Error fetching quote_supplier_items:", siError);
+          throw siError;
+        }
+
+        // Group by quote_id
+        supplierItems?.forEach(item => {
+          const list = supplierItemsByQuote.get(item.quote_id) || [];
+          list.push({ supplier_id: item.supplier_id, valor_oferecido: Number(item.valor_oferecido) });
+          supplierItemsByQuote.set(item.quote_id, list);
+        });
+      }
+
+      // 4. Collect all supplier IDs to fetch names
+      const allSupplierIds = new Set<string>();
+      supplierItemsByQuote.forEach(items => {
+        items.forEach(item => allSupplierIds.add(item.supplier_id));
+      });
+
+      let supplierMap = new Map<string, string>();
+      if (allSupplierIds.size > 0) {
+        const { data: suppliers, error: suppliersError } = await supabase
+          .from('suppliers')
+          .select('id, name')
+          .in('id', Array.from(allSupplierIds));
+
+        if (suppliersError) {
+          console.error("❌ Error fetching suppliers:", suppliersError);
+          throw suppliersError;
+        }
+        supplierMap = new Map(suppliers?.map(s => [s.id, s.name]) || []);
+      }
+
+      // 5. Build quote history entries
       const quoteHistory: PriceHistoryEntry[] = [];
-      const orderHistory: PriceHistoryEntry[] = [];
 
-      // Process Quote History (Best price per quote)
-      const quoteGroups = new Map<string, any>();
-      supplierItems?.forEach(item => {
-        const quote = (item as any).quotes;
+      quoteIds.forEach(quoteId => {
+        const quote = quotesMap.get(quoteId);
         if (!quote) return;
 
-        const currentBest = quoteGroups.get(item.quote_id);
-        if (!currentBest || Number(item.valor_oferecido) < Number(currentBest.bestOffer.valor_oferecido)) {
-          quoteGroups.set(item.quote_id, {
-            quote,
-            bestOffer: item
+        const offers = supplierItemsByQuote.get(quoteId) || [];
+        // Filter offers with actual values
+        const validOffers = offers.filter(o => o.valor_oferecido > 0);
+
+        if (validOffers.length > 0) {
+          // Find best (lowest) price offer
+          const bestOffer = validOffers.reduce((best, curr) => 
+            curr.valor_oferecido < best.valor_oferecido ? curr : best
+          , validOffers[0]);
+
+          quoteHistory.push({
+            id: `quote-${quoteId}`,
+            date: quote.created_at,
+            supplier: supplierMap.get(bestOffer.supplier_id) || 'Fornecedor Desconhecido',
+            supplierId: bestOffer.supplier_id,
+            price: bestOffer.valor_oferecido,
+            quotationId: quote.id,
+            status: quote.status,
+            type: 'quote'
+          });
+        } else {
+          // Quote exists but no offers yet — still show it with price 0
+          quoteHistory.push({
+            id: `quote-${quoteId}`,
+            date: quote.created_at,
+            supplier: 'Aguardando propostas',
+            supplierId: '',
+            price: 0,
+            quotationId: quote.id,
+            status: quote.status,
+            type: 'quote'
           });
         }
       });
 
-      quoteGroups.forEach(({ quote, bestOffer }) => {
-        quoteHistory.push({
-          id: `quote-${bestOffer.quote_id}`,
-          date: quote.created_at,
-          supplier: supplierMap.get(bestOffer.supplier_id) || 'Fornecedor Desconhecido',
-          supplierId: bestOffer.supplier_id,
-          price: Number(bestOffer.valor_oferecido),
-          quotationId: quote.id,
-          status: quote.status,
-          type: 'quote'
-        });
-      });
+      // ============== ORDER HISTORY ==============
+      // 6. Fetch order items for this product
+      const { data: orderItems, error: oiError } = await supabase
+        .from('order_items')
+        .select('id, product_id, order_id, unit_price, created_at')
+        .eq('product_id', productId)
+        .gt('unit_price', 0);
 
-      // Process Order History
+      if (oiError) {
+        console.error("❌ Error fetching order items:", oiError);
+        throw oiError;
+      }
+
+      // 7. Fetch order details separately
+      const orderIds = [...new Set(orderItems?.map(oi => oi.order_id) || [])];
+      let ordersMap = new Map<string, { id: string; supplier_name: string; supplier_id: string; status: string; order_date: string; quote_id: string | null; created_at: string }>();
+      
+      if (orderIds.length > 0) {
+        const { data: orders, error: ordersError } = await supabase
+          .from('orders')
+          .select('id, supplier_name, supplier_id, status, order_date, quote_id, created_at')
+          .in('id', orderIds);
+
+        if (ordersError) {
+          console.error("❌ Error fetching orders:", ordersError);
+          throw ordersError;
+        }
+        ordersMap = new Map(orders?.map(o => [o.id, o]) || []);
+      }
+
+      // 8. Build order history entries
+      const orderHistory: PriceHistoryEntry[] = [];
+
       orderItems?.forEach(item => {
+        const order = ordersMap.get(item.order_id);
+        if (!order) return;
+        if (order.status === 'cancelado') return;
+
         orderHistory.push({
           id: `order-${item.order_id}`,
-          date: item.orders?.order_date || item.orders?.created_at || item.created_at,
-          supplier: item.orders?.supplier_name || 'Fornecedor Desconhecido',
-          supplierId: '', // We don't have supplier_id directly in order_items
+          date: order.order_date || order.created_at || item.created_at,
+          supplier: order.supplier_name || 'Fornecedor Desconhecido',
+          supplierId: order.supplier_id || '',
           price: Number(item.unit_price),
           orderId: item.order_id,
-          quotationId: item.orders?.quote_id || undefined,
-          status: item.orders?.status || 'concluido',
+          quotationId: order.quote_id || undefined,
+          status: order.status || 'concluido',
           type: 'order'
         });
       });
 
-      // Sort both by date
-      const sortFn = (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime();
+      // Sort both by date (most recent first)
+      const sortFn = (a: PriceHistoryEntry, b: PriceHistoryEntry) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime();
       quoteHistory.sort(sortFn);
       orderHistory.sort(sortFn);
 
+      console.log(`✅ Price history: ${quoteHistory.length} quotes, ${orderHistory.length} orders`);
       return { quoteHistory, orderHistory };
     },
     enabled: !!productId,

@@ -115,7 +115,7 @@ export function ProductPriceHistoryDialog({
   };
 
   const HistoryList = ({ history }: { history: PriceHistoryEntry[] }) => (
-    <div className="flex-1 overflow-y-auto space-y-2 py-3 pr-1 custom-scrollbar">
+    <div className="space-y-2 py-3 pr-1">
       {history.map((entry, index) => {
         const previousEntry = history[index + 1];
         const variation = calculatePriceVariation(entry.price, previousEntry?.price || null);
@@ -135,7 +135,9 @@ export function ProductPriceHistoryDialog({
                         {entry.supplier}
                       </span>
                       <Badge variant="outline" className="text-[10px] bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-900/40 dark:text-gray-300 dark:border-gray-700 px-1.5 py-0">
-                        {entry.quotationId ? `COT #${entry.quotationId.substring(0, 6)}` : `PED #${entry.orderId?.substring(0, 6)}`}
+                        {entry.type === 'quote' 
+                          ? `COT #${(entry.quotationId || '').substring(0, 6)}` 
+                          : `PED #${(entry.orderId || '').substring(0, 6)}`}
                       </Badge>
                       {getStatusBadge(entry.status, entry.type)}
                     </div>
@@ -387,7 +389,7 @@ export function ProductPriceHistoryDialog({
             </TabsList>
           </div>
 
-          <div className="flex-1 overflow-hidden px-4">
+          <div className="flex-1 overflow-y-auto px-4 custom-scrollbar">
             {isLoading ? (
               <div className="h-full flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 text-blue-500 mb-4 animate-spin" />
@@ -400,7 +402,7 @@ export function ProductPriceHistoryDialog({
               </div>
             ) : (
               <>
-                <TabsContent value="pedidos" className="flex-1 h-full m-0 focus-visible:ring-0 flex flex-col overflow-hidden">
+                <TabsContent value="pedidos" className="m-0 focus-visible:ring-0">
                   {orderHistory.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center py-12 text-center">
                       <ShoppingCart className="h-12 w-12 text-gray-200 dark:text-gray-700 mb-4" />
@@ -414,7 +416,7 @@ export function ProductPriceHistoryDialog({
                   )}
                 </TabsContent>
                 
-                <TabsContent value="cotacoes" className="flex-1 h-full m-0 focus-visible:ring-0 flex flex-col overflow-hidden">
+                <TabsContent value="cotacoes" className="m-0 focus-visible:ring-0">
                   {quoteHistory.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center py-12 text-center">
                       <ClipboardList className="h-12 w-12 text-gray-200 dark:text-gray-700 mb-4" />
@@ -448,11 +450,15 @@ export function ProductPriceHistoryDialog({
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div className="space-y-1">
                     <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">Menor</div>
-                    <div className="font-bold text-green-600 dark:text-green-400 text-sm">R$ {minPrice.toFixed(2)}</div>
+                    <div className="font-bold text-green-600 dark:text-green-400 text-sm">
+                      R$ {isFinite(minPrice) ? minPrice.toFixed(2) : '0,00'}
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">Maior</div>
-                    <div className="font-bold text-red-600 dark:text-red-400 text-sm">R$ {maxPrice.toFixed(2)}</div>
+                    <div className="font-bold text-red-600 dark:text-red-400 text-sm">
+                      R$ {isFinite(maxPrice) ? maxPrice.toFixed(2) : '0,00'}
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">Médio</div>
