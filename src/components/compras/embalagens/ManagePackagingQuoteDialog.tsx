@@ -354,7 +354,7 @@ export function ManagePackagingQuoteDialog({
         } else {
           doc.setTextColor(gray[0], gray[1], gray[2]);
         }
-        doc.text(`R$ ${f.custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`, margin + 100, y);
+        doc.text(`R$ ${f.custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, margin + 100, y);
         
         // Status
         if (isWinner) {
@@ -571,7 +571,7 @@ export function ManagePackagingQuoteDialog({
                   <tr class="${f.isMelhorPreco ? 'winner-row' : ''}">
                     <td>${f.supplierName}</td>
                     <td>R$ ${f.valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                    <td><strong>R$ ${f.custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}</strong></td>
+                    <td><strong>R$ ${f.custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
                     <td>
                       ${f.isMelhorPreco 
                         ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>' 
