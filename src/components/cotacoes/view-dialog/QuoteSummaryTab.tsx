@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
-import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign } from "lucide-react";
+import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ interface QuoteSummaryTabProps {
 export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr }: QuoteSummaryTabProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
+  const [groupBySupplier, setGroupBySupplier] = useState(false);
 
   const topSuppliersCount = useMemo(() => {
     const wins = new Set();
@@ -52,6 +54,92 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     }
     return data;
   }, [productPricesData, searchQuery, sortBy, safeStr]);
+
+  const groupedData = useMemo(() => {
+    if (!groupBySupplier || filteredAndSortedData.length === 0) return null;
+    
+    const groups: Record<string, { name: string, items: any[], total: number }> = {};
+    
+    filteredAndSortedData.forEach(item => {
+      const supplierName = item.bestSupplierName || "Pendente / Sem Vencedor";
+      if (!groups[supplierName]) {
+        groups[supplierName] = { name: supplierName, items: [], total: 0 };
+      }
+      groups[supplierName].items.push(item);
+      groups[supplierName].total += (item.bestPrice > 0 ? item.bestPrice * item.quantidade : 0);
+    });
+    
+    return Object.values(groups).sort((a, b) => {
+      if (a.name === "Pendente / Sem Vencedor") return 1;
+      if (b.name === "Pendente / Sem Vencedor") return -1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [filteredAndSortedData, groupBySupplier]);
+
+  const renderItem = (item: any) => (
+    <div
+      key={item.productId}
+      className={cn(
+        "grid md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-2 md:gap-4 items-center px-3 py-2 rounded-xl border transition-all duration-200",
+        item.bestPrice > 0
+          ? "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 hover:shadow-sm"
+          : "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-100 dark:border-zinc-800/50 opacity-40"
+      )}
+    >
+      <div className="min-w-0 pr-2">
+        <p className="font-bold text-xs text-zinc-900 dark:text-zinc-50 truncate leading-tight uppercase tracking-tight" title={item.productName}>
+          {safeStr(item.productName)}
+        </p>
+      </div>
+
+      <div className="hidden md:flex justify-center">
+        <div className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[8px] font-black text-zinc-500 uppercase">
+          {safeStr(item.unidade)}
+        </div>
+      </div>
+
+      <div className="hidden md:flex justify-center">
+        <span className="text-[11px] font-bold text-zinc-500">
+          {safeStr(item.quantidade)}
+        </span>
+      </div>
+
+      <div className="text-right flex items-center justify-end gap-2">
+        {item.bestPrice > 0 ? (
+          <div className="flex flex-col items-end">
+            <div className="flex items-center gap-1.5">
+              {item.savings > 0 && (
+                <span className="px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
+                  -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
+                </span>
+              )}
+              <span className="text-sm font-black text-brand tracking-tight">
+                R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              </span>
+              <CurrentPricesTooltip prices={item.allPrices} />
+            </div>
+          </div>
+        ) : (
+          <span className="text-[9px] font-bold text-zinc-400 uppercase italic">Pendente</span>
+        )}
+      </div>
+
+      <div className="flex justify-end items-center pr-2 min-w-0">
+        {item.bestSupplierName ? (
+          <div className="flex items-center justify-end gap-1.5 max-w-full">
+            <div className="w-5 h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              <Building2 className="h-3 w-3 text-zinc-400" />
+            </div>
+            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>
+              {safeStr(item.bestSupplierName)}
+            </span>
+          </div>
+        ) : (
+          <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col w-full h-auto bg-transparent">
@@ -108,6 +196,20 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => setGroupBySupplier(!groupBySupplier)}
+            className={cn(
+              "h-9 px-3 rounded-xl border-zinc-200 dark:border-zinc-800 transition-all",
+              groupBySupplier 
+                ? "bg-brand/10 border-brand/30 text-brand hover:bg-brand/20" 
+                : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-500 hover:bg-zinc-100"
+            )}
+          >
+            <ListFilter className="h-3.5 w-3.5 mr-2" />
+            <span className="text-[10px] font-black uppercase tracking-widest">{groupBySupplier ? "Desagrupar" : "Agrupar por Fornecedor"}</span>
+          </Button>
+
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 sm:w-48 h-9 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800")}>
               <div className="flex items-center gap-2">
@@ -138,70 +240,34 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
         <div className="p-4 space-y-1 pb-16">
           {filteredAndSortedData.length > 0 ? (
-            filteredAndSortedData.map((item) => (
-              <div
-                key={item.productId}
-                className={cn(
-                  "grid md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-2 md:gap-4 items-center px-3 py-2 rounded-xl border transition-all duration-200",
-                  item.bestPrice > 0
-                    ? "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 hover:shadow-sm"
-                    : "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-100 dark:border-zinc-800/50 opacity-40"
-                )}
-              >
-                <div className="min-w-0 pr-2">
-                  <p className="font-bold text-xs text-zinc-900 dark:text-zinc-50 truncate leading-tight uppercase tracking-tight" title={item.productName}>
-                    {safeStr(item.productName)}
-                  </p>
-                </div>
-
-                <div className="hidden md:flex justify-center">
-                  <div className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[8px] font-black text-zinc-500 uppercase">
-                    {safeStr(item.unidade)}
+            groupBySupplier && groupedData ? (
+              groupedData.map(group => (
+                <div key={group.name} className="mt-6 first:mt-0 mb-4 bg-zinc-50/30 dark:bg-zinc-900/20 rounded-2xl p-3 border border-zinc-100/50 dark:border-zinc-800/50">
+                  <div className="flex items-center justify-between mb-3 px-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                        {group.name === "Pendente / Sem Vencedor" ? <Package className="h-3 w-3 text-zinc-400" /> : <Building2 className="h-3 w-3 text-brand" />}
+                      </div>
+                      <span className="text-[11px] font-black text-zinc-700 dark:text-zinc-300 uppercase tracking-widest">{safeStr(group.name)}</span>
+                      <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded-md font-bold">{group.items.length} itens</span>
+                    </div>
+                    {group.name !== "Pendente / Sem Vencedor" && (
+                      <div className="flex items-baseline gap-1 bg-green-500/10 px-2 py-1 rounded-lg border border-green-500/20">
+                        <span className="text-[9px] font-black text-green-600 dark:text-green-500 uppercase">Subtotal</span>
+                        <span className="text-xs font-black text-green-600 dark:text-green-500">
+                          R$ {group.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    {group.items.map(renderItem)}
                   </div>
                 </div>
-
-                <div className="hidden md:flex justify-center">
-                  <span className="text-[11px] font-bold text-zinc-500">
-                    {safeStr(item.quantidade)}
-                  </span>
-                </div>
-
-                <div className="text-right flex items-center justify-end gap-2">
-                  {item.bestPrice > 0 ? (
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-center gap-1.5">
-                        {item.savings > 0 && (
-                          <span className="px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
-                            -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
-                          </span>
-                        )}
-                        <span className="text-sm font-black text-brand tracking-tight">
-                          R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </span>
-                        <CurrentPricesTooltip prices={item.allPrices} />
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase italic">Pendente</span>
-                  )}
-                </div>
-
-                <div className="flex justify-end items-center pr-2 min-w-0">
-                  {item.bestSupplierName ? (
-                    <div className="flex items-center justify-end gap-1.5 max-w-full">
-                      <div className="w-5 h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="h-3 w-3 text-zinc-400" />
-                      </div>
-                      <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>
-                        {safeStr(item.bestSupplierName)}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
-                  )}
-                </div>
-              </div>
-            ))
+              ))
+            ) : (
+              filteredAndSortedData.map(renderItem)
+            )
           ) : (
             <div className="py-20 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
               <div className="inline-flex p-4 rounded-full bg-zinc-100 dark:bg-zinc-900 mb-4 opacity-50">
