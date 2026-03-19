@@ -400,7 +400,7 @@ export function ProductPriceHistoryDialog({
               </div>
             ) : (
               <>
-                <TabsContent value="pedidos" className="h-full m-0 focus-visible:ring-0">
+                <TabsContent value="pedidos" className="flex-1 h-full m-0 focus-visible:ring-0 flex flex-col overflow-hidden">
                   {orderHistory.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center py-12 text-center">
                       <ShoppingCart className="h-12 w-12 text-gray-200 dark:text-gray-700 mb-4" />
@@ -414,7 +414,7 @@ export function ProductPriceHistoryDialog({
                   )}
                 </TabsContent>
                 
-                <TabsContent value="cotacoes" className="h-full m-0 focus-visible:ring-0">
+                <TabsContent value="cotacoes" className="flex-1 h-full m-0 focus-visible:ring-0 flex flex-col overflow-hidden">
                   {quoteHistory.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center py-12 text-center">
                       <ClipboardList className="h-12 w-12 text-gray-200 dark:text-gray-700 mb-4" />
