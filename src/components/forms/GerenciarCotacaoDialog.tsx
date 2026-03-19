@@ -295,93 +295,128 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
     // Gerar HTML
     const html = `
+    const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comparativo de Cotação - ${quote.id.substring(0, 8)}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    .header { background: linear-gradient(135deg, #1f2937 0%, #111827 100%); color: white; padding: 40px 20px; border-radius: 12px; margin-bottom: 30px; text-align: center; }
-    .header h1 { font-size: 28px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
-    .header p { font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-    .info-card { background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #1f2937; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .info-card strong { display: block; color: #1f2937; margin-bottom: 5px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-    .info-card span { font-size: 14px; color: #4b5563; font-weight: 600; }
-    .winners-section { background: white; padding: 25px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .winners-section h2 { color: #111827; margin-bottom: 15px; font-size: 18px; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px; }
-    .winners-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-    .winner-card { background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; }
-    .winner-card .rank { display: inline-block; background: #111827; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; margin-bottom: 8px; }
-    .winner-card .name { font-weight: 700; color: #111827; margin-bottom: 5px; font-size: 16px; }
-    .winner-card .wins { font-size: 14px; color: #4b5563; }
-    .comparatives { display: grid; gap: 20px; }
-    .comparative-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .comparative-header { background: #f9fafb; padding: 15px; border-bottom: 2px solid #1f2937; }
-    .comparative-header h3 { color: #111827; font-size: 16px; display: flex; align-items: center; gap: 8px; font-weight: 800; }
-    .comparative-header .qty { font-size: 11px; color: #6b7280; font-weight: 700; margin-left: auto; text-transform: uppercase; letter-spacing: 1px; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f3f4f6; color: #1f2937; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 30px; }
+    
+    /* Header */
+    .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 40px 30px; border-radius: 16px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-bottom: 4px solid #10b981; }
+    .header-content h1 { font-size: 28px; margin-bottom: 6px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 12px; }
+    .header-content p { font-size: 14px; opacity: 0.8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .header-badge { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: right; }
+    .header-badge span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 4px; }
+    .header-badge strong { font-size: 18px; font-weight: 800; color: #34d399; }
+
+    /* Cards Informativos */
+    .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+    .info-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
+    .info-card strong { display: block; color: #64748b; margin-bottom: 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; }
+    .info-card span { font-size: 16px; color: #0f172a; font-weight: 900; }
+
+    /* Ranking */
+    .winners-section { background: white; padding: 30px; border-radius: 16px; margin-bottom: 40px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    .winners-section h2 { color: #0f172a; margin-bottom: 20px; font-size: 20px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; padding-bottom: 15px; border-bottom: 2px solid #f1f5f9; }
+    .winners-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .winner-card { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+    .winner-card.first-place { background: linear-gradient(to right, #ecfdf5, #ffffff); border-color: #6ee7b7; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
+    .winner-card.first-place::before { content: '🥇 TOP 1'; position: absolute; top: 12px; right: 12px; background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; }
+    .winner-card .rank { background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; display: inline-block; margin-bottom: 12px; width: max-content; }
+    .winner-card.first-place .rank { background: #059669; }
+    .winner-card .name { font-weight: 900; color: #0f172a; margin-bottom: 6px; font-size: 18px; letter-spacing: -0.5px; }
+    .winner-card .wins { font-size: 13px; color: #64748b; font-weight: 600; }
+
+    /* Comparativos */
+    .comparatives { display: grid; gap: 24px; }
+    .comparative-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .comparative-header { background: #f8fafc; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; }
+    .comparative-header h3 { color: #0f172a; font-size: 16px; font-weight: 900; letter-spacing: -0.5px; }
+    .comparative-header .qty { font-size: 12px; color: #64748b; font-weight: 800; background: #e2e8f0; padding: 4px 10px; border-radius: 6px; }
+    
     .comparative-table { width: 100%; border-collapse: collapse; }
-    .comparative-table th { background: #f9fafb; padding: 12px; text-align: left; font-weight: 700; font-size: 11px; color: #6b7280; border-bottom: 1px solid #e5e7eb; text-transform: uppercase; letter-spacing: 1px; }
-    .comparative-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-    .comparative-table tr:hover { background: #f9fafb; }
-    .winner-row { background: #f3f4f6 !important; }
-    .winner-row td { font-weight: 700; color: #000; }
-    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-    .badge-winner { background: #000; color: white; }
-    .badge-difference { background: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
-    .no-response { padding: 20px; text-align: center; color: #9ca3af; font-style: italic; }
-    .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; margin-top: 40px; border-top: 1px solid #e5e7eb; }
+    .comparative-table th { background: white; padding: 14px 24px; text-align: left; font-weight: 800; font-size: 11px; color: #64748b; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; letter-spacing: 1px; }
+    .comparative-table td { padding: 14px 24px; border-bottom: 1px solid #f1f5f9; font-size: 14px; font-weight: 600; color: #334155; vertical-align: middle; }
+    
+    .winner-row { background: #ecfdf5 !important; }
+    .winner-row td { color: #064e3b; }
+    .winner-row td:first-child { font-weight: 800; border-left: 4px solid #10b981; padding-left: 20px; }
+    .val-oferecido { color: #94a3b8; font-size: 12px; text-decoration: line-through; margin-right: 8px; font-weight: 500; }
+    
+    .badge { display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.5px; }
+    .badge-winner { background: #10b981; color: white; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
+    .badge-diff-low { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .badge-diff-med { background: #ffedd5; color: #ea580c; border: 1px solid #fdba74; }
+    .badge-diff-high { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+    
+    .no-response { padding: 30px; text-align: center; color: #94a3b8; font-weight: 600; font-style: italic; background: #f8fafc; }
+    
+    .footer { text-align: center; padding: 30px; color: #94a3b8; font-size: 12px; font-weight: 600; margin-top: 40px; }
+    
     @media print {
-      body { background: white; }
-      .container { max-width: 100%; padding: 10px; }
-      .header { padding: 20px; margin-bottom: 20px; }
-      .comparative-card { break-inside: avoid; }
+      body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .container { max-width: 100%; padding: 0; }
+      .header { border-radius: 0; margin-bottom: 20px; }
+      .comparative-card { break-inside: avoid; border: 1px solid #e2e8f0; margin-bottom: 15px; }
+      .winner-card { break-inside: avoid; }
+      .info-grid { gap: 10px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>🏆 COMPARATIVO DE COTAÇÃO</h1>
-      <p>Cotação #${quote.id.substring(0, 8)}</p>
+      <div class="header-content">
+        <h1>📊 COMPARATIVO DE COTAÇÃO</h1>
+        <p>Referência #${quote.id.substring(0, 8).toUpperCase()}</p>
+      </div>
+      <div class="header-badge">
+        <span>Itens Analisados</span>
+        <strong>${products.length}</strong>
+      </div>
     </div>
 
     <div class="info-grid">
       <div class="info-card">
-        <strong>Período</strong>
-        <span>${quote.dataInicio} a ${quote.dataFim}</span>
+        <strong>Início da Cotação</strong>
+        <span>${quote.dataInicio}</span>
       </div>
       <div class="info-card">
-        <strong>Produtos</strong>
-        <span>${products.length} itens</span>
+        <strong>Fim da Cotação</strong>
+        <span>${quote.dataFim}</span>
       </div>
       <div class="info-card">
         <strong>Fornecedores</strong>
-        <span>${quote.fornecedoresParticipantes.length} participantes</span>
+        <span>${quote.fornecedoresParticipantes.length} convidados</span>
       </div>
       <div class="info-card">
         <strong>Gerado em</strong>
-        <span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span>
+        <span>${new Date().toLocaleDateString('pt-BR')}</span>
       </div>
     </div>
 
     ${winsPerSupplier.length > 0 ? `
+    ${winsPerSupplier.length > 0 ? `
     <div class="winners-section">
-      <h2>🎯 Ranking de Fornecedores</h2>
+      <h2>🎯 Ranking de Vencedores</h2>
       <div class="winners-list">
         ${winsPerSupplier.map((w: any, idx: number) => `
-          <div class="winner-card">
-            <div class="rank">#${idx + 1} - ${w.wins} ${w.wins === 1 ? 'produto' : 'produtos'}</div>
+          <div class="winner-card ${idx === 0 ? 'first-place' : ''}">
+            <div class="rank">#${idx + 1} Lugar</div>
             <div class="name">${w.name}</div>
-            <div class="wins">Melhor preço em ${w.wins} ${w.wins === 1 ? 'produto' : 'produtos'}</div>
+            <div class="wins">Arrematou <strong>${w.wins}</strong> ${w.wins === 1 ? 'produto' : 'produtos'}</div>
           </div>
         `).join('')}
       </div>
     </div>
+    ` : ''}
     ` : ''}
 
     <div class="comparatives">
@@ -395,16 +430,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           </div>
           ${comp.fornecedores.length === 0 ? `
             <div class="no-response">
-              Nenhum fornecedor ofereceu preço para este produto
+              Ninguém enviou preços para este item.
             </div>
           ` : `
             <table class="comparative-table">
               <thead>
                 <tr>
-                  <th>Fornecedor</th>
-                  <th>Valor Oferecido</th>
-                  <th>Valor Unit. Normalizado</th>
-                  <th>Status</th>
+                  <th>Fornecedor Participante</th>
+                  <th>Proposta (Unidade/Quant.)</th>
+                  <th>Preço Custo Normalizado</th>
+                  <th>Resultado</th>
                 </tr>
               </thead>
               <tbody>
@@ -413,15 +448,22 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         .map((f: any) => {
           const melhorValor = Math.min(...comp.fornecedores.map((x: any) => x.valorNormalizado));
           const diferenca = melhorValor > 0 ? ((f.valorNormalizado - melhorValor) / melhorValor * 100) : 0;
+          
+          let diferencaClass = 'badge-diff-low';
+          if (diferenca > 5 && diferenca <= 15) diferencaClass = 'badge-diff-med';
+          if (diferenca > 15) diferencaClass = 'badge-diff-high';
+
           return `
                   <tr class="${f.isMelhorPreco ? 'winner-row' : ''}">
                     <td>${f.supplierName}</td>
-                    <td>R$ ${formatCurrency(f.valorOferecido)}</td>
+                    <td>
+                      ${f.valorOferecido !== f.valorNormalizado ? `<span class="val-oferecido">R$ ${formatCurrency(f.valorOferecido)} original</span>` : ''}
+                    </td>
                     <td><strong>R$ ${formatCurrency(f.valorNormalizado)}</strong></td>
                     <td>
                       ${f.isMelhorPreco
-              ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>'
-              : `<span class="badge badge-difference">+${diferenca.toFixed(1)}%</span>`
+              ? '<span class="badge badge-winner">🏆 Melhor Opção</span>'
+              : `<span class="badge ${diferencaClass}">+${diferenca.toFixed(1)}% mais caro</span>`
             }
                     </td>
                   </tr>
