@@ -295,7 +295,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
     // Gerar HTML
     const html = `
-    const html = `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -403,7 +402,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     </div>
 
     ${winsPerSupplier.length > 0 ? `
-    ${winsPerSupplier.length > 0 ? `
     <div class="winners-section">
       <h2>🎯 Ranking de Vencedores</h2>
       <div class="winners-list">
@@ -416,7 +414,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         `).join('')}
       </div>
     </div>
-    ` : ''}
     ` : ''}
 
     <div class="comparatives">
