@@ -55,36 +55,40 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
   return (
     <div className="flex flex-col w-full h-auto bg-transparent">
-      {/* 1. SEÇÃO DE STATS */}
-      <div className="bg-zinc-50/50 dark:bg-zinc-900/10 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 p-4">
-          <MetricCard
-            title="Produtos"
-            value={stats.totalProdutos}
-            icon={Package}
-            className="h-20 shadow-sm"
-          />
-          <MetricCard
-            title="Respostas"
-            value={`${stats.fornecedoresRespondidos}/${stats.totalFornecedores}`}
-            icon={Building2}
-            variant="info"
-            className="h-20 shadow-sm"
-          />
-          <MetricCard
-            title="Melhor Total"
-            value={`R$ ${melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={DollarSign}
-            variant="success"
-            className="h-20 shadow-sm"
-          />
-          <MetricCard
-            title="Ganhadores"
-            value={topSuppliersCount}
-            icon={Trophy}
-            variant="warning"
-            className="h-20 shadow-sm"
-          />
+      {/* 1. SEÇÃO DE STATS COMPACTA */}
+      <div className="bg-zinc-50/80 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800 px-4 py-2 flex items-center overflow-x-auto custom-scrollbar">
+        <div className="flex items-center gap-6 min-w-max">
+          <div className="flex items-center gap-2">
+            <Package className="h-4 w-4 text-zinc-400" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-0.5">Produtos</span>
+              <span className="text-xs font-black text-zinc-700 dark:text-zinc-300 leading-none">{stats.totalProdutos} itens</span>
+            </div>
+          </div>
+          <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+          <div className="flex items-center gap-2">
+            <Building2 className="h-4 w-4 text-blue-500" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-0.5">Respostas</span>
+              <span className="text-xs font-black text-blue-600 dark:text-blue-400 leading-none">{stats.fornecedoresRespondidos} de {stats.totalFornecedores}</span>
+            </div>
+          </div>
+          <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+          <div className="flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-amber-500" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-0.5">Ganhadores</span>
+              <span className="text-xs font-black text-amber-600 dark:text-amber-400 leading-none">{topSuppliersCount}</span>
+            </div>
+          </div>
+          <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+          <div className="flex items-center gap-2">
+            <DollarSign className="h-4 w-4 text-green-500" />
+            <div className="flex flex-col">
+              <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-0.5">Melhor Total</span>
+              <span className="text-xs font-black text-green-600 dark:text-green-400 leading-none">R$ {melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+            </div>
+          </div>
         </div>
       </div>
 
