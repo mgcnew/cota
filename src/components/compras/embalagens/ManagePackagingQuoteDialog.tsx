@@ -997,16 +997,55 @@ export function ManagePackagingQuoteDialog({
                               className="h-7 text-xs font-bold uppercase tracking-wider bg-background border-border hover:bg-muted"><Edit2 className="h-3 w-3 mr-1.5" />Editar</Button>}
                           </div>
                           {isEditing ? (
-                            <div className="space-y-4 bg-muted/50 -m-1 p-3 rounded-lg border border-border">
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Valor Total (R$) *</Label><Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} onFocus={handleInputFocus} placeholder="0,00" className="h-8 bg-background border-input" /></div>
-                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Unidade de Venda *</Label><Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}><SelectTrigger className="h-8 bg-background border-input"><SelectValue /></SelectTrigger><SelectContent>{PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent></Select></div>
-                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Qtd. na Unidade *</Label><Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 5" className="h-8 bg-background border-input" /></div>
-                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Qtd. Unidades Est. *</Label><Input type="number" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 500" className="h-8 bg-background border-input" /></div>
-                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Gramatura</Label><Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 0.08" className="h-8 bg-background border-input" /></div>
-                                <div><Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Dimensões</Label><Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 30x40cm" className="h-8 bg-background border-input" /></div>
+                            <div className="space-y-4 bg-muted/50 -m-1 p-4 rounded-lg border border-border">
+                              {/* Linha 1: Preço e como é vendido */}
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <div>
+                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">💰 Preço do Pacote/Fardo (R$) *</Label>
+                                  <Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 50.00" className="h-9 bg-background border-input font-bold" />
+                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Quanto o fornecedor cobra</p>
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">📦 Vendido como *</Label>
+                                  <Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}><SelectTrigger className="h-9 bg-background border-input"><SelectValue /></SelectTrigger><SelectContent>{PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent></Select>
+                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Como vem: pacote, kg, caixa...</p>
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">🔢 Qtd. Comprada *</Label>
+                                  <Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 1" className="h-9 bg-background border-input" />
+                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Quantos pacotes/kg pelo preço acima</p>
+                                </div>
                               </div>
-                              {custoPorUnidadePreview && <div className="bg-background p-2.5 rounded-lg border border-border flex justify-between items-center"><span className="text-xs text-muted-foreground font-medium">Custo calculado:</span><span className="text-sm font-bold text-foreground">{formatCurrency(custoPorUnidadePreview)}/un</span></div>}
+                              {/* Linha 2: Conteúdo e especificações */}
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                <div>
+                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">🎯 Total de Peças no Pacote *</Label>
+                                  <Input type="number" step="0.01" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 500" className="h-9 bg-background border-input font-bold" />
+                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Quantas sacolas/peças vêm dentro</p>
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Espessura/Gramatura (mm)</Label>
+                                  <Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 0.08" className="h-9 bg-background border-input" />
+                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Opcional — espessura do material</p>
+                                </div>
+                                <div>
+                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Tamanho (LxA)</Label>
+                                  <Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 30×40cm" className="h-9 bg-background border-input" />
+                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Opcional — largura × altura</p>
+                                </div>
+                              </div>
+                              {/* Cálculo transparente */}
+                              {custoPorUnidadePreview && (
+                                <div className="bg-background p-3 rounded-lg border border-border">
+                                  <div className="flex justify-between items-center">
+                                    <div className="flex flex-col">
+                                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Custo por unidade</span>
+                                      <span className="text-[9px] text-muted-foreground mt-0.5">R$ {formData.valorTotal || '0'} ÷ {formData.quantidadeUnidadesEstimada || '0'} peças</span>
+                                    </div>
+                                    <span className="text-lg font-black text-foreground">{formatCurrency(custoPorUnidadePreview)}<span className="text-xs font-medium text-muted-foreground ml-0.5">/un</span></span>
+                                  </div>
+                                </div>
+                              )}
                               <div className="flex items-center justify-between pt-2 border-t border-border">
                                 <p className="text-[10px] text-muted-foreground font-medium"><kbd className="px-1 py-0.5 rounded bg-background border border-border font-sans">Enter</kbd> salvar</p>
                                 <div className="flex gap-2">
@@ -1017,9 +1056,9 @@ export function ManagePackagingQuoteDialog({
                             </div>
                           ) : supplierItem?.valorTotal ? (
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border">
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Valor Total</span><p className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Venda</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Unidades</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeUnidadesEstimada}</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">💰 Preço Pacote</span><p className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">📦 Formato</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">🎯 Peças no Pacote</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeUnidadesEstimada} un</p></div>
                               <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Custo/un</span><p className={cn("font-black text-base", isBestPrice ? "text-emerald-600" : "text-foreground")}>{formatCurrency(supplierItem.custoPorUnidade)}</p></div>
                             </div>
                           ) : <div className="p-4 rounded-lg border-2 border-dashed border-border bg-muted/50 text-center"><p className="text-xs text-muted-foreground font-medium">Nenhum valor informado</p></div>}
