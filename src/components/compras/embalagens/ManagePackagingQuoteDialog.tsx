@@ -184,8 +184,8 @@ export function ManagePackagingQuoteDialog({
 
   const custoPorUnidadePreview = useMemo(() => {
     const valor = parseFloat(formData.valorTotal) || 0;
-    const unidades = parseInt(formData.quantidadeUnidadesEstimada) || 0;
-    return valor > 0 && unidades > 0 ? (valor / unidades).toFixed(4) : null;
+    const unidades = parseFloat(formData.quantidadeUnidadesEstimada) || 0;
+    return valor > 0 && unidades > 0 ? valor / unidades : null;
   }, [formData.valorTotal, formData.quantidadeUnidadesEstimada]);
 
   const handleEditItem = useCallback((supplierId: string, packagingId: string) => {
