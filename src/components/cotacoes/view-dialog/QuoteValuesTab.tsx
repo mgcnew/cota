@@ -95,7 +95,7 @@ export function QuoteValuesTab({
     setEditedValues(prev => ({ ...prev, [productId]: formatted }));
   }, []);
 
-  const handleSaveEdit = useCallback(async (productId: string) => {
+  const handleSaveEdit = useCallback(async (productId: string, nextProductId?: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
       try {
         const newValue = parseBRLToNumber(editedValues[productId]);
@@ -105,15 +105,26 @@ export function QuoteValuesTab({
           productId,
           newValue
         });
-        setEditingProductId(null);
-        setEditedValues({});
+
+        if (nextProductId) {
+          const nextVal = getSupplierProductValue(selectedSupplier, nextProductId);
+          setEditingProductId(nextProductId);
+          const formatted = nextVal > 0
+            ? nextVal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : "";
+          setEditedValues({ [nextProductId]: formatted });
+        } else {
+          setEditingProductId(null);
+          setEditedValues({});
+        }
+
         toast({ title: "Valor atualizado!" });
         onRefresh();
       } catch {
         toast({ title: "Erro ao salvar", variant: "destructive" });
       }
     }
-  }, [selectedSupplier, editedValues, quoteId, onUpdateSupplierProductValue, onRefresh, toast]);
+  }, [selectedSupplier, editedValues, quoteId, onUpdateSupplierProductValue, onRefresh, toast, getSupplierProductValue]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingProductId(null);
@@ -259,7 +270,7 @@ export function QuoteValuesTab({
             )}
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1 pb-16">
-              {products.map((product: any) => {
+              {products.map((product: any, index: number) => {
                 const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                 const isEditing = editingProductId === product.product_id;
                 const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
@@ -293,7 +304,11 @@ export function QuoteValuesTab({
                               value={editedValues[product.product_id] || ""}
                               onChange={(e) => handleInputChange(product.product_id, e.target.value)}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') handleSaveEdit(product.product_id);
+                                if (e.key === 'Enter' || e.key === 'Tab') {
+                                  e.preventDefault();
+                                  const nextProduct = products[index + 1];
+                                  handleSaveEdit(product.product_id, nextProduct?.product_id);
+                                }
                                 if (e.key === 'Escape') handleCancelEdit();
                               }}
                               className={cn(
