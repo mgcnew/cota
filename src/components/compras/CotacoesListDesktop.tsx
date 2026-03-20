@@ -151,7 +151,7 @@ export const CotacoesListDesktop = memo(({
                             <>
                               <DropdownMenuItem onClick={() => onManage(cotacao)} className="gap-2">
                                 <ClipboardList className="h-4 w-4 text-emerald-500" />
-                                Gerenciar Fornecedores
+                                Negociar Cotação
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => onDelete(cotacao)} className="gap-2 text-red-500 focus:text-red-500">

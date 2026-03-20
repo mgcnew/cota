@@ -178,7 +178,7 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
                   onClick={() => onManage(cotacao)}
                 >
                   <ClipboardList className="h-4 w-4 mr-2" />
-                  Gerenciar
+                  Negociar Cotação
                 </Button>
                 
                 {isProntaParaDecisao && (

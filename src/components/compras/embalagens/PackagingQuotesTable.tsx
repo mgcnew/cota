@@ -188,7 +188,7 @@ export function PackagingQuotesTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
                         <DropdownMenuItem onClick={() => onManage(quote)} className="rounded-lg gap-2">
-                          <Eye className="h-4 w-4" />Gerenciar
+                          <Eye className="h-4 w-4" />Negociar Cotação
                         </DropdownMenuItem>
                         {isPronta && (
                           <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="rounded-lg gap-2 text-brand">

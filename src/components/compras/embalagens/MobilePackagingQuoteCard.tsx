@@ -153,7 +153,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
               onClick={() => onManage(quote)}
             >
               <Eye className="h-4 w-4 mr-2" />
-              Gerenciar
+              Negociar Cotação
             </Button>
             
             {isPronta && (
