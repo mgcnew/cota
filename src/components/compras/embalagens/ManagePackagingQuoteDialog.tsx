@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect, lazy, Suspense } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,8 @@ import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
-  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info
+  TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info,
+  Copy, Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
@@ -37,6 +39,13 @@ import { PACKAGING_SALE_UNITS } from "@/types/packaging";
 import jsPDF from "jspdf";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+import { ResumoTab } from "./quote-tabs/ResumoTab";
+import { TabSkeleton, ValoresTabSkeleton } from "./quote-tabs/TabSkeleton";
+
+// Lazy load heavy tabs
+const ComparativoTab = lazy(() => import("./quote-tabs/ComparativoTab").then(m => ({ default: m.ComparativoTab })));
+const ExportarTab = lazy(() => import("./quote-tabs/ExportarTab").then(m => ({ default: m.ExportarTab })));
+
 
 interface Props {
   open: boolean;
@@ -63,6 +72,7 @@ export function ManagePackagingQuoteDialog({
     removeQuoteItem
   } = usePackagingQuotes();
   
+  const { toast } = useToast();
   const { orders } = usePackagingOrders();
   
   const isMobile = useIsMobile();
@@ -132,20 +142,25 @@ export function ManagePackagingQuoteDialog({
     }
   }, [open, quote, selectedSupplier]);
 
+  // Keyboard shortcuts: Ctrl+1-5 for tabs, Escape to close
+  useEffect(() => {
+    if (!open) return;
+    const TAB_MAP: Record<string, string> = { '1': 'resumo', '2': 'editar', '3': 'valores', '4': 'comparativo', '5': 'exportar' };
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && TAB_MAP[e.key]) {
+        e.preventDefault();
+        setActiveTab(TAB_MAP[e.key]);
+      }
+      if (e.key === 'Escape' && !editingItem) {
+        e.preventDefault();
+        onOpenChange(false);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [open, editingItem, onOpenChange]);
+
   const comparison = useMemo(() => quote ? getComparison(quote) : [], [quote, getComparison]);
-
-  // Embalagens e fornecedores não presentes na cotação
-  const packagingNotInQuote = useMemo(() => {
-    if (!quote) return availablePackagingItems;
-    const idsInQuote = quote.itens.map(i => i.packagingId);
-    return availablePackagingItems.filter(p => !idsInQuote.includes(p.id));
-  }, [quote, availablePackagingItems]);
-
-  const suppliersNotInQuote = useMemo(() => {
-    if (!quote) return availableSuppliers;
-    const idsInQuote = quote.fornecedores.map(f => f.supplierId);
-    return availableSuppliers.filter(s => !idsInQuote.includes(s.id));
-  }, [quote, availableSuppliers]);
 
   const bestPricesData = useMemo(() => {
     if (!quote) return [];
@@ -177,6 +192,184 @@ export function ManagePackagingQuoteDialog({
       return { packagingId: item.packagingId, packagingName: item.packagingName, bestPrice: bestPrice === Infinity ? 0 : bestPrice, bestSupplierId, bestSupplierName, allPrices, savings };
     });
   }, [quote]);
+
+  const handleCopyBestPricesSummary = useCallback(() => {
+    if (!quote || !bestPricesData.length) return;
+    
+    let text = `🏆 *RESUMO DE MELHORES PREÇOS - EMBALAGENS*\n`;
+    text += `*Cotação:* ${quote.dataInicio} - ${quote.dataFim}\n\n`;
+    
+    bestPricesData.forEach((item, idx) => {
+      text += `${idx + 1}. *${item.packagingName}*\n`;
+      if (item.bestPrice > 0) {
+        text += `   💰 Melhor: ${formatCurrency(item.bestPrice)}/un (${item.bestSupplierName})\n`;
+        if (item.savings > 0) text += `   📈 Econ. estimada: ${formatCurrency(item.savings)}/un\n`;
+      } else {
+        text += `   ⚠️ Sem ofertas preenchidas\n`;
+      }
+      text += `\n`;
+    });
+    
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copiado!", description: "Resumo de melhores preços copiado." });
+  }, [quote, bestPricesData, toast]);
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopySupplierSummary = useCallback((group: any) => {
+    try {
+      let text = `📋 *COMPARATIVO DE EMBALAGENS*\n`;
+      text += `*Fornecedor:* ${group.supplierName}\n`;
+      text += `*Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n`;
+      
+      const vitorias = group.itens.filter((i: any) => i.isMelhorPreco);
+      if (vitorias.length > 0) {
+        text += `✅ *ITENS COM MELHOR PREÇO (${vitorias.length}):*\n`;
+        vitorias.forEach((item: any) => {
+          text += `• ${item.packagingName}: ${formatCurrency(item.custoPorUnidade)}/un\n`;
+          text += `  (Total: ${formatCurrency(item.valorTotal)} - ${item.quantidadeVenda}${item.unidadeVenda})\n`;
+        });
+        text += `\n*TOTAL VENCIDO: ${formatCurrency(group.valorTotalGanhos)}*\n\n`;
+      }
+
+      const outros = group.itens.filter((i: any) => !i.isMelhorPreco);
+      if (outros.length > 0) {
+        text += `📊 *OUTROS ITENS COTADOS:*\n`;
+        outros.forEach((item: any) => {
+          text += `• ${item.packagingName}: ${formatCurrency(item.custoPorUnidade)}/un (+${item.diferencaPercentual.toFixed(1)}%)\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(text);
+      setCopiedId(group.supplierId);
+      toast({ title: "Copiado!", description: "Resumo copiado para a área de transferência." });
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      toast({ title: "Erro ao copiar", variant: "destructive" });
+    }
+  }, [toast]);
+
+  const handleExportSupplierHtml = useCallback((group: any) => {
+    if (!quote) return;
+    
+    const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposta de Embalagens - ${group.supplierName}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, system-ui, sans-serif; padding: 40px 20px; background: #f9fafb; color: #111827; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); border: 1px solid #e5e7eb; }
+    .header { margin-bottom: 30px; border-bottom: 2px solid #111827; padding-bottom: 20px; }
+    .header h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .header p { color: #6b7280; font-size: 14px; font-weight: 500; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th { text-align: left; padding: 12px; background: #f3f4f6; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: #4b5563; }
+    td { padding: 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+    .winner { background: #ecfdf5; color: #065f46; font-weight: 700; }
+    .total-box { margin-top: 30px; padding: 20px; background: #111827; color: white; border-radius: 12px; display: flex; justify-between; align-items: center; }
+    .total-label { font-size: 12px; text-transform: uppercase; font-weight: 800; opacity: 0.7; }
+    .total-value { font-size: 24px; font-weight: 900; }
+    .footer { margin-top: 40px; text-align: center; font-size: 11px; color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Resumo de Cotação</h1>
+      <p><strong>Fornecedor:</strong> ${group.supplierName}</p>
+      <p><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+      <p><strong>Cotação:</strong> ${quote.dataInicio} - ${quote.dataFim}</p>
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Formato</th>
+          <th>Preço Unit.</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${group.itens.map((item: any) => `
+          <tr class="${item.isMelhorPreco ? 'winner' : ''}">
+            <td>${item.packagingName}${item.isMelhorPreco ? ' ★' : ''}</td>
+            <td>${item.quantidadeVenda} ${item.unidadeVenda}</td>
+            <td>${formatCurrency(item.custoPorUnidade)}</td>
+            <td>${formatCurrency(item.valorTotal)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    
+    <div class="total-box">
+      <div>
+        <p class="total-label">Total Vencido em Vitórias</p>
+        <p style="font-size: 14px; opacity: 0.8;">${group.vitorias} itens com melhor preço</p>
+      </div>
+      <div style="text-align: right; margin-left: auto;">
+        <p class="total-value">${formatCurrency(group.valorTotalGanhos)}</p>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>Gerado automaticamente pelo Sistema CotaJá • Embalagens</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `proposta-embalagens-${group.supplierName.replace(/\s+/g, '-')}.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    
+    toast({ title: "Exportado!", description: "Arquivo HTML gerado com sucesso." });
+  }, [quote, toast]);
+
+  const comparisonBySupplier = useMemo(() => {
+    if (!quote || !comparison.length) return [];
+    
+    return quote.fornecedores.map(fornecedor => {
+      const items = comparison.map(comp => {
+        const supplierResult = comp.fornecedores.find(f => f.supplierId === fornecedor.supplierId);
+        if (!supplierResult) return null;
+        
+        return {
+          packagingId: comp.packagingId,
+          packagingName: comp.packagingName,
+          ...supplierResult
+        };
+      }).filter((i): i is NonNullable<typeof i> => i !== null);
+      
+      return {
+        supplierId: fornecedor.supplierId,
+        supplierName: fornecedor.supplierName,
+        itens: items,
+        vitorias: items.filter(i => i.isMelhorPreco).length,
+        valorTotalGanhos: items.filter(i => i.isMelhorPreco).reduce((sum, item) => sum + (item.valorTotal || 0), 0)
+      };
+    }).filter(s => s.itens.length > 0).sort((a, b) => b.vitorias - a.vitorias);
+  }, [quote, comparison]);
+
+  // Embalagens e fornecedores não presentes na cotação
+  const packagingNotInQuote = useMemo(() => {
+    if (!quote) return availablePackagingItems;
+    const idsInQuote = quote.itens.map(i => i.packagingId);
+    return availablePackagingItems.filter(p => !idsInQuote.includes(p.id));
+  }, [quote, availablePackagingItems]);
+
+  const suppliersNotInQuote = useMemo(() => {
+    if (!quote) return availableSuppliers;
+    const idsInQuote = quote.fornecedores.map(f => f.supplierId);
+    return availableSuppliers.filter(s => !idsInQuote.includes(s.id));
+  }, [quote, availableSuppliers]);
 
   const handleStatusChange = useCallback((status: string) => {
     if (quote && status !== quote.status) updateQuoteStatus.mutate({ quoteId: quote.id, status });
@@ -647,23 +840,24 @@ export function ManagePackagingQuoteDialog({
   const content = (
     <div className="flex flex-col h-full bg-background">
         {/* Header */}
-        <div className="flex-shrink-0 px-5 py-3 border-b border-border bg-background relative overflow-hidden">
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-foreground border border-border flex-shrink-0">
-                <Package className="h-5 w-5" />
+        <div className="flex-shrink-0 px-4 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-card/80">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300 flex-shrink-0">
+                <Package className="h-3.5 w-3.5" />
               </div>
-              <div>
-                <DialogTitleComponent className="text-lg font-black text-foreground tracking-tight">Gerenciar Cotação</DialogTitleComponent>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-[10px] font-bold uppercase tracking-wider h-5">{quote.status}</Badge>
-                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{quote.dataInicio} - {quote.dataFim}</span>
+              <div className="min-w-0">
+                <DialogTitleComponent className="text-[13px] font-bold text-zinc-900 dark:text-zinc-50 tracking-tight leading-none">Gerenciar Cotação</DialogTitleComponent>
+                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-[9px] font-bold uppercase tracking-wider h-[18px] px-1.5 rounded-md">{quote.status}</Badge>
+                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{quote.dataInicio} - {quote.dataFim}</span>
+                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 hidden md:inline">• {stats.totalEmbalagens} emb. • {stats.totalFornecedores} forn. • {stats.fornecedoresRespondidos} resp.</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 flex-shrink-0">
               <Select value={quote.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-32 h-8 text-xs font-medium bg-background border-input"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="w-24 h-7 text-[10px] font-medium bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ativa">Ativa</SelectItem>
                   <SelectItem value="concluida">Concluída</SelectItem>
@@ -671,119 +865,55 @@ export function ManagePackagingQuoteDialog({
                 </SelectContent>
               </Select>
               <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} 
-                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent rounded-xl transition-all">
-                <X className="h-4 w-4" />
+                className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">
+                <X className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Stats */}
-        <div className="flex-shrink-0 px-5 py-2 border-b border-border bg-muted/50">
-          <div className="flex items-center gap-6 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground whitespace-nowrap">
-              <Package className="h-3.5 w-3.5 text-muted-foreground" />
-              <span><strong className="text-foreground">{stats.totalEmbalagens}</strong> embalagens</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground whitespace-nowrap">
-              <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-              <span><strong className="text-foreground">{stats.totalFornecedores}</strong> fornecedores</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground whitespace-nowrap">
-              <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
-              <span><strong className="text-foreground">{stats.fornecedoresRespondidos}</strong> responderam</span>
-            </div>
-          </div>
+          <DialogDescriptionComponent className="sr-only">Gerenciar cotação de embalagens</DialogDescriptionComponent>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 px-5 py-3 border-b border-border bg-background">
-            <TabsList className="flex w-full sm:w-auto space-x-1 overflow-x-auto scrollbar-hide p-1 bg-muted rounded-xl border border-border h-auto">
-              <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground">
-                <Trophy className="h-3.5 w-3.5 mb-0.5" />Resumo
+          <div className="flex-shrink-0 px-4 py-1 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-card/80">
+            <TabsList className="flex w-full sm:w-auto gap-0 overflow-x-auto scrollbar-hide p-0.5 bg-zinc-100/50 dark:bg-zinc-800/40 rounded-lg border border-zinc-200/50 dark:border-zinc-700/30 h-auto">
+              <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <Trophy className="h-3 w-3" />Resumo
               </TabsTrigger>
-              <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground">
-                <Settings className="h-3.5 w-3.5 mb-0.5" />Editar
+              <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <Settings className="h-3 w-3" />Editar
               </TabsTrigger>
-              <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground">
-                <DollarSign className="h-3.5 w-3.5 mb-0.5" />Valores
+              <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <DollarSign className="h-3 w-3" />Valores
               </TabsTrigger>
-              <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground">
-                <TrendingDown className="h-3.5 w-3.5 mb-0.5" />Comparativo
+              <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <TrendingDown className="h-3 w-3" />Comparativo
               </TabsTrigger>
-              <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm text-muted-foreground hover:text-foreground">
-                <FileDown className="h-3.5 w-3.5 mb-0.5" />Exportar
+              <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                <FileDown className="h-3 w-3" />Exportar
               </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Tab Resumo */}
-          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <ScrollArea className="h-full">
-              <div className="p-4 sm:p-6 space-y-4">
-                <h3 className="text-xs font-black text-muted-foreground uppercase tracking-wider flex items-center gap-2 px-1">
-                  <Star className="h-3.5 w-3.5 text-muted-foreground" />
-                  Melhor Preço por Embalagem
-                </h3>
-                <Card className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-                  <div className="divide-y divide-border">
-                    {bestPricesData.map((item) => (
-                      <div key={item.packagingId} className="p-4 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-foreground text-sm">{item.packagingName}</p>
-                            {item.allPrices.length > 1 && (
-                              <div className="mt-2 flex flex-wrap gap-1.5">
-                                {item.allPrices.map((price, idx) => (
-                                  <Badge key={price.supplierId} variant="outline"
-                                    className={cn("text-[10px] font-medium cursor-pointer border-border", 
-                                      idx === 0 
-                                        ? "bg-muted text-foreground border-border hover:bg-muted/80" 
-                                        : "bg-background text-muted-foreground hover:bg-muted/50")}
-                                    onClick={() => handleEditItem(price.supplierId, item.packagingId)}>
-                                    {price.supplierName}: {formatCurrency(price.custoPorUnidade)}/un
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            {item.bestPrice > 0 ? (
-                              <>
-                                <div className="flex items-center gap-2 justify-end">
-                                  <Award className="h-4 w-4 text-muted-foreground" />
-                                  <span className="text-lg font-black text-foreground tracking-tight">{formatCurrency(item.bestPrice)}<span className="text-xs font-medium text-muted-foreground ml-0.5">/un</span></span>
-                                </div>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mt-0.5">{item.bestSupplierName}</p>
-                                {item.savings > 0 && (
-                                  <Badge className="mt-1 bg-primary text-primary-foreground border-0 text-[10px] font-bold">
-                                    <TrendingDown className="h-2.5 w-2.5 mr-1" />
-                                    Economia: {formatCurrency(item.savings)}/un
-                                  </Badge>
-                                )}
-                              </>
-                            ) : <Badge variant="outline" className="text-muted-foreground bg-muted/50 text-[10px]">Sem preço</Badge>}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            </ScrollArea>
+          <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0">
+            <ResumoTab 
+              bestPricesData={bestPricesData}
+              onCopyBestPrices={handleCopyBestPricesSummary}
+              onEditItem={handleEditItem}
+            />
           </TabsContent>
 
           {/* Tab Editar Cotação */}
-          <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-white dark:bg-gray-950">
+          <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-background">
             <ScrollArea className="h-full">
-              <div className="p-4 sm:p-6 space-y-6">
+              <div className="p-4 space-y-4">
                 {/* Seção Embalagens */}
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-                  <div className="p-4 border-b bg-muted/50">
-                    <h3 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
-                      <Package className="h-4 w-4 text-muted-foreground" />
-                      Embalagens da Cotação ({quote.itens.length})
+                  <div className="px-3 py-2 border-b bg-muted/50">
+                    <h3 className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5">
+                      <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                      Embalagens ({quote.itens.length})
                     </h3>
                   </div>
                   {packagingNotInQuote.length > 0 && (
@@ -825,10 +955,10 @@ export function ManagePackagingQuoteDialog({
 
                 {/* Seção Fornecedores */}
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-                  <div className="p-4 border-b bg-muted/50">
-                    <h3 className="text-sm font-bold uppercase tracking-wide flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-muted-foreground" />
-                      Fornecedores da Cotação ({quote.fornecedores.length})
+                  <div className="px-3 py-2 border-b bg-muted/50">
+                    <h3 className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5">
+                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      Fornecedores ({quote.fornecedores.length})
                     </h3>
                   </div>
                   {suppliersNotInQuote.length > 0 && (
@@ -893,7 +1023,7 @@ export function ManagePackagingQuoteDialog({
           {/* Tab Valores */}
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-background">
             <div className="h-full flex flex-col md:flex-row">
-              <div className="w-full md:w-56 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/30">
+              <div className="w-full md:w-48 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/20">
                 {isMobile ? (
                   <div className="p-3">
                     <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 block">Selecionar Fornecedor</Label>
@@ -915,23 +1045,21 @@ export function ManagePackagingQuoteDialog({
                   </div>
                 ) : (
                   <>
-                    <div className="p-3 border-b border-border"><h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</h4></div>
-                    <ScrollArea className="h-[calc(100%-41px)]">
-                      <div className="p-2 space-y-1">
+                    <div className="px-2.5 py-2 border-b border-border"><h4 className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</h4></div>
+                    <ScrollArea className="h-[calc(100%-33px)]">
+                      <div className="p-1.5 space-y-0.5">
                         {quote.fornecedores.map((fornecedor) => (
                           <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                            className={cn("w-full p-2.5 rounded-lg text-left transition-all text-xs font-medium group relative overflow-hidden",
+                            className={cn("w-full p-2 rounded-md text-left transition-all text-xs font-medium",
                               selectedSupplier === fornecedor.supplierId 
-                                ? "bg-primary text-primary-foreground shadow-md" 
+                                ? "bg-primary text-primary-foreground shadow-sm" 
                                 : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                            <div className="flex items-center gap-2 relative z-10">
-                              <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/80" : "text-muted-foreground group-hover:text-foreground")} />
-                              <span className="truncate font-bold">{fornecedor.supplierName}</span>
-                            </div>
-                            <div className="flex items-center gap-1 mt-1.5 pl-5.5 relative z-10">
-                              {fornecedor.status === "respondido" ? 
-                                <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/90" : "text-foreground")}><CheckCircle2 className="h-2.5 w-2.5" />Respondido</span> : 
-                                <span className={cn("text-[9px] flex items-center gap-1", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/70" : "text-muted-foreground")}><Clock className="h-2.5 w-2.5" />Pendente</span>
+                            <div className="flex items-center gap-1.5">
+                              <Building2 className={cn("h-3 w-3 flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/80" : "text-muted-foreground")} />
+                              <span className="truncate font-bold text-[11px]">{fornecedor.supplierName}</span>
+                              {fornecedor.status === "respondido" 
+                                ? <CheckCircle2 className={cn("h-2.5 w-2.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/80" : "text-emerald-500")} />
+                                : <Clock className={cn("h-2.5 w-2.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/60" : "text-muted-foreground/50")} />
                               }
                             </div>
                           </button>
@@ -943,7 +1071,7 @@ export function ManagePackagingQuoteDialog({
               </div>
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                  <div className="p-4 sm:p-6 space-y-3" onKeyDown={handleKeyDown}>
+                  <div className="p-3 space-y-2.5" onKeyDown={handleKeyDown}>
                     {!selectedSupplier ? (
                       <div className="h-full flex flex-col items-center justify-center text-center p-8 text-muted-foreground">
                         <Building2 className="h-12 w-12 mb-3 opacity-20" />
@@ -1073,155 +1201,31 @@ export function ManagePackagingQuoteDialog({
 
           {/* Tab Comparativo */}
           <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <ScrollArea className="h-full">
-              <div className="p-4 sm:p-6 space-y-4">
-                {comparison.length === 0 || comparison.every(c => c.fornecedores.length === 0) ? (
-                  <div className="text-center py-16 text-muted-foreground">
-                    <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
-                      <TrendingDown className="h-8 w-8 opacity-50" />
-                    </div>
-                    <p className="font-bold text-foreground mb-1">Sem dados comparativos</p>
-                    <p className="text-xs">Adicione os valores na aba "Valores" para visualizar</p>
-                  </div>
-                ) : comparison.map((comp) => (
-                  <Card key={comp.packagingId} className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-                    <div className="bg-muted/50 p-3 border-b border-border">
-                      <h4 className="font-bold text-sm text-foreground flex items-center gap-2"><Package className="h-4 w-4 text-muted-foreground" />{comp.packagingName}</h4>
-                    </div>
-                    {comp.fornecedores.length === 0 ? (
-                      <div className="p-6 text-center text-muted-foreground text-xs font-medium">Nenhum fornecedor respondeu ainda</div>
-                    ) : (
-                      <div className="divide-y divide-border">
-                        {comp.fornecedores.map((f, index) => (
-                          <div key={f.supplierId} className={cn("p-4 flex items-center gap-4 transition-colors cursor-pointer hover:bg-muted/50", f.isMelhorPreco && "bg-muted/30")} onClick={() => handleEditItem(f.supplierId, comp.packagingId)}>
-                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm", f.isMelhorPreco ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                              {f.isMelhorPreco ? <Award className="h-4 w-4" /> : index + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-bold text-foreground text-sm">{f.supplierName}</p>
-                              <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{formatCurrency(f.valorTotal)} ({f.quantidadeVenda} {f.unidadeVenda} / {f.quantidadeUnidades} un)</p>
-                            </div>
-                            <div className="text-right flex-shrink-0">
-                              <p className={cn("font-black text-sm", f.isMelhorPreco ? "text-foreground" : "text-foreground")}>{formatCurrency(f.custoPorUnidade)}/un</p>
-                              {!f.isMelhorPreco ? <p className="text-[10px] font-bold text-red-500 mt-0.5">+{f.diferencaPercentual.toFixed(1)}%</p> : <Badge className="bg-primary text-primary-foreground border-0 text-[9px] mt-0.5 h-4">Melhor</Badge>}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
+            <Suspense fallback={<TabSkeleton />}>
+              <ComparativoTab 
+                comparison={comparison}
+                comparisonBySupplier={comparisonBySupplier}
+                onEditItem={handleEditItem}
+                onCopySupplierSummary={handleCopySupplierSummary}
+                onExportSupplierHtml={handleExportSupplierHtml}
+                copiedId={copiedId}
+              />
+            </Suspense>
           </TabsContent>
 
           {/* Tab Exportar PDF */}
           <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <ScrollArea className="h-full">
-              <div className="p-4 sm:p-6 space-y-6">
-                <div className="text-center py-6">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted flex items-center justify-center shadow-inner">
-                    <FileDown className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="text-lg font-black text-foreground mb-2 tracking-tight">Exportar Relatório</h3>
-                  <p className="text-xs text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                    Gere um PDF ou HTML com o comparativo completo, ideal para documentação e aprovação.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Preview do que será exportado */}
-                  <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-                    <div className="p-3 border-b border-border bg-muted/50">
-                      <h4 className="text-xs font-black text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                        <FileText className="h-3.5 w-3.5" />
-                        Conteúdo
-                      </h4>
-                    </div>
-                    <div className="p-4 space-y-2.5">
-                      {[
-                        `Período: ${quote.dataInicio} a ${quote.dataFim}`,
-                        `${quote.itens.length} embalagens comparadas`,
-                        `${quote.fornecedores.length} fornecedores participantes`,
-                        "Tabela de preços detalhada",
-                        "Destaque dos melhores preços",
-                        "Ranking de fornecedores"
-                      ].map((text, i) => (
-                        <div key={i} className="flex items-center gap-2.5 text-xs font-medium text-muted-foreground">
-                          <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 flex-shrink-0" />
-                          <span>{text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-
-                  {/* Resumo dos vencedores */}
-                  <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-                    <div className="p-3 border-b border-border bg-muted/50">
-                      <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
-                        <Trophy className="h-3.5 w-3.5 text-muted-foreground" />
-                        Vencedores
-                      </h4>
-                    </div>
-                    <div className="p-4 space-y-2">
-                      {(() => {
-                        const winsPerSupplier: Record<string, { name: string; wins: number }> = {};
-                        comparison.forEach(comp => {
-                          const winner = comp.fornecedores.find(f => f.isMelhorPreco);
-                          if (winner) {
-                            if (!winsPerSupplier[winner.supplierId]) {
-                              winsPerSupplier[winner.supplierId] = { name: winner.supplierName, wins: 0 };
-                            }
-                            winsPerSupplier[winner.supplierId].wins++;
-                          }
-                        });
-                        const sorted = Object.values(winsPerSupplier).sort((a, b) => b.wins - a.wins);
-                        
-                        if (sorted.length === 0) return <p className="text-xs text-muted-foreground italic">Sem dados suficientes</p>;
-                        
-                        return sorted.map((w, idx) => (
-                          <div key={idx} className="flex items-center justify-between text-xs">
-                            <span className={cn("flex items-center gap-2", idx === 0 ? "font-bold text-foreground" : "text-muted-foreground")}>
-                              {idx === 0 && <Award className="h-3.5 w-3.5 text-muted-foreground" />}
-                              {w.name}
-                            </span>
-                            <Badge variant="outline" className={cn("h-5 border-border bg-background text-foreground", idx !== 0 && "border-border bg-muted/50 text-muted-foreground")}>
-                              {w.wins} {w.wins === 1 ? "item" : "itens"}
-                            </Badge>
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                  </Card>
-                </div>
-
-                {/* Botões */}
-                <div className="flex flex-col sm:flex-row justify-center gap-3 pt-4">
-                  <Button size="lg" onClick={handleGeneratePDF} disabled={comparison.every(c => c.fornecedores.length === 0)}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold uppercase tracking-wider text-xs shadow-lg shadow-primary/20 rounded-xl px-8 h-10">
-                    <Download className="h-4 w-4 mr-2" />Baixar PDF
-                  </Button>
-                  <Button size="lg" onClick={handleDownloadHtml} disabled={comparison.every(c => c.fornecedores.length === 0)}
-                    variant="outline" className="font-bold uppercase tracking-wider text-xs rounded-xl px-8 h-10 border-border hover:bg-muted">
-                    <FileText className="h-4 w-4 mr-2" />Baixar HTML
-                  </Button>
-                  <Button size="lg" onClick={() => setShowHtmlPreview(!showHtmlPreview)} disabled={comparison.every(c => c.fornecedores.length === 0)}
-                    variant="ghost" className="font-bold uppercase tracking-wider text-xs rounded-xl px-8 h-10 text-muted-foreground hover:text-foreground hover:bg-muted">
-                    <Eye className="h-4 w-4 mr-2" />{showHtmlPreview ? "Ocultar" : "Visualizar"}
-                  </Button>
-                </div>
-
-                {/* Preview HTML */}
-                {showHtmlPreview && (
-                  <div className="mt-6 border border-border rounded-xl overflow-hidden shadow-2xl">
-                    <div className="bg-muted/50 px-4 py-2 border-b border-border">
-                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Preview</p>
-                    </div>
-                    <iframe srcDoc={generateHtmlComparative()} className="w-full h-[400px] sm:h-[600px] border-0 bg-background" title="HTML Preview" />
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
+            <Suspense fallback={<TabSkeleton />}>
+              <ExportarTab 
+                quote={quote}
+                comparison={comparison}
+                showHtmlPreview={showHtmlPreview}
+                onTogglePreview={() => setShowHtmlPreview(!showHtmlPreview)}
+                onGeneratePDF={handleGeneratePDF}
+                onDownloadHtml={handleDownloadHtml}
+                generateHtmlComparative={generateHtmlComparative}
+              />
+            </Suspense>
           </TabsContent>
         </Tabs>
     </div>
@@ -1246,7 +1250,7 @@ export function ManagePackagingQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[95vw] max-w-[1200px] h-[90vh] sm:h-[92vh] max-h-[850px] p-0 gap-0 overflow-hidden border border-border shadow-2xl rounded-[2rem] flex flex-col bg-background animate-in fade-in zoom-in-95 duration-300">
+      <DialogContent className="w-[96vw] sm:w-[90vw] md:w-[92vw] max-w-[1100px] h-[88vh] sm:h-[90vh] max-h-[820px] p-0 gap-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl flex flex-col bg-white dark:bg-card animate-in fade-in zoom-in-95 duration-200">
         {content}
       </DialogContent>
     </Dialog>
