@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { usePackagingItems } from "@/hooks/usePackagingItems";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
@@ -48,7 +47,7 @@ import {
 function EmbalagensTab() {
   const { isMobile } = useBreakpoint();
   const { paginate } = usePagination<PackagingQuoteDisplay>({ initialItemsPerPage: isMobile ? 8 : 10 });
-  const [activeSubTab, setActiveSubTab] = useState("cotacoes");
+  const [activeSubTab, setActiveSubTab] = useState("hub");
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -163,72 +162,114 @@ function EmbalagensTab() {
 
   return (
     <div className="space-y-6">
-      {/* Sub-tabs & Actions Container */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800 pb-2 bg-transparent !bg-transparent !bg-none !shadow-none !bg-opacity-0">
-        <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full md:w-auto bg-transparent">
-          <TabsList className={designSystem.components.tabs.clean.list}>
-            {[
-              { value: "cotacoes", icon: ClipboardList, label: "Cotações", badge: stats.prontasParaDecisao },
-              { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
-              { value: "analise", icon: BarChart3, label: "Análise" },
-              { value: "economia", icon: Calculator, label: "Poupança" }
-            ].map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className={designSystem.components.tabs.clean.trigger}
+      {/* Hub Central Navigation */}
+      {activeSubTab === "hub" && (
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+            <div className="text-center md:text-left">
+              <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Portal de Embalagens</h2>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gerencie fluxos e acompanhe o balanço de compras deste setor.</p>
+            </div>
+            
+            <div className="flex w-full md:w-auto items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setItemsDialogOpen(true)}
+                className="flex-1 md:flex-auto h-11 md:h-10 rounded-xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 shadow-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900"
               >
-                <tab.icon className={cn("h-4 w-4 mr-2", activeSubTab === tab.value ? "text-brand" : "opacity-70")} />
-                {tab.label}
-                {tab.badge ? (
-                  <span className="ml-2 px-1.5 py-0.5 bg-brand text-black text-[10px] font-black rounded-full animate-bounce">
-                    {tab.badge}
+                <Package className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Gestão de Itens</span>
+              </Button>
+              <Button
+                onClick={() => setAddDialogOpen(true)}
+                className="flex-1 md:flex-auto h-11 md:h-10 rounded-xl bg-zinc-900 dark:bg-zinc-200 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-300 shadow-sm transition-colors"
+              >
+                <Plus className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Nova Cotação</span>
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              { id: "cotacoes", icon: ClipboardList, label: "Cotações", desc: "Gerencie orçamentos e compare preços", badge: stats.prontasParaDecisao },
+              { id: "pedidos", icon: ShoppingCart, label: "Pedidos", desc: "Acompanhe reposições geradas" },
+              { id: "analise", icon: BarChart3, label: "Análise", desc: "Métricas gerenciais gerais" },
+              { id: "economia", icon: Calculator, label: "Poupança", desc: "Monitoramento de saving" }
+            ].map(card => (
+              <button 
+                key={card.id}
+                onClick={() => setActiveSubTab(card.id)}
+                className="group relative flex flex-col items-start p-6 bg-white dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl text-left transition-all hover:bg-zinc-50/80 dark:hover:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
+              >
+                <div className="p-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl mb-5 text-zinc-600 dark:text-zinc-400 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
+                  <card.icon className="h-5 w-5" />
+                </div>
+                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">{card.label}</h3>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-[90%]">{card.desc}</p>
+                
+                {card.badge ? (
+                  <span className="absolute top-6 right-6 px-2.5 py-0.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] uppercase font-bold tracking-wider rounded-full shadow-sm animate-in zoom-in-50">
+                    {card.badge}
                   </span>
                 ) : null}
-                {activeSubTab === tab.value && (
-                  <div className="absolute bottom-[-1px] left-0 right-0 h-[2px] bg-brand shadow-[0_0_10px_hsl(var(--brand)/0.5)] rounded-full transition-all" />
-                )}
-              </TabsTrigger>
+              </button>
             ))}
-          </TabsList>
-        </Tabs>
-
-        <div className="flex items-center gap-2">
-          {!isMobile && (
-            <Button
-              variant="outline"
-              onClick={() => setItemsDialogOpen(true)}
-              className={cn("h-10 rounded-xl", designSystem.colors.border.subtle)}
-            >
-              <Package className="h-4 w-4 mr-2" />
-              Gerenciar Itens
-            </Button>
-          )}
-          {activeSubTab === "cotacoes" && (
-            <Button
-              onClick={() => setAddDialogOpen(true)}
-              className={designSystem.components.button.primary}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Cotação
-            </Button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {isMobile && (
+      {/* Internal Navigation Header (When deeply navigated) */}
+      {activeSubTab !== "hub" && (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800/80 pb-4 mb-4 animate-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => setActiveSubTab("hub")} className="rounded-full shadow-none bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 h-9 w-9">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+              </Button>
+              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 capitalize">
+                {activeSubTab === "cotacoes" ? "Cotações de Embalagem" : activeSubTab} 
+              </h2>
+            </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            {!isMobile && (
+              <Button
+                variant="outline"
+                onClick={() => setItemsDialogOpen(true)}
+                className="flex-1 sm:flex-auto h-9 rounded-xl border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 shadow-none text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+              >
+                <Package className="h-4 w-4 mr-2" />
+                Gestão de Itens
+              </Button>
+            )}
+            {activeSubTab === "cotacoes" && (
+              <Button
+                onClick={() => setAddDialogOpen(true)}
+                className="flex-1 sm:flex-auto h-9 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300 shadow-none text-sm transition-colors"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Nova Cotação
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isMobile && activeSubTab !== "hub" && (
         <Button
           variant="outline"
           onClick={() => setItemsDialogOpen(true)}
-          className="w-full h-11 rounded-2xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+          className="w-full h-11 rounded-2xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-sm text-zinc-700 dark:text-zinc-300 my-4"
         >
           <Package className="h-4 w-4 mr-2" />
           Gerenciar Itens de Embalagem
         </Button>
       )}
 
+      {/* Cotações Content */}
       {activeSubTab === "cotacoes" && (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
           {/* Métricas */}
           <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
             <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
@@ -356,24 +397,18 @@ function EmbalagensTab() {
         </div>
       )}
 
-      {/* Other Content - Persistent ForceMount */}
-      <TabsContent value="pedidos" className="mt-0" forceMount>
-        <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
-        </div>
-      </TabsContent>
+      {/* Other Pages Content - Persistent Display toggled via CSS */}
+      <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-500"}>
+        <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
+      </div>
 
-      <TabsContent value="analise" className="mt-0" forceMount>
-        <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingAnalysisTab />
-        </div>
-      </TabsContent>
+      <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-500"}>
+        <PackagingAnalysisTab />
+      </div>
 
-      <TabsContent value="economia" className="mt-0" forceMount>
-        <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-300"}>
-          <PackagingEconomyTab />
-        </div>
-      </TabsContent>
+      <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-500"}>
+        <PackagingEconomyTab />
+      </div>
 
       {/* Dialogs */}
       <AddPackagingQuoteDialog
