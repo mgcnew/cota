@@ -1023,7 +1023,7 @@ export function ManagePackagingQuoteDialog({
           {/* Tab Valores */}
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-background">
             <div className="h-full flex flex-col md:flex-row">
-              <div className="w-full md:w-48 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/20">
+              <div className="w-full md:w-60 lg:w-64 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/10 flex flex-col">
                 {isMobile ? (
                   <div className="p-3">
                     <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 block">Selecionar Fornecedor</Label>
@@ -1045,21 +1045,22 @@ export function ManagePackagingQuoteDialog({
                   </div>
                 ) : (
                   <>
-                    <div className="px-2.5 py-2 border-b border-border"><h4 className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</h4></div>
-                    <ScrollArea className="h-[calc(100%-33px)]">
-                      <div className="p-1.5 space-y-0.5">
+                    <div className="px-4 py-3 border-b border-border flex-shrink-0"><h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</h4></div>
+                    <ScrollArea className="flex-1">
+                      <div className="p-2 space-y-1 pb-6">
                         {quote.fornecedores.map((fornecedor) => (
                           <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                            className={cn("w-full p-2 rounded-md text-left transition-all text-xs font-medium",
+                            className={cn("w-full p-2.5 rounded-lg text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background",
                               selectedSupplier === fornecedor.supplierId 
-                                ? "bg-primary text-primary-foreground shadow-sm" 
-                                : "text-muted-foreground hover:bg-muted hover:text-foreground")}>
-                            <div className="flex items-center gap-1.5">
-                              <Building2 className={cn("h-3 w-3 flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/80" : "text-muted-foreground")} />
-                              <span className="truncate font-bold text-[11px]">{fornecedor.supplierName}</span>
+                                ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20" 
+                                : "text-muted-foreground hover:bg-muted/80 hover:text-foreground")}
+                            title={fornecedor.supplierName}>
+                            <div className="flex items-center gap-2.5">
+                              <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/90" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
+                              <span className="truncate font-bold text-xs">{fornecedor.supplierName}</span>
                               {fornecedor.status === "respondido" 
-                                ? <CheckCircle2 className={cn("h-2.5 w-2.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/80" : "text-emerald-500")} />
-                                : <Clock className={cn("h-2.5 w-2.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/60" : "text-muted-foreground/50")} />
+                                ? <CheckCircle2 className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/90" : "text-emerald-500")} />
+                                : <Clock className={cn("h-3 w-3 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/70" : "text-muted-foreground/40")} />
                               }
                             </div>
                           </button>
@@ -1071,7 +1072,7 @@ export function ManagePackagingQuoteDialog({
               </div>
               <div className="flex-1 overflow-hidden">
                 <ScrollArea className="h-full">
-                  <div className="p-3 space-y-2.5" onKeyDown={handleKeyDown}>
+                  <div className="p-4 md:p-5 space-y-3 pb-10" onKeyDown={handleKeyDown}>
                     {!selectedSupplier ? (
                       <div className="h-full flex flex-col items-center justify-center text-center p-8 text-muted-foreground">
                         <Building2 className="h-12 w-12 mb-3 opacity-20" />
@@ -1250,7 +1251,7 @@ export function ManagePackagingQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[90vw] md:w-[92vw] max-w-[1100px] h-[88vh] sm:h-[90vh] max-h-[820px] p-0 gap-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl flex flex-col bg-white dark:bg-card animate-in fade-in zoom-in-95 duration-200">
+      <DialogContent className="w-[96vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] max-w-[900px] h-[85vh] sm:h-[80vh] max-h-[680px] p-0 gap-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl flex flex-col bg-white dark:bg-card animate-in fade-in zoom-in-95 duration-200">
         {content}
       </DialogContent>
     </Dialog>
