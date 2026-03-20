@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter } from "lucide-react";
+import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
+import { analyzeQuoteOptions } from "@/lib/gemini";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -26,6 +27,21 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [groupBySupplier, setGroupBySupplier] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+
+  const handleAnalyzeQuote = async () => {
+    setIsAnalyzing(true);
+    try {
+      const result = await analyzeQuoteOptions(productPricesData);
+      setAnalysisResult(result);
+    } catch (error) {
+      console.error(error);
+      setAnalysisResult("Ocorreu um erro ao gerar a análise.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const topSuppliersCount = useMemo(() => {
     const wins = new Set();
@@ -144,7 +160,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   return (
     <div className="flex flex-col w-full h-auto bg-transparent">
       {/* 1. SEÇÃO DE STATS COMPACTA */}
-      <div className="bg-zinc-50/80 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800 px-4 py-2 flex items-center overflow-x-auto custom-scrollbar">
+      <div className="bg-zinc-50/80 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800 px-4 py-2 flex items-center justify-between overflow-x-auto custom-scrollbar">
         <div className="flex items-center gap-6 min-w-max">
           <div className="flex items-center gap-2">
             <Package className="h-4 w-4 text-zinc-400" />
@@ -178,7 +194,29 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
             </div>
           </div>
         </div>
+        
+        <Button 
+          onClick={handleAnalyzeQuote} 
+          disabled={isAnalyzing}
+          className="ml-4 h-8 bg-brand hover:bg-brand/90 text-black font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm shadow-brand/20 border-none transition-all hover:scale-[1.02] flex-shrink-0"
+        >
+          {isAnalyzing ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1.5" />}
+          Otimizar Compra
+        </Button>
       </div>
+
+      {/* RESULTADO DA IA (condicional) */}
+      {analysisResult && (
+        <div className="bg-amber-50 dark:bg-amber-950/20 border-b border-amber-200 dark:border-amber-900/30 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-amber-500" />
+            <h3 className="font-black text-amber-800 dark:text-amber-500 uppercase tracking-widest text-xs">Análise Inteligente de Cotação</h3>
+          </div>
+          <div className="text-sm text-amber-900 dark:text-amber-100/80 whitespace-pre-wrap leading-relaxed">
+            {analysisResult}
+          </div>
+        </div>
+      )}
 
       {/* 2. TOOLBAR & FILTROS */}
       <div className="bg-white dark:bg-zinc-950 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">

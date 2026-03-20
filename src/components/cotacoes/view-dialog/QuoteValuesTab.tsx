@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { designSystem } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
 import { LastPaidPricesTooltip } from "./LastPaidPricesTooltip";
+import { generateWhatsAppMessage } from "@/lib/gemini";
 
 interface QuoteValuesTabProps {
   products: any[];
@@ -151,6 +152,12 @@ export function QuoteValuesTab({
     [fornecedores, selectedSupplier]
   );
 
+  const handleWhatsApp = async (e: React.MouseEvent, supplierName: string) => {
+    e.stopPropagation();
+    const msg = await generateWhatsAppMessage(supplierName, products);
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
   return (
     <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
       {/* Sidebar - Lista de Fornecedores */}
@@ -204,9 +211,23 @@ export function QuoteValuesTab({
                     <span className={cn("text-[11px] font-black", isSelected ? "text-brand" : "text-zinc-400")}>
                       {formatCurrency(total)}
                     </span>
-                    {fornecedor.status === 'respondido' && isSelected && (
-                      <div className="h-4 px-1.5 rounded bg-brand/10 text-brand text-[9px] font-black tracking-tighter">RESPONDEU</div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => handleWhatsApp(e, fornecedor.contato)}
+                        className={cn(
+                          "flex items-center justify-center p-1.5 rounded-lg transition-colors border",
+                          isSelected
+                            ? "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500 hover:text-white"
+                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border-transparent hover:bg-green-500 hover:text-white"
+                        )}
+                        title="Enviar Cotação via WhatsApp"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                      </button>
+                      {fornecedor.status === 'respondido' && isSelected && (
+                        <div className="h-4 px-1.5 rounded bg-brand/10 text-brand text-[9px] font-black tracking-tighter flex items-center">RESPONDEU</div>
+                      )}
+                    </div>
                   </div>
                 </button>
               );

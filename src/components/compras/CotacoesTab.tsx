@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { usePedidos } from "@/hooks/usePedidos";
@@ -38,13 +39,31 @@ function CotacoesTab() {
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: isMobile ? 8 : 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [gerenciarDialogOpen, setGerenciarDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("filter") || "all");
+
+  useEffect(() => {
+    const filter = searchParams.get("filter");
+    if (filter && filter !== statusFilter) {
+      setStatusFilter(filter);
+    }
+  }, [searchParams]);
+
+  const handleStatusFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setSearchParams(prev => {
+      if (val === "all") prev.delete("filter");
+      else prev.set("filter", val);
+      return prev;
+    });
+  };
 
   const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, updateQuoteStatus, isUpdating } = useCotacoes();
   const { pedidos } = usePedidos();
@@ -80,6 +99,25 @@ function CotacoesTab() {
   const handleGerenciarQuote = useCallback((quote: Quote) => {
     startTransition(() => { setSelectedQuoteId(quote.id); setGerenciarDialogOpen(true); });
   }, []);
+
+  // Interceptar URL param para abrir modal de gerenciar automaticamente
+  useEffect(() => {
+    const manageQuoteId = searchParams.get("manageQuote");
+    if (manageQuoteId && cotacoes.length > 0) {
+      const quoteToManage = cotacoes.find(c => c.id?.toString() === manageQuoteId.toString());
+      if (quoteToManage) {
+        // Timeout para evitar conflitos de re-render com react-router
+        setTimeout(() => {
+          handleGerenciarQuote(quoteToManage);
+          // Limpar o parâmetro da URL para não reabrir se ele fechar e voltar
+          setSearchParams(prev => {
+            prev.delete("manageQuote");
+            return prev;
+          }, { replace: true });
+        }, 100);
+      }
+    }
+  }, [searchParams, cotacoes, handleGerenciarQuote, setSearchParams]);
 
   const handleDeleteQuote = useCallback((quote: Quote) => {
     startTransition(() => { setSelectedQuoteId(quote.id); setDeleteDialogOpen(true); });
@@ -161,14 +199,14 @@ function CotacoesTab() {
           value={stats.prontasParaDecisao}
           icon={CheckCircle2}
           variant="success"
-          onClick={() => setStatusFilter("prontas")}
+          onClick={() => handleStatusFilterChange("prontas")}
         />
         <MetricCard
           title="Vencendo"
           value={stats.vencendo}
           icon={AlertTriangle}
           variant="warning"
-          onClick={() => setStatusFilter("vencendo")}
+          onClick={() => handleStatusFilterChange("vencendo")}
         />
         <MetricCard
           title="Economia Real"
@@ -198,7 +236,7 @@ function CotacoesTab() {
 
         <div className="flex items-center gap-2">
           {/* Mobile: reduced width to fit "Nova Cotação" button */}
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
             <SelectTrigger className={cn("w-[130px] sm:w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -248,7 +286,7 @@ function CotacoesTab() {
                 size="sm"
                 variant="outline"
                 className="rounded-lg h-8 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
-                onClick={() => setStatusFilter("prontas")}
+                onClick={() => handleStatusFilterChange("prontas")}
               >
                 Ver agora
               </Button>
@@ -270,7 +308,7 @@ function CotacoesTab() {
                 size="sm"
                 variant="outline"
                 className="rounded-lg h-8 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
-                onClick={() => setStatusFilter("vencendo")}
+                onClick={() => handleStatusFilterChange("vencendo")}
               >
                 Revisar
               </Button>

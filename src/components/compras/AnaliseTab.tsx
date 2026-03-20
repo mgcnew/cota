@@ -20,6 +20,7 @@ import {
   CollapsibleTrigger
 } from "@/components/ui/collapsible";
 import { designSystem } from "@/styles/design-system";
+import { MetricCard } from "@/components/ui/metric-card";
 
 interface AnaliseTabProps { }
 

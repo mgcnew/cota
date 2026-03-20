@@ -116,212 +116,172 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-white/20 dark:border-white/10 shadow-2xl rounded-xl !bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl [&>button]:hidden">
-        <DialogHeader className="px-6 py-5 border-b border-white/10 dark:border-white/5 bg-white/20 dark:bg-white/5 backdrop-blur-md">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border shadow-2xl rounded-xl bg-card">
+        {/* Header Compacto */}
+        <DialogHeader className="px-5 py-4 border-b border-border bg-muted/30">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                <Truck className="h-6 w-6" />
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
+                <Truck className="h-4 w-4" />
               </div>
               <div>
-                <DialogTitle className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
+                <DialogTitle className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
                   Registrar Recebimento
+                  {veioDeCotacao && (
+                    <Badge variant="outline" className="h-[18px] px-1.5 text-[9px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-bold uppercase tracking-wider">
+                      Via Cotação
+                    </Badge>
+                  )}
                 </DialogTitle>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
-                  Confirme os produtos e quantidades recebidas
+                <p className="text-xs text-muted-foreground font-medium mt-0.5">
+                  {pedido.supplier_name} <span className="mx-1 opacity-50">•</span> Pedido #{pedido.id.substring(0, 8)}
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-9 w-9 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-white/10 dark:hover:bg-white/5 rounded-full transition-all">
-              <X className="h-5 w-5" />
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-full">
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden flex flex-col p-0">
-          <div className="p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
-            {/* Info do Pedido */}
-            <div className="flex items-center justify-between p-4 bg-white/40 dark:bg-gray-900/40 rounded-2xl border border-white/20 dark:border-white/10 backdrop-blur-md shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gray-500/10 flex items-center justify-center border border-white/10">
-                  <Package className="h-5 w-5 text-gray-500" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm text-gray-900 dark:text-white tracking-tight leading-none">{pedido.supplier_name}</p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-1.5">
-                    Pedido #{pedido.id.substring(0, 8)}
-                  </p>
-                </div>
+        <div className="flex-1 flex flex-col p-5 overflow-y-auto custom-scrollbar">
+          {/* Aviso se não veio de cotação */}
+          {!veioDeCotacao && (
+            <div className="flex items-start gap-2 p-3 mb-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5" />
+              <div className="text-xs text-amber-700 dark:text-amber-400">
+                <span className="font-semibold block">Pedido direto s/ cotação</span>
+                <span className="opacity-80">A economia real não será calculada para este registro.</span>
               </div>
-              {veioDeCotacao ? (
-                <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-bold uppercase tracking-tighter text-[10px] px-2.5 h-6 rounded-lg">
-                  <TrendingDown className="h-3 w-3 mr-1.5" />
-                  Via Cotação
-                </Badge>
-              ) : (
-                <Badge variant="secondary" className="bg-gray-500/10 text-gray-600 dark:text-gray-400 border-gray-500/20 font-bold uppercase tracking-tighter text-[10px] px-2.5 h-6 rounded-lg">Pedido Direto</Badge>
-              )}
             </div>
+          )}
 
-            {/* Aviso se não veio de cotação */}
-            {!veioDeCotacao && (
-              <div className="flex items-start gap-3 p-4 bg-amber-500/5 dark:bg-amber-900/10 rounded-2xl border border-amber-500/10 backdrop-blur-sm">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="text-xs text-amber-700 dark:text-amber-300 font-medium leading-relaxed">
-                  <p className="font-bold uppercase tracking-wider mb-0.5">Sem histórico de cotação</p>
-                  <p className="opacity-70">Este pedido foi criado manualmente. A economia real não poderá ser calculada para este registro.</p>
-                </div>
-              </div>
-            )}
+          {/* Lista Compacta de Itens */}
+          <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
+            <div className="hidden sm:grid grid-cols-12 gap-4 p-3 bg-muted/50 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider items-center">
+              <div className="col-span-5">Produto Pedido</div>
+              <div className="col-span-2 text-right">Qtd Pedida</div>
+              <div className="col-span-2 text-right">Preço Unit.</div>
+              <div className="col-span-3 text-right pr-2">Qtd Recebida</div>
+            </div>
+            
+            <div className="divide-y divide-border">
+            {itensEntrega.map((item, index) => {
+              const diff = item.quantidadeEntregue - item.quantidadePedida;
+              const isDifferent = item.quantidadeEntregue > 0 && Math.abs(diff) > 0.001;
+              
+              return (
+                <div key={item.itemId || index} className="grid sm:grid-cols-12 gap-3 sm:gap-4 p-3 sm:items-center hover:bg-muted/30 transition-colors">
+                  <div className="sm:col-span-5 flex items-start sm:items-center gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center shrink-0 mt-1 sm:mt-0">
+                      <Package className="h-4 w-4 text-brand/70" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-foreground tracking-tight leading-none mb-1.5" title={item.productName}>
+                        {item.productName}
+                      </p>
+                      {veioDeCotacao && item.maiorValor > item.valorUnitario && (
+                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                          Econ. R$ {(item.maiorValor - item.valorUnitario).toFixed(2)}/{item.unidadeEntregue}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-            {/* Lista de Itens */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 px-1">
-                <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Itens para Conferência</span>
-                <div className="h-px flex-1 bg-white/10 dark:bg-white/5"></div>
-              </div>
+                  <div className="sm:col-span-2 flex flex-col sm:items-end justify-center pt-2 sm:pt-0 border-t sm:border-0 border-border/50 mt-2 sm:mt-0">
+                    <p className="sm:hidden text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">Qtd Pedida</p>
+                    <span className="font-semibold text-foreground text-sm">{item.quantidadePedida} <span className="text-xs text-muted-foreground uppercase ml-0.5">{item.unidadePedida}</span></span>
+                  </div>
 
-              {itensEntrega.map((item, index) => {
-                const diff = item.quantidadeEntregue - item.quantidadePedida;
-                const isDifferent = item.quantidadeEntregue > 0 && Math.abs(diff) > 0.001;
-                
-                return (
-                  <Card key={item.itemId || index} className="overflow-hidden border border-white/20 dark:border-white/10 bg-white/40 dark:bg-gray-900/40 backdrop-blur-md shadow-sm rounded-2xl group hover:border-emerald-500/30 transition-all duration-300">
-                    <CardContent className="p-0">
-                      <div className="p-4 border-b border-white/5 bg-white/5">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0 border border-orange-500/20 group-hover:scale-110 transition-transform duration-500">
-                            <Package className="h-5 w-5 text-orange-600" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-bold text-sm text-gray-900 dark:text-white truncate tracking-tight">{item.productName}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[10px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest">
-                                Pedida: <span className="text-gray-900 dark:text-gray-200">{item.quantidadePedida} {item.unidadePedida}</span>
-                              </span>
-                              {veioDeCotacao && item.maiorValor > item.valorUnitario && (
-                                <Badge variant="outline" className="h-4 px-1.5 text-[8px] bg-emerald-500/5 text-emerald-600 dark:text-emerald-400 border-emerald-500/10 font-bold uppercase">
-                                  Economia: R$ {(item.maiorValor - item.valorUnitario).toFixed(2)}/{item.unidadeEntregue}
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="sm:col-span-2 flex flex-col sm:items-end justify-center pt-2 sm:pt-0">
+                    <p className="sm:hidden text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">Preço Unit.</p>
+                    <p className="font-semibold text-foreground text-sm">
+                      R$ {item.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                  </div>
 
-                      <div className="p-4 space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest block pl-1">Qtd Recebida</Label>
-                            <div className="relative">
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                value={item.quantidadeEntregue || ''}
-                                onChange={(e) => handleQuantidadeChange(index, e.target.value)}
-                                placeholder="0.00"
-                                className="h-11 pr-10 bg-white/40 dark:bg-gray-950/40 border-white/20 dark:border-white/10 font-black text-sm focus:ring-emerald-500/20 rounded-xl transition-all"
-                              />
-                              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400 uppercase">{item.unidadeEntregue}</span>
-                            </div>
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest block pl-1">Preço Unitário</Label>
-                            <div className="h-11 px-4 flex items-center bg-gray-500/5 dark:bg-white/5 border border-white/10 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300">
-                              R$ {item.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </div>
-                          </div>
-                        </div>
-
-                        {item.quantidadeEntregue > 0 && (
-                          <div className="pt-3 border-t border-white/5 flex justify-between items-center animate-in fade-in slide-in-from-top-1 duration-300">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Subtotal do Item</span>
-                              {isDifferent && (
-                                <span className={cn("text-[9px] font-bold uppercase tracking-tight", diff > 0 ? "text-blue-500" : "text-amber-500")}>
-                                  {diff > 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2)} {item.unidadeEntregue} que o pedido
-                                </span>
-                              )}
-                            </div>
-                            <span className="font-black text-emerald-600 dark:text-emerald-400 text-lg tracking-tight">
-                              R$ {(item.quantidadeEntregue * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                            </span>
-                          </div>
+                  <div className="sm:col-span-3 flex flex-col justify-center pt-2 sm:pt-0">
+                    <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest mb-1">Recebida</p>
+                    <div className="relative w-full">
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.quantidadeEntregue === 0 ? '' : item.quantidadeEntregue}
+                        onChange={(e) => handleQuantidadeChange(index, e.target.value)}
+                        placeholder="0.00"
+                        className={cn(
+                          "h-10 pr-10 text-right font-black text-sm transition-all",
+                          isDifferent ? (diff > 0 ? "border-blue-500/50 focus-visible:ring-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400" : "border-amber-500/50 focus-visible:ring-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400") : "bg-background"
                         )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase pointer-events-none">
+                        {item.unidadeEntregue}
+                      </span>
+                    </div>
+                    {isDifferent && (
+                       <span className={cn("text-[10px] font-bold mt-1.5 text-right flex items-center justify-end gap-1", diff > 0 ? "text-blue-500" : "text-amber-500")}>
+                         <AlertCircle className="h-3 w-3" />
+                         {diff > 0 ? `Sobrou ${diff.toFixed(2)}` : `Faltou ${Math.abs(diff).toFixed(2)}`}
+                       </span>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
             </div>
           </div>
+        </div>
 
-          {/* Resumo Final */}
-          <div className="p-6 bg-white/20 dark:bg-gray-950/40 border-t border-white/10 dark:border-white/5 space-y-4 backdrop-blur-md">
-            <div className="flex justify-between items-end px-1">
-              <div className="space-y-1">
-                <span className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-[0.15em]">Total Recebido</span>
-                <p className="text-[10px] text-gray-400 font-medium">Baseado nas quantidades informadas</p>
-              </div>
-              <span className="font-black text-3xl text-gray-900 dark:text-white tracking-tighter">
+        {/* Resumo Final e Ações Footer */}
+        <div className="px-5 py-4 bg-muted/30 border-t border-border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 flex-1">
+            <div>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5">Total Recebido</span>
+              <span className="font-black text-2xl text-foreground tracking-tight">
                 R$ {valorTotalEntregue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
             </div>
             
             {veioDeCotacao && economiaPreview > 0 && (
-              <div className="relative group overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 dark:from-emerald-500/10 dark:to-teal-500/10 blur-xl group-hover:scale-110 transition-transform duration-700"></div>
-                <div className="relative flex justify-between items-center p-5 bg-emerald-500/10 dark:bg-emerald-900/20 rounded-2xl border border-emerald-500/20 backdrop-blur-md shadow-inner">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-                      <TrendingDown className="h-5 w-5" />
-                    </div>
-                    <div className="space-y-0.5">
-                      <span className="text-[10px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">
-                        Economia Real Obtida
-                      </span>
-                      <p className="text-[10px] text-emerald-600/70 dark:text-emerald-400/50 font-bold uppercase tracking-tight">Resultado da sua cotação</p>
-                    </div>
-                  </div>
-                  <span className="font-black text-3xl text-emerald-600 dark:text-emerald-400 tracking-tighter">
-                    R$ {economiaPreview.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
+              <div className="pl-0 sm:pl-8 border-l-0 sm:border-l border-border relative">
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest block mb-0.5 flex items-center gap-1">
+                  <TrendingDown className="h-3 w-3" /> Economia Obtida
+                </span>
+                <span className="font-black text-2xl text-emerald-600 dark:text-emerald-400 tracking-tight">
+                  R$ {economiaPreview.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                </span>
               </div>
             )}
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-5 border-t border-white/10 dark:border-white/5 bg-white/20 dark:bg-gray-950/20 backdrop-blur-md">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)} 
-            disabled={isUpdating}
-            className="h-12 px-8 border-white/20 dark:border-white/10 bg-transparent font-bold text-xs uppercase tracking-[0.15em] hover:bg-white/10 dark:hover:bg-white/5 transition-all rounded-xl"
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!todosPreenchidos || isUpdating}
-            className="h-12 px-10 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs uppercase tracking-[0.15em] shadow-lg shadow-emerald-500/20 transition-all active:scale-[0.98] rounded-xl"
-          >
-            {isUpdating ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-3 animate-spin" />
-                Processando...
-              </>
-            ) : (
-              <>
-                <CheckCircle2 className="h-4 w-4 mr-3" />
-                Confirmar Recebimento
-              </>
-            )}
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              disabled={isUpdating}
+              className="h-10 px-4 text-xs font-semibold flex-1 sm:flex-none"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={!todosPreenchidos || isUpdating}
+              className="h-10 px-6 text-xs font-bold flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+            >
+              {isUpdating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Confirmar
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

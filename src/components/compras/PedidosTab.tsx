@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, memo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +30,7 @@ function PedidosTab() {
   const { paginate } = usePagination<OrderData>({ initialItemsPerPage: isMobile ? 8 : 10 });
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { pedidos: pedidosDataArray, isLoading, refetch, updatePedidoStatus, isUpdating } = usePedidos();
@@ -104,6 +106,25 @@ function PedidosTab() {
     setSelectedPedidoRaw(pedido._raw || null);
     setEntregaDialogOpen(true);
   }, []);
+
+  // Interceptar URL param para abrir modal de registrar recebimento automaticamente
+  useEffect(() => {
+    const receiveOrderId = searchParams.get("receiveOrder");
+    if (receiveOrderId && pedidos.length > 0) {
+      const orderToReceive = pedidos.find(p => p.id?.toString() === receiveOrderId.toString());
+      if (orderToReceive) {
+        // Usa setTimeout para garantir que a renderização inicial não atropele o estado do dialog
+        setTimeout(() => {
+          handleRegistrarEntrega(orderToReceive);
+          // Limpar o parâmetro da URL
+          setSearchParams(prev => {
+            prev.delete("receiveOrder");
+            return prev;
+          }, { replace: true });
+        }, 100);
+      }
+    }
+  }, [searchParams, pedidos, handleRegistrarEntrega, setSearchParams]);
 
   const handleUpdateStatus = useCallback((pedidoId: string, status: string) => {
     updatePedidoStatus({ pedidoId, status });

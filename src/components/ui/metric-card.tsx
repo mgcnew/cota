@@ -14,6 +14,7 @@ interface MetricCardProps {
   variant?: "default" | "success" | "warning" | "error" | "info";
   className?: string;
   onClick?: () => void;
+  subtitle?: string;
 }
 
 const LIGHT_VARIANTS = {
@@ -40,6 +41,7 @@ export const MetricCard = memo(function MetricCard({
   variant = "default",
   className,
   onClick,
+  subtitle,
 }: MetricCardProps) {
   return (
     <div
@@ -103,6 +105,15 @@ export const MetricCard = memo(function MetricCard({
               "text-white/70 dark:text-muted-foreground"
             )}>
               {trend.label}
+            </p>
+          )}
+
+          {subtitle && !trend?.label && (
+            <p className={cn(
+              "text-[11px] font-medium transition-colors",
+              "text-white/70 dark:text-muted-foreground"
+            )}>
+              {subtitle}
             </p>
           )}
         </div>

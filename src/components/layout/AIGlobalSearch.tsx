@@ -11,7 +11,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { usePedidos } from "@/hooks/usePedidos";
-import { queryGroqAssistant } from "@/lib/groq";
+import { askGemini } from "@/lib/gemini";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,8 +58,8 @@ const ChatContent = memo(function ChatContent({
         <div className="p-4">
           {conversationHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[250px] py-6 text-center">
-              <div className="p-3 rounded-full bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-400/20 dark:to-purple-400/20 mb-4">
-                <Sparkles className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+              <div className="p-3 rounded-full bg-brand/10 dark:bg-brand/20 mb-4">
+                <Sparkles className="h-6 w-6 text-brand" />
               </div>
               <h3 className="text-base font-semibold text-foreground mb-1">Como posso ajudar?</h3>
               <p className="text-xs text-muted-foreground mb-4">
@@ -82,8 +82,8 @@ const ChatContent = memo(function ChatContent({
               {conversationHistory.map((msg, i) => (
                 <div key={i} className={cn("flex gap-2", msg.role === "user" ? "justify-end" : "justify-start")}>
                   {msg.role === "assistant" && (
-                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-500/10 h-fit flex-shrink-0">
-                      <Sparkles className="h-3.5 w-3.5 text-violet-600" />
+                    <div className="p-1.5 rounded-lg bg-brand/10 h-fit flex-shrink-0">
+                      <Sparkles className="h-3.5 w-3.5 text-brand" />
                     </div>
                   )}
                   <div className={cn("rounded-lg p-2.5 max-w-[85%]", msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted")}>
@@ -93,8 +93,8 @@ const ChatContent = memo(function ChatContent({
               ))}
               {isLoading && (
                 <div className="flex gap-2">
-                  <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-500/10 h-fit">
-                    <Sparkles className="h-3.5 w-3.5 text-violet-600" />
+                  <div className="p-1.5 rounded-lg bg-brand/10 h-fit">
+                    <Sparkles className="h-3.5 w-3.5 text-brand" />
                   </div>
                   <div className="rounded-lg p-2.5 bg-muted">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -145,18 +145,18 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
   const { cotacoes } = useCotacoes();
   const { pedidos } = usePedidos();
 
-  // Buscar dados financeiros apenas quando aberto
+  // Buscar dados financeiros apenas quando aberto (sem limites para dar contexto completo à IA)
   const { data: orderItems = [] } = useQuery({
     queryKey: ["order-items-for-ai"],
     queryFn: async () => {
       const { data } = await supabase
         .from("order_items")
-        .select("*, created_at")
-        .order("created_at", { ascending: false })
-        .limit(2000);
+        .select("*")
+        .order("created_at", { ascending: false });
       return data || [];
     },
-    enabled: open, // Só busca quando aberto
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: quoteSupplierItems = [] } = useQuery({
@@ -164,12 +164,12 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
     queryFn: async () => {
       const { data } = await supabase
         .from("quote_supplier_items")
-        .select("*, created_at")
-        .order("created_at", { ascending: false })
-        .limit(2000);
+        .select("*")
+        .order("created_at", { ascending: false });
       return data || [];
     },
     enabled: open,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: packagingQuotes = [] } = useQuery({
@@ -178,11 +178,11 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
       const { data } = await supabase
         .from("packaging_quotes")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
+        .order("created_at", { ascending: false });
       return data || [];
     },
     enabled: open,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: packagingOrders = [] } = useQuery({
@@ -191,11 +191,11 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
       const { data } = await supabase
         .from("packaging_orders")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(500);
+        .order("created_at", { ascending: false });
       return data || [];
     },
     enabled: open,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: packagingOrderItems = [] } = useQuery({
@@ -204,11 +204,11 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
       const { data } = await supabase
         .from("packaging_order_items")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1000);
+        .order("created_at", { ascending: false });
       return data || [];
     },
     enabled: open,
+    staleTime: 5 * 60 * 1000,
   });
 
   const { data: packagingSupplierItems = [] } = useQuery({
@@ -217,11 +217,11 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
       const { data } = await supabase
         .from("packaging_supplier_items")
         .select("*")
-        .order("created_at", { ascending: false })
-        .limit(1000);
+        .order("created_at", { ascending: false });
       return data || [];
     },
     enabled: open,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Scroll automático para a última mensagem
@@ -266,7 +266,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
     setSearchQuery("");
 
     try {
-      const response = await queryGroqAssistant(userQuery, {
+      const response = await askGemini(userQuery, {
         products: products || [],
         suppliers: suppliers || [],
         quotes: cotacoes || [],
@@ -298,12 +298,12 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
         <DrawerContent className="h-[85vh] max-h-[85vh]">
           <DrawerHeader className="border-b border-border pb-3">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-500/10">
-                <MessageSquareText className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-brand/10">
+                <MessageSquareText className="h-4 w-4 text-brand" />
               </div>
               <div>
-                <DrawerTitle className="text-sm font-semibold">Assistente IA</DrawerTitle>
-                <p className="text-xs text-muted-foreground">Pergunte sobre cotações</p>
+                <DrawerTitle className="text-sm font-semibold">Assistente Inteligente</DrawerTitle>
+                <p className="text-xs text-muted-foreground">Analista financeiro e comprador profissional</p>
               </div>
             </div>
           </DrawerHeader>
@@ -329,12 +329,12 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
         {/* Header */}
         <div className="relative border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
           <div className="relative flex items-center px-4 py-3.5 gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-br from-violet-500/10 to-purple-500/10 dark:from-violet-400/20 dark:to-purple-400/20 shrink-0">
-              <Sparkles className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+              <div className="p-2 rounded-lg bg-brand/10 dark:bg-brand/20 shrink-0">
+                <Sparkles className="h-5 w-5 text-brand" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-semibold text-foreground">Assistente de Cotações</h3>
-              <p className="text-xs text-muted-foreground">Pergunte sobre produtos, fornecedores, preços...</p>
+              <h3 className="text-sm font-semibold text-foreground">Assistente Inteligente</h3>
+              <p className="text-xs text-muted-foreground">Analista financeiro • Comprador profissional</p>
             </div>
             <kbd className="inline-flex h-6 px-2 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
               ESC

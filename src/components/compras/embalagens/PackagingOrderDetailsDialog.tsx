@@ -1,7 +1,10 @@
+import { useState, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ShoppingCart, Package, Calendar, Building2, DollarSign, Truck, Clock, CheckCircle2 } from "lucide-react";
+import { ShoppingCart, Package, Calendar, Building2, DollarSign, Truck, Clock, CheckCircle2, Copy, Check, FileText } from "lucide-react";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
@@ -25,14 +28,164 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
     red: "bg-red-100 text-red-700 border-red-200",
   };
   const IconComponent = order.status === "pendente" ? Clock : order.status === "confirmado" ? CheckCircle2 : order.status === "entregue" ? Truck : Clock;
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyOrderSummary = useCallback(() => {
+    if (!order) return;
+    
+    let text = `📦 *PEDIDO DE EMBALAGENS*\n`;
+    text += `*Fornecedor:* ${order.supplierName}\n`;
+    text += `*Data:* ${order.orderDate}\n`;
+    if (order.deliveryDate) text += `*Previsão:* ${order.deliveryDate}\n`;
+    text += `\n*ITENS:*\n`;
+    
+    order.itens.forEach(item => {
+      text += `• ${item.packagingName}: ${item.quantidade} ${item.unidadeCompra || 'un'} × ${formatCurrency(item.valorUnitario)} = ${formatCurrency(item.valorTotal)}\n`;
+    });
+    
+    text += `\n*VALOR TOTAL: ${formatCurrency(order.totalValue)}*\n`;
+    if (order.observations) text += `\n*Obs:* ${order.observations}\n`;
+
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    toast({ title: "Copiado!", description: "Resumo do pedido copiado para a área de transferência." });
+    setTimeout(() => setCopied(false), 2000);
+  }, [order, toast]);
+
+  const handleExportOrderHtml = useCallback(() => {
+    if (!order) return;
+    
+    const html = `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido # - ${order.supplierName}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, system-ui, sans-serif; padding: 40px 20px; background: #f9fafb; color: #111827; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 16px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    .header { margin-bottom: 30px; border-bottom: 2px solid #111827; padding-bottom: 20px; }
+    .header h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+    .header p { color: #6b7280; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 30px; }
+    th { text-align: left; padding: 14px 12px; background: #f3f4f6; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #4b5563; font-weight: 800; }
+    td { padding: 14px 12px; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+    .total-section { margin-top: 40px; padding: 24px; background: #111827; color: white; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .total-label { font-size: 11px; text-transform: uppercase; font-weight: 800; opacity: 0.7; letter-spacing: 1px; }
+    .total-value { font-size: 28px; font-weight: 900; }
+    .obs-section { margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 12px; border-left: 4px solid #e5e7eb; }
+    .obs-label { font-size: 11px; text-transform: uppercase; font-weight: 800; color: #6b7280; margin-bottom: 8px; }
+    .footer { margin-top: 50px; text-align: center; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; }
+    @media print { body { padding: 0; background: white; } .container { box-shadow: none; border: none; max-width: 100%; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Pedido de Compra</h1>
+      <p><strong>Fornecedor:</strong> ${order.supplierName}</p>
+      <p><strong>Data do Pedido:</strong> ${order.orderDate}</p>
+      ${order.deliveryDate ? `<p><strong>Previsão de Entrega:</strong> ${order.deliveryDate}</p>` : ''}
+    </div>
+    
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 50%">Descrição</th>
+          <th style="text-align: center;">Qtd</th>
+          <th style="text-align: center;">Unidade</th>
+          <th style="text-align: right;">Unitário</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${order.itens.map(item => `
+          <tr>
+            <td style="font-weight: 600;">${item.packagingName}</td>
+            <td style="text-align: center;">${item.quantidade}</td>
+            <td style="text-align: center;">${item.unidadeCompra || '-'}</td>
+            <td style="text-align: right;">${formatCurrency(item.valorUnitario)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    
+    ${order.observations ? `
+      <div class="obs-section">
+        <p class="obs-label">Observações</p>
+        <p style="font-size: 14px; line-height: 1.5;">${order.observations}</p>
+      </div>
+    ` : ''}
+
+    <div class="total-section">
+      <div>
+        <p class="total-label">Total a Pagar</p>
+        <p style="font-size: 14px; opacity: 0.8;">${order.itens.length} itens incluídos</p>
+      </div>
+      <div style="text-align: right;">
+        <p class="total-value">${formatCurrency(order.totalValue)}</p>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>Gerado pelo Sistema CotaJá • Departamento de Compras</p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `pedido-${order.supplierName.replace(/\s+/g, '-')}.html`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    
+    toast({ title: "Exportado!", description: "Arquivo HTML gerado com sucesso." });
+  }, [order, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5 text-purple-600" />
-            Detalhes do Pedido
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-purple-600" />
+              Detalhes do Pedido
+            </div>
+            <div className="flex items-center gap-2 mr-6">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-2 rounded-lg border-border hover:bg-muted font-bold text-[10px] uppercase tracking-wider"
+                onClick={handleCopyOrderSummary}
+                title="Copiar Resumo"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-3 w-3 text-emerald-500" />
+                    Copiado
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-3 w-3 text-muted-foreground" />
+                    Copiar
+                  </>
+                )}
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-2 rounded-lg border-border hover:bg-muted font-bold text-[10px] uppercase tracking-wider"
+                onClick={handleExportOrderHtml}
+                title="Exportar HTML"
+              >
+                <FileText className="h-3 w-3 text-muted-foreground" />
+                HTML
+              </Button>
+            </div>
           </DialogTitle>
         </DialogHeader>
 

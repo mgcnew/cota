@@ -65,8 +65,16 @@ import {
 } from "../cotacoes/view-dialog/types";
 import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 
-
-
+// Safe string converter
+const safeStr = (val: unknown): string => {
+  if (val === null || val === undefined) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+  if (typeof val === 'object') {
+    try { return JSON.stringify(val); } catch { return ''; }
+  }
+  return '';
+};
 export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProductValue, onConvertToOrder, onEdit, trigger, isUpdating, defaultTab, readOnly = false, open: externalOpen, onOpenChange: externalOnOpenChange }: ViewQuoteDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -1500,7 +1508,12 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           fornecedores={currentQuote.fornecedoresParticipantes || []}
                           quoteId={currentQuote.id}
                           supplierItems={currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || []}
-                          onUpdateSupplierProductValue={onUpdateSupplierProductValue || (() => Promise.resolve())}
+                          onUpdateSupplierProductValue={(params: any) => {
+                            if (onUpdateSupplierProductValue) {
+                              return onUpdateSupplierProductValue(params.quoteId, params.supplierId, params.productId, params.newValue);
+                            }
+                            return Promise.resolve();
+                          }}
                           onRefresh={() => {}}
                           isMobile={isMobile}
                           safeStr={safeStr}

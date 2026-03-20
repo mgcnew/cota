@@ -115,12 +115,17 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const fornecedores = useMemo(() => {
     if (!quote) return [];
     const rawSuppliers = quote._raw?.quote_suppliers || [];
-    return rawSuppliers.map((cf: any) => ({
-      id: cf.supplier_id,
-      nome: cf.supplier_name,
-      status: cf.status
-    }));
-  }, [quote?._raw]);
+    return rawSuppliers.map((cf: any) => {
+      // Find the supplier info to get the contact (seller) name
+      const supplierInfo = availableSuppliers?.find((s: any) => s.id === cf.supplier_id);
+      return {
+        id: cf.supplier_id,
+        nome: cf.supplier_name,
+        contato: supplierInfo?.contact || cf.supplier_name, // Fallback to company name
+        status: cf.status
+      };
+    });
+  }, [quote?._raw, availableSuppliers]);
 
   const supplierItems = useMemo(() => {
     if (!quote) return [];

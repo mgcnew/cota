@@ -188,30 +188,46 @@ export function useDashboard() {
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
-      // OPTIMIZED: Fetch all data in parallel
-      const [quotesResult, suppliersResult, ordersResult, quoteSupplierItemsResult] = await Promise.all([
+      // 1. Fetch main data first to get quote IDs
+      const [quotesRes, suppliersRes, ordersRes] = await Promise.all([
         supabase.from("quotes").select(`*, quote_items(*), quote_suppliers(*)`).order("created_at", { ascending: false }),
         supabase.from("suppliers").select("*"),
         supabase.from("orders").select("*").order("order_date", { ascending: false }),
-        supabase.from("quote_supplier_items").select("*"),
       ]);
 
-      if (quotesResult.error) throw quotesResult.error;
-      if (suppliersResult.error) throw suppliersResult.error;
-      if (ordersResult.error) throw ordersResult.error;
-      if (quoteSupplierItemsResult.error) throw quoteSupplierItemsResult.error;
+      if (quotesRes.error) throw quotesRes.error;
+      const quotes = quotesRes.data || [];
+      const quoteIds = quotes.map(q => q.id);
 
-      // Integrate quote_supplier_items into quotes
-      const quotesWithSupplierItems = quotesResult.data?.map(quote => ({
+      // 2. Fetch supplier items for only THESE quotes in chunks to avoid URL size limits if many quotes
+      let allSupplierItems: any[] = [];
+      if (quoteIds.length > 0) {
+        // Fetch items for all quotes - grouping by chunks of 100 just in case
+        const chunkSize = 100;
+        for (let i = 0; i < quoteIds.length; i += chunkSize) {
+          const chunk = quoteIds.slice(i, i + chunkSize);
+          const { data: items, error: itemsError } = await supabase
+            .from("quote_supplier_items")
+            .select("*")
+            .in("quote_id", chunk);
+          
+          if (!itemsError && items) {
+            allSupplierItems = [...allSupplierItems, ...items];
+          }
+        }
+      }
+
+      // 3. Integrate quote_supplier_items into quotes
+      const quotesWithSupplierItems = quotes.map(quote => ({
         ...quote,
-        quote_supplier_items: quoteSupplierItemsResult.data?.filter(item => item.quote_id === quote.id) || []
-      })) || [];
+        quote_supplier_items: allSupplierItems.filter(item => item.quote_id === quote.id)
+      }));
 
       return {
         quotes: quotesWithSupplierItems,
-        suppliers: suppliersResult.data || [],
-        products: [], // Products list not used in dashboard aggregation
-        orders: ordersResult.data || [],
+        suppliers: suppliersRes.data || [],
+        products: [],
+        orders: ordersRes.data || [],
       };
     },
   });
@@ -610,20 +626,30 @@ export function useDashboard() {
       // Find best price from quote_supplier_items for the first product
       let melhorPreco = Infinity;
       let fornecedorMelhorOferta = null;
+      let allOffers: { supplier: string; price: number }[] = [];
 
       if (quote.quote_supplier_items && quote.quote_supplier_items.length > 0) {
-        const ofertasProduto = quote.quote_supplier_items.filter(
-          (item: any) => item.product_id === firstItem.product_id && item.valor_oferecido > 0
-        );
-
-        ofertasProduto.forEach((item: any) => {
-          if (item.valor_oferecido < melhorPreco) {
-            melhorPreco = item.valor_oferecido;
-            // Find supplier name from quote_suppliers
-            const supplier = quote.quote_suppliers?.find((qs: any) => qs.supplier_id === item.supplier_id);
-            fornecedorMelhorOferta = supplier?.supplier_name || "Fornecedor";
-          }
+        const ofertasProduto = quote.quote_supplier_items.filter((item: any) => {
+          const hasValor = Number(item.valor_oferecido) > 0;
+          const matchesId = item.product_id && firstItem.product_id && item.product_id.toString() === firstItem.product_id.toString();
+          const matchesName = item.product_name === firstItem.product_name;
+          return (matchesId || matchesName) && hasValor;
         });
+
+        allOffers = ofertasProduto.map((item: any) => {
+          const supplier = quote.quote_suppliers?.find(
+            (qs: any) => qs.supplier_id?.toString() === item.supplier_id?.toString()
+          );
+          return {
+            supplier: supplier?.supplier_name || "Fornecedor",
+            price: item.valor_oferecido
+          };
+        }).sort((a: any, b: any) => a.price - b.price);
+
+        if (allOffers.length > 0) {
+          melhorPreco = allOffers[0].price;
+          fornecedorMelhorOferta = allOffers[0].supplier;
+        }
       }
 
       const productName = firstItem.product_name || "Produto";
@@ -638,11 +664,12 @@ export function useDashboard() {
         product: productSummary,
         productFull,
         quantity: firstItem.quantidade || "0",
-        bestPrice: melhorPreco !== Infinity ? `R$ ${melhorPreco.toFixed(2)}` : "Sem ofertas",
+        bestPrice: melhorPreco !== Infinity ? `R$ ${melhorPreco.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : "Sem ofertas",
         supplier: supplierSummary,
         supplierFull: supplierName,
         date: new Date(quote.created_at).toLocaleDateString('pt-BR'),
-        status: quote.status
+        status: quote.status,
+        offers: allOffers
       };
     });
   }, [data]);
