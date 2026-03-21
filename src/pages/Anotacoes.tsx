@@ -39,7 +39,7 @@ export default function Anotacoes() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12")}>
+      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12 animate-in fade-in zoom-in-95 duration-500")}>
         {/* Page Header */}
         <div className="flex flex-col gap-6 mb-10">
           <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export default function Anotacoes() {
 
         {/* Notes Grid */}
         {filteredNotes && filteredNotes.length > 0 ? (
-          <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3, wide: 4 }}>
+          <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }}>
             {filteredNotes.map((note, index) => (
               <NoteCard
                 key={note.id}
@@ -156,7 +156,7 @@ export default function Anotacoes() {
               </h2>
             </div>
             
-            <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3, wide: 4 }} className="opacity-60 hover:opacity-100 transition-opacity duration-300">
+            <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }} className="opacity-60 hover:opacity-100 transition-opacity duration-300">
               {resolvedNotes.map((note) => (
                 <div key={note.id} className={cn(ds.components.card.root, "bg-muted/30 border-dashed hover:bg-muted/50 transition-all p-5")}>
                   <div className="flex justify-between items-start gap-4">

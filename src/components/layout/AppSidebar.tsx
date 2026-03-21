@@ -22,7 +22,11 @@ import {
   Menu,
   LogOut,
   Settings,
-  LucideIcon
+  LucideIcon,
+  Sparkles,
+  Sun,
+  Moon,
+  Monitor
 } from "lucide-react";
 import {
   Tooltip,
@@ -40,6 +44,19 @@ import {
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 import { designSystem } from "@/styles/design-system";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CompanySelector } from "./CompanySelector";
+
+interface AppSidebarProps {
+  onOpenAI?: () => void;
+}
 
 interface MenuItem {
   title: string;
@@ -89,10 +106,10 @@ const menuCategories: MenuCategory[] = [
 
 const allMenuItems = menuCategories.flatMap((c) => c.items);
 
-export function AppSidebar() {
+export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -284,6 +301,90 @@ export function AppSidebar() {
         )}
       </div>
 
+      {/* FOOTER ACTIONS */}
+      <div className="mt-auto flex flex-col items-center w-full pb-6 pt-4 gap-4 px-2 relative z-10">
+        
+        {/* Assistente de IA - Destacado e Flutuante */}
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                onClick={onOpenAI}
+                className={cn(
+                  "relative group w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden outline-none ring-0",
+                  "bg-brand/10 text-brand hover:bg-brand/20 border-transparent",
+                  "active:scale-95 mx-auto"
+                )}
+              >
+                <Sparkles strokeWidth={1.5} className="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={16} className="font-semibold text-xs border border-brand/20 shadow-lg shadow-brand/10">Assistente IA</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        {/* User Profile / Config Controls */}
+        <DropdownMenu>
+          <TooltipProvider delayDuration={0}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <DropdownMenuTrigger asChild>
+                  <div 
+                    className={cn(
+                      "w-10 h-10 rounded-xl bg-muted/50 hover:bg-accent flex items-center justify-center overflow-hidden cursor-pointer",
+                      "transition-all duration-300 hover:scale-105 active:scale-95 group relative border border-border mx-auto text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="font-semibold text-sm transition-colors uppercase">
+                        {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
+                      </span>
+                    )}
+                  </div>
+                </DropdownMenuTrigger>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={16} className="font-semibold text-xs">Menu do Usuário</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          <DropdownMenuContent side="right" sideOffset={20} align="end" className="w-64 rounded-2xl border-border/40 shadow-2xl bg-card/95 backdrop-blur-xl p-2 z-[60]">
+            <DropdownMenuLabel className="font-normal px-2 py-2">
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-bold leading-none">{profile?.full_name || "Usuário"}</p>
+                <p className="text-[11px] leading-tight text-muted-foreground line-clamp-1">{user?.email}</p>
+              </div>
+            </DropdownMenuLabel>
+            
+            <DropdownMenuSeparator className="bg-border/50 my-1" />
+
+            {/* Alternância de Empresas, caso tenha mais de uma */}
+            <div className="px-2 py-1.5 w-full">
+              <CompanySelector />
+            </div>
+
+            <DropdownMenuItem onClick={() => navigate('/dashboard/configuracoes')} className="cursor-pointer rounded-xl py-2.5">
+              <Settings className="mr-3 h-4 w-4 opacity-70" />
+              <span className="font-medium text-sm">Configurações</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer rounded-xl py-2.5">
+              {theme === 'dark' ? <Sun className="mr-3 h-4 w-4 text-emerald-400" /> : <Moon className="mr-3 h-4 w-4 text-indigo-400" />}
+              <span className="font-medium text-sm">{theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
+            </DropdownMenuItem>
+            
+            <DropdownMenuSeparator className="bg-border/50 my-1" />
+            
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer rounded-xl py-2.5 text-red-500 hover:text-red-600 focus:text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 transition-colors">
+              <LogOut className="mr-3 h-4 w-4 opacity-80" />
+              <span className="font-bold text-sm">Sair do Sistema</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+      </div>
     </div>
   );
 

@@ -133,7 +133,7 @@ function PedidosTab() {
   if (isLoading) return <div className="flex items-center justify-center py-24"><Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} /></div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Metrics */}
       <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
         <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />

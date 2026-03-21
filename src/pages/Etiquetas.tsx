@@ -249,7 +249,7 @@ export default function Etiquetas() {
 
   return (
     <PageWrapper>
-      <div className={designSystem.layout.container.page}>
+      <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
            <div>
              <h1 className="text-2xl font-bold">Gerador de Etiquetas</h1>

@@ -190,7 +190,7 @@ function CotacoesTab() {
   const paginatedData = paginate(filteredCotacoes);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Metrics */}
       <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
         <MetricCard title="Ativas" value={stats.ativas} icon={FileText} variant="info" />

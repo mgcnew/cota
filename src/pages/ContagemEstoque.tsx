@@ -144,7 +144,7 @@ export default function ContagemEstoque() {
 
   return (
     <PageWrapper>
-      <div className={ds.layout.container.page}>
+      <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
         {/* Page Title */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-3">

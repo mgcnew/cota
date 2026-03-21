@@ -231,7 +231,7 @@ function Fornecedores() {
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className={designSystem.layout.container.page}>
+        <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
           {/* Page Header */}
           <div className="flex items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">

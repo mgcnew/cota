@@ -109,7 +109,7 @@ function Dashboard() {
 
   return (
     <PageWrapper>
-      <div className={designSystem.layout.container.page}>
+      <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
         
         {/* Header - Command Center Style */}
         <div className="flex flex-col gap-6 mb-8">

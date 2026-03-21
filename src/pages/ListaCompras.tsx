@@ -56,7 +56,7 @@ export default function ListaCompras() {
 
   return (
     <PageWrapper>
-      <div className="page-container space-y-4 sm:space-y-6">
+      <div className="page-container space-y-4 sm:space-y-6 animate-in fade-in zoom-in-95 duration-500">
         {/* Stats Cards - Cores Sólidas */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
           {/* Total de Itens - Azul (informação) */}

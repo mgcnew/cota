@@ -134,7 +134,7 @@ export default function ListaComprasTab() {
   const clearSelection = useCallback(() => setSelectedItems(new Set()), []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Stats Cards */}
       <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }}>
         <MetricCard

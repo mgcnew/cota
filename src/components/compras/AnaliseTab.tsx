@@ -401,7 +401,7 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
   }
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       <div className={cn(
         "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative",
         "bg-zinc-900 text-white"

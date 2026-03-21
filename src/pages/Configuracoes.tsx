@@ -553,7 +553,7 @@ export default function Configuracoes() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12")} ref={contentRef}>
+      <div className={cn(ds.layout.container.page, "pt-8 md:pt-12 animate-in fade-in zoom-in-95 duration-500")} ref={contentRef}>
         {/* Page Header */}
         <div className="flex flex-col gap-6 mb-10">
           <div className="flex items-center justify-between">

@@ -171,7 +171,7 @@ export function PackagingEconomyTab() {
                     <div>
                       <p className="font-bold text-sm">Cotação #{quote.id.substring(0, 8)}</p>
                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
-                        {quote.itens?.length || 0} itens cotados • Finalizada em {new Date(quote.updatedAt || "").toLocaleDateString('pt-BR')}
+                        {quote.itens?.length || 0} itens cotados
                       </p>
                     </div>
                   </div>
@@ -184,7 +184,7 @@ export function PackagingEconomyTab() {
 
       {/* Análise de Economia */}
       {analysisData && (
-        <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
           {/* Card do Vencedor */}
           <div className={cn(
             "p-8 rounded-3xl shadow-2xl overflow-hidden relative",
@@ -201,7 +201,7 @@ export function PackagingEconomyTab() {
                 </div>
                 <div>
                   <p className="text-brand text-[10px] font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">🏆 Fornecedor Vencedor</p>
-                  <h2 className={cn(ds.typography.size["3xl"], ds.typography.weight.black, "tracking-tighter")}>
+                  <h2 className={cn(ds.typography.size["3xl"], "font-black tracking-tighter")}>
                     {analysisData.vencedor.nome}
                   </h2>
                   <div className="flex items-center gap-3 mt-2">
@@ -351,7 +351,7 @@ export function PackagingEconomyTab() {
                 <Package className="h-7 w-7" />
               </div>
               <div>
-                <h3 className={cn(ds.typography.size.xl, ds.typography.weight.black, ds.colors.text.primary, "tracking-tighter")}>
+                <h3 className={cn(ds.typography.size.xl, "font-black", ds.colors.text.primary, "tracking-tighter")}>
                   Resumo Estratégico de Economia
                 </h3>
                 <p className={cn("text-xs font-bold uppercase tracking-widest opacity-50 mt-1", ds.colors.text.secondary)}>Análise comparativa direta de performance</p>
