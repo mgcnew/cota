@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, memo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sparkles, Loader2, Send, MessageSquareText } from "lucide-react";
-import { CommandDialog, CommandInput } from "@/components/ui/command";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,10 +15,27 @@ import { askGemini } from "@/lib/gemini";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { designSystem } from "@/styles/design-system";
 
 interface AIGlobalSearchProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+}
+
+// Mini-parse para o **negrito** nativo do Markdown que o Gemini manda
+function FormattedMessage({ content }: { content: string }) {
+  // Transforma **texto** em <strong>texto</strong> e faz quebras seguras
+  const parts = content.split(/(\*\*.*?\*\*)/g);
+  return (
+    <div className={cn("text-[15px] leading-[1.65] text-foreground font-medium", "tracking-tight")}>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={i} className="font-bold text-foreground">{part.slice(2, -2)}</strong>;
+        }
+        return <span key={i} className="whitespace-pre-wrap opacity-90">{part}</span>;
+      })}
+    </div>
+  );
 }
 
 // Conteúdo do chat - memoizado para evitar re-renders
@@ -37,6 +54,13 @@ const ChatContent = memo(function ChatContent({
   onAskAI: () => void;
   scrollAreaRef: React.RefObject<HTMLDivElement>;
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Foco automático e bloqueio de enters
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [isLoading]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -54,50 +78,75 @@ const ChatContent = memo(function ChatContent({
   return (
     <div className="flex flex-col h-full">
       {/* Conversation Area */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-y-auto">
-        <div className="p-4">
+      <ScrollArea ref={scrollAreaRef} className="flex-1 overflow-y-auto w-full px-4">
+        <div className="w-full py-4">
           {conversationHistory.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[250px] py-6 text-center">
-              <div className="p-3 rounded-full bg-brand/10 dark:bg-brand/20 mb-4">
-                <Sparkles className="h-6 w-6 text-brand" />
+            <div className="flex flex-col items-center justify-center min-h-[260px] text-center my-auto animate-in fade-in zoom-in-95 duration-300">
+              <div className="p-3 rounded-2xl bg-muted border border-border/50 mb-4 shadow-sm">
+                <Sparkles strokeWidth={1.5} className="h-6 w-6 text-foreground/80" />
               </div>
-              <h3 className="text-base font-semibold text-foreground mb-1">Como posso ajudar?</h3>
-              <p className="text-xs text-muted-foreground mb-4">
-                Pergunte sobre produtos, fornecedores, preços...
+              <h3 className={cn(designSystem.typography.size.lg, "font-semibold text-foreground mb-1 tracking-tight")}>
+                Assistente de Inteligência Artificial
+              </h3>
+              <p className="text-sm font-medium text-muted-foreground mb-6 max-w-xs mx-auto">
+                Explore seus dados financeiros ou orçamentos usando comandos naturais.
               </p>
-              <div className="grid grid-cols-1 gap-2 w-full max-w-sm">
+              
+              <div className="flex flex-col gap-2 w-full max-w-sm mx-auto">
                 {exampleQuestions.map((example, i) => (
                   <button
                     key={i}
                     onClick={() => setSearchQuery(example)}
-                    className="text-left p-2.5 rounded-lg border border-border active:bg-accent transition-colors text-sm"
+                    className="text-left py-2 px-3 rounded-xl border border-border/40 bg-card hover:bg-muted transition-colors text-sm font-medium text-muted-foreground hover:text-foreground flex items-center gap-2"
                   >
-                    {example}
+                    <MessageSquareText className="w-3.5 h-3.5 opacity-50 flex-shrink-0" />
+                    <span className="truncate">{example}</span>
                   </button>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="space-y-3 pb-4">
+            <div className="space-y-5 pb-2">
               {conversationHistory.map((msg, i) => (
-                <div key={i} className={cn("flex gap-2", msg.role === "user" ? "justify-end" : "justify-start")}>
+                <div key={i} className={cn("flex gap-3", msg.role === "user" ? "justify-end" : "justify-start")}>
                   {msg.role === "assistant" && (
-                    <div className="p-1.5 rounded-lg bg-brand/10 h-fit flex-shrink-0">
-                      <Sparkles className="h-3.5 w-3.5 text-brand" />
+                    <div className="shrink-0 mt-0.5">
+                      <div className="w-7 h-7 rounded-lg border border-border/50 bg-muted flex items-center justify-center">
+                        <Sparkles className="h-3.5 w-3.5 text-foreground/70" />
+                      </div>
                     </div>
                   )}
-                  <div className={cn("rounded-lg p-2.5 max-w-[85%]", msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  
+                  <div 
+                    className={cn(
+                      "max-w-[85%]", 
+                      msg.role === "user" 
+                        ? "bg-foreground text-background rounded-2xl rounded-tr-sm px-3.5 py-2 shadow-sm" 
+                        : "pt-1"
+                    )}
+                  >
+                    {msg.role === "assistant" ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-foreground/90 leading-relaxed font-medium">
+                        <FormattedMessage content={msg.content} />
+                      </div>
+                    ) : (
+                      <p className="text-[14px] font-medium leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                    )}
                   </div>
                 </div>
               ))}
+              
               {isLoading && (
-                <div className="flex gap-2">
-                  <div className="p-1.5 rounded-lg bg-brand/10 h-fit">
-                    <Sparkles className="h-3.5 w-3.5 text-brand" />
+                <div className="flex gap-3 animate-in fade-in duration-300">
+                  <div className="shrink-0 mt-0.5">
+                    <div className="w-7 h-7 rounded-lg border border-border/50 bg-muted flex items-center justify-center">
+                      <Loader2 className="h-3.5 w-3.5 text-foreground/70 animate-spin" />
+                    </div>
                   </div>
-                  <div className="rounded-lg p-2.5 bg-muted">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <div className="pt-2 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               )}
@@ -106,24 +155,26 @@ const ChatContent = memo(function ChatContent({
         </div>
       </ScrollArea>
 
-      {/* Input Area */}
-      <div className="border-t border-border bg-background p-3 flex-shrink-0">
-        <div className="flex items-center gap-2">
+      {/* Input Area (Strictly Standard & Flat) */}
+      <div className="border-t border-border/60 bg-card p-3 flex-shrink-0">
+        <div className="flex items-center gap-2 max-w-2xl mx-auto w-full">
           <Input
-            placeholder="Faça uma pergunta..."
+            ref={inputRef}
+            placeholder="Faça sua pergunta..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={isLoading}
-            className="flex-1 h-10"
+            className="flex-1 h-10 border-border/50 bg-background shadow-sm text-sm"
           />
           <Button
             onClick={onAskAI}
             disabled={!searchQuery.trim() || isLoading}
             size="icon"
-            className="h-10 w-10 flex-shrink-0"
+            variant="default"
+            className="h-10 w-10 flex-shrink-0 shadow-sm transition-colors rounded-lg"
           >
-            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 ml-0.5" />}
           </Button>
         </div>
       </div>
@@ -322,36 +373,44 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
     );
   }
 
-  // Desktop: CommandDialog
+  // Desktop: Proper Dialog Layout for Chat
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <div className="relative flex flex-col h-[80vh] max-h-[600px] overflow-hidden">
-        {/* Header */}
-        <div className="relative border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
-          <div className="relative flex items-center px-4 py-3.5 gap-3">
-              <div className="p-2 rounded-lg bg-brand/10 dark:bg-brand/20 shrink-0">
-                <Sparkles className="h-5 w-5 text-brand" />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden flex flex-col h-[75vh] max-h-[700px] border-border/60 shadow-xl bg-background sm:rounded-2xl">
+        <DialogTitle className="sr-only">Assistente Inteligente</DialogTitle>
+        
+        {/* Header Premium Flat */}
+        <div className="border-b border-border/50 shrink-0 bg-card">
+          <div className="flex items-center px-4 py-3 gap-3">
+            <div className="p-2 rounded-xl bg-muted shrink-0 border border-border/50">
+              <Sparkles className="h-4 w-4 text-foreground/80" />
             </div>
-            <div className="flex-1">
-              <h3 className="text-sm font-semibold text-foreground">Assistente Inteligente</h3>
-              <p className="text-xs text-muted-foreground">Analista financeiro • Comprador profissional</p>
+            <div className="flex-1 leading-tight">
+              <h3 className="text-sm font-semibold text-foreground tracking-tight">
+                Cota Aki AI
+              </h3>
+              <p className="text-[11px] text-muted-foreground font-medium">Assistente de Banco de Dados</p>
             </div>
-            <kbd className="inline-flex h-6 px-2 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground shadow-sm">
+            <kbd className="hidden sm:inline-flex h-6 px-2 select-none items-center justify-center rounded-md border border-border/80 bg-background font-mono text-[10px] font-bold text-muted-foreground shadow-sm">
               ESC
             </kbd>
           </div>
         </div>
 
-        <ChatContent
-          conversationHistory={conversationHistory}
-          isLoading={isLoading}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onAskAI={handleAskAI}
-          scrollAreaRef={scrollAreaRef}
-        />
-      </div>
-    </CommandDialog>
+        <div className="flex-1 flex flex-col relative overflow-hidden">          
+          <div className="w-full flex-1 relative z-10 flex flex-col h-full">
+            <ChatContent
+              conversationHistory={conversationHistory}
+              isLoading={isLoading}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onAskAI={handleAskAI}
+              scrollAreaRef={scrollAreaRef}
+            />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

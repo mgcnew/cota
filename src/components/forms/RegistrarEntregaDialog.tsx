@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Truck, Package, DollarSign, TrendingDown, 
-  Loader2, CheckCircle2, AlertCircle, X 
+  Loader2, CheckCircle2, AlertCircle, X, Sparkles 
 } from "lucide-react";
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { cn } from "@/lib/utils";
@@ -32,8 +32,9 @@ interface ItemEntrega {
   unidadePedida: string;
   quantidadeEntregue: number;
   unidadeEntregue: string;
-  valorUnitario: number;
-  maiorValor: number;
+  valorUnitario: number; // Preço acordado originalmente
+  valorFaturado: number; // Preço real cobrado na NFe
+  maiorValor: number; // Teto para cálculo da economia
 }
 
 export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
@@ -52,27 +53,38 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           quantidadeEntregue: item.quantidade_entregue || 0,
           unidadeEntregue: item.unidade_entregue || 'kg',
           valorUnitario: item.valor_unitario_cotado || item.unit_price,
+          valorFaturado: item.unit_price, // Iniciamos com o valor que estava no pedido (que já pode ter sido alterado da cotação)
           maiorValor: item.maior_valor_cotado || item.unit_price,
         }))
       );
     }
   }, [pedido]);
 
-  // Calcular economia estimada (preview)
-  const economiaPreview = useMemo(() => {
+  // Calcular economia que seria feita
+  const economiaEsperada = useMemo(() => {
     return itensEntrega.reduce((sum, item) => {
-      if (item.quantidadeEntregue > 0 && item.maiorValor > item.valorUnitario) {
-        const diferenca = item.maiorValor - item.valorUnitario;
+      if (item.maiorValor > item.valorUnitario) {
+        return sum + ((item.maiorValor - item.valorUnitario) * item.quantidadePedida);
+      }
+      return sum;
+    }, 0);
+  }, [itensEntrega]);
+
+  // Calcular economia real considerando quebra/excesso e preço NFe
+  const economiaRealPreview = useMemo(() => {
+    return itensEntrega.reduce((sum, item) => {
+      if (item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado) {
+        const diferenca = item.maiorValor - item.valorFaturado;
         return sum + (diferenca * item.quantidadeEntregue);
       }
       return sum;
     }, 0);
   }, [itensEntrega]);
 
-  // Valor total baseado na quantidade entregue
+  // Valor total baseado na quantidade entregue multiplicada pelo valor REAL da Nfe
   const valorTotalEntregue = useMemo(() => {
     return itensEntrega.reduce((sum, item) => {
-      return sum + (item.quantidadeEntregue * item.valorUnitario);
+      return sum + (item.quantidadeEntregue * item.valorFaturado);
     }, 0);
   }, [itensEntrega]);
 
@@ -81,6 +93,15 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     setItensEntrega(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], quantidadeEntregue: quantidade };
+      return updated;
+    });
+  };
+
+  const handlePrecoChange = (index: number, value: string) => {
+    const preco = parseFloat(value) || 0;
+    setItensEntrega(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], valorFaturado: preco };
       return updated;
     });
   };
@@ -94,6 +115,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
         itemId: item.itemId,
         quantidadeEntregue: item.quantidadeEntregue,
         unidadeEntregue: item.unidadeEntregue,
+        valorFaturado: item.valorFaturado,
       }));
 
     if (itensParaAtualizar.length === 0) return;
@@ -156,12 +178,29 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
             </div>
           )}
 
+          {/* Alerta de IA: Fuga de Economia */}
+          {veioDeCotacao && (economiaEsperada - economiaRealPreview) > 0.05 && todosPreenchidos && (
+            <div className="flex items-start gap-4 p-4 mb-4 bg-amber-500/5 rounded-xl border border-amber-500/20 shadow-sm animate-in fade-in duration-500">
+              <div className="p-2.5 rounded-xl bg-amber-500/10 shrink-0 border border-amber-500/20">
+                <Sparkles className="h-5 w-5 text-amber-600" />
+              </div>
+              <div className="text-sm space-y-1">
+                <p className="font-bold flex items-center gap-1.5 text-amber-600 tracking-tight text-[15px]">
+                  Alerta Cota Aki AI
+                </p>
+                <p className="font-medium text-foreground/80 leading-relaxed pr-4">
+                  Observamos alterações de preço cobrado ou quebras de volume neste faturamento. Você terá uma <strong className="text-amber-500 font-bold">fuga de economia de R$ {(economiaEsperada - economiaRealPreview).toFixed(2).replace('.', ',')}</strong> na consolidação em relação à expectativa base.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Lista Compacta de Itens */}
           <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
             <div className="hidden sm:grid grid-cols-12 gap-4 p-3 bg-muted/50 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider items-center">
               <div className="col-span-5">Produto Pedido</div>
               <div className="col-span-2 text-right">Qtd Pedida</div>
-              <div className="col-span-2 text-right">Preço Unit.</div>
+              <div className="col-span-2 text-right">Custo NFe / Unit</div>
               <div className="col-span-3 text-right pr-2">Qtd Recebida</div>
             </div>
             
@@ -194,10 +233,34 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                   </div>
 
                   <div className="sm:col-span-2 flex flex-col sm:items-end justify-center pt-2 sm:pt-0">
-                    <p className="sm:hidden text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">Preço Unit.</p>
-                    <p className="font-semibold text-foreground text-sm">
-                      R$ {item.valorUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </p>
+                    <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest mb-1">Custo NFe</p>
+                    <div className="relative w-full max-w-[120px] ml-auto">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-black text-muted-foreground uppercase pointer-events-none">
+                        R$
+                      </span>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.valorFaturado === 0 ? '' : item.valorFaturado}
+                        onChange={(e) => handlePrecoChange(index, e.target.value)}
+                        placeholder="0.00"
+                        className={cn(
+                          "h-10 pl-8 pr-2 w-full text-right font-black text-sm transition-all focus-within:ring-1",
+                          item.valorFaturado !== item.valorUnitario ? "border-amber-500/50 focus-visible:ring-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400" : "bg-background"
+                        )}
+                      />
+                    </div>
+                    {item.valorFaturado !== item.valorUnitario && (
+                       <span className="text-[10px] font-bold mt-1 text-amber-500 text-right w-full block">
+                         Cotado: R$ {item.valorUnitario.toFixed(2)}
+                       </span>
+                    )}
+                    {item.valorFaturado === item.valorUnitario && (
+                       <span className="opacity-0 text-[10px] font-bold mt-1 text-right w-full block">
+                         -
+                       </span>
+                    )}
                   </div>
 
                   <div className="sm:col-span-3 flex flex-col justify-center pt-2 sm:pt-0">
@@ -243,13 +306,13 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
               </span>
             </div>
             
-            {veioDeCotacao && economiaPreview > 0 && (
+            {veioDeCotacao && economiaRealPreview > 0 && (
               <div className="pl-0 sm:pl-8 border-l-0 sm:border-l border-border relative">
                 <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest block mb-0.5 flex items-center gap-1">
-                  <TrendingDown className="h-3 w-3" /> Economia Obtida
+                  <TrendingDown className="h-3 w-3" /> Economia Real Obtida
                 </span>
                 <span className="font-black text-2xl text-emerald-600 dark:text-emerald-400 tracking-tight">
-                  R$ {economiaPreview.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  R$ {economiaRealPreview.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </span>
               </div>
             )}

@@ -159,43 +159,52 @@ export function usePedidos() {
       itens 
     }: { 
       pedidoId: string; 
-      itens: Array<{ itemId: string; quantidadeEntregue: number; unidadeEntregue?: string }>;
+      itens: Array<{ itemId: string; quantidadeEntregue: number; unidadeEntregue?: string; valorFaturado: number }>;
     }) => {
-      // Atualizar cada item com a quantidade entregue
+      // Atualizar cada item com a quantidade entregue e o Preço Faturado
       for (const item of itens) {
         const { error } = await supabase
           .from('order_items')
           .update({ 
             quantidade_entregue: item.quantidadeEntregue,
-            unidade_entregue: item.unidadeEntregue || 'kg'
+            unidade_entregue: item.unidadeEntregue || 'kg',
+            unit_price: item.valorFaturado, // Atualiza para o valor real da nota
+            total_price: item.quantidadeEntregue * item.valorFaturado
           })
           .eq('id', item.itemId);
 
         if (error) throw error;
       }
 
-      // Buscar os itens atualizados para calcular economia real
+      // Buscar os itens atualizados para calcular economia real global da NFe
       const { data: orderItems, error: itemsError } = await supabase
         .from('order_items')
-        .select('quantidade_entregue, valor_unitario_cotado, maior_valor_cotado')
+        .select('quantidade_entregue, unit_price, valor_unitario_cotado, maior_valor_cotado')
         .eq('order_id', pedidoId);
 
       if (itemsError) throw itemsError;
 
-      // Calcular economia real
+      // Calcular economia real considerando o unit_price (que agora é o valor faturado da NFe) vs maior_valor de base
       let economiaReal = 0;
+      let totalValueAtualizado = 0;
+      
       for (const item of orderItems || []) {
-        if (item.quantidade_entregue && item.valor_unitario_cotado && item.maior_valor_cotado) {
-          const diferenca = Number(item.maior_valor_cotado) - Number(item.valor_unitario_cotado);
+        if (item.quantidade_entregue && item.unit_price && item.maior_valor_cotado) {
+          // A Economia da NFe é a diferença do "melhor valor que ele ia pagar" pelo valor REAL que a NFe cobrou
+          const diferenca = Number(item.maior_valor_cotado) - Number(item.unit_price);
           economiaReal += diferenca * Number(item.quantidade_entregue);
+        }
+        if (item.quantidade_entregue && item.unit_price) {
+          totalValueAtualizado += Number(item.quantidade_entregue) * Number(item.unit_price);
         }
       }
 
-      // Atualizar pedido com economia real e status entregue
+      // Atualizar pedido com economia real e novo Total consolidado, fechar o ciclo
       const { error: orderError } = await supabase
         .from('orders')
         .update({ 
           economia_real: economiaReal,
+          total_value: totalValueAtualizado,
           status: 'entregue'
         })
         .eq('id', pedidoId);
