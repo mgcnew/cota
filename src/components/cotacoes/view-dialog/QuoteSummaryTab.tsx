@@ -98,8 +98,8 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       className={cn(
         "grid md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-2 md:gap-4 items-center px-3 py-2 rounded-xl border transition-all duration-200",
         item.bestPrice > 0
-          ? "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 hover:shadow-sm"
-          : "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-100 dark:border-zinc-800/50 opacity-40"
+          ? "bg-card border-border hover:border-brand/30 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] dark:hover:shadow-none"
+          : "bg-muted/30 border-border/50 opacity-60 grayscale-[0.5]"
       )}
     >
       <div className="min-w-0 pr-2">
@@ -160,7 +160,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   return (
     <div className="flex flex-col w-full h-auto bg-transparent">
       {/* 1. SEÇÃO DE STATS COMPACTA */}
-      <div className="bg-zinc-50/80 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800 px-4 py-2 flex items-center justify-between overflow-x-auto custom-scrollbar">
+      <div className="bg-card/50 border-b border-border/40 px-4 py-3 flex items-center justify-between overflow-x-auto custom-scrollbar">
         <div className="flex items-center gap-6 min-w-max">
           <div className="flex items-center gap-2">
             <Package className="h-4 w-4 text-zinc-400" />
@@ -207,29 +207,26 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
       {/* RESULTADO DA IA (condicional) */}
       {analysisResult && (
-        <div className="bg-amber-50 dark:bg-amber-950/20 border-b border-amber-200 dark:border-amber-900/30 p-4">
+        <div className="bg-brand/5 border-b border-brand/20 p-4">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-amber-500" />
-            <h3 className="font-black text-amber-800 dark:text-amber-500 uppercase tracking-widest text-xs">Análise Inteligente de Cotação</h3>
+            <Sparkles className="h-4 w-4 text-brand" />
+            <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Análise Inteligente de Cotação</h3>
           </div>
-          <div className="text-sm text-amber-900 dark:text-amber-100/80 whitespace-pre-wrap leading-relaxed">
+          <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
             {analysisResult}
           </div>
         </div>
       )}
 
       {/* 2. TOOLBAR & FILTROS */}
-      <div className="bg-white dark:bg-zinc-950 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">
+      <div className="bg-background/80 backdrop-blur-md px-4 py-3 border-b border-border/40 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">
         <div className="relative w-full sm:flex-1 group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors z-20 pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-brand transition-colors z-20 pointer-events-none" />
           <Input
             placeholder="Pesquisar por item ou empresa..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={cn(
-              designSystem.components.input.root,
-              "pl-9 h-9 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800 focus:ring-1 focus:ring-brand transition-all"
-            )}
+            className="pl-9 h-9 text-xs rounded-xl bg-card border-border/50 focus:border-brand/50 focus:ring-1 focus:ring-brand shadow-sm transition-all"
           />
         </div>
 
@@ -238,10 +235,10 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
             variant="outline"
             onClick={() => setGroupBySupplier(!groupBySupplier)}
             className={cn(
-              "h-9 px-3 rounded-xl border-zinc-200 dark:border-zinc-800 transition-all",
+              "h-9 px-3 rounded-xl transition-all shadow-sm",
               groupBySupplier 
                 ? "bg-brand/10 border-brand/30 text-brand hover:bg-brand/20" 
-                : "bg-zinc-50 dark:bg-zinc-900/50 text-zinc-500 hover:bg-zinc-100"
+                : "bg-card border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted/50"
             )}
           >
             <ListFilter className="h-3.5 w-3.5 mr-2" />
@@ -249,13 +246,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           </Button>
 
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className={cn(designSystem.components.input.root, "flex-1 sm:w-48 h-9 text-xs rounded-xl bg-zinc-50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800")}>
+            <SelectTrigger className="flex-1 sm:w-48 h-9 text-xs rounded-xl bg-card border-border/50 shadow-sm">
               <div className="flex items-center gap-2">
-                <ArrowUpDown className="h-3.5 w-3.5 text-zinc-400" />
+                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 <SelectValue placeholder="Ordenar" />
               </div>
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-zinc-200 dark:border-zinc-800">
+            <SelectContent className="rounded-xl border-border/50">
               <SelectItem value="default" className="text-xs">Ordenação Padrão</SelectItem>
               <SelectItem value="price-asc" className="text-xs">Menor Preço</SelectItem>
               <SelectItem value="price-desc" className="text-xs">Maior Preço</SelectItem>
@@ -267,20 +264,20 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       </div>
 
       {/* 3. TABELA (Corpo sem scroll interno) */}
-      <div className="flex flex-col bg-white dark:bg-zinc-950">
-        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-6 py-2 bg-zinc-50/50 dark:bg-zinc-900/40 border-b border-zinc-100 dark:border-zinc-800">
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Item Adquirido</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Unid.</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Quant.</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right">Custo Vencedor</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-4">Melhor Proposta</span>
+      <div className="flex flex-col bg-transparent">
+        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-6 py-2 bg-muted/30 border-b border-border/40">
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Item Adquirido</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Unid.</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Quant.</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Custo Vencedor</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right pr-4">Melhor Proposta</span>
         </div>
 
-        <div className="p-4 space-y-1 pb-16">
+        <div className="p-4 space-y-2 pb-16">
           {filteredAndSortedData.length > 0 ? (
             groupBySupplier && groupedData ? (
               groupedData.map(group => (
-                <div key={group.name} className="mt-6 first:mt-0 mb-4 bg-zinc-50/30 dark:bg-zinc-900/20 rounded-2xl p-3 border border-zinc-100/50 dark:border-zinc-800/50">
+                <div key={group.name} className="mt-4 first:mt-0 mb-4 bg-card rounded-2xl p-3 border border-border/40 shadow-sm">
                   <div className="flex items-center justify-between mb-3 px-1">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">

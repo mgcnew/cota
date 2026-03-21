@@ -690,7 +690,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 <div
                   className={cn(
                     "h-1.5 rounded-full transition-all duration-300",
-                    isCompleted ? "bg-brand" : isActive ? "bg-brand/60" : "bg-zinc-100 dark:bg-zinc-800/50"
+                    isCompleted ? "bg-brand" : isActive ? "bg-brand/60" : "bg-muted dark:bg-muted/50"
                   )}
                 />
               </div>
@@ -724,7 +724,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
                           {/* Formulário de Adição - Lado Esquerdo */}
                           <div className="flex flex-col space-y-4">
-                            <div className="pb-1 border-b border-zinc-100 dark:border-zinc-800/50">
+                            <div className="pb-1 border-b border-border/50">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Plus className="h-5 w-5 text-brand flex-shrink-0" />
                                 <span className="truncate">Adicionar Produto</span>
@@ -929,7 +929,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                           {/* Lista de Produtos - Lado Direito */}
                           <div className="flex flex-col space-y-4">
-                            <div className="pb-1 border-b border-zinc-100 dark:border-zinc-800/50">
+                            <div className="pb-1 border-b border-border/50">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
                                 <span className="truncate">Produtos Adicionados ({fields.length})</span>
@@ -997,8 +997,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         {/* Esquerda: Periodo */}
                         <div className={cn(
                           "flex flex-col gap-5 p-5 sm:p-6 lg:w-[320px] xl:w-[360px] flex-shrink-0 overflow-y-auto pb-24 custom-scrollbar",
-                          "lg:border-r border-zinc-100 dark:border-zinc-800/50",
-                          ds.colors.surface.card
+                          "lg:border-r border-border/50 bg-card rounded-l-2xl"
                         )}>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-brand flex-shrink-0" />
@@ -1315,7 +1314,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 
                                 {/* Resumo de Produtos */}
                                 <div className={cn(
-                                  "p-5 rounded-2xl border bg-white dark:bg-zinc-900/50",
+                                  "p-5 rounded-2xl border bg-card/50",
                                   ds.colors.border.subtle
                                 )}>
                                   <div className="flex items-center gap-2 mb-4">
@@ -1348,7 +1347,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   
                                   {/* Prazos */}
                                   <div className={cn(
-                                    "p-5 rounded-2xl border bg-white dark:bg-zinc-900/50",
+                                    "p-5 rounded-2xl border bg-card/50",
                                     ds.colors.border.subtle
                                   )}>
                                     <div className="flex items-center gap-2 mb-4">
@@ -1377,7 +1376,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                   {/* Fornecedores */}
                                   <div className={cn(
-                                    "p-5 rounded-2xl border bg-white dark:bg-zinc-900/50",
+                                    "p-5 rounded-2xl border bg-card/50",
                                     ds.colors.border.subtle
                                   )}>
                                     <div className="flex items-center gap-2 mb-4">
@@ -1470,7 +1469,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           <div className="text-center space-y-3">
             <div className={cn(
               "animate-spin h-12 w-12 border-4 rounded-full mx-auto",
-              "border-zinc-200 dark:border-zinc-700",
+              "border-border",
               "border-t-brand"
             )}></div>
             <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>

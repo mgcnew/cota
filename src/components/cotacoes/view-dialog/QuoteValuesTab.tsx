@@ -162,10 +162,10 @@ export function QuoteValuesTab({
     <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
       {/* Sidebar - Lista de Fornecedores */}
       <div className={cn(
-        "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-100 dark:border-zinc-800 flex flex-col bg-zinc-50/30 dark:bg-zinc-950/20",
+        "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10",
         isMobile && showMobileValues ? "hidden" : "flex"
       )}>
-        <div className="p-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-950/40">
+        <div className="p-3 border-b border-border/50 bg-card/50">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="h-4 w-4 text-zinc-400" />
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
@@ -176,7 +176,7 @@ export function QuoteValuesTab({
               placeholder="Filtro rápido..."
               value={supplierSearch}
               onChange={e => setSupplierSearch(e.target.value)}
-              className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-xl text-xs bg-white dark:bg-zinc-950")}
+              className="pl-9 h-9 rounded-xl text-xs bg-background border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand"
             />
           </div>
         </div>
@@ -198,8 +198,8 @@ export function QuoteValuesTab({
                   className={cn(
                     "w-full text-left px-3 py-2 rounded-xl border transition-all duration-200 relative overflow-hidden group",
                     isSelected
-                      ? "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 shadow-sm ring-1 ring-brand/20"
-                      : "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-900/50"
+                      ? "bg-card border-border shadow-sm ring-1 ring-brand/20"
+                      : "bg-transparent border-transparent hover:bg-muted/40"
                   )}
                 >
                   {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />}
@@ -217,8 +217,8 @@ export function QuoteValuesTab({
                         className={cn(
                           "flex items-center justify-center p-1.5 rounded-lg transition-colors border",
                           isSelected
-                            ? "bg-green-500/10 text-green-600 border-green-500/20 hover:bg-green-500 hover:text-white"
-                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border-transparent hover:bg-green-500 hover:text-white"
+                            ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
+                            : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
                         )}
                         title="Enviar Cotação via WhatsApp"
                       >
@@ -243,11 +243,11 @@ export function QuoteValuesTab({
 
       {/* Área Principal - Valores */}
       <div className={cn(
-        "flex-1 flex flex-col bg-white dark:bg-zinc-950 overflow-hidden",
+        "flex-1 flex flex-col bg-background overflow-hidden",
         isMobile && !showMobileValues ? "hidden" : "flex"
       )}>
         {isMobile && (
-          <div className="flex items-center gap-2 p-4 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="flex items-center gap-2 p-4 border-b border-border/50 bg-card">
             <Button variant="ghost" className="h-9 px-2 rounded-xl" onClick={() => setShowMobileValues(false)}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               <span className="text-xs font-bold">Trocar Fornecedor</span>
@@ -257,21 +257,21 @@ export function QuoteValuesTab({
 
         {selectedSupplier ? (
           <>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/30 dark:bg-zinc-950/20 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-card/50 flex-shrink-0">
               <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
                 <div className="p-2 rounded-xl bg-brand/10 flex-shrink-0">
                   <Building2 className="h-5 w-5 text-brand" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Gerenciando Valores:</p>
-                  <p className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight truncate" title={currentSupplier?.nome}>{currentSupplier?.nome}</p>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Gerenciando Valores:</p>
+                  <p className="text-lg font-black text-foreground tracking-tight truncate" title={currentSupplier?.nome}>{currentSupplier?.nome}</p>
                 </div>
               </div>
               <div className="text-right flex flex-col items-end flex-shrink-0">
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Valor Proposto</p>
+                <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Valor Proposto</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-[10px] font-bold text-brand">R$</span>
-                  <p className="text-xl font-black text-zinc-900 dark:text-zinc-50">
+                  <p className="text-xl font-black text-foreground">
                     {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </p>
                 </div>
@@ -279,7 +279,7 @@ export function QuoteValuesTab({
             </div>
 
             {!isMobile && (
-              <div className="px-6 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/10 flex-shrink-0">
+              <div className="px-6 py-3 border-b border-border/50 bg-muted/30 flex-shrink-0">
                 <div className="grid grid-cols-[3fr_80px_100px_140px_auto] gap-4 items-center px-4">
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
                   <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Unid.</span>
@@ -305,8 +305,8 @@ export function QuoteValuesTab({
                       isBest
                         ? "bg-brand/5 border-brand/20 shadow-sm"
                         : currentValue === 0
-                        ? "bg-zinc-50/50 dark:bg-zinc-950/20 border-zinc-100 dark:border-zinc-800/50 opacity-60 hover:opacity-100 grayscale-[0.5]"
-                        : "bg-white dark:bg-zinc-900/30 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
+                        ? "bg-muted/20 border-border/50 opacity-60 hover:opacity-100 grayscale-[0.5]"
+                        : "bg-card border-border hover:border-brand/30"
                     )}
                   >
                     {isEditing ? (
@@ -362,10 +362,10 @@ export function QuoteValuesTab({
                         {!isMobile && (
                           <>
                             <div className="text-center">
-                              <Badge variant="outline" className="h-5 px-2 text-[9px] font-black uppercase text-zinc-500 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">{safeStr(product.unidade)}</Badge>
+                              <Badge variant="outline" className="h-5 px-2 text-[9px] font-black uppercase text-muted-foreground border-border/50 bg-background">{safeStr(product.unidade)}</Badge>
                             </div>
                             <div className="text-center">
-                              <span className="text-xs font-black text-zinc-700 dark:text-zinc-300">{safeStr(product.quantidade)}</span>
+                              <span className="text-xs font-black text-foreground">{safeStr(product.quantidade)}</span>
                             </div>
                           </>
                         )}

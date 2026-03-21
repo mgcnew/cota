@@ -526,21 +526,25 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
           <div className="flex items-center gap-4 relative z-10 flex-1 min-w-0">
             {/* Título - Mais compacto */}
-            <div className="flex items-center gap-2.5 min-w-max">
-              <div className="p-1.5 rounded-lg bg-brand/10">
+            <div className="flex items-center gap-3 min-w-max">
+              <div className="p-2 rounded-[10px] bg-brand/10 border border-brand/20">
                 <ClipboardList className="h-4 w-4 text-brand" />
               </div>
-              <div>
-                <DialogTitleComponent className="text-base font-black text-foreground tracking-tight leading-none mb-1">Gerenciar Cotação</DialogTitleComponent>
-                <p className="text-[10px] font-bold text-muted-foreground leading-none">ID #{safeStr(quote.id).substring(0, 8)}</p>
+              <div className="flex flex-col">
+                <DialogTitleComponent className="text-base font-black text-foreground tracking-tight leading-none mb-1">
+                  Cotação
+                </DialogTitleComponent>
+                <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">
+                  #{safeStr(quote.id).substring(0, 8)}
+                </span>
               </div>
             </div>
 
-            {/* Tabs - Flexível */}
-            <div className="flex-1 min-w-0 max-w-fit overflow-x-auto no-scrollbar">
+            {/* Tabs - Flexível e Desenhado como pílulas (Pills) */}
+            <div className="flex-1 min-w-0 flex items-center pl-4 border-l border-border/50 ml-2">
               {isMobile ? (
                 <Select value={activeTab} onValueChange={setActiveTab}>
-                  <SelectTrigger className={cn("w-32 h-9 rounded-xl text-xs", designSystem.components.input.root)}>
+                  <SelectTrigger className="w-32 h-8 rounded-lg text-[11px] font-bold bg-muted/50 border-transparent hover:bg-muted">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -548,35 +552,28 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                       { id: 'resumo', label: 'Resumo' },
                       { id: 'valores', label: 'Valores' },
                       { id: 'converter', label: 'Conversão' },
-                      { id: 'editar', label: 'Editar' }
+                      { id: 'editar', label: 'Ajustes' }
                     ].map((tab) => (
-                      <SelectItem key={tab.id} value={tab.id}>
+                      <SelectItem key={tab.id} value={tab.id} className="text-xs font-semibold">
                         {tab.label}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               ) : (
-                <TabsList className={cn(designSystem.components.tabs.clean.list, "bg-transparent h-9 p-0 gap-1")}>
+                <TabsList className="bg-muted/30 p-1 border border-border/50 rounded-xl h-auto flex gap-1">
                   {[
                     { id: 'resumo', label: 'Resumo' },
                     { id: 'valores', label: 'Valores' },
-                    { id: 'converter', label: 'Conversão' },
+                    { id: 'converter', label: 'Decisão' },
                     { id: 'editar', label: 'Configurações' }
                   ].map((tab) => (
                     <TabsTrigger
                       key={tab.id}
                       value={tab.id}
-                      className={cn(
-                        designSystem.components.tabs.clean.trigger,
-                        "h-8 px-2 text-[10px] font-bold uppercase tracking-wider",
-                        "data-[state=active]:bg-transparent"
-                      )}
+                      className="px-3 py-1.5 h-7 text-[10px] font-black uppercase tracking-widest text-muted-foreground rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
                     >
                       {tab.label}
-                      {activeTab === tab.id && (
-                        <div className="absolute bottom-0 left-2 right-2 h-[2px] bg-brand shadow-[0_0_8px_hsl(var(--brand))] rounded-full" />
-                      )}
                     </TabsTrigger>
                   ))}
                 </TabsList>
@@ -611,7 +608,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 relative bg-background flex flex-col">
+        <div className="flex-1 min-h-0 relative bg-background/50 flex flex-col">
           <Suspense fallback={<TabSkeleton type={activeTab} />}>
             <TabsContent value="resumo" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'resumo' && (
@@ -721,7 +718,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border-none shadow-2xl">
+      <DialogContent className="max-w-[1000px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border/50 bg-card rounded-2xl shadow-2xl">
         {modalContent}
       </DialogContent>
     </Dialog>

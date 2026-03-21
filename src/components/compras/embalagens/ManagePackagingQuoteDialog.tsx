@@ -839,34 +839,34 @@ export function ManagePackagingQuoteDialog({
 
   const content = (
     <div className="flex flex-col h-full bg-background">
-        {/* Header */}
-        <div className="flex-shrink-0 px-4 py-2 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-card/80">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-300 flex-shrink-0">
-                <Package className="h-3.5 w-3.5" />
+        {/* Header Premium */}
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border/50 bg-card relative overflow-hidden">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand border border-brand/20 flex-shrink-0">
+                <Package className="h-5 w-5" />
               </div>
-              <div className="min-w-0">
-                <DialogTitleComponent className="text-[13px] font-bold text-zinc-900 dark:text-zinc-50 tracking-tight leading-none">Gerenciar Cotação</DialogTitleComponent>
-                <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className="text-[9px] font-bold uppercase tracking-wider h-[18px] px-1.5 rounded-md">{quote.status}</Badge>
-                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400">{quote.dataInicio} - {quote.dataFim}</span>
-                  <span className="text-[10px] text-zinc-400 dark:text-zinc-500 hidden md:inline">• {stats.totalEmbalagens} emb. • {stats.totalFornecedores} forn. • {stats.fornecedoresRespondidos} resp.</span>
+              <div className="min-w-0 flex flex-col justify-center">
+                <DialogTitleComponent className="text-lg font-bold text-foreground tracking-tight leading-tight truncate">Gerenciar Cotação</DialogTitleComponent>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className={cn("text-[9px] font-bold uppercase tracking-wider h-5 px-2 rounded-md", quote.status === "ativa" ? "bg-brand text-black hover:bg-brand/90" : "bg-muted text-muted-foreground border-border")}>{quote.status}</Badge>
+                  <span className="text-[10px] font-medium text-muted-foreground">{quote.dataInicio} - {quote.dataFim}</span>
+                  <span className="text-[10px] font-medium text-muted-foreground hidden md:inline">• {stats.totalEmbalagens} embalagens • {stats.totalFornecedores} fornecedores • {stats.fornecedoresRespondidos} respostas</span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Select value={quote.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-24 h-7 text-[10px] font-medium bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ativa">Ativa</SelectItem>
-                  <SelectItem value="concluida">Concluída</SelectItem>
-                  <SelectItem value="cancelada">Cancelada</SelectItem>
+                <SelectTrigger className="w-28 h-9 text-xs font-bold bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
+                <SelectContent className="bg-background border-border">
+                  <SelectItem value="ativa" className="text-xs font-bold">Ativa</SelectItem>
+                  <SelectItem value="concluida" className="text-xs font-bold">Concluída</SelectItem>
+                  <SelectItem value="cancelada" className="text-xs font-bold">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} 
-                className="h-7 w-7 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">
-                <X className="h-3.5 w-3.5" />
+                className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors ml-1">
+                <X className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -875,21 +875,21 @@ export function ManagePackagingQuoteDialog({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 px-4 py-1 border-b border-zinc-100 dark:border-zinc-800 bg-white dark:bg-card/80">
-            <TabsList className="flex w-full sm:w-auto gap-0 overflow-x-auto scrollbar-hide p-0.5 bg-zinc-100/50 dark:bg-zinc-800/40 rounded-lg border border-zinc-200/50 dark:border-zinc-700/30 h-auto">
-              <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+          <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border/50 bg-muted/30">
+            <TabsList className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-background rounded-lg border border-border/50 shadow-sm justify-start sm:justify-center w-full sm:w-auto h-auto">
+              <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <Trophy className="h-3 w-3" />Resumo
               </TabsTrigger>
-              <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+              <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <Settings className="h-3 w-3" />Editar
               </TabsTrigger>
-              <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+              <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <DollarSign className="h-3 w-3" />Valores
               </TabsTrigger>
-              <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+              <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <TrendingDown className="h-3 w-3" />Comparativo
               </TabsTrigger>
-              <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-900 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+              <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <FileDown className="h-3 w-3" />Exportar
               </TabsTrigger>
             </TabsList>
@@ -917,39 +917,43 @@ export function ManagePackagingQuoteDialog({
                     </h3>
                   </div>
                   {packagingNotInQuote.length > 0 && (
-                    <div className="p-4 border-b bg-background">
+                    <div className="p-4 border-b border-border/50 bg-muted/10">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
-                          <SelectTrigger className="flex-1 h-9 text-xs font-medium bg-background text-foreground border-input">
+                          <SelectTrigger className="flex-1 h-10 text-xs font-bold bg-background text-foreground border-border shadow-sm hover:bg-muted/40 transition-colors">
                             <SelectValue placeholder="Selecione uma embalagem para adicionar..." />
                           </SelectTrigger>
-                          <SelectContent className="bg-background border-border">
+                          <SelectContent className="bg-background border-border shadow-xl">
                             {packagingNotInQuote.map(p => <SelectItem key={p.id} value={p.id} className="text-xs font-medium focus:bg-accent focus:text-accent-foreground">{p.name}</SelectItem>)}
                           </SelectContent>
                         </Select>
                         <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} 
-                          className="h-9 px-4 text-xs font-bold uppercase tracking-wider w-full sm:w-auto">
-                          {addQuoteItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Plus className="h-3 w-3 mr-1.5" />}Adicionar
+                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-black hover:bg-brand/90 shadow-sm rounded-lg">
+                          {addQuoteItem.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}Adicionar
                         </Button>
                       </div>
                     </div>
                   )}
-                  <div className="divide-y">
+                  <div className="p-4 bg-background">
                     {quote.itens.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground"><Package className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhuma embalagem na cotação</p></div>
-                    ) : quote.itens.map((item, index) => (
-                      <div key={item.packagingId} className="p-3 flex items-center justify-between hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <span className="text-[10px] font-bold text-muted-foreground w-6">#{index + 1}</span>
-                          <div className="w-6 h-6 rounded bg-muted flex items-center justify-center">
-                            <Package className="h-3 w-3 text-muted-foreground" />
+                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Package className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhuma embalagem na cotação</p></div>
+                    ) : (
+                      <div className="flex flex-col gap-2.5">
+                        {quote.itens.map((item, index) => (
+                          <div key={item.packagingId} className="group relative p-3 flex items-center justify-between bg-card hover:bg-muted/20 hover:border-brand/30 border border-border/50 rounded-xl transition-all shadow-sm">
+                            <div className="flex items-center gap-3">
+                              <span className="text-[10px] font-black text-muted-foreground w-5 opacity-40">#{index + 1}</span>
+                              <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center flex-shrink-0">
+                                <Package className="h-4 w-4 text-brand" />
+                              </div>
+                              <span className="text-sm font-bold text-foreground">{item.packagingName}</span>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => handleRemovePackaging(item.packagingId)} disabled={removeQuoteItem.isPending}
+                              className="h-8 w-8 p-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"><Trash2 className="h-4 w-4" /></Button>
                           </div>
-                          <span className="text-sm font-bold">{item.packagingName}</span>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={() => handleRemovePackaging(item.packagingId)} disabled={removeQuoteItem.isPending}
-                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"><Trash2 className="h-3.5 w-3.5" /></Button>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 </Card>
 
@@ -962,35 +966,39 @@ export function ManagePackagingQuoteDialog({
                     </h3>
                   </div>
                   {suppliersNotInQuote.length > 0 && (
-                    <div className="p-4 border-b bg-background">
+                    <div className="p-4 border-b border-border/50 bg-muted/10">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 h-9 text-xs font-medium"><SelectValue placeholder="Selecione um fornecedor para adicionar..." /></SelectTrigger>
-                          <SelectContent>{suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id} className="text-xs font-medium">{s.name}</SelectItem>)}</SelectContent>
+                          <SelectTrigger className="flex-1 h-10 text-xs font-bold bg-background text-foreground border-border shadow-sm hover:bg-muted/40 transition-colors">
+                            <SelectValue placeholder="Selecione um fornecedor para adicionar..." />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border-border shadow-xl">
+                            {suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id} className="text-xs font-medium">{s.name}</SelectItem>)}
+                          </SelectContent>
                         </Select>
                         <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} 
-                          className="h-9 px-4 text-xs font-bold uppercase tracking-wider w-full sm:w-auto">
-                          {addQuoteSupplier.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Plus className="h-3 w-3 mr-1.5" />}Adicionar
+                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-black hover:bg-brand/90 shadow-sm rounded-lg">
+                          {addQuoteSupplier.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}Adicionar
                         </Button>
                       </div>
                     </div>
                   )}
                   <div className="p-4 bg-background">
                     {quote.fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-xl"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-20" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
+                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {quote.fornecedores.map((fornecedor, index) => (
-                          <div key={fornecedor.supplierId} className="group relative flex items-center p-3 rounded-xl border bg-card hover:bg-accent/50 transition-all">
-                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-muted flex items-center justify-center mr-3 shadow-sm">
-                              <Building2 className="h-5 w-5 text-muted-foreground" />
+                          <div key={fornecedor.supplierId} className="group relative flex items-center p-3 rounded-xl border border-border/50 bg-card hover:border-brand/30 hover:bg-muted/20 transition-all shadow-sm">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center mr-3 shadow-sm">
+                              <Building2 className="h-4 w-4 text-brand" />
                             </div>
                             <div className="flex-1 min-w-0 mr-2">
                               <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-xs font-black truncate">{fornecedor.supplierName}</span>
+                                <span className="text-xs font-black truncate text-foreground">{fornecedor.supplierName}</span>
                               </div>
                               {fornecedor.status === "respondido" ? (
-                                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                                <div className="flex items-center gap-1 text-[10px] font-bold text-brand">
                                   <CheckCircle2 className="h-3 w-3" />
                                   <span className="uppercase tracking-wide">Respondido</span>
                                 </div>
@@ -1050,17 +1058,17 @@ export function ManagePackagingQuoteDialog({
                       <div className="p-2 space-y-1 pb-6">
                         {quote.fornecedores.map((fornecedor) => (
                           <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                            className={cn("w-full p-2.5 rounded-lg text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+                            className={cn("w-full p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background",
                               selectedSupplier === fornecedor.supplierId 
-                                ? "bg-primary text-primary-foreground shadow-sm ring-1 ring-primary/20" 
-                                : "text-muted-foreground hover:bg-muted/80 hover:text-foreground")}
+                                ? "bg-brand text-black shadow-md ring-1 ring-brand/20 font-bold" 
+                                : "text-muted-foreground hover:bg-muted/80 hover:text-foreground border border-transparent")}
                             title={fornecedor.supplierName}>
                             <div className="flex items-center gap-2.5">
-                              <Building2 className={cn("h-3.5 w-3.5 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/90" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
-                              <span className="truncate font-bold text-xs">{fornecedor.supplierName}</span>
+                              <Building2 className={cn("h-4 w-4 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-black/80" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
+                              <span className="truncate text-xs tracking-tight">{fornecedor.supplierName}</span>
                               {fornecedor.status === "respondido" 
-                                ? <CheckCircle2 className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/90" : "text-emerald-500")} />
-                                : <Clock className={cn("h-3 w-3 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-primary-foreground/70" : "text-muted-foreground/40")} />
+                                ? <CheckCircle2 className={cn("h-4 w-4 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-black/80" : "text-brand")} />
+                                : <Clock className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-black/60" : "text-muted-foreground/40")} />
                               }
                             </div>
                           </button>
@@ -1086,12 +1094,12 @@ export function ManagePackagingQuoteDialog({
                       const isBestPrice = bestData?.bestSupplierId === selectedSupplier;
 
                       return (
-                        <Card key={item.packagingId} className={cn("p-4 transition-all border-border shadow-sm", 
-                          isBestPrice ? "bg-muted/50 ring-1 ring-border" : "bg-card",
-                          isEditing && "ring-2 ring-primary shadow-lg z-10")}>
+                        <Card key={item.packagingId} className={cn("p-4 transition-all border shadow-sm rounded-xl", 
+                          isBestPrice ? "bg-brand/5 border-brand/30 ring-1 ring-brand/10" : "bg-card border-border/50",
+                          isEditing && "ring-2 ring-brand border-brand/50 shadow-lg z-10")}>
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2.5">
-                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shadow-sm", isBestPrice ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shadow-sm border", isBestPrice ? "bg-brand text-black border-brand/20" : "bg-muted text-muted-foreground border-border/50")}>
                                 <Package className="h-4 w-4" />
                               </div>
                               <div>
@@ -1131,36 +1139,43 @@ export function ManagePackagingQuoteDialog({
                               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 <div>
                                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">💰 Preço do Pacote/Fardo (R$) *</Label>
-                                  <Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 50.00" className="h-9 bg-background border-input font-bold" />
-                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Quanto o fornecedor cobra</p>
+                                  <Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 50.00" className="h-10 bg-background border-border/50 shadow-sm font-bold text-foreground focus-visible:ring-brand/30" />
+                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Quanto o fornecedor cobra</p>
                                 </div>
                                 <div>
                                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">📦 Vendido como *</Label>
-                                  <Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}><SelectTrigger className="h-9 bg-background border-input"><SelectValue /></SelectTrigger><SelectContent>{PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent></Select>
-                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Como vem: pacote, kg, caixa...</p>
+                                  <Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}>
+                                    <SelectTrigger className="h-10 bg-background border-border/50 shadow-sm focus:ring-brand/30">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-background border-border shadow-xl rounded-xl">
+                                      {PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value} className="text-xs font-semibold focus:bg-brand/10">{u.label}</SelectItem>)}
+                                    </SelectContent>
+                                  </Select>
+                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Como vem: pacote, kg, caixa...</p>
                                 </div>
                                 <div>
                                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">🔢 Qtd. Comprada *</Label>
-                                  <Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 1" className="h-9 bg-background border-input" />
-                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Quantos pacotes/kg pelo preço acima</p>
+                                  <Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 1" className="h-10 bg-background border-border/50 shadow-sm focus-visible:ring-brand/30" />
+                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Quantos pacotes/kg pelo preço acima</p>
                                 </div>
                               </div>
                               {/* Linha 2: Conteúdo e especificações */}
                               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                                 <div>
                                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">🎯 Total de Peças no Pacote *</Label>
-                                  <Input type="number" step="0.01" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 500" className="h-9 bg-background border-input font-bold" />
-                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Quantas sacolas/peças vêm dentro</p>
+                                  <Input type="number" step="0.01" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 500" className="h-10 bg-background border-border/50 shadow-sm font-bold text-foreground focus-visible:ring-brand/30" />
+                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Quantas sacolas/peças vêm dentro</p>
                                 </div>
                                 <div>
                                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Espessura/Gramatura (mm)</Label>
-                                  <Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 0.08" className="h-9 bg-background border-input" />
-                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Opcional — espessura do material</p>
+                                  <Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 0.08" className="h-10 bg-background border-border/50 shadow-sm focus-visible:ring-brand/30" />
+                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Opcional — espessura do material</p>
                                 </div>
                                 <div>
                                   <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Tamanho (LxA)</Label>
-                                  <Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 30×40cm" className="h-9 bg-background border-input" />
-                                  <p className="text-[9px] text-muted-foreground mt-1 leading-tight">Opcional — largura × altura</p>
+                                  <Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 30×40cm" className="h-10 bg-background border-border/50 shadow-sm focus-visible:ring-brand/30" />
+                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Opcional — largura × altura</p>
                                 </div>
                               </div>
                               {/* Cálculo transparente */}
@@ -1251,7 +1266,7 @@ export function ManagePackagingQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] sm:w-[90vw] md:w-[85vw] lg:w-[80vw] max-w-[900px] h-[85vh] sm:h-[80vh] max-h-[680px] p-0 gap-0 overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl flex flex-col bg-white dark:bg-card animate-in fade-in zoom-in-95 duration-200">
+      <DialogContent className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-border shadow-md rounded-2xl flex flex-col bg-background [&>button]:hidden">
         {content}
       </DialogContent>
     </Dialog>
