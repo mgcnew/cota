@@ -41,7 +41,8 @@ import {
   PackagingQuotesTable,
   PackagingOrdersTab,
   PackagingAnalysisTab,
-  PackagingEconomyTab
+  PackagingEconomyTab,
+  ResumoPackagingQuoteDialog
 } from "./embalagens";
 
 function EmbalagensTab() {
@@ -57,6 +58,7 @@ function EmbalagensTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemsDialogOpen, setItemsDialogOpen] = useState(false);
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
+  const [resumoDialogOpen, setResumoDialogOpen] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const { quotes, isLoading: quotesLoading, deleteQuote } = usePackagingQuotes();
@@ -85,6 +87,13 @@ function EmbalagensTab() {
     startTransition(() => {
       setSelectedQuoteId(quote.id);
       setManageDialogOpen(true);
+    });
+  }, []);
+
+  const handleViewSummary = useCallback((quote: PackagingQuoteDisplay) => {
+    startTransition(() => {
+      setSelectedQuoteId(quote.id);
+      setResumoDialogOpen(true);
     });
   }, []);
 
@@ -361,6 +370,7 @@ function EmbalagensTab() {
                     quote={quote}
                     quoteNumber={numero}
                     onManage={handleManageQuote}
+                    onViewSummary={handleViewSummary}
                     onDelete={handleDeleteQuote}
                     onConvertToOrder={handleConvertToOrder}
                   />
@@ -373,6 +383,7 @@ function EmbalagensTab() {
                 quotes={paginatedData.items}
                 startIndex={paginatedData.pagination.startIndex}
                 onManage={handleManageQuote}
+                onViewSummary={handleViewSummary}
                 onDelete={handleDeleteQuote}
                 onConvertToOrder={handleConvertToOrder}
               />
@@ -448,6 +459,14 @@ function EmbalagensTab() {
         open={itemsDialogOpen}
         onOpenChange={setItemsDialogOpen}
       />
+
+      {selectedQuote && (
+        <ResumoPackagingQuoteDialog
+          open={resumoDialogOpen}
+          onOpenChange={setResumoDialogOpen}
+          quote={selectedQuote}
+        />
+      )}
     </div>
   );
 }

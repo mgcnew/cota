@@ -205,7 +205,7 @@ new_configuracao = '''{/* Step: Configuração (Merge Period, Suppliers and Conf
 '''
 
 if start_idx != -1 and end_idx != -1:
-    content = content[:start_idx] + new_configuracao + content[end_idx:]
+    content = content[:start_idx] + new_configuracao + content[end_idx:] # type: ignore
 else:
     print("Could not find blocks to replace!")
     exit(1)

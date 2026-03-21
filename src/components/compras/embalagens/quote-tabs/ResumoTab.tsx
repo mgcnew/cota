@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { Star, Award, TrendingDown, Copy, Package, Building2 } from "lucide-reac
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
+import { PackagingEconomyBreakdown } from "./PackagingEconomyBreakdown";
 
 interface BestPriceItem {
   packagingId: string;
@@ -22,10 +23,11 @@ interface ResumoTabProps {
   bestPricesData: BestPriceItem[];
   onCopyBestPrices: () => void;
   onEditItem: (supplierId: string, packagingId: string) => void;
+  isCompleted?: boolean;
 }
 
-export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem }: ResumoTabProps) {
-  const [view, setView] = useState<"item" | "fornecedor">("item");
+export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isCompleted }: ResumoTabProps) {
+  const [view, setView] = useState<"item" | "fornecedor" | "economia">(isCompleted ? "fornecedor" : "item");
 
   const bestPricesBySupplier = useMemo(() => {
     const grouped = bestPricesData.reduce((acc, curr) => {
@@ -50,11 +52,11 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem }: Resu
     <ScrollArea className="flex-1 h-full">
       <div className="p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-            <Star className="h-3 w-3" />Melhor Preço por Embalagem
+          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 overflow-hidden">
+            <Star className="h-3 w-3 flex-shrink-0" /><span className="truncate">Melhor Preço</span>
           </h3>
-          <div className="flex items-center gap-2">
-            <div className="flex bg-muted/20 border border-border/50 rounded-md p-0.5">
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
+            <div className="flex bg-muted/20 border border-border/50 rounded-md p-0.5 flex-shrink-0">
               <Button 
                 variant={view === "item" ? "secondary" : "ghost"} 
                 size="sm" 
@@ -73,13 +75,24 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem }: Resu
               >
                 <Building2 className="h-3 w-3 mr-1.5" />Fornecedor
               </Button>
+              <Button 
+                variant={view === "economia" ? "secondary" : "ghost"} 
+                size="sm" 
+                onClick={() => setView("economia")}
+                className={cn("h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded transition-all", 
+                  view === "economia" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground")}
+              >
+                <TrendingDown className="h-3 w-3 mr-1.5" />Economia
+              </Button>
             </div>
-            <Button variant="outline" size="sm" className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded-md border-border hover:bg-muted" onClick={onCopyBestPrices}>
-              <Copy className="h-3 w-3 mr-1.5" />Copiar Geral
+            <Button variant="outline" size="sm" className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded-md border-border hover:bg-muted flex-shrink-0" onClick={onCopyBestPrices}>
+              <Copy className="h-3 w-3 sm:mr-1.5" /><span className="hidden sm:inline">Copiar</span>
             </Button>
           </div>
         </div>
-        {view === "item" ? (
+        {view === "economia" ? (
+          <PackagingEconomyBreakdown bestPricesData={bestPricesData} />
+        ) : view === "item" ? (
           <Card className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
             <div className="divide-y divide-border/50">
               {bestPricesData.map((item) => (

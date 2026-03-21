@@ -270,6 +270,59 @@ export function usePackagingOrders() {
     },
   });
 
+  // Confirmar entrega do pedido ajustando quantidades e valores reais
+  const confirmDelivery = useMutation({
+    mutationFn: async (data: {
+      orderId: string;
+      totalValue: number;
+      economiaEstimada: number;
+      itens: {
+        id: string; // The order item ID
+        quantidade: number;
+        valorTotal: number;
+        valorUnitario: number;
+      }[];
+    }) => {
+      // Atualizar o pedido principal para entregue
+      const { error: orderError } = await (supabase
+        .from('packaging_orders' as any)
+        .update({ 
+          status: 'entregue', 
+          total_value: data.totalValue,
+          economia_estimada: data.economiaEstimada,
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', data.orderId) as any);
+
+      if (orderError) throw orderError;
+
+      // Atualizar cada item do pedido
+      for (const item of data.itens) {
+        const { error: itemError } = await (supabase
+          .from('packaging_order_items' as any)
+          .update({
+            quantidade: item.quantidade,
+            valor_total: item.valorTotal,
+            valor_unitario: item.valorUnitario
+          })
+          .eq('id', item.id) as any);
+          
+        if (itemError) throw itemError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['packaging-orders'] });
+      toast({ title: 'Entrega confirmada!', description: 'Valores atualizados na nota com sucesso.' });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Erro ao confirmar entrega',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   // Excluir pedido
   const deleteOrder = useMutation({
     mutationFn: async (orderId: string) => {
@@ -300,6 +353,7 @@ export function usePackagingOrders() {
     createOrderFromQuote,
     createOrder,
     updateOrderStatus,
+    confirmDelivery,
     deleteOrder,
   };
 }

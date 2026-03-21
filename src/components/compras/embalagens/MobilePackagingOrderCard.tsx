@@ -21,6 +21,7 @@ interface MobilePackagingOrderCardProps {
   orderNumber: number;
   onViewDetails: (order: PackagingOrderDisplay) => void;
   onUpdateStatus: (orderId: string, status: string) => void;
+  onConfirmDelivery: (order: PackagingOrderDisplay) => void;
   onDelete: (orderId: string) => void;
 }
 
@@ -29,6 +30,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
   orderNumber,
   onViewDetails,
   onUpdateStatus,
+  onConfirmDelivery,
   onDelete
 }: MobilePackagingOrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -152,7 +154,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
                   "h-10 touch-target active:scale-95 transition-transform text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200",
                   order.status === "confirmado" ? "col-span-2" : ""
                 )}
-                onClick={() => onUpdateStatus(order.id, 'entregue')}
+                onClick={() => onConfirmDelivery(order)}
               >
                 <Truck className="h-4 w-4 mr-2" />
                 Marcar Entregue

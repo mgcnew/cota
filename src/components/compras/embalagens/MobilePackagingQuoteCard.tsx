@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { 
   Package, Building2, Eye, CheckCircle2, ShoppingCart, Trash2, 
-  DollarSign, ChevronDown, ChevronUp, MoreVertical
+  DollarSign, ChevronDown, ChevronUp, MoreVertical, FileText
 } from "lucide-react";
 import { 
   Collapsible, 
@@ -18,6 +18,7 @@ interface MobilePackagingQuoteCardProps {
   quote: PackagingQuoteDisplay;
   quoteNumber: number;
   onManage: (quote: PackagingQuoteDisplay) => void;
+  onViewSummary?: (quote: PackagingQuoteDisplay) => void;
   onDelete: (quote: PackagingQuoteDisplay) => void;
   onConvertToOrder: (quote: PackagingQuoteDisplay) => void;
 }
@@ -26,6 +27,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
   quote,
   quoteNumber,
   onManage,
+  onViewSummary,
   onDelete,
   onConvertToOrder
 }: MobilePackagingQuoteCardProps) {
@@ -148,19 +150,32 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
               variant="outline" 
               className={cn(
                 "h-10 touch-target active:scale-95 transition-transform",
-                isPronta ? "col-span-1" : "col-span-2"
+                isPronta || quote.status === 'concluida' ? "col-span-1" : "col-span-2"
               )}
+              disabled={quote.status === "concluida"}
               onClick={() => onManage(quote)}
             >
               <Eye className="h-4 w-4 mr-2" />
               Negociar Cotação
             </Button>
             
-            {isPronta && (
+            {quote.status === "concluida" && onViewSummary && (
               <Button 
                 size="sm" 
                 variant="outline" 
-                className="h-10 touch-target active:scale-95 transition-transform text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200"
+                className="h-10 touch-target active:scale-95 transition-transform text-brand hover:text-brand/80 hover:bg-brand/5 border-brand/20 col-span-1"
+                onClick={() => onViewSummary(quote)}
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Resumo
+              </Button>
+            )}
+
+            {isPronta && quote.status !== "concluida" && (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="h-10 touch-target active:scale-95 transition-transform text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200 col-span-1"
                 onClick={() => onConvertToOrder(quote)}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />

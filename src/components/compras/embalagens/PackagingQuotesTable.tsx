@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableRow, TableHeader } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Package, Calendar, DollarSign, Building2, MoreVertical, Eye, Trash2, ShoppingCart, CheckCircle2, CircleDot, Info } from "lucide-react";
+import { Package, Calendar, DollarSign, Building2, MoreVertical, Eye, Trash2, ShoppingCart, CheckCircle2, CircleDot, Info, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -12,6 +12,7 @@ interface PackagingQuotesTableProps {
   quotes: PackagingQuoteDisplay[];
   startIndex: number;
   onManage: (quote: PackagingQuoteDisplay) => void;
+  onViewSummary?: (quote: PackagingQuoteDisplay) => void;
   onDelete: (quote: PackagingQuoteDisplay) => void;
   onConvertToOrder: (quote: PackagingQuoteDisplay) => void;
 }
@@ -20,6 +21,7 @@ export function PackagingQuotesTable({
   quotes, 
   startIndex,
   onManage, 
+  onViewSummary,
   onDelete, 
   onConvertToOrder 
 }: PackagingQuotesTableProps) {
@@ -187,10 +189,15 @@ export function PackagingQuotesTable({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
-                        <DropdownMenuItem onClick={() => onManage(quote)} className="rounded-lg gap-2">
+                        <DropdownMenuItem onClick={() => onManage(quote)} disabled={quote.status === "concluida"} className="rounded-lg gap-2">
                           <Eye className="h-4 w-4" />Negociar Cotação
                         </DropdownMenuItem>
-                        {isPronta && (
+                        {quote.status === "concluida" && onViewSummary && (
+                          <DropdownMenuItem onClick={() => onViewSummary(quote)} className="rounded-lg gap-2 text-brand">
+                            <FileText className="h-4 w-4" />Resumo da Cotação
+                          </DropdownMenuItem>
+                        )}
+                        {isPronta && quote.status !== "concluida" && (
                           <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="rounded-lg gap-2 text-brand">
                             <ShoppingCart className="h-4 w-4" />Converter em Pedido
                           </DropdownMenuItem>

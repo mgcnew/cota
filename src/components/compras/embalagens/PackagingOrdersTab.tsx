@@ -13,6 +13,7 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { PackagingOrderDetailsDialog } from "./PackagingOrderDetailsDialog";
+import { ConfirmPackagingDeliveryDialog } from "./ConfirmPackagingDeliveryDialog";
 import { MobilePackagingOrderCard } from "./MobilePackagingOrderCard";
 import {
   ShoppingCart, Plus, Trash2, Calendar, DollarSign,
@@ -41,6 +42,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState<PackagingOrderDisplay | null>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [deliveryDialogOpen, setDeliveryDialogOpen] = useState(false);
 
   const { orders, isLoading, updateOrderStatus, deleteOrder } = usePackagingOrders();
 
@@ -70,10 +72,10 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
   const getStatusBadge = (status: string) => {
     const statusConfig = PACKAGING_ORDER_STATUS.find(s => s.value === status);
     
-    let badgeClass = ds.components.badge.outline;
-    if (status === "confirmado") badgeClass = ds.components.badge.active;
-    if (status === "entregue") badgeClass = ds.components.badge.success;
-    if (status === "cancelado") badgeClass = ds.components.badge.destructive;
+    let badgeClass: string = ds.components.badge.outline as string;
+    if (status === "confirmado") badgeClass = ds.components.badge.active as string;
+    if (status === "entregue") badgeClass = ds.components.badge.success as string;
+    if (status === "cancelado") badgeClass = ds.components.badge.destructive as string;
 
     const IconComponent = status === "pendente" ? Clock : status === "confirmado" ? CheckCircle2 : status === "entregue" ? Truck : Clock;
     
@@ -96,6 +98,11 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
   const handleViewDetails = (order: PackagingOrderDisplay) => {
     setSelectedOrder(order);
     setDetailsDialogOpen(true);
+  };
+
+  const handleConfirmDelivery = (order: PackagingOrderDisplay) => {
+    setSelectedOrder(order);
+    setDeliveryDialogOpen(true);
   };
 
   if (isLoading) {
@@ -165,6 +172,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                 orderNumber={numero}
                 onViewDetails={handleViewDetails}
                 onUpdateStatus={handleUpdateStatus}
+                onConfirmDelivery={handleConfirmDelivery}
                 onDelete={handleDelete}
               />
             );
@@ -298,7 +306,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                               </DropdownMenuItem>
                             )}
                             {(order.status === "pendente" || order.status === "confirmado") && (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'entregue')} className="rounded-lg gap-2 text-brand">
+                              <DropdownMenuItem onClick={() => handleConfirmDelivery(order)} className="rounded-lg gap-2 text-brand">
                                 <Truck className="h-4 w-4" />Marcar Entregue
                               </DropdownMenuItem>
                             )}
@@ -334,6 +342,12 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
       <PackagingOrderDetailsDialog
         open={detailsDialogOpen}
         onOpenChange={setDetailsDialogOpen}
+        order={selectedOrder}
+      />
+
+      <ConfirmPackagingDeliveryDialog
+        open={deliveryDialogOpen}
+        onOpenChange={setDeliveryDialogOpen}
         order={selectedOrder}
       />
     </div>

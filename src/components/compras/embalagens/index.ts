@@ -8,3 +8,5 @@ export { PackagingOrderDetailsDialog } from './PackagingOrderDetailsDialog';
 export { default as PackagingOrdersTab } from './PackagingOrdersTab';
 export { default as PackagingAnalysisTab } from './PackagingAnalysisTab';
 export { PackagingEconomyTab } from './PackagingEconomyTab';
+export { ResumoPackagingQuoteDialog } from './ResumoPackagingQuoteDialog';
+export { ConfirmPackagingDeliveryDialog } from './ConfirmPackagingDeliveryDialog';

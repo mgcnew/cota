@@ -19,6 +19,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
+import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { 
   ShoppingCart, Package, Building2, DollarSign, Calendar, 
   Check, Loader2, Award, AlertCircle, ChevronDown, FileText,
@@ -47,6 +48,7 @@ interface OrderItem {
 
 export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Props) {
   const { createOrderFromQuote } = usePackagingOrders();
+  const { updateQuoteStatus } = usePackagingQuotes();
   const [conversionMode, setConversionMode] = useState<ConversionMode>("auto");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
@@ -54,6 +56,17 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const [customSelections, setCustomSelections] = useState<Record<string, string>>({}); // packagingId -> supplierId
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Inicializar quantidades com as quantidades necessárias da cotação
+  useMemo(() => {
+    if (quote && Object.keys(quantities).length === 0) {
+      const initialQuantities: Record<string, number> = {};
+      quote.itens.forEach(item => {
+        initialQuantities[item.packagingId] = item.quantidadeNecessaria || 1;
+      });
+      setQuantities(initialQuantities);
+    }
+  }, [quote, quantities]);
 
   // Fornecedores que responderam
   const respondedSuppliers = useMemo(() => {
@@ -177,11 +190,12 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const totalGeral = useMemo(() => {
     return Object.values(ordersBySupplier).reduce((sum, order) => {
       return sum + order.items.reduce((itemSum, item) => {
-        const qty = quantities[item.packagingId] || 1;
+        const defaultQtd = quote?.itens.find(i => i.packagingId === item.packagingId)?.quantidadeNecessaria || 1;
+        const qty = quantities[item.packagingId] || defaultQtd;
         return itemSum + (qty * (item.valorTotal || 0));
       }, 0);
     }, 0);
-  }, [ordersBySupplier, quantities]);
+  }, [ordersBySupplier, quantities, quote]);
 
   // Calcular economia estimada: (Maior preço - Preço escolhido) × Quantidade
   const economiaBySupplier = useMemo(() => {
@@ -191,7 +205,8 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
       let supplierEconomia = 0;
       
       orderData.items.forEach(item => {
-        const qty = quantities[item.packagingId] || 1;
+        const defaultQtd = quote?.itens.find(i => i.packagingId === item.packagingId)?.quantidadeNecessaria || 1;
+        const qty = quantities[item.packagingId] || defaultQtd;
         const worst = worstSupplierByItem[item.packagingId];
         
         if (worst && worst.item?.valorTotal) {
@@ -252,14 +267,17 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     try {
       // Criar um pedido para cada fornecedor
       for (const [supplierId, orderData] of Object.entries(ordersBySupplier)) {
-        const itens: OrderItem[] = orderData.items.map(item => ({
-          packagingId: item.packagingId,
-          packagingName: item.packagingName,
-          quantidade: quantities[item.packagingId] || 1,
-          unidadeCompra: item.unidadeVenda || 'un',
-          quantidadePorUnidade: item.quantidadeVenda || undefined,
-          valorUnitario: item.valorTotal || 0,
-        }));
+        const itens: OrderItem[] = orderData.items.map(item => {
+          const defaultQtd = quote?.itens.find(i => i.packagingId === item.packagingId)?.quantidadeNecessaria || 1;
+          return {
+            packagingId: item.packagingId,
+            packagingName: item.packagingName,
+            quantidade: quantities[item.packagingId] || defaultQtd,
+            unidadeCompra: item.unidadeVenda || 'un',
+            quantidadePorUnidade: item.quantidadeVenda || undefined,
+            valorUnitario: item.valorTotal || 0,
+          };
+        });
 
         await createOrderFromQuote.mutateAsync({
           quoteId: quote.id,
@@ -271,6 +289,8 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           itens,
         });
       }
+
+      await updateQuoteStatus.mutateAsync({ quoteId: quote.id, status: 'concluida' });
 
       onOpenChange(false);
       resetForm();
@@ -443,7 +463,8 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                     <div className="space-y-2">
                       {Object.entries(ordersBySupplier).map(([supplierId, orderData]) => {
                         const orderTotal = orderData.items.reduce((sum, item) => {
-                          const qty = quantities[item.packagingId] || 1;
+                          const defaultQtd = quote?.itens.find(i => i.packagingId === item.packagingId)?.quantidadeNecessaria || 1;
+                          const qty = quantities[item.packagingId] || defaultQtd;
                           return sum + (qty * (item.valorTotal || 0));
                         }, 0);
                         
@@ -469,7 +490,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                                       <Input
                                         type="number"
                                         min="1"
-                                        value={quantities[item.packagingId] || 1}
+                                        value={quantities[item.packagingId] || quote?.itens.find(i => i.packagingId === item.packagingId)?.quantidadeNecessaria || 1}
                                         onChange={(e) => handleQuantityChange(item.packagingId, e.target.value)}
                                         className="w-14 h-6 text-center text-xs"
                                       />

@@ -10,80 +10,79 @@ import {
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
-import type { Quote } from "@/hooks/useCotacoes";
+import type { PackagingQuoteDisplay } from "@/types/packaging";
 
-interface ResumoCotacaoDialogProps {
+interface ResumoPackagingQuoteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  quote: Quote;
+  quote: PackagingQuoteDisplay;
 }
 
-export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: ResumoCotacaoDialogProps) {
-  const products = (quote as any)?._raw?.quote_items || [];
-  const fornecedores = quote.fornecedoresParticipantes || [];
+export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: ResumoPackagingQuoteDialogProps) {
+  const products = quote.itens || [];
+  const fornecedores = quote.fornecedores || [];
   const fornecedoresRespondidos = fornecedores.filter(f => f.status === "respondido").length;
 
   const safeStr = (val: any): string => typeof val === 'string' ? val : String(val || '');
 
-  const getSupplierProductValue = (supplierId: string, productId: string): number => {
-    const raw = quote as any;
-    const items = raw._supplierItems || raw._raw?.quote_supplier_items || [];
-    return items.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId)?.valor_oferecido || 0;
+  const getQtdNecessaria = (packagingId: string): number => {
+    const p = products.find((p: any) => p.packagingId === packagingId);
+    return p?.quantidadeNecessaria || 1;
+  };
+
+  const getSupplierCustoPorUnidade = (supplierId: string, packagingId: string): number => {
+    const f = fornecedores.find(f => f.supplierId === supplierId);
+    if (!f) return 0;
+    const item = f.itens.find(i => i.packagingId === packagingId);
+    return item?.custoPorUnidade || 0;
+  };
+
+  const getSupplierValorTotalOfItem = (supplierId: string, packagingId: string): number => {
+    const f = fornecedores.find(f => f.supplierId === supplierId);
+    if (!f) return 0;
+    const item = f.itens.find(i => i.packagingId === packagingId);
+    const qtdNecessaria = getQtdNecessaria(packagingId);
+    return (item?.valorTotal || 0) * qtdNecessaria;
   };
 
   const calcularTotalFornecedor = (supplierId: string): number => {
-    return products.reduce((sum: number, p: any) => {
-      const precoUn = getSupplierProductValue(supplierId, p.product_id);
-      const qtd = Number(p.quantidade) || 1;
-      return sum + (precoUn * qtd);
-    }, 0);
+    let total = 0;
+    const f = fornecedores.find(f => f.supplierId === supplierId);
+    if (!f) return 0;
+    f.itens.forEach(i => {
+      const qtdNecessaria = getQtdNecessaria(i.packagingId);
+      total += (i.valorTotal || 0) * qtdNecessaria;
+    });
+    return total;
   };
 
-  const getBestPrice = (productId: string) => {
+  const getBestPrice = (packagingId: string) => {
     let best = { price: 0, supplier: '-' };
     fornecedores.forEach(f => {
-      const val = getSupplierProductValue(f.id, productId);
-      if (val > 0 && (best.price === 0 || val < best.price)) {
-        best = { price: val, supplier: safeStr(f.nome) };
+      const totalOfItem = getSupplierValorTotalOfItem(f.supplierId, packagingId);
+      if (totalOfItem > 0 && (best.price === 0 || totalOfItem < best.price)) {
+        best = { price: totalOfItem, supplier: safeStr(f.supplierName) };
       }
     });
     return best;
   };
 
-  // Mapear para cada produto qual fornecedor ganhou (menor preço)
-  const produtosComVencedor = useMemo(() => {
-    return products.map((p: any) => {
-      const best = getBestPrice(p.product_id);
-      const qtd = Number(p.quantidade) || 1;
-      // Encontrar o ID do fornecedor vencedor
-      let winnerId: string | null = null;
-      fornecedores.forEach(f => {
-        const val = getSupplierProductValue(f.id, p.product_id);
-        if (val > 0 && val === best.price) {
-          winnerId = f.id;
-        }
-      });
-      return {
-        productId: p.product_id,
-        productName: p.product_name,
-        quantidade: qtd,
-        unidade: p.unidade,
-        bestPrice: best.price,
-        bestSupplier: best.supplier,
-        winnerId,
-        totalItem: best.price * qtd,
-      };
-    });
-  }, [products, fornecedores]);
+  const totalMelhorPreco = products.reduce((t: number, p: any) => {
+    const best = getBestPrice(p.packagingId);
+    return t + best.price;
+  }, 0);
 
-  const totalMelhorPreco = produtosComVencedor.reduce((t, p) => t + p.totalItem, 0);
+  const melhorFornecedor = fornecedores.reduce((best: any, f) => {
+    const total = calcularTotalFornecedor(f.supplierId);
+    if (total > 0 && (!best || total < best.total)) return { ...f, total };
+    return best;
+  }, null);
 
   const totalEconomiaPotencial = useMemo(() => {
     let economia = 0;
     products.forEach((p: any) => {
-      const qtd = Number(p.quantidade) || 1;
       const prices = fornecedores
-        .map(f => getSupplierProductValue(f.id, p.product_id))
+        .map(f => getSupplierValorTotalOfItem(f.supplierId, p.packagingId))
         .filter(val => val > 0)
         .sort((a, b) => b - a);
 
@@ -91,33 +90,24 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         const highestPrice = prices[0];
         const bestPrice = prices[prices.length - 1];
         if (highestPrice > bestPrice) {
-          economia += (highestPrice - bestPrice) * qtd;
+          economia += (highestPrice - bestPrice);
         }
       }
     });
     return economia;
   }, [products, fornecedores]);
 
-  // Ranking: calcular total de cada fornecedor só com os produtos que ELE ganhou
+  // Ranking de fornecedores ordenado por valor total (menor primeiro)
   const fornecedoresRanking = useMemo(() => {
     return fornecedores
-      .map(f => {
-        // Soma apenas os itens onde ESTE fornecedor é o vencedor
-        const itensGanhos = produtosComVencedor.filter(p => p.winnerId === f.id);
-        const totalGanho = itensGanhos.reduce((sum, p) => sum + p.totalItem, 0);
-        return {
-          ...f,
-          total: totalGanho,
-          itensGanhos: itensGanhos.length,
-          isRespondido: f.status === 'respondido'
-        };
-      })
+      .map(f => ({
+        ...f,
+        total: calcularTotalFornecedor(f.supplierId),
+        itensRespondidos: f.itens?.length || 0
+      }))
       .filter(f => f.total > 0)
-      .sort((a, b) => b.itensGanhos - a.itensGanhos || a.total - b.total);
-  }, [fornecedores, produtosComVencedor]);
-
-  // Melhor fornecedor = quem ganhou mais itens (desempate: menor valor)
-  const melhorFornecedor = fornecedoresRanking.length > 0 ? fornecedoresRanking[0] : null;
+      .sort((a, b) => a.total - b.total);
+  }, [fornecedores, products]);
 
   return (
     <ResponsiveModal
@@ -165,29 +155,26 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
               </div>
               <div>
                 <p className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
-                  Cotação de Produtos
+                  Cotação de Embalagem
                 </p>
                 <StatusBadge status={quote.status} />
               </div>
             </div>
             <div className="text-right">
-              <div className="flex items-center gap-1 justify-end mb-0.5">
-                <Calendar className="h-3 w-3 text-zinc-400" />
-                <p className={cn("text-[10px] uppercase tracking-wider", ds.typography.weight.bold, ds.colors.text.muted)}>Período</p>
-              </div>
+              <p className={cn("text-[10px] uppercase tracking-wider", ds.typography.weight.bold, ds.colors.text.muted)}>Período</p>
               <p className={cn("text-xs", ds.typography.weight.bold, ds.colors.text.primary)}>
                 {safeStr(quote.dataInicio)} – {safeStr(quote.dataFim)}
               </p>
             </div>
           </div>
 
-          {/* ── KPI ROW: 3 colunas compactas ── */}
+          {/* ── KPI ROW ── */}
           <div className="grid grid-cols-3 gap-2">
-            {/* Produtos */}
+            {/* Embalagens */}
             <div className={cn(ds.components.card.root, "p-2.5 text-center")}>
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <Package className="h-3 w-3 text-zinc-500" />
-                <span className={cn("text-[9px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>Produtos</span>
+                <span className={cn("text-[9px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>Itens</span>
               </div>
               <p className={cn("text-lg leading-none", ds.typography.weight.bold, ds.colors.text.primary)}>
                 {products.length}
@@ -220,7 +207,10 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
           {/* ── MELHOR FORNECEDOR + ECONOMIA ── */}
           {melhorFornecedor && (
-            <div className={cn(ds.components.card.root, "overflow-hidden")}>
+            <div className={cn(
+              ds.components.card.root,
+              "overflow-hidden"
+            )}>
               {/* Melhor Fornecedor */}
               <div className="px-3 py-2.5 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800/50">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-brand/10 border border-brand/20">
@@ -231,7 +221,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     🏆 Melhor Fornecedor
                   </p>
                   <p className={cn("text-sm truncate", ds.typography.weight.bold, ds.colors.text.primary)}>
-                    {safeStr(melhorFornecedor.nome)}
+                    {safeStr(melhorFornecedor.supplierName)}
                   </p>
                 </div>
                 <p className={cn("text-sm text-brand flex-shrink-0", ds.typography.weight.bold)}>
@@ -239,7 +229,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 </p>
               </div>
 
-              {/* Economia Potencial */}
+              {/* Economia */}
               {totalEconomiaPotencial > 0 && (
                 <div className="px-3 py-2.5 flex items-center gap-3 bg-brand/5 dark:bg-brand/10">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-brand/10 border border-brand/20">
@@ -250,7 +240,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                       Economia Potencial
                     </p>
                     <p className={cn("text-xs leading-relaxed", ds.colors.text.secondary)}>
-                      Diferença entre a pior e melhor oferta × quantidade
+                      Diferença entre a pior e melhor oferta por item
                     </p>
                   </div>
                   <p className={cn("text-sm text-brand flex-shrink-0", ds.typography.weight.bold)}>
@@ -261,13 +251,13 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             </div>
           )}
 
-          {/* ── PRODUTOS: Tabela compacta ── */}
+          {/* ── EMBALAGENS: Lista compacta ── */}
           <div className={cn(ds.components.card.root, "overflow-hidden")}>
             <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Package className="h-3.5 w-3.5 text-brand" />
                 <span className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
-                  Produtos Cotados
+                  Itens Cotados
                 </span>
               </div>
               <Badge className="bg-brand/10 text-brand border-brand/20 h-5 px-1.5 !text-[10px] font-bold">
@@ -275,9 +265,9 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
               </Badge>
             </div>
 
-            {/* Cabeçalho */}
-            <div className="grid grid-cols-[1fr_60px_90px_80px] gap-1 px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800/30">
-              <span className={cn("text-[9px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>Produto</span>
+            {/* Cabeçalho da tabela compacta */}
+            <div className="grid grid-cols-[1fr_60px_90px_90px] gap-1 px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800/30">
+              <span className={cn("text-[9px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>Embalagem</span>
               <span className={cn("text-[9px] uppercase tracking-widest text-center", ds.typography.weight.bold, ds.colors.text.muted)}>Qtd</span>
               <span className={cn("text-[9px] uppercase tracking-widest text-right", ds.typography.weight.bold, ds.colors.text.muted)}>Melhor</span>
               <span className={cn("text-[9px] uppercase tracking-widest text-right", ds.typography.weight.bold, ds.colors.text.muted)}>Fornec.</span>
@@ -285,17 +275,17 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
             <div className="divide-y divide-zinc-100 dark:divide-zinc-800/30 max-h-[200px] overflow-y-auto custom-scrollbar">
               {products.map((p: any) => {
-                const best = getBestPrice(p.product_id);
+                const best = getBestPrice(p.packagingId);
                 return (
                   <div
-                    key={p.product_id}
-                    className="grid grid-cols-[1fr_60px_90px_80px] gap-1 px-3 py-1.5 items-center hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 transition-colors"
+                    key={p.packagingId}
+                    className="grid grid-cols-[1fr_60px_90px_90px] gap-1 px-3 py-1.5 items-center hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20 transition-colors"
                   >
                     <p className={cn("text-xs truncate", ds.typography.weight.bold, ds.colors.text.primary)}>
-                      {safeStr(p.product_name)}
+                      {safeStr(p.packagingName)}
                     </p>
                     <p className={cn("text-xs text-center tabular-nums", ds.colors.text.secondary)}>
-                      {safeStr(p.quantidade)} {safeStr(p.unidade)}
+                      {p.quantidadeNecessaria || '-'}
                     </p>
                     <p className={cn("text-xs text-right tabular-nums text-brand", ds.typography.weight.bold)}>
                       {formatCurrency(best.price)}
@@ -315,7 +305,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
               <div className="flex items-center gap-1.5">
                 <Building2 className="h-3.5 w-3.5 text-brand" />
                 <span className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
-                  Ranking · Itens Ganhos
+                  Ranking por Valor Total
                 </span>
               </div>
               <Badge className="bg-brand/10 text-brand border-brand/20 h-5 px-1.5 !text-[10px] font-bold">
@@ -328,7 +318,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 const isBest = idx === 0;
                 return (
                   <div
-                    key={f.id}
+                    key={f.supplierId}
                     className={cn(
                       "px-3 py-2 flex items-center gap-2.5 transition-colors",
                       isBest ? "bg-brand/5 dark:bg-brand/10" : "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
@@ -349,18 +339,20 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className={cn("text-xs truncate", ds.typography.weight.bold, ds.colors.text.primary)}>
-                          {safeStr(f.nome)}
+                          {safeStr(f.supplierName)}
                         </p>
-                        {isBest && <Award className="h-3 w-3 text-brand flex-shrink-0" />}
+                        {isBest && (
+                          <Award className="h-3 w-3 text-brand flex-shrink-0" />
+                        )}
                       </div>
                       <div className="flex items-center gap-1 mt-0.5">
-                        {f.isRespondido ? (
+                        {f.status === 'respondido' ? (
                           <CheckCircle2 className="h-2.5 w-2.5 text-brand" />
                         ) : (
                           <Clock className="h-2.5 w-2.5 text-amber-500" />
                         )}
                         <span className={cn("text-[9px] uppercase tracking-wider", ds.colors.text.muted)}>
-                          Ganhou {f.itensGanhos} {f.itensGanhos === 1 ? 'item' : 'itens'}
+                          {f.status === 'respondido' ? 'Respondido' : 'Pendente'} · {f.itensRespondidos} itens
                         </span>
                       </div>
                     </div>
@@ -381,16 +373,19 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 </div>
               )}
 
-              {/* Fornecedores sem resposta */}
+              {/* Fornecedores que não responderam */}
               {fornecedores
-                .filter(f => calcularTotalFornecedor(f.id) === 0)
+                .filter(f => calcularTotalFornecedor(f.supplierId) === 0)
                 .map(f => (
-                  <div key={f.id} className="px-3 py-2 flex items-center gap-2.5 opacity-40">
+                  <div
+                    key={f.supplierId}
+                    className="px-3 py-2 flex items-center gap-2.5 opacity-40"
+                  >
                     <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
                       <Clock className="h-3 w-3 text-zinc-400" />
                     </div>
                     <p className={cn("text-xs flex-1 truncate", ds.colors.text.muted)}>
-                      {safeStr(f.nome)}
+                      {safeStr(f.supplierName)}
                     </p>
                     <span className={cn("text-[10px]", ds.colors.text.muted)}>Sem resposta</span>
                   </div>
@@ -400,13 +395,13 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           </div>
 
           {/* ── OBSERVAÇÕES ── */}
-          {(quote as any).observacoes && (
+          {quote.observacoes && (
             <div className={cn(ds.components.card.root, "p-3")}>
               <p className={cn("text-[9px] uppercase tracking-widest mb-1", ds.typography.weight.bold, ds.colors.text.muted)}>
                 Observações
               </p>
               <p className={cn("text-xs leading-relaxed", ds.colors.text.secondary)}>
-                {safeStr((quote as any).observacoes)}
+                {safeStr(quote.observacoes)}
               </p>
             </div>
           )}

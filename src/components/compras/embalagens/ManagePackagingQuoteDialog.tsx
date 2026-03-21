@@ -134,13 +134,17 @@ export function ManagePackagingQuoteDialog({
     if (open && quote && quote.fornecedores.length > 0 && !selectedSupplier) {
       setSelectedSupplier(quote.fornecedores[0].supplierId);
     }
+    if (open && quote?.status === "concluida" && (activeTab === "editar" || activeTab === "valores")) {
+      setActiveTab("resumo");
+    }
     if (!open) {
       setSelectedSupplier("");
       setEditingItem(null);
       setSelectedPackagingToAdd("");
       setSelectedSupplierToAdd("");
+      setActiveTab("resumo");
     }
-  }, [open, quote, selectedSupplier]);
+  }, [open, quote, selectedSupplier, activeTab]);
 
   // Keyboard shortcuts: Ctrl+1-5 for tabs, Escape to close
   useEffect(() => {
@@ -880,12 +884,16 @@ export function ManagePackagingQuoteDialog({
               <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <Trophy className="h-3 w-3" />Resumo
               </TabsTrigger>
-              <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <Settings className="h-3 w-3" />Editar
-              </TabsTrigger>
-              <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <DollarSign className="h-3 w-3" />Valores
-              </TabsTrigger>
+              {quote?.status !== "concluida" && (
+                <>
+                  <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
+                    <Settings className="h-3 w-3" />Editar
+                  </TabsTrigger>
+                  <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
+                    <DollarSign className="h-3 w-3" />Valores
+                  </TabsTrigger>
+                </>
+              )}
               <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <TrendingDown className="h-3 w-3" />Comparativo
               </TabsTrigger>
@@ -901,6 +909,7 @@ export function ManagePackagingQuoteDialog({
               bestPricesData={bestPricesData}
               onCopyBestPrices={handleCopyBestPricesSummary}
               onEditItem={handleEditItem}
+              isCompleted={quote?.status === "concluida"}
             />
           </TabsContent>
 
