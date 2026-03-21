@@ -77,7 +77,7 @@ export function ComparativoTab({
                 <div className="divide-y divide-border/50">
                   {comp.fornecedores.map((f: any, index: number) => (
                     <div key={f.supplierId} className={cn("px-4 py-3 flex items-center gap-3 transition-colors cursor-pointer hover:bg-muted/30", f.isMelhorPreco && "bg-brand/5")} onClick={() => onEditItem(f.supplierId, comp.packagingId)}>
-                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] flex-shrink-0", f.isMelhorPreco ? "bg-brand text-black" : "bg-muted text-muted-foreground")}>
+                      <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center font-bold text-[10px] flex-shrink-0", f.isMelhorPreco ? "bg-brand/10 text-brand border-brand/20 shadow-none" : "bg-muted text-muted-foreground")}>
                         {f.isMelhorPreco ? <Award className="h-3.5 w-3.5" /> : index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -118,7 +118,7 @@ export function ComparativoTab({
                   </Button>
                   {group.vitorias > 0 && (
                     <div className="text-right ml-1">
-                      <Badge className="bg-brand text-black border-0 text-[9px] font-bold h-5">
+                      <Badge className="bg-brand/10 text-brand border border-brand/20 text-[9px] font-bold h-5 shadow-none pb-0">
                         <Trophy className="h-2.5 w-2.5 mr-1" />{group.vitorias} VIT.
                       </Badge>
                       <p className="text-[9px] font-bold text-brand mt-0.5">{formatCurrency(group.valorTotalGanhos)}</p>
@@ -134,7 +134,7 @@ export function ComparativoTab({
                     onClick={() => onEditItem(group.supplierId, item.packagingId)}
                   >
                     <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", 
-                      item.isMelhorPreco ? "bg-brand text-black" : "bg-muted text-muted-foreground")}>
+                      item.isMelhorPreco ? "bg-brand/10 text-brand border border-brand/20 shadow-none" : "bg-muted text-muted-foreground border border-border/50")}>
                       {item.isMelhorPreco ? <Award className="h-3.5 w-3.5" /> : <Package className="h-3.5 w-3.5" />}
                     </div>
                     <div className="flex-1 min-w-0">

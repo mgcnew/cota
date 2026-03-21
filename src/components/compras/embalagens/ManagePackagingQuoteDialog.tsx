@@ -849,7 +849,7 @@ export function ManagePackagingQuoteDialog({
               <div className="min-w-0 flex flex-col justify-center">
                 <DialogTitleComponent className="text-lg font-bold text-foreground tracking-tight leading-tight truncate">Gerenciar Cotação</DialogTitleComponent>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className={cn("text-[9px] font-bold uppercase tracking-wider h-5 px-2 rounded-md", quote.status === "ativa" ? "bg-brand text-black hover:bg-brand/90" : "bg-muted text-muted-foreground border-border")}>{quote.status}</Badge>
+                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className={cn("text-[9px] font-bold uppercase tracking-wider h-5 px-2 rounded-md", quote.status === "ativa" ? "bg-brand/10 text-brand border border-brand/20 shadow-none hover:bg-brand/20" : "bg-muted text-muted-foreground border-border")}>{quote.status}</Badge>
                   <span className="text-[10px] font-medium text-muted-foreground">{quote.dataInicio} - {quote.dataFim}</span>
                   <span className="text-[10px] font-medium text-muted-foreground hidden md:inline">• {stats.totalEmbalagens} embalagens • {stats.totalFornecedores} fornecedores • {stats.fornecedoresRespondidos} respostas</span>
                 </div>
@@ -1058,17 +1058,17 @@ export function ManagePackagingQuoteDialog({
                       <div className="p-2 space-y-1 pb-6">
                         {quote.fornecedores.map((fornecedor) => (
                           <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                            className={cn("w-full p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background",
+                            className={cn("w-full p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background border",
                               selectedSupplier === fornecedor.supplierId 
-                                ? "bg-brand text-black shadow-md ring-1 ring-brand/20 font-bold" 
-                                : "text-muted-foreground hover:bg-muted/80 hover:text-foreground border border-transparent")}
+                                ? "bg-card text-foreground shadow-sm border-border/50 font-bold" 
+                                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent")}
                             title={fornecedor.supplierName}>
                             <div className="flex items-center gap-2.5">
-                              <Building2 className={cn("h-4 w-4 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-black/80" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
+                              <Building2 className={cn("h-4 w-4 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-brand" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
                               <span className="truncate text-xs tracking-tight">{fornecedor.supplierName}</span>
                               {fornecedor.status === "respondido" 
-                                ? <CheckCircle2 className={cn("h-4 w-4 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-black/80" : "text-brand")} />
-                                : <Clock className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-black/60" : "text-muted-foreground/40")} />
+                                ? <CheckCircle2 className={cn("h-4 w-4 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-brand" : "text-brand")} />
+                                : <Clock className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-muted-foreground" : "text-muted-foreground/40")} />
                               }
                             </div>
                           </button>
@@ -1099,7 +1099,7 @@ export function ManagePackagingQuoteDialog({
                           isEditing && "ring-2 ring-brand border-brand/50 shadow-lg z-10")}>
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2.5">
-                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shadow-sm border", isBestPrice ? "bg-brand text-black border-brand/20" : "bg-muted text-muted-foreground border-border/50")}>
+                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shadow-none border", isBestPrice ? "bg-brand/10 text-brand border-brand/20" : "bg-muted text-muted-foreground border-border/50")}>
                                 <Package className="h-4 w-4" />
                               </div>
                               <div>
