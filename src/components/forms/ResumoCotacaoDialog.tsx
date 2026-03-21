@@ -19,7 +19,10 @@ interface ResumoCotacaoDialogProps {
 }
 
 export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: ResumoCotacaoDialogProps) {
-  const products = (quote as any)?._raw?.quote_items || [];
+  const products = useMemo(() => {
+    const items = (quote as any)?._raw?.quote_items || [];
+    return [...items].sort((a, b) => (a.product_name || '').localeCompare(b.product_name || ''));
+  }, [quote]);
   const fornecedores = quote.fornecedoresParticipantes || [];
   const fornecedoresRespondidos = fornecedores.filter(f => f.status === "respondido").length;
 

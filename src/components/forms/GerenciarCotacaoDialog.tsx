@@ -111,7 +111,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       product_name: item.product_name,
       quantidade: item.quantidade,
       unidade: item.unidade
-    }));
+    })).sort((a: any, b: any) => (a.product_name || '').localeCompare(b.product_name || ''));
   }, [quote?._raw]);
 
   const fornecedores = useMemo(() => {

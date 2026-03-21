@@ -142,7 +142,7 @@ function CotacoesTab() {
   }, []);
 
   const filteredCotacoes = useMemo(() => {
-    return cotacoes.filter(c => {
+    const filtered = cotacoes.filter(c => {
       const matchesSearch = c.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || c.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
 
       // Filtros especiais
@@ -161,6 +161,23 @@ function CotacoesTab() {
 
       const matchesStatus = statusFilter === "all" || c.statusReal === statusFilter;
       return matchesSearch && matchesStatus;
+    });
+
+    return filtered.sort((a, b) => {
+      const aIsClosed = a.status === 'finalizada' || a.statusReal === 'concluida' || a.statusReal === 'finalizada';
+      const bIsClosed = b.status === 'finalizada' || b.statusReal === 'concluida' || b.statusReal === 'finalizada';
+      
+      // Se um está finalizado e o outro não, o não finalizado (aberto) vem primeiro
+      if (aIsClosed !== bIsClosed) {
+        return aIsClosed ? 1 : -1;
+      }
+      
+      // Se ambos têm o mesmo status, ordena pela data mais recente (priorizando a última cotação)
+      // Usando created_at real se disponível, caso contrário recai na data de início
+      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(a.dataInicio.split('/').reverse().join('-')).getTime();
+      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(b.dataInicio.split('/').reverse().join('-')).getTime();
+      
+      return bDate - aDate;
     });
   }, [cotacoes, debouncedSearchTerm, statusFilter]);
 

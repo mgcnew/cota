@@ -108,7 +108,7 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                   <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
                     <div className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20">
                       <FileText className="h-3.5 w-3.5 text-blue-500" />
-                      <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{supplier.activeQuotes}</span>
+                      <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{supplier.totalQuotes}</span>
                     </div>
                   </div>
 

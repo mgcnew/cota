@@ -110,7 +110,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
           <div className="flex items-center gap-2">
             <FileText className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
             <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{supplier.activeQuotes}/{supplier.totalQuotes}</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{supplier.totalQuotes}</span>
           </div>
         </div>
       </div>

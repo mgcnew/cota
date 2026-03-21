@@ -17,6 +17,7 @@ export interface Supplier {
   phone?: string;
   email?: string;
   address?: string;
+  updated_at?: string;
 }
 
 export function useSuppliers() {
@@ -44,42 +45,50 @@ export function useSuppliers() {
         { data: quoteResponses, error: qrError }
       ] = await Promise.all([
         supabase.from('quote_suppliers').select('supplier_id, valor_oferecido, quote_id, quotes(status, data_inicio)').abortSignal(signal),
-        supabase.from('orders').select('supplier_id, order_date, total_value, status').order('order_date', { ascending: false }).abortSignal(signal),
-        supabase.from('quote_supplier_items').select('supplier_id, quote_id, product_id, valor_oferecido').abortSignal(signal),
-        supabase.from('quote_suppliers').select('supplier_id, quote_id, data_resposta, quotes(data_inicio)').not('data_resposta', 'is', null).abortSignal(signal)
+        supabase.from('orders').select('id, supplier_id, total_value, status, created_at, order_date').abortSignal(signal),
+        supabase.from('quote_supplier_items').select('supplier_id, valor_oferecido, quote_id').not('valor_oferecido', 'is', null).gt('valor_oferecido', 0).abortSignal(signal),
+        supabase.from('quote_responses').select('id, supplier_id, quote_id, data_resposta, status, quotes(data_inicio)').abortSignal(signal)
       ]);
 
-      if (qsError) throw qsError;
-      if (ordersError) throw ordersError;
-      if (qsiError) throw qsiError;
-      if (qrError) throw qrError;
+      if (qsError) console.error("Error fetching quote suppliers:", qsError);
+      if (ordersError) console.error("Error fetching orders:", ordersError);
+      if (qsiError) console.error("Error fetching quote supplier items:", qsiError);
+      if (qrError) console.error("Error fetching quote responses:", qrError);
 
       const formattedSuppliers: Supplier[] = suppliersData.map(s => {
-        // Get supplier-specific data
-        const supplierQuotes = quoteSuppliers?.filter(qs => qs.supplier_id === s.id) || [];
-        const supplierItems = quoteSupplierItems?.filter(qi => qi.supplier_id === s.id) || [];
-        const supplierOrders = orders?.filter(o => o.supplier_id === s.id) || [];
-        const supplierResponseData = quoteResponses?.filter(qr => qr.supplier_id === s.id) || [];
+        try {
+          // Get supplier-specific data
+          const supplierQuotes = quoteSuppliers?.filter(qs => qs.supplier_id === s.id) || [];
+          const supplierItems = quoteSupplierItems?.filter(qi => qi.supplier_id === s.id) || [];
+          const supplierOrders = orders?.filter(o => o.supplier_id === s.id) || [];
+          const supplierResponseData = quoteResponses?.filter(qr => qr.supplier_id === s.id) || [];
 
-        // Active quotes count
-        const activeQuotes = supplierQuotes.filter(qs => 
-          qs.quotes?.status === 'ativa' || qs.quotes?.status === 'pendente'
-        ).length;
-        
-        // Total: mostra total de pedidos quando houver, senão mostra total de cotações
-        const totalOrders = supplierOrders.length;
-        const totalQuotesCount = supplierQuotes.length;
-        // Se houver pedidos, mostra apenas pedidos (mais relevante), senão mostra cotações
-        const totalQuotes = totalOrders > 0 ? totalOrders : totalQuotesCount;
-        
-        // Calculate average price
-        const respondedQuotes = supplierQuotes.filter(qs => 
-          qs.valor_oferecido && qs.valor_oferecido > 0
-        );
-        const avgPrice = respondedQuotes.length > 0
-          ? respondedQuotes.reduce((sum, qs) => sum + Number(qs.valor_oferecido), 0) / respondedQuotes.length
-          : 0;
-
+          // Active quotes count
+          const activeQuotes = supplierQuotes.filter(qs => 
+            qs.quotes?.status === 'ativa' || qs.quotes?.status === 'pendente'
+          ).length;
+          
+          // Total de pedidos
+          const totalOrders = supplierOrders.length;
+          // Total real de cotações que este fornecedor participou
+          const totalQuotes = supplierQuotes.length;
+          
+          // Calculate average price (Ticket Médio)
+          // 1. Tenta usar o valor real de compras (pedidos)
+          const validOrders = supplierOrders.filter(o => o.total_value && o.total_value > 0);
+          let avgPrice = 0;
+          
+          if (validOrders.length > 0) {
+            avgPrice = validOrders.reduce((sum, o) => sum + Number(o.total_value), 0) / validOrders.length;
+          } else {
+            // 2. Fallback: Usa a média de valores ofertados em cotações
+            const respondedQuotes = supplierQuotes.filter(qs => 
+              qs.valor_oferecido && qs.valor_oferecido > 0
+            );
+            if (respondedQuotes.length > 0) {
+              avgPrice = respondedQuotes.reduce((sum, qs) => sum + Number(qs.valor_oferecido), 0) / respondedQuotes.length;
+            }
+          }
         // Last order date
         const lastOrderDate = supplierOrders.length > 0 
           ? new Date(supplierOrders[0].order_date).toLocaleDateString('pt-BR')
@@ -208,12 +217,29 @@ export function useSuppliers() {
           phone: maskSensitiveData ? undefined : (s.phone || undefined),
           email: maskSensitiveData ? undefined : (s.email || undefined),
           address: maskSensitiveData ? undefined : (s.address || undefined),
+          updated_at: s.updated_at || s.created_at,
           _lastCompletedOrderTimestamp: lastCompletedOrderTimestamp, // Internal field for sorting
         };
+        } catch (err) {
+          console.error(`Error formatting supplier ${s.name}:`, err);
+          return {
+            id: s.id,
+            name: s.name,
+            contact: s.contact || "",
+            limit: "R$ 0,00",
+            activeQuotes: 0,
+            totalQuotes: 0,
+            avgPrice: "R$ 0,00",
+            lastOrder: "-",
+            rating: 0,
+            status: "active" as const,
+            updated_at: s.updated_at || s.created_at,
+          };
+        }
       });
 
       // Sort suppliers: those with recent completed orders first
-      formattedSuppliers.sort((a, b) => {
+      /* formattedSuppliers.sort((a, b) => {
         const aTimestamp = (a as any)._lastCompletedOrderTimestamp;
         const bTimestamp = (b as any)._lastCompletedOrderTimestamp;
         
@@ -228,7 +254,7 @@ export function useSuppliers() {
         
         // Neither has completed orders: maintain original order
         return 0;
-      });
+      }); */
 
       // Remove internal sorting field before returning
       const cleanedSuppliers = formattedSuppliers.map(({ _lastCompletedOrderTimestamp, ...rest }: any) => rest as Supplier);

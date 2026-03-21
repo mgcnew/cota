@@ -142,7 +142,11 @@ function Produtos() {
       if (aHidden !== bHidden) {
         return aHidden ? 1 : -1;
       }
-      return 0; // Keep original sort order otherwise
+      
+      // Then sort by most recently modified
+      const aDate = new Date(a.updated_at || 0).getTime();
+      const bDate = new Date(b.updated_at || 0).getTime();
+      return bDate - aDate;
     });
   }, [safeProducts, debouncedSearchQuery, selectedCategory, activeTab, hiddenProductIds]);
 

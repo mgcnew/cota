@@ -191,6 +191,10 @@ function Fornecedores() {
       const matchesSearch = supplier.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()) || supplier.contact?.toLowerCase().includes(debouncedSearchQuery.toLowerCase());
       const matchesStatus = statusFilter === "all" || supplier.status === statusFilter;
       return matchesSearch && matchesStatus;
+    }).sort((a, b) => {
+      const aDate = new Date(a.updated_at || 0).getTime();
+      const bDate = new Date(b.updated_at || 0).getTime();
+      return bDate - aDate;
     });
   }, [suppliers, debouncedSearchQuery, statusFilter]);
 
@@ -416,7 +420,7 @@ function Fornecedores() {
                           <FileText className="h-3.5 w-3.5" />
                           <span className="text-xs">Cotações</span>
                         </div>
-                        <span className="text-sm font-medium">{supplier.activeQuotes}</span>
+                        <span className="text-sm font-medium">{supplier.totalQuotes}</span>
                       </div>
 
                       <div className="pt-2.5">

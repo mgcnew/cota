@@ -79,11 +79,27 @@ function PedidosTab() {
   }, [pedidosDataArray]);
 
   const filteredPedidos = useMemo(() => {
-    return pedidos.filter(pedido => {
+    const filtered = pedidos.filter(pedido => {
       const matchesSearch = pedido.fornecedor.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
         pedido.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
       const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
       return matchesSearch && matchesStatus;
+    });
+
+    return filtered.sort((a, b) => {
+      const aIsClosed = a.status === 'entregue' || a.status === 'cancelado';
+      const bIsClosed = b.status === 'entregue' || b.status === 'cancelado';
+      
+      // Aberto vem antes de fechado
+      if (aIsClosed !== bIsClosed) {
+        return aIsClosed ? 1 : -1;
+      }
+      
+      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
+      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(a.dataPedido.split('/').reverse().join('-')).getTime();
+      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(b.dataPedido.split('/').reverse().join('-')).getTime();
+      
+      return bDate - aDate;
     });
   }, [pedidos, debouncedSearchTerm, statusFilter]);
 

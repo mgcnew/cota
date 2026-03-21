@@ -19,6 +19,7 @@ export interface Product {
   quotesCount: number;
   lastUpdate: string;
   trend: "up" | "down" | "stable";
+  updated_at?: string;
 }
 
 export function useProducts() {
@@ -196,12 +197,13 @@ export function useProducts() {
           quotesCount,
           lastUpdate,
           trend,
+          updated_at: p.updated_at || p.created_at,
           _lastOrderTimestamp: lastOrderTimestamp, // Internal field for sorting
         };
       });
 
       // Sort products: those with recent orders first, then by created_at
-      formattedProducts.sort((a, b) => {
+      /* formattedProducts.sort((a, b) => { // Removed based on new UI preference
         const aTimestamp = (a as any)._lastOrderTimestamp;
         const bTimestamp = (b as any)._lastOrderTimestamp;
         
@@ -216,7 +218,7 @@ export function useProducts() {
         
         // Neither has orders: maintain original order (by created_at)
         return 0;
-      });
+      }); */
 
       // Remove internal sorting field before returning
       const cleanedProducts = formattedProducts.map(({ _lastOrderTimestamp, ...rest }: any) => rest as Product);
