@@ -1,73 +1,108 @@
 import { memo } from "react";
 import { Zap, BarChart3, Package, Building2, TrendingUp, FileText } from "lucide-react";
-import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
+import { designSystem as ds } from "@/styles/design-system";
 
 const features = [
   {
-    icon: <Package className="h-6 w-6 text-brand" />,
-    title: "Gestão de Produtos",
-    description: "Cadastre e organize todos os seus produtos com categorias, códigos de barras e imagens em uma interface de alta performance."
+    icon: Package,
+    title: "Produtos",
+    description: "Cadastro completo com categorias, códigos de barras e imagens. Tudo organizado para consulta rápida."
   },
   {
-    icon: <Building2 className="h-6 w-6 text-brand" />,
-    title: "Gestão de Fornecedores",
-    description: "Mantenha um histórico completo de fornecedores, avaliações e performance de entrega para decisões baseadas em dados."
+    icon: Building2,
+    title: "Fornecedores",
+    description: "Histórico de performance, avaliações e contato centralizado para decisões baseadas em dados."
   },
   {
-    icon: <FileText className="h-6 w-6 text-brand" />,
-    title: "Cotações Inteligentes",
-    description: "Compare preços automaticamente entre múltiplos fornecedores e encontre a melhor opção de custo-benefício em segundos."
+    icon: FileText,
+    title: "Cotações",
+    description: "Compare preços entre múltiplos fornecedores automaticamente. Encontre o melhor custo-benefício."
   },
   {
-    icon: <TrendingUp className="h-6 w-6 text-brand" />,
-    title: "Analytics Avançado",
-    description: "Visualize tendências de mercado e comportamento de preços com dashboards intuitivos e relatórios de inteligência."
+    icon: TrendingUp,
+    title: "Análise de Preços",
+    description: "Tendências de mercado e comportamento de preços com dashboards intuitivos e alertas."
   },
   {
-    icon: <BarChart3 className="h-6 w-6 text-brand" />,
-    title: "Relatórios de Economia",
-    description: "Gere relatórios detalhados de KPIs, eficiência operacional e economia real gerada pelo sistema de cotação."
+    icon: BarChart3,
+    title: "Relatórios",
+    description: "KPIs, economia acumulada e eficiência operacional em relatórios prontos para decisão."
   },
   {
-    icon: <Zap className="h-6 w-6 text-brand" />,
-    title: "Automação com IA",
-    description: "Utilize inteligência artificial para otimizar processos repetitivos e garantir a precisão nas suas cotações diárias."
+    icon: Zap,
+    title: "Automação",
+    description: "Processos otimizados com inteligência artificial para agilizar o dia a dia de compras."
   }
 ];
 
 const FeaturesSection = memo(function FeaturesSection() {
   return (
-    <section className="container mx-auto px-4 py-20 sm:py-32">
-      <div className="text-center mb-16 sm:mb-24">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
-          Plataforma <span className="text-brand">Full-Stack</span> para Compras
-        </h2>
-        <p className="text-zinc-500 dark:text-zinc-400 text-lg sm:text-xl max-w-2xl mx-auto px-4 leading-relaxed font-medium">
-          Tudo o que sua empresa precisa para uma gestão de cotações profissional,
-          unificado em um sistema robusto e elegante.
-        </p>
-      </div>
+    <section className="border-t border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 dark:bg-zinc-950/50">
+      <div className="max-w-6xl mx-auto px-6 py-16 sm:py-20">
+        {/* Section header */}
+        <div className="text-center mb-12 sm:mb-14">
+          <p className={cn(
+            "text-[11px] uppercase tracking-widest mb-3 text-brand",
+            ds.typography.weight.bold
+          )}>
+            Plataforma Completa
+          </p>
+          <h2 className={cn(
+            "text-2xl sm:text-3xl md:text-4xl tracking-tight mb-3",
+            ds.typography.weight.extrabold,
+            ds.colors.text.primary
+          )}>
+            Tudo que sua equipe precisa
+          </h2>
+          <p className={cn(
+            "text-sm sm:text-base max-w-lg mx-auto leading-relaxed",
+            ds.typography.weight.medium,
+            ds.colors.text.secondary
+          )}>
+            Módulos integrados para gestão eficiente do ciclo completo de compras.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className={`${designSystem.components.card.root} group p-8 space-y-4 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden`}
-          >
-            {/* Subtle Gradient Hover Effect */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        {/* Features grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          {features.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <div
+                key={index}
+                className={cn(
+                  ds.components.card.root,
+                  "group p-5 sm:p-6 space-y-3 hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden"
+                )}
+              >
+                {/* Hover glow */}
+                <div className="absolute top-0 right-0 w-28 h-28 bg-brand/5 blur-[50px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-            <div className="w-12 h-12 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-center group-hover:bg-brand/10 transition-colors">
-              {feature.icon}
-            </div>
-            <h3 className="text-xl font-bold tracking-tight">
-              {feature.title}
-            </h3>
-            <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium text-[15px]">
-              {feature.description}
-            </p>
-          </div>
-        ))}
+                {/* Icon */}
+                <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800/60 flex items-center justify-center group-hover:bg-brand/10 transition-colors duration-300">
+                  <Icon className="h-5 w-5 text-zinc-500 group-hover:text-brand transition-colors duration-300" />
+                </div>
+
+                {/* Content */}
+                <h3 className={cn(
+                  "text-sm sm:text-base tracking-tight",
+                  ds.typography.weight.bold,
+                  ds.colors.text.primary
+                )}>
+                  {feature.title}
+                </h3>
+                <p className={cn(
+                  "text-xs sm:text-sm leading-relaxed",
+                  ds.typography.weight.medium,
+                  ds.colors.text.secondary
+                )}>
+                  {feature.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

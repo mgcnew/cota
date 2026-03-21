@@ -23,7 +23,7 @@ import {
   LogOut,
   Settings,
   LucideIcon,
-  Sparkles,
+
   Sun,
   Moon,
   Monitor
@@ -312,12 +312,20 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                 variant="ghost"
                 onClick={onOpenAI}
                 className={cn(
-                  "relative group w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden outline-none ring-0",
+                  "relative group w-10 h-10 p-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden outline-none ring-0",
                   "bg-brand/10 text-brand hover:bg-brand/20 border-transparent",
                   "active:scale-95 mx-auto"
                 )}
               >
-                <Sparkles strokeWidth={1.5} className="w-5 h-5 relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform duration-300"
+                >
+                  <path d="M10.5 0C10.5 5.8 15.2 10.5 21 10.5C15.2 10.5 10.5 15.2 10.5 21C10.5 15.2 5.8 10.5 0 10.5C5.8 10.5 10.5 5.8 10.5 0Z" />
+                  <path d="M20.5 3C20.5 4.933 22.067 6.5 24 6.5C22.067 6.5 20.5 8.067 20.5 10C20.5 8.067 18.933 6.5 17 6.5C18.933 6.5 20.5 4.933 20.5 3Z" />
+                </svg>
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={16} className="font-semibold text-xs border border-brand/20 shadow-lg shadow-brand/10">Assistente IA</TooltipContent>
