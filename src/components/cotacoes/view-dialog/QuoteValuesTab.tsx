@@ -20,6 +20,7 @@ interface QuoteValuesTabProps {
   isMobile: boolean;
   safeStr: (val: any) => string;
   getBestPriceInfoForProduct: (productId: string) => { bestPrice: number; bestSupplierId: string | null };
+  isReadOnly?: boolean;
 }
 
 export function QuoteValuesTab({
@@ -31,7 +32,8 @@ export function QuoteValuesTab({
   onRefresh,
   isMobile,
   safeStr,
-  getBestPriceInfoForProduct
+  getBestPriceInfoForProduct,
+  isReadOnly = false
 }: QuoteValuesTabProps) {
   const { toast } = useToast();
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
@@ -88,13 +90,14 @@ export function QuoteValuesTab({
   }, [selectedSupplier, editedValues, getSupplierProductValue]);
 
   const handleStartEdit = useCallback((productId: string, currentValue: number) => {
+    if (isReadOnly) return;
     setEditingProductId(productId);
     // Inicializa com o valor formatado (sem R$)
     const formatted = currentValue > 0
       ? currentValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       : "";
     setEditedValues(prev => ({ ...prev, [productId]: formatted }));
-  }, []);
+  }, [isReadOnly]);
 
   const handleSaveEdit = useCallback(async (productId: string, nextProductId?: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
@@ -387,9 +390,11 @@ export function QuoteValuesTab({
                           </div>
                         </div>
                         <div className="flex-shrink-0">
-                          <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-brand hover:bg-brand/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
+                          {!isReadOnly && (
+                            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-brand hover:bg-brand/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )}

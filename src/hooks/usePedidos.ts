@@ -103,6 +103,18 @@ export function usePedidos() {
 
   const deleteMutation = useMutation({
     mutationFn: async (pedidoId: string) => {
+      // Check order status first
+      const { data: order, error: statusError } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('id', pedidoId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (order?.status === 'entregue') {
+        throw new Error("Este pedido já foi entregue e não pode ser excluído.");
+      }
+
       const { error } = await supabase
         .from('orders')
         .delete()
@@ -129,6 +141,18 @@ export function usePedidos() {
   // Mutation para atualizar status do pedido
   const updateStatusMutation = useMutation({
     mutationFn: async ({ pedidoId, status }: { pedidoId: string; status: string }) => {
+      // Check order status first
+      const { data: order, error: statusError } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('id', pedidoId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (order?.status === 'entregue') {
+        throw new Error("Este pedido já foi entregue e não pode ser alterado.");
+      }
+
       const { error } = await supabase
         .from('orders')
         .update({ status })
@@ -161,6 +185,18 @@ export function usePedidos() {
       pedidoId: string; 
       itens: Array<{ itemId: string; quantidadeEntregue: number; unidadeEntregue?: string; valorFaturado: number }>;
     }) => {
+      // Check order status first
+      const { data: order, error: statusError } = await supabase
+        .from('orders')
+        .select('status')
+        .eq('id', pedidoId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (order?.status === 'entregue') {
+        throw new Error("Este pedido já foi entregue e não pode ser alterado.");
+      }
+
       // Atualizar cada item com a quantidade entregue e o Preço Faturado
       for (const item of itens) {
         const { error } = await supabase

@@ -172,6 +172,7 @@ export const MobileOrderCard = memo(function MobileOrderCard({
               variant="outline" 
               className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
               onClick={() => onDelete(pedido)}
+              disabled={pedido.status === 'entregue'}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Excluir

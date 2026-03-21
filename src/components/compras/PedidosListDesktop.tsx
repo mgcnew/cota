@@ -94,6 +94,7 @@ export const PedidosListDesktop = memo(({
                       options={ORDER_STATUS_OPTIONS}
                       onChange={(newStatus) => onUpdateStatus(pedido.id, newStatus)}
                       isLoading={isUpdating}
+                      disabled={pedido.status === 'entregue' || pedido.status === 'cancelado'}
                     />
                   </div>
                   <div className="w-[15%] pl-2">

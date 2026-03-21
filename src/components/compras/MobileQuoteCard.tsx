@@ -108,6 +108,7 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
           options={QUOTE_STATUS_OPTIONS}
           onChange={(newStatus) => onUpdateStatus(cotacao.id, newStatus)}
           isLoading={isUpdating}
+          disabled={cotacao.status === 'finalizada'}
         />
         <Badge variant="outline" className={cn(
           "text-xs",

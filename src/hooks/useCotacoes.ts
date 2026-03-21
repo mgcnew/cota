@@ -335,6 +335,18 @@ export function useCotacoes() {
         quoteId, supplierId, productId, newValue, unidadePreco, fatorConversao, quantidadePorEmbalagem, brandId
       });
 
+      // Check quote status first
+      const { data: quote, error: quoteStatusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (quoteStatusError) throw quoteStatusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
+
       // First check if record exists
       const { data: existing, error: selectError } = await supabase
         .from("quote_supplier_items")
@@ -483,6 +495,18 @@ export function useCotacoes() {
     mutationFn: async ({ quoteId, data }: { quoteId: string; data: any }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      // Check quote status first
+      const { data: quote, error: quoteStatusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (quoteStatusError) throw quoteStatusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser editada.");
+      }
 
       // Update quote
       const { error: quoteError } = await supabase
@@ -762,6 +786,18 @@ export function useCotacoes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Check quote status first
+      const { data: quote, error: quoteStatusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (quoteStatusError) throw quoteStatusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e seu status não pode ser alterado.");
+      }
+
       const { error } = await supabase
         .from("quotes")
         .update({ status })
@@ -788,6 +824,18 @@ export function useCotacoes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
+
       const { error } = await supabase
         .from("quote_items")
         .insert([{ quote_id: quoteId, product_id: productId, product_name: productName, quantidade: String(quantidade), unidade }]);
@@ -809,6 +857,18 @@ export function useCotacoes() {
     mutationFn: async ({ quoteId, productId }: { quoteId: string; productId: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
 
       // Remove from quote_items
       const { error } = await supabase
@@ -842,6 +902,18 @@ export function useCotacoes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
 
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
+
       const { error } = await supabase
         .from("quote_suppliers")
         .insert({ quote_id: quoteId, supplier_id: supplierId, supplier_name: supplierName, status: 'pendente' });
@@ -863,6 +935,18 @@ export function useCotacoes() {
     mutationFn: async ({ quoteId, supplierId }: { quoteId: string; supplierId: string }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Usuário não autenticado");
+
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
 
       // Remove from quote_suppliers
       const { error } = await supabase

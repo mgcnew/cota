@@ -99,6 +99,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
+  
+  const isFinalizada = quote?.status === "finalizada";
 
   // Memos globais para evitar recálculos
   const products = useMemo(() => {
@@ -131,6 +133,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     if (!quote) return [];
     return quote._supplierItems || [];
   }, [quote?._supplierItems, quote]); // Add quote to dependency to force re-calc
+
+  // Redirect if tab becomes invalid after finishing
+  useEffect(() => {
+    if (isFinalizada && (activeTab === 'converter' || activeTab === 'editar')) {
+      setActiveTab('resumo');
+    }
+  }, [isFinalizada, activeTab]);
 
   // Helpers
   const safeStr = useCallback((val: any) => val || "", []);
@@ -551,9 +560,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     {[
                       { id: 'resumo', label: 'Resumo' },
                       { id: 'valores', label: 'Valores' },
-                      { id: 'converter', label: 'Conversão' },
-                      { id: 'editar', label: 'Ajustes' }
-                    ].map((tab) => (
+                      { id: 'converter', label: 'Conversão', hide: isFinalizada },
+                      { id: 'editar', label: 'Ajustes', hide: isFinalizada }
+                    ].filter(tab => !tab.hide).map((tab) => (
                       <SelectItem key={tab.id} value={tab.id} className="text-xs font-semibold">
                         {tab.label}
                       </SelectItem>
@@ -565,9 +574,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   {[
                     { id: 'resumo', label: 'Resumo' },
                     { id: 'valores', label: 'Valores' },
-                    { id: 'converter', label: 'Decisão' },
-                    { id: 'editar', label: 'Configurações' }
-                  ].map((tab) => (
+                    { id: 'converter', label: 'Decisão', hide: isFinalizada },
+                    { id: 'editar', label: 'Configurações', hide: isFinalizada }
+                  ].filter(tab => !tab.hide).map((tab) => (
                     <TabsTrigger
                       key={tab.id}
                       value={tab.id}
@@ -633,6 +642,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   isMobile={isMobile}
                   safeStr={safeStr}
                   getBestPriceInfoForProduct={getBestPriceInfoForProduct}
+                  isReadOnly={isFinalizada}
                 />
               )}
             </TabsContent>

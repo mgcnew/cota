@@ -55,6 +55,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const [itens, setItens] = useState<PedidoItem[]>([]);
   const [loading, setLoading] = useState(false);
   
+  const isReadOnly = pedido?.status === 'entregue';
+  
   // Add Product Form States
   const [newProduct, setNewProduct] = useState<any>(null);
   const [newProductSearch, setNewProductSearch] = useState("");
@@ -390,7 +392,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       <Button 
         onClick={handleSubmit} 
         size="sm" 
-        disabled={loading} 
+        disabled={loading || isReadOnly} 
         className={cn(ds.components.button.primary, "gap-2")}
       >
         {loading ? (
@@ -401,7 +403,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         ) : (
           <>
             <Save className="h-4 w-4" />
-            Salvar Alterações
+            {isReadOnly ? 'Pedido Entregue' : 'Salvar Alterações'}
           </>
         )}
       </Button>
@@ -470,7 +472,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                     <div className="grid grid-cols-2 gap-3">
                       <div className={ds.components.input.group}>
                         <Label className={ds.components.input.label}>Fornecedor</Label>
-                        <Select value={fornecedor} onValueChange={setFornecedor}>
+                        <Select value={fornecedor} onValueChange={setFornecedor} disabled={isReadOnly}>
                           <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
@@ -501,118 +503,120 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           value={dataEntrega} 
                           onChange={e => setDataEntrega(e.target.value)} 
                           onFocus={handleInputFocus}
+                          disabled={isReadOnly}
                           className={cn(ds.components.input.root, "h-10")} 
                         />
                       </div>
                     </div>
                     
-                    {/* Formulário de Adição Rápida Mobile */}
-                    <div className={cn(
-                      "pt-4 border-t space-y-3",
-                      ds.colors.border.default
-                    )}>
-                      <Label className={cn(
-                        ds.components.input.label,
-                        "text-brand"
-                      )}>Adicionar Produto</Label>
-                      <div className="relative group">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-                        <Input
-                          ref={newProductInputRef}
-                          placeholder="Buscar produto..."
-                          value={newProductSearch}
-                          onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
-                          onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                          onFocus={handleInputFocus}
-                          className={cn(ds.components.input.root, "pl-10")}
-                        />
-                        {filteredNewProducts.length > 0 && !newProduct && (
-                          <div className={cn(
-                            "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-40 overflow-auto custom-scrollbar",
-                            ds.colors.surface.card,
-                            ds.colors.border.default,
-                            "border"
-                          )}>
-                            {filteredNewProducts.map((p, idx) => (
-                              <button
-                                key={p.id}
-                                onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
-                                className={cn(
-                                  "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
-                                  highlightedIndex === idx 
-                                    ? "bg-brand/10 text-brand" 
-                                    : ds.colors.surface.hover,
-                                  ds.colors.border.default,
-                                  "border-b last:border-none"
-                                )}
-                              >
-                                <div className="flex flex-col min-w-0 flex-1">
-                                  <span className={cn(
-                                    ds.typography.size.sm,
-                                    ds.typography.weight.bold,
-                                    "truncate"
-                                  )}>{p.name}</span>
-                                  {p.brand_name && (
-                                    <div className="flex items-center gap-2 mt-1">
+                    {!isReadOnly && (
+                      <div className={cn(
+                        "pt-4 border-t space-y-3",
+                        ds.colors.border.default
+                      )}>
+                        <Label className={cn(
+                          ds.components.input.label,
+                          "text-brand"
+                        )}>Adicionar Produto</Label>
+                        <div className="relative group">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                          <Input
+                            ref={newProductInputRef}
+                            placeholder="Buscar produto..."
+                            value={newProductSearch}
+                            onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
+                            onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
+                            onFocus={handleInputFocus}
+                            className={cn(ds.components.input.root, "pl-10")}
+                          />
+                          {filteredNewProducts.length > 0 && !newProduct && (
+                            <div className={cn(
+                              "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-40 overflow-auto custom-scrollbar",
+                              ds.colors.surface.card,
+                              ds.colors.border.default,
+                              "border"
+                            )}>
+                              {filteredNewProducts.map((p, idx) => (
+                                <button
+                                  key={p.id}
+                                  onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
+                                  className={cn(
+                                    "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
+                                    highlightedIndex === idx 
+                                      ? "bg-brand/10 text-brand" 
+                                      : ds.colors.surface.hover,
+                                    ds.colors.border.default,
+                                    "border-b last:border-none"
+                                  )}
+                                >
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <span className={cn(
+                                      ds.typography.size.sm,
+                                      ds.typography.weight.bold,
+                                      "truncate"
+                                    )}>{p.name}</span>
+                                    {p.brand_name && (
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <span className={cn(
+                                          ds.typography.size.xs,
+                                          ds.colors.text.secondary,
+                                          "uppercase tracking-wider"
+                                        )}>{p.brand_name}</span>
+                                        {p.brand_rating > 0 && (
+                                          <div className="flex items-center gap-1">
+                                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                                            <span className={cn(
+                                              ds.typography.size.xs,
+                                              "text-amber-600 dark:text-amber-500"
+                                            )}>{p.brand_rating}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {p.brand_score > 0 && (
+                                    <div className="flex items-center gap-1 bg-brand/10 px-2 py-1 rounded-lg flex-shrink-0">
+                                      <Trophy className="h-3 w-3 text-brand" />
                                       <span className={cn(
                                         ds.typography.size.xs,
-                                        ds.colors.text.secondary,
-                                        "uppercase tracking-wider"
-                                      )}>{p.brand_name}</span>
-                                      {p.brand_rating > 0 && (
-                                        <div className="flex items-center gap-1">
-                                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                          <span className={cn(
-                                            ds.typography.size.xs,
-                                            "text-amber-600 dark:text-amber-500"
-                                          )}>{p.brand_rating}</span>
-                                        </div>
-                                      )}
+                                        ds.typography.weight.bold,
+                                        "text-brand"
+                                      )}>{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
                                     </div>
                                   )}
-                                </div>
-                                {p.brand_score > 0 && (
-                                  <div className="flex items-center gap-1 bg-brand/10 px-2 py-1 rounded-lg flex-shrink-0">
-                                    <Trophy className="h-3 w-3 text-brand" />
-                                    <span className={cn(
-                                      ds.typography.size.xs,
-                                      ds.typography.weight.bold,
-                                      "text-brand"
-                                    )}>{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
-                                  </div>
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-5 gap-2">
+                          <Input
+                            ref={newQuantityInputRef}
+                            type="number"
+                            placeholder="Qtd"
+                            value={newQuantity}
+                            onChange={(e) => setNewQuantity(e.target.value)}
+                            onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
+                            className={cn(ds.components.input.root, "col-span-2 text-center")}
+                          />
+                          <Input
+                            ref={newPriceInputRef}
+                            placeholder="Preço"
+                            value={newPrice}
+                            onChange={(e) => setNewPrice(e.target.value)}
+                            onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
+                            className={cn(ds.components.input.root, "col-span-2 text-center")}
+                          />
+                          <Button 
+                            onClick={handleAddNewItem} 
+                            size="icon" 
+                            className={cn(ds.components.button.primary, "h-10 w-10 flex-shrink-0")}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-5 gap-2">
-                        <Input
-                          ref={newQuantityInputRef}
-                          type="number"
-                          placeholder="Qtd"
-                          value={newQuantity}
-                          onChange={(e) => setNewQuantity(e.target.value)}
-                          onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                          className={cn(ds.components.input.root, "col-span-2 text-center")}
-                        />
-                        <Input
-                          ref={newPriceInputRef}
-                          placeholder="Preço"
-                          value={newPrice}
-                          onChange={(e) => setNewPrice(e.target.value)}
-                          onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                          className={cn(ds.components.input.root, "col-span-2 text-center")}
-                        />
-                        <Button 
-                          onClick={handleAddNewItem} 
-                          size="icon" 
-                          className={cn(ds.components.button.primary, "h-10 w-10 flex-shrink-0")}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -676,14 +680,16 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             ds.colors.text.primary
                           )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => setItens(itens.filter((_, i) => i !== index))} 
-                          className={cn(ds.components.button.danger, "h-8 w-8")}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {!isReadOnly && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => setItens(itens.filter((_, i) => i !== index))} 
+                            className={cn(ds.components.button.danger, "h-8 w-8")}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
                       </CardContent>
                     </Card>
                   ))}
@@ -964,7 +970,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Fornecedor *</Label>
-                    <Select value={fornecedor} onValueChange={setFornecedor}>
+                    <Select value={fornecedor} onValueChange={setFornecedor} disabled={isReadOnly}>
                       <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
                         <SelectValue placeholder="Selecione" />
                       </SelectTrigger>
@@ -995,13 +1001,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       type="date" 
                       value={dataEntrega} 
                       onChange={e => setDataEntrega(e.target.value)} 
+                      disabled={isReadOnly}
                       className={cn(ds.components.input.root, "h-10")} 
                     />
                   </div>
 
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Status</Label>
-                    <Select value={status} onValueChange={setStatus}>
+                    <Select value={status} onValueChange={setStatus} disabled={isReadOnly}>
                       <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
                         <SelectValue />
                       </SelectTrigger>
@@ -1032,110 +1039,115 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       value={observacoes} 
                       onChange={e => setObservacoes(e.target.value)} 
                       placeholder="Observações sobre o pedido..."
+                      disabled={isReadOnly}
                       className={cn(ds.components.input.root, "min-h-[80px] resize-none")}
                     />
                   </div>
                 </div>
 
-                {/* Divisor */}
-                <div className={ds.components.separator.horizontal} />
+                {!isReadOnly && (
+                  <>
+                    {/* Divisor */}
+                    <div className={ds.components.separator.horizontal} />
 
-                {/* Adicionar Produto */}
-                <div className="space-y-4">
-                  <h3 className={cn(
-                    ds.typography.size.sm,
-                    ds.typography.weight.bold,
-                    "text-brand",
-                    "uppercase tracking-wider"
-                  )}>Adicionar Produto</h3>
-                  
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Produto</Label>
-                    <div className="relative group">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-                      <Input
-                        ref={newProductInputRef}
-                        placeholder="Buscar produto..."
-                        value={newProductSearch}
-                        onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
-                        onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                        className={cn(ds.components.input.root, "pl-10")}
-                      />
-                      {filteredNewProducts.length > 0 && !newProduct && (
-                        <div className={cn(
-                          "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar",
-                          ds.colors.surface.card,
-                          ds.colors.border.default,
-                          "border"
-                        )}>
-                          {filteredNewProducts.map((p, idx) => (
-                            <button
-                              key={p.id}
-                              onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
-                              className={cn(
-                                "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
-                                highlightedIndex === idx 
-                                  ? "bg-brand/10 text-brand" 
-                                  : ds.colors.surface.hover,
-                                ds.colors.border.default,
-                                "border-b last:border-none"
-                              )}
-                            >
-                              <div className="flex flex-col min-w-0 flex-1">
-                                <span className={cn(
-                                  ds.typography.size.sm,
-                                  ds.typography.weight.bold,
-                                  "truncate"
-                                )}>{p.name}</span>
-                                {p.brand_name && (
-                                  <span className={cn(
-                                    ds.typography.size.xs,
-                                    ds.colors.text.secondary
-                                  )}>{p.brand_name}</span>
-                                )}
-                              </div>
-                            </button>
-                          ))}
+                    {/* Adicionar Produto */}
+                    <div className="space-y-4">
+                      <h3 className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        "text-brand",
+                        "uppercase tracking-wider"
+                      )}>Adicionar Produto</h3>
+                      
+                      <div className={ds.components.input.group}>
+                        <Label className={ds.components.input.label}>Produto</Label>
+                        <div className="relative group">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                          <Input
+                            ref={newProductInputRef}
+                            placeholder="Buscar produto..."
+                            value={newProductSearch}
+                            onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
+                            onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
+                            className={cn(ds.components.input.root, "pl-10")}
+                          />
+                          {filteredNewProducts.length > 0 && !newProduct && (
+                            <div className={cn(
+                              "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar",
+                              ds.colors.surface.card,
+                              ds.colors.border.default,
+                              "border"
+                            )}>
+                              {filteredNewProducts.map((p, idx) => (
+                                <button
+                                  key={p.id}
+                                  onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
+                                  className={cn(
+                                    "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
+                                    highlightedIndex === idx 
+                                      ? "bg-brand/10 text-brand" 
+                                      : ds.colors.surface.hover,
+                                    ds.colors.border.default,
+                                    "border-b last:border-none"
+                                  )}
+                                >
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <span className={cn(
+                                      ds.typography.size.sm,
+                                      ds.typography.weight.bold,
+                                      "truncate"
+                                    )}>{p.name}</span>
+                                    {p.brand_name && (
+                                      <span className={cn(
+                                        ds.typography.size.xs,
+                                        ds.colors.text.secondary
+                                      )}>{p.brand_name}</span>
+                                    )}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className={ds.components.input.group}>
-                      <Label className={ds.components.input.label}>Quantidade</Label>
-                      <Input
-                        ref={newQuantityInputRef}
-                        type="number"
-                        placeholder="0"
-                        value={newQuantity}
-                        onChange={(e) => setNewQuantity(e.target.value)}
-                        onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                        className={ds.components.input.root}
-                      />
-                    </div>
-                    <div className={ds.components.input.group}>
-                      <Label className={ds.components.input.label}>Preço Unit.</Label>
-                      <Input
-                        ref={newPriceInputRef}
-                        placeholder="0,00"
-                        value={newPrice}
-                        onChange={(e) => setNewPrice(e.target.value)}
-                        onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                        className={ds.components.input.root}
-                      />
-                    </div>
-                  </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className={ds.components.input.group}>
+                          <Label className={ds.components.input.label}>Quantidade</Label>
+                          <Input
+                            ref={newQuantityInputRef}
+                            type="number"
+                            placeholder="0"
+                            value={newQuantity}
+                            onChange={(e) => setNewQuantity(e.target.value)}
+                            onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
+                            className={ds.components.input.root}
+                          />
+                        </div>
+                        <div className={ds.components.input.group}>
+                          <Label className={ds.components.input.label}>Preço Unit.</Label>
+                          <Input
+                            ref={newPriceInputRef}
+                            placeholder="0,00"
+                            value={newPrice}
+                            onChange={(e) => setNewPrice(e.target.value)}
+                            onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
+                            className={ds.components.input.root}
+                          />
+                        </div>
+                      </div>
 
-                  <Button 
-                    onClick={handleAddNewItem} 
-                    disabled={!newProduct || !newQuantity || !newPrice}
-                    className={cn(ds.components.button.primary, "w-full")}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Item
-                  </Button>
-                </div>
+                      <Button 
+                        onClick={handleAddNewItem} 
+                        disabled={!newProduct || !newQuantity || !newPrice}
+                        className={cn(ds.components.button.primary, "w-full")}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Item
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Coluna Direita: Lista de Itens */}
@@ -1226,21 +1238,23 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               )}>R$ {item.valorUnitario.toFixed(2)}</span>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right flex-shrink-0">
                             <p className={cn(
-                              ds.typography.size.base,
+                              ds.typography.size.sm,
                               ds.typography.weight.bold,
                               ds.colors.text.primary
                             )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                           </div>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => setItens(itens.filter((_, i) => i !== index))} 
-                            className={cn(ds.components.button.danger, "h-9 w-9")}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {!isReadOnly && (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => setItens(itens.filter((_, i) => i !== index))} 
+                              className={cn(ds.components.button.danger, "h-9 w-9")}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
