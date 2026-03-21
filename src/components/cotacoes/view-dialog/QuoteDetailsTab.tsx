@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Package, Users, Clock, TrendingDown, Star } from "lucide-react";
+import { Package, Users, Clock, TrendingDown, Star, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Quote } from "./types";
 
@@ -19,6 +19,21 @@ export function QuoteDetailsTab({
     getSupplierProductValue
 }: QuoteDetailsTabProps) {
     if (!currentQuote) return null;
+
+    // Calcula os totais de todos os fornecedores que responderam para traçar a estatística da IA multiplicando pela quantidade
+    const supplierTotals = currentQuote.fornecedoresParticipantes
+        .filter(f => f.status === 'respondido')
+        .map(fornecedor => {
+            let total = 0;
+            products.forEach(p => {
+                const value = getSupplierProductValue(fornecedor.id, p.product_id) || 0;
+                const qtd = Number(p.quantidade) || 1;
+                total += value * qtd;
+            });
+            return { ...fornecedor, total };
+        })
+        .filter(f => f.total > 0)
+        .sort((a, b) => a.total - b.total);
 
     return (
         <ScrollArea className="h-full">
@@ -84,24 +99,57 @@ export function QuoteDetailsTab({
 
                     {/* Seção 2: Melhor Oferta Destaque */}
                     {bestSupplier && (
-                        <Card className="p-3 sm:p-4 border border-emerald-100 dark:border-emerald-900/50 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-lg shadow-sm dark:shadow-none">
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                                    <div className="p-2 rounded-lg bg-emerald-600 text-white flex-shrink-0">
-                                        <Star className="h-4 w-4" />
+                        <div className="space-y-2">
+                            <Card className="p-3 sm:p-4 border border-emerald-100 dark:border-emerald-900/50 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-lg shadow-sm dark:shadow-none">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                                        <div className="p-2 rounded-lg bg-emerald-600 text-white flex-shrink-0">
+                                            <Star className="h-4 w-4" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase mb-0.5">Melhor Fornecedor</p>
+                                            <p className="font-bold text-sm text-emerald-900 dark:text-white truncate">{bestSupplier.nome}</p>
+                                            <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">R$ {bestSupplier.totalValue.toFixed(2)}</p>
+                                        </div>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 uppercase mb-0.5">Melhor Fornecedor</p>
-                                        <p className="font-bold text-sm text-emerald-900 dark:text-white truncate">{bestSupplier.nome}</p>
-                                        <p className="text-xs text-emerald-700 dark:text-emerald-400 font-medium mt-0.5">R$ {bestSupplier.totalValue.toFixed(2)}</p>
+                                    <div className="flex-shrink-0 text-right">
+                                        <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mb-0.5">Economia</p>
+                                        <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</p>
                                     </div>
                                 </div>
-                                <div className="flex-shrink-0 text-right">
-                                    <p className="text-[10px] text-emerald-700 dark:text-emerald-400 font-medium mb-0.5">Economia</p>
-                                    <p className="text-base font-bold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</p>
-                                </div>
-                            </div>
-                        </Card>
+                            </Card>
+
+                            {/* Análise Inteligente de Cenário (Cota Aki AI) */}
+                            {supplierTotals.length > 1 && (() => {
+                                const cheapest = supplierTotals[0];
+                                const mostExpensive = supplierTotals[supplierTotals.length - 1];
+                                
+                                // Média dos outros fornecedores
+                                const otherSuppliers = supplierTotals.slice(1);
+                                const otherAverage = otherSuppliers.reduce((acc, curr) => acc + curr.total, 0) / otherSuppliers.length;
+
+                                const savingsAgainstHighest = mostExpensive.total - cheapest.total;
+                                const savingsAgainstAverage = otherAverage - cheapest.total;
+
+                                if (savingsAgainstHighest <= 0) return null;
+
+                                return (
+                                    <div className="flex items-start gap-4 p-4 bg-brand/5 rounded-xl border border-brand/20 shadow-sm">
+                                        <div className="p-2 rounded-xl bg-brand/10 shrink-0 border border-brand/20 shadow-sm mt-0.5">
+                                            <Sparkles className="h-5 w-5 text-brand" />
+                                        </div>
+                                        <div className="text-sm">
+                                            <p className="font-bold flex items-center gap-1.5 text-foreground tracking-tight text-[15px] mb-1">
+                                                Análise Inteligente 
+                                            </p>
+                                            <p className="font-medium text-muted-foreground leading-relaxed">
+                                                Se os preços forem mantidos, fechando esta cotação agora com <strong className="text-foreground">{cheapest.nome}</strong>, você economizará <strong className="text-emerald-600 dark:text-emerald-400 font-bold">R$ {savingsAgainstHighest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> comparado com o cenário mais caro oferecido{supplierTotals.length > 2 ? `, garantindo impressionantes R$ ${savingsAgainstAverage.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a menos em relação à média de preço das outras ofertas` : ''}.
+                                            </p>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
                     )}
 
                     {/* Seção 3: Fornecedores Participantes - Tabela Compacta */}
@@ -131,7 +179,8 @@ export function QuoteDetailsTab({
                                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             const totalValue = products.reduce((sum: number, product: any) => {
                                                 const value = getSupplierProductValue(fornecedor.id, product.product_id);
-                                                return sum + (value || 0);
+                                                const qtd = Number(product.quantidade) || 1;
+                                                return sum + ((value || 0) * qtd);
                                             }, 0);
                                             const isBest = bestSupplier && fornecedor.id === bestSupplier.id;
 

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Package, Building2, DollarSign, Calendar, ClipboardList, TrendingDown, Award, Users, FileText, X, CheckCircle2, Clock } from "lucide-react";
+import { Package, Building2, DollarSign, Calendar, ClipboardList, TrendingDown, Award, Users, FileText, X, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 import type { Quote } from "@/hooks/useCotacoes";
@@ -35,7 +35,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
   };
 
   const calcularTotalFornecedor = (supplierId: string): number => {
-    return products.reduce((sum: number, p: any) => sum + getSupplierProductValue(supplierId, p.product_id), 0);
+    return products.reduce((sum: number, p: any) => {
+      const precoUn = getSupplierProductValue(supplierId, p.product_id);
+      const qtd = Number(p.quantidade) || 1;
+      return sum + (precoUn * qtd);
+    }, 0);
   };
 
   const getBestPrice = (productId: string) => {
@@ -49,7 +53,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     return best;
   };
 
-  const totalMelhorPreco = products.reduce((t: number, p: any) => t + getBestPrice(p.product_id).price, 0);
+  const totalMelhorPreco = products.reduce((t: number, p: any) => {
+    const best = getBestPrice(p.product_id);
+    const qtd = Number(p.quantidade) || 1;
+    return t + (best.price * qtd);
+  }, 0);
   
   const melhorFornecedor = fornecedores.reduce((best: any, f) => {
     const total = calcularTotalFornecedor(f.id);
@@ -57,6 +65,25 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     return best;
   }, null);
 
+  // Calcula a economia preditiva exata: (Maior Preço Oferecido - Melhor Preço) * Quantidade, por item.
+  let totalEconomiaPotencial = 0;
+  
+  // Para cada produto, acha a maior oferta válida contra a menor oferta
+  products.forEach((p: any) => {
+    const qtd = Number(p.quantidade) || 1;
+    const prices = fornecedores
+      .map(f => getSupplierProductValue(f.id, p.product_id))
+      .filter(val => val > 0)
+      .sort((a, b) => b - a); // Maior para o menor
+
+    if (prices.length > 1) {
+      const highestPrice = prices[0]; // Maior valor (ou segundo se usarmos a lógica de exclusão do topo)
+      const bestPrice = prices[prices.length - 1]; // O menor valor daquele item
+      if (highestPrice > bestPrice) {
+        totalEconomiaPotencial += (highestPrice - bestPrice) * qtd;
+      }
+    }
+  });
 
   return (
     <ResponsiveModal
@@ -236,42 +263,75 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
         {/* Melhor Fornecedor - Destaque */}
         {melhorFornecedor && (
-          <Card className={cn(
-            ds.components.card.root,
-            "bg-gradient-to-br from-amber-500/10 to-amber-600/5 !border-amber-500/20"
-          )}>
-            <CardContent className={cn("p-3 flex items-center gap-3")}>
-              <div className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
-                "bg-amber-500/20 border-2 border-amber-500/30"
-              )}>
-                <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className={cn(
-                  "text-[10px]",
-                  ds.typography.weight.bold,
-                  "text-amber-700 dark:text-amber-300",
-                  "uppercase tracking-widest"
-                )}>🏆 Melhor Fornecedor</p>
-                <div className="flex items-baseline justify-between gap-2 mt-0.5">
-                  <p className={cn(
-                    ds.typography.size.sm,
-                    ds.typography.weight.bold,
-                    "text-amber-900 dark:text-amber-100",
-                    "truncate"
-                  )}>
-                    {safeStr(melhorFornecedor.nome)}
-                  </p>
-                  <p className={cn(
-                    ds.typography.size.base,
-                    ds.typography.weight.bold,
-                    "text-amber-600 dark:text-amber-400 flex-shrink-0"
-                  )}>R$ {melhorFornecedor.total.toFixed(2)}</p>
+          <div className="space-y-3">
+            <Card className={cn(
+              ds.components.card.root,
+              "bg-gradient-to-br from-amber-500/10 to-amber-600/5 !border-amber-500/20"
+            )}>
+              <CardContent className={cn("p-3 flex items-center gap-3")}>
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                  "bg-amber-500/20 border-2 border-amber-500/30"
+                )}>
+                  <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="min-w-0 flex-1">
+                  <p className={cn(
+                    "text-[10px]",
+                    ds.typography.weight.bold,
+                    "text-amber-700 dark:text-amber-300",
+                    "uppercase tracking-widest"
+                  )}>🏆 Melhor Fornecedor</p>
+                  <div className="flex items-baseline justify-between gap-2 mt-0.5">
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      "text-amber-900 dark:text-amber-100",
+                      "truncate"
+                    )}>
+                      {safeStr(melhorFornecedor.nome)}
+                    </p>
+                    <p className={cn(
+                      ds.typography.size.base,
+                      ds.typography.weight.bold,
+                      "text-amber-600 dark:text-amber-400 flex-shrink-0"
+                    )}>R$ {melhorFornecedor.total.toFixed(2)}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Análise Inteligente de Cenário (Cota Aki AI) - Agora com Quantidades Reais */}
+            {totalEconomiaPotencial > 0 && (
+              <Card className={cn(
+                ds.components.card.root,
+                "bg-brand/5 dark:bg-brand/10 !border-brand/20 shadow-sm transition-all"
+              )}>
+                <CardContent className="p-3.5 flex items-start gap-3">
+                  <div className={cn(
+                    "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5",
+                    "bg-brand/10 border border-brand/20"
+                  )}>
+                    <Sparkles className="h-4 w-4 text-brand" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn(
+                      "text-[10px]",
+                      ds.typography.weight.bold,
+                      "text-brand",
+                      "uppercase tracking-widest leading-none mb-1.5 flex items-center gap-1"
+                    )}>Análise Estratégica</p>
+                    <p className={cn(
+                      "text-xs leading-relaxed",
+                      ds.colors.text.secondary
+                    )}>
+                      Cruzando a **quantidade requerida** contra o **pior e o melhor preço** oferecido em cada item, fechar esta cotação agora pelo menor conjunto te garantirá uma economia potencial bruta de <strong className="text-emerald-600 dark:text-emerald-400 font-bold">R$ {totalEconomiaPotencial.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> nesta operação fiscal.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
 
         {/* Lista de Produtos */}
