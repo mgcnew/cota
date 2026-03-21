@@ -5,7 +5,7 @@ import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Package, Building2, DollarSign, Calendar, ClipboardList,
-  TrendingDown, Award, X, CheckCircle2, Clock, Sparkles
+  TrendingDown, Award, X, CheckCircle2, Clock, Sparkles, Info
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
@@ -48,6 +48,16 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       }
     });
     return best;
+  };
+
+  const getAllPricesForProduct = (productId: string): { supplier: string; price: number }[] => {
+    return fornecedores
+      .map(f => ({
+        supplier: safeStr(f.nome),
+        price: getSupplierProductValue(f.id, productId),
+      }))
+      .filter(item => item.price > 0)
+      .sort((a, b) => a.price - b.price);
   };
 
   // Mapear para cada produto qual fornecedor ganhou (menor preço)
@@ -297,9 +307,51 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     <p className={cn("text-xs text-center tabular-nums", ds.colors.text.secondary)}>
                       {safeStr(p.quantidade)} {safeStr(p.unidade)}
                     </p>
-                    <p className={cn("text-xs text-right tabular-nums text-brand", ds.typography.weight.bold)}>
-                      {formatCurrency(best.price)}
-                    </p>
+                    <div className="flex items-center justify-end gap-1 relative group/info">
+                      <p className={cn("text-xs tabular-nums text-brand", ds.typography.weight.bold)}>
+                        {formatCurrency(best.price)}
+                      </p>
+                      {(() => {
+                        const allPrices = getAllPricesForProduct(p.product_id);
+                        if (allPrices.length <= 1) return null;
+                        const bestPrice = allPrices[0]?.price || 1;
+                        return (
+                          <>
+                            <Info className="h-3 w-3 text-zinc-400 hover:text-brand cursor-help transition-colors flex-shrink-0" />
+                            <div className="absolute right-0 top-full mt-1 z-[100] hidden group-hover/info:block animate-in fade-in slide-in-from-top-1 duration-200">
+                              <div className={cn("rounded-lg border shadow-xl p-2.5 min-w-[200px] max-w-[260px]", ds.colors.surface.card, "border-zinc-200 dark:border-zinc-700")}>
+                                <p className={cn("text-[9px] uppercase tracking-widest mb-2 pb-1.5 border-b border-zinc-100 dark:border-zinc-800/50", ds.typography.weight.bold, ds.colors.text.muted)}>
+                                  Comparativo de Preços
+                                </p>
+                                <div className="space-y-1.5">
+                                  {allPrices.map((item, idx) => {
+                                    const diff = ((item.price - bestPrice) / bestPrice) * 100;
+                                    const isBest = idx === 0;
+                                    return (
+                                      <div key={item.supplier} className="flex items-center justify-between gap-2">
+                                        <span className={cn("text-[11px] truncate flex-1", isBest ? "text-brand" : "", ds.typography.weight.medium, isBest ? "" : ds.colors.text.secondary)}>
+                                          {isBest && "🏆 "}{item.supplier}
+                                        </span>
+                                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                                          <span className={cn("text-[11px] tabular-nums", ds.typography.weight.bold, isBest ? "text-brand" : ds.colors.text.primary)}>
+                                            {formatCurrency(item.price)}
+                                          </span>
+                                          {!isBest && (
+                                            <span className="text-[9px] tabular-nums font-bold text-red-500/80">
+                                              +{diff.toFixed(1)}%
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
                     <p className={cn("text-[10px] text-right truncate", ds.colors.text.muted)} title={best.supplier}>
                       {best.supplier}
                     </p>

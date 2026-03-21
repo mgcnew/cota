@@ -48,7 +48,7 @@ export default function Landing() {
             <img
               src="/logo-cotapro.png"
               alt="CotaPro"
-              className="h-40 -my-[52px] translate-y-1 w-auto object-contain"
+              className="h-40 -my-[52px] translate-y-1 w-auto object-contain hover:scale-105 transition-transform duration-300"
             />
           </Link>
 
