@@ -9,6 +9,7 @@ import { Package, TrendingUp, TrendingDown, Calendar, Building2, DollarSign, Min
 import { cn } from "@/lib/utils";
 import { useProductPriceHistory, PriceHistoryEntry } from "@/hooks/useProductPriceHistory";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { designSystem } from "@/styles/design-system";
 
 interface ProductPriceHistoryDialogProps {
   productName: string;
@@ -330,7 +331,7 @@ export function ProductPriceHistoryDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent hideClose className="max-w-2xl h-[80vh] flex flex-col p-0 overflow-hidden bg-white dark:bg-[#10141f] [&>button]:hidden">
+      <DialogContent hideClose className={cn(designSystem.components.modal.content, "max-w-2xl h-[80vh] flex flex-col p-0 overflow-hidden left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 [&>button]:hidden")}>
         <DialogHeader className="p-4 border-b border-gray-100/80 dark:border-gray-700/60 flex flex-row items-center justify-between space-y-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center shadow-lg">
