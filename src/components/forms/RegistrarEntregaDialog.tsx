@@ -109,8 +109,8 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const handleSubmit = async () => {
     if (!pedido) return;
 
+    // Agora permitimos enviar itens com quantidade zero (representa FALTA)
     const itensParaAtualizar = itensEntrega
-      .filter(item => item.itemId && item.quantidadeEntregue > 0)
       .map(item => ({
         itemId: item.itemId,
         quantidadeEntregue: item.quantidadeEntregue,
@@ -131,8 +131,17 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     }
   };
 
+  const handleMarcarFalta = (index: number) => {
+    setItensEntrega(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], quantidadeEntregue: 0 };
+      return updated;
+    });
+  };
+
   const veioDeCotacao = pedido?.quote_id != null;
-  const todosPreenchidos = itensEntrega.every(item => item.quantidadeEntregue > 0);
+  // Agora validamos se os campos foram manipulados/conferidos, mesmo que zerados
+  const todosPreenchidos = itensEntrega.every(item => item.quantidadeEntregue >= 0);
 
   if (!pedido) return null;
 
@@ -244,6 +253,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                         min="0"
                         value={item.valorFaturado === 0 ? '' : item.valorFaturado}
                         onChange={(e) => handlePrecoChange(index, e.target.value)}
+                        onFocus={(e) => e.target.select()}
                         placeholder="0.00"
                         className={cn(
                           "h-10 pl-8 pr-2 w-full text-right font-black text-sm transition-all focus-within:ring-1",
@@ -264,7 +274,15 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                   </div>
 
                   <div className="sm:col-span-3 flex flex-col justify-center pt-2 sm:pt-0">
-                    <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest mb-1">Recebida</p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest">Recebida</p>
+                      <button 
+                        onClick={() => handleMarcarFalta(index)}
+                        className="text-[9px] font-bold text-amber-600 hover:text-amber-700 uppercase tracking-tighter"
+                      >
+                        Marcar Falta
+                      </button>
+                    </div>
                     <div className="relative w-full">
                       <Input
                         type="number"
@@ -272,9 +290,11 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                         min="0"
                         value={item.quantidadeEntregue === 0 ? '' : item.quantidadeEntregue}
                         onChange={(e) => handleQuantidadeChange(index, e.target.value)}
+                        onFocus={(e) => e.target.select()}
                         placeholder="0.00"
                         className={cn(
                           "h-10 pr-10 text-right font-black text-sm transition-all",
+                          item.quantidadeEntregue === 0 ? "border-red-500/50 bg-red-500/5 text-red-600" :
                           isDifferent ? (diff > 0 ? "border-blue-500/50 focus-visible:ring-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400" : "border-amber-500/50 focus-visible:ring-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400") : "bg-background"
                         )}
                       />
@@ -282,7 +302,13 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                         {item.unidadeEntregue}
                       </span>
                     </div>
-                    {isDifferent && (
+                    {item.quantidadeEntregue === 0 && (
+                       <span className="text-[10px] font-bold mt-1.5 text-right text-red-500 flex items-center justify-end gap-1 uppercase tracking-tighter">
+                         <X className="h-3 w-3" />
+                         Produto em Falta
+                       </span>
+                    )}
+                    {item.quantidadeEntregue > 0 && isDifferent && (
                        <span className={cn("text-[10px] font-bold mt-1.5 text-right flex items-center justify-end gap-1", diff > 0 ? "text-blue-500" : "text-amber-500")}>
                          <AlertCircle className="h-3 w-3" />
                          {diff > 0 ? `Sobrou ${diff.toFixed(2)}` : `Faltou ${Math.abs(diff).toFixed(2)}`}
