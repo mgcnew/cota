@@ -6,7 +6,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useExportCSV } from "@/hooks/useExportCSV";
 import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal, Eye, EyeOff } from "lucide-react";
@@ -319,36 +319,33 @@ function Produtos() {
             />
           </ResponsiveGrid>
 
-          {/* Grupo coeso de ações abaixo da topbar: Adicionar + Categorias + Busca */}
-          <div className={cn("mt-2 mb-4")}>
-            <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-3">
-              <div className="w-full md:w-[320px]">
-                <ExpandableSearch
+          <div className="mt-2 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="flex-1 max-w-xl">
+                <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Buscar produtos..."
-                  accentColor="gray"
-                  expandedWidth="w-full"
+                  placeholder="Pesquisar por nome, categoria ou marca..."
                 />
               </div>
-              <div className="flex-1 md:flex md:justify-end">
+              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                <div className="w-full sm:w-[240px]">
+                  <CategorySelect
+                    categories={safeCategories}
+                    products={safeProducts}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
+                  />
+                </div>
                 <div className="flex items-center gap-2">
-                  <div className="md:w-[220px]">
-                    <CategorySelect
-                      categories={safeCategories}
-                      products={safeProducts}
-                      selectedCategory={selectedCategory}
-                      onCategoryChange={setSelectedCategory}
-                    />
-                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="outline"
                         size="sm"
-                        className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-3")}
+                        className={cn(designSystem.components.button.secondary, "h-11 px-4 flex items-center justify-center")}
                       >
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[200px]">
@@ -362,10 +359,10 @@ function Produtos() {
                   </DropdownMenu>
                   <Button
                     onClick={handleAddProduct}
-                    className={cn(designSystem.components.button.primary, "h-11 px-6 hidden md:flex")}
+                    className={cn(designSystem.components.button.primary, "h-11 px-6")}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    <span>Adicionar</span>
+                    <span>Novo Produto</span>
                   </Button>
                 </div>
               </div>

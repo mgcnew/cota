@@ -60,9 +60,9 @@ export function CategorySelect({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="w-full sm:w-[280px] h-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-2 border-gray-200/60 dark:border-gray-700/60 sm:hover:border-orange-300/70 sm:dark:hover:border-orange-600/70 focus:border-orange-400 dark:focus:border-orange-500 focus:ring-2 focus:ring-orange-200/50 dark:focus:ring-orange-800/50 rounded-xl shadow-sm text-gray-900 dark:text-white">
+        <SelectTrigger className="w-full sm:w-[280px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            <Filter className="h-4 w-4 text-brand" />
             <SelectValue placeholder="Categorias" />
           </div>
         </SelectTrigger>
@@ -81,7 +81,7 @@ export function CategorySelect({
           variant="ghost"
           size="sm"
           onClick={clearSelection}
-          className="h-9 px-2 text-orange-600 hover:text-orange-700 hover:bg-orange-100/50 transition-colors"
+          className="h-11 px-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
           title="Limpar filtro de categoria"
         >
           <X className="h-4 w-4" />
