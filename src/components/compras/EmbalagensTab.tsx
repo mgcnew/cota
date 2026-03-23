@@ -8,7 +8,7 @@ import { useSuppliers } from "@/hooks/useSuppliers";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { usePagination } from "@/hooks/usePagination";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { SearchInput } from "@/components/ui/search-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -305,26 +305,30 @@ function EmbalagensTab() {
           </ResponsiveGrid>
 
           {/* Filtros */}
-          <div className="flex flex-col sm:flex-row items-stretch gap-3">
-            <div className="flex-1 flex flex-col sm:flex-row gap-2">
-              <ExpandableSearch
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Buscar em embalagens..."
-                accentColor="brand"
-                expandedWidth="w-full sm:w-64"
-              />
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className={cn("w-full sm:w-[180px] h-11 rounded-2xl", designSystem.components.input.root)}>
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  <SelectItem value="ativa">🟢 Ativas</SelectItem>
-                  <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
-                  <SelectItem value="concluida">🔵 Concluídas</SelectItem>
-                </SelectContent>
-              </Select>
+          <div className="mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+              {/* Search Field */}
+              <div className="flex-1 max-w-xl">
+                <SearchInput
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  placeholder="Buscar em embalagens..."
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos os Status</SelectItem>
+                    <SelectItem value="ativa">🟢 Ativas</SelectItem>
+                    <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
+                    <SelectItem value="concluida">🔵 Concluídas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

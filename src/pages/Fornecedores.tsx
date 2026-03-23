@@ -8,7 +8,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
@@ -291,22 +291,20 @@ function Fornecedores() {
 
           {/* Unified Actions Bar */}
           <div className="mb-6">
-            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
               {/* Search Field */}
-              <div className="w-full md:w-[320px]">
-                <ExpandableSearch
+              <div className="flex-1 max-w-xl">
+                <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Buscar fornecedores..."
-                  accentColor="gray"
-                  expandedWidth="w-full"
+                  placeholder="Pesquisar fornecedores..."
                 />
               </div>
 
               {/* Actions & Filters Group */}
-              <div className="flex items-center gap-2 md:justify-end md:ml-auto">
+              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
                 <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                  <SelectTrigger className={cn(designSystem.components.input.root, "w-[150px] h-11")}>
+                  <SelectTrigger className="w-[150px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -330,7 +328,7 @@ function Fornecedores() {
                 <Button
                   size="sm"
                   onClick={() => addSupplierRef.current?.click()}
-                  className={cn(designSystem.components.button.primary, "h-11 hidden md:flex px-6")}
+                  className={cn(designSystem.components.button.primary, "h-11 md:flex px-6 w-full sm:w-auto")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   <span>Novo Fornecedor</span>

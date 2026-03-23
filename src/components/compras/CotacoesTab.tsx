@@ -9,9 +9,9 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
-import { StatusSelect, QUOTE_STATUS_OPTIONS } from "@/components/ui/status-select";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
-import { FileText, Plus, Trash2, Download, Building2, MoreVertical, ClipboardList, Eye, CheckCircle2, AlertTriangle, ShoppingCart, TrendingDown, Loader2 } from "lucide-react";
+import { Plus, Filter, TrendingDown, Clock, CheckCircle2, ShoppingCart } from "lucide-react";
+import { SearchInput } from "@/components/ui/search-input";
+import { DatePickerWithRange } from "@/components/ui/date-range-picker";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { designSystem } from "@/styles/design-system";
@@ -239,24 +239,23 @@ function CotacoesTab() {
       </ResponsiveGrid>
 
       {/* Filters & Actions */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2">
-          <ExpandableSearch
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Buscar cotação..."
-            accentColor="brand"
-            expandedWidth="w-full sm:w-64"
-            data-search-input
-          />
-        </div>
+      <div className="mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+          {/* Search Field */}
+          <div className="flex-1 max-w-xl">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar cotação..."
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
-          {/* Mobile: reduced width to fit "Nova Cotação" button */}
-          <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-            <SelectTrigger className={cn("w-[130px] sm:w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
+          <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+            {/* Mobile: reduced width to fit "Nova Cotação" button */}
+            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+              <SelectTrigger className="w-[130px] sm:w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos os Status</SelectItem>
               <SelectItem value="ativa">🟢 Ativas</SelectItem>
@@ -270,20 +269,21 @@ function CotacoesTab() {
             variant="outline"
             size="icon"
             onClick={handleExportQuotes}
-            className={cn("h-10 w-10 rounded-xl", designSystem.components.button.secondary)}
+            className={cn("h-11 w-11 rounded-lg border-zinc-200 dark:border-zinc-800", designSystem.components.button.secondary)}
             title="Exportar CSV"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
           </Button>
           <Button
             onClick={() => setAddDialogOpen(true)}
-            className={cn(designSystem.components.button.primary, "shrink-0")}
+            className={cn(designSystem.components.button.primary, "h-11 px-6 rounded-lg shrink-0")}
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Nova Cotação
           </Button>
         </div>
       </div>
+    </div>
 
       {/* Alerts */}
       {(stats.prontasParaDecisao > 0 || stats.vencendo > 0) && (

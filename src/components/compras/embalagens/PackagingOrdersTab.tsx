@@ -6,7 +6,7 @@ import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePagination } from "@/hooks/usePagination";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { SearchInput } from "@/components/ui/search-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -122,34 +122,36 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         <MetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
       </ResponsiveGrid>
 
-      <div className="flex flex-col sm:flex-row items-stretch gap-3">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2">
-          <ExpandableSearch 
-            value={searchTerm} 
-            onChange={setSearchTerm} 
-            placeholder="Buscar pedidos..." 
-            accentColor="brand" 
-            expandedWidth="w-full sm:w-64" 
-          />
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn("w-full sm:w-[180px] h-11 rounded-2xl", ds.components.input.root)}>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              {PACKAGING_ORDER_STATUS.map(s => (
-                <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex gap-2">
-          <Button 
-            onClick={onCreateOrder} 
-            className={ds.components.button.primary}
-          >
-            <Plus className="h-4 w-4 mr-2" />Novo Pedido
-          </Button>
+      <div className="mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+          {/* Search Field */}
+          <div className="flex-1 max-w-xl">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar pedidos..."
+            />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Status</SelectItem>
+                {PACKAGING_ORDER_STATUS.map(s => (
+                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button 
+              onClick={onCreateOrder} 
+              className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+            >
+              <Plus className="h-4 w-4 mr-2" />Novo Pedido
+            </Button>
+          </div>
         </div>
       </div>
 

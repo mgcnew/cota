@@ -4,7 +4,7 @@ import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { SearchInput } from "@/components/ui/search-input";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2 } from "lucide-react";
@@ -159,37 +159,38 @@ function PedidosTab() {
       </ResponsiveGrid>
 
       {/* Filters & Actions */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2">
-          <ExpandableSearch
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Buscar pedido..."
-            accentColor="brand"
-            expandedWidth="w-full sm:w-64"
-          />
-        </div>
+      <div className="mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+          {/* Search Field */}
+          <div className="flex-1 max-w-xl">
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar pedido..."
+            />
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className={cn("w-[180px] rounded-xl h-10", designSystem.components.input.root)}>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="pendente">🟡 Pendentes</SelectItem>
-              <SelectItem value="confirmado">🟢 Confirmados</SelectItem>
-              <SelectItem value="entregue">🔵 Entregues</SelectItem>
-              <SelectItem value="cancelado">🔴 Cancelados</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            onClick={() => setAddDialogOpen(true)}
-            className={designSystem.components.button.primary}
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            Novo Pedido
-          </Button>
+          <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Status</SelectItem>
+                <SelectItem value="pendente">🟡 Pendentes</SelectItem>
+                <SelectItem value="confirmado">🟢 Confirmados</SelectItem>
+                <SelectItem value="entregue">🔵 Entregues</SelectItem>
+                <SelectItem value="cancelado">🔴 Cancelados</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={() => setAddDialogOpen(true)}
+              className={cn(designSystem.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Novo Pedido
+            </Button>
+          </div>
         </div>
       </div>
 

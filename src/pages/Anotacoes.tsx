@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExpandableSearch } from "@/components/ui/expandable-search";
+import { SearchInput } from "@/components/ui/search-input";
 import {
   Plus,
   StickyNote,
@@ -56,23 +56,29 @@ export default function Anotacoes() {
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="w-full sm:max-w-md">
-              <ExpandableSearch
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Pesquisar anotações..."
-                accentColor="gray"
-                expandedWidth="w-full"
-              />
+          {/* Unified Actions Bar */}
+          <div className="mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+              {/* Search Field */}
+              <div className="flex-1 max-w-xl">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Pesquisar anotações..."
+                />
+              </div>
+              
+              {/* Actions Group */}
+              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                <Button
+                  onClick={() => setShowCreateDialog(true)}
+                  className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova Anotação
+                </Button>
+              </div>
             </div>
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Anotação
-            </Button>
           </div>
         </div>
 
