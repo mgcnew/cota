@@ -444,7 +444,7 @@ function EditProductDialogInternal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className={cn(designSystem.components.modal.content, "max-h-[85vh] p-0 overflow-hidden flex flex-col left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2")}>
+      <DialogContent hideClose className={cn(designSystem.components.modal.content, "max-h-[85vh] p-0 overflow-hidden flex flex-col")}>
         {Header}
         {formContent}
       </DialogContent>

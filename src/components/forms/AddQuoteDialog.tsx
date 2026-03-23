@@ -1521,7 +1521,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         className={cn(
           "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] p-0 flex flex-col [&>button]:hidden",
           designSystem.components.modal.content,
-          "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
           "rounded-xl sm:rounded-2xl border backdrop-blur-xl"
         )}
         onKeyDown={handleModalKeyDown}

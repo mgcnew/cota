@@ -668,7 +668,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent className={cn(designSystem.components.modal.content, "left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 scale-100 animate-in fade-in duration-500 md:w-[90vw] md:max-w-3xl h-[85vh]")}>
+      <DialogContent className={cn(designSystem.components.modal.content, "md:w-[90vw] md:max-w-3xl h-[85vh]")}>
         {content}
       </DialogContent>
     </Dialog>

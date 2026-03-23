@@ -208,7 +208,7 @@ export const designSystem = {
         // Modais (Dialogs) & Drawers
         modal: {
             overlay: "fixed inset-0 z-50 bg-background/60 backdrop-blur-[2px] animate-in fade-in duration-200",
-        content: "fixed left-[50%] top-[50%] z-50 w-full max-w-2xl translate-x-[-50%] translate-y-[-50%] bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 duration-500 animate-in fade-in slide-in-from-bottom-12 ease-out flex flex-col max-h-[90vh] fill-mode-forwards",
+            content: "relative z-50 w-full max-w-2xl bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 animate-fade-in flex flex-col max-h-[90vh]",
             // Padrão para Modais de Alta Densidade (Scroll Global)
             header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
             title: "text-base font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",

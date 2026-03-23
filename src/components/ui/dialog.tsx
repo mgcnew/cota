@@ -55,8 +55,7 @@ const DialogContent = React.forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "relative z-50 grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg overflow-hidden flex flex-col will-change-transform",
-          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+          "relative z-50 w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg overflow-hidden flex flex-col",
           "max-h-[95vh]",
           className,
         )}
@@ -73,7 +72,6 @@ const DialogContent = React.forwardRef<
     </div>
   </DialogPortal>
 ));
-DialogContent.displayName = DialogPrimitive.Content.displayName;
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
