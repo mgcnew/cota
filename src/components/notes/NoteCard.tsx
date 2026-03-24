@@ -59,7 +59,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
       <div className={cn(
         ds.components.card.root,
         "group relative flex flex-col h-full transition-all duration-300 overflow-hidden",
-        "border-zinc-200/60 dark:border-zinc-800/60 hover:border-brand/40 shadow-none hover:shadow-xl hover:shadow-brand/5",
+        "border-zinc-200/60 dark:border-zinc-800/60 hover:border-brand/40 shadow-none hover:shadow-xl",
         note.pinned && "ring-1 ring-brand/30 border-brand/30"
       )}>
         {/* Category Accent Line */}
@@ -71,7 +71,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
           className={cn(
             "absolute top-3 right-3 p-1.5 rounded-lg transition-all z-10",
             note.pinned 
-              ? "bg-brand text-zinc-950 opacity-100" 
+              ? "bg-brand text-zinc-950 dark:text-white opacity-100" 
               : "text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           )}
           title={note.pinned ? "Desafixar" : "Fixar"}

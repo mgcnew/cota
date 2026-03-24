@@ -96,7 +96,7 @@ export default function Anotacoes() {
               <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
                 <Button
                   onClick={() => setShowCreateDialog(true)}
-                  className={cn(ds.components.button.primary, "h-11 px-6 shadow-xl shadow-brand/20 w-full sm:w-auto font-bold")}
+                  className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto font-bold dark:text-white")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Criar Anotação
@@ -117,7 +117,7 @@ export default function Anotacoes() {
                   className={cn(
                     "px-4 py-1.5 rounded-xl text-xs font-bold transition-all border",
                     selectedCategory === cat
-                      ? "bg-brand text-zinc-950 border-brand shadow-lg shadow-brand/10"
+                      ? "bg-brand text-zinc-950 dark:text-white border-brand"
                       : "bg-zinc-100/50 dark:bg-zinc-900/50 text-muted-foreground border-transparent hover:border-zinc-300 dark:hover:border-zinc-700"
                   )}
                 >
