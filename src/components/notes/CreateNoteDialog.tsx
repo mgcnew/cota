@@ -10,7 +10,7 @@ import { Importance, Note } from "@/hooks/useNotes";
 import { ds } from "@/styles/design-system";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
-import { StickyNote, AlertCircle, FileText, MessageSquare, Plus, Check } from "lucide-react";
+import { StickyNote, AlertCircle, FileText, MessageSquare, Plus, Check, Tag } from "lucide-react";
 
 interface CreateNoteDialogProps {
   open: boolean;
@@ -20,6 +20,7 @@ interface CreateNoteDialogProps {
     title: string;
     content: string;
     importance: Importance;
+    category: string;
     observation: string;
   };
   setFormData: (data: any) => void;
@@ -78,25 +79,49 @@ export function CreateNoteDialog({
               {errors.title && <p className="text-xs text-red-500 font-medium">{errors.title}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="importance" className="text-sm font-bold flex items-center gap-2">
-                <AlertCircle className="h-3.5 w-3.5 text-brand" />
-                Prioridade
-              </Label>
-              <Select
-                value={formData.importance}
-                onValueChange={(value) => setFormData({ ...formData, importance: value as Importance })}
-              >
-                <SelectTrigger id="importance" className={ds.components.input.root}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Baixa</SelectItem>
-                  <SelectItem value="medium">Média</SelectItem>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="urgent">Urgente</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="importance" className="text-sm font-bold flex items-center gap-2">
+                  <AlertCircle className="h-3.5 w-3.5 text-brand" />
+                  Prioridade
+                </Label>
+                <Select
+                  value={formData.importance}
+                  onValueChange={(value) => setFormData({ ...formData, importance: value as Importance })}
+                >
+                  <SelectTrigger id="importance" className={ds.components.input.root}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Baixa</SelectItem>
+                    <SelectItem value="medium">Média</SelectItem>
+                    <SelectItem value="high">Alta</SelectItem>
+                    <SelectItem value="urgent">Urgente</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-sm font-bold flex items-center gap-2">
+                  <Tag className="h-3.5 w-3.5 text-brand" />
+                  Categoria
+                </Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
+                  <SelectTrigger id="category" className={ds.components.input.root}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Geral">Geral</SelectItem>
+                    <SelectItem value="Trabalho">Trabalho</SelectItem>
+                    <SelectItem value="Pessoal">Pessoal</SelectItem>
+                    <SelectItem value="Urgente">Urgente</SelectItem>
+                    <SelectItem value="Ideias">Ideias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>

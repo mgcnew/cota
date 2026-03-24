@@ -10,13 +10,15 @@ interface AnimatedTabContentProps {
   activeTab: string;
   children: ReactNode;
   className?: string;
+  direction?: "forward" | "backward";
 }
 
 export const AnimatedTabContent = memo(function AnimatedTabContent({ 
   value, 
   activeTab, 
   children, 
-  className = "" 
+  className = "",
+  direction = "forward"
 }: AnimatedTabContentProps) {
   const isActive = value === activeTab;
   const [shouldRender, setShouldRender] = useState(isActive);
@@ -40,8 +42,13 @@ export const AnimatedTabContent = memo(function AnimatedTabContent({
   return (
     <div
       className={cn(
-        "transition-opacity duration-150 ease-out will-change-[opacity]",
-        isVisible ? "opacity-100" : "opacity-0",
+        "transition-all duration-300 ease-out will-change-[opacity,transform]",
+        isVisible 
+          ? "opacity-100 translate-x-0" 
+          : cn(
+              "opacity-0",
+              direction === "forward" ? "translate-x-4" : "-translate-x-4"
+            ),
         className
       )}
     >

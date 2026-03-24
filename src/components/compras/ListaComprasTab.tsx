@@ -21,6 +21,7 @@ import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import { usePedidos } from "@/hooks/usePedidos";
 import { useToast } from "@/hooks/use-toast";
 import { ViewToggle } from "@/components/ui/view-toggle";
+import { SearchInput } from "@/components/ui/search-input";
 import { cn } from "@/lib/utils";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
@@ -170,36 +171,27 @@ export default function ListaComprasTab() {
 
 
       {/* Search and Controls */}
-      <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2 w-full">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-            <Input
-              placeholder="Buscar itens na lista..."
+      <div className="mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+          {/* Search Field */}
+          <div className="flex-1 max-w-xl">
+            <SearchInput
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={cn("pl-10 h-11", designSystem.components.input.root)}
+              onChange={setSearchQuery}
+              placeholder="Buscar itens na lista..."
             />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button
-            onClick={() => setShowAddDialog(true)}
-            className={cn("flex-1 sm:flex-none h-11 px-6", designSystem.components.button.primary)}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar à Lista
-          </Button>
-          <ViewToggle view={viewMode} onViewChange={setViewMode} className="hidden md:flex" />
+          <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+            <Button
+              onClick={() => setShowAddDialog(true)}
+              className={cn(designSystem.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Adicionar à Lista
+            </Button>
+            <ViewToggle view={viewMode} onViewChange={setViewMode} className="hidden md:flex" />
+          </div>
         </div>
       </div>
 

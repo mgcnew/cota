@@ -50,13 +50,13 @@ export const designSystem = {
         surface: {
             page: "bg-background", // Sincronizado com index.css
             card: "bg-card",       // Sincronizado com index.css
-            section: "bg-muted/30 dark:bg-card/50",
+            section: "bg-zinc-100/60 dark:bg-card/50",
             hover: "hover:bg-accent dark:hover:bg-zinc-800",
             active: "active:bg-accent/80 dark:active:bg-zinc-700"
         },
         border: {
             default: "border-border", // Sincronizado com index.css
-            subtle: "border-border/50 dark:border-zinc-900",
+            subtle: "border-zinc-200/70 dark:border-zinc-900",
             active: "border-primary",
             brand: "border-primary"
         }
@@ -148,7 +148,7 @@ export const designSystem = {
 
         // Cartões (Cards)
         card: {
-            root: "bg-white dark:bg-card/80 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200",
+            root: "bg-white dark:bg-card/80 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)] hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200",
             flat: "bg-zinc-50 dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl",
             interactive: "cursor-pointer active:scale-[0.99] transition-transform",
             header: "px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between",
@@ -236,16 +236,56 @@ export const designSystem = {
             container: "bg-background w-full", // Fundo do sistema para as linhas flutuarem
             header: "bg-transparent",
             headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
-            row: "bg-card border border-border/40 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md hover:scale-[1.002]",
+            headerWrapper: "flex items-center rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-4 border bg-white dark:bg-card/50 mb-3",
+            row: "bg-card border border-zinc-200/80 dark:border-border/40 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] hover:scale-[1.002] mb-1.5",
+            rowWrapper: "flex items-center px-4 py-3 transition-all duration-300",
             rowCompact: "group py-1.5 px-5 rounded-xl border transition-all duration-300 relative overflow-hidden",
             rowActive: "bg-brand/5 border-brand/20 ring-1 ring-brand/10", // Removido shadow neon
             cell: "p-0 align-middle", // Padrão 0 para que o container interno da linha controle o padding
+            
+            // Variantes de cores para Headers/Linhas (Substitui cores hardcoded)
+            accents: {
+                brand: {
+                    bg: "bg-brand/10 dark:bg-brand/20",
+                    border: "border-brand/20",
+                    text: "text-brand",
+                    icon: "text-brand"
+                },
+                orange: {
+                    bg: "bg-orange-50/80 dark:bg-orange-900/20",
+                    border: "border-orange-200/60 dark:border-orange-800/40",
+                    text: "text-orange-800 dark:text-orange-200",
+                    icon: "text-orange-500"
+                },
+                blue: {
+                    bg: "bg-blue-50/80 dark:bg-blue-900/20",
+                    border: "border-blue-200/60 dark:border-blue-800/40",
+                    text: "text-blue-800 dark:text-blue-200",
+                    icon: "text-blue-500"
+                }
+            },
             caption: "mt-4 text-sm text-muted-foreground",
             
             // Novos utilitários para padronização de cabeçalhos internos (Header de tabelas sem scroll)
-            headerContainer: "flex items-center shadow-sm px-4 py-4 border bg-zinc-50/50 dark:bg-card/50 rounded-xl mb-2",
+            headerContainer: "flex items-center shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-4 border bg-white dark:bg-card/50 rounded-xl mb-2",
             headerLabel: "uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400",
             headerIcon: "w-8 h-8 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0 text-zinc-500 dark:text-zinc-400"
+        },
+
+        // Visualização de Dados Interpolares (Textos e Valores padrão)
+        dataDisplay: {
+            money: "font-bold text-emerald-600 dark:text-emerald-400 tracking-tight", // Brand green para dinheiro
+            category: "inline-flex items-center text-[10px] uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-2 py-0.5 rounded-md", // Tom Indigo para diferenciar
+            highlight: "font-bold text-sm text-zinc-900 dark:text-zinc-50", // Texto principal destacado
+            secondary: "text-[11px] font-medium text-zinc-500 dark:text-zinc-400", // Informações de suporte (data, quantidade)
+            code: "font-mono text-[10px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-700", // Identificadores (SKU, IDs)
+            badge: {
+                quotes: {
+                    root: "bg-blue-500/10 border-blue-500/20 dark:bg-blue-500/5 dark:border-blue-500/10",
+                    icon: "h-3.5 w-3.5 text-blue-500",
+                    text: "font-bold text-blue-600 dark:text-blue-400 text-xs"
+                }
+            }
         },
 
         // Inputs & Forms

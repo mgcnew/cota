@@ -1,36 +1,44 @@
 import { memo } from "react";
 import { CSSSlideIn } from "@/components/ui/css-animation";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, MessageSquare, Clock, Edit, Trash2, CheckCircle2 } from "lucide-react";
+import { AlertCircle, MessageSquare, Clock, Edit, Trash2, CheckCircle2, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Note, Importance } from "@/hooks/useNotes";
 import { ds } from "@/styles/design-system";
 
-const importanceConfig = {
-  low: {
-    label: "Baixa",
+const categoryConfig: Record<string, { color: string; bg: string; border: string }> = {
+  "Geral": {
+    color: "text-zinc-500",
+    bg: "bg-zinc-50 dark:bg-zinc-900/40",
+    border: "border-zinc-200 dark:border-zinc-800",
+  },
+  "Trabalho": {
     color: "text-blue-500",
-    bg: "bg-blue-50 dark:bg-blue-900/20",
-    border: "border-blue-200 dark:border-blue-800",
+    bg: "bg-blue-50/50 dark:bg-blue-900/10",
+    border: "border-blue-100 dark:border-blue-800/50",
   },
-  medium: {
-    label: "Média",
-    color: "text-indigo-500",
-    bg: "bg-indigo-50 dark:bg-indigo-900/20",
-    border: "border-indigo-200 dark:border-indigo-800",
+  "Pessoal": {
+    color: "text-emerald-500",
+    bg: "bg-emerald-50/50 dark:bg-emerald-900/10",
+    border: "border-emerald-100 dark:border-emerald-800/50",
   },
-  high: {
-    label: "Alta",
-    color: "text-orange-500",
-    bg: "bg-orange-50 dark:bg-orange-900/20",
-    border: "border-orange-200 dark:border-orange-800",
-  },
-  urgent: {
-    label: "Urgente",
+  "Urgente": {
     color: "text-red-500",
-    bg: "bg-red-50 dark:bg-red-900/20",
-    border: "border-red-200 dark:border-red-800",
+    bg: "bg-red-50/50 dark:bg-red-900/10",
+    border: "border-red-100 dark:border-red-800/50",
   },
+  "Ideias": {
+    color: "text-amber-500",
+    bg: "bg-amber-50/50 dark:bg-amber-900/10",
+    border: "border-amber-100 dark:border-amber-800/50",
+  },
+};
+
+const importanceConfig = {
+  low: { label: "Baixa", color: "text-zinc-400" },
+  medium: { label: "Média", color: "text-indigo-500" },
+  high: { label: "Alta", color: "text-orange-500" },
+  urgent: { label: "Urgente", color: "text-red-500" },
 };
 
 interface NoteCardProps {
@@ -39,69 +47,105 @@ interface NoteCardProps {
   onEdit: (note: Note) => void;
   onResolve: (noteId: string) => void;
   onDelete: (noteId: string) => void;
+  onTogglePin: (note: Note) => void;
 }
 
-export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: NoteCardProps) => {
-  const config = importanceConfig[note.importance];
+export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogglePin }: NoteCardProps) => {
+  const config = categoryConfig[note.category || "Geral"];
+  const importance = importanceConfig[note.importance];
 
   return (
-    <CSSSlideIn direction="up" duration={300} delay={index * 50}>
+    <CSSSlideIn direction="up" duration={400} delay={index * 30}>
       <div className={cn(
         ds.components.card.root,
-        "group relative flex flex-col h-full hover:shadow-lg hover:shadow-brand/5 transition-all duration-300"
+        "group relative flex flex-col h-full transition-all duration-300 overflow-hidden",
+        "border-zinc-200/60 dark:border-zinc-800/60 hover:border-brand/40 shadow-none hover:shadow-xl hover:shadow-brand/5",
+        note.pinned && "ring-1 ring-brand/30 border-brand/30"
       )}>
+        {/* Category Accent Line */}
+        <div className={cn("absolute top-0 left-0 w-full h-1", config.color.replace("text-", "bg-"))} />
         
+        {/* Pin Button */}
+        <button
+          onClick={() => onTogglePin(note)}
+          className={cn(
+            "absolute top-3 right-3 p-1.5 rounded-lg transition-all z-10",
+            note.pinned 
+              ? "bg-brand text-zinc-950 opacity-100" 
+              : "text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          )}
+          title={note.pinned ? "Desafixar" : "Fixar"}
+        >
+          {note.pinned ? <PinOff className="h-3.5 w-3.5 fill-current" /> : <Pin className="h-3.5 w-3.5" />}
+        </button>
+
         {/* Header */}
-        <div className="p-5 pb-3 flex items-start justify-between gap-3">
-          <h3 className={cn(ds.typography.size.base, "font-bold text-foreground leading-tight line-clamp-2")}>
+        <div className="p-6 pb-2">
+          <div className="flex items-center gap-2 mb-2">
+            <span className={cn(
+              "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border",
+              config.color, config.bg, config.border
+            )}>
+              {note.category || "Geral"}
+            </span>
+            {note.importance !== "low" && (
+              <span className={cn("text-[9px] font-black uppercase tracking-widest flex items-center gap-1", importance.color)}>
+                <AlertCircle className="h-2.5 w-2.5" />
+                {importance.label}
+              </span>
+            )}
+          </div>
+          <h3 className={cn(ds.typography.size.base, "font-bold text-foreground leading-snug line-clamp-2 pr-6")}>
             {note.title}
           </h3>
-          
-          {/* Indicador de Status (Exclamação) */}
-          <div className={cn(
-            "flex items-center justify-center w-7 h-7 rounded-xl shrink-0 transition-colors border",
-            config.bg,
-            config.border
-          )}>
-            <AlertCircle className={cn("h-4 w-4", config.color)} />
-          </div>
         </div>
 
         {/* Content */}
-        <div className="px-5 py-2 flex-1">
-          <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap line-clamp-5">
+        <div className="px-6 py-2 flex-1">
+          <p className="text-sm text-muted-foreground/90 leading-relaxed whitespace-pre-wrap line-clamp-6">
             {note.content}
           </p>
           
           {note.observation && (
-            <div className="mt-4 pt-3 border-t border-border/50">
-              <div className="flex items-center gap-1.5 mb-1.5">
-                <MessageSquare className="h-3 w-3 text-brand" />
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Observação</span>
+            <div className="mt-4 pt-4 border-t border-border/40 relative">
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="p-1 rounded bg-brand/10">
+                  <MessageSquare className="h-2.5 w-2.5 text-brand" />
+                </div>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Alt. Observação</span>
               </div>
-              <p className="text-xs text-muted-foreground italic line-clamp-2">
+              <p className="text-xs text-muted-foreground/80 italic line-clamp-2 pl-2 border-l-2 border-brand/30">
                 {note.observation}
               </p>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="p-4 flex items-center justify-between mt-auto border-t border-transparent group-hover:border-border/50 transition-colors">
-          <div className="flex items-center text-[11px] font-semibold text-muted-foreground/70">
-            <Clock className="h-3.5 w-3.5 mr-1.5 text-brand/70" />
+        {/* Action Tray */}
+        <div className="p-4 px-6 flex items-center justify-between mt-auto bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-800/50">
+          <div className="flex items-center text-[10px] font-bold text-muted-foreground/60 tracking-wider">
+            <Clock className="h-3 w-3 mr-1.5 text-brand/60" />
             {new Date(note.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
           </div>
 
-          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onEdit(note)}
-              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-brand hover:bg-brand/10"
+              className="h-8 w-8 rounded-lg text-muted-foreground hover:text-brand hover:bg-zinc-100 dark:hover:bg-zinc-800"
               title="Editar"
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onResolve(note.id)}
+              className="h-8 w-8 rounded-lg text-emerald-600 hover:bg-emerald-500/10"
+              title="Concluir"
+            >
+              <CheckCircle2 className="h-3.5 w-3.5" />
             </Button>
             <Button
               variant="ghost"
@@ -110,16 +154,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete }: Note
               className="h-8 w-8 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-500/10"
               title="Excluir"
             >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onResolve(note.id)}
-              className="h-8 w-8 rounded-lg text-emerald-600 bg-emerald-500/5 dark:bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20"
-              title="Concluir"
-            >
-              <CheckCircle2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>

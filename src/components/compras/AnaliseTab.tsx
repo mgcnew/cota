@@ -15,6 +15,13 @@ import {
   ChevronDown, ChevronUp
 } from "lucide-react";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger
@@ -550,66 +557,143 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
   }, [quotes, orders]);
 
   return (
-    <ScrollArea className="h-[400px] pr-4">
-      <div className="space-y-2">
-        {combined.map((item, idx) => (
-          <div key={idx} className={cn(
-            "flex items-center justify-between p-4 rounded-xl border transition-all",
-            "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
-          )}>
-            <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg",
-                item.type === 'order' ? 'bg-brand/10 text-brand' : 'bg-muted text-muted-foreground'
-              )}>
-                {item.type === 'order' ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+    <div className="overflow-hidden custom-scrollbar">
+      <Table className={designSystem.components.table.root}>
+        <TableHeader className={designSystem.components.table.header}>
+          <TableRow className="hover:bg-transparent border-none">
+            <TableCell colSpan={4} className="px-1 pb-3 pt-0 border-none">
+              <div className={designSystem.components.table.headerContainer}>
+                <div className="w-[15%] flex items-center gap-3">
+                  <div className={designSystem.components.table.headerIcon}>
+                    <FileText className="h-4 w-4" />
+                  </div>
+                  <span className={designSystem.components.table.headerLabel}>Tipo</span>
+                </div>
+                <div className="w-[45%] pl-2 flex items-center gap-2">
+                  <span className={designSystem.components.table.headerLabel}>Fornecedor</span>
+                </div>
+                <div className="w-[20%] pl-2 flex items-center gap-2">
+                  <span className={designSystem.components.table.headerLabel}>Data</span>
+                </div>
+                <div className="w-[20%] text-right flex justify-end items-center px-2">
+                  <span className={designSystem.components.table.headerLabel}>Preço</span>
+                </div>
               </div>
-              <div>
-                <p className={cn("font-bold text-sm", designSystem.colors.text.primary)}>{item.supplier}</p>
-                <p className={cn("text-[10px] uppercase font-black tracking-widest", designSystem.colors.text.secondary, "opacity-50")}>
-                  {item.date.toLocaleDateString('pt-BR')} • {item.type === 'order' ? 'Pedido' : 'Cotação'}
-                </p>
-              </div>
-            </div>
-            <span className={cn("font-black italic text-base", designSystem.colors.text.primary)}>
-              R$ {item.price.toFixed(2)}
-            </span>
-          </div>
-        ))}
-      </div>
-    </ScrollArea>
+            </TableCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {combined.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic">
+                Nenhum histórico encontrado.
+              </TableCell>
+            </TableRow>
+          ) : (
+            combined.map((item, idx) => (
+              <TableRow key={idx} className="group border-none hover:bg-transparent">
+                <TableCell colSpan={4} className={designSystem.components.table.cell}>
+                  <div className={cn("flex items-center px-4 py-3 mb-1", designSystem.components.table.row)}>
+                    <div className="w-[15%] flex items-center gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg",
+                        item.type === 'order' ? 'bg-brand/10 text-brand' : 'bg-muted text-muted-foreground'
+                      )}>
+                        {item.type === 'order' ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+                      </div>
+                      <span className={cn("text-[10px] font-black uppercase tracking-widest", designSystem.colors.text.secondary, "opacity-50")}>
+                        {item.type === 'order' ? 'Pedido' : 'Cotação'}
+                      </span>
+                    </div>
+                    <div className="w-[45%] pl-2">
+                      <p className={cn("font-bold text-sm", designSystem.colors.text.primary)}>{item.supplier}</p>
+                    </div>
+                    <div className="w-[20%] pl-2">
+                      <p className={cn("text-xs font-medium", designSystem.colors.text.secondary)}>{item.date.toLocaleDateString('pt-BR')}</p>
+                    </div>
+                    <div className="w-[20%] text-right px-2">
+                      <span className={cn("font-black italic text-base", designSystem.colors.text.primary)}>
+                        R$ {item.price.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
 function OrderHistoryList({ orders }: { orders: any[] }) {
   return (
-    <div className="space-y-3">
-      {orders.map((order) => (
-        <div key={order.id} className={cn(
-          "p-5 rounded-2xl border transition-all",
-          "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
-        )}>
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">#ORD-{order.id.substring(0, 8)}</span>
-            <Badge variant="secondary" className="text-[10px] uppercase font-black tracking-widest bg-muted/50 text-muted-foreground border-border/50">{order.status}</Badge>
-          </div>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className={cn("text-2xl font-black tracking-tight", designSystem.colors.text.primary)}>
-                R$ {Number(order.total_value).toFixed(2)}
-              </p>
-              <p className={cn("text-[11px] font-bold flex items-center gap-1.5 mt-1 opacity-60", designSystem.colors.text.secondary)}>
-                <Calendar className="h-3 w-3" />
-                {new Date(order.order_date).toLocaleDateString('pt-BR')}
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
-              <Package className="h-3 w-3 text-muted-foreground" />
-              <span className="text-[11px] font-black text-muted-foreground uppercase tracking-wider">{order.order_items?.length} itens</span>
-            </div>
-          </div>
-        </div>
-      ))}
+    <div className="overflow-hidden custom-scrollbar">
+      <Table className={designSystem.components.table.root}>
+        <TableHeader className={designSystem.components.table.header}>
+          <TableRow className="hover:bg-transparent border-none">
+            <TableCell colSpan={5} className="px-1 pb-3 pt-0 border-none">
+              <div className={designSystem.components.table.headerContainer}>
+                <div className="w-[20%] flex items-center gap-3">
+                  <div className={designSystem.components.table.headerIcon}>
+                    <ShoppingCart className="h-4 w-4" />
+                  </div>
+                  <span className={designSystem.components.table.headerLabel}>ID / Status</span>
+                </div>
+                <div className="w-[40%] pl-2 flex items-center gap-2">
+                  <span className={designSystem.components.table.headerLabel}>Data</span>
+                </div>
+                <div className="w-[15%] pl-2 flex justify-center items-center gap-2">
+                  <span className={designSystem.components.table.headerLabel}>Itens</span>
+                </div>
+                <div className="w-[25%] text-right flex justify-end items-center px-2">
+                  <span className={designSystem.components.table.headerLabel}>Valor</span>
+                </div>
+              </div>
+            </TableCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {orders.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="py-12 text-center text-muted-foreground italic">
+                Nenhum pedido encontrado.
+              </TableCell>
+            </TableRow>
+          ) : (
+            orders.map((order) => (
+              <TableRow key={order.id} className="group border-none hover:bg-transparent">
+                <TableCell colSpan={5} className={designSystem.components.table.cell}>
+                  <div className={cn("flex items-center px-4 py-3 mb-1", designSystem.components.table.row)}>
+                    <div className="w-[20%] flex flex-col items-start gap-1">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50">#ORD-{order.id.substring(0, 8)}</span>
+                      <Badge variant="secondary" className="text-[9px] uppercase font-black tracking-widest bg-muted/50 text-muted-foreground border-border/50">{order.status}</Badge>
+                    </div>
+                    <div className="w-[40%] pl-2">
+                      <p className={cn("text-xs font-bold flex items-center gap-1.5 opacity-60", designSystem.colors.text.secondary)}>
+                        <Calendar className="h-3 w-3" />
+                        {new Date(order.order_date).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                    <div className="w-[15%] flex justify-center items-center pl-2">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+                        <Package className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{order.order_items?.length}</span>
+                      </div>
+                    </div>
+                    <div className="w-[25%] text-right px-2">
+                      <p className={cn("text-base font-black tracking-tight italic", designSystem.colors.text.primary)}>
+                        R$ {Number(order.total_value).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }
@@ -627,36 +711,71 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
   }, [orders, quotes]);
 
   return (
-    <div className="space-y-2">
-      {stats.map((s, idx) => (
-        <div key={idx} className={cn(
-          "flex items-center justify-between p-4 rounded-xl border transition-all",
-          "bg-card/50 border-border/40 hover:border-brand/30 hover:shadow-sm"
-        )}>
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] border transition-colors",
-              idx === 0 ? "bg-brand text-white border-brand" : "bg-muted text-muted-foreground border-border/50"
-            )}>
-              {idx + 1}
-            </div>
-            <div>
-              <span className={cn("font-bold text-sm", designSystem.colors.text.primary)}>{s.name}</span>
-              {idx === 0 && (
-                <p className="text-[10px] font-black text-brand uppercase tracking-widest">Melhor preço médio</p>
-              )}
-            </div>
-          </div>
-          <div className="text-right">
-            <p className={cn("font-black text-base italic", designSystem.colors.text.primary)}>
-              R$ {s.avg.toFixed(2)}
-            </p>
-            <p className={cn("text-[10px] font-black uppercase tracking-widest", designSystem.colors.text.secondary, "opacity-50")}>
-              {s.count} interações
-            </p>
-          </div>
-        </div>
-      ))}
+    <div className="overflow-hidden custom-scrollbar">
+      <Table className={designSystem.components.table.root}>
+        <TableHeader className={designSystem.components.table.header}>
+          <TableRow className="hover:bg-transparent border-none">
+            <TableCell colSpan={4} className="px-1 pb-3 pt-0 border-none">
+              <div className={designSystem.components.table.headerContainer}>
+                <div className="w-[10%] flex items-center gap-3">
+                  <span className={designSystem.components.table.headerLabel}>Pos</span>
+                </div>
+                <div className="w-[45%] pl-2 flex items-center gap-2">
+                  <span className={designSystem.components.table.headerLabel}>Fornecedor</span>
+                </div>
+                <div className="w-[20%] pl-2 flex items-center gap-2">
+                  <span className={designSystem.components.table.headerLabel}>Interações</span>
+                </div>
+                <div className="w-[25%] text-right flex justify-end items-center px-2">
+                  <span className={designSystem.components.table.headerLabel}>Preço Médio</span>
+                </div>
+              </div>
+            </TableCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {stats.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic">
+                Nenhuma informação encontrada.
+              </TableCell>
+            </TableRow>
+          ) : (
+            stats.map((s, idx) => (
+              <TableRow key={idx} className="group border-none hover:bg-transparent">
+                <TableCell colSpan={4} className={designSystem.components.table.cell}>
+                  <div className={cn("flex items-center px-4 py-3 mb-1", designSystem.components.table.row)}>
+                    <div className="w-[10%] flex items-center">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg flex items-center justify-center font-black text-[11px] border transition-colors",
+                        idx === 0 ? "bg-brand text-white border-brand" : "bg-muted text-muted-foreground border-border/50"
+                      )}>
+                        {idx + 1}
+                      </div>
+                    </div>
+                    <div className="w-[45%] pl-2">
+                      <span className={cn("font-bold text-sm block", designSystem.colors.text.primary)}>{s.name}</span>
+                      {idx === 0 && (
+                        <p className="text-[9px] font-black text-brand uppercase tracking-widest mt-0.5">Melhor Preço Médio</p>
+                      )}
+                    </div>
+                    <div className="w-[20%] pl-2">
+                      <p className={cn("font-medium text-xs opacity-70", designSystem.colors.text.secondary)}>
+                        {s.count} vezes
+                      </p>
+                    </div>
+                    <div className="w-[25%] text-right px-2">
+                      <p className={cn("font-black text-base italic", designSystem.colors.text.primary)}>
+                        R$ {s.avg.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

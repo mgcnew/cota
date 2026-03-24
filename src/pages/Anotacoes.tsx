@@ -6,6 +6,9 @@ import {
   StickyNote,
   CheckCircle2,
   Trash2,
+  Pin,
+  Tag,
+  Filter
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useAnotacoes } from "@/hooks/useAnotacoes";
@@ -14,6 +17,8 @@ import { CreateNoteDialog } from "@/components/notes/CreateNoteDialog";
 import { ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export default function Anotacoes() {
   const {
@@ -34,8 +39,27 @@ export default function Anotacoes() {
     handleEditNote,
     handleResolveNote,
     handleDeleteNote,
+    handleTogglePin,
     resetForm
   } = useAnotacoes();
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("Todas");
+  const categories = ["Todas", "Geral", "Trabalho", "Pessoal", "Urgente", "Ideias"];
+
+  const finalFilteredNotes = filteredNotes.filter(note => {
+    if (selectedCategory === "Todas") return true;
+    if (selectedCategory === "Geral") return !note.category || note.category === "Geral";
+    return note.category === selectedCategory;
+  });
+
+  const finalResolvedNotes = resolvedNotes.filter(note => {
+    if (selectedCategory === "Todas") return true;
+    if (selectedCategory === "Geral") return !note.category || note.category === "Geral";
+    return note.category === selectedCategory;
+  });
+
+  const pinnedNotes = finalFilteredNotes.filter(n => n.pinned);
+  const otherNotes = finalFilteredNotes.filter(n => !n.pinned);
 
   return (
     <PageWrapper>
@@ -57,14 +81,14 @@ export default function Anotacoes() {
           </div>
           
           {/* Unified Actions Bar */}
-          <div className="mb-6">
+          <div className="flex flex-col gap-6">
             <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
               {/* Search Field */}
               <div className="flex-1 max-w-xl">
                 <SearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder="Pesquisar anotações..."
+                  placeholder="Pesquisar em suas notas..."
                 />
               </div>
               
@@ -72,12 +96,34 @@ export default function Anotacoes() {
               <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
                 <Button
                   onClick={() => setShowCreateDialog(true)}
-                  className={cn(ds.components.button.primary, "h-11 px-6 shadow-lg shadow-brand/10 w-full sm:w-auto")}
+                  className={cn(ds.components.button.primary, "h-11 px-6 shadow-xl shadow-brand/20 w-full sm:w-auto font-bold")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Nova Anotação
+                  Criar Anotação
                 </Button>
               </div>
+            </div>
+
+            {/* Category Filter Bar */}
+            <div className="flex flex-wrap items-center gap-2 pb-2">
+              <div className="flex items-center gap-2 mr-2 text-muted-foreground">
+                <Filter className="h-3.5 w-3.5" />
+                <span className="text-[10px] font-black uppercase tracking-wider">Filtrar:</span>
+              </div>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-xl text-xs font-bold transition-all border",
+                    selectedCategory === cat
+                      ? "bg-brand text-zinc-950 border-brand shadow-lg shadow-brand/10"
+                      : "bg-zinc-100/50 dark:bg-zinc-900/50 text-muted-foreground border-transparent hover:border-zinc-300 dark:hover:border-zinc-700"
+                  )}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
@@ -104,20 +150,57 @@ export default function Anotacoes() {
           onSave={editingNote ? handleUpdateNote : handleCreateNote}
         />
 
-        {/* Notes Grid */}
-        {filteredNotes && filteredNotes.length > 0 ? (
-          <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }}>
-            {filteredNotes.map((note, index) => (
-              <NoteCard
-                key={note.id}
-                note={note}
-                index={index}
-                onEdit={handleEditNote}
-                onResolve={handleResolveNote}
-                onDelete={handleDeleteNote}
-              />
-            ))}
-          </ResponsiveGrid>
+        {/* Notes Sections */}
+        {finalFilteredNotes && finalFilteredNotes.length > 0 ? (
+          <div className="space-y-12">
+            {/* Pinned Section */}
+            {pinnedNotes.length > 0 && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2">
+                  <Pin className="h-4 w-4 text-brand fill-brand" />
+                  <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Notas Fixadas</h2>
+                </div>
+                <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }}>
+                  {pinnedNotes.map((note, index) => (
+                    <NoteCard
+                      key={note.id}
+                      note={note}
+                      index={index}
+                      onEdit={handleEditNote}
+                      onResolve={handleResolveNote}
+                      onDelete={handleDeleteNote}
+                      onTogglePin={handleTogglePin}
+                    />
+                  ))}
+                </ResponsiveGrid>
+              </div>
+            )}
+
+            {/* Other Notes Section */}
+            {otherNotes.length > 0 && (
+              <div className="space-y-6">
+                {pinnedNotes.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <StickyNote className="h-4 w-4 text-muted-foreground" />
+                    <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Outras Anotações</h2>
+                  </div>
+                )}
+                <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }}>
+                  {otherNotes.map((note, index) => (
+                    <NoteCard
+                      key={note.id}
+                      note={note}
+                      index={index + pinnedNotes.length}
+                      onEdit={handleEditNote}
+                      onResolve={handleResolveNote}
+                      onDelete={handleDeleteNote}
+                      onTogglePin={handleTogglePin}
+                    />
+                  ))}
+                </ResponsiveGrid>
+              </div>
+            )}
+          </div>
         ) : (
           !isLoading && (
             <div className={cn(ds.components.card.root, "p-12 border-dashed")}>
@@ -151,19 +234,19 @@ export default function Anotacoes() {
         )}
 
         {/* Resolved Section */}
-        {resolvedNotes && resolvedNotes.length > 0 && (
+        {finalResolvedNotes && finalResolvedNotes.length > 0 && (
           <div className="pt-12 mt-12 border-t border-border">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h2 className={cn(ds.typography.size.lg, "font-semibold text-foreground")}>
-                Concluídas ({resolvedNotes.length})
+                Concluídas ({finalResolvedNotes.length})
               </h2>
             </div>
             
             <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }} className="opacity-60 hover:opacity-100 transition-opacity duration-300">
-              {resolvedNotes.map((note) => (
+              {finalResolvedNotes.map((note) => (
                 <div key={note.id} className={cn(ds.components.card.root, "bg-muted/30 border-dashed hover:bg-muted/50 transition-all p-5")}>
                   <div className="flex justify-between items-start gap-4">
                     <div className="space-y-1 min-w-0">

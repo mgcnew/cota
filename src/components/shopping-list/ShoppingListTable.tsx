@@ -32,6 +32,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { designSystem } from "@/styles/design-system";
 import type { ShoppingListItem } from "@/hooks/useShoppingList";
 
 interface ShoppingListTableProps {
@@ -140,12 +141,12 @@ export function ShoppingListTable({
 
 
   return (
-    <div className="overflow-hidden">
-      <Table>
-        <thead>
-          <tr>
-            <td colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className="flex items-center bg-card border border-border rounded-xl shadow-sm px-4 py-4">
+    <div className="overflow-hidden custom-scrollbar">
+      <Table className={designSystem.components.table.root}>
+        <TableHeader className={designSystem.components.table.header}>
+          <TableRow className="hover:bg-transparent border-none">
+            <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
+              <div className={designSystem.components.table.headerContainer}>
                 <div className="w-[5%] flex items-center">
                   <Checkbox
                     checked={selectedItems.size === items.length && items.length > 0}
@@ -153,30 +154,30 @@ export function ShoppingListTable({
                   />
                 </div>
                 <div className="w-[25%] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-                    <Package className="h-4 w-4 text-muted-foreground" />
+                  <div className={designSystem.components.table.headerIcon}>
+                    <Package className="h-4 w-4" />
                   </div>
-                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Produto</span>
+                  <span className={designSystem.components.table.headerLabel}>Produto</span>
                 </div>
                 <div className="w-[12%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Qtd</span>
+                  <span className={designSystem.components.table.headerLabel}>Qtd</span>
                 </div>
                 <div className="w-[15%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Prioridade</span>
+                  <span className={designSystem.components.table.headerLabel}>Prioridade</span>
                 </div>
                 <div className="w-[13%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Preço Est.</span>
+                  <span className={designSystem.components.table.headerLabel}>Preço Est.</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Observações</span>
+                  <span className={designSystem.components.table.headerLabel}>Observações</span>
                 </div>
-                <div className="w-[10%] pl-2 flex justify-end items-center">
-                  <span className="uppercase tracking-wide text-xs font-semibold text-muted-foreground">Ações</span>
+                <div className="w-[10%] px-2 flex justify-end items-center">
+                  <span className={designSystem.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
-            </td>
-          </tr>
-        </thead>
+            </TableCell>
+          </TableRow>
+        </TableHeader>
         <TableBody>
           {items.map((item) => {
             const isEditing = editingId === item.id;
@@ -184,13 +185,12 @@ export function ShoppingListTable({
             const PriorityIcon = config.icon;
 
             return (
-              <TableRow key={item.id} className="group border-none">
-                <TableCell colSpan={7} className="px-1 py-1.5">
+              <TableRow key={item.id} className="group border-none hover:bg-transparent">
+                <TableCell colSpan={7} className={designSystem.components.table.cell}>
                   <div className={cn(
-                    "flex items-center px-4 py-3 bg-card rounded-xl border transition-colors duration-150",
-                    selectedItems.has(item.id) 
-                      ? "border-blue-300 dark:border-blue-700 bg-blue-50/50 dark:bg-blue-950/20" 
-                      : "border-border hover:bg-muted/50"
+                    "flex items-center px-4 py-3 mb-1",
+                    designSystem.components.table.row,
+                    selectedItems.has(item.id) ? designSystem.components.table.rowActive : ""
                   )}>
                     <div className="w-[5%] flex items-center">
                       <Checkbox

@@ -72,38 +72,13 @@ function Produtos() {
   const safeProducts = useMemo(() => products || [], [products]);
   const safeCategories = useMemo(() => categories || [], [categories]);
 
-  // Visibility Logic
-  const [hiddenProductIds, setHiddenProductIds] = useState<Set<string>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('hiddenProducts');
-      if (saved) {
-        try {
-          return new Set(JSON.parse(saved));
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-    return new Set();
-  });
+  const [activeTab, setActiveTab] = useState("all");
 
   useEffect(() => {
-    localStorage.setItem('hiddenProducts', JSON.stringify(Array.from(hiddenProductIds)));
-  }, [hiddenProductIds]);
-
-  const toggleProductVisibility = useCallback((productId: string) => {
-    setHiddenProductIds(prev => {
-      const next = new Set(prev);
-      if (next.has(productId)) {
-        next.delete(productId);
-      } else {
-        next.add(productId);
-      }
-      return next;
-    });
-  }, []);
-
-  const [activeTab, setActiveTab] = useState("all"); // 'all', 'active', 'hidden'
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
+    }
+  }, [loading, user]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -128,35 +103,19 @@ function Produtos() {
       const productCategory = (product.category || '').trim().toLowerCase();
       const matchesCategory = categoryNormalized === "all" || productCategory === categoryNormalized;
       
-      const isHidden = hiddenProductIds.has(product.id);
-      const matchesTab = 
-          activeTab === "all" ? true :
-          activeTab === "active" ? !isHidden :
-          activeTab === "hidden" ? isHidden : true;
-
-      return matchesSearch && matchesCategory && matchesTab;
+      return matchesSearch && matchesCategory;
     }).sort((a, b) => {
-      // Sort by visibility first (active first, hidden last)
-      const aHidden = hiddenProductIds.has(a.id);
-      const bHidden = hiddenProductIds.has(b.id);
-      if (aHidden !== bHidden) {
-        return aHidden ? 1 : -1;
-      }
-      
-      // Then sort by most recently modified
+      // Sort by most recently modified
       const aDate = new Date(a.updated_at || 0).getTime();
       const bDate = new Date(b.updated_at || 0).getTime();
       return bDate - aDate;
     });
-  }, [safeProducts, debouncedSearchQuery, selectedCategory, activeTab, hiddenProductIds]);
+  }, [safeProducts, debouncedSearchQuery, selectedCategory]);
 
   // Counts for tabs
   const counts = useMemo(() => {
-    const total = safeProducts.length;
-    const hidden = safeProducts.filter(p => hiddenProductIds.has(p.id)).length;
-    const active = total - hidden;
-    return { total, active, hidden };
-  }, [safeProducts, hiddenProductIds]);
+    return { total: safeProducts.length };
+  }, [safeProducts]);
 
   const safeFilteredProducts = filteredProducts;
   const paginatedData = paginate(safeFilteredProducts);
@@ -183,8 +142,7 @@ function Produtos() {
       status: getProductStatus(product),
       price: product.lastOrderPrice || 'R$ 0,00',
       bestSupplier: product.bestSupplier || 'N/A',
-      quotesCount: product.quotesCount || 0,
-      hidden: hiddenProductIds.has(product.id) ? 'Sim' : 'Não'
+      quotesCount: product.quotesCount || 0
     }));
 
     exportToCSV({
@@ -198,8 +156,7 @@ function Produtos() {
         status: 'Status',
         price: 'Preço',
         bestSupplier: 'Melhor Fornecedor',
-        quotesCount: 'Cotações',
-        hidden: 'Oculto'
+        quotesCount: 'Cotações'
       }
     });
 
@@ -207,7 +164,7 @@ function Produtos() {
       title: "Exportação realizada",
       description: `${exportData.length} produtos exportados com sucesso.`,
     });
-  }, [safeFilteredProducts, toast, exportToCSV, hiddenProductIds]);
+  }, [safeFilteredProducts, toast, exportToCSV]);
 
   const handleAddProduct = useCallback(() => {
     if (isMobile) {
@@ -369,22 +326,7 @@ function Produtos() {
             </div>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-            <TabsList className="bg-muted/50 p-1">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                Todos
-                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold">{counts.total}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="active" className="flex items-center gap-2">
-                Ativos
-                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{counts.active}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="hidden" className="flex items-center gap-2">
-                Ocultos
-                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400">{counts.hidden}</Badge>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="md:hidden mt-4" />
 
           <div className="w-full">
             <div>
@@ -406,8 +348,6 @@ function Produtos() {
                       <MobileProductCard
                         key={product.id}
                         product={product}
-                        isHidden={hiddenProductIds.has(product.id)}
-                        onToggleVisibility={toggleProductVisibility}
                         onEdit={handleEditProduct}
                         onDelete={handleDeleteProduct}
                         onHistory={handleHistoryProduct}
@@ -419,11 +359,9 @@ function Produtos() {
                   <div className="hidden md:block">
                     <ProductListDesktop
                       products={paginatedData.items}
-                      hiddenProductIds={hiddenProductIds}
                       onEdit={handleEditProduct}
                       onDelete={handleDeleteProduct}
                       onHistory={handleHistoryProduct}
-                      onToggleVisibility={toggleProductVisibility}
                     />
                   </div>
 

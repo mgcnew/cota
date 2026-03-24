@@ -184,13 +184,13 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         <Table className={ds.components.table.root}>
           <TableHeader className={ds.components.table.header}>
             <TableRow className="border-none hover:bg-transparent">
-              <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
-                <div className={ds.components.table.headerContainer}>
+              <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
+                <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
                   <div className="w-[14%] flex items-center gap-3">
-                    <div className={ds.components.table.headerIcon}>
-                      <ShoppingCart className="h-4 w-4" />
+                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
+                      <ShoppingCart className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
                     </div>
-                    <span className={ds.components.table.headerLabel}>Pedido</span>
+                    <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Pedido</span>
                   </div>
                   <div className="w-[18%] pl-2 flex items-center gap-2">
                     <span className={ds.components.table.headerLabel}>Fornecedor</span>
@@ -223,8 +223,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                 <TableRow key={order.id} className="group border-none hover:bg-transparent">
                   <TableCell colSpan={7} className={ds.components.table.cell}>
                     <div className={cn(
-                      "flex items-center px-4 py-3 mb-1",
                       ds.components.table.row,
+                      ds.components.table.rowWrapper,
                       isEntregue && ds.components.table.rowActive
                     )}>
                       {/* Pedido */}

@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import type { OrderData } from "@/hooks/usePedidosStats";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface PedidosListDesktopProps {
   pedidos: OrderData[];
@@ -32,31 +33,31 @@ export const PedidosListDesktop = memo(({
       <Table className={designSystem.components.table.root}>
         <TableHeader className={designSystem.components.table.header}>
           <TableRow className="hover:bg-transparent border-none">
-            <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className={cn("flex items-center shadow-sm px-4 py-4 border", designSystem.components.card.flat, designSystem.colors.border.subtle)}>
+            <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
+              <div className={cn(designSystem.components.table.headerWrapper, designSystem.components.table.accents.brand.bg, designSystem.components.table.accents.brand.border)}>
                 <div className="w-[15%] flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-100/50 dark:bg-zinc-800/50 flex items-center justify-center flex-shrink-0">
-                    <ShoppingCart className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", designSystem.components.table.accents.brand.bg)}>
+                    <ShoppingCart className={cn("h-4 w-4", designSystem.components.table.accents.brand.icon)} />
                   </div>
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Pedido</span>
+                  <span className={cn(designSystem.components.table.headerLabel, designSystem.components.table.accents.brand.text)}>Pedido</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Fornecedor</span>
+                  <span className={designSystem.components.table.headerLabel}>Fornecedor</span>
                 </div>
                 <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Status</span>
+                  <span className={designSystem.components.table.headerLabel}>Status</span>
                 </div>
                 <div className="w-[15%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Valor Total</span>
+                  <span className={designSystem.components.table.headerLabel}>Valor Total</span>
                 </div>
                 <div className="w-[12%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Itens</span>
+                  <span className={designSystem.components.table.headerLabel}>Itens</span>
                 </div>
                 <div className="w-[15%] pl-2 flex items-center gap-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Previsão Entrega</span>
+                  <span className={designSystem.components.table.headerLabel}>Previsão Entrega</span>
                 </div>
                 <div className="w-[11%] flex justify-end items-center gap-2 px-2">
-                  <span className="uppercase tracking-wide text-[10px] font-bold text-zinc-500 dark:text-zinc-400">Ações</span>
+                  <span className={designSystem.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
             </TableCell>
@@ -67,27 +68,31 @@ export const PedidosListDesktop = memo(({
             <TableRow key={pedido.id} className="group border-none hover:bg-transparent">
               <TableCell colSpan={7} className={designSystem.components.table.cell}>
                 <div className={cn(
-                  "flex items-center px-4 py-3 mb-1",
-                  designSystem.components.table.row
+                  designSystem.components.table.row,
+                  designSystem.components.table.rowWrapper
                 )}>
+                  {/* Pedido # */}
                   <div className="w-[15%] flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-border/40">
                       <ShoppingCart className="h-4 w-4 text-brand" />
                     </div>
                     <div>
-                      <span className={cn("font-bold text-sm block", designSystem.colors.text.primary)}>
+                      <span className={designSystem.components.dataDisplay.code}>
                         #{pedido.id.substring(0, 8)}
                       </span>
-                      <p className={cn("text-[10px] opacity-60", designSystem.colors.text.secondary)}>
+                      <p className={designSystem.components.dataDisplay.secondary}>
                         {pedido.dataPedido}
                       </p>
                     </div>
                   </div>
-                  <div className="w-[20%] pl-2 min-w-0">
-                    <span className={cn("font-bold text-sm truncate block", designSystem.colors.text.primary)}>
-                      {capitalize(pedido.fornecedor)}
-                    </span>
+
+                  {/* Fornecedor */}
+                  <div className="w-[20%] pl-2 min-w-0 flex flex-col">
+                    <span className={designSystem.components.dataDisplay.highlight}>{capitalize(pedido.fornecedor)}</span>
+                    <span className={designSystem.components.dataDisplay.secondary}>#{pedido.id.substring(0, 4)}</span>
                   </div>
+
+                  {/* Status Select */}
                   <div className="w-[12%] pl-2 flex justify-center">
                     <StatusSelect
                       value={pedido.status}
@@ -97,14 +102,21 @@ export const PedidosListDesktop = memo(({
                       disabled={pedido.status === 'entregue' || pedido.status === 'cancelado'}
                     />
                   </div>
+
+                  {/* Valor Total */}
                   <div className="w-[15%] pl-2">
-                    <span className={cn("font-bold text-sm text-brand")}>{pedido.total}</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <div className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                      <Package className="h-3.5 w-3.5 text-blue-500" />
-                      <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{pedido.itens}</span>
+                    <div className="flex flex-col">
+                      <span className={designSystem.components.dataDisplay.money}>
+                        {pedido.total}
+                      </span>
+                      <span className={designSystem.components.dataDisplay.secondary}>Data: {pedido.dataPedido}</span>
                     </div>
+                  </div>
+
+                  {/* Itens Tooltip */}
+                  <div className="w-[12%] pl-2 flex items-center gap-1.5">
+                    <span className={designSystem.components.dataDisplay.highlight}>{pedido.itens}</span>
+                    <span className={designSystem.components.dataDisplay.secondary}>prod.</span>
                     {pedido.produtos && pedido.produtos.length > 0 && (
                       <TooltipProvider>
                         <Tooltip>
@@ -123,12 +135,16 @@ export const PedidosListDesktop = memo(({
                       </TooltipProvider>
                     )}
                   </div>
-                  <div className={cn("w-[15%] pl-2 text-xs font-medium", designSystem.colors.text.secondary)}>
-                    <div className="flex items-center gap-1.5">
+
+                  {/* Entrega */}
+                  <div className="w-[15%] pl-2">
+                    <div className={cn("flex items-center gap-1.5", designSystem.components.dataDisplay.secondary)}>
                       <Truck className="h-3.5 w-3.5 opacity-50" />
                       {pedido.dataEntrega || '-'}
                     </div>
                   </div>
+
+                  {/* Ações */}
                   <div className="w-[11%] flex justify-end items-center px-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

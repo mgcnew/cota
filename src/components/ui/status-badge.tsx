@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { designSystem } from "@/styles/design-system";
 
 export type StatusType = 
   | "active" | "inactive" | "pending" | "completed" | "expired" | "cancelled"
@@ -15,54 +16,55 @@ interface StatusBadgeProps {
   customLabel?: string;
 }
 
-// Objeto estático - não recria a cada render
+const ds = designSystem.components;
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   // Ativos
-  active: { label: "Ativo", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
-  ativo: { label: "Ativo", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
-  ativa: { label: "Ativa", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
+  active: { label: "Ativo", className: ds.badge.success },
+  ativo: { label: "Ativo", className: ds.badge.success },
+  ativa: { label: "Ativa", className: ds.badge.success },
   
   // Inativos
-  inactive: { label: "Inativo", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700" },
-  inativo: { label: "Inativo", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700" },
+  inactive: { label: "Inativo", className: ds.badge.outline },
+  inativo: { label: "Inativo", className: ds.badge.outline },
   
   // Pendentes
-  pending: { label: "Pendente", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800" },
-  pendente: { label: "Pendente", className: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800" },
-  planejada: { label: "Planejada", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
+  pending: { label: "Pendente", className: ds.badge.secondary },
+  pendente: { label: "Pendente", className: ds.badge.secondary },
+  planejada: { label: "Planejada", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
   
   // Concluídos
-  completed: { label: "Concluído", className: "bg-primary/10 text-primary border-primary/20" },
-  concluido: { label: "Concluído", className: "bg-primary/10 text-primary border-primary/20" },
-  concluida: { label: "Concluída", className: "bg-primary/10 text-primary border-primary/20" },
-  finalizada: { label: "Finalizada", className: "bg-primary/10 text-primary border-primary/20" },
+  completed: { label: "Concluído", className: ds.badge.active },
+  concluido: { label: "Concluído", className: ds.badge.active },
+  concluida: { label: "Concluída", className: ds.badge.active },
+  finalizada: { label: "Finalizada", className: ds.badge.active },
   
   // Expirados/Cancelados
-  expired: { label: "Expirado", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
-  expirado: { label: "Expirado", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
-  expirada: { label: "Expirada", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
-  cancelled: { label: "Cancelado", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
-  cancelado: { label: "Cancelado", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
-  cancelada: { label: "Cancelada", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
+  expired: { label: "Expirado", className: ds.badge.destructive },
+  expirado: { label: "Expirado", className: ds.badge.destructive },
+  expirada: { label: "Expirada", className: ds.badge.destructive },
+  cancelled: { label: "Cancelado", className: ds.badge.destructive },
+  cancelado: { label: "Cancelado", className: ds.badge.destructive },
+  cancelada: { label: "Cancelada", className: ds.badge.destructive },
   
   // Em andamento
-  em_andamento: { label: "Em Andamento", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
+  em_andamento: { label: "Em Andamento", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
   
   // Estoque
-  baixo_estoque: { label: "Baixo Estoque", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800" },
-  sem_estoque: { label: "Sem Estoque", className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800" },
+  baixo_estoque: { label: "Baixo Estoque", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200" },
+  sem_estoque: { label: "Sem Estoque", className: ds.badge.destructive },
   
   // Pedidos
-  entregue: { label: "Entregue", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
-  enviado: { label: "Enviado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
-  confirmado: { label: "Confirmado", className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800" },
+  entregue: { label: "Entregue", className: ds.badge.success },
+  enviado: { label: "Enviado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
+  confirmado: { label: "Confirmado", className: ds.badge.success },
   
   // Produtos
-  cotado: { label: "Cotado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
-  sem_cotacao: { label: "Sem Cotação", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700" },
+  cotado: { label: "Cotado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
+  sem_cotacao: { label: "Sem Cotação", className: ds.badge.outline },
   
   // Pedidos
-  processando: { label: "Processando", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800" },
+  processando: { label: "Processando", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
 };
 
 const defaultConfig = { label: "Desconhecido", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" };

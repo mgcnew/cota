@@ -13,6 +13,8 @@ export interface Note {
   title: string;
   content: string;
   importance: Importance;
+  category?: string;
+  pinned: boolean;
   observation?: string;
   resolved: boolean;
   created_at: string;
@@ -23,6 +25,7 @@ export interface CreateNoteData {
   title: string;
   content: string;
   importance: Importance;
+  category?: string;
   observation?: string;
 }
 
@@ -31,6 +34,8 @@ export interface UpdateNoteData {
   title?: string;
   content?: string;
   importance?: Importance;
+  category?: string;
+  pinned?: boolean;
   observation?: string;
   resolved?: boolean;
 }
@@ -55,6 +60,7 @@ export function useNotes() {
         .from("notes")
         .select("*")
         .eq("company_id", currentCompany.id)
+        .order("pinned", { ascending: false })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -78,7 +84,9 @@ export function useNotes() {
           title: noteData.title,
           content: noteData.content,
           importance: noteData.importance,
+          category: noteData.category,
           observation: noteData.observation,
+          pinned: false,
           resolved: false,
         })
         .select()

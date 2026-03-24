@@ -45,31 +45,31 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
       <Table className={designSystem.components.table.root}>
         <TableHeader className={designSystem.components.table.header}>
           <TableRow className="hover:bg-transparent border-none">
-            <TableHead colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className={cn("flex items-center rounded-xl shadow-sm px-4 py-4 border border-border/40", designSystem.components.card.flat)}>
+            <TableHead colSpan={7} className="px-1 pb-0 pt-0 border-none">
+              <div className={cn(designSystem.components.table.headerWrapper, designSystem.components.table.accents.brand.bg, designSystem.components.table.accents.brand.border)}>
                 <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100/50 dark:bg-gray-800/50 flex items-center justify-center flex-shrink-0">
-                    <Building2 className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", designSystem.components.table.accents.brand.bg)}>
+                    <Building2 className={cn("h-4 w-4", designSystem.components.table.accents.brand.icon)} />
                   </div>
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Fornecedor</span>
+                  <span className={cn(designSystem.components.table.headerLabel, designSystem.components.table.accents.brand.text)}>Fornecedor</span>
                 </div>
                 <div className="w-[15%] px-2 flex justify-center items-center gap-2">
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Status</span>
+                  <span className={designSystem.components.table.headerLabel}>Status</span>
                 </div>
                 <div className="w-[15%] px-2 flex justify-center items-center gap-2">
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Limite</span>
+                  <span className={designSystem.components.table.headerLabel}>Limite</span>
                 </div>
                 <div className="hidden lg:flex w-[15%] px-2 justify-center items-center gap-2">
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Preço Médio</span>
+                  <span className={designSystem.components.table.headerLabel}>Preço Médio</span>
                 </div>
                 <div className="hidden lg:flex w-[10%] px-2 justify-center items-center gap-2">
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Cot.</span>
+                  <span className={designSystem.components.table.headerLabel}>Cot.</span>
                 </div>
                 <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Avaliação</span>
+                  <span className={designSystem.components.table.headerLabel}>Avaliação</span>
                 </div>
                 <div className="w-[5%] flex justify-end items-center px-2">
-                  <span className="uppercase tracking-wider text-[10px] font-bold text-gray-500 dark:text-gray-400">Ações</span>
+                  <span className={designSystem.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
             </TableHead>
@@ -80,21 +80,21 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
             <TableRow key={supplier.id} className="group border-none hover:bg-transparent">
               <TableCell colSpan={7} className={designSystem.components.table.cell}>
                 <div className={cn(
-                  "flex items-center px-4 py-3 mb-1",
-                  designSystem.components.table.row
+                  designSystem.components.table.row,
+                  designSystem.components.table.rowWrapper
                 )}>
                   <div className="w-[30%] flex items-center gap-3 pr-4 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 border border-border/40">
                       <Building2 className="h-4 w-4 text-brand" />
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className={cn("font-semibold text-sm truncate", designSystem.colors.text.primary)}>{capitalize(supplier.name)}</div>
-                      <div className={cn("text-xs truncate", designSystem.colors.text.secondary)}>{capitalize(supplier.contact)}</div>
+                    <div className="flex flex-col min-w-0">
+                      <span className={designSystem.components.dataDisplay.highlight}>{capitalize(supplier.name)}</span>
+                      <span className={designSystem.components.dataDisplay.secondary}>{supplier.contact || "Sem contato"}</span>
                     </div>
                   </div>
 
                   <div className="w-[15%] px-2 flex justify-center items-center">
-                    <StatusBadge status={supplier.status} />
+                    <StatusBadge status={supplier.status === 'ativo' ? 'active' : supplier.status === 'inativo' ? 'inactive' : supplier.status as any} />
                   </div>
 
                   <div className="w-[15%] px-2 flex justify-center items-center">
@@ -106,9 +106,9 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                   </div>
 
                   <div className="hidden lg:flex w-[10%] px-2 justify-center items-center">
-                    <div className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                      <FileText className="h-3.5 w-3.5 text-blue-500" />
-                      <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{supplier.totalQuotes}</span>
+                    <div className={cn("flex items-center gap-1 px-2.5 py-1 rounded-lg border", designSystem.components.dataDisplay.badge.quotes.root)}>
+                      <FileText className={designSystem.components.dataDisplay.badge.quotes.icon} />
+                      <span className={designSystem.components.dataDisplay.badge.quotes.text}>{supplier.totalQuotes}</span>
                     </div>
                   </div>
 

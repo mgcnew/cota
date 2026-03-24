@@ -16,6 +16,7 @@ export function useAnotacoes() {
     title: "",
     content: "",
     importance: "medium" as Importance,
+    category: "Geral",
     observation: "",
   });
 
@@ -71,10 +72,11 @@ export function useAnotacoes() {
       title: formData.title.trim(),
       content: formData.content.trim(),
       importance: formData.importance,
+      category: formData.category,
       observation: formData.observation?.trim() || undefined,
     });
 
-    setFormData({ title: "", content: "", importance: "medium", observation: "" });
+    setFormData({ title: "", content: "", importance: "medium", category: "Geral", observation: "" });
     setErrors({});
     startTransition(() => {
       setShowCreateDialog(false);
@@ -98,12 +100,13 @@ export function useAnotacoes() {
       title: formData.title.trim(),
       content: formData.content.trim(),
       importance: formData.importance,
+      category: formData.category,
       observation: formData.observation?.trim() || undefined,
     });
 
     startTransition(() => {
       setEditingNote(null);
-      setFormData({ title: "", content: "", importance: "medium", observation: "" });
+      setFormData({ title: "", content: "", importance: "medium", category: "Geral", observation: "" });
       setErrors({});
       setShowCreateDialog(false); // Close dialog after update
     });
@@ -116,11 +119,19 @@ export function useAnotacoes() {
         title: note.title,
         content: note.content,
         importance: note.importance,
+        category: note.category || "Geral",
         observation: note.observation || "",
       });
       setShowCreateDialog(true); // Open dialog for editing
     });
   }, []);
+
+  const handleTogglePin = useCallback(async (note: Note) => {
+    await updateNote.mutateAsync({
+      id: note.id,
+      pinned: !note.pinned
+    });
+  }, [updateNote]);
 
   const handleResolveNote = useCallback(async (noteId: string) => {
     await toggleResolve.mutateAsync(noteId);
@@ -133,7 +144,7 @@ export function useAnotacoes() {
 
   const resetForm = useCallback(() => {
     startTransition(() => {
-      setFormData({ title: "", content: "", importance: "medium", observation: "" });
+      setFormData({ title: "", content: "", importance: "medium", category: "Geral", observation: "" });
       setEditingNote(null);
       setErrors({});
     });
@@ -158,6 +169,7 @@ export function useAnotacoes() {
     handleEditNote,
     handleResolveNote,
     handleDeleteNote,
+    handleTogglePin,
     resetForm
   };
 }

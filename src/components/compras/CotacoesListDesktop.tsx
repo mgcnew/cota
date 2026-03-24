@@ -9,6 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Quote } from "@/hooks/useCotacoes";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+import { StatusBadge } from '@/components/ui/status-badge';
 
 interface CotacoesListDesktopProps {
   cotacoes: Quote[];
@@ -34,13 +35,13 @@ export const CotacoesListDesktop = memo(({
       <Table className={designSystem.components.table.root}>
         <TableHeader className={designSystem.components.table.header}>
           <TableRow className="hover:bg-transparent border-none">
-            <TableCell colSpan={7} className="px-1 pb-3 pt-0 border-none">
-              <div className={designSystem.components.table.headerContainer}>
+            <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
+              <div className={cn(designSystem.components.table.headerWrapper, designSystem.components.table.accents.brand.bg, designSystem.components.table.accents.brand.border)}>
                 <div className="w-[15%] flex items-center gap-3">
-                  <div className={designSystem.components.table.headerIcon}>
-                    <ClipboardList className="h-4 w-4" />
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", designSystem.components.table.accents.brand.bg)}>
+                    <ClipboardList className={cn("h-4 w-4", designSystem.components.table.accents.brand.icon)} />
                   </div>
-                  <span className={designSystem.components.table.headerLabel}>Cotação</span>
+                  <span className={cn(designSystem.components.table.headerLabel, designSystem.components.table.accents.brand.text)}>Cotação</span>
                 </div>
                 <div className="w-[18%] pl-2 flex items-center gap-2">
                   <span className={designSystem.components.table.headerLabel}>Produto</span>
@@ -74,22 +75,27 @@ export const CotacoesListDesktop = memo(({
               <TableRow key={cotacao.id} className="group border-none hover:bg-transparent">
                 <TableCell colSpan={7} className={designSystem.components.table.cell}>
                   <div className={cn(
-                    "flex items-center px-4 py-3 mb-1",
-                    designSystem.components.table.row
+                    designSystem.components.table.row,
+                    designSystem.components.table.rowWrapper
                   )}>
+                    {/* Cotação # */}
                     <div className="w-[15%] flex items-center gap-3">
                       <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-border/40">
                         <ClipboardList className="h-4 w-4 text-brand" />
                       </div>
-                      <span className={cn("font-bold text-sm", designSystem.colors.text.primary)}>
+                      <span className={designSystem.components.dataDisplay.code}>
                         #{cotacaoNumero.toString().padStart(4, '0')}
                       </span>
                     </div>
+
+                    {/* Resumo do Produto */}
                     <div className="w-[18%] pl-2 min-w-0">
-                      <CapitalizedText className={cn("font-bold text-sm truncate block", designSystem.colors.text.primary)}>
+                      <CapitalizedText className={cn(designSystem.components.dataDisplay.highlight, "truncate block")}>
                         {cotacao.produtoResumo || cotacao.produto}
                       </CapitalizedText>
                     </div>
+
+                    {/* Status Select */}
                     <div className="w-[12%] pl-2 flex justify-center">
                       <StatusSelect
                         value={cotacao.status}
@@ -99,18 +105,26 @@ export const CotacoesListDesktop = memo(({
                         disabled={cotacao.status === 'finalizada'}
                       />
                     </div>
+
+                    {/* Melhor Preço */}
                     <div className="w-[14%] pl-2 min-w-0">
-                      <span className="font-bold text-emerald-500 text-sm">{cotacao.melhorPreco || 'R$ 0,00'}</span>
-                      <p className={cn("text-xs truncate opacity-70", designSystem.colors.text.secondary)}>{cotacao.melhorFornecedor || '-'}</p>
-                    </div>
-                    <div className="w-[12%] pl-2">
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20 w-fit">
-                        <Building2 className="h-3.5 w-3.5 text-blue-500" />
-                        <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{cotacao.fornecedores}</span>
+                      <div className="flex flex-col">
+                        <span className={designSystem.components.dataDisplay.money}>{cotacao.melhorPreco || 'R$ 0,00'}</span>
+                        <p className={cn("truncate opacity-70", designSystem.components.dataDisplay.secondary)}>{cotacao.melhorFornecedor || '-'}</p>
                       </div>
                     </div>
+
+                    {/* Contagem de Fornecedores */}
+                    <div className="w-[12%] pl-2">
+                      <div className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border w-fit", designSystem.components.dataDisplay.badge.quotes.root)}>
+                        <Building2 className={designSystem.components.dataDisplay.badge.quotes.icon} />
+                        <span className={designSystem.components.dataDisplay.badge.quotes.text}>{cotacao.fornecedores}</span>
+                      </div>
+                    </div>
+
+                    {/* Itens Tooltip */}
                     <div className="w-[8%] pl-2 flex items-center gap-1.5">
-                      <span className={cn("text-sm font-bold", designSystem.colors.text.primary)}>{cotacao.produtosLista?.length || 0}</span>
+                      <span className={designSystem.components.dataDisplay.highlight}>{cotacao.produtosLista?.length || 0}</span>
                       {cotacao.produtosLista && cotacao.produtosLista.length > 0 && (
                         <TooltipProvider>
                           <Tooltip>
@@ -129,12 +143,16 @@ export const CotacoesListDesktop = memo(({
                         </TooltipProvider>
                       )}
                     </div>
-                    <div className={cn("w-[11%] pl-2 text-xs font-medium", designSystem.colors.text.secondary)}>
-                      <div className="flex items-center gap-1.5">
+
+                    {/* Data de Prazo */}
+                    <div className="w-[11%] pl-2">
+                      <div className={cn("flex items-center gap-1.5", designSystem.components.dataDisplay.secondary)}>
                         <Calendar className="h-3 w-3 opacity-50" />
                         {cotacao.dataFim || '-'}
                       </div>
                     </div>
+
+                    {/* Ações */}
                     <div className="w-[10%] flex justify-end items-center px-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

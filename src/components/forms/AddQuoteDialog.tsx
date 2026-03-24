@@ -176,6 +176,23 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [isSubmitting, setIsSubmitting] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
+  const prevTabIndexRef = useRef(0);
+
+  const tabs = useMemo(() => [
+    { id: "produtos", label: "Produtos", icon: Package },
+    { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Clock },
+    { id: "detalhes", label: "Detalhes", icon: FileText }
+  ], []);
+
+  const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
+
+  const changeTab = (newTabId: string) => {
+    const newIndex = tabs.findIndex(t => t.id === newTabId);
+    setDirection(newIndex > currentTabIndex ? "forward" : "backward");
+    prevTabIndexRef.current = currentTabIndex;
+    setActiveTab(newTabId);
+  };
 
   // Estados para o novo formulário de produto único
   const [newProductQuantity, setNewProductQuantity] = useState("");
@@ -323,7 +340,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       e.preventDefault();
       const tabIndex = parseInt(e.key) - 1;
       if (tabs[tabIndex]) {
-        setActiveTab(tabs[tabIndex].id);
+        changeTab(tabs[tabIndex].id);
       }
     }
   };
@@ -344,6 +361,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     } else {
       // Reset ao fechar
       setActiveTab("produtos");
+      prevTabIndexRef.current = 0;
+      setDirection("forward");
       setSelectedProduct(null);
       setNewProductQuantity("");
       setNewProductUnit("");
@@ -527,7 +546,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       form.reset();
       setSelectedSuppliers([]);
       setSupplierSearch("");
-      setActiveTab("produtos");
+      changeTab("produtos");
 
       if (!keepOpen) {
         setOpen(false);
@@ -616,13 +635,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     )
     : [];
 
-  const tabs = [
-    { id: "produtos", label: "Produtos", icon: Package },
-    { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Clock },
-    { id: "detalhes", label: "Detalhes", icon: FileText }
-  ];
-
-  const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
   const progress = ((currentTabIndex + 1) / tabs.length) * 100;
 
   const canProceedToNext = () => {
@@ -645,13 +657,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   const handleNext = () => {
     if (currentTabIndex < tabs.length - 1) {
-      setActiveTab(tabs[currentTabIndex + 1].id);
+      changeTab(tabs[currentTabIndex + 1].id);
     }
   };
 
   const handlePrevious = () => {
     if (currentTabIndex > 0) {
-      setActiveTab(tabs[currentTabIndex - 1].id);
+      changeTab(tabs[currentTabIndex - 1].id);
     }
   };
 
@@ -715,9 +727,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 <AnimatedTabContent
                   value={activeTab}
                   activeTab={activeTab}
+                  direction={direction}
                   className="h-full"
                 >
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full">
+                  <Tabs value={activeTab} onValueChange={changeTab} className="w-full h-full">
                     {/* Produtos Tab */}
                     <TabsContent value="produtos" className="h-full m-0">
                       <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
@@ -1416,14 +1429,26 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               {/* Footer Fixo */}
               <div className={cn(ds.components.modal.footer, "flex-shrink-0")}>
                 <div className="flex gap-2 justify-end">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setOpen(false)}
-                    className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
-                  >
-                    Cancelar
-                  </Button>
+                  {currentTabIndex > 0 ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handlePrevious}
+                      className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" />
+                      Voltar
+                    </Button>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setOpen(false)}
+                      className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
+                    >
+                      Cancelar
+                    </Button>
+                  )}
 
                   {currentTabIndex === tabs.length - 1 ? (
                     <Button
