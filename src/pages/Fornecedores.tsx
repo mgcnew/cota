@@ -4,13 +4,14 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useBreakpoint } from "@/hooks/useBreakpoint";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye } from "lucide-react";
+import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye } from "lucide-material";
+import { Building2 as Building2Icon, Plus as PlusIcon, TrendingUp as TrendingUpIcon, DollarSign as DollarSignIcon, FileText as FileTextIcon, MoreVertical as MoreVerticalIcon, Edit as EditIcon, Trash2 as Trash2Icon, Upload as UploadIcon, Eye as EyeIcon } from "lucide-react";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -61,6 +62,7 @@ interface Supplier {
   phone?: string;
   email?: string;
   address?: string;
+  updated_at?: string;
 }
 
 type SupplierFormData = {
@@ -73,14 +75,11 @@ type SupplierFormData = {
   status: "active" | "inactive" | "pending";
 };
 
-// Virtualization threshold for supplier list
-const VIRTUALIZATION_THRESHOLD = 15;
-
 function Fornecedores() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading } = useAuth();
   const { canViewSensitiveData } = useUserRole();
-  const { isMobile } = useBreakpoint();
+  const isMobile = useIsMobile();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
@@ -220,29 +219,17 @@ function Fornecedores() {
     );
   }
 
-  // Render mobile card with VirtualList for lists > 15 items (Requirement 4.5)
-  const renderMobileSupplierCard = (supplier: Supplier, index: number, style: React.CSSProperties) => (
-    <div style={style} className="pb-3">
-      <ExpandableSupplierCard
-        supplier={supplier}
-        onDelete={setDeletingSupplier}
-        onWhatsApp={openWhatsApp}
-        renderRating={renderNumericRating}
-      />
-    </div>
-  );
-
   return (
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <PullToRefresh onRefresh={invalidateCache} className="h-full">
+        <PullToRefresh onRefresh={invalidateCache} className="h-screen w-full">
           <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
           {/* Page Header */}
           <div className="flex items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-                <Building2 className="h-6 w-6 text-brand" />
+                <Building2Icon className="h-6 w-6 text-brand" />
               </div>
               <div>
                 <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
@@ -260,7 +247,7 @@ function Fornecedores() {
             <MetricCard
               title="Fornecedores"
               value={stats.total}
-              icon={Building2}
+              icon={Building2Icon}
               trend={{ value: "+15", label: "novos este mês", type: "positive" }}
               variant="info"
               className="hover:scale-[1.02] transition-transform"
@@ -268,7 +255,7 @@ function Fornecedores() {
             <MetricCard
               title="Ativos"
               value={stats.active}
-              icon={TrendingUp}
+              icon={TrendingUpIcon}
               trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
               variant="success"
               className="hover:scale-[1.02] transition-transform"
@@ -276,7 +263,7 @@ function Fornecedores() {
             <MetricCard
               title="Limite Total"
               value={stats.totalLimit}
-              icon={DollarSign}
+              icon={DollarSignIcon}
               trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
               variant="default"
               className="hover:scale-[1.02] transition-transform"
@@ -284,7 +271,7 @@ function Fornecedores() {
             <MetricCard
               title="Cotações"
               value={stats.activeQuotes}
-              icon={FileText}
+              icon={FileTextIcon}
               trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
               variant="warning"
               className="hover:scale-[1.02] transition-transform"
@@ -323,7 +310,7 @@ function Fornecedores() {
                   onClick={() => importSuppliersRef.current?.click()}
                   className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
                 >
-                  <Upload className="h-4 w-4 mr-2" />
+                  <UploadIcon className="h-4 w-4 mr-2" />
                   <span>Importar</span>
                 </Button>
                 
@@ -332,7 +319,7 @@ function Fornecedores() {
                   onClick={() => addSupplierRef.current?.click()}
                   className={cn(designSystem.components.button.primary, "h-11 md:flex px-6 w-full sm:w-auto")}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
+                  <PlusIcon className="h-4 w-4 mr-2" />
                   <span>Novo Fornecedor</span>
                 </Button>
               </div>
@@ -348,7 +335,7 @@ function Fornecedores() {
                       <div className="space-y-2 sm:space-y-3 flex-1">
                         <div className="flex items-center gap-2 sm:gap-3">
                           <div className="p-2 rounded-lg bg-primary/10 md:group-hover:bg-primary/20 md:transition-colors">
-                            <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                            <Building2Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <CardTitle className="text-base font-semibold truncate">
@@ -367,7 +354,7 @@ function Fornecedores() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
+                            <MoreVerticalIcon className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -376,14 +363,14 @@ function Fornecedores() {
                             supplierId={supplier.id}
                             trigger={
                               <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <Eye className="h-4 w-4 mr-2" />
+                                <EyeIcon className="h-4 w-4 mr-2" />
                                 Ver Histórico
                               </DropdownMenuItem>
                             }
                           />
                           {!isMobile && (
                             <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                              <Edit className="h-4 w-4 mr-2" />
+                              <EditIcon className="h-4 w-4 mr-2" />
                               Editar
                             </DropdownMenuItem>
                           )}
@@ -391,7 +378,7 @@ function Fornecedores() {
                             className="text-destructive focus:text-destructive"
                             onClick={() => setDeletingSupplier(supplier)}
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
+                            <Trash2Icon className="h-4 w-4 mr-2" />
                             Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -403,21 +390,21 @@ function Fornecedores() {
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <DollarSign className="h-3.5 w-3.5" />
+                          <DollarSignIcon className="h-3.5 w-3.5" />
                           <span className="text-xs">Limite</span>
                         </div>
                         <span className="text-sm font-medium">{supplier.limit}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <TrendingUp className="h-3.5 w-3.5" />
+                          <TrendingUpIcon className="h-3.5 w-3.5" />
                           <span className="text-xs">Preço Médio</span>
                         </div>
                         <span className="text-sm font-medium">{supplier.avgPrice}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <FileText className="h-3.5 w-3.5" />
+                          <FileTextIcon className="h-3.5 w-3.5" />
                           <span className="text-xs">Cotações</span>
                         </div>
                         <span className="text-sm font-medium">{supplier.totalQuotes}</span>
@@ -426,7 +413,7 @@ function Fornecedores() {
                       <div className="pt-2.5">
                         <AddQuoteDialog onAdd={handleAddQuote} trigger={
                           <Button size="sm" variant="outline" className="w-full h-9 transition-smooth hover:bg-muted">
-                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                            <PlusIcon className="h-3.5 w-3.5 mr-1.5" />
                             Nova Cotação
                           </Button>
                         } />
@@ -439,31 +426,20 @@ function Fornecedores() {
           ) : (
             <Card className="border-0 bg-transparent">
               <CardContent className="p-0">
-                {/* Mobile Cards View with Expandable Details and Virtualization (Requirements 4.2, 4.5) */}
+                {/* Mobile Cards View */}
                 <div className="md:hidden">
-                  {paginatedData.items.length > VIRTUALIZATION_THRESHOLD ? (
-                    <VirtualList
-                      items={paginatedData.items}
-                      itemHeight={180}
-                      threshold={VIRTUALIZATION_THRESHOLD}
-                      height={600}
-                      renderItem={renderMobileSupplierCard}
-                      className="p-2"
-                    />
-                  ) : (
-                    <div className="space-y-3 p-2">
-                      {paginatedData.items.map(supplier => (
-                        <ExpandableSupplierCard
-                          key={supplier.id}
-                          supplier={supplier}
-                          onDelete={setDeletingSupplier}
-                          onWhatsApp={openWhatsApp}
-                          onViewHistory={setHistorySupplier}
-                          renderRating={renderNumericRating}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  <div className="space-y-3 p-2 pb-24">
+                    {filteredSuppliers.map(supplier => (
+                      <ExpandableSupplierCard
+                        key={supplier.id}
+                        supplier={supplier}
+                        onDelete={setDeletingSupplier}
+                        onWhatsApp={openWhatsApp}
+                        onViewHistory={setHistorySupplier}
+                        renderRating={renderNumericRating}
+                      />
+                    ))}
+                  </div>
                 </div>
 
                 {/* Desktop Table View */}
@@ -493,11 +469,11 @@ function Fornecedores() {
 
           {filteredSuppliers.length === 0 && (
             <EmptyState
-              icon={Building2}
+              icon={Building2Icon}
               title="Nenhum fornecedor encontrado"
               description="Tente ajustar os filtros ou adicione novos fornecedores"
               actionLabel="Adicionar Fornecedor"
-              actionIcon={Plus}
+              actionIcon={PlusIcon}
               onAction={!isMobile ? () => addSupplierRef.current?.click() : undefined}
             />
           )}
