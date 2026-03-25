@@ -162,6 +162,8 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
     setMobileMenuOpen(false);
   }, []);
 
+  const menuItems = useMemo(() => allMenuItems, []);
+
 
   const SidebarContent = ({
     expanded = true,
@@ -417,23 +419,23 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden fixed top-3 left-3 z-[100] h-11 w-11 rounded-2xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl active:scale-90 transition-all group overflow-hidden"
+            aria-label="Menu"
+            className="md:hidden fixed top-3 left-3 z-[100] h-12 w-12 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/5 shadow-xl active:scale-90 transition-all group overflow-hidden touch-manipulation"
           >
-            <div className="relative w-6 h-6 flex flex-col justify-center items-center gap-1.5">
+            <div className="relative w-6 h-6">
               <span className={cn(
-                "w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-in-out origin-center",
-                mobileMenuOpen ? "rotate-45 translate-y-1" : ""
+                "absolute top-1.5 left-0 w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-out",
+                mobileMenuOpen ? "translate-y-1.5 rotate-45" : ""
               )} />
               <span className={cn(
-                "w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-in-out",
+                "absolute top-3 left-0 w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-out",
                 mobileMenuOpen ? "opacity-0 -translate-x-2" : "opacity-100"
               )} />
               <span className={cn(
-                "w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-in-out origin-center",
-                mobileMenuOpen ? "-rotate-45 -translate-y-1" : ""
+                "absolute top-4.5 left-0 w-6 h-0.5 bg-foreground rounded-full transition-all duration-200 ease-out",
+                mobileMenuOpen ? "top-[1.125rem] -rotate-45" : "top-[1.125rem]"
               )} />
             </div>
-            <div className="absolute inset-0 bg-brand/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Button>
         </SheetTrigger>
         <SheetContent
@@ -469,9 +471,9 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             </div>
 
             {/* Mobile Menu Items - Focused Layout */}
-            <nav className="flex-1 py-4 px-4 overflow-y-auto custom-scrollbar">
-              <div className="space-y-1.5 px-1">
-                {allMenuItems.map((item) => {
+            <nav className="flex-1 py-4 px-4 overflow-y-auto overscroll-contain custom-scrollbar">
+              <div className="space-y-1 px-1">
+                {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = item.url === "/dashboard"
                     ? location.pathname === "/dashboard"
@@ -483,18 +485,18 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                       to={item.url}
                       onClick={handleMobileNavigation}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 relative group",
-                        "active:scale-[0.97]",
+                        "flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-150 relative",
+                        "active:scale-[0.98] active:bg-muted/30",
                         isActive
-                          ? "bg-brand/10 text-brand font-bold shadow-sm"
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                          ? "bg-brand/10 text-brand font-bold"
+                          : "text-muted-foreground"
                       )}
                     >
                       {isActive && (
                         <div className="absolute left-0 w-1 h-6 bg-brand rounded-r-full" />
                       )}
-                      <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-brand" : "opacity-80")} />
-                      <span className="text-sm tracking-wide">{item.title}</span>
+                      <Icon className={cn("w-5 h-5", isActive ? "text-brand" : "opacity-80")} />
+                      <span className="text-[15px] tracking-tight">{item.title}</span>
                     </NavLink>
                   );
                 })}
