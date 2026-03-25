@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { 
   ChevronDown, ChevronUp, History, Package, Trash2, ClipboardList, 
-  TrendingUp, TrendingDown, Minus, Star 
+  TrendingUp, TrendingDown, Minus, Star, Edit 
 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -105,6 +105,19 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
               </div>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="h-9 w-9 p-0 flex-shrink-0 active:scale-95 transition-transform"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+            >
+              <Edit className="h-4 w-4 text-gray-500" />
+            </Button>
+          </div>
         </div>
         
         {/* Info compacta em linha */}
@@ -126,17 +139,17 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
       {/* Expand/Collapse Button */}
       <CollapsibleTrigger asChild>
         <button
-          className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[40px]"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-gray-50/50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[48px]"
         >
           {isExpanded ? (
             <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Menos detalhes</span>
+              <ChevronUp className="h-3.5 w-3.5" />
+              <span>Ver Menos</span>
             </>
           ) : (
             <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Mais detalhes</span>
+              <ChevronDown className="h-3.5 w-3.5" />
+              <span>Detalhes do Produto</span>
             </>
           )}
         </button>

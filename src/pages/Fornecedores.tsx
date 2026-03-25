@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye } from "lucide-react";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -235,7 +236,8 @@ function Fornecedores() {
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
+        <PullToRefresh onRefresh={invalidateCache} className="h-full">
+          <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
           {/* Page Header */}
           <div className="flex items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
@@ -541,6 +543,7 @@ function Fornecedores() {
             </Suspense>
           </div>
         </div>
+        </PullToRefresh>
       </PageWrapper>
     </>
   );
