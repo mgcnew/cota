@@ -417,89 +417,125 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden fixed top-3 left-3 z-[60] h-10 w-10 rounded-xl bg-background/80 backdrop-blur-md border border-border shadow-sm active:scale-95 transition-all"
+            className="md:hidden fixed top-3 left-3 z-[100] h-11 w-11 rounded-2xl bg-background/60 backdrop-blur-xl border border-white/10 shadow-2xl active:scale-90 transition-all group overflow-hidden"
           >
-            <Menu className="h-5 w-5" />
+            <div className="relative w-6 h-6 flex flex-col justify-center items-center gap-1.5">
+              <span className={cn(
+                "w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-in-out origin-center",
+                mobileMenuOpen ? "rotate-45 translate-y-1" : ""
+              )} />
+              <span className={cn(
+                "w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-in-out",
+                mobileMenuOpen ? "opacity-0 -translate-x-2" : "opacity-100"
+              )} />
+              <span className={cn(
+                "w-6 h-0.5 bg-foreground rounded-full transition-all duration-300 ease-in-out origin-center",
+                mobileMenuOpen ? "-rotate-45 -translate-y-1" : ""
+              )} />
+            </div>
+            <div className="absolute inset-0 bg-brand/5 opacity-0 group-hover:opacity-100 transition-opacity" />
           </Button>
         </SheetTrigger>
         <SheetContent
           side="left"
-          className={cn("p-0 w-[280px] border-r border-white/5", designSystem.layout.container.glass)}
+          className={cn(
+            "p-0 w-[85%] max-w-[300px] border-r border-white/5 shadow-2xl",
+            "bg-gradient-to-b from-background/95 to-background/98 backdrop-blur-2xl"
+          )}
         >
           <div className="w-full h-full flex flex-col">
-            {/* Mobile Header */}
-            <div className="flex items-center gap-3 h-16 px-4 border-b border-white/5">
+            {/* Mobile Header - Premium Glass Effect */}
+            <div className="relative px-6 pt-10 pb-6 flex flex-col items-center gap-4 overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-brand/10 to-transparent pointer-events-none opacity-30" />
+              
               <div 
                 onClick={() => {
                   setProfileDialogOpen(true);
                   setMobileMenuOpen(false);
                 }}
-                className="relative shrink-0 cursor-pointer overflow-hidden rounded-xl ring-2 ring-border/10 shadow-lg w-12 h-12 hover:opacity-80 transition-opacity bg-white flex items-center justify-center p-0.5"
+                className="relative z-10 p-1 rounded-2xl bg-white shadow-xl ring-4 ring-brand/5 w-20 h-20 active:scale-95 transition-transform cursor-pointer overflow-hidden"
               >
                 <img 
                   src="/logo.png" 
                   alt="Logo Empresa" 
-                  className="w-full h-full object-contain drop-shadow-sm scale-[1.05]"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
+                  className="w-full h-full object-contain"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <Package className={cn("w-5 h-5", designSystem.colors.brand.primary)} />
-                <span className="font-bold text-white tracking-tight">Cota Aki</span>
+              
+              <div className="relative z-10 text-center space-y-1">
+                <h3 className="font-bold text-lg text-foreground tracking-tight">Cota Aki</h3>
+                <p className="text-xs text-muted-foreground font-medium opacity-80 uppercase tracking-widest px-2 py-0.5 bg-muted rounded-full">Sistema Gestor</p>
               </div>
             </div>
 
-            {/* Mobile Menu Items */}
-            <nav className="flex-1 py-4 px-3 overflow-y-auto space-y-1">
-              {allMenuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = item.url === "/dashboard"
-                  ? location.pathname === "/dashboard"
-                  : location.pathname.startsWith(item.url);
+            {/* Mobile Menu Items - Focused Layout */}
+            <nav className="flex-1 py-4 px-4 overflow-y-auto custom-scrollbar">
+              <div className="space-y-1.5 px-1">
+                {allMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = item.url === "/dashboard"
+                    ? location.pathname === "/dashboard"
+                    : location.pathname.startsWith(item.url);
 
-                return (
-                  <NavLink
-                    key={item.title}
-                    to={item.url}
-                    onClick={handleMobileNavigation}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-3 rounded-xl transition-all active:scale-[0.98]",
-                      isActive
-                        ? designSystem.layout.sidebar.item.active
-                        : designSystem.layout.sidebar.item.inactive
-                    )}
-                  >
-                    <Icon className={cn("w-5 h-5 flex-shrink-0", isActive ? "text-brand" : "opacity-70")} />
-                    <span className="text-sm font-medium">{item.title}</span>
-                  </NavLink>
-                );
-              })}
+                  return (
+                    <NavLink
+                      key={item.title}
+                      to={item.url}
+                      onClick={handleMobileNavigation}
+                      className={cn(
+                        "flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-200 relative group",
+                        "active:scale-[0.97]",
+                        isActive
+                          ? "bg-brand/10 text-brand font-bold shadow-sm"
+                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                      )}
+                    >
+                      {isActive && (
+                        <div className="absolute left-0 w-1 h-6 bg-brand rounded-r-full" />
+                      )}
+                      <Icon className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive ? "text-brand" : "opacity-80")} />
+                      <span className="text-sm tracking-wide">{item.title}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
             </nav>
 
-            {/* Mobile Footer */}
-            <div className="p-4 border-t border-border space-y-2">
-              <button
-                onClick={() => {
-                  navigate('/dashboard/configuracoes');
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              >
-                <Settings className="w-5 h-5" />
-                <span className="text-sm font-medium">Configurações</span>
-              </button>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                <span className="text-sm font-medium">Sair</span>
-              </button>
+            {/* Mobile Footer - Native Feel */}
+            <div className="mt-auto p-6 space-y-4 bg-muted/20 backdrop-blur-md rounded-t-[32px] border-t border-white/5">
+              {/* User Identity Shortcut */}
+              <div className="flex items-center gap-3 px-2 mb-2">
+                <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-xs ring-2 ring-brand/5 shrink-0">
+                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-foreground truncate">{profile?.full_name || "Usuário"}</p>
+                  <p className="text-[10px] text-muted-foreground truncate opacity-70">Avançar para Perfil</p>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => {
+                    navigate('/dashboard/configuracoes');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground transition-all active:scale-[0.98]"
+                >
+                  <Settings className="w-5 h-5 opacity-70" />
+                  <span className="text-sm font-medium">Configurações</span>
+                </button>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-400 font-bold hover:bg-red-500/10 transition-all active:scale-[0.98]"
+                >
+                  <LogOut className="w-5 h-5 opacity-80" />
+                  <span className="text-sm">Sair do Sistema</span>
+                </button>
+              </div>
             </div>
           </div>
         </SheetContent>
