@@ -229,6 +229,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     name: "produtos",
   });
 
+  // Filter suppliers only if search has content (Mover para cima para uso nos handlers)
+  const filteredSuppliers = supplierSearch.length > 0
+    ? suppliers.filter(supplier =>
+      supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
+      (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase()))
+    )
+    : [];
+
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = e.target;
     setTimeout(() => {
@@ -664,14 +672,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     setSelectedSuppliers([]);
     form.setValue("fornecedoresIds", []);
   };
-
-  // Filter suppliers only if search has content
-  const filteredSuppliers = supplierSearch.length > 0
-    ? suppliers.filter(supplier =>
-      supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
-      (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase()))
-    )
-    : [];
 
   const progress = ((currentTabIndex + 1) / tabs.length) * 100;
 
@@ -1326,9 +1326,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         className={cn(
                                           "w-full flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all text-left",
                                           isSelected
-                                            ? "border-brand/30 bg-brand/5 dark:bg-brand/10"
+                                            ? "border-brand/30 bg-brand/10 dark:bg-brand/20"
                                             : isHighlighted 
-                                              ? "border-brand/40 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm"
+                                              ? "border-brand bg-brand/5 dark:bg-brand/10 shadow-md ring-1 ring-brand/30"
                                               : cn(ds.colors.surface.card, "border-transparent hover:border-brand/20")
                                         )}
                                       >
