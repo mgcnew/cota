@@ -228,7 +228,7 @@ function Fornecedores() {
           <div className="flex items-center justify-between gap-6 mb-8">
             <div className="flex items-center gap-3">
               <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-                <Building2Icon className="h-6 w-6 text-brand" />
+                <Building2 className="h-6 w-6 text-brand" />
               </div>
               <div>
                 <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
@@ -246,7 +246,7 @@ function Fornecedores() {
             <MetricCard
               title="Fornecedores"
               value={stats.total}
-              icon={Building2Icon}
+              icon={Building2}
               trend={{ value: "+15", label: "novos este mês", type: "positive" }}
               variant="info"
               className="hover:scale-[1.02] transition-transform"
@@ -254,7 +254,7 @@ function Fornecedores() {
             <MetricCard
               title="Ativos"
               value={stats.active}
-              icon={TrendingUpIcon}
+              icon={TrendingUp}
               trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
               variant="success"
               className="hover:scale-[1.02] transition-transform"
@@ -262,7 +262,7 @@ function Fornecedores() {
             <MetricCard
               title="Limite Total"
               value={stats.totalLimit}
-              icon={DollarSignIcon}
+              icon={DollarSign}
               trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
               variant="default"
               className="hover:scale-[1.02] transition-transform"
@@ -270,7 +270,7 @@ function Fornecedores() {
             <MetricCard
               title="Cotações"
               value={stats.activeQuotes}
-              icon={FileTextIcon}
+              icon={FileText}
               trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
               variant="warning"
               className="hover:scale-[1.02] transition-transform"
@@ -309,7 +309,7 @@ function Fornecedores() {
                   onClick={() => importSuppliersRef.current?.click()}
                   className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
                 >
-                  <UploadIcon className="h-4 w-4 mr-2" />
+                  <Upload className="h-4 w-4 mr-2" />
                   <span>Importar</span>
                 </Button>
                 
@@ -318,7 +318,7 @@ function Fornecedores() {
                   onClick={() => addSupplierRef.current?.click()}
                   className={cn(designSystem.components.button.primary, "h-11 md:flex px-6 w-full sm:w-auto")}
                 >
-                  <PlusIcon className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 mr-2" />
                   <span>Novo Fornecedor</span>
                 </Button>
               </div>
@@ -334,7 +334,7 @@ function Fornecedores() {
                       <div className="space-y-2 sm:space-y-3 flex-1">
                         <div className="flex items-center gap-2 sm:gap-3">
                           <div className="p-2 rounded-lg bg-primary/10 md:group-hover:bg-primary/20 md:transition-colors">
-                            <Building2Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                            <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <CardTitle className="text-base font-semibold truncate">
@@ -353,7 +353,7 @@ function Fornecedores() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVerticalIcon className="h-4 w-4" />
+                            <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -362,14 +362,14 @@ function Fornecedores() {
                             supplierId={supplier.id}
                             trigger={
                               <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <EyeIcon className="h-4 w-4 mr-2" />
+                                <Eye className="h-4 w-4 mr-2" />
                                 Ver Histórico
                               </DropdownMenuItem>
                             }
                           />
                           {!isMobile && (
                             <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                              <EditIcon className="h-4 w-4 mr-2" />
+                              <Edit className="h-4 w-4 mr-2" />
                               Editar
                             </DropdownMenuItem>
                           )}
@@ -377,7 +377,7 @@ function Fornecedores() {
                             className="text-destructive focus:text-destructive"
                             onClick={() => setDeletingSupplier(supplier)}
                           >
-                            <Trash2Icon className="h-4 w-4 mr-2" />
+                            <Trash2 className="h-4 w-4 mr-2" />
                             Excluir
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -389,21 +389,21 @@ function Fornecedores() {
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <DollarSignIcon className="h-3.5 w-3.5" />
+                          <DollarSign className="h-3.5 w-3.5" />
                           <span className="text-xs">Limite</span>
                         </div>
                         <span className="text-sm font-medium">{supplier.limit}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <TrendingUpIcon className="h-3.5 w-3.5" />
+                          <TrendingUp className="h-3.5 w-3.5" />
                           <span className="text-xs">Preço Médio</span>
                         </div>
                         <span className="text-sm font-medium">{supplier.avgPrice}</span>
                       </div>
                       <div className="flex items-center justify-between py-2 border-b border-border/50">
                         <div className="flex items-center gap-2 text-muted-foreground">
-                          <FileTextIcon className="h-3.5 w-3.5" />
+                          <FileText className="h-3.5 w-3.5" />
                           <span className="text-xs">Cotações</span>
                         </div>
                         <span className="text-sm font-medium">{supplier.totalQuotes}</span>
@@ -412,7 +412,7 @@ function Fornecedores() {
                       <div className="pt-2.5">
                         <AddQuoteDialog onAdd={handleAddQuote} trigger={
                           <Button size="sm" variant="outline" className="w-full h-9 transition-smooth hover:bg-muted">
-                            <PlusIcon className="h-3.5 w-3.5 mr-1.5" />
+                            <Plus className="h-3.5 w-3.5 mr-1.5" />
                             Nova Cotação
                           </Button>
                         } />
@@ -468,11 +468,11 @@ function Fornecedores() {
 
           {filteredSuppliers.length === 0 && (
             <EmptyState
-              icon={Building2Icon}
+              icon={Building2}
               title="Nenhum fornecedor encontrado"
               description="Tente ajustar os filtros ou adicione novos fornecedores"
               actionLabel="Adicionar Fornecedor"
-              actionIcon={PlusIcon}
+              actionIcon={Plus}
               onAction={!isMobile ? () => addSupplierRef.current?.click() : undefined}
             />
           )}
