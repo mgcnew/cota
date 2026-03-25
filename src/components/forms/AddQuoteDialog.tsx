@@ -170,6 +170,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
+  const [highlightedSupplierIndex, setHighlightedSupplierIndex] = useState(-1);
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([]);
   const [activeTab, setActiveTab] = useState("produtos");
@@ -209,6 +210,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const productSearchRef = useRef<HTMLInputElement>(null);
   const unitSelectRef = useRef<HTMLButtonElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
+  const supplierSearchRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -317,6 +319,40 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   };
 
+  // Handler para busca de fornecedores e navegação
+  const handleSupplierKeyDown = (e: React.KeyboardEvent) => {
+    if (filteredSuppliers.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setHighlightedSupplierIndex(prev => prev < filteredSuppliers.length - 1 ? prev + 1 : 0);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setHighlightedSupplierIndex(prev => prev > 0 ? prev - 1 : filteredSuppliers.length - 1);
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (highlightedSupplierIndex >= 0) {
+          const supplier = filteredSuppliers[highlightedSupplierIndex];
+          const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
+          if (isSelected) {
+            handleSupplierRemove(supplier.id);
+          } else {
+            handleSupplierSelect(supplier);
+          }
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        setSupplierSearch("");
+        setHighlightedSupplierIndex(-1);
+        return;
+      }
+    }
+  };
+
   // Handler para atalhos globais do modal
   const handleModalKeyDown = (e: React.KeyboardEvent) => {
     // Ctrl+Enter para criar cotação
@@ -352,10 +388,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       if (!newProductUnit) {
         setNewProductUnit(lastUsedUnit);
       }
-      // Auto-foco no seletor de produto ao abrir
+      // Auto-foco no seletor correspondente ao abrir ou trocar de aba
       setTimeout(() => {
         if (activeTab === 'produtos' && productSearchRef.current) {
           productSearchRef.current.focus();
+        } else if (activeTab === 'periodo_fornecedores' && supplierSearchRef.current) {
+          supplierSearchRef.current.focus();
         }
       }, 300);
     } else {
@@ -1241,15 +1279,20 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </button>
                               )}
                             </div>
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                              <Input
-                                placeholder="Buscar fornecedor..."
-                                value={supplierSearch}
-                                onChange={(e) => setSupplierSearch(e.target.value)}
-                                className={cn(ds.components.input.root, "pl-10 h-9")}
-                              />
-                            </div>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                                <Input
+                                  ref={supplierSearchRef}
+                                  placeholder="Buscar fornecedor..."
+                                  value={supplierSearch}
+                                  onChange={(e) => {
+                                    setSupplierSearch(e.target.value);
+                                    setHighlightedSupplierIndex(-1);
+                                  }}
+                                  onKeyDown={handleSupplierKeyDown}
+                                  className={cn(ds.components.input.root, "pl-10 h-9")}
+                                />
+                              </div>
                           </div>
 
                           <div className="flex-1 overflow-y-auto p-2 custom-scrollbar pb-20">
@@ -1261,39 +1304,47 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </p>
                               </div>
                             ) : (
-                              <div className="space-y-1">
-                                {(supplierSearch.length > 0 ? filteredSuppliers : selectedSuppliers).map((supplier) => {
-                                  const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
-                                  return (
-                                    <div
-                                      key={supplier.id}
-                                      onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
-                                      className={cn(
-                                        "flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all",
-                                        isSelected
-                                          ? "border-brand/30 bg-brand/5 dark:bg-brand/10"
-                                          : cn(ds.colors.surface.card, "border-transparent hover:border-brand/20")
-                                      )}
-                                    >
-                                      <div className={cn(
-                                        "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
-                                        isSelected ? "bg-brand border-brand text-zinc-950" : cn(ds.colors.border.default, "bg-transparent")
-                                      )}>
-                                        {isSelected && <Check className="h-3 w-3" />}
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
-                                          {supplier.name}
-                                        </p>
-                                        {supplier.contact && (
-                                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "truncate")}>
-                                            {supplier.contact}
-                                          </p>
+                                <div className="space-y-1">
+                                  {(supplierSearch.length > 0 ? filteredSuppliers : selectedSuppliers).map((supplier, index) => {
+                                    const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
+                                    const isHighlighted = supplierSearch.length > 0 && highlightedSupplierIndex === index;
+                                    
+                                    return (
+                                      <button
+                                        key={supplier.id}
+                                        type="button"
+                                        onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
+                                        onMouseEnter={() => {
+                                          if (supplierSearch.length > 0) setHighlightedSupplierIndex(index);
+                                        }}
+                                        className={cn(
+                                          "w-full flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all text-left",
+                                          isSelected
+                                            ? "border-brand/30 bg-brand/5 dark:bg-brand/10"
+                                            : isHighlighted 
+                                              ? "border-brand/40 bg-zinc-50 dark:bg-zinc-800/50 shadow-sm"
+                                              : cn(ds.colors.surface.card, "border-transparent hover:border-brand/20")
                                         )}
-                                      </div>
-                                    </div>
-                                  );
-                                })}
+                                      >
+                                        <div className={cn(
+                                          "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
+                                          isSelected ? "bg-brand border-brand text-zinc-950" : cn(ds.colors.border.default, "bg-transparent")
+                                        )}>
+                                          {isSelected && <Check className="h-3 w-3" />}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
+                                            {supplier.name}
+                                          </p>
+                                          {supplier.contact && (
+                                            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "truncate")}>
+                                              {supplier.contact}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
                                 {supplierSearch.length > 0 && filteredSuppliers.length === 0 && (
                                   <p className={cn("p-4 text-center", ds.typography.size.sm, ds.colors.text.secondary)}>
                                     Nenhum resultado para "{supplierSearch}"
