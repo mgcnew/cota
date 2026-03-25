@@ -428,7 +428,7 @@ function Fornecedores() {
                 {/* Mobile Cards View */}
                 <div className="md:hidden">
                   <div className="space-y-3 p-2 pb-24">
-                    {filteredSuppliers.map(supplier => (
+                    {paginatedData.items.map(supplier => (
                       <ExpandableSupplierCard
                         key={supplier.id}
                         supplier={supplier}
