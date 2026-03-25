@@ -26,7 +26,7 @@ import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistor
 import { ProductListDesktop } from "@/components/products/ProductListDesktop";
 import { useProductStats } from "@/hooks/useProductStats";
 import { designSystem } from "@/styles/design-system";
-import { cn } from "@/lib/utils";
+import { cn, normalizeText } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 
@@ -91,17 +91,20 @@ function Produtos() {
       return [];
     }
 
-    const searchLower = debouncedSearchQuery.toLowerCase();
-    const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
+    const searchNormalized = normalizeText(debouncedSearchQuery);
+    const categoryNormalized = normalizeText(selectedCategory);
 
     return safeProducts.filter(product => {
-      const matchesSearch = !searchLower || 
-                            product.name.toLowerCase().includes(searchLower) || 
-                            (product.category || '').toLowerCase().includes(searchLower) ||
-                            (product.brand_name || '').toLowerCase().includes(searchLower);
+      const productNameNormalized = normalizeText(product.name);
+      const productCategoryNormalized = normalizeText(product.category || '');
+      const productBrandNormalized = normalizeText(product.brand_name || '');
+
+      const matchesSearch = !searchNormalized || 
+                            productNameNormalized.includes(searchNormalized) || 
+                            productCategoryNormalized.includes(searchNormalized) ||
+                            productBrandNormalized.includes(searchNormalized);
       
-      const productCategory = (product.category || '').trim().toLowerCase();
-      const matchesCategory = categoryNormalized === "all" || productCategory === categoryNormalized;
+      const matchesCategory = categoryNormalized === "all" || productCategoryNormalized === categoryNormalized;
       
       return matchesSearch && matchesCategory;
     }).sort((a, b) => {
@@ -372,7 +375,11 @@ function Produtos() {
             <AddProductDialog
               open={addDialogOpen}
               onOpenChange={setAddDialogOpen}
-              product={undefined}
+              onProductAdded={() => {
+                invalidateCache();
+                setAddDialogOpen(false);
+              }}
+              onCategoryAdded={() => invalidateCache()}
             />
           </Suspense>
 
@@ -380,6 +387,11 @@ function Produtos() {
             <ImportProductsDialog
               open={importDialogOpen}
               onOpenChange={setImportDialogOpen}
+              onProductsImported={() => {
+                invalidateCache();
+                setImportDialogOpen(false);
+              }}
+              onCategoryAdded={() => invalidateCache()}
             />
           </Suspense>
 
@@ -388,6 +400,21 @@ function Produtos() {
               product={editingProduct}
               open={!!editingProduct}
               onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+              onProductUpdated={(updatedProduct) => {
+                updateProduct({ 
+                  productId: updatedProduct.id, 
+                  data: {
+                    name: updatedProduct.name,
+                    category: updatedProduct.category,
+                    unit: updatedProduct.unit,
+                    brand_id: updatedProduct.brand_id,
+                    barcode: updatedProduct.barcode
+                  } 
+                });
+                setEditingProduct(null);
+              }}
+              categories={safeCategories.filter(c => c !== 'all')}
+              onCategoryAdded={() => invalidateCache()}
             />
           </Suspense>
 
