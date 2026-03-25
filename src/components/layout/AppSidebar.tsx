@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { useTheme } from "next-themes";
 import {
   LayoutDashboard,
