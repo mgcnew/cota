@@ -408,7 +408,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setSupplierSearch("");
       setProducts([]);
     }
-  }, [open]);
+  }, [open, activeTab]);
 
   // Busca dinâmica de produtos quando o termo de busca muda
   useEffect(() => {
@@ -1286,8 +1286,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   placeholder="Buscar fornecedor..."
                                   value={supplierSearch}
                                   onChange={(e) => {
-                                    setSupplierSearch(e.target.value);
-                                    setHighlightedSupplierIndex(-1);
+                                    const val = e.target.value;
+                                    setSupplierSearch(val);
+                                    // Auto-selecionar o primeiro resultado ao digitar
+                                    if (val.length > 0) {
+                                      setHighlightedSupplierIndex(0);
+                                    } else {
+                                      setHighlightedSupplierIndex(-1);
+                                    }
                                   }}
                                   onKeyDown={handleSupplierKeyDown}
                                   className={cn(ds.components.input.root, "pl-10 h-9")}
