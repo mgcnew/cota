@@ -1,300 +1,425 @@
-import { memo, useState, useCallback, useMemo, useRef, Suspense, lazy } from "react";
-import { PageWrapper } from "@/components/layout/PageWrapper";
+import { useState, useEffect, useMemo, useCallback, startTransition, memo, lazy, Suspense } from "react";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { AuthDialog } from "@/components/auth/AuthDialog";
+import { useProducts } from "@/hooks/useProducts";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Search, MoreVertical, Edit, Trash2, History, Package, ClipboardList } from "lucide-react";
-import { PullToRefresh } from "@/components/ui/pull-to-refresh";
-import { capitalize } from "@/lib/text-utils";
-import { designSystem } from "@/styles/design-system";
-import { cn } from "@/lib/utils";
-import { useProducts, type Product } from "@/hooks/useProducts";
 import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
-import { VirtualList } from "@/components/responsive/VirtualList";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useExportCSV } from "@/hooks/useExportCSV";
+import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal, Eye, EyeOff } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { CategorySelect } from "@/components/ui/category-select";
+import { DataPagination } from "@/components/ui/data-pagination";
+import { usePagination } from "@/hooks/usePagination";
+import type { Product } from "@/hooks/useProducts";
+import { PageWrapper } from "@/components/layout/PageWrapper";
+import { useToast } from "@/hooks/use-toast";
+import { MetricCard } from "@/components/ui/metric-card";
+import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
-import { ErrorBoundary } from "@/components/ui/error-boundary";
-import { toast } from "sonner";
-import { AuthDialog } from "@/components/auth/AuthDialog";
+import ProductsSkeleton from "@/components/products/ProductsSkeleton";
+import { BrandManagementDialog } from "@/components/products/BrandManagementDialog";
+import { ProductPriceHistoryDialog } from "@/components/forms/ProductPriceHistoryDialog";
+import { ProductListDesktop } from "@/components/products/ProductListDesktop";
+import { useProductStats } from "@/hooks/useProductStats";
+import { designSystem } from "@/styles/design-system";
+import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 
-// Lazy loaded dialogs for performance
-const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog"));
-const ProductHistoryDialog = lazy(() => import("@/components/products/ProductHistoryDialog"));
-const AlertDialog = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialog })));
-const AlertDialogContent = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogContent })));
-const AlertDialogHeader = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogHeader })));
-const AlertDialogTitle = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogTitle })));
-const AlertDialogDescription = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogDescription })));
-const AlertDialogFooter = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogFooter })));
-const AlertDialogAction = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogAction })));
-const AlertDialogCancel = lazy(() => import("@/components/ui/alert-dialog").then(mod => ({ default: mod.AlertDialogCancel })));
-const AddBrandDialog = lazy(() => import("@/components/forms/AddBrandDialog"));
+// Lazy load dialogs for better initial load performance
+const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
+const EditProductDialog = lazy(() => import("@/components/forms/EditProductDialog").then(m => ({ default: m.EditProductDialog })));
+const DeleteProductDialog = lazy(() => import("@/components/forms/DeleteProductDialog").then(m => ({ default: m.DeleteProductDialog })));
+const ImportProductsDialog = lazy(() => import("@/components/forms/ImportProductsDialog").then(m => ({ default: m.ImportProductsDialog })));
 
-const Produtos = () => {
+// Dialog loading fallback
+const DialogLoader = () => (
+  <div className={cn(designSystem.components.modal.overlay, "flex items-center justify-center")}>
+    <Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} />
+  </div>
+);
+
+const getProductStatus = (product: Product) => {
+  if (product.quotesCount === 0) return "sem_cotacao";
+  if (product.lastOrderPrice === "R$ 0,00") return "pendente";
+  if (product.quotesCount >= 3) return "ativo";
+  return "cotado";
+};
+
+function Produtos() {
+  const { user, loading } = useAuth();
   const isMobile = useIsMobile();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  // Use smaller page size on mobile for faster rendering
+  const { paginate } = usePagination<Product>({ initialItemsPerPage: isMobile ? 8 : 10 });
+  const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+  const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [brandDialogOpen, setBrandDialogOpen] = useState(false);
-  
-  const { products, isLoading, deleteProduct, invalidateCache } = useProducts();
+  const { toast } = useToast();
+
+  const { products, categories, isLoading: productsLoading, deleteProduct, updateProduct, invalidateCache } = useProducts();
+
+  const safeProducts = useMemo(() => products || [], [products]);
+  const safeCategories = useMemo(() => categories || [], [categories]);
+
+  const [activeTab, setActiveTab] = useState("all");
+
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
+    }
+  }, [loading, user]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      setAuthDialogOpen(true);
+    }
+  }, [loading, user]);
 
   const filteredProducts = useMemo(() => {
-    if (!searchTerm) return products;
-    const term = searchTerm.toLowerCase();
-    return products.filter(p => 
-      p.name.toLowerCase().includes(term) || 
-      p.category.toLowerCase().includes(term) ||
-      (p.brand_name && p.brand_name.toLowerCase().includes(term))
-    );
-  }, [products, searchTerm]);
-
-  const handleAddProduct = () => {
-    setEditingProduct(null);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleDeleteClick = (product: Product) => {
-    setProductToDelete(product);
-  };
-
-  const confirmDelete = async () => {
-    if (!productToDelete) return;
-    try {
-      await deleteProduct(productToDelete.id);
-      toast.success("Produto excluído com sucesso");
-    } catch (error) {
-      toast.error("Erro ao excluir produto");
-    } finally {
-      setProductToDelete(null);
+    if (!Array.isArray(safeProducts) || safeProducts.length === 0) {
+      return [];
     }
-  };
 
-  const handleHistoryClick = (product: Product) => {
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    const categoryNormalized = (selectedCategory || '').trim().toLowerCase();
+
+    return safeProducts.filter(product => {
+      const matchesSearch = !searchLower || 
+                            product.name.toLowerCase().includes(searchLower) || 
+                            (product.category || '').toLowerCase().includes(searchLower) ||
+                            (product.brand_name || '').toLowerCase().includes(searchLower);
+      
+      const productCategory = (product.category || '').trim().toLowerCase();
+      const matchesCategory = categoryNormalized === "all" || productCategory === categoryNormalized;
+      
+      return matchesSearch && matchesCategory;
+    }).sort((a, b) => {
+      // Sort by most recently modified
+      const aDate = new Date(a.updated_at || 0).getTime();
+      const bDate = new Date(b.updated_at || 0).getTime();
+      return bDate - aDate;
+    });
+  }, [safeProducts, debouncedSearchQuery, selectedCategory]);
+
+  // Counts for tabs
+  const counts = useMemo(() => {
+    return { total: safeProducts.length };
+  }, [safeProducts]);
+
+  const safeFilteredProducts = filteredProducts;
+  const paginatedData = paginate(safeFilteredProducts);
+
+  const stats = useProductStats(safeProducts, safeCategories);
+
+  const { exportToCSV } = useExportCSV();
+
+  const handleExportProducts = useCallback(() => {
+    if (safeFilteredProducts.length === 0) {
+      toast({
+        title: "Nenhum produto para exportar",
+        description: "Não há produtos filtrados para exportar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const exportData = safeFilteredProducts.map((product) => ({
+      name: product.name,
+      category: product.category || 'Sem Categoria',
+      barcode: product.barcode || 'N/A',
+      unit: product.unit || 'un',
+      status: getProductStatus(product),
+      price: product.lastOrderPrice || 'R$ 0,00',
+      bestSupplier: product.bestSupplier || 'N/A',
+      quotesCount: product.quotesCount || 0
+    }));
+
+    exportToCSV({
+      filename: 'produtos',
+      data: exportData,
+      columns: {
+        name: 'Nome',
+        category: 'Categoria',
+        barcode: 'Código de Barras',
+        unit: 'Unidade',
+        status: 'Status',
+        price: 'Preço',
+        bestSupplier: 'Melhor Fornecedor',
+        quotesCount: 'Cotações'
+      }
+    });
+
+    toast({
+      title: "Exportação realizada",
+      description: `${exportData.length} produtos exportados com sucesso.`,
+    });
+  }, [safeFilteredProducts, toast, exportToCSV]);
+
+  const handleAddProduct = useCallback(() => {
+    startTransition(() => {
+      setAddDialogOpen(true);
+    });
+  }, []);
+
+  const handleImportProducts = useCallback(() => {
+    startTransition(() => {
+      setImportDialogOpen(true);
+    });
+  }, []);
+
+  const handleEditProduct = useCallback((product: Product) => {
+    startTransition(() => {
+      setEditingProduct(product);
+    });
+  }, []);
+
+  const handleDeleteProduct = useCallback((product: Product) => {
+    startTransition(() => {
+      setDeletingProduct(product);
+    });
+  }, []);
+
+  const handleHistoryProduct = useCallback((product: Product) => {
     setHistoryProduct(product);
-  };
+  }, []);
 
-  const handleProductSuccess = () => {
-    setIsAddDialogOpen(false);
-    setEditingProduct(null);
-  };
-
-  const openBrandDialog = () => {
-    setBrandDialogOpen(true);
-  };
-
-  const handleBrandSuccess = () => {
-    setBrandDialogOpen(false);
-  };
-
-  const renderProductItem = (product: Product, index: number, style: React.CSSProperties) => {
-    if (isMobile) {
-      return (
-        <div style={style} className="px-4 py-2">
-          <MobileProductCard 
-            product={product}
-            onEdit={handleEditProduct}
-            onDelete={handleDeleteClick}
-            onHistory={handleHistoryClick}
-          />
-        </div>
-      );
-    }
-
+  if (loading || productsLoading) {
     return (
-      <div 
-        style={style}
-        className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors border-b border-gray-100 dark:border-gray-700/30"
-      >
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center flex-shrink-0">
-            <Package className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-medium text-gray-900 dark:text-white truncate">{capitalize(product.name)}</p>
-            <div className="flex items-center gap-2 mt-0.5">
-              <Badge variant="secondary" className="text-[10px] px-2 py-0">
-                {capitalize(product.category)}
-              </Badge>
-              {product.brand_name && (
-                <span className="text-xs text-gray-500 truncate max-w-[150px]">
-                  • {capitalize(product.brand_name)}
-                </span>
-              )}
-            </div>
-          </div>
+      <PageWrapper>
+        <div className={designSystem.layout.container.page}>
+          <ProductsSkeleton />
         </div>
-
-        <div className="flex items-center gap-8 flex-shrink-0">
-          <div className="flex flex-col items-end">
-            <span className="text-sm font-semibold text-gray-900 dark:text-white">{product.lastOrderPrice}</span>
-            <span className="text-[10px] text-gray-500 uppercase">Último preço</span>
-          </div>
-          
-          <div className="flex items-center gap-1">
-            <Button size="sm" variant="ghost" onClick={() => handleHistoryClick(product)}>
-              <History className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => handleEditProduct(product)}>
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => handleDeleteClick(product)}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
+      </PageWrapper>
     );
-  };
+  }
 
   return (
     <>
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
-        <PullToRefresh onRefresh={invalidateCache} className="h-full">
-          <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
-            {/* Page Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-2xl bg-primary/10 dark:bg-primary/20">
-                  <Package className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h1 className={designSystem.typography.h1.desktop}>Produtos</h1>
-                  <p className="text-sm text-muted-foreground">Gerencie seu catálogo de produtos e marcas</p>
-                </div>
+        <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
+          {/* Page Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+                <Package className="h-6 w-6 text-brand" />
               </div>
-              
-              <div className="flex items-center gap-3">
-                <Button 
-                  variant="outline" 
-                  onClick={openBrandDialog}
-                  className="rounded-xl active:scale-95 transition-transform"
-                >
-                  Nova Marca
-                </Button>
-                <Button 
-                  onClick={handleAddProduct}
-                  className="rounded-xl bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25 active:scale-95 transition-transform"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Produto
-                </Button>
+              <div>
+                <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
+                  Produtos
+                </h1>
+                <p className={cn(designSystem.colors.text.secondary, "text-sm mt-0.5")}>
+                  Gerencie seu catálogo de itens e categorias
+                </p>
               </div>
             </div>
 
-            {/* Content Card */}
-            <div className="bg-white dark:bg-gray-900/50 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
-              {/* Toolbar */}
-              <div className="p-4 md:p-6 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="w-full md:w-96">
-                  <SearchInput 
-                    placeholder="Buscar por nome, categoria ou marca..." 
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+            <div />
+          </div>
+
+          {/* Métricas essenciais */}
+          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
+            <MetricCard
+              title="Produtos"
+              value={stats.totalProducts}
+              icon={Package}
+              variant="warning"
+              className="hover:scale-[1.02] transition-transform"
+            />
+            <MetricCard
+              title="Categorias"
+              value={stats.totalCategories}
+              icon={Tags}
+              variant="info"
+              className="hover:scale-[1.02] transition-transform"
+            />
+            <MetricCard
+              title="Cotações"
+              value={stats.activeQuotes}
+              icon={ClipboardList}
+              variant="success"
+              className="hover:scale-[1.02] transition-transform"
+            />
+            <MetricCard
+              title="Valor Médio"
+              value={stats.averageValue}
+              icon={DollarSign}
+              variant="default"
+              className="hover:scale-[1.02] transition-transform"
+            />
+          </ResponsiveGrid>
+
+          <div className="mt-2 mb-6">
+            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+              <div className="flex-1 max-w-xl">
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Pesquisar por nome, categoria ou marca..."
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                <div className="w-full sm:w-[240px]">
+                  <CategorySelect
+                    categories={safeCategories}
+                    products={safeProducts}
+                    selectedCategory={selectedCategory}
+                    onCategoryChange={setSelectedCategory}
                   />
                 </div>
-                
-                <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-                  <ClipboardList className="h-4 w-4" />
-                  <span>{filteredProducts.length} produtos encontrados</span>
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(designSystem.components.button.secondary, "h-11 px-4 flex items-center justify-center")}
+                      >
+                        <MoreHorizontal className="h-5 w-5" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-[200px]">
+                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
+                        <Download className="h-4 w-4 mr-2" /> Exportar
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                        <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button
+                    onClick={handleAddProduct}
+                    className={cn(designSystem.components.button.primary, "h-11 px-6")}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    <span>Novo Produto</span>
+                  </Button>
                 </div>
               </div>
-
-              {/* List Area */}
-              <div className="flex-1 min-h-0 relative">
-                <ErrorBoundary>
-                  {isLoading ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                    </div>
-                  ) : filteredProducts.length === 0 ? (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <EmptyState 
-                        icon={<Package className="h-12 w-12 text-gray-300" />}
-                        title="Nenhum produto encontrado"
-                        description={searchTerm ? "Tente ajustar os termos da sua busca" : "Comece adicionando seu primeiro produto ao catálogo"}
-                        action={!searchTerm ? {
-                          label: "Adicionar Produto",
-                          onClick: handleAddProduct
-                        } : undefined}
-                      />
-                    </div>
-                  ) : (
-                    <VirtualList 
-                      items={filteredProducts}
-                      renderItem={renderProductItem}
-                      itemHeight={isMobile ? 140 : 80}
-                      overscan={5}
-                    />
-                  )}
-                </ErrorBoundary>
-              </div>
             </div>
-
-            {/* Modal Components - Lazy Loaded */}
-            <Suspense fallback={null}>
-              {isAddDialogOpen && (
-                <AddProductDialog 
-                  open={isAddDialogOpen} 
-                  onOpenChange={setIsAddDialogOpen}
-                  onSuccess={handleProductSuccess}
-                  product={editingProduct}
-                />
-              )}
-            </Suspense>
-
-            <Suspense fallback={null}>
-              {historyProduct && (
-                <ProductHistoryDialog 
-                  open={!!historyProduct} 
-                  onOpenChange={(open) => !open && setHistoryProduct(null)}
-                  product={historyProduct}
-                />
-              )}
-            </Suspense>
-
-            <Suspense fallback={null}>
-              {productToDelete && (
-                <AlertDialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
-                  <AlertDialogContent className="rounded-2xl">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Excluir Produto</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tem certeza que deseja excluir o produto "{productToDelete?.name}"? Esta ação não poderá ser desfeita.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={confirmDelete} className="bg-red-500 hover:bg-red-600 rounded-xl">
-                        Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
-            </Suspense>
-
-            <Suspense fallback={null}>
-              <AddBrandDialog 
-                open={brandDialogOpen}
-                onOpenChange={setBrandDialogOpen}
-                onSuccess={handleBrandSuccess}
-              />
-            </Suspense>
           </div>
-        </PullToRefresh>
+
+          <div className="md:hidden mt-4" />
+
+          <div className="w-full">
+            <div>
+              {paginatedData.items.length === 0 && !productsLoading ? (
+                <EmptyState
+                  icon={Package}
+                  title="Nenhum produto encontrado"
+                  description="Tente ajustar sua busca ou filtros."
+                  actionLabel="Adicionar Produto"
+                  actionIcon={Plus}
+                  onAction={handleAddProduct}
+                  variant="inline"
+                />
+              ) : (
+                <>
+                  {/* Mobile Cards View */}
+                  <div className="md:hidden space-y-2">
+                    {paginatedData.items.map((product) => (
+                      <MobileProductCard
+                        key={product.id}
+                        product={product}
+                        onEdit={handleEditProduct}
+                        onDelete={handleDeleteProduct}
+                        onHistory={handleHistoryProduct}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block">
+                    <ProductListDesktop
+                      products={paginatedData.items}
+                      onEdit={handleEditProduct}
+                      onDelete={handleDeleteProduct}
+                      onHistory={handleHistoryProduct}
+                    />
+                  </div>
+
+                  {/* Pagination */}
+                  <div className={cn("mt-2", designSystem.colors.border.subtle)}>
+                    <DataPagination
+                      currentPage={paginatedData.pagination.currentPage}
+                      totalPages={paginatedData.pagination.totalPages}
+                      itemsPerPage={paginatedData.pagination.itemsPerPage}
+                      totalItems={safeFilteredProducts.length}
+                      onPageChange={paginatedData.pagination.goToPage}
+                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                      startIndex={(paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage}
+                      endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Lazy loaded dialogs desktop-only */}
+          <Suspense fallback={null}>
+            <AddProductDialog
+              open={addDialogOpen}
+              onOpenChange={setAddDialogOpen}
+              product={undefined}
+            />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <ImportProductsDialog
+              open={importDialogOpen}
+              onOpenChange={setImportDialogOpen}
+            />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <EditProductDialog
+              product={editingProduct}
+              open={!!editingProduct}
+              onOpenChange={(open) => { if (!open) setEditingProduct(null); }}
+            />
+          </Suspense>
+
+          <Suspense fallback={null}>
+            <DeleteProductDialog
+              product={deletingProduct}
+              open={!!deletingProduct}
+              onOpenChange={(open) => { if (!open) setDeletingProduct(null); }}
+              onProductDeleted={(id) => {
+                if (typeof deleteProduct === 'function') { deleteProduct(id); }
+                setDeletingProduct(null);
+              }}
+            />
+          </Suspense>
+
+          {/* Product Price History Dialog - controlled by state */}
+          <ProductPriceHistoryDialog
+            productId={historyProduct?.id || ''}
+            productName={historyProduct?.name || ''}
+            open={!!historyProduct}
+            onOpenChange={(open) => { if (!open) setHistoryProduct(null); }}
+          />
+
+        </div>
       </PageWrapper>
+
+      <BrandManagementDialog
+        open={brandDialogOpen}
+        onOpenChange={setBrandDialogOpen}
+      />
     </>
   );
-};
+}
 
 export default memo(Produtos);
