@@ -117,7 +117,7 @@ export const DashboardIntelligenceBoard = memo(({
         </div>
         <div className="p-4 flex-1 overflow-y-auto max-h-[290px] custom-scrollbar relative pl-6">
           {/* Vertical line connecting timeline dots */}
-          <div className="absolute left-[18px] top-6 bottom-6 w-px bg-border/60 z-0 hidden sm:block" />
+          <div className="absolute left-[21px] top-6 bottom-6 w-px bg-border/40 z-0" />
 
           <div className="space-y-5 relative z-10">
             {recentQuotes.length === 0 ? (
@@ -127,39 +127,39 @@ export const DashboardIntelligenceBoard = memo(({
                 const badge = processStatus(quote.status);
                 
                 return (
-                  <div key={idx} className="flex gap-4 group">
-                    {/* Dot */}
-                    <div className="relative mt-1 hidden sm:flex items-center justify-center shrink-0 w-[5px] h-[5px]">
-                      <div className={cn("absolute w-2.5 h-2.5 rounded-full border-2 border-background z-10", badge.color)} />
+                  <div key={idx} className="flex gap-3 sm:gap-4 group">
+                    {/* Dot - Visible on all screens now but carefully positioned */}
+                    <div className="relative mt-2 flex items-center justify-center shrink-0 w-[8px] h-[8px] z-20">
+                      <div className={cn("absolute w-3 h-3 rounded-full border-2 border-background shadow-sm", badge.color)} />
                     </div>
                     
-                    <div className="flex-1 border bg-muted/20 border-border/50 rounded-lg p-3 group-hover:bg-muted/40 transition-colors shadow-sm min-w-0">
-                      <div className="flex items-center justify-between mb-1.5 gap-2">
+                    <div className="flex-1 border bg-muted/20 border-border/50 rounded-lg p-3.5 group-hover:bg-muted/40 transition-colors shadow-sm min-w-0">
+                      <div className="flex flex-wrap items-center justify-between mb-2 gap-2">
                         <span className={cn("text-[10px] font-bold uppercase tracking-wider", quote.status === 'ativa' ? 'text-blue-500' : quote.status === 'finalizada' ? 'text-emerald-500' : 'text-zinc-500')}>
                           {badge.label}
                         </span>
-                        <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.muted, "shrink-0")}>
+                        <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.muted, "shrink-0 ml-auto")}>
                           {quote.date}
                         </span>
                       </div>
                       
-                      <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.medium, designSystem.colors.text.primary, "truncate")}>
+                      <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.bold, designSystem.colors.text.primary, "truncate")}>
                         <CapitalizedText>{quote.product}</CapitalizedText>
                       </p>
                       
-                      <div className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary, "mt-1.5 flex items-center justify-between")}>
+                      <div className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary, "mt-2 flex items-center justify-between gap-2")}>
                         <div className="flex-1 truncate flex items-center gap-2">
                           {quote.bestPrice !== 'Sem ofertas' ? (
                             <>
                               <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">
                                 {quote.bestPrice}
                               </span>
-                              <span className="text-muted-foreground truncate max-w-[140px]">
+                              <span className="text-muted-foreground truncate max-w-[120px] hidden sm:inline">
                                 com {quote.supplier}
                               </span>
                             </>
                           ) : (
-                            <span className="text-muted-foreground italic">Aguardando ofertas...</span>
+                            <span className="text-muted-foreground italic text-[11px]">Aguardando ofertas...</span>
                           )}
                         </div>
                         
@@ -167,9 +167,9 @@ export const DashboardIntelligenceBoard = memo(({
                           <TooltipProvider delayDuration={100}>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <div className="p-1 rounded-full hover:bg-muted/80 text-primary cursor-help transition-colors border border-primary/20 bg-primary/5">
-                                  <Info className="h-3.5 w-3.5" />
-                                </div>
+                                <button className="p-2 rounded-full hover:bg-muted/80 text-primary cursor-help transition-colors border border-primary/20 bg-primary/5 shrink-0">
+                                  <Info className="h-4 w-4" />
+                                </button>
                               </TooltipTrigger>
                               <TooltipContent side="top" align="end" className="p-0 border-border shadow-2xl min-w-[200px] overflow-hidden">
                                 <div className="px-3 py-2 border-b border-border bg-emerald-500/5">
@@ -190,7 +190,7 @@ export const DashboardIntelligenceBoard = memo(({
                       </div>
                     </div>
                   </div>
-                )
+                );
               })
             )}
           </div>
