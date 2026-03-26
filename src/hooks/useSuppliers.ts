@@ -214,7 +214,7 @@ export function useSuppliers() {
           lastOrder: lastOrderDate,
           rating: rating || 0,
           status: "active" as const,
-          phone: maskSensitiveData ? undefined : (s.phone || undefined),
+          phone: s.phone || undefined, // Ativado para todos, pois é necessário para o WhatsApp
           email: maskSensitiveData ? undefined : (s.email || undefined),
           address: maskSensitiveData ? undefined : (s.address || undefined),
           updated_at: s.updated_at || s.created_at,
@@ -233,6 +233,7 @@ export function useSuppliers() {
             lastOrder: "-",
             rating: 0,
             status: "active" as const,
+            phone: s.phone || undefined,
             updated_at: s.updated_at || s.created_at,
           };
         }

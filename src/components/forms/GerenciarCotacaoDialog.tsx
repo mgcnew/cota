@@ -124,6 +124,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         id: cf.supplier_id,
         nome: cf.supplier_name,
         contato: supplierInfo?.contact || cf.supplier_name, // Fallback to company name
+        phone: supplierInfo?.phone || "",
         status: cf.status
       };
     });

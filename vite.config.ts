@@ -13,6 +13,13 @@ export default defineConfig(({ mode }) => ({
     port: 8087,
     strictPort: true, // Permite usar outra porta se 8098 estiver ocupada
     open: true, // Abre automaticamente no navegador
+    proxy: {
+      '/whatsapp-api': {
+        target: 'https://api.w-api.app',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/whatsapp-api/, '')
+      }
+    }
   },
   preview: {
     host: "localhost",

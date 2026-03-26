@@ -150,7 +150,7 @@ function Fornecedores() {
   }, []);
 
   // Optimized WhatsApp handler with < 100ms response (Requirement 4.3)
-  const openWhatsApp = useCallback((supplier: Supplier) => {
+  const openWhatsApp = useCallback(async (supplier: Supplier) => {
     if (!canViewSensitiveData) {
       toast({
         title: "Acesso restrito",
@@ -169,10 +169,26 @@ function Fornecedores() {
       return;
     }
 
-    // Remove non-numeric characters from phone
+    // Gerar mensagem
+    const message = decodeURIComponent(generateWhatsAppMessage(supplier.name, supplier.contact));
+
+    // Se a W-API estiver configurada, usa ela
+    const { isWhatsAppConfigured, sendWhatsAppMessage } = await import("@/lib/whatsapp");
+    
+    if (isWhatsAppConfigured()) {
+      try {
+        toast({ title: "Iniciando conversa via WhatsApp..." });
+        await sendWhatsAppMessage(null, supplier.phone, message);
+        toast({ title: "Mensagem enviada com sucesso!" });
+        return;
+      } catch (error) {
+        console.error("Erro ao enviar via API, tentando manual...", error);
+      }
+    }
+
+    // Fallback manual original
     const cleanPhone = supplier.phone.replace(/\D/g, '');
-    const message = generateWhatsAppMessage(supplier.name, supplier.contact);
-    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${message}`;
+    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   }, [canViewSensitiveData, generateWhatsAppMessage]);
 

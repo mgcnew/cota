@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
+console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
 import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { designSystem } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
 import { LastPaidPricesTooltip } from "./LastPaidPricesTooltip";
 import { generateWhatsAppMessage } from "@/lib/gemini";
+import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp";
 
 interface QuoteValuesTabProps {
   products: any[];
@@ -157,10 +159,59 @@ export function QuoteValuesTab({
     [fornecedores, selectedSupplier]
   );
 
-  const handleWhatsApp = async (e: React.MouseEvent, supplierName: string) => {
+  const handleWhatsApp = async (e: React.MouseEvent, supplierName: string, phone?: string) => {
     e.stopPropagation();
-    const msg = await generateWhatsAppMessage(supplierName, products);
-    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    
+    // Alerta para confirmar que o clique foi capturado pelo código novo
+    window.alert(`[WhatsApp DEBUG] Clicou em: ${supplierName}\nTelefone: ${phone || 'SEM TELEFONE'}`);
+    
+    const configured = isWhatsAppConfigured();
+    console.log('[WhatsApp DEBUG] State:', { configured, token: !!import.meta.env.VITE_W_API_TOKEN });
+    
+    // Alerta definitivo para diagnóstico do .env no navegador
+    window.alert(`DIAGNÓSTICO WHATSAPP:\n\nConfigurado: ${configured ? 'SIM' : 'NÃO'}\nToken no Navegador: ${import.meta.env.VITE_W_API_TOKEN ? 'SIM (Começa com ' + import.meta.env.VITE_W_API_TOKEN.substring(0,3) + ')' : 'NÃO'}\n\nSe aparecer NÃO, o seu .env não está sendo lido pelo Vite.`);
+    
+    console.log('[WhatsApp DEBUG] ========================================');
+    console.log('[WhatsApp DEBUG] isWhatsAppConfigured():', configured);
+    console.log('[WhatsApp DEBUG] phone:', phone);
+    console.log('[WhatsApp DEBUG] supplierName:', supplierName);
+    console.log('[WhatsApp DEBUG] Vai usar API?', configured && !!phone);
+    console.log('[WhatsApp DEBUG] ========================================');
+    
+    if (configured && phone) {
+      try {
+        toast({ title: "Enviando cotação para o WhatsApp...", description: `Fornecedor: ${supplierName}` });
+        const msg = await generateWhatsAppMessage(supplierName, products);
+        console.log('[WhatsApp DEBUG] Mensagem gerada, chamando sendWhatsAppMessage...');
+        const result = await sendWhatsAppMessage(null, phone, msg);
+        console.log('[WhatsApp DEBUG] Resultado:', JSON.stringify(result));
+        
+        if (result.success) {
+          toast({ title: "✅ Cotação enviada com sucesso!", variant: "default" });
+        } else {
+          throw new Error(result.error || "Erro desconhecido");
+        }
+      } catch (error: any) {
+        console.error("[WhatsApp DEBUG] Erro no envio via API:", error);
+        toast({ 
+          title: "Erro ao enviar via API", 
+          description: error?.message || "Erro de validação ou conexão",
+          variant: "destructive" 
+        });
+        
+        // TEMPORARIAMENTE: Não vamos abrir o WhatsApp manual automaticamente quando houver falha,
+        // para que possamos ler a mensagem de erro da API na tela.
+      }
+    } else {
+      console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
+      console.log('[WhatsApp DEBUG] Motivo:', !configured ? 'API não configurada' : 'Sem telefone');
+      // Modo manual original
+      const msg = await generateWhatsAppMessage(supplierName, products);
+      const url = phone 
+        ? `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
+        : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+    }
   };
 
   return (
@@ -218,7 +269,7 @@ export function QuoteValuesTab({
                     </span>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={(e) => handleWhatsApp(e, fornecedor.contato)}
+                        onClick={(e) => handleWhatsApp(e, fornecedor.nome, fornecedor.phone)}
                         className={cn(
                           "flex items-center justify-center p-1.5 rounded-lg transition-colors border",
                           isSelected

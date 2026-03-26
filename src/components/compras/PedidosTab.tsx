@@ -24,6 +24,7 @@ import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { usePedidosStats, OrderData } from "@/hooks/usePedidosStats";
 import { PedidosListDesktop } from "./PedidosListDesktop";
 import { MobileOrderCard } from "@/components/pedidos/MobileOrderCard";
+import { ConfirmWhatsAppOrderDialog } from "@/components/forms/ConfirmWhatsAppOrderDialog";
 
 function PedidosTab() {
   const { isMobile } = useBreakpoint();
@@ -41,6 +42,10 @@ function PedidosTab() {
   const [entregaDialogOpen, setEntregaDialogOpen] = useState(false);
   const [selectedPedido, setSelectedPedido] = useState<OrderData | null>(null);
   const [selectedPedidoRaw, setSelectedPedidoRaw] = useState<Pedido | null>(null);
+
+  // States para o envio no WhatsApp
+  const [whatsAppDialogOpen, setWhatsAppDialogOpen] = useState(false);
+  const [pedidoToWhatsApp, setPedidoToWhatsApp] = useState<OrderData | null>(null);
 
   // Ouvir evento de atalho de teclado para novo pedido
   useEffect(() => {
@@ -143,8 +148,16 @@ function PedidosTab() {
   }, [searchParams, pedidos, handleRegistrarEntrega, setSearchParams]);
 
   const handleUpdateStatus = useCallback((pedidoId: string, status: string) => {
+    if (status === 'enviado') {
+      const pedidoInfo = pedidos.find(p => p.id === pedidoId);
+      if (pedidoInfo) {
+        setPedidoToWhatsApp(pedidoInfo);
+        setWhatsAppDialogOpen(true);
+        return;
+      }
+    }
     updatePedidoStatus({ pedidoId, status });
-  }, [updatePedidoStatus]);
+  }, [updatePedidoStatus, pedidos]);
 
   if (isLoading) return <div className="flex items-center justify-center py-24"><Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} /></div>;
 
@@ -212,6 +225,7 @@ function PedidosTab() {
             pedido={pedido}
             onManage={handleManagePedido}
             onDelete={handleDeletePedidoClick}
+            onUpdateStatus={handleUpdateStatus}
           />
         ))}
       </div>
@@ -240,6 +254,16 @@ function PedidosTab() {
         open={entregaDialogOpen}
         onOpenChange={setEntregaDialogOpen}
         pedido={selectedPedidoRaw}
+      />
+      <ConfirmWhatsAppOrderDialog
+        open={whatsAppDialogOpen}
+        onOpenChange={setWhatsAppDialogOpen}
+        pedido={pedidoToWhatsApp}
+        onConfirm={() => {
+          if (pedidoToWhatsApp) {
+            updatePedidoStatus({ pedidoId: pedidoToWhatsApp.id, status: 'confirmado' });
+          }
+        }}
       />
     </div>
   );

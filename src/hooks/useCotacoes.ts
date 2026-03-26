@@ -205,6 +205,7 @@ export function useCotacoes() {
           return {
             id: s.supplier_id,
             nome: s.supplier_name,
+            phone: s.supplier_phone || "", // Se tiver phone na tabela quote_suppliers
             valorOferecido: totalValue,
             dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
             observacoes: s.observacoes || "",

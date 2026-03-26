@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MessageSquare, Send, CheckCircle2, XCircle, Settings } from "lucide-react";
-import { sendQuoteViaWhatsApp, generateQuoteMessage, getWhatsAppConfig } from "@/lib/whatsapp";
+import { sendQuoteViaWhatsApp, generateQuoteMessage, getWhatsAppConfig, isWhatsAppConfigured } from "@/lib/whatsapp";
 import { useCompany } from "@/hooks/useCompany";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -51,6 +51,15 @@ export function SendQuoteWhatsAppDialog({
   }, [open, company, quoteId]);
 
   const checkConfig = async () => {
+    // Primeiro check global (via env ou banco)
+    const configured = isWhatsAppConfigured();
+    
+    if (configured) {
+      setIsConfigured(true);
+      return;
+    }
+
+    // Se não estiver no env, busca no banco da empresa
     if (!company) return;
     const config = await getWhatsAppConfig(company.id);
     setIsConfigured(!!config);

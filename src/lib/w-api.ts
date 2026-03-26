@@ -1,0 +1,60 @@
+/**
+ * Utilitário para integração com a W-API de WhatsApp
+ */
+
+const W_API_INSTANCE = import.meta.env.VITE_W_API_INSTANCE;
+const W_API_TOKEN = import.meta.env.VITE_W_API_TOKEN;
+
+interface SendMessageResponse {
+  message: string;
+  status: number;
+  data?: any;
+}
+
+/**
+ * Envia uma mensagem via W-API
+ */
+export async function sendWhatsAppMessage(phone: string, message: string): Promise<SendMessageResponse> {
+  // 1. Limpar o número (apenas dígitos)
+  const cleanPhone = phone.replace(/\D/g, '');
+  
+  // 2. Garantir código do país (Brasil default)
+  const formattedPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
+
+  if (!W_API_TOKEN || W_API_TOKEN === "COLE_AQUI_O_TOKEN_DA_IMAGEM") {
+    throw new Error("W-API Token não configurado no .env");
+  }
+
+  const endpoint = `https://api.w-api.app/v1/message/send`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${W_API_TOKEN}`
+      },
+      body: JSON.stringify({
+        phone: formattedPhone,
+        message: message,
+        delayMessage: 5 // Delay opcional de 5 segundos para evitar spam
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Erro ao enviar mensagem via W-API");
+    }
+
+    return data;
+  } catch (error: any) {
+    console.error("[W-API] Erro no envio:", error);
+    throw error;
+  }
+}
+
+/**
+ * Verifica se a API está configurada no ambiente
+ */
+export const isWApiConfigured = !!W_API_TOKEN && W_API_TOKEN !== "COLE_AQUI_O_TOKEN_DA_IMAGEM";

@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { capitalize } from "@/lib/text-utils";
+import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { 
   ShoppingCart, Trash2, Package, Truck, MoreVertical, Clock, CheckCircle, XCircle,
   ChevronDown, ChevronUp
@@ -36,6 +37,7 @@ export interface MobileOrderCardProps {
   pedido: OrderData;
   onManage: (pedido: OrderData) => void;
   onDelete: (pedido: OrderData) => void;
+  onUpdateStatus?: (pedidoId: string, status: string) => void;
   className?: string;
 }
 
@@ -74,6 +76,7 @@ export const MobileOrderCard = memo(function MobileOrderCard({
   pedido,
   onManage,
   onDelete,
+  onUpdateStatus,
   className,
 }: MobileOrderCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -107,7 +110,15 @@ export const MobileOrderCard = memo(function MobileOrderCard({
         </div>
         
         <div className="flex items-center gap-2 mb-3">
-          <StatusBadge status={pedido.status} />
+          {onUpdateStatus ? (
+            <StatusSelect
+              value={pedido.status}
+              options={ORDER_STATUS_OPTIONS}
+              onChange={(newStatus) => onUpdateStatus(pedido.id, newStatus)}
+            />
+          ) : (
+            <StatusBadge status={pedido.status} />
+          )}
           <span className="text-xs text-muted-foreground">{pedido.dataPedido}</span>
         </div>
         
