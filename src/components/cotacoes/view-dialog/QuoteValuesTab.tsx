@@ -101,31 +101,32 @@ export function QuoteValuesTab({
 
   const handleSaveEdit = useCallback(async (productId: string, nextProductId?: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
+      const newValue = parseBRLToNumber(editedValues[productId]);
+
+      // Atualização otimista: avança para o próximo campo IMEDIATAMENTE
+      if (nextProductId) {
+        const nextVal = getSupplierProductValue(selectedSupplier, nextProductId);
+        setEditingProductId(nextProductId);
+        const formatted = nextVal > 0
+          ? nextVal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : "";
+        setEditedValues({ [nextProductId]: formatted });
+      } else {
+        setEditingProductId(null);
+        setEditedValues({});
+      }
+
+      // Salva no banco em background (sem bloquear a UI)
       try {
-        const newValue = parseBRLToNumber(editedValues[productId]);
         await onUpdateSupplierProductValue({
           quoteId,
           supplierId: selectedSupplier,
           productId,
           newValue
         });
-
-        if (nextProductId) {
-          const nextVal = getSupplierProductValue(selectedSupplier, nextProductId);
-          setEditingProductId(nextProductId);
-          const formatted = nextVal > 0
-            ? nextVal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            : "";
-          setEditedValues({ [nextProductId]: formatted });
-        } else {
-          setEditingProductId(null);
-          setEditedValues({});
-        }
-
-        toast({ title: "Valor atualizado!" });
         onRefresh();
       } catch {
-        toast({ title: "Erro ao salvar", variant: "destructive" });
+        toast({ title: "Erro ao salvar valor", variant: "destructive" });
       }
     }
   }, [selectedSupplier, editedValues, quoteId, onUpdateSupplierProductValue, onRefresh, toast, getSupplierProductValue]);
@@ -134,6 +135,7 @@ export function QuoteValuesTab({
     setEditingProductId(null);
     setEditedValues({});
   }, []);
+
 
   const handleInputChange = (productId: string, value: string) => {
     const formatted = formatInputToBRL(value);
