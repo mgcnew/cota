@@ -178,7 +178,7 @@ function Fornecedores() {
       toast({ title: "Iniciando conversa via WhatsApp..." });
       
       // Tenta enviar via API (pode falhar se não houver configuração, o que disparará o fallback)
-      const res = await sendWhatsApp(supplier.phone, message);
+      const res = await sendWhatsApp(supplier.phone, message) as any;
       
       if (res.success) {
         toast({ title: "Mensagem enviada com sucesso!" });

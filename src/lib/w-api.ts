@@ -9,6 +9,7 @@ interface SendMessageResponse {
   message: string;
   status: number;
   data?: any;
+  success?: boolean;
 }
 
 /**
