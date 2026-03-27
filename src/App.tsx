@@ -24,6 +24,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const VendorPortal = lazy(() => import("./pages/VendorPortal"));
 
 // Prefetch function for probable next pages (Requirements 16.5)
 const prefetchDashboard = () => import("./pages/Dashboard");
@@ -77,6 +78,7 @@ const App = () => {
                 <Route path="/" element={<PageWrapper><Landing /></PageWrapper>} />
                 <Route path="/auth" element={<PageWrapper><Auth /></PageWrapper>} />
                 <Route path="/accept-invite" element={<PageWrapper><AcceptInvite /></PageWrapper>} />
+                <Route path="/responder/:token" element={<PageWrapper><VendorPortal /></PageWrapper>} />
 
                 {/* Rotas protegidas - with ErrorBoundary */}
                 <Route
