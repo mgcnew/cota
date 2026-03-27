@@ -172,18 +172,20 @@ function Fornecedores() {
     // Gerar mensagem
     const message = decodeURIComponent(generateWhatsAppMessage(supplier.name, supplier.contact));
 
-    // Se a W-API estiver configurada, usa ela
-    const { isWhatsAppConfigured, sendWhatsAppMessage } = await import("@/lib/whatsapp");
-    
-    if (isWhatsAppConfigured()) {
-      try {
-        toast({ title: "Iniciando conversa via WhatsApp..." });
-        await sendWhatsAppMessage(null, supplier.phone, message);
+    // Tenta enviar via API de serviço padronizada
+    try {
+      const { sendWhatsApp } = await import("@/lib/whatsapp-service");
+      toast({ title: "Iniciando conversa via WhatsApp..." });
+      
+      // Tenta enviar via API (pode falhar se não houver configuração, o que disparará o fallback)
+      const res = await sendWhatsApp(supplier.phone, message);
+      
+      if (res.success) {
         toast({ title: "Mensagem enviada com sucesso!" });
         return;
-      } catch (error) {
-        console.error("Erro ao enviar via API, tentando manual...", error);
       }
+    } catch (error) {
+      console.error("Erro ao enviar via API, tentando manual...", error);
     }
 
     // Fallback manual original
