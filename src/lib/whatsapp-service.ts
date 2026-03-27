@@ -121,62 +121,56 @@ export function generateQuoteExportMessage(
   potentialSavings?: number
 ): string {
   const company = "MERCADÃO NOVO BOI JOÃO DIAS";
-  const LINE = "──────────────────";
+  const SEP = "━━━━━━━━━━━━━━━━━━━";
+  
+  // Extrair lista de produtos únicos
+  const allProductsSet = new Set<string>();
+  groupedData.forEach(g => g.items.forEach(i => {
+    const name = i.productName || i.product_name || "Item";
+    if (name) allProductsSet.add(name);
+  }));
+  const productsList = Array.from(allProductsSet).slice(0, 15);
+  
+  // Extrair fornecedores arrematantes
+  const suppliersNames = groupedData
+    .filter(g => g.name !== "Pendente / Sem Vencedor")
+    .map(g => g.name);
 
-  let m = "📜 *RELATÓRIO DE NEGOCIAÇÃO*\n";
+  let m = "📜 *RELATÓRIO DE COMPRAS | CotaPro*\n";
   m += "🏢 *" + company + "*\n";
-  m += LINE + "\n\n";
+  m += SEP + "\n\n";
 
-  m += "*RESUMO DA OPERAÇÃO*\n";
-  m += "📦 Itens Cotados: *" + stats.totalProdutos + "*\n";
-  m += "🏢 Fornecedores: *" + stats.fornecedoresRespondidos + "/" + stats.totalFornecedores + "*\n";
-
-  if (potentialSavings && potentialSavings > totalSavings) {
-    m += "🎯 Economia de Mercado: *" + fmtCurrency(potentialSavings) + "*\n";
-    m += "📈 Economia Negociada: *" + fmtCurrency(totalSavings) + "*\n";
-  } else {
-    m += "📈 Economia Total: *" + fmtCurrency(totalSavings) + "*\n";
+  m += "📦 *ITENS EM COTAÇÃO*\n";
+  m += productsList.map(p => "• " + p).join("\n") + "\n";
+  if (allProductsSet.size > 15) {
+    m += "_(... e outros " + (allProductsSet.size - 15) + " itens)_\n";
   }
+  m += "\n" + SEP + "\n\n";
 
-  m += "💰 Valor Total: *" + fmtCurrency(melhorTotal) + "*\n\n";
-  m += LINE + "\n\n";
+  m += "👥 *FORNECEDORES ARREMATANTES*\n";
+  m += suppliersNames.map(s => "• " + s).join("\n");
+  m += "\n\n" + SEP + "\n\n";
 
-  m += "*ARREMATE POR FORNECEDOR*\n\n";
-
-  groupedData.slice(0, 5).forEach(function (group, index) {
-    if (group.items.length === 0) return;
-    const isWinner = index === 0 && group.name !== "Pendente / Sem Vencedor";
-    const header = isWinner
-      ? "🏆 *" + group.name + "*"
-      : "*" + group.name + "*";
-    m += header + "\n";
-    m += "> " + group.items.length + " itens arrematados\n";
-    m += "> Total: *" + fmtCurrency(group.total) + "*\n\n";
-
-    group.items.slice(0, 5).forEach(function (item) {
-      m += "  ✅ " + (item.productName || item.product_name || "Item") + "\n";
-    });
-
-    if (group.items.length > 5) {
-      m += "  _... e mais " + (group.items.length - 5) + " itens_\n";
-    }
-    m += "\n";
-  });
-
-  if (groupedData.length > 5) {
-    m += "_... e mais " + (groupedData.length - 5) + " fornecedores_\n\n";
+  m += "📊 *RESUMO EXECUTIVO FINANCEIRO*\n";
+  m += "💰 Valor Final Cotação: *" + fmtCurrency(melhorTotal) + "*\n\n";
+  
+  if (potentialSavings && potentialSavings > 0) {
+    m += "📉 Economia de Mercado: *" + fmtCurrency(potentialSavings) + "*\n";
   }
-
-  m += LINE + "\n\n";
+  
+  m += "🚀 *ECONOMIA REAL NEGOCIADA: " + fmtCurrency(totalSavings) + "*\n";
+  m += "_(Redução bruta alcançada nas negociações)_\n\n";
+  
+  m += SEP + "\n\n";
 
   if (analysisResult) {
     m += "💡 *ANÁLISE ESTRATÉGICA (IA)*\n";
     m += "_" + analysisResult + "_\n\n";
-    m += LINE + "\n\n";
+    m += SEP + "\n\n";
   }
 
-  m += "*PLATAFORMA MGC | GESTÃO PROFISSIONAL*\n";
-  m += "_Documento de auditoria de compras_";
+  m += "*GESTÃO DE COMPRAS AUDITADA*\n";
+  m += "Sistema *CotaPro* — Inteligência de Mercado";
 
   return m;
 }

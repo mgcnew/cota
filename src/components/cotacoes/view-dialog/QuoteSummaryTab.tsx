@@ -10,6 +10,8 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
 import { analyzeQuoteOptions } from "@/lib/gemini";
 import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
+import { useCompany } from "@/hooks/useCompany";
+import { toast } from "sonner";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -25,6 +27,7 @@ interface QuoteSummaryTabProps {
 }
 
 export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr }: QuoteSummaryTabProps) {
+  const { data: company } = useCompany();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [groupBySupplier, setGroupBySupplier] = useState(false);
@@ -200,19 +203,37 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           <Button 
             variant="outline"
             onClick={() => {
+                const negotiatedSavings = filteredAndSortedData.reduce((acc, item) => {
+                  const bestEntry = item.allPrices?.find((p: any) => p.fornecedorId === item.bestSupplierId);
+                  const initial = bestEntry?.valor_inicial || item.bestPrice;
+                  return acc + Math.max(0, (initial - item.bestPrice) * item.quantidade);
+                }, 0);
+
+                const marketSavings = filteredAndSortedData.reduce((acc, item) => 
+                  acc + (item.savings > 0 ? item.savings * item.quantidade : 0), 0
+                );
+
                 const exportMsg = generateQuoteExportMessage(
                   stats,
                   groupedData || [],
-                  filteredAndSortedData.reduce((acc, item) => acc + (item.savings > 0 ? item.savings : 0), 0),
+                  negotiatedSavings,
                   melhorTotal,
-                  analysisResult,
-                  0
+                  (stats as any).analiseResult || null,
+                  marketSavings
                 );
                 
-                import("@/lib/whatsapp-service").then(async m => {
-                  m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg);
-                });
-                alert("Relatório enviado para o WhatsApp configurado!");
+                toast.promise(
+                  import("@/lib/whatsapp-service").then(async m => {
+                    const res: any = await m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg, company?.id);
+                    if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
+                    return res;
+                  }),
+                  {
+                    loading: 'Enviando relatório para WhatsApp...',
+                    success: 'Relatório enviado com sucesso via API!',
+                    error: (err) => `Falha no envio via API: ${err.message}`
+                  }
+                );
               }}
             className="h-8 border-brand/20 text-brand font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm hover:bg-brand/10 transition-all flex-shrink-0"
           >

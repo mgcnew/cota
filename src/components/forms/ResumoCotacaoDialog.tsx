@@ -255,6 +255,20 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         logging: false,
         width: contentRef.current.scrollWidth,
         height: contentRef.current.scrollHeight, // Capturar tudo (mesmo o que tem scroll)
+        onclone: (clonedDoc) => {
+          // Forçar modo claro no clone para o print ficar sempre profissional (diurno)
+          const el = clonedDoc.querySelector('[data-capture-container="true"]') as HTMLElement;
+          if (el) {
+            el.classList.remove('dark');
+            el.classList.add('light');
+            el.style.backgroundColor = '#ffffff';
+            el.style.color = '#000000';
+            
+            // Remover dark da raiz do clone
+            clonedDoc.documentElement.classList.remove('dark');
+            clonedDoc.body.classList.remove('dark');
+          }
+        }
       });
 
       const base64Image = canvas.toDataURL("image/jpeg", 0.85); // JPEG rápido e leve
@@ -350,6 +364,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
       <div 
         ref={contentRef}
+        data-capture-container="true"
         className={cn(
           "w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 pb-8",
           isCapturing ? "h-auto overflow-visible p-6 rounded-none shadow-none text-black bg-white" : "flex-1 min-h-0 overflow-y-auto px-4 py-2 custom-scrollbar",

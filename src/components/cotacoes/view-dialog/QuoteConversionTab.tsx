@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { useCompany } from "@/hooks/useCompany";
 import { designSystem } from "@/styles/design-system";
 import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
 
@@ -33,7 +34,7 @@ export function QuoteConversionTab({
   supplierItems = [],
   safeStr
 }: QuoteConversionTabProps) {
-  const { toast } = useToast();
+  const { data: company } = useCompany();
   const [pedidoSubTab, setPedidoSubTab] = useState("melhores");
   const [productSelections, setProductSelections] = useState<Record<string, string>>({});
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -103,11 +104,11 @@ export function QuoteConversionTab({
 
   const handleConvertToOrder = () => {
     if (!deliveryDate) {
-      toast({ title: "Informe a data de entrega", variant: "destructive" });
+      toast.error("Informe a data de entrega");
       return;
     }
     if (supplierGroups.length === 0) {
-      toast({ title: "Selecione fornecedores para os produtos", variant: "destructive" });
+      toast.error("Selecione fornecedores para os produtos");
       return;
     }
     if (onConvertToOrder) {
@@ -139,36 +140,49 @@ export function QuoteConversionTab({
         
         return {
           productName: p.product_name,
+          product_name: p.product_name, // Suporte a ambos os nomes
           quantidade: p.quantidade,
           unidade: p.unidade,
           bestPrice: p.value,
           bestSupplierId: group.supplierId,
-          allPrices: [{
-            fornecedorId: group.supplierId,
-            valor_inicial: supplierItem?.price_history?.[0]?.old_price || p.value
-          }],
+          initialOffer: supplierItem?.price_history?.[0]?.old_price || p.value,
+          allPrices: [], // Estrutura mínima
           savings: bestPrice > 0 ? (bestPrice - p.value) : 0
         };
       })
     }));
 
-    const totalSavings = groupedDataExport.reduce((acc, g) => 
-      acc + g.items.reduce((sum, i) => sum + (i.savings > 0 ? i.savings : 0), 0), 0
+    // Economia Real: Diferença entre a primeira oferta do fornecedor e o preço final selecionado
+    const totalNegotiatedSavings = groupedDataExport.reduce((acc, g) => 
+      acc + g.items.reduce((sum, i: any) => sum + (Math.max(0, (i.initialOffer - i.bestPrice)) * i.quantidade), 0), 0
+    );
+
+    // Economia de Mercado: Diferença entre o melhor preço global e o selecionado
+    const totalMarketPotential = groupedDataExport.reduce((acc, g) => 
+      acc + g.items.reduce((sum, i: any) => sum + (i.savings > 0 ? i.savings * i.quantidade : 0), 0), 0
     );
 
     const exportMsg = generateQuoteExportMessage(
       statsExport,
       groupedDataExport,
-      totalSavings,
+      totalNegotiatedSavings,
       totalSelecao,
-      null,
-      0
+      (quote as any).analise_ia || null,
+      totalMarketPotential
     );
 
-    import("@/lib/whatsapp-service").then(m => {
-      m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg);
-    });
-    alert("Relatório enviado para o WhatsApp configurado!");
+    toast.promise(
+      import("@/lib/whatsapp-service").then(async m => {
+        const res: any = await m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg, company?.id);
+        if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
+        return res;
+      }),
+      {
+        loading: 'Enviando relatório para WhatsApp...',
+        success: 'Relatório enviado com sucesso via API!',
+        error: (err) => `Falha no envio via API: ${err.message}`
+      }
+    );
   };
 
   if (products.length === 0) {
