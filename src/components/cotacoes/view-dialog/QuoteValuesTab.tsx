@@ -168,29 +168,22 @@ export function QuoteValuesTab({
     [fornecedores, selectedSupplier]
   );
 
-  const handleWhatsApp = async (e: React.MouseEvent, supplierName: string, phone?: string) => {
+  const handleWhatsApp = async (e: React.MouseEvent, supplierName: string, phone?: string, accessToken?: string) => {
     e.stopPropagation();
     
-    // Alerta para confirmar que o clique foi capturado pelo código novo
-    window.alert(`[WhatsApp DEBUG] Clicou em: ${supplierName}\nTelefone: ${phone || 'SEM TELEFONE'}`);
-    
     const configured = isWhatsAppConfigured();
-    console.log('[WhatsApp DEBUG] State:', { configured, token: !!import.meta.env.VITE_W_API_TOKEN });
-    
-    // Alerta definitivo para diagnóstico do .env no navegador
-    window.alert(`DIAGNÓSTICO WHATSAPP:\n\nConfigurado: ${configured ? 'SIM' : 'NÃO'}\nToken no Navegador: ${import.meta.env.VITE_W_API_TOKEN ? 'SIM (Começa com ' + import.meta.env.VITE_W_API_TOKEN.substring(0,3) + ')' : 'NÃO'}\n\nSe aparecer NÃO, o seu .env não está sendo lido pelo Vite.`);
-    
-    console.log('[WhatsApp DEBUG] ========================================');
-    console.log('[WhatsApp DEBUG] isWhatsAppConfigured():', configured);
-    console.log('[WhatsApp DEBUG] phone:', phone);
-    console.log('[WhatsApp DEBUG] supplierName:', supplierName);
-    console.log('[WhatsApp DEBUG] Vai usar API?', configured && !!phone);
-    console.log('[WhatsApp DEBUG] ========================================');
     
     if (configured && phone) {
       try {
         toast({ title: "Enviando cotação para o WhatsApp...", description: `Fornecedor: ${supplierName}` });
-        const msg = await generateWhatsAppMessage(supplierName, products);
+        let msg = await generateWhatsAppMessage(supplierName, products);
+        
+        // Adiciona link do portal se existir token
+        if (accessToken) {
+          const baseUrl = window.location.origin;
+          msg += `\n\n🔗 *Responda direto no link seguro:*\n${baseUrl}/responder/${accessToken}`;
+        }
+        
         console.log('[WhatsApp DEBUG] Mensagem gerada, chamando sendWhatsAppMessage...');
         const result = await sendWhatsAppMessage(null, phone, msg);
         console.log('[WhatsApp DEBUG] Resultado:', JSON.stringify(result));
@@ -215,7 +208,13 @@ export function QuoteValuesTab({
       console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
       console.log('[WhatsApp DEBUG] Motivo:', !configured ? 'API não configurada' : 'Sem telefone');
       // Modo manual original
-      const msg = await generateWhatsAppMessage(supplierName, products);
+      let msg = await generateWhatsAppMessage(supplierName, products);
+
+      if (accessToken) {
+        const baseUrl = window.location.origin;
+        msg += `\n\n🔗 *Responda direto no link seguro:*\n${baseUrl}/responder/${accessToken}`;
+      }
+
       const url = phone 
         ? `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
         : `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -304,7 +303,7 @@ export function QuoteValuesTab({
                       </span>
                     </div>
                     <div
-                      onClick={(e) => handleWhatsApp(e, fornecedor.nome, fornecedor.phone)}
+                      onClick={(e) => handleWhatsApp(e, fornecedor.nome, fornecedor.phone, fornecedor.accessToken)}
                       className={cn(
                         "flex items-center justify-center p-1.5 rounded-lg transition-colors border cursor-pointer",
                         isSelected
@@ -316,6 +315,17 @@ export function QuoteValuesTab({
                       <MessageCircle className="h-3 w-3" />
                     </div>
                   </div>
+                  
+                  {/* DEBUG: Indicador de Token */}
+                  {fornecedor.accessToken ? (
+                    <div className="absolute right-0 bottom-0 px-1 py-0.5 bg-green-500/10 text-[6px] text-green-600 rounded-tl-md font-mono">
+                      LINK OK
+                    </div>
+                  ) : (
+                    <div className="absolute right-0 bottom-0 px-1 py-0.5 bg-red-500/10 text-[6px] text-red-600 rounded-tl-md font-mono">
+                      SEM LINK
+                    </div>
+                  )}
                   
                   {isSelected && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />
@@ -484,10 +494,23 @@ export function QuoteValuesTab({
                             <div className="flex items-center gap-1">
                               {currentValue > 0 ? (
                                 <>
-                                  <div className="flex items-center gap-2">
-                                    <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
-                                      {formatCurrency(currentValue)}
-                                    </p>
+                                  <div className="flex flex-col sm:flex-row items-baseline gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
+                                        {formatCurrency(currentValue)}
+                                      </p>
+                                      {(() => {
+                                        const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                        if (itemData?.updated_by_type === 'fornecedor') {
+                                          return (
+                                            <Badge variant="outline" className="h-4 px-1 bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400 text-[8px] font-black uppercase">
+                                              Via Link
+                                            </Badge>
+                                          );
+                                        }
+                                        return null;
+                                      })()}
+                                    </div>
                                     {(() => {
                                       const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
                                       const hasHistory = itemData?.price_history && itemData.price_history.length > 0;

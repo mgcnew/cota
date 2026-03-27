@@ -297,7 +297,14 @@ export async function sendQuoteViaWhatsApp(params: {
     }
 
     try {
-      await sendMsg(phone, customMessage);
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://cotapro.com';
+      const linkMsg = qs.access_token 
+        ? `\n\n🔗 *Responda direto no link seguro:*\n${baseUrl}/responder/${qs.access_token}` 
+        : '';
+        
+      const finalMessage = customMessage + linkMsg;
+
+      await sendMsg(phone, finalMessage);
       sent++;
     } catch (e: any) {
       failed++;

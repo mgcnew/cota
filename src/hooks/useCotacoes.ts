@@ -10,6 +10,7 @@ export interface FornecedorParticipante {
   dataResposta: string | null;
   observacoes: string;
   status: "pendente" | "respondido";
+  accessToken?: string;
 }
 
 // Interface for supplier item with pricing metadata
@@ -26,6 +27,7 @@ export interface SupplierItemWithPricing {
   brand_id: string | null;
   brand_name: string | null;
   brand_rating: number | null;
+  updated_by_type: 'comprador' | 'fornecedor' | null;
   created_at: string;
   updated_at: string;
 }
@@ -81,12 +83,14 @@ export function useCotacoes() {
           .select(`
             *,
             quote_items(*),
-            quote_suppliers(*)
+            quote_suppliers(*, access_token)
           `)
           .order("created_at", { ascending: false });
 
         if (quotesError) {
           console.error("❌ Error fetching quotes:", quotesError);
+          // MOSTRE UM ALERT FEIO E GIGANTE SE HOUVER ERRO DE SQL
+          alert("ERRO NO BANCO DE DADOS: " + (quotesError.message || JSON.stringify(quotesError)));
           throw quotesError;
         }
 
@@ -124,6 +128,7 @@ export function useCotacoes() {
               quantidade_por_embalagem,
               brand_id,
               brands(name, manual_rating),
+              updated_by_type,
               created_at
             `)
             .in('quote_id', quoteIds)
@@ -146,6 +151,7 @@ export function useCotacoes() {
               product_id,
               product_name,
               valor_oferecido,
+              updated_by_type,
               created_at
             `)
             .in('quote_id', quoteIds)
@@ -161,7 +167,8 @@ export function useCotacoes() {
             ...item,
             unidade_preco: null,
             fator_conversao: null,
-            quantidade_por_embalagem: null
+            quantidade_por_embalagem: null,
+            updated_by_type: item.updated_by_type || null
           }));
         }
 
@@ -191,6 +198,7 @@ export function useCotacoes() {
                 brand_id: item.brand_id,
                 brand_name: item.brands?.name,
                 brand_rating: item.brands?.manual_rating,
+                updated_by_type: item.updated_by_type,
                 created_at: item.created_at,
                 updated_at: item.updated_at
               }))
@@ -203,8 +211,14 @@ export function useCotacoes() {
             .map(item => Number(item?.valor_oferecido) || 0)
             .filter(val => val > 0);
 
-          // Use the total or average (for now, let's sum all values)
           const totalValue = supplierValues.reduce((sum, val) => sum + val, 0);
+
+          if (!s.access_token) {
+             console.warn(`[Supabase DEBUG] Fornecedor sem access_token carregado. Fornecedor: ${s.supplier_name}, ID: ${s.id || s.supplier_id}`);
+             console.log('[Supabase DEBUG] Objeto Inteiro fornecido pelo Supabase:', s);
+          } else {
+             console.log(`[Supabase DEBUG] ✅ Token OK para ${s.supplier_name}: ${s.access_token}`);
+          }
 
           return {
             id: s.supplier_id,
@@ -213,7 +227,8 @@ export function useCotacoes() {
             valorOferecido: totalValue,
             dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString("pt-BR") : null,
             observacoes: s.observacoes || "",
-            status: s.status as "pendente" | "respondido"
+            status: s.status as "pendente" | "respondido",
+            accessToken: s.access_token
           };
         });
 
@@ -405,7 +420,8 @@ export function useCotacoes() {
             unidade_preco: unidadePreco ?? null,
             fator_conversao: fatorConversao ?? null,
             quantidade_por_embalagem: quantidadePorEmbalagem ?? null,
-            brand_id: brandId ?? null
+            brand_id: brandId ?? null,
+            updated_by_type: 'comprador'
           })
           .eq("id", existing.id)
           .select();
@@ -440,7 +456,8 @@ export function useCotacoes() {
             unidade_preco: unidadePreco ?? defaultUnidadePreco,
             fator_conversao: fatorConversao ?? null,
             quantidade_por_embalagem: quantidadePorEmbalagem ?? null,
-            brand_id: brandId ?? null
+            brand_id: brandId ?? null,
+            updated_by_type: 'comprador'
           })
           .select();
 

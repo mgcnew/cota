@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { DeleteQuoteDialogLazy } from "@/components/forms/LazyDialogs";
+import { supabase } from "@/integrations/supabase/client";
 
 // Lazy loading dos componentes das abas
 const QuoteSummaryTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteSummaryTab").then(m => ({ default: m.QuoteSummaryTab })));
@@ -98,6 +99,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+
+  // Debug removido pois já confirmamos que o BD está OK
   const keyboardOffset = useKeyboardOffset();
   
   const isFinalizada = quote?.status === "finalizada";
@@ -125,7 +128,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         nome: cf.supplier_name,
         contato: supplierInfo?.contact || cf.supplier_name, // Fallback to company name
         phone: supplierInfo?.phone || "",
-        status: cf.status
+        status: cf.status,
+        accessToken: cf.access_token
       };
     });
   }, [quote?._raw, availableSuppliers]);
