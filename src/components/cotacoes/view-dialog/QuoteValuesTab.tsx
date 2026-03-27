@@ -11,7 +11,7 @@ import { designSystem } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
 import { LastPaidPricesTooltip } from "./LastPaidPricesTooltip";
 import { generateWhatsAppMessage } from "@/lib/gemini";
-import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp";
+import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp-service";
 
 interface QuoteValuesTabProps {
   products: any[];

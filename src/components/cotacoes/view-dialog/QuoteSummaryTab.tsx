@@ -9,7 +9,7 @@ import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
 import { analyzeQuoteOptions } from "@/lib/gemini";
-import { generateQuoteExportMessage } from "@/lib/whatsapp";
+import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -205,10 +205,14 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                   groupedData || [],
                   filteredAndSortedData.reduce((acc, item) => acc + (item.savings > 0 ? item.savings : 0), 0),
                   melhorTotal,
-                  analysisResult
+                  analysisResult,
+                  0
                 );
-                const url = `https://wa.me/?text=${encodeURIComponent(exportMsg)}`;
-                window.open(url, '_blank');
+                
+                import("@/lib/whatsapp-service").then(async m => {
+                  m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg);
+                });
+                alert("Relatório enviado para o WhatsApp configurado!");
               }}
             className="h-8 border-brand/20 text-brand font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm hover:bg-brand/10 transition-all flex-shrink-0"
           >

@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MessageSquare, Send, CheckCircle2, XCircle, Settings } from "lucide-react";
-import { sendQuoteViaWhatsApp, generateQuoteMessage, getWhatsAppConfig, isWhatsAppConfigured } from "@/lib/whatsapp";
+import { sendQuoteViaWhatsApp, generateQuoteMessage, getWhatsAppConfig, isWhatsAppConfigured } from "@/lib/whatsapp-service";
 import { useCompany } from "@/hooks/useCompany";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";

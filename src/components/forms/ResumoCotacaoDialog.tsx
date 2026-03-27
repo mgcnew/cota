@@ -11,10 +11,11 @@ import {
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
-import { generateQuoteExportMessage, sendWhatsAppMedia } from "@/lib/whatsapp";
+import { generateQuoteExportMessage, sendWhatsAppMedia } from "@/lib/whatsapp-service";
 import type { Quote } from "@/hooks/useCotacoes";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
+import { useCompany } from "@/hooks/useCompany";
 
 interface ResumoCotacaoDialogProps {
   open: boolean;
@@ -23,6 +24,7 @@ interface ResumoCotacaoDialogProps {
 }
 
 export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: ResumoCotacaoDialogProps) {
+  const { data: company } = useCompany();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
@@ -219,13 +221,23 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     const exportMsg = generateQuoteExportMessage(
       statsExport,
       groupedDataExport,
-      economiaReport,
+      totalEconomiaReal,
       totalMelhorPreco,
-      (quote as any).analise_ia 
+      (quote as any).analise_ia,
+      totalEconomiaPotencial
     );
 
-    const url = `https://wa.me/?text=${encodeURIComponent(exportMsg)}`;
-    window.open(url, '_blank');
+    toast.promise(
+      import("@/lib/whatsapp-service").then(m => m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg, company?.id)),
+      {
+        loading: 'Enviando relatório para WhatsApp...',
+        success: (res: any) => {
+          if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
+          return 'Relatório enviado com sucesso via API!';
+        },
+        error: (err) => `Falha no envio via API: ${err.message}. Tente novamente.`
+      }
+    );
   };
 
   const handleSendScreenshot = async () => {
@@ -348,15 +360,20 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
           {/* ── HEADER PROFISSIONAL ── */}
           <div className={cn("flex items-start justify-between pb-4 border-b", isCapturing ? "border-zinc-300" : "border-zinc-200 dark:border-zinc-800")}>
-            <div>
-              <h1 className={cn("text-xl tracking-tight uppercase font-black")}>
-                Relatório de Negociação <span className="text-zinc-400 font-normal">#{safeStr(quote.id).slice(0, 8)}</span>
-              </h1>
-              <div className="flex items-center gap-3 mt-2">
-                <StatusBadge status={quote.status} />
-                <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-medium">
-                  <Calendar className="h-3.5 w-3.5" />
-                  {safeStr(quote.dataInicio)} até {safeStr(quote.dataFim)}
+            <div className="flex gap-4">
+              <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 rounded-lg flex items-center justify-center text-white dark:text-zinc-900 font-black text-xl shadow-lg">
+                M
+              </div>
+              <div>
+                <h1 className={cn("text-xl tracking-tight uppercase font-black")}>
+                  Relatório de Negociação <span className="text-zinc-400 font-normal text-sm">#{safeStr(quote.id).slice(0, 8)}</span>
+                </h1>
+                <div className="flex items-center gap-3 mt-1">
+                  <StatusBadge status={quote.status} />
+                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                    <Calendar className="h-3 w-3" />
+                    {safeStr(quote.dataInicio)} — {safeStr(quote.dataFim)}
+                  </div>
                 </div>
               </div>
             </div>

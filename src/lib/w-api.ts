@@ -25,7 +25,9 @@ export async function sendWhatsAppMessage(phone: string, message: string): Promi
     throw new Error("W-API Token não configurado no .env");
   }
 
-  const endpoint = `https://api.w-api.app/v1/message/send`;
+  // Usar o proxy em desenvolvimento para evitar erro de CORS e <!DOCTYPE (HTML)
+  const baseUrl = import.meta.env.PROD ? 'https://api.w-api.app' : '/whatsapp-api';
+  const endpoint = `${baseUrl}/v1/message/send-text${W_API_INSTANCE ? `?instanceId=${W_API_INSTANCE}` : ''}`;
 
   try {
     const response = await fetch(endpoint, {
@@ -36,8 +38,7 @@ export async function sendWhatsAppMessage(phone: string, message: string): Promi
       },
       body: JSON.stringify({
         phone: formattedPhone,
-        message: message,
-        delayMessage: 5 // Delay opcional de 5 segundos para evitar spam
+        message: message
       })
     });
 

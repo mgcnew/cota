@@ -11,7 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Send } from "lucide-react";
-import { isWhatsAppConfigured, generateOrderMessage, sendWhatsAppMessage, getWhatsAppConfig } from "@/lib/whatsapp";
+import { isWhatsAppConfigured, generateOrderMessage, sendWhatsAppMessage, getWhatsAppConfig } from "@/lib/whatsapp-service";
 import { OrderData } from "@/hooks/usePedidosStats";
 import { supabase } from "@/integrations/supabase/client";
 

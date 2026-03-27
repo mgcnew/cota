@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { designSystem } from "@/styles/design-system";
-import { generateQuoteExportMessage } from "@/lib/whatsapp";
+import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
 
 interface QuoteConversionTabProps {
   products: any[];
@@ -160,11 +160,15 @@ export function QuoteConversionTab({
       statsExport,
       groupedDataExport,
       totalSavings,
-      totalSelecao
+      totalSelecao,
+      null,
+      0
     );
 
-    const url = `https://wa.me/?text=${encodeURIComponent(exportMsg)}`;
-    window.open(url, '_blank');
+    import("@/lib/whatsapp-service").then(m => {
+      m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg);
+    });
+    alert("Relatório enviado para o WhatsApp configurado!");
   };
 
   if (products.length === 0) {

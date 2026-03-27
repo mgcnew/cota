@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, MessageSquare, CheckCircle2, XCircle } from "lucide-react";
-import { getWhatsAppConfig, saveWhatsAppConfig } from "@/lib/whatsapp";
+import { getWhatsAppConfig, saveWhatsAppConfig } from "@/lib/whatsapp-service";
 import { useCompany } from "@/hooks/useCompany";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
