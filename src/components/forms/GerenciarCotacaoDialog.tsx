@@ -203,12 +203,22 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   const productPricesData = useMemo(() => {
     return products.map((product: any) => {
-      const { bestPrice, bestSupplierName } = getBestPriceInfoForProduct(product.product_id);
+      const { bestPrice, bestSupplierId, bestSupplierName } = getBestPriceInfoForProduct(product.product_id);
 
-      const allPrices = fornecedores.map((f: any) => ({
-        nome: f.nome,
-        value: getSupplierProductValue(f.id, product.product_id)
-      })).filter((p: any) => p.value > 0).sort((a: any, b: any) => a.value - b.value);
+      const allPrices = fornecedores.map((f: any) => {
+        const item = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === product.product_id);
+        const currentPrice = item?.valor_oferecido || 0;
+        const initialPrice = item?.price_history && item.price_history.length > 0 
+          ? item.price_history[0].old_price 
+          : currentPrice;
+
+        return {
+          nome: f.nome,
+          fornecedorId: f.id,
+          value: currentPrice,
+          valor_inicial: initialPrice
+        };
+      }).filter((p: any) => p.value > 0).sort((a: any, b: any) => a.value - b.value);
 
       const averagePrice = allPrices.length > 0
         ? allPrices.reduce((acc: number, curr: any) => acc + curr.value, 0) / allPrices.length
@@ -222,6 +232,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         quantidade: product.quantidade,
         unidade: product.unidade,
         bestPrice,
+        bestSupplierId,
         bestSupplierName,
         allPrices,
         savings
@@ -658,6 +669,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   onOpenChange={onOpenChange}
                   getSupplierProductValue={getSupplierProductValue}
                   getBestPriceInfoForProduct={getBestPriceInfoForProduct}
+                  supplierItems={supplierItems}
                   safeStr={safeStr}
                 />
               )}

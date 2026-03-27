@@ -9,7 +9,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Filter, TrendingDown, Clock, CheckCircle2, ShoppingCart, FileText, AlertTriangle, Download } from "lucide-react";
+import { Plus, Filter, TrendingDown, Clock, CheckCircle2, ShoppingCart, FileText, AlertTriangle, Download, Users, Zap, Award, Sparkles } from "lucide-react";
 import { SearchInput } from "@/components/ui/search-input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -209,29 +209,42 @@ function CotacoesTab() {
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Metrics */}
       <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-        <MetricCard title="Ativas" value={stats.ativas} icon={FileText} variant="info" />
+        <MetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
+        
         <MetricCard
-          title="Prontas"
-          value={stats.prontasParaDecisao}
-          icon={CheckCircle2}
-          variant="success"
-          onClick={() => handleStatusFilterChange("prontas")}
-        />
-        <MetricCard
-          title="Vencendo"
-          value={stats.vencendo}
-          icon={AlertTriangle}
-          variant="warning"
-          onClick={() => handleStatusFilterChange("vencendo")}
-        />
-        <MetricCard
-          title="Economia Real"
-          value={stats.economiaRealFormatada}
-          icon={TrendingDown}
+          title="Adesão de Fornecedores"
+          value={stats.adesaoFormatada}
+          icon={Users}
           variant="success"
           trend={{
-            value: stats.economiaEstimadaFormatada,
-            label: "estimada",
+            value: `${stats.prontasParaDecisao} prontas`,
+            label: "p/ fechar",
+            type: "positive"
+          }}
+          onClick={() => handleStatusFilterChange("prontas")}
+        />
+
+        <MetricCard
+          title="Ações Urgentes"
+          value={stats.vencendo}
+          icon={Zap}
+          variant="warning"
+          trend={{
+            value: "Vencendo",
+            label: "em 48h",
+            type: "neutral"
+          }}
+          onClick={() => handleStatusFilterChange("vencendo")}
+        />
+
+        <MetricCard
+          title="Economia Real Negociada"
+          value={stats.economiaTrabalhoFormatada}
+          icon={Sparkles}
+          variant="success"
+          trend={{
+            value: stats.economiaPotencialFormatada,
+            label: "mercado",
             type: "neutral"
           }}
         />

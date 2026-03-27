@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, Sparkles, Loader2 } from "lucide-react";
+import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
 import { analyzeQuoteOptions } from "@/lib/gemini";
+import { generateQuoteExportMessage } from "@/lib/whatsapp";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -195,24 +196,67 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           </div>
         </div>
         
-        <Button 
-          onClick={handleAnalyzeQuote} 
-          disabled={isAnalyzing}
-          className="ml-4 h-8 bg-brand hover:bg-brand/90 text-black font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm shadow-brand/20 border-none transition-all hover:scale-[1.02] flex-shrink-0"
-        >
-          {isAnalyzing ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1.5" />}
-          Otimizar Compra
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            onClick={() => {
+                const exportMsg = generateQuoteExportMessage(
+                  stats,
+                  groupedData || [],
+                  filteredAndSortedData.reduce((acc, item) => acc + (item.savings > 0 ? item.savings : 0), 0),
+                  melhorTotal,
+                  analysisResult
+                );
+                const url = `https://wa.me/?text=${encodeURIComponent(exportMsg)}`;
+                window.open(url, '_blank');
+              }}
+            className="h-8 border-brand/20 text-brand font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm hover:bg-brand/10 transition-all flex-shrink-0"
+          >
+            <MessageCircle className="h-3 w-3 mr-1.5" />
+            <span className="hidden sm:inline">Exportar p/</span> WhatsApp
+          </Button>
+
+          <Button 
+            onClick={handleAnalyzeQuote} 
+            disabled={isAnalyzing}
+            className="h-8 bg-brand hover:bg-brand/90 text-black font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm shadow-brand/20 border-none transition-all hover:scale-[1.02] flex-shrink-0"
+          >
+            {isAnalyzing ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1.5" />}
+            <span className="hidden sm:inline">Otimizar Compra</span>
+            <span className="sm:hidden">Otimizar</span>
+          </Button>
+        </div>
       </div>
 
-      {/* RESULTADO DA IA (condicional) */}
+      {/* RESULTADO DA IA (condicional) - RESUMO DA DECISÃO */}
       {analysisResult && (
         <div className="bg-brand/5 border-b border-brand/20 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-brand" />
-            <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Análise Inteligente de Cotação</h3>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-brand" />
+              <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Resumo da Decisão (IA)</h3>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const exportMsg = generateQuoteExportMessage(
+                  stats,
+                  groupedData || [],
+                  filteredAndSortedData.reduce((acc, item) => acc + (item.savings > 0 ? item.savings : 0), 0),
+                  melhorTotal,
+                  analysisResult
+                );
+                const url = `https://wa.me/?text=${encodeURIComponent(exportMsg)}`;
+                window.open(url, '_blank');
+              }}
+              className="h-7 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95"
+            >
+              <MessageCircle className="h-3.5 w-3.5 mr-1" />
+              Exportar Decisão
+            </Button>
           </div>
-          <div className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+          <div className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed font-medium">
             {analysisResult}
           </div>
         </div>

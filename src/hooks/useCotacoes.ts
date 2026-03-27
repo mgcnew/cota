@@ -117,6 +117,8 @@ export function useCotacoes() {
               product_id,
               product_name,
               valor_oferecido,
+              valor_inicial,
+              price_history,
               unidade_preco,
               fator_conversao,
               quantidade_por_embalagem,
@@ -181,6 +183,8 @@ export function useCotacoes() {
                 product_id: item.product_id,
                 product_name: item.product_name,
                 valor_oferecido: item.valor_oferecido,
+                valor_inicial: item.valor_inicial,
+                price_history: item.price_history || [],
                 unidade_preco: item.unidade_preco as PricingUnit | null,
                 fator_conversao: item.fator_conversao,
                 quantidade_por_embalagem: item.quantidade_por_embalagem,
@@ -365,11 +369,39 @@ export function useCotacoes() {
       console.log('📋 Registro existente:', existing);
 
       if (existing) {
-        // Update existing record with pricing metadata
+        // Encontrar valor inicial e histórico se existir
+        const { data: recordData } = await supabase
+          .from("quote_supplier_items")
+          .select("valor_inicial, valor_oferecido, price_history")
+          .eq("id", existing.id)
+          .single();
+
+        let valorInicial = recordData?.valor_inicial;
+        
+        // Se ainda não tem valor inicial e o valor novo é válido (>0)
+        if (!valorInicial && newValue > 0) {
+          valorInicial = recordData?.valor_oferecido > 0 ? recordData?.valor_oferecido : newValue;
+        }
+
+        const oldValor = Number(recordData?.valor_oferecido) || 0;
+        let newHistory = Array.isArray(recordData?.price_history) ? [...recordData.price_history] : [];
+        
+        // Se o valor anterior era maior que zero e é diferente do novo, salva no histórico
+        if (oldValor > 0 && oldValor !== newValue) {
+          newHistory.push({
+            old_value: oldValor,
+            new_value: newValue,
+            date: new Date().toISOString()
+          });
+        }
+
+        // Update existing record with pricing metadata and history
         const { data: updatedData, error } = await supabase
           .from("quote_supplier_items")
           .update({
             valor_oferecido: newValue,
+            valor_inicial: valorInicial,
+            price_history: newHistory,
             unidade_preco: unidadePreco ?? null,
             fator_conversao: fatorConversao ?? null,
             quantidade_por_embalagem: quantidadePorEmbalagem ?? null,
@@ -404,6 +436,7 @@ export function useCotacoes() {
             product_id: productId,
             product_name: productData?.name || "Produto",
             valor_oferecido: newValue,
+            valor_inicial: newValue, // Primeiro valor inserido é o inicial
             unidade_preco: unidadePreco ?? defaultUnidadePreco,
             fator_conversao: fatorConversao ?? null,
             quantidade_por_embalagem: quantidadePorEmbalagem ?? null,

@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -149,6 +150,14 @@ export function QuoteValuesTab({
       sum + getSupplierProductValue(supplierId, product.product_id), 0);
   }, [products, getSupplierProductValue]);
 
+  const calcularTotalInicialFornecedor = useCallback((supplierId: string) => {
+    return products.reduce((sum: number, product: any) => {
+      const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === product.product_id);
+      const val = Number(item?.valor_inicial) || Number(item?.valor_oferecido) || 0;
+      return sum + val;
+    }, 0);
+  }, [products, supplierItems]);
+
   const filteredSuppliers = useMemo(() => {
     if (!supplierSearch) return fornecedores;
     return fornecedores.filter((f: any) => f.nome.toLowerCase().includes(supplierSearch.toLowerCase()));
@@ -239,8 +248,10 @@ export function QuoteValuesTab({
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1.5">
           {filteredSuppliers.length > 0 ? (
-            filteredSuppliers.map((fornecedor: any) => {
+              filteredSuppliers.map((fornecedor: any) => {
               const total = calcularTotalFornecedor(fornecedor.id);
+              const totalInicial = calcularTotalInicialFornecedor(fornecedor.id);
+              const economiaTotal = totalInicial > total ? totalInicial - total : 0;
               const isSelected = selectedSupplier === fornecedor.id;
 
               return (
@@ -252,39 +263,63 @@ export function QuoteValuesTab({
                     if (isMobile) setShowMobileValues(true);
                   }}
                   className={cn(
-                    "w-full text-left px-3 py-2 rounded-xl border transition-all duration-200 relative overflow-hidden group",
-                    isSelected
-                      ? "bg-card border-border shadow-sm ring-1 ring-brand/20"
-                      : "bg-transparent border-transparent hover:bg-muted/40"
+                    "w-full p-3 rounded-xl transition-all duration-300 flex flex-col gap-1.5 text-left border relative overflow-hidden",
+                    isSelected 
+                      ? "bg-brand/10 border-brand/40 shadow-sm" 
+                      : "bg-card hover:bg-muted/50 border-border/50 hover:border-brand/30"
                   )}
                 >
-                  {isSelected && <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />}
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <div className={cn("w-2 h-2 rounded-full", fornecedor.status === 'respondido' ? "bg-brand shadow-[0_0_8px_hsl(var(--brand))]" : "bg-zinc-300 dark:bg-zinc-700")} />
-                    <span className={cn("text-xs font-bold truncate", isSelected ? "text-zinc-900 dark:text-zinc-50" : "text-zinc-500")} title={fornecedor.nome}>{safeStr(fornecedor.nome)}</span>
-                  </div>
-                  <div className="flex items-center justify-between pl-4">
-                    <span className={cn("text-[11px] font-black", isSelected ? "text-brand" : "text-zinc-400")}>
-                      {formatCurrency(total)}
+                  <div className="flex items-center justify-between gap-2 relative z-10">
+                    <span className={cn(
+                      "text-[11px] font-bold uppercase truncate tracking-tight",
+                      isSelected ? "text-brand" : "text-foreground"
+                    )}>
+                      {fornecedor.nome}
                     </span>
+                    <Badge variant={isSelected ? "default" : "outline"} className={cn(
+                      "h-4 px-1 text-[8px] font-black uppercase tracking-tighter",
+                      isSelected ? "bg-brand text-black" : "text-muted-foreground"
+                    )}>
+                      {total > 0 ? formatCurrency(total) : "Pendente"}
+                    </Badge>
+                  </div>
+                  
+                  {economiaTotal > 0 && (
+                    <div className="flex items-center gap-1.5 opacity-80 z-10">
+                      <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                      <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 tracking-widest uppercase">
+                        Economia: {formatCurrency(economiaTotal)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between mt-1 relative z-10">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={(e) => handleWhatsApp(e, fornecedor.nome, fornecedor.phone)}
-                        className={cn(
-                          "flex items-center justify-center p-1.5 rounded-lg transition-colors border",
-                          isSelected
-                            ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
-                            : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
-                        )}
-                        title="Enviar Cotação via WhatsApp"
-                      >
-                        <MessageCircle className="h-3.5 w-3.5" />
-                      </button>
-                      {fornecedor.status === 'respondido' && isSelected && (
-                        <div className="h-4 px-1.5 rounded bg-brand/10 text-brand text-[9px] font-black tracking-tighter flex items-center">RESPONDEU</div>
+                      <div className={cn(
+                        "w-2 h-2 rounded-full",
+                        fornecedor.status === 'respondido' ? "bg-brand shadow-[0_0_8px_hsl(var(--brand))]" : "bg-zinc-300 dark:bg-zinc-700"
+                      )} />
+                      <span className="text-[8px] font-black uppercase text-zinc-400 tracking-tighter">
+                        {fornecedor.status === 'respondido' ? "Respondeu" : "Pendente"}
+                      </span>
+                    </div>
+                    <div
+                      onClick={(e) => handleWhatsApp(e, fornecedor.nome, fornecedor.phone)}
+                      className={cn(
+                        "flex items-center justify-center p-1.5 rounded-lg transition-colors border cursor-pointer",
+                        isSelected
+                          ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
+                          : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
                       )}
+                      title="Enviar Cotação via WhatsApp"
+                    >
+                      <MessageCircle className="h-3 w-3" />
                     </div>
                   </div>
+                  
+                  {isSelected && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />
+                  )}
                 </button>
               );
             })
@@ -327,9 +362,28 @@ export function QuoteValuesTab({
                 <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Valor Proposto</p>
                 <div className="flex items-baseline gap-1">
                   <span className="text-[10px] font-bold text-brand">R$</span>
-                  <p className="text-xl font-black text-foreground">
-                    {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                  </p>
+                  <div className="flex flex-col items-end">
+                    <p className="text-xl font-black text-foreground">
+                      {calcularTotalFornecedor(selectedSupplier).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    </p>
+                    {(() => {
+                      const totalC = calcularTotalFornecedor(selectedSupplier);
+                      const totalI = calcularTotalInicialFornecedor(selectedSupplier);
+                      if (totalI > totalC && totalC > 0) {
+                        return (
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-bold text-zinc-400 line-through">
+                              {formatCurrency(totalI)}
+                            </span>
+                            <Badge className="bg-emerald-500 text-black border-none h-4 px-1.5 text-[9px] font-black uppercase tracking-tighter">
+                              Economia: {formatCurrency(totalI - totalC)}
+                            </Badge>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -429,9 +483,72 @@ export function QuoteValuesTab({
                           <div className="flex flex-col items-end">
                             <div className="flex items-center gap-1">
                               {currentValue > 0 ? (
-                                <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
-                                  {formatCurrency(currentValue)}
-                                </p>
+                                <>
+                                  <div className="flex items-center gap-2">
+                                    <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
+                                      {formatCurrency(currentValue)}
+                                    </p>
+                                    {(() => {
+                                      const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                      const hasHistory = itemData?.price_history && itemData.price_history.length > 0;
+                                      if (!hasHistory) return null;
+                                      
+                                      return (
+                                        <TooltipProvider delayDuration={100}>
+                                          <Tooltip>
+                                            <TooltipTrigger asChild>
+                                              <div className="cursor-help flex items-center justify-center p-0.5 rounded text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors">
+                                                <History className="h-3 w-3" />
+                                              </div>
+                                            </TooltipTrigger>
+                                            <TooltipContent side="left" className="min-w-[140px] p-2 bg-zinc-900 border-zinc-800 text-zinc-100">
+                                              <p className="text-[9px] font-black uppercase mb-1.5 text-zinc-400 tracking-widest border-b border-zinc-800 pb-1">Histórico de Preços</p>
+                                              <ul className="space-y-1">
+                                                {itemData.price_history.map((h: any, i: number) => {
+                                                  const isLast = i === itemData.price_history.length - 1;
+                                                  const nextVal = isLast ? currentValue : itemData.price_history[i+1].old_value;
+                                                  return (
+                                                    <li key={i} className="flex flex-col text-[10px]">
+                                                      <div className="flex justify-between items-center gap-3">
+                                                        <div className="flex items-center gap-1">
+                                                          <span className="line-through text-red-400/80">{formatCurrency(h.old_value)}</span>
+                                                          <span className="text-zinc-600">→</span>
+                                                          <span className="text-emerald-400">{formatCurrency(nextVal)}</span>
+                                                        </div>
+                                                        <span className="text-[8px] text-zinc-500 bg-zinc-800 px-1 rounded">
+                                                          {new Date(h.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} {new Date(h.date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                                                        </span>
+                                                      </div>
+                                                    </li>
+                                                  );
+                                                })}
+                                              </ul>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                        </TooltipProvider>
+                                      );
+                                    })()}
+                                  </div>
+                                  {(() => {
+                                    const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                    const initialValue = Number(itemData?.valor_inicial) || 0;
+                                    const savings = (initialValue > currentValue && currentValue > 0) ? (initialValue - currentValue) : 0;
+                                    
+                                    if (savings > 0) {
+                                      return (
+                                        <div className="flex items-center gap-1">
+                                          <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 line-through opacity-70">
+                                            {formatCurrency(initialValue)}
+                                          </p>
+                                          <Badge className="bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-none h-3 px-1 text-[8px] font-black mr-1">
+                                            -{((savings / initialValue) * 100).toFixed(0)}%
+                                          </Badge>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  })()}
+                                </>
                               ) : (
                                 <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
                                   Não Cotado

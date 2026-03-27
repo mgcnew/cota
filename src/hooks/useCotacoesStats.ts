@@ -23,28 +23,92 @@ export function useCotacoesStats(cotacoes: Quote[], pedidos: Pedido[]) {
       const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
       return dataFim <= em48h && dataFim >= hoje;
     }).length;
+
+    // --- NOVA MÉTRICA: ECONOMIA DE NEGOCIAÇÃO (TRABALHO DE REDUÇÃO) ---
+    // Diferente da economia em pedidos, essa aqui mede o recuo dos preços nas cotações ATIVAS e CONCLUÍDAS
+    let economiaNegotiated = 0;
+    let totalEsperado = 0;
+    let totalRecebido = 0;
+
+    cotacoes.forEach(quote => {
+      const raw = quote as any;
+      const supplierItems = raw._raw?.quote_supplier_items || raw._supplierItems || [];
+      const quoteItems = raw._raw?.quote_items || [];
+      const participants = quote.fornecedoresParticipantes || [];
+      
+      // Estatísticas de Adesão
+      totalEsperado += participants.length;
+      totalRecebido += participants.filter(f => f.status === 'respondido').length;
+
+      // Cálculo de Economia por Negociação (De -> Por)
+      quoteItems.forEach((qi: any) => {
+        let bestPrice = 0;
+        let winnerId = null;
+
+        participants.forEach((f: any) => {
+          const si = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === qi.product_id);
+          const val = si?.valor_oferecido || 0;
+          if (val > 0 && (bestPrice === 0 || val < bestPrice)) {
+            bestPrice = val;
+            winnerId = f.id;
+          }
+        });
+
+        if (winnerId) {
+          const winnerItem = supplierItems.find((i: any) => i?.supplier_id === winnerId && i?.product_id === qi.product_id);
+          const history = winnerItem?.price_history || [];
+          const firstPrice = history.length > 0 ? history[0].old_price : (winnerItem?.valor_oferecido || 0);
+          
+          if (firstPrice > bestPrice) {
+            economiaNegotiated += (firstPrice - bestPrice) * (Number(qi.quantidade) || 0);
+          }
+        }
+      });
+    });
+
+    const percentualAdesao = totalEsperado > 0 ? (totalRecebido / totalEsperado) * 100 : 0;
     
     // Calcular economia dos pedidos que vieram de cotações
     const pedidosDeCotacao = pedidos.filter(p => p.quote_id);
     
-    // Economia REAL = soma de economia_real dos pedidos entregues
-    const economiaReal = pedidosDeCotacao
-      .filter(p => p.status === 'entregue')
+    // Economia REAL = soma de economia_real dos pedidos que já foram confirmados ou entregues
+    const economiaRealPedidos = pedidosDeCotacao
       .reduce((sum, p) => sum + (p.economia_real || 0), 0);
     
-    // Economia ESTIMADA = soma de economia_estimada de todos os pedidos de cotação
-    const economiaEstimada = pedidosDeCotacao
-      .reduce((sum, p) => sum + (p.economia_estimada || 0), 0);
+    // Economia ESTIMADA (Melhor vs Pior do mercado na cotação)
+    const economiaPotencialTotal = cotacoes.reduce((sum, c) => {
+       const raw = c as any;
+       const supplierItems = raw._raw?.quote_supplier_items || raw._supplierItems || [];
+       const quoteItems = raw._raw?.quote_items || [];
+       const participants = c.fornecedoresParticipantes || [];
+
+       let cEcon = 0;
+       quoteItems.forEach((qi: any) => {
+          const prices = participants
+            .map((f: any) => supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === qi.product_id)?.valor_oferecido || 0)
+            .filter(v => v > 0)
+            .sort((a, b) => b - a);
+
+          if (prices.length > 1) {
+             cEcon += (prices[0] - prices[prices.length - 1]) * (Number(qi.quantidade) || 0);
+          }
+       });
+       return sum + cEcon;
+    }, 0);
     
     return { 
       ativas, 
       pendentes,
       prontasParaDecisao,
       vencendo,
-      economiaReal,
-      economiaEstimada,
-      economiaRealFormatada: economiaReal > 0 ? `R$ ${economiaReal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0",
-      economiaEstimadaFormatada: economiaEstimada > 0 ? `R$ ${economiaEstimada.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}` : "R$ 0"
+      economiaTrabalho: economiaNegotiated,
+      adesaoMedia: percentualAdesao,
+      economiaRealPedidos,
+      economiaPotencialTotal,
+      economiaTrabalhoFormatada: `R$ ${economiaNegotiated.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
+      economiaRealFormatada: `R$ ${economiaRealPedidos.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
+      economiaPotencialFormatada: `R$ ${economiaPotencialTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,
+      adesaoFormatada: `${percentualAdesao.toFixed(0)}%`
     };
   }, [cotacoes, pedidos]);
 }

@@ -74,14 +74,9 @@ export async function sendWhatsAppMessage(
       console.log('[WhatsApp DEBUG] ✅ Enviando via W-API.APP (Modo LITE)');
       const formattedPhone = formatPhoneNumber(phoneNumber);
       
-      // O endpoint original da W-API.APP (usando o proxy local para evitar CORS em dev)
-      // Endpoint exato documentado no Postman da W-API para a Instância LITE
       const isProduction = import.meta.env.PROD;
       const baseUrl = isProduction ? 'https://api.w-api.app' : '/whatsapp-api';
       const endpoint = `${baseUrl}/v1/message/send-text?instanceId=${W_API_INSTANCE}`;
-      
-      console.log('[WhatsApp DEBUG] Endpoint Final:', endpoint);
-      console.log('[WhatsApp DEBUG] Destinatário:', formattedPhone);
       
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -91,14 +86,12 @@ export async function sendWhatsAppMessage(
           'Authorization': `Bearer ${W_API_TOKEN}`,
         },
         body: JSON.stringify({
-          phone: formattedPhone, // Conforme documentação a chave deve ser 'phone' e não 'number'
+          phone: formattedPhone,
           message: message,
         }),
       });
 
       const data = await response.json();
-      console.log('[WhatsApp DEBUG] HTTP Status:', response.status);
-      console.log('[WhatsApp DEBUG] Resposta JSON:', JSON.stringify(data));
 
       if (!response.ok || data.status === 'error' || data.error) {
         return { success: false, error: data.message || data.error || `Erro HTTP ${response.status}` };
@@ -139,6 +132,47 @@ export async function sendWhatsAppMessage(
   }
 }
 
+// Enviar mídia via WaAPI
+export async function sendWhatsAppMedia(
+  phoneNumber: string,
+  mediaBase64: string,
+  caption?: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const formattedPhone = formatPhoneNumber(phoneNumber);
+    
+    if (W_API_TOKEN && W_API_TOKEN !== "COLE_AQUI_O_TOKEN_DA_IMAGEM") {
+      const isProduction = import.meta.env.PROD;
+      const baseUrl = isProduction ? 'https://api.w-api.app' : '/whatsapp-api';
+      const response = await fetch(`${baseUrl}/v1/message/send-image?instanceId=${W_API_INSTANCE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${W_API_TOKEN}`,
+        },
+        body: JSON.stringify({
+          phone: formattedPhone,
+          image: mediaBase64,   // Base64 completo (com 'data:image/jpeg;base64,')
+          caption: caption,
+          delayMessage: 10      // Conforme o exemplo do usuário
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok || data.status === 'error' || data.error) {
+        return { success: false, error: data.message || data.error || `Erro HTTP ${response.status}` };
+      }
+
+      return { success: true, messageId: data.id || 'wapi-media-sent' };
+    }
+
+    return { success: false, error: 'W-API não configurada para envio de mídia' };
+  } catch (error: any) {
+    console.error('Erro ao enviar mídia WhatsApp:', error);
+    return { success: false, error: error.message || 'Erro de conexão no envio de mídia' };
+  }
+}
+
 // Gerar mensagem de cotação personalizada
 export async function generateQuoteMessage(
   quoteId: string,
@@ -163,13 +197,6 @@ export async function generateQuoteMessage(
   if (!quote) {
     throw new Error('Cotação não encontrada');
   }
-
-  // Buscar empresa e CNPJ
-  const { data: company } = await supabase
-    .from('companies')
-    .select('name, cnpj')
-    .eq('id', quote.company_id)
-    .single();
 
   // Se tiver mensagem customizada, usa ela
   if (customMessage) {
@@ -247,7 +274,6 @@ export async function sendQuoteViaWhatsApp(
     return { success: false, sent: 0, failed: 0, errors: ['WhatsApp não configurado'] };
   }
 
-  // Buscar fornecedores (precisamos do contact tbm agora para saudação)
   const { data: suppliers } = await supabase
     .from('suppliers')
     .select('id, name, contact, phone')
@@ -257,14 +283,12 @@ export async function sendQuoteViaWhatsApp(
     return { success: false, sent: 0, failed: 0, errors: ['Nenhum fornecedor encontrado'] };
   }
 
-  // Gerar template genérico da mensagem (sem o nome do fornecedor específico)
   const baseMessage = await generateQuoteMessage(quoteId, templateId, customMessage, deadline);
 
   let sent = 0;
   let failed = 0;
   const errors: string[] = [];
 
-  // Enviar para cada fornecedor
   for (const supplier of suppliers) {
     if (!supplier.phone) {
       errors.push(`${supplier.name}: Telefone não cadastrado`);
@@ -272,16 +296,11 @@ export async function sendQuoteViaWhatsApp(
       continue;
     }
 
-    // Adaptar mensagem substituindo o placeholder de saudação com o nome daquele exato contatro (ou empresa)
     const supplierContactName = supplier.contact || supplier.name || "Fornecedor";
-    // Tenta substituir se a tag estiver lá (nossos novos defaults têm). Se não tiver a tag, se houver um fallback simples (como o Bom dia), 
-    // podemos opcionalmente empurrar, mas como refizemos o default, será trocado com sucesso
     const personalizedMessage = baseMessage.replace(/{supplier_name}/g, supplierContactName);
 
-    // Enviar mensagem
     const result = await sendWhatsAppMessage(config, supplier.phone, personalizedMessage);
 
-    // Registrar no banco
     const messageRecord = {
       company_id: quote.company_id,
       quote_id: quoteId,
@@ -303,12 +322,7 @@ export async function sendQuoteViaWhatsApp(
     }
   }
 
-  return {
-    success: sent > 0,
-    sent,
-    failed,
-    errors,
-  };
+  return { success: sent > 0, sent, failed, errors };
 }
 
 // Processar resposta do fornecedor (webhook)
@@ -318,21 +332,18 @@ export async function processWhatsAppResponse(
   companyId: string
 ): Promise<{ success: boolean; parsed?: any }> {
   try {
-    // Buscar fornecedor pelo telefone
     const formattedPhone = formatPhoneNumber(phoneNumber);
     const { data: supplier } = await supabase
       .from('suppliers')
       .select('id')
       .eq('company_id', companyId)
-      .ilike('phone', `%${formattedPhone.slice(-9)}%`) // Últimos 9 dígitos
+      .ilike('phone', `%${formattedPhone.slice(-9)}%`)
       .single();
 
     if (!supplier) {
-      console.log('Fornecedor não encontrado para o telefone:', phoneNumber);
       return { success: false };
     }
 
-    // Buscar última mensagem enviada para este fornecedor
     const { data: lastMessage } = await (supabase
       .from('whatsapp_messages' as any)
       .select('id, quote_id, packaging_quote_id')
@@ -343,14 +354,11 @@ export async function processWhatsAppResponse(
       .single() as any);
 
     if (!lastMessage) {
-      console.log('Nenhuma mensagem anterior encontrada');
       return { success: false };
     }
 
-    // Tentar extrair preços da mensagem
     const parsedData = parseQuoteResponse(messageText);
 
-    // Salvar resposta
     await (supabase.from('whatsapp_responses' as any).insert({
       company_id: companyId,
       whatsapp_message_id: (lastMessage as any).id,
@@ -373,24 +381,14 @@ export async function processWhatsAppResponse(
 // Parser inteligente para extrair preços da mensagem
 function parseQuoteResponse(text: string): any {
   const prices: Array<{ product?: string; price?: number; quantity?: number }> = [];
-  
-  // Padrões comuns de resposta:
-  // "Arroz R$ 5,50"
-  // "1. Feijão - R$ 8,00"
-  // "Óleo: 12.50"
-  
   const lines = text.split('\n');
   
   for (const line of lines) {
-    // Tentar encontrar preço na linha
     const priceMatch = line.match(/R?\$?\s*(\d+[.,]\d{2})/i);
     if (priceMatch) {
       const price = parseFloat(priceMatch[1].replace(',', '.'));
-      
-      // Tentar encontrar nome do produto
       const productMatch = line.match(/^[\d.)\-\s]*([a-záàâãéèêíïóôõöúçñ\s]+)/i);
       const product = productMatch ? productMatch[1].trim() : undefined;
-      
       prices.push({ product, price });
     }
   }
@@ -401,7 +399,6 @@ function parseQuoteResponse(text: string): any {
 export async function generateOrderMessage(
   orderId: string
 ): Promise<{ message: string; phone: string | null }> {
-  // Buscar dados do pedido
   const { data: order, error } = await supabase
     .from('orders')
     .select(`
@@ -419,43 +416,27 @@ export async function generateOrderMessage(
     throw new Error('Pedido não encontrado para gerar mensagem.');
   }
 
-  // Buscar empresa atual
-  const { data: company } = await supabase
-    .from('companies')
-    .select('name, cnpj')
-    .eq('id', order.company_id)
-    .single();
-
-  // Buscar fornecedor
   const { data: supplier } = await supabase
     .from('suppliers')
     .select('name, contact, phone')
     .eq('id', order.supplier_id)
     .single();
 
-  // Identificar se foi oriundo de uma Cotação ou Pedido Direto
   const isQuoted = !!order.quote_id;
-
   const headerText = isQuoted 
     ? `Este é um pedido referente à cotação que vocês venceram conosco.` 
     : `Este é um pedido direto do setor de compras.`;
 
-  // Lista de produtos formatada
   const productsList = order.order_items
     .map((item: any, index: number) => 
       `${index + 1}. *${item.product_name}* - ${item.quantity} ${item.unidade_pedida || 'un'}`
     )
     .join('\n');
 
-  // Aplicando dados do comprador:
-  // Forçando as informações solicitadas (pois o nome da tabela companies está "Empresa de xxx@email...")
   const companyName = "NOVO BOI JOÃO DIAS MERCADÃO LTDA";
   const companyCnpj = "63.195.471/0001-12";
-  
-  // Tratamento do vendedor fornecedor
   const supplierContactName = supplier?.contact || supplier?.name || "Fornecedor";
 
-  // Montagem da mensagem final
   let message = `Olá *${supplierContactName}*, tudo bem?\n\n`;
   message += `${headerText}\n\n`;
   message += `*Empresa:* ${companyName}\n`;
@@ -464,4 +445,81 @@ export async function generateOrderMessage(
   message += `Por favor, nos envie o *espelho da nota* ou *comprovante do pedido* para conferência.\n\nMuito obrigado!`;
 
   return { message, phone: supplier?.phone || null };
+}
+
+// Gerar relatório de fechamento de cotação para WhatsApp
+export function generateQuoteExportMessage(
+  stats: { totalProdutos: number; totalFornecedores: number; fornecedoresRespondidos: number; },
+  groupedData: { name: string, items: any[], total: number }[],
+  totalSavings: number,
+  melhorTotal: number,
+  analysisResult?: string | null
+): string {
+  let message = `🏢 *NOVO BOI JOÃO DIAS MERCADÃO LTDA*\n`;
+  message += `📊 *RELATÓRIO EXECUTIVO DE NEGOCIAÇÃO*\n`;
+  message += `──────────────────────\n\n`;
+
+  if (analysisResult) {
+    message += `💡 *INSIGHTS E ESTRATÉGIA (IA):*\n_${analysisResult}_\n\n`;
+    message += `──────────────────────\n\n`;
+  }
+
+  message += `📈 *MÉTRICAS DE PERFORMANCE:*\n`;
+  message += `• Itens Negociados: *${stats.totalProdutos}*\n`;
+  message += `• Fornecedores Consultados: *${stats.totalFornecedores}*\n`;
+  message += `• Participação Efetiva: *${stats.fornecedoresRespondidos} empresas*\n\n`;
+
+  message += `💰 *VALORES DA NEGOCIAÇÃO:*\n`;
+  message += `• Valor Final do Lote: *R$ ${melhorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}*\n`;
+  
+  if (totalSavings > 0) {
+    const savingsPercent = ((totalSavings / (melhorTotal + totalSavings)) * 100).toFixed(1);
+    message += `• Economia Gerada: *R$ ${totalSavings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}* (-${savingsPercent}%)\n`;
+  }
+  message += `\n`;
+
+  message += `🏆 *FORNECEDORES SELECIONADOS:*\n\n`;
+
+  groupedData.forEach(group => {
+    if (group.name === "Pendente / Sem Vencedor") return;
+
+    message += `*${group.name.toUpperCase()}*\n`;
+    message += `Total Alocado: *R$ ${group.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}*\n`;
+    message += `_Itens Conquistados (_${group.items.length}_):_\n`;
+
+    group.items.forEach((item, index) => {
+      const finalPrice = item.bestPrice;
+      const qtd = item.quantidade || 1;
+      const itemTotalValue = finalPrice * qtd;
+      const winningSupplierPriceInfo = item.allPrices?.find((p: any) => p.fornecedorId === item.bestSupplierId);
+      const initialPrice = winningSupplierPriceInfo?.valor_inicial || finalPrice;
+      
+      message += `${index + 1}. *${item.productName}*\n`;
+      message += `   ${qtd} ${item.unidade || 'un'} × R$ ${finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} = *R$ ${itemTotalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}*\n`;
+      
+      if (initialPrice > finalPrice) {
+        const itemSavingsUnit = initialPrice - finalPrice;
+        const totalItemSavings = itemSavingsUnit * qtd;
+        const savingsPercent = ((itemSavingsUnit / initialPrice) * 100).toFixed(0);
+        message += `   📉 _Negociado:_ ~R$ ${initialPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}~ → *R$ ${finalPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}* (-${savingsPercent}%)\n`;
+        message += `   ✅ *Economia de R$ ${totalItemSavings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} neste item*\n`;
+      }
+    });
+    message += `\n`;
+  });
+
+  const pendingGroup = groupedData.find(g => g.name === "Pendente / Sem Vencedor");
+  if (pendingGroup && pendingGroup.items.length > 0) {
+    message += `⚠️ *ITENS AGUARDANDO DEFINIÇÃO (${pendingGroup.items.length}):*\n`;
+    pendingGroup.items.forEach((item, index) => {
+      message += `${index + 1}. _${item.productName}_\n`;
+    });
+    message += `\n`;
+  }
+
+  message += `──────────────────────\n`;
+  message += `_Este relatório demonstra o valor técnico das negociações realizadas, focado em otimização de custos e eficiência de suprimentos._\n\n`;
+  message += `*MGC COTAÇÕES | GESTÃO PROFISSIONAL*`;
+
+  return message;
 }
