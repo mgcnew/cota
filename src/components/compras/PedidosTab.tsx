@@ -168,7 +168,17 @@ function PedidosTab() {
         <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
         <MetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
         <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
-        <MetricCard title="Economia Real" value={stats.economiaRealFormatada} icon={TrendingDown} variant="success" />
+        <MetricCard
+          title="Economia Real"
+          value={stats.economiaRealFormatada}
+          icon={TrendingDown}
+          variant="success"
+          trend={{
+            value: stats.variacaoFaturadoFormatada,
+            label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
+            type: stats.variacaoType
+          }}
+        />
       </ResponsiveGrid>
 
       {/* Filters & Actions */}
