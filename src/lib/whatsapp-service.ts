@@ -238,25 +238,59 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
 
   const { data: supplier } = await supabase
     .from("suppliers")
-    .select("name, phone")
+    .select("name, phone, contact")
     .eq("id", order.supplier_id)
     .single();
 
-  const items = (order.order_items || [])
-    .map(
-      (item: any) =>
-        "- " + (item.product_name || "Produto") + " x" + (item.quantidade || 1)
-    )
+  const SEP = "─────────────────────";
+  const supplierName = supplier?.name || "Prezado(a) Fornecedor(a)";
+  const contactName = supplier?.contact || supplierName;
+
+  // Client details
+  const CLIENT_RAZAO_SOCIAL = "Novo Boi Dias Mercadão Ltda";
+  const CLIENT_CNPJ = "63.195.471/0001-12";
+
+  // Format items list
+  const itemsList = (order.order_items || [])
+    .map((item: any) => {
+      const qty = item.quantidade || 1;
+      const unit = item.unidade || "un";
+      return `  • ${item.product_name || "Produto"} — *${qty} ${unit}*`;
+    })
     .join("\n");
 
-  let msg = "*PEDIDO DE COMPRA*\n\n";
-  msg += "*Fornecedor:* " + (supplier?.name || "-") + "\n";
-  msg += "*Data Entrega:* " + (order.delivery_date || "-") + "\n\n";
-  msg += "*Itens:*\n" + items + "\n\n";
+  let msg = `Olá, *${contactName}*! 👋\n\n`;
+  msg += `Tudo bem?\n\n`;
+  msg += SEP + "\n";
+  msg += `📦 *PEDIDO DE COMPRA*\n`;
+  msg += SEP + "\n\n";
+
+  msg += `*Comprador:*\n`;
+  msg += `🏢 ${CLIENT_RAZAO_SOCIAL}\n`;
+  msg += `CNPJ: ${CLIENT_CNPJ}\n\n`;
+
+  msg += `*Pedido para:* ${supplierName}\n\n`;
+
+  msg += SEP + "\n";
+  msg += `🛒 *ITENS SOLICITADOS*\n`;
+  msg += SEP + "\n";
+  msg += itemsList + "\n\n";
+
   if (order.observations) {
-    msg += "*Obs:* " + order.observations + "\n\n";
+    msg += SEP + "\n";
+    msg += `📝 *OBSERVAÇÕES*\n`;
+    msg += order.observations + "\n\n";
   }
-  msg += "*PLATAFORMA MGC | COMPRAS*";
+
+  msg += SEP + "\n";
+  msg += `📅 *PRAZO DE ENTREGA*\n`;
+  msg += `Por favor, informe o *prazo de entrega disponível* para os itens acima.\n\n`;
+
+  msg += SEP + "\n";
+  msg += `Aguardamos seu retorno. Qualquer dúvida estamos à disposição!\n\n`;
+  msg += `_Atenciosamente,_\n`;
+  msg += `*${CLIENT_RAZAO_SOCIAL}*\n`;
+  msg += `_Setor de Compras_`;
 
   return { message: msg, phone: supplier?.phone || "" };
 }
