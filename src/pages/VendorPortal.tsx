@@ -237,24 +237,34 @@ export default function VendorPortal() {
   if (success) {
     return (
       <div className={rootClasses}>
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex flex-col items-center justify-center p-6 transition-colors">
-          <div className="w-full max-w-md bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-3xl p-12 text-center shadow-2xl shadow-zinc-200/40 dark:shadow-black/40 space-y-8 animate-in zoom-in-95 duration-500">
-            <div className="relative mx-auto w-32 h-32 mb-6">
-               <div className="absolute inset-0 bg-zinc-500/5 dark:bg-zinc-500/5 blur-2xl rounded-full" />
-               <div className="relative w-full h-full bg-white rounded-3xl flex items-center justify-center shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-100 dark:border-zinc-800 p-2">
-                 <img 
-                   src="/images/logo-joao-dias-transparent.png" 
-                   alt="Logo Novo Boi João Dias" 
-                   className="w-full h-full object-contain" 
-                 />
-               </div>
+        <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-900 flex flex-col items-center justify-center p-6 transition-colors overflow-hidden">
+          
+          {/* Logo as Premium Background Theme */}
+          <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center opacity-[0.04] dark:opacity-[0.06] transform scale-125 md:scale-150">
+            <img 
+               src="/images/logo-joao-dias-transparent.png" 
+               alt="Background Theme" 
+               className="w-full h-full object-contain blur-[1px]" 
+            />
+          </div>
+
+          <div className="relative z-10 w-full max-w-md bg-white/80 dark:bg-zinc-800/80 backdrop-blur-2xl border border-white/50 dark:border-zinc-700/50 rounded-[2.5rem] p-10 sm:p-12 text-center shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 space-y-8 animate-in zoom-in-95 duration-500">
+            
+            {/* Unframed Floating Logo */}
+            <div className="relative mx-auto w-48 mb-8">
+               <img 
+                 src="/images/logo-joao-dias-transparent.png" 
+                 alt="Logo Novo Boi João Dias" 
+                 className="w-full h-auto object-contain drop-shadow-2xl" 
+               />
             </div>
-            <div className="space-y-4">
-              <h2 className="text-3xl font-extrabold tracking-tighter text-zinc-900 dark:text-zinc-50">
+
+            <div className="space-y-5">
+              <h2 className="text-3xl font-extrabold tracking-tighter text-zinc-900 dark:text-zinc-50 drop-shadow-sm">
                 Proposta Enviada!
               </h2>
-              <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
-                <p className="text-zinc-600 dark:text-zinc-300 font-medium text-base leading-relaxed">
+              <div className="p-5 bg-zinc-50/80 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800/80 shadow-inner">
+                <p className="text-zinc-700 dark:text-zinc-300 font-medium text-base leading-relaxed">
                   O <strong className="text-zinc-900 dark:text-white font-bold">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
                   Sua cotação foi registrada com sucesso e nosso time já foi notificado!
                 </p>
@@ -296,8 +306,8 @@ export default function VendorPortal() {
         <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 px-4 py-3 transition-colors">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
-                 <img src="/images/logo-joao-dias.png" alt="Logo Novo Boi João Dias" className="w-full h-full object-contain p-1" />
+               <div className="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg">
+                 <Quote className="h-4 w-4 fill-current" />
                </div>
                <div>
                  <h1 className="text-base font-extrabold leading-none tracking-tight text-zinc-900 dark:text-zinc-50">
