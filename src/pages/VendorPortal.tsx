@@ -239,40 +239,35 @@ export default function VendorPortal() {
       <div className={rootClasses}>
         <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-900 flex flex-col items-center justify-center p-6 transition-colors overflow-hidden">
           
-          {/* Logo as Premium Background Theme */}
-          <div className="absolute inset-0 z-0 pointer-events-none flex items-center justify-center opacity-[0.04] dark:opacity-[0.06] transform scale-125 md:scale-150">
-            <img 
-               src="/images/logo-joao-dias-transparent.png" 
-               alt="Background Theme" 
-               className="w-full h-full object-contain blur-[1px]" 
-            />
-          </div>
-
-          <div className="relative z-10 w-full max-w-md bg-white/80 dark:bg-zinc-800/80 backdrop-blur-2xl border border-white/50 dark:border-zinc-700/50 rounded-[2.5rem] p-10 sm:p-12 text-center shadow-2xl shadow-zinc-200/50 dark:shadow-black/50 space-y-8 animate-in zoom-in-95 duration-500">
+          <div className="relative z-10 w-full max-w-md bg-white rounded-[2rem] p-10 text-center shadow-2xl shadow-zinc-200/50 dark:shadow-black/60 overflow-hidden animate-in zoom-in-95 duration-500">
+            {/* Minimal top decorative edge matching brand color */}
+            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-600 via-red-500 to-red-600" />
             
-            {/* Unframed Floating Logo */}
-            <div className="relative mx-auto w-48 mb-8">
+            {/* The Logo Container - using mix-blend-multiply to completely erase white borders into the white card */}
+            <div className="relative mx-auto w-48 mb-8 pb-4">
                <img 
                  src="/images/logo-joao-dias-transparent.png" 
                  alt="Logo Novo Boi João Dias" 
-                 className="w-full h-auto object-contain drop-shadow-2xl" 
+                 className="w-full h-auto object-contain mix-blend-multiply drop-shadow-sm" 
                />
             </div>
 
-            <div className="space-y-5">
-              <h2 className="text-3xl font-extrabold tracking-tighter text-zinc-900 dark:text-zinc-50 drop-shadow-sm">
-                Proposta Enviada!
-              </h2>
-              <div className="p-5 bg-zinc-50/80 dark:bg-zinc-900/50 rounded-2xl border border-zinc-100 dark:border-zinc-800/80 shadow-inner">
-                <p className="text-zinc-700 dark:text-zinc-300 font-medium text-base leading-relaxed">
-                  O <strong className="text-zinc-900 dark:text-white font-bold">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
-                  Sua cotação foi registrada com sucesso e nosso time já foi notificado!
+            <div className="space-y-6">
+              <div className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-full font-bold text-sm border border-emerald-100/50 shadow-sm">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <span>Cotação Enviada com Sucesso</span>
+              </div>
+
+              <div className="space-y-5 px-2">
+                <p className="text-zinc-700 font-medium text-base leading-relaxed">
+                  O <strong className="text-zinc-900 font-black">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
+                </p>
+                <div className="w-8 h-1 bg-zinc-100 mx-auto rounded-full" />
+                <p className="text-zinc-500 font-medium text-[13px] leading-relaxed">
+                  Sua proposta foi registrada de forma segura no nosso sistema e a equipe de compras já foi notificada.
                 </p>
               </div>
             </div>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">
-              Aba segura - Brazil
-            </p>
           </div>
 
           {/* Footer Credit for Success State */}
