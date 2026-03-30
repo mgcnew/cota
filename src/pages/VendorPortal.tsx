@@ -204,16 +204,9 @@ export default function VendorPortal() {
     return (
       <div className={rootClasses}>
         <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4 transition-colors">
-          <div className="text-center space-y-6">
-            <div className="mx-auto w-32 h-32 bg-white rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-900/10 border border-zinc-100 dark:border-zinc-800 p-2 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/50 to-transparent animate-shimmer" />
-              <img 
-                src="/images/logo-joao-dias-transparent.png" 
-                alt="Logo Novo Boi João Dias" 
-                className="w-full h-full object-contain relative z-10 animate-pulse" 
-              />
-            </div>
-            <p className="text-zinc-500 dark:text-zinc-400 font-bold tracking-tight">Preparando cotação segura...</p>
+          <div className="text-center space-y-4">
+            <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400 mx-auto" />
+            <p className="text-zinc-500 dark:text-zinc-400 font-medium">Carregando cotação segura...</p>
           </div>
         </div>
       </div>
