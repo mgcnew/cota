@@ -246,19 +246,26 @@ export default function VendorPortal() {
       <div className={rootClasses}>
         <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex flex-col items-center justify-center p-6 transition-colors">
           <div className="w-full max-w-md bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-3xl p-12 text-center shadow-2xl shadow-zinc-200/40 dark:shadow-black/40 space-y-8 animate-in zoom-in-95 duration-500">
-            <div className="relative mx-auto w-24 h-24">
-               <div className="absolute inset-0 bg-emerald-500/10 dark:bg-emerald-500/5 blur-2xl rounded-full" />
-               <div className="relative w-full h-full bg-emerald-500 text-white rounded-3xl flex items-center justify-center shadow-lg shadow-emerald-500/20 rotate-6">
-                 <CheckCircle2 className="h-12 w-12" />
+            <div className="relative mx-auto w-32 h-32 mb-6">
+               <div className="absolute inset-0 bg-zinc-500/5 dark:bg-zinc-500/5 blur-2xl rounded-full" />
+               <div className="relative w-full h-full bg-white rounded-3xl flex items-center justify-center shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-100 dark:border-zinc-800 p-2">
+                 <img 
+                   src="/images/logo-joao-dias-transparent.png" 
+                   alt="Logo Novo Boi João Dias" 
+                   className="w-full h-full object-contain" 
+                 />
                </div>
             </div>
-            <div className="space-y-3">
-              <h2 className="text-4xl font-extrabold tracking-tighter text-zinc-900 dark:text-zinc-50">
-                Enviado!
+            <div className="space-y-4">
+              <h2 className="text-3xl font-extrabold tracking-tighter text-zinc-900 dark:text-zinc-50">
+                Proposta Enviada!
               </h2>
-              <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-lg leading-snug">
-                Obrigado! Sua proposta foi enviada e o comprador já foi notificado. 
-              </p>
+              <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                <p className="text-zinc-600 dark:text-zinc-300 font-medium text-base leading-relaxed">
+                  O <strong className="text-zinc-900 dark:text-white font-bold">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
+                  Sua cotação foi registrada com sucesso e nosso time já foi notificado!
+                </p>
+              </div>
             </div>
             <p className="text-xs text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-widest">
               Aba segura - Brazil
