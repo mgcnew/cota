@@ -46,6 +46,17 @@ export default function VendorPortal() {
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
+  
+  // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
+  const formatInputToBRL = (value: string) => {
+    const digitOnly = value.replace(/\D/g, "");
+    if (!digitOnly) return "";
+    const numericValue = parseInt(digitOnly, 10) / 100;
+    return numericValue.toLocaleString("pt-BR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -72,7 +83,14 @@ export default function VendorPortal() {
           setError("Esta cotação já foi encerrada e não aceita mais propostas.");
         } else {
           setData(quoteData);
-          setItems(quoteData.items || []);
+          // Formata os valores iniciais vindo do banco (número -> string pt-BR)
+          const formattedItems = (quoteData.items || []).map(item => ({
+            ...item,
+            valor_oferecido: item.valor_oferecido 
+              ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+              : ""
+          }));
+          setItems(formattedItems);
         }
       } catch (err: any) {
         console.error("Erro ao carregar cotação:", err);
@@ -111,10 +129,10 @@ export default function VendorPortal() {
   }, [token]);
 
   const handlePriceChange = (productId: string, value: string) => {
-    const cleanValue = value.replace(/[^0-9.,]/g, "");
+    const formatted = formatInputToBRL(value);
     setItems(items.map(item => 
       item.product_id === productId 
-        ? { ...item, valor_oferecido: cleanValue } 
+        ? { ...item, valor_oferecido: formatted } 
         : item
     ));
   };
@@ -145,11 +163,15 @@ export default function VendorPortal() {
     try {
       const payload = items
         .filter(i => i.valor_oferecido !== null && i.valor_oferecido !== "")
-        .map(i => ({
-          product_id: i.product_id,
-          valor_oferecido: Number(i.valor_oferecido?.toString().replace(",", ".")),
-          observacoes: i.observacoes || ""
-        }));
+        .map(i => {
+          // Converte "1.250,50" -> 1250.5
+          const numValue = parseFloat(i.valor_oferecido!.toString().replace(/\./g, "").replace(",", "."));
+          return {
+            product_id: i.product_id,
+            valor_oferecido: numValue,
+            observacoes: i.observacoes || ""
+          };
+        });
 
       const { error: saveError } = await supabase.rpc('save_vendor_quote_items', {
         p_token: token,
@@ -267,8 +289,8 @@ export default function VendorPortal() {
         <header className="sticky top-0 z-50 w-full bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 px-4 py-3 transition-colors">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg">
-                 <Quote className="h-4 w-4 fill-current" />
+               <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                 <img src="/images/logo-joao-dias.png" alt="Logo Novo Boi João Dias" className="w-full h-full object-contain p-1" />
                </div>
                <div>
                  <h1 className="text-base font-extrabold leading-none tracking-tight text-zinc-900 dark:text-zinc-50">
