@@ -42,6 +42,28 @@ export function WhatsAppResponsesDialog({
   useEffect(() => {
     if (open && company) {
       loadResponses();
+
+      // ==========================================
+      // REALTIME SUBSCRIPTION
+      // Listen for new WhatsApp responses
+      // ==========================================
+      const channel = supabase
+        .channel(`whatsapp-responses-${quoteId}`)
+        .on('postgres_changes' as any, 
+          { 
+            event: '*', 
+            table: 'whatsapp_responses' as any,
+            filter: `quote_id=eq.${quoteId}`
+          }, 
+          () => {
+            loadResponses();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [open, company, quoteId]);
 

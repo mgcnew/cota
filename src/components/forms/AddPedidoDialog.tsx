@@ -71,7 +71,6 @@ const STEPS = [
 
 import { usePackagingItems } from "@/hooks/usePackagingItems";
 import { useSuppliers } from "@/hooks/useSuppliers";
-import { useProducts } from "@/hooks/useProducts";
 
 export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [] }: AddPedidoDialogProps) {
   const isMobile = useIsMobile();
@@ -81,7 +80,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const { logActivity } = useActivityLog();
 
   // Data Hooks
-  const { products, isLoading: productsLoading } = useProducts();
+  const [searchedProducts, setSearchedProducts] = useState<any[]>([]);
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const { suppliers, isLoading: suppliersLoading } = useSuppliers();
 
   // Form states
@@ -96,6 +96,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const [productSearch, setProductSearch] = useState("");
   const [supplierSearch, setSupplierSearch] = useState("");
   const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
 
@@ -136,6 +137,42 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   }, [open]);
 
+  // Busca reativa de produtos
+  useEffect(() => {
+    async function searchProducts() {
+      if (!debouncedProductSearch || debouncedProductSearch.trim().length < 3) {
+        setSearchedProducts([]);
+        setShowProductSuggestions(false);
+        return;
+      }
+
+      setIsSearchingProducts(true);
+      try {
+        const term = debouncedProductSearch.trim();
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, unit')
+          .ilike('name', `%${term}%`)
+          .order('name')
+          .limit(20);
+
+        if (error) throw error;
+        setSearchedProducts(data || []);
+        if ((data || []).length > 0) {
+          setShowProductSuggestions(true);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar produtos:", err);
+      } finally {
+        setIsSearchingProducts(false);
+      }
+    }
+
+    if (!selectedProduct) {
+      searchProducts();
+    }
+  }, [debouncedProductSearch, selectedProduct]);
+
   // Focus management on step change
   useEffect(() => {
     if (open) {
@@ -168,32 +205,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   };
 
-  const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) return [];
-    
-    // Filtrar apenas se houver produtos carregados
-    if (products.length === 0) return [];
-
-    const searchLower = debouncedProductSearch.toLowerCase().trim();
-    
-    return products.filter(p => {
-      // Busca pelo nome do produto
-      if (p.name.toLowerCase().includes(searchLower)) return true;
-      
-      // Busca pela marca (opcional, se quiser expandir a busca)
-      if (p.brand_name && p.brand_name.toLowerCase().includes(searchLower)) return true;
-      
-      return false;
-    }).slice(0, 30);
-  }, [products, debouncedProductSearch]);
-
   const filteredSuppliers = useMemo(() => {
     if (!debouncedSupplierSearch) return suppliers;
     return suppliers.filter(s => s.name.toLowerCase().includes(debouncedSupplierSearch.toLowerCase()));
   }, [suppliers, debouncedSupplierSearch]);
 
   const handleAddProduct = () => {
-    if (!selectedProduct || !newProductQuantity || !newProductPrice) {
+    const productName = selectedProduct ? selectedProduct.name : productSearch.trim();
+    if (!productName || !newProductQuantity || !newProductPrice) {
       toast({ title: "Erro", description: "Preencha todos os campos", variant: "destructive" });
       return;
     }
@@ -205,14 +224,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
     
     setItens(prev => [...prev, { 
-      produto: selectedProduct.name, 
+      produto: productName, 
       quantidade, 
       unidade: newProductUnit, 
       valorUnitario: preco,
-      product_id: selectedProduct.id 
+      product_id: selectedProduct?.id 
     }]);
     
-    setLastUsedPrices(prev => ({ ...prev, [selectedProduct.id]: preco }));
+    if (selectedProduct) {
+      setLastUsedPrices(prev => ({ ...prev, [selectedProduct.id]: preco }));
+    }
     
     // Reset inputs but keep adding
     setSelectedProduct(null);
@@ -227,6 +248,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const selectProductFromList = (product: any) => {
     setSelectedProduct(product);
     setProductSearch("");
+    setSearchedProducts([]);
     setHighlightedProductIndex(-1);
     
     // Set default unit and price
@@ -247,20 +269,20 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   };
 
   const handleProductKeyDown = useCallback((e: React.KeyboardEvent, field: 'search' | 'quantity' | 'price') => {
-    if (field === 'search' && filteredProducts.length > 0 && !selectedProduct) {
+    if (field === 'search' && searchedProducts.length > 0 && !selectedProduct) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setHighlightedProductIndex(prev => prev < filteredProducts.length - 1 ? prev + 1 : 0);
+        setHighlightedProductIndex(prev => prev < searchedProducts.length - 1 ? prev + 1 : 0);
         return;
       }
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : filteredProducts.length - 1);
+        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : searchedProducts.length - 1);
         return;
       }
       if (e.key === 'Enter' && highlightedProductIndex >= 0) {
         e.preventDefault();
-        selectProductFromList(filteredProducts[highlightedProductIndex]);
+        selectProductFromList(searchedProducts[highlightedProductIndex]);
         return;
       }
     }
@@ -277,7 +299,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         handleAddProduct();
       }
     }
-  }, [selectedProduct, newProductQuantity, newProductPrice, filteredProducts, highlightedProductIndex]);
+  }, [selectedProduct, newProductQuantity, newProductPrice, searchedProducts, highlightedProductIndex]);
 
   const canProceed = () => {
     switch (activeStep) {
@@ -381,15 +403,21 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const renderProductItem = (p: any, index: number) => (
     <button
       key={p.id}
-      onClick={() => selectProductFromList(p)}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        setSelectedProduct(p);
+        setProductSearch(p.name);
+        setNewProductUnit(p.unit || 'un');
+        setShowProductSuggestions(false);
+        setHighlightedProductIndex(-1);
+        setTimeout(() => quantityInputRef.current?.focus(), 50);
+      }}
+      onMouseEnter={() => setHighlightedProductIndex(index)}
       className={cn(
-        "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all rounded-lg",
-        highlightedProductIndex === index 
-          ? "bg-brand/10 text-brand" 
-          : cn(
-              ds.colors.surface.hover,
-              ds.colors.text.primary
-            )
+        "w-full px-4 py-2.5 text-left transition-all",
+        highlightedProductIndex === index
+          ? "bg-brand/10 text-brand"
+          : ds.colors.surface.hover
       )}
     >
       <div className="flex items-center gap-3 overflow-hidden">
@@ -407,25 +435,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             ds.typography.size.sm,
             "truncate"
           )}>{p.name}</span>
-          {p.brand_name && (
-            <div className="flex items-center gap-2 mt-0.5">
-              <span className={cn(
-                ds.typography.size.xs,
-                ds.typography.weight.bold,
-                ds.colors.text.secondary,
-                "uppercase tracking-wider"
-              )}>{p.brand_name}</span>
-              {p.brand_rating > 0 && (
-                <div className="flex items-center gap-1">
-                  <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                  <span className={cn(
-                    ds.typography.size.xs,
-                    ds.typography.weight.bold,
-                    "text-amber-600 dark:text-amber-500"
-                  )}>{p.brand_rating}</span>
-                </div>
-              )}
-            </div>
+          {p.unit && (
+            <span className={cn(
+              ds.typography.size.xs,
+              ds.colors.text.secondary,
+              "mt-0.5"
+            )}>{p.unit}</span>
           )}
         </div>
       </div>
@@ -525,18 +540,18 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start">
               
               {/* Adicionar Produto */}
-              <Card className={ds.components.card.root}>
+              <Card className={cn(ds.components.card.root, "overflow-visible")}>
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
                     <Plus className="h-4 w-4 text-brand flex-shrink-0" />
                     <span>Adicionar Produto</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className={cn(ds.components.card.body, "space-y-4")}>
+                <CardContent className={cn(ds.components.card.body, "space-y-4 overflow-visible")}>
                   {/* Busca */}
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Produto *</Label>
-                    <div className="relative">
+                    <div className="relative overflow-visible">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                       <Input 
                         ref={productSearchRef}
@@ -544,18 +559,37 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         value={selectedProduct ? selectedProduct.name : productSearch}
                         onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
-                        onFocus={handleInputFocus}
+                        onFocus={(e) => {
+                          if (productSearch.trim().length >= 3) {
+                            setShowProductSuggestions(true);
+                          }
+                          handleInputFocus(e);
+                        }}
                         className={cn(ds.components.input.root, "pl-10")} 
                       />
-                      {/* Dropdown de resultados */}
-                      {filteredProducts.length > 0 && !selectedProduct && (
+                      {showProductSuggestions && searchedProducts.length > 0 && !selectedProduct && (
                         <div className={cn(
-                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-xl max-h-[200px] overflow-y-auto z-50 custom-scrollbar",
+                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl max-h-[250px] overflow-y-auto z-[200] custom-scrollbar animate-in fade-in zoom-in-95 duration-200",
                           ds.colors.surface.card,
                           ds.colors.border.default,
                           "border"
                         )}>
-                          {filteredProducts.map((p, i) => renderProductItem(p, i))}
+                          {searchedProducts.map((p, i) => renderProductItem(p, i))}
+                        </div>
+                      )}
+                      {showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && (
+                        <div className={cn(
+                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl p-4 text-center z-[100] animate-in fade-in zoom-in-95",
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "border"
+                        )}>
+                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>Nenhum produto encontrado</p>
+                        </div>
+                      )}
+                      {isSearchingProducts && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <Loader2 className="h-3 w-3 animate-spin text-zinc-400" />
                         </div>
                       )}
                     </div>
@@ -619,7 +653,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
                   <Button 
                     onClick={handleAddProduct} 
-                    disabled={!selectedProduct || !newProductQuantity || !newProductPrice}
+                    disabled={(!selectedProduct && productSearch.trim().length < 2) || !newProductQuantity || !newProductPrice}
                     className={cn(ds.components.button.primary, "w-full h-10")}
                   >
                     <Plus className="h-4 w-4 mr-2" />

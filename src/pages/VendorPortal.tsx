@@ -83,6 +83,31 @@ export default function VendorPortal() {
     }
 
     loadData();
+
+    // ==========================================
+    // REALTIME SUBSCRIPTION
+    // Listen for changes in THIS specific quote
+    // ==========================================
+    if (token) {
+      const channel = supabase
+        .channel(`vendor-portal-${token}`)
+        .on('postgres_changes' as any, 
+          { 
+            event: 'UPDATE', 
+            table: 'quotes'
+          }, 
+          (payload: any) => {
+            if (payload.new && (payload.new as any).status === 'finalizada') {
+              setError("Esta cotação já foi encerrada e não aceita mais propostas.");
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [token]);
 
   const handlePriceChange = (productId: string, value: string) => {

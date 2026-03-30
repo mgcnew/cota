@@ -231,7 +231,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   });
 
   // Filter suppliers only if search has content (Mover para cima para uso nos handlers)
-  const filteredSuppliers = supplierSearch.length > 0
+  const filteredSuppliers = supplierSearch.length >= 1
     ? suppliers.filter(supplier =>
       supplier.name.toLowerCase().includes(supplierSearch.toLowerCase()) ||
       (supplier.contact && supplier.contact.toLowerCase().includes(supplierSearch.toLowerCase()))
@@ -421,7 +421,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   // Busca dinâmica de produtos quando o termo de busca muda
   useEffect(() => {
-    if (debouncedProductSearch.length >= 2) {
+    if (debouncedProductSearch.trim().length >= 1) {
       searchProducts(debouncedProductSearch);
     } else {
       setProducts([]);
@@ -878,7 +878,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   )}
 
                                   {/* Estado Vazio/Nenhum Resultado */}
-                                  {showProductSuggestions && productSearch.length >= 2 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
+                                  {showProductSuggestions && productSearch.length >= 1 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
                                     <div className={cn(
                                       "absolute z-[100] w-full mt-2 rounded-xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2",
                                       ds.colors.surface.card,

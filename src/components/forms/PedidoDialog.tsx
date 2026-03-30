@@ -64,6 +64,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const [newPrice, setNewPrice] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("un"); // Nova unidade para o item
   const [isSearchingProducts, setIsSearchingProducts] = useState(false);
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debouncedNewProductSearch = useDebounce(newProductSearch, 300);
   
@@ -183,8 +184,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   };
 
   const searchProducts = async (term: string) => {
-    if (!term || term.length < 2) {
+    if (!term || term.trim().length < 3) {
       setProducts([]);
+      setShowProductSuggestions(false);
       return;
     }
     
@@ -192,27 +194,15 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     try {
       const { data, error } = await supabase
         .from('products')
-        .select(`
-          id, 
-          name, 
-          unit,
-          brand_id, 
-          brands(name, manual_rating, purchaseScore)
-        `)
+        .select('id, name, unit')
         .ilike('name', `%${term}%`)
         .order('name')
         .limit(20);
       
       if (error) throw error;
-      
-      if (data) {
-        const processedData = data.map(p => ({
-          ...p,
-          brand_name: (p as any).brands?.name,
-          brand_rating: (p as any).brands?.manual_rating,
-          brand_score: (p as any).brands?.purchaseScore
-        }));
-        setProducts(processedData);
+      setProducts(data || []);
+      if ((data || []).length > 0) {
+        setShowProductSuggestions(true);
       }
     } catch (error) {
       console.error('Error searching products:', error);
@@ -223,10 +213,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (debouncedNewProductSearch) {
+      if (debouncedNewProductSearch && debouncedNewProductSearch.trim().length >= 3) {
         searchProducts(debouncedNewProductSearch);
       } else {
         setProducts([]);
+        setShowProductSuggestions(false);
       }
     }, 100);
     return () => clearTimeout(timer);
@@ -539,23 +530,27 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           ds.components.input.label,
                           "text-brand"
                         )}>Adicionar Produto</Label>
-                        <div className="relative group">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                        <div className="relative overflow-visible">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                           <Input
                             ref={newProductInputRef}
                             placeholder="Buscar produto..."
                             value={newProductSearch}
                             onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
                             onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                            onFocus={handleInputFocus}
-                            className={cn(ds.components.input.root, "pl-10")}
+                            onFocus={(e) => {
+                              if (newProductSearch.trim().length >= 3) {
+                                setShowProductSuggestions(true);
+                              }
+                              handleInputFocus(e);
+                            }}
+                            className={cn(ds.components.input.root, "pl-10 h-10")}
                           />
-                          {filteredNewProducts.length > 0 && !newProduct && (
+                          {showProductSuggestions && products.length > 0 && !newProduct && (
                             <div className={cn(
-                              "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-40 overflow-auto custom-scrollbar",
+                              "absolute top-full left-0 right-0 mt-1 max-h-[200px] overflow-y-auto rounded-xl shadow-2xl z-[200] animate-in fade-in zoom-in-95 duration-200 border custom-scrollbar",
                               ds.colors.surface.card,
-                              ds.colors.border.default,
-                              "border"
+                              ds.colors.border.default
                             )}>
                               {filteredNewProducts.map((p, idx) => (
                                 <button
@@ -582,37 +577,27 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                       ds.typography.weight.bold,
                                       "truncate"
                                     )}>{p.name}</span>
-                                    {p.brand_name && (
-                                      <div className="flex items-center gap-2 mt-1">
-                                        <span className={cn(
-                                          ds.typography.size.xs,
-                                          ds.colors.text.secondary,
-                                          "uppercase tracking-wider"
-                                        )}>{p.brand_name}</span>
-                                        {p.brand_rating > 0 && (
-                                          <div className="flex items-center gap-1">
-                                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                                            <span className={cn(
-                                              ds.typography.size.xs,
-                                              "text-amber-600 dark:text-amber-500"
-                                            )}>{p.brand_rating}</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                  {p.brand_score > 0 && (
-                                    <div className="flex items-center gap-1 bg-brand/10 px-2 py-1 rounded-lg flex-shrink-0">
-                                      <Trophy className="h-3 w-3 text-brand" />
+                                    {p.unit && (
                                       <span className={cn(
                                         ds.typography.size.xs,
-                                        ds.typography.weight.bold,
-                                        "text-brand"
-                                      )}>{p.brand_score >= 1000 ? `${(p.brand_score/1000).toFixed(1)}k` : p.brand_score}</span>
-                                    </div>
-                                  )}
+                                        ds.colors.text.secondary,
+                                        "mt-0.5"
+                                      )}>{p.unit}</span>
+                                    )}
+                                  </div>
                                 </button>
                               ))}
+                            </div>
+                          )}
+
+                          {showProductSuggestions && newProductSearch.trim().length >= 3 && filteredNewProducts.length === 0 && !newProduct && !loading && (
+                            <div className={cn(
+                              "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl p-4 text-center z-[100] animate-in fade-in zoom-in-95",
+                              ds.colors.surface.card,
+                              ds.colors.border.default,
+                              "border"
+                            )}>
+                              <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>Nenhum produto encontrado</p>
                             </div>
                           )}
                         </div>

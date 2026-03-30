@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +37,26 @@ export interface Pedido {
 export function usePedidos() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // ==========================================
+  // REALTIME SUBSCRIPTION
+  // Listen for changes in orders and their items
+  // ==========================================
+  useEffect(() => {
+    const channel = supabase
+      .channel('orders-realtime-global')
+      .on('postgres_changes' as any, { event: '*', table: 'orders' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'order_items' }, () => {
+        queryClient.invalidateQueries({ queryKey: ['pedidos'] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: pedidos = [], isLoading, error, refetch } = useQuery({
     queryKey: ['pedidos'],

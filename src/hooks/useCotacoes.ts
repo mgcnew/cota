@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -70,6 +71,42 @@ function getDefaultPricingUnit(productUnit?: string): PricingUnit {
 export function useCotacoes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // ==========================================
+  // REALTIME SUBSCRIPTION
+  // Listen for changes in quotes, suppliers and prices
+  // ==========================================
+  useEffect(() => {
+    console.log("🔄 Realtime: Ativando canais de escuta...");
+    
+    // Inscreve-se apenas uma vez para todos os canais relevantes
+    const channel = supabase
+      .channel('quotes-realtime-global')
+      .on('postgres_changes' as any, { event: '*', table: 'quotes' }, (payload: any) => {
+        console.log("⚡ Realtime Update [quotes]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'quote_items' }, (payload: any) => {
+        console.log("⚡ Realtime Update [quote_items]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'quote_suppliers' }, (payload: any) => {
+        console.log("⚡ Realtime Update [quote_suppliers]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'quote_supplier_items' }, (payload: any) => {
+        console.log("⚡ Realtime Update [quote_supplier_items]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      })
+      .subscribe((status) => {
+        console.log("📡 Realtime Status:", status);
+      });
+
+    return () => {
+      console.log("🔌 Realtime: Removendo canais de escuta...");
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: cotacoes = [], isLoading } = useQuery({
     queryKey: ['cotacoes'],
