@@ -337,17 +337,24 @@ export default function VendorPortal() {
                   {item.product_name}
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="relative group/field">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 font-black text-sm group-focus-within/field:text-blue-600 dark:group-focus-within/field:text-blue-400 transition-colors">R$</span>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      placeholder="Preço Unitário"
-                      className="w-full pl-9 h-10 text-sm font-bold bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
-                      value={item.valor_oferecido || ""}
-                      onChange={(e) => handlePriceChange(item.product_id, e.target.value)}
-                    />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="relative group/field">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 font-black text-sm group-focus-within/field:text-blue-600 dark:group-focus-within/field:text-blue-400 transition-colors">R$</span>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder={item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG" : "Preço Unitário"}
+                        className="w-full pl-9 h-10 text-sm font-bold bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
+                        value={item.valor_oferecido || ""}
+                        onChange={(e) => handlePriceChange(item.product_id, e.target.value)}
+                      />
+                    </div>
+                    {item.unidade?.toUpperCase().startsWith('CX') && (
+                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold px-1">
+                        * Informe o valor do QUILO
+                      </span>
+                    )}
                   </div>
                   <input
                     placeholder="Obs / Marca"
