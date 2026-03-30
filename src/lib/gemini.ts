@@ -375,14 +375,22 @@ REGRAS:
   }
 }
 
-/** Opção 2: Geração de Mensagem de WhatsApp */
 export async function generateWhatsAppMessage(
   sellerName: string,
-  items: any[]
+  items: any[],
+  withPortalLink: boolean = false
 ): Promise<string> {
-  const itemList = items.map((i) => `- ${i.quantidade} ${i.unidade} de ${i.product_name || i.productName || i.produto}`).join('\n');
-  
-  const msg = `*COTAÇÃO*\n\nOlá *${sellerName}*, tudo bem?\nEstamos fazendo as compras da semana. Poderia nos enviar seus valores para os seguintes itens?\n\n${itemList}\n\nObrigado!`;
+  let msg = `*COTAÇÃO*\n\n`;
+  msg += `Olá *${sellerName}*, tudo bem?\n`;
+  msg += `Estamos fazendo as compras da semana. `;
+
+  if (withPortalLink) {
+    msg += `Gostaríamos de receber seus valores através do nosso novo portal oficial de cotações. É mais rápido e seguro.\n\n`;
+    msg += `🚀 *Acesse os itens e responda no link abaixo:*`;
+  } else {
+    const itemList = items.map((i) => `- ${i.quantidade} ${i.unidade} de ${i.product_name || i.productName || i.produto}`).join('\n');
+    msg += `Poderia nos enviar seus valores para os seguintes itens?\n\n${itemList}\n\nObrigado!`;
+  }
   
   return msg;
 }

@@ -176,13 +176,16 @@ export function QuoteValuesTab({
     if (configured && phone) {
       try {
         toast({ title: "Enviando cotação para o WhatsApp...", description: `Fornecedor: ${supplierName}` });
-        let msg = await generateWhatsAppMessage(supplierName, products);
+        let msg = await generateWhatsAppMessage(supplierName, products, !!accessToken);
         
         // Adiciona link do portal se existir token
         if (accessToken) {
           const baseUrl = window.location.origin;
-          msg += `\n\n🔗 *Responda direto no link seguro:*\n${baseUrl}/responder/${accessToken}`;
+          msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
+          msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
         }
+        
+        msg += `\n\nEquipe de Compras`;
         
         console.log('[WhatsApp DEBUG] Mensagem gerada, chamando sendWhatsAppMessage...');
         const result = await sendWhatsAppMessage(null, phone, msg);
@@ -208,12 +211,15 @@ export function QuoteValuesTab({
       console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
       console.log('[WhatsApp DEBUG] Motivo:', !configured ? 'API não configurada' : 'Sem telefone');
       // Modo manual original
-      let msg = await generateWhatsAppMessage(supplierName, products);
+      let msg = await generateWhatsAppMessage(supplierName, products, !!accessToken);
 
       if (accessToken) {
         const baseUrl = window.location.origin;
-        msg += `\n\n🔗 *Responda direto no link seguro:*\n${baseUrl}/responder/${accessToken}`;
+        msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
+        msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
       }
+
+      msg += `\n\nEquipe de Compras`;
 
       const url = phone 
         ? `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
