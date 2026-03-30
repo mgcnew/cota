@@ -527,7 +527,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                             <SelectItem value="un">Unidade (un)</SelectItem>
                             <SelectItem value="kg">Quilograma (kg)</SelectItem>
                             <SelectItem value="cx">Caixa (cx)</SelectItem>
-                            <SelectItem value="pc">Pacote (pc)</SelectItem>
+                            <SelectItem value="pct">Pacote (pct)</SelectItem>
+                            <SelectItem value="lt">Litro (lt)</SelectItem>
+                            <SelectItem value="gar">Garrafa (gar)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

@@ -62,6 +62,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const [newProductSearch, setNewProductSearch] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
   const [newPrice, setNewPrice] = useState("");
+  const [newProductUnit, setNewProductUnit] = useState("un"); // Nova unidade para o item
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debouncedNewProductSearch = useDebounce(newProductSearch, 300);
   
@@ -152,7 +154,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   useEffect(() => {
     if (open) {
       loadSuppliers();
-      loadProducts();
+      // Removido loadProducts massivo
       setActiveTab("itens");
     }
     if (pedido && open) {
@@ -180,39 +182,57 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     setSuppliers(data || []);
   };
 
-  const loadProducts = async () => {
+  const searchProducts = async (term: string) => {
+    if (!term || term.length < 2) {
+      setProducts([]);
+      return;
+    }
+    
+    setIsSearchingProducts(true);
     try {
-      const { count } = await supabase.from('products').select('*', { count: 'exact', head: true });
-      if (!count) { setProducts([]); return; }
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          id, 
+          name, 
+          unit,
+          brand_id, 
+          brands(name, manual_rating, purchaseScore)
+        `)
+        .ilike('name', `%${term}%`)
+        .order('name')
+        .limit(20);
       
-      const allProducts: any[] = [];
-      for (let page = 0; page < Math.ceil(count / 1000); page++) {
-        const { data } = await supabase
-          .from('products')
-          .select('id, name, brand_id, brands(name, manual_rating, purchaseScore)')
-          .order('name')
-          .range(page * 1000, (page + 1) * 1000 - 1);
-        
-        if (data) {
-          const processedData = data.map(p => ({
-            ...p,
-            brand_name: p.brands?.name,
-            brand_rating: p.brands?.manual_rating,
-            brand_score: p.brands?.purchaseScore
-          }));
-          allProducts.push(...processedData);
-        }
+      if (error) throw error;
+      
+      if (data) {
+        const processedData = data.map(p => ({
+          ...p,
+          brand_name: (p as any).brands?.name,
+          brand_rating: (p as any).brands?.manual_rating,
+          brand_score: (p as any).brands?.purchaseScore
+        }));
+        setProducts(processedData);
       }
-      setProducts(allProducts);
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('Error searching products:', error);
+    } finally {
+      setIsSearchingProducts(false);
     }
   };
 
-  const filteredNewProducts = useMemo(() => {
-    if (!debouncedNewProductSearch || debouncedNewProductSearch.length < 2) return [];
-    return products.filter(p => p.name.toLowerCase().includes(debouncedNewProductSearch.toLowerCase())).slice(0, 30);
-  }, [products, debouncedNewProductSearch]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (debouncedNewProductSearch) {
+        searchProducts(debouncedNewProductSearch);
+      } else {
+        setProducts([]);
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [debouncedNewProductSearch]);
+
+  const filteredNewProducts = products;
 
   const handleAddNewItem = () => {
     const productName = newProduct ? newProduct.name : newProductSearch;
@@ -221,8 +241,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     const qty = parseFloat(newQuantity) || 1;
     const price = typeof newPrice === 'string' ? parseFloat(newPrice.replace(',', '.')) || 0 : newPrice;
     const marca = newProduct?.brand_name || "";
+    const unidade = newProductUnit || (newProduct?.unit || 'un');
 
-    setItens([{ produto: productName, quantidade: qty, valorUnitario: price, unidade: 'un', marca }, ...itens]);
+    setItens([{ produto: productName, quantidade: qty, valorUnitario: price, unidade, marca }, ...itens]);
     
     // Reset form
     setNewProduct(null);
@@ -539,7 +560,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               {filteredNewProducts.map((p, idx) => (
                                 <button
                                   key={p.id}
-                                  onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
+                                  onClick={() => { 
+                                    setNewProduct(p); 
+                                    setNewProductSearch(p.name); 
+                                    setNewProductUnit(p.unit || 'un');
+                                    setProducts([]);
+                                    newQuantityInputRef.current?.focus(); 
+                                  }}
                                   className={cn(
                                     "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
                                     highlightedIndex === idx 
@@ -589,7 +616,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             </div>
                           )}
                         </div>
-                        <div className="grid grid-cols-5 gap-2">
+                        <div className="grid grid-cols-6 gap-2">
                           <Input
                             ref={newQuantityInputRef}
                             type="number"
@@ -599,13 +626,25 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
                             className={cn(ds.components.input.root, "col-span-2 text-center")}
                           />
+                          <div className="col-span-2">
+                            <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                              <SelectTrigger className={cn(ds.components.input.root, "h-10 px-2")}>
+                                <SelectValue placeholder="Un" />
+                              </SelectTrigger>
+                              <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border backdrop-blur-xl")}>
+                                {['un', 'kg', 'pct', 'cx', 'g', 'l', 'ml'].map(u => (
+                                  <SelectItem key={u} value={u} className="text-xs uppercase font-bold">{u}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
                           <Input
                             ref={newPriceInputRef}
                             placeholder="Preço"
                             value={newPrice}
                             onChange={(e) => setNewPrice(e.target.value)}
                             onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                            className={cn(ds.components.input.root, "col-span-2 text-center")}
+                            className={cn(ds.components.input.root, "col-span-1 text-center px-1")}
                           />
                           <Button 
                             onClick={handleAddNewItem} 
@@ -1081,7 +1120,13 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               {filteredNewProducts.map((p, idx) => (
                                 <button
                                   key={p.id}
-                                  onClick={() => { setNewProduct(p); setNewProductSearch(p.name); newQuantityInputRef.current?.focus(); }}
+                                  onClick={() => { 
+                                    setNewProduct(p); 
+                                    setNewProductSearch(p.name); 
+                                    setNewProductUnit(p.unit || 'un');
+                                    setProducts([]);
+                                    newQuantityInputRef.current?.focus(); 
+                                  }}
                                   className={cn(
                                     "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
                                     highlightedIndex === idx 
@@ -1111,9 +1156,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-3 gap-3">
                         <div className={ds.components.input.group}>
-                          <Label className={ds.components.input.label}>Quantidade</Label>
+                          <Label className={ds.components.input.label}>Qtd</Label>
                           <Input
                             ref={newQuantityInputRef}
                             type="number"
@@ -1123,6 +1168,19 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
                             className={ds.components.input.root}
                           />
+                        </div>
+                        <div className={ds.components.input.group}>
+                          <Label className={ds.components.input.label}>Unid.</Label>
+                          <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                            <SelectTrigger className={ds.components.input.root}>
+                              <SelectValue placeholder="Un" />
+                            </SelectTrigger>
+                            <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border backdrop-blur-xl")}>
+                              {['un', 'kg', 'pct', 'cx', 'g', 'l', 'ml'].map(u => (
+                                <SelectItem key={u} value={u} className="uppercase font-bold">{u}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className={ds.components.input.group}>
                           <Label className={ds.components.input.label}>Preço Unit.</Label>

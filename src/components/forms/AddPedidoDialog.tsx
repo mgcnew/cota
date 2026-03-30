@@ -23,6 +23,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { 
@@ -221,12 +228,21 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setSelectedProduct(product);
     setProductSearch("");
     setHighlightedProductIndex(-1);
+    
+    // Set default unit and price
+    if (product.unit) {
+      setNewProductUnit(product.unit);
+    }
+    
     if (lastUsedPrices[product.id]) {
       setNewProductPrice(lastUsedPrices[product.id].toString());
     }
+    
     setTimeout(() => {
       quantityInputRef.current?.focus();
-      quantityInputRef.current?.select();
+      if (quantityInputRef.current) {
+        quantityInputRef.current.select();
+      }
     }, 50);
   };
 
@@ -310,9 +326,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         product_id: item.product_id || null,
         product_name: item.produto,
         quantity: item.quantidade,
+        unit: item.unidade,
         unit_price: item.valorUnitario,
         total_price: item.quantidade * item.valorUnitario,
-        unit: item.unidade
+        // Campos para consistência com economia real
+        quantidade_pedida: item.quantidade,
+        unidade_pedida: item.unidade,
+        valor_unitario_cotado: item.valorUnitario,
+        maior_valor_cotado: item.valorUnitario // No pedido manual, o maior é o único
       }));
       
       await supabase.from('order_items').insert(orderItems);
@@ -540,9 +561,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className={ds.components.input.group}>
-                      <Label className={ds.components.input.label}>Quantidade *</Label>
+                  <div className="grid grid-cols-6 gap-3">
+                    <div className={cn(ds.components.input.group, "col-span-3 sm:col-span-2")}>
+                      <Label className={ds.components.input.label}>Qtd *</Label>
                       <Input 
                         ref={quantityInputRef}
                         type="number" 
@@ -551,10 +572,29 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         onChange={(e) => setNewProductQuantity(e.target.value)}
                         onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
                         onFocus={handleInputFocus}
-                        className={ds.components.input.root}
+                        className={cn(ds.components.input.root, "h-9")}
                       />
                     </div>
-                    <div className={ds.components.input.group}>
+                    
+                    <div className={cn(ds.components.input.group, "col-span-3 sm:col-span-1")}>
+                      <Label className={ds.components.input.label}>Unid *</Label>
+                      <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                        <SelectTrigger className={cn(ds.components.input.root, "h-9 px-2")}>
+                          <SelectValue placeholder="Un" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="kg">kg</SelectItem>
+                          <SelectItem value="un">un</SelectItem>
+                          <SelectItem value="pct">pct</SelectItem>
+                          <SelectItem value="cx">cx</SelectItem>
+                          <SelectItem value="g">g</SelectItem>
+                          <SelectItem value="l">l</SelectItem>
+                          <SelectItem value="ml">ml</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className={cn(ds.components.input.group, "col-span-6 sm:col-span-3")}>
                       <Label className={ds.components.input.label}>Preço Unit. *</Label>
                       <div className="relative">
                         <span className={cn(
@@ -571,7 +611,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           onChange={(e) => setNewProductPrice(e.target.value)}
                           onKeyDown={(e) => handleProductKeyDown(e, 'price')}
                           onFocus={handleInputFocus}
-                          className={cn(ds.components.input.root, "pl-10")}
+                          className={cn(ds.components.input.root, "pl-10 h-9")}
                         />
                       </div>
                     </div>
@@ -580,10 +620,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <Button 
                     onClick={handleAddProduct} 
                     disabled={!selectedProduct || !newProductQuantity || !newProductPrice}
-                    className={cn(ds.components.button.primary, "w-full")}
+                    className={cn(ds.components.button.primary, "w-full h-10")}
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Item (Enter)
+                    Adicionar (Enter)
                   </Button>
                 </CardContent>
               </Card>
@@ -606,7 +646,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 </CardHeader>
                 <CardContent className="pt-0 flex-1 overflow-hidden p-0">
                   <ScrollArea className="h-full">
-                    <div className="p-4 space-y-3">
+                    <div className="p-2 space-y-2">
                       {itens.length === 0 ? (
                         <div className={cn(
                           "flex flex-col items-center justify-center py-12",
@@ -618,28 +658,28 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       ) : (
                         itens.map((item, index) => (
                           <div key={index} className={cn(
-                            "flex items-center gap-3 p-4 rounded-xl border shadow-sm group",
+                            "flex items-center gap-2 p-2.5 rounded-lg border shadow-sm group",
                             ds.colors.surface.card,
                             ds.colors.border.default
                           )}>
                             <div className={cn(
-                              "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                              "w-6 h-6 rounded flex items-center justify-center flex-shrink-0",
                               ds.typography.size.xs,
                               ds.typography.weight.bold,
-                              "bg-brand/10 text-brand"
+                              "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
                             )}>
                               {index + 1}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
-                                ds.typography.size.sm,
+                                "text-[13px]",
                                 ds.typography.weight.bold,
                                 ds.colors.text.primary,
-                                "truncate"
+                                "truncate leading-tight"
                               )}>{item.produto}</p>
                               <div className={cn(
-                                "flex items-center gap-2 mt-1",
-                                ds.typography.size.xs,
+                                "flex items-center gap-1.5 mt-0.5",
+                                "text-[11px]",
                                 ds.colors.text.secondary
                               )}>
                                 <span>{item.quantidade} {item.unidade}</span>
@@ -647,9 +687,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 <span>R$ {item.valorUnitario.toFixed(2)}</span>
                               </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right ml-auto px-1">
                               <p className={cn(
-                                ds.typography.size.sm,
+                                "text-[13px]",
                                 ds.typography.weight.bold,
                                 ds.colors.text.primary
                               )}>R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>

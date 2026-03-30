@@ -724,7 +724,7 @@ export function useCotacoes() {
             
             const maiorValor = valoresParaProduto.length > 0 ? Math.max(...valoresParaProduto) : valorEscolhido;
             const diferencaPorUnidade = maiorValor - valorEscolhido;
-            const quantidade = parseInt(item.quantidade) || 1;
+            const quantidade = parseFloat(item.quantidade?.toString().replace(',', '.') || '0') || 1;
             
             // Economia estimada = diferença × quantidade pedida
             const economiaItem = diferencaPorUnidade * quantidade;

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PricingUnit } from "@/utils/priceNormalization";
 import { useDebounce } from "@/hooks/useDebounce";
 import { designSystem } from "@/styles/design-system";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuoteEditTabProps {
   products: any[];
@@ -55,6 +56,40 @@ export function QuoteEditTab({
   const supplierSearchRef = useRef<HTMLInputElement>(null);
   const supplierListRef = useRef<HTMLDivElement>(null);
 
+  const [dynamicProducts, setDynamicProducts] = useState<any[]>([]);
+  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
+
+  // Busca reativa de produtos via Supabase
+  useEffect(() => {
+    const searchProducts = async () => {
+      if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) {
+        setDynamicProducts([]);
+        return;
+      }
+
+      setIsSearchingProducts(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, brand_name, brand_rating, brand_score, unit')
+          .ilike('name', `%${debouncedProductSearch}%`)
+          .limit(30);
+
+        if (error) throw error;
+        
+        // Filtra produtos que já estão na cotação
+        const filtered = (data || []).filter(p => !products.some(qp => qp.product_id === p.id));
+        setDynamicProducts(filtered);
+      } catch (error) {
+        console.error("Erro na busca de produtos:", error);
+      } finally {
+        setIsSearchingProducts(false);
+      }
+    };
+
+    searchProducts();
+  }, [debouncedProductSearch, products]);
+
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const target = e.target;
     setTimeout(() => {
@@ -98,6 +133,8 @@ export function QuoteEditTab({
     setSelectedProduct(product);
     setSelectedProductToAdd(product.id);
     setProductSearch(safeStr(product.name));
+    setProductUnit(product.unit || "un");
+    setDynamicProducts([]);
     setHighlightedProductIndex(-1);
   };
 
@@ -109,20 +146,20 @@ export function QuoteEditTab({
   };
 
   const handleProductKeyDown = (e: React.KeyboardEvent) => {
-    if (filteredProducts.length > 0 && !selectedProduct) {
+    if (dynamicProducts.length > 0 && !selectedProduct) {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setHighlightedProductIndex(prev => prev < filteredProducts.length - 1 ? prev + 1 : 0);
+        setHighlightedProductIndex(prev => prev < dynamicProducts.length - 1 ? prev + 1 : 0);
         return;
       }
       if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : filteredProducts.length - 1);
+        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : dynamicProducts.length - 1);
         return;
       }
       if (e.key === 'Enter' && highlightedProductIndex >= 0) {
         e.preventDefault();
-        selectProductFromList(filteredProducts[highlightedProductIndex]);
+        selectProductFromList(dynamicProducts[highlightedProductIndex]);
         return;
       }
       if (e.key === 'Escape') {
@@ -224,9 +261,9 @@ export function QuoteEditTab({
                   className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
                 />
 
-                {filteredProducts.length > 0 && !selectedProduct && (
+                {dynamicProducts.length > 0 && !selectedProduct && (
                   <div ref={productListRef} className="absolute z-50 w-full mt-2 bg-popover border border-border rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1 custom-scrollbar">
-                    {filteredProducts.map((p: any, index: number) => (
+                    {dynamicProducts.map((p: any, index: number) => (
                       <button
                         key={p.id}
                         onClick={() => selectProductFromList(p)}

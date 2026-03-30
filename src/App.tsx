@@ -24,7 +24,7 @@ const Landing = lazy(() => import("./pages/Landing"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const VendorPortal = lazy(() => import("./pages/VendorPortal"));
+const VendorPortal = lazy(() => import("@/pages/VendorPortal"));
 
 // Prefetch function for probable next pages (Requirements 16.5)
 const prefetchDashboard = () => import("./pages/Dashboard");

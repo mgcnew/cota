@@ -139,6 +139,7 @@ type QuoteFormData = z.infer<typeof quoteSchema>;
 interface Product {
   id: string;
   name: string;
+  unit?: string | null;
 }
 
 interface Supplier {
@@ -459,7 +460,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name')
+        .select('id, name, unit')
         .ilike('name', `%${term}%`)
         .order('name')
         .limit(10);
@@ -827,6 +828,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             type="button"
                                             onClick={() => {
                                               setSelectedProduct(product);
+                                              if (product.unit) {
+                                                setNewProductUnit(product.unit);
+                                              }
                                               setProductSearch("");
                                               setShowProductSuggestions(false);
                                               setHighlightedProductIndex(-1);
