@@ -237,53 +237,56 @@ export default function VendorPortal() {
   if (success) {
     return (
       <div className={rootClasses}>
-        <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-900 flex flex-col items-center justify-center p-6 transition-colors overflow-hidden">
+        <div className="relative min-h-screen w-full bg-white flex flex-col items-center justify-center p-6 md:p-12 transition-colors animate-in fade-in duration-500 overflow-hidden">
           
-          <div className="relative z-10 w-full max-w-md bg-white rounded-[2rem] p-10 text-center shadow-2xl shadow-zinc-200/50 dark:shadow-black/60 overflow-hidden animate-in zoom-in-95 duration-500">
-            {/* Minimal top decorative edge matching brand color */}
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-600 via-red-500 to-red-600" />
+          {/* Top thick red brand accent directly on the screen edge */}
+          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-red-600 via-red-500 to-red-700" />
+
+          {/* Main Content wrapper */}
+          <div className="w-full max-w-lg flex flex-col items-center text-center space-y-10 relative z-10 -mt-16">
             
-            {/* The Logo Container - using mix-blend-multiply to completely erase white borders into the white card */}
-            <div className="relative mx-auto w-48 mb-8 pb-4">
+            {/* The Logo Container */}
+            <div className="relative mx-auto w-56 sm:w-64 drop-shadow-2xl">
                <img 
                  src="/images/logo-joao-dias-transparent.png" 
                  alt="Logo Novo Boi João Dias" 
-                 className="w-full h-auto object-contain mix-blend-multiply drop-shadow-sm" 
+                 className="w-full h-auto object-contain mix-blend-multiply" 
                />
             </div>
 
-            <div className="space-y-6">
-              <div className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-50 text-emerald-700 rounded-full font-bold text-sm border border-emerald-100/50 shadow-sm">
+            <div className="space-y-8 w-full">
+              <div className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-full font-bold text-[15px] border border-emerald-100 shadow-sm">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
                 <span>Cotação Enviada com Sucesso</span>
               </div>
 
-              <div className="space-y-5 px-2">
-                <p className="text-zinc-700 font-medium text-base leading-relaxed">
-                  O <strong className="text-zinc-900 font-black">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
+              <div className="space-y-6 px-4">
+                <p className="text-zinc-700 font-medium text-lg leading-relaxed">
+                  O <strong className="text-zinc-900 font-black text-xl block mt-1">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
                 </p>
-                <div className="w-8 h-1 bg-zinc-100 mx-auto rounded-full" />
-                <p className="text-zinc-500 font-medium text-[13px] leading-relaxed">
+                <div className="w-12 h-1.5 bg-zinc-100 mx-auto rounded-full" />
+                <p className="text-zinc-500 font-medium text-sm sm:text-base leading-relaxed max-w-sm mx-auto">
                   Sua proposta foi registrada de forma segura no nosso sistema e a equipe de compras já foi notificada.
                 </p>
               </div>
             </div>
           </div>
-
-          {/* Footer Credit for Success State */}
-          <div className="mt-16 text-center space-y-4">
-            <div className="flex items-center justify-center gap-2 opacity-20">
-              <div className="h-px w-8 bg-zinc-900 dark:bg-zinc-100" />
-              <ShieldCheck className="h-4 w-4 text-zinc-900 dark:text-zinc-100" />
-              <div className="h-px w-8 bg-zinc-900 dark:bg-zinc-100" />
-            </div>
-            <p className="text-[11px] font-black text-zinc-300 dark:text-zinc-600 uppercase tracking-[0.2em]">
-              Desenvolvido por Marcelo
-            </p>
-            <a href="mailto:mgc.info.new@gmail.com" className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
-              mgc.info.new@gmail.com
-            </a>
+          
+          {/* Footer absolute to bottom */}
+          <div className="absolute bottom-8 left-0 w-full px-6 flex flex-col items-center space-y-3">
+             <div className="flex items-center justify-center gap-2 opacity-30">
+               <div className="h-px w-8 bg-zinc-900" />
+               <ShieldCheck className="h-4 w-4 text-zinc-900" />
+               <div className="h-px w-8 bg-zinc-900" />
+             </div>
+             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+               Desenvolvido por Marcelo
+             </p>
+             <a href="mailto:mgc.info.new@gmail.com" className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+               mgc.info.new@gmail.com
+             </a>
           </div>
+
         </div>
       </div>
     );
