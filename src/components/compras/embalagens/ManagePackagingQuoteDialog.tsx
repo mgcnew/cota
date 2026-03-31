@@ -28,7 +28,7 @@ import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
   TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info,
-  Copy, Check
+  Copy, Check, MessageCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
@@ -45,6 +45,7 @@ import { TabSkeleton, ValoresTabSkeleton } from "./quote-tabs/TabSkeleton";
 // Lazy load heavy tabs
 const ComparativoTab = lazy(() => import("./quote-tabs/ComparativoTab").then(m => ({ default: m.ComparativoTab })));
 const ExportarTab = lazy(() => import("./quote-tabs/ExportarTab").then(m => ({ default: m.ExportarTab })));
+const WhatsappTab = lazy(() => import("./quote-tabs/WhatsappTab").then(m => ({ default: m.WhatsappTab })));
 
 
 interface Props {
@@ -914,8 +915,21 @@ export function ManagePackagingQuoteDialog({
               <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <FileDown className="h-3 w-3" />Exportar
               </TabsTrigger>
+              <TabsTrigger value="whatsapp" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
+                <MessageCircle className="h-3 w-3" />WhatsApp
+              </TabsTrigger>
             </TabsList>
           </div>
+
+          {/* Tab WhatsApp */}
+          <TabsContent value="whatsapp" className="flex-1 overflow-hidden m-0 p-0">
+            <Suspense fallback={<TabSkeleton />}>
+              <WhatsappTab
+                quote={quote}
+                availableSuppliers={availableSuppliers}
+              />
+            </Suspense>
+          </TabsContent>
 
           {/* Tab Resumo */}
           <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0">
