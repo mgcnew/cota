@@ -439,12 +439,17 @@ export function useCotacoes() {
         let newHistory = Array.isArray(recordData?.price_history) ? [...recordData.price_history] : [];
         
         // Se o valor anterior era maior que zero e é diferente do novo, salva no histórico
-        if (oldValor > 0 && oldValor !== newValue) {
-          newHistory.push({
-            old_value: oldValor,
-            new_value: newValue,
-            date: new Date().toISOString()
-          });
+        if (oldValor > 0 && Math.abs(oldValor - newValue) > 0.001) {
+          // Evitar duplicatas consecutivas no histórico se o valor for o mesmo
+          const lastHistoryEntry = newHistory.length > 0 ? newHistory[newHistory.length - 1] : null;
+          if (!lastHistoryEntry || Math.abs(lastHistoryEntry.new_value - newValue) > 0.001) {
+            newHistory.push({
+              old_value: oldValor,
+              new_value: newValue,
+              date: new Date().toISOString(),
+              by: 'comprador' // Manual updates in this hook are always by the buyer
+            });
+          }
         }
 
         // Update existing record with pricing metadata and history
@@ -754,10 +759,14 @@ export function useCotacoes() {
             const supplierItem = supplierItems.find((si: any) => si.product_id === item.product_id);
             const valorEscolhido = supplierItem?.valor_oferecido || 0;
             
-            // Encontrar o MAIOR valor cotado para este produto entre todos os fornecedores
+            // Encontrar o MAIOR valor cotado para este produto entre todos os fornecedores (considerando valor inicial e atual)
             const valoresParaProduto = (allSupplierItems || [])
-              .filter((si: any) => si.product_id === item.product_id && si.valor_oferecido > 0)
-              .map((si: any) => Number(si.valor_oferecido));
+              .filter((si: any) => si.product_id === item.product_id)
+              .flatMap((si: any) => [
+                Number(si.valor_oferecido) || 0,
+                Number(si.valor_inicial) || 0
+              ])
+              .filter(val => val > 0);
             
             const maiorValor = valoresParaProduto.length > 0 ? Math.max(...valoresParaProduto) : valorEscolhido;
             const diferencaPorUnidade = maiorValor - valorEscolhido;

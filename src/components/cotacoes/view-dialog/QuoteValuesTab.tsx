@@ -409,11 +409,11 @@ export function QuoteValuesTab({
 
             {!isMobile && (
               <div className="px-6 py-3 border-b border-border/50 bg-muted/30 flex-shrink-0">
-                  <div className="grid grid-cols-[3fr_60px_60px_240px_auto] gap-4 items-center px-4">
+                  <div className="grid grid-cols-[3fr_60px_60px_280px_auto] gap-4 items-center px-4">
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-6">Negociação e Valor</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">Negociação e Valor</span>
                     <div className="w-10" />
                   </div>
               </div>
@@ -478,7 +478,7 @@ export function QuoteValuesTab({
                         </div>
                       </div>
                     ) : (
-                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[3fr_60px_60px_240px_auto] gap-4 items-center h-11")}>
+                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[3fr_60px_60px_280px_auto] gap-4 items-center h-11")}>
                         <div className="min-w-0 pr-2">
                           <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate text-[13px]" title={product.product_name}>{safeStr(product.product_name)}</p>
                           {isMobile && (
@@ -557,8 +557,8 @@ export function QuoteValuesTab({
                               <div className="w-6 flex justify-center">
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
-                                  const hasHistory = itemData?.price_history && itemData.price_history.length > 0;
-                                  if (!hasHistory) return <div className="w-6" />;
+                                  const historyArray = Array.isArray(itemData?.price_history) ? itemData.price_history : [];
+                                  if (historyArray.length === 0) return <div className="w-6" />;
                                   
                                   return (
                                     <TooltipProvider delayDuration={100}>
@@ -568,25 +568,49 @@ export function QuoteValuesTab({
                                             <History className="h-3.5 w-3.5" />
                                           </div>
                                         </TooltipTrigger>
-                                        <TooltipContent side="left" className="min-w-[140px] p-2 bg-zinc-900 border-zinc-800 text-zinc-100 shadow-xl">
-                                          <p className="text-[9px] font-black uppercase mb-1.5 text-zinc-400 tracking-widest border-b border-zinc-800 pb-1">Histórico</p>
-                                          <ul className="space-y-1">
-                                            {itemData.price_history.map((h: any, i: number) => {
-                                              const isLast = i === itemData.price_history.length - 1;
-                                              const nextVal = isLast ? currentValue : itemData.price_history[i+1].old_value;
+                                        <TooltipContent side="left" className="p-0 border-none shadow-2xl rounded-2xl overflow-hidden min-w-[220px]">
+                                          <div className="bg-zinc-900 text-white p-3 border-b border-white/10 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                              <History className="h-4 w-4 text-brand" />
+                                              <span className="text-[11px] font-black uppercase tracking-widest leading-none">Negociação</span>
+                                            </div>
+                                            <Badge className="bg-white/10 text-white/70 border-none text-[10px] font-black h-5 px-1.5">
+                                              {historyArray.length} etapas
+                                            </Badge>
+                                          </div>
+                                          <div className="bg-zinc-950 p-2 max-h-[300px] overflow-y-auto space-y-2 custom-scrollbar">
+                                            {[...historyArray].reverse().map((entry: any, auditIdx: number) => {
+                                              const isBuyerAudit = entry.by === 'comprador';
                                               return (
-                                                <li key={i} className="flex flex-col text-[10px]">
-                                                  <div className="flex justify-between items-center gap-3">
-                                                    <div className="flex items-center gap-1">
-                                                      <span className="line-through text-red-400/80">{formatCurrency(h.old_value)}</span>
-                                                      <span className="text-zinc-600">→</span>
-                                                      <span className="text-emerald-400">{formatCurrency(nextVal)}</span>
+                                                <div key={auditIdx} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2 hover:bg-white/[0.06] transition-colors group/audit">
+                                                  <div className="flex items-center justify-between gap-4">
+                                                    <div className="flex items-center gap-2">
+                                                      <div className={cn(
+                                                        "w-1.5 h-1.5 rounded-full shadow-[0_0_8px]",
+                                                        isBuyerAudit ? "bg-blue-500 shadow-blue-500/50" : "bg-emerald-500 shadow-emerald-500/50"
+                                                      )} />
+                                                      <span className="text-[10px] font-black uppercase tracking-tight text-white/60">
+                                                        {isBuyerAudit ? 'Comprador' : 'Vendedor'}
+                                                      </span>
                                                     </div>
+                                                    <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                                                      {entry.date ? new Date(entry.date).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
+                                                    </span>
                                                   </div>
-                                                </li>
+                                                  <div className="flex items-center justify-between font-mono bg-black/20 p-2 rounded-lg border border-white/5">
+                                                    <span className="text-white/30 line-through text-[10px]">{formatCurrency(entry.old_value)}</span>
+                                                    <div className="h-px w-3 bg-white/10" />
+                                                    <span className={cn(
+                                                      "text-xs font-black italic tracking-tighter",
+                                                      entry.new_value < entry.old_value ? "text-emerald-400" : "text-white"
+                                                    )}>
+                                                      {formatCurrency(entry.new_value)}
+                                                    </span>
+                                                  </div>
+                                                </div>
                                               );
                                             })}
-                                          </ul>
+                                          </div>
                                         </TooltipContent>
                                       </Tooltip>
                                     </TooltipProvider>

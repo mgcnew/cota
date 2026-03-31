@@ -49,6 +49,9 @@ DECLARE
   v_quote_id UUID;
   v_supplier_id UUID;
   v_item JSONB;
+  v_old_valor NUMERIC;
+  v_valor_inicial NUMERIC;
+  v_price_history JSONB;
 BEGIN
   -- Identify quote and supplier
   SELECT quote_id, supplier_id INTO v_quote_id, v_supplier_id
@@ -62,6 +65,29 @@ BEGIN
   -- Upsert items from JSONB array
   FOR v_item IN SELECT * FROM jsonb_array_elements(p_items)
   LOOP
+    -- Get existing data to maintain history and initial value
+    SELECT valor_oferecido, valor_inicial, price_history 
+    INTO v_old_valor, v_valor_inicial, v_price_history
+    FROM quote_supplier_items
+    WHERE quote_id = v_quote_id 
+      AND supplier_id = v_supplier_id 
+      AND product_id = (v_item->>'product_id')::UUID;
+
+    -- Update history if value changed
+    IF v_old_valor IS NOT NULL AND v_old_valor > 0 AND v_old_valor != (v_item->>'valor_oferecido')::NUMERIC THEN
+      v_price_history := COALESCE(v_price_history, '[]'::JSONB) || jsonb_build_object(
+        'old_value', v_old_valor,
+        'new_value', (v_item->>'valor_oferecido')::NUMERIC,
+        'date', NOW(),
+        'by', 'vendedor'
+      );
+    END IF;
+
+    -- Set initial value if not set
+    IF v_valor_inicial IS NULL AND (v_item->>'valor_oferecido')::NUMERIC > 0 THEN
+      v_valor_inicial := COALESCE(v_old_valor, (v_item->>'valor_oferecido')::NUMERIC);
+    END IF;
+
     -- Insert or update item price
     INSERT INTO quote_supplier_items (
       quote_id, 
@@ -69,6 +95,8 @@ BEGIN
       product_id, 
       product_name,
       valor_oferecido, 
+      valor_inicial,
+      price_history,
       observacoes, 
       updated_by_type,
       updated_at
@@ -79,6 +107,8 @@ BEGIN
       (v_item->>'product_id')::UUID, 
       p.name,
       (v_item->>'valor_oferecido')::NUMERIC, 
+      v_valor_inicial,
+      v_price_history,
       v_item->>'observacoes', 
       'fornecedor',
       NOW()
@@ -87,6 +117,8 @@ BEGIN
     ON CONFLICT (quote_id, supplier_id, product_id) 
     DO UPDATE SET 
       valor_oferecido = EXCLUDED.valor_oferecido,
+      valor_inicial = EXCLUDED.valor_inicial,
+      price_history = EXCLUDED.price_history,
       observacoes = EXCLUDED.observacoes,
       updated_by_type = 'fornecedor',
       updated_at = NOW();
