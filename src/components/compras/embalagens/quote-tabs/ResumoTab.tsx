@@ -51,12 +51,13 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
   return (
     <ScrollArea className="flex-1 h-full">
       <div className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 overflow-hidden">
-            <Star className="h-3 w-3 flex-shrink-0" /><span className="truncate">Melhor Preço</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 shrink-0">
+            <Star className="h-3 w-3 text-brand" />
+            <span>Resumo de Vencedores</span>
           </h3>
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
-            <div className="flex bg-muted/20 border border-border/50 rounded-md p-0.5 flex-shrink-0">
+            <div className="flex bg-muted/20 border border-border/50 rounded-lg p-0.5 shrink-0">
               <Button 
                 variant={view === "item" ? "secondary" : "ghost"} 
                 size="sm" 
@@ -85,7 +86,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                 <TrendingDown className="h-3 w-3 mr-1.5" />Economia
               </Button>
             </div>
-            <Button variant="outline" size="sm" className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded-md border-border hover:bg-muted flex-shrink-0" onClick={onCopyBestPrices}>
+            <Button variant="outline" size="sm" className="h-7 px-3 text-[10px] font-bold uppercase tracking-wider rounded-lg border-border hover:bg-muted shrink-0" onClick={onCopyBestPrices}>
               <Copy className="h-3 w-3 sm:mr-1.5" /><span className="hidden sm:inline">Copiar</span>
             </Button>
           </div>

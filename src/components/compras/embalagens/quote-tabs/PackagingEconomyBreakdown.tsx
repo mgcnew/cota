@@ -163,7 +163,7 @@ export function PackagingEconomyBreakdown({
 
               {/* Prices Comparison */}
               {item.hasMultipleSuppliers ? (
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {/* Best Price */}
                   <div className="bg-green-50/50 dark:bg-green-900/10 rounded-lg p-3 border border-green-200/50 dark:border-green-800/30">
                     <p className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400 mb-1">

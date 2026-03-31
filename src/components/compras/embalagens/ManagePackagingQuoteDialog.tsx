@@ -845,21 +845,35 @@ export function ManagePackagingQuoteDialog({
     <div className="flex flex-col h-full bg-background">
         {/* Header Premium */}
         <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border/50 bg-card relative overflow-hidden">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand border border-brand/20 flex-shrink-0">
                 <Package className="h-5 w-5" />
               </div>
               <div className="min-w-0 flex flex-col justify-center">
-                <DialogTitleComponent className="text-lg font-bold text-foreground tracking-tight leading-tight truncate">Gerenciar Cotação</DialogTitleComponent>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <Badge variant={quote.status === "ativa" ? "default" : "secondary"} className={cn("text-[9px] font-bold uppercase tracking-wider h-5 px-2 rounded-md", quote.status === "ativa" ? "bg-brand/10 text-brand border border-brand/20 shadow-none hover:bg-brand/20" : "bg-muted text-muted-foreground border-border")}>{quote.status}</Badge>
-                  <span className="text-[10px] font-medium text-muted-foreground">{quote.dataInicio} - {quote.dataFim}</span>
-                  <span className="text-[10px] font-medium text-muted-foreground hidden md:inline">• {stats.totalEmbalagens} embalagens • {stats.totalFornecedores} fornecedores • {stats.fornecedoresRespondidos} respostas</span>
+                <DialogTitleComponent className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight truncate">
+                  Gerenciar Cotação
+                </DialogTitleComponent>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <Badge 
+                    variant={quote.status === "ativa" ? "default" : "secondary"} 
+                    className={cn(
+                      "text-[8px] font-black uppercase tracking-wider h-4 px-1.5 rounded-md", 
+                      quote.status === "ativa" ? "bg-brand/10 text-brand border border-brand/20 shadow-none hover:bg-brand/20" : "bg-muted text-muted-foreground border-border"
+                    )}
+                  >
+                    {quote.status}
+                  </Badge>
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">
+                    {quote.dataInicio} - {quote.dataFim}
+                  </span>
+                  <span className="text-[9px] font-bold text-muted-foreground hidden lg:inline uppercase opacity-40">
+                    • {stats.totalEmbalagens} itens • {stats.totalFornecedores} fornec. • {stats.fornecedoresRespondidos} respostas
+                  </span>
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
               <Select value={quote.status} onValueChange={handleStatusChange}>
                 <SelectTrigger className="w-28 h-9 text-xs font-bold bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-background border-border">
@@ -1007,9 +1021,9 @@ export function ManagePackagingQuoteDialog({
                                 <span className="text-xs font-black truncate text-foreground">{fornecedor.supplierName}</span>
                               </div>
                               {fornecedor.status === "respondido" ? (
-                                <div className="flex items-center gap-1 text-[10px] font-bold text-brand">
+                                <div className="flex items-center gap-1 text-[10px] font-black text-emerald-600 dark:text-emerald-400">
                                   <CheckCircle2 className="h-3 w-3" />
-                                  <span className="uppercase tracking-wide">Respondido</span>
+                                  <span className="uppercase tracking-widest whitespace-nowrap">📲 VIA PORTAL</span>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
@@ -1143,59 +1157,125 @@ export function ManagePackagingQuoteDialog({
                               className="h-7 text-xs font-bold uppercase tracking-wider bg-background border-border hover:bg-muted"><Edit2 className="h-3 w-3 mr-1.5" />Editar</Button>}
                           </div>
                           {isEditing ? (
-                            <div className="space-y-4 bg-muted/50 -m-1 p-4 rounded-lg border border-border">
-                              {/* Linha 1: Preço e como é vendido */}
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                <div>
-                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">💰 Preço do Pacote/Fardo (R$) *</Label>
-                                  <Input ref={valorTotalInputRef} type="number" step="0.01" value={formData.valorTotal} onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 50.00" className="h-10 bg-background border-border/50 shadow-sm font-bold text-foreground focus-visible:ring-brand/30" />
-                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Quanto o fornecedor cobra</p>
+                            <div className="space-y-4 bg-muted/60 -m-1 p-4 rounded-lg border border-border shadow-inner">
+                              {/* Grid Principal de Inputs */}
+                              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-5">
+                                {/* Preço */}
+                                <div className="space-y-1 group flex flex-col">
+                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                    {isMobile ? "💰 Preço (R$)" : "💰 Preço Pacote/Fardo (R$) *"}
+                                  </Label>
+                                  <Input 
+                                    ref={valorTotalInputRef} 
+                                    type="number" 
+                                    step="0.01" 
+                                    value={formData.valorTotal} 
+                                    onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} 
+                                    onFocus={handleInputFocus} 
+                                    placeholder="0.00" 
+                                    className="h-10 sm:h-11 rounded-xl bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
+                                  />
                                 </div>
-                                <div>
-                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">📦 Vendido como *</Label>
-                                  <Select value={formData.unidadeVenda} onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}>
-                                    <SelectTrigger className="h-10 bg-background border-border/50 shadow-sm focus:ring-brand/30">
+
+                                {/* Unidade */}
+                                <div className="space-y-1 group flex flex-col">
+                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                    {isMobile ? "📦 Venda" : "📦 Vendido como *"}
+                                  </Label>
+                                  <Select 
+                                    value={formData.unidadeVenda} 
+                                    onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}
+                                  >
+                                    <SelectTrigger className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm uppercase">
                                       <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-background border-border shadow-xl rounded-xl">
-                                      {PACKAGING_SALE_UNITS.map(u => <SelectItem key={u.value} value={u.value} className="text-xs font-semibold focus:bg-brand/10">{u.label}</SelectItem>)}
+                                    <SelectContent className="bg-card border-border shadow-2xl rounded-xl">
+                                      {PACKAGING_SALE_UNITS.map(u => (
+                                        <SelectItem key={u.value} value={u.value} className="text-xs font-bold uppercase focus:bg-brand/10">
+                                          {u.label}
+                                        </SelectItem>
+                                      ))}
                                     </SelectContent>
                                   </Select>
-                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Como vem: pacote, kg, caixa...</p>
                                 </div>
-                                <div>
-                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">🔢 Qtd. Comprada *</Label>
-                                  <Input type="number" step="0.01" value={formData.quantidadeVenda} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 1" className="h-10 bg-background border-border/50 shadow-sm focus-visible:ring-brand/30" />
-                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Quantos pacotes/kg pelo preço acima</p>
+
+                                {/* Qtd Compra */}
+                                <div className="space-y-1 group flex flex-col">
+                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                    {isMobile ? "🔢 Qtd Compra" : "🔢 Qtd. Comprada *"}
+                                  </Label>
+                                  <Input 
+                                    type="number" 
+                                    step="0.01" 
+                                    value={formData.quantidadeVenda} 
+                                    onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} 
+                                    onFocus={handleInputFocus} 
+                                    placeholder="1" 
+                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
+                                  />
                                 </div>
-                              </div>
-                              {/* Linha 2: Conteúdo e especificações */}
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                <div>
-                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">🎯 Total de Peças no Pacote *</Label>
-                                  <Input type="number" step="0.01" value={formData.quantidadeUnidadesEstimada} onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 500" className="h-10 bg-background border-border/50 shadow-sm font-bold text-foreground focus-visible:ring-brand/30" />
-                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Quantas sacolas/peças vêm dentro</p>
+
+                                {/* Peças no Pack */}
+                                <div className="space-y-1 group flex flex-col">
+                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                    {isMobile ? "🎯 Peças/Pack" : "🎯 Total Peças no Pack *"}
+                                  </Label>
+                                  <Input 
+                                    type="number" 
+                                    step="0.01" 
+                                    value={formData.quantidadeUnidadesEstimada} 
+                                    onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} 
+                                    onFocus={handleInputFocus} 
+                                    placeholder="500" 
+                                    className="h-10 sm:h-11 rounded-xl bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
+                                  />
                                 </div>
-                                <div>
-                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Espessura/Gramatura (mm)</Label>
-                                  <Input type="number" step="0.01" value={formData.gramatura} onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 0.08" className="h-10 bg-background border-border/50 shadow-sm focus-visible:ring-brand/30" />
-                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Opcional — espessura do material</p>
+
+                                {/* Gramatura */}
+                                <div className="space-y-1 group flex flex-col">
+                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                    {isMobile ? "📏 Espessura" : "📏 Espessura (mm)"}
+                                  </Label>
+                                  <Input 
+                                    type="number" 
+                                    step="0.01" 
+                                    value={formData.gramatura} 
+                                    onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} 
+                                    onFocus={handleInputFocus} 
+                                    placeholder="0.08" 
+                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
+                                  />
                                 </div>
-                                <div>
-                                  <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1 block">Tamanho (LxA)</Label>
-                                  <Input value={formData.dimensoes} onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} onFocus={handleInputFocus} placeholder="Ex: 30×40cm" className="h-10 bg-background border-border/50 shadow-sm focus-visible:ring-brand/30" />
-                                  <p className="text-[9px] text-muted-foreground mt-1.5 leading-tight">Opcional — largura × altura</p>
+
+                                {/* Tamanho */}
+                                <div className="space-y-1 group flex flex-col">
+                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                    {isMobile ? "📐 Tamanho" : "📐 Tamanho (LxA)"}
+                                  </Label>
+                                  <Input 
+                                    value={formData.dimensoes} 
+                                    onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} 
+                                    onFocus={handleInputFocus} 
+                                    placeholder="30x40" 
+                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
+                                  />
                                 </div>
                               </div>
                               {/* Cálculo transparente */}
                               {custoPorUnidadePreview && (
-                                <div className="bg-background p-3 rounded-lg border border-border">
-                                  <div className="flex justify-between items-center">
-                                    <div className="flex flex-col">
-                                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Custo por unidade</span>
-                                      <span className="text-[9px] text-muted-foreground mt-0.5">R$ {formData.valorTotal || '0'} ÷ {formData.quantidadeUnidadesEstimada || '0'} peças</span>
+                                <div className="bg-background/80 p-3.5 rounded-xl border border-border shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                                  <div className="flex flex-col text-center sm:text-left">
+                                    <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Custo Real por Unidade</span>
+                                    <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-0.5 opacity-60">
+                                      <div className="p-1 bg-brand/10 rounded-md">
+                                        <TrendingDown className="h-3 w-3 text-brand" />
+                                      </div>
+                                      <span className="text-[9px] font-bold uppercase tracking-tighter">R$ {formData.valorTotal || '0'} ÷ {formData.quantidadeUnidadesEstimada || '0'} unidades</span>
                                     </div>
-                                    <span className="text-lg font-black text-foreground">{formatCurrency(custoPorUnidadePreview)}<span className="text-xs font-medium text-muted-foreground ml-0.5">/un</span></span>
+                                  </div>
+                                  <div className="flex items-baseline gap-1.5">
+                                    <span className="text-2xl font-black text-foreground tracking-tighter">{formatCurrency(custoPorUnidadePreview)}</span>
+                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">/un</span>
                                   </div>
                                 </div>
                               )}

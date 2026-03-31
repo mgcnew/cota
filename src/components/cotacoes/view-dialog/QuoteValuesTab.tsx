@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -304,8 +304,11 @@ export function QuoteValuesTab({
                         "w-2 h-2 rounded-full",
                         fornecedor.status === 'respondido' ? "bg-brand shadow-[0_0_8px_hsl(var(--brand))]" : "bg-zinc-300 dark:bg-zinc-700"
                       )} />
-                      <span className="text-[8px] font-black uppercase text-zinc-400 tracking-tighter">
-                        {fornecedor.status === 'respondido' ? "Respondeu" : "Pendente"}
+                      <span className={cn(
+                        "text-[8px] font-black uppercase tracking-tighter",
+                        fornecedor.status === 'respondido' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
+                      )}>
+                        {fornecedor.status === 'respondido' ? "📲 VIA PORTAL" : "Pendente"}
                       </span>
                     </div>
                     <div
@@ -322,14 +325,14 @@ export function QuoteValuesTab({
                     </div>
                   </div>
                   
-                  {/* DEBUG: Indicador de Token */}
+                  {/* Indicador de Acesso ao Portal */}
                   {fornecedor.accessToken ? (
-                    <div className="absolute right-0 bottom-0 px-1 py-0.5 bg-green-500/10 text-[6px] text-green-600 rounded-tl-md font-mono">
-                      LINK OK
+                    <div className="absolute right-0 bottom-0 px-1.5 py-0.5 bg-brand/10 text-[6px] text-brand rounded-tl-md font-black uppercase tracking-tighter">
+                      ACESSO ATIVO
                     </div>
                   ) : (
-                    <div className="absolute right-0 bottom-0 px-1 py-0.5 bg-red-500/10 text-[6px] text-red-600 rounded-tl-md font-mono">
-                      SEM LINK
+                    <div className="absolute right-0 bottom-0 px-1.5 py-0.5 bg-red-500/5 text-[6px] text-red-400 rounded-tl-md font-black uppercase tracking-tighter">
+                      SEM ACESSO
                     </div>
                   )}
                   
@@ -406,13 +409,13 @@ export function QuoteValuesTab({
 
             {!isMobile && (
               <div className="px-6 py-3 border-b border-border/50 bg-muted/30 flex-shrink-0">
-                <div className="grid grid-cols-[3fr_80px_100px_140px_auto] gap-4 items-center px-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Unid.</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Quant.</span>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-4">Valor (R$)</span>
-                  <div className="w-10" />
-                </div>
+                  <div className="grid grid-cols-[3fr_60px_60px_240px_auto] gap-4 items-center px-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-6">Negociação e Valor</span>
+                    <div className="w-10" />
+                  </div>
               </div>
             )}
 
@@ -475,13 +478,13 @@ export function QuoteValuesTab({
                         </div>
                       </div>
                     ) : (
-                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[3fr_80px_100px_140px_auto] gap-4 items-center")}>
+                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[3fr_60px_60px_240px_auto] gap-4 items-center h-11")}>
                         <div className="min-w-0 pr-2">
-                          <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate text-sm" title={product.product_name}>{safeStr(product.product_name)}</p>
+                          <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate text-[13px]" title={product.product_name}>{safeStr(product.product_name)}</p>
                           {isMobile && (
                             <p className="text-[10px] font-bold text-zinc-500 uppercase mt-0.5">
                               {product.quantidade} {product.unidade}
-                              {isBest && <span className="ml-2 text-brand font-black">🏆 MELHOR PREÇO</span>}
+                              {isBest && <span className="ml-2 text-brand font-black">🏆</span>}
                             </p>
                           )}
                         </div>
@@ -495,98 +498,129 @@ export function QuoteValuesTab({
                             </div>
                           </>
                         )}
-                        <div className="text-right pr-2">
-                          <div className="flex flex-col items-end">
-                            <div className="flex items-center gap-1">
-                              {currentValue > 0 ? (
-                                <>
-                                  <div className="flex flex-col sm:flex-row items-baseline gap-2">
-                                    <div className="flex items-center gap-2">
-                                      <p className={cn("text-base font-black tracking-tight", isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100")}>
-                                        {formatCurrency(currentValue)}
-                                      </p>
-                                      {(() => {
-                                        const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
-                                        if (itemData?.updated_by_type === 'fornecedor') {
-                                          return (
-                                            <Badge variant="outline" className="h-4 px-1 bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400 text-[8px] font-black uppercase">
-                                              Via Link
-                                            </Badge>
-                                          );
-                                        }
-                                        return null;
-                                      })()}
-                                    </div>
-                                    {(() => {
-                                      const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
-                                      const hasHistory = itemData?.price_history && itemData.price_history.length > 0;
-                                      if (!hasHistory) return null;
-                                      
-                                      return (
-                                        <TooltipProvider delayDuration={100}>
-                                          <Tooltip>
-                                            <TooltipTrigger asChild>
-                                              <div className="cursor-help flex items-center justify-center p-0.5 rounded text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors">
-                                                <History className="h-3 w-3" />
-                                              </div>
-                                            </TooltipTrigger>
-                                            <TooltipContent side="left" className="min-w-[140px] p-2 bg-zinc-900 border-zinc-800 text-zinc-100">
-                                              <p className="text-[9px] font-black uppercase mb-1.5 text-zinc-400 tracking-widest border-b border-zinc-800 pb-1">Histórico de Preços</p>
-                                              <ul className="space-y-1">
-                                                {itemData.price_history.map((h: any, i: number) => {
-                                                  const isLast = i === itemData.price_history.length - 1;
-                                                  const nextVal = isLast ? currentValue : itemData.price_history[i+1].old_value;
-                                                  return (
-                                                    <li key={i} className="flex flex-col text-[10px]">
-                                                      <div className="flex justify-between items-center gap-3">
-                                                        <div className="flex items-center gap-1">
-                                                          <span className="line-through text-red-400/80">{formatCurrency(h.old_value)}</span>
-                                                          <span className="text-zinc-600">→</span>
-                                                          <span className="text-emerald-400">{formatCurrency(nextVal)}</span>
-                                                        </div>
-                                                        <span className="text-[8px] text-zinc-500 bg-zinc-800 px-1 rounded">
-                                                          {new Date(h.date).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})} {new Date(h.date).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
-                                                        </span>
-                                                      </div>
-                                                    </li>
-                                                  );
-                                                })}
-                                              </ul>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                        </TooltipProvider>
-                                      );
-                                    })()}
-                                  </div>
-                                  {(() => {
-                                    const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
-                                    const initialValue = Number(itemData?.valor_inicial) || 0;
-                                    const savings = (initialValue > currentValue && currentValue > 0) ? (initialValue - currentValue) : 0;
-                                    
-                                    if (savings > 0) {
-                                      return (
-                                        <div className="flex items-center gap-1">
-                                          <p className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 line-through opacity-70">
-                                            {formatCurrency(initialValue)}
-                                          </p>
-                                          <Badge className="bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border-none h-3 px-1 text-[8px] font-black mr-1">
-                                            -{((savings / initialValue) * 100).toFixed(0)}%
-                                          </Badge>
+                        <div className="flex items-center justify-end gap-2 pr-2">
+                          {currentValue > 0 ? (
+                            <div className="flex items-center gap-3">
+                              {/* Melhor Preço Indicator */}
+                              <div className="w-5 flex justify-center">
+                                {isBest && (
+                                  <TooltipProvider delayDuration={100}>
+                                    <Tooltip>
+                                      <TooltipTrigger asChild>
+                                        <div className="flex items-center justify-center h-5 w-5 bg-brand/10 text-brand rounded-full animate-pulse">
+                                          <Trophy className="h-3 w-3" />
                                         </div>
-                                      );
-                                    }
-                                    return null;
-                                  })()}
-                                </>
-                              ) : (
-                                <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
-                                  Não Cotado
-                                </Badge>
-                              )}
-                              <LastPaidPricesTooltip productId={product.product_id} />
+                                      </TooltipTrigger>
+                                      <TooltipContent className="bg-brand text-black font-black text-[10px] uppercase border-none shadow-xl"> Melhor Preço Garantido </TooltipContent>
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                )}
+                              </div>
+
+                              {/* Preço Principal */}
+                              <p className={cn(
+                                "text-[14px] font-black tracking-tight w-[75px] text-right",
+                                isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100"
+                              )}>
+                                {formatCurrency(currentValue)}
+                              </p>
+
+                              {/* Ícone de Origem */}
+                              <div className="w-6 flex justify-center">
+                                {(() => {
+                                  const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                  const isFromSupplier = itemData?.updated_by_type === 'fornecedor';
+                                  
+                                  return (
+                                    <TooltipProvider delayDuration={100}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className={cn(
+                                            "flex items-center justify-center h-6 w-6 rounded-md border shadow-sm transition-all shrink-0",
+                                            isFromSupplier 
+                                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                                              : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                          )}>
+                                            {isFromSupplier ? <Smartphone className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="top" className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 border-zinc-800 text-white shadow-xl">
+                                          {isFromSupplier ? "Preenchido via Link" : "Preenchido Manual"}
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  );
+                                })()}
+                              </div>
+
+                              {/* Histórico */}
+                              <div className="w-6 flex justify-center">
+                                {(() => {
+                                  const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                  const hasHistory = itemData?.price_history && itemData.price_history.length > 0;
+                                  if (!hasHistory) return <div className="w-6" />;
+                                  
+                                  return (
+                                    <TooltipProvider delayDuration={100}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="cursor-help flex items-center justify-center h-6 w-6 rounded-md text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors">
+                                            <History className="h-3.5 w-3.5" />
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="left" className="min-w-[140px] p-2 bg-zinc-900 border-zinc-800 text-zinc-100 shadow-xl">
+                                          <p className="text-[9px] font-black uppercase mb-1.5 text-zinc-400 tracking-widest border-b border-zinc-800 pb-1">Histórico</p>
+                                          <ul className="space-y-1">
+                                            {itemData.price_history.map((h: any, i: number) => {
+                                              const isLast = i === itemData.price_history.length - 1;
+                                              const nextVal = isLast ? currentValue : itemData.price_history[i+1].old_value;
+                                              return (
+                                                <li key={i} className="flex flex-col text-[10px]">
+                                                  <div className="flex justify-between items-center gap-3">
+                                                    <div className="flex items-center gap-1">
+                                                      <span className="line-through text-red-400/80">{formatCurrency(h.old_value)}</span>
+                                                      <span className="text-zinc-600">→</span>
+                                                      <span className="text-emerald-400">{formatCurrency(nextVal)}</span>
+                                                    </div>
+                                                  </div>
+                                                </li>
+                                              );
+                                            })}
+                                          </ul>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  );
+                                })()}
+                              </div>
+
+                              {/* Savings % */}
+                              <div className="w-[45px] flex justify-end">
+                                {(() => {
+                                  const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                  const initialValue = Number(itemData?.valor_inicial) || 0;
+                                  const currentPriceValue = currentValue;
+                                  const savings = (initialValue > currentPriceValue && currentPriceValue > 0) ? (initialValue - currentPriceValue) : 0;
+                                  
+                                  if (savings > 0) {
+                                    return (
+                                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none h-5 px-1.5 text-[10px] font-black">
+                                        -{((savings / initialValue) * 100).toFixed(0)}%
+                                      </Badge>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </div>
                             </div>
-                            {!isMobile && isBest && <p className="text-[8px] font-black text-brand uppercase tracking-tighter mt-0.5">🏆 MELHOR PREÇO</p>}
-                          </div>
+                          ) : (
+                            <div className="text-right w-[150px]">
+                              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+                                Não Cotado
+                              </Badge>
+                            </div>
+                          )}
+                          <LastPaidPricesTooltip productId={product.product_id} />
                         </div>
                         <div className="flex-shrink-0">
                           {!isReadOnly && (
