@@ -25,6 +25,7 @@ interface QuoteData {
   supplier_name: string;
   company_id: string;
   items: QuoteItem[];
+  deadline?: string;
 }
 
 export default function VendorPortal() {
@@ -99,7 +100,7 @@ export default function VendorPortal() {
             }
           }
 
-          if (qd.status !== 'finalizada') {
+          if (qd.status === 'ativo') {
             anyOpen = true;
             const formattedItems = (qd.items || []).map(item => ({
               ...item,

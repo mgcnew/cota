@@ -85,7 +85,7 @@ export function QuoteValuesTab({
     }
   }, [editingProductId]);
 
-  // Busca se esse fornecedor está em outras cotações "abertas"
+  // Busca se esse fornecedor está em outras cotações "ativas"
   useEffect(() => {
     setOtherOpenQuotes([]);
     setUseGroupedLink(false);
@@ -98,7 +98,7 @@ export function QuoteValuesTab({
           .from('quote_suppliers')
           .select('access_token, quotes!inner(id, nome_cotacao, status, data_inicio)')
           .eq('supplier_id', selectedSupplier)
-          .eq('quotes.status', 'aberta')
+          .eq('quotes.status', 'ativo')
           .neq('quotes.id', quoteId);
 
         if (!error && data) {
