@@ -1,8 +1,9 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,10 @@ export function QuoteValuesTab({
   const editInputRef = useRef<HTMLInputElement>(null);
   const [supplierSearch, setSupplierSearch] = useState("");
   const [showMobileValues, setShowMobileValues] = useState(false);
+  
+  // Agrupamento de cotações
+  const [otherOpenQuotes, setOtherOpenQuotes] = useState<any[]>([]);
+  const [useGroupedLink, setUseGroupedLink] = useState(false);
 
   // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
   const formatInputToBRL = (value: string) => {
@@ -79,6 +84,33 @@ export function QuoteValuesTab({
       editInputRef.current.select();
     }
   }, [editingProductId]);
+
+  // Busca se esse fornecedor está em outras cotações "abertas"
+  useEffect(() => {
+    setOtherOpenQuotes([]);
+    setUseGroupedLink(false);
+
+    if (!selectedSupplier || !quoteId) return;
+
+    const fetchOtherQuotes = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('quote_suppliers')
+          .select('access_token, quotes!inner(id, nome_cotacao, status, data_inicio)')
+          .eq('supplier_id', selectedSupplier)
+          .eq('quotes.status', 'aberta')
+          .neq('quotes.id', quoteId);
+
+        if (!error && data) {
+          setOtherOpenQuotes(data.filter(d => d.access_token));
+        }
+      } catch (err) {
+        console.error("Erro ao buscar outras cotações do fornecedor", err);
+      }
+    };
+    
+    fetchOtherQuotes();
+  }, [selectedSupplier, quoteId]);
 
   const getSupplierProductValue = useCallback((supplierId: string, productId: string): number => {
     const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
@@ -181,8 +213,20 @@ export function QuoteValuesTab({
         // Adiciona link do portal se existir token
         if (accessToken) {
           const baseUrl = window.location.origin;
-          msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
-          msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
+          
+          let finalToken = accessToken;
+          if (useGroupedLink && otherOpenQuotes.length > 0) {
+            const extraTokens = otherOpenQuotes.map(q => q.access_token);
+            finalToken = [accessToken, ...extraTokens].join(',');
+          }
+
+          msg += `\n${baseUrl}/responder/${finalToken}\n\n`;
+          
+          if (useGroupedLink && otherOpenQuotes.length > 0) {
+            msg += `🛡️ *Acesso Unificado:* Criamos um link único reunindo todos os itens que precisamos cotar com você no momento. Suas informações estão totalmente seguras.`;
+          } else {
+            msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
+          }
         }
         
         msg += `\n\nEquipe de Compras`;
@@ -215,8 +259,20 @@ export function QuoteValuesTab({
 
       if (accessToken) {
         const baseUrl = window.location.origin;
-        msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
-        msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
+        
+        let finalToken = accessToken;
+        if (useGroupedLink && otherOpenQuotes.length > 0) {
+          const extraTokens = otherOpenQuotes.map(q => q.access_token);
+          finalToken = [accessToken, ...extraTokens].join(',');
+        }
+
+        msg += `\n${baseUrl}/responder/${finalToken}\n\n`;
+        
+        if (useGroupedLink && otherOpenQuotes.length > 0) {
+            msg += `🛡️ *Acesso Unificado:* Criamos um link único reunindo todos os itens que precisamos cotar com você no momento. Suas informações estão totalmente seguras.`;
+        } else {
+            msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
+        }
       }
 
       msg += `\n\nEquipe de Compras`;
@@ -406,6 +462,46 @@ export function QuoteValuesTab({
                 </div>
               </div>
             </div>
+
+            {otherOpenQuotes.length > 0 && currentSupplier?.accessToken && (
+              <div className="mx-5 my-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between shadow-sm flex-shrink-0 animate-in fade-in zoom-in-95">
+                <div className="flex gap-3">
+                   <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
+                     <LinkIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                   </div>
+                   <div>
+                     <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                       Vínculo Encontrado
+                     </p>
+                     <p className="text-[10px] text-amber-700 dark:text-amber-400/80 leading-relaxed font-medium">
+                       Este fornecedor possui <strong className="text-amber-900 dark:text-amber-300">{otherOpenQuotes.length}</strong> outra{otherOpenQuotes.length > 1 ? 's' : ''} cotaç{otherOpenQuotes.length > 1 ? 'ões' : 'ão'} em andamento.
+                     </p>
+                   </div>
+                </div>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button 
+                        onClick={() => setUseGroupedLink(!useGroupedLink)}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shrink-0 w-full sm:w-auto justify-center",
+                          useGroupedLink 
+                            ? "bg-amber-600 text-white shadow-md shadow-amber-600/20" 
+                            : "bg-white dark:bg-zinc-800 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 hover:bg-amber-50"
+                        )}
+                      >
+                        <Check className={cn("h-3.5 w-3.5", useGroupedLink ? "opacity-100" : "opacity-0 w-0 h-0 hidden")} />
+                        {useGroupedLink ? "Agrupamento Ativado" : "Agrupar Link Unificado"}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-amber-900 text-white border-amber-800 text-xs max-w-xs shadow-xl rounded-xl">
+                      As outras cotações serão resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            )}
 
             {!isMobile && (
               <div className="px-6 py-3 border-b border-border/50 bg-muted/30 flex-shrink-0">

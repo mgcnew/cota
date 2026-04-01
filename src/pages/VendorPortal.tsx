@@ -14,6 +14,8 @@ interface QuoteItem {
   unidade: string;
   valor_oferecido: string | number | null;
   observacoes: string | null;
+  _token?: string;
+  _quote_id?: string;
 }
 
 interface QuoteData {
@@ -67,34 +69,63 @@ export default function VendorPortal() {
       }
 
       try {
-        const { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { 
-          p_token: token 
-        });
+        const tokens = token.split(',');
+        const allItems: QuoteItem[] = [];
+        let anyOpen = false;
+        let mainQuoteData: QuoteData | null = null;
+        let hasErrors = false;
 
-        if (rpcError) throw rpcError;
+        await Promise.all(tokens.map(async (tk) => {
+          const { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
+          
+          if (rpcError || !result) {
+            console.error("Erro no token", tk, rpcError);
+            hasErrors = true;
+            return;
+          }
 
-        if (!result) {
-          throw new Error("Cotação não encontrada. Verifique se o link está correto.");
+          const qd = result as unknown as QuoteData;
+          if (!mainQuoteData) {
+            mainQuoteData = { ...qd }; // Shallow copy para permitir mutação do deadline
+          } else {
+            // Assume sempre o menor prazo (a data mais próxima/menor)
+            if (qd.deadline) {
+              if (
+                !mainQuoteData.deadline || 
+                new Date(qd.deadline).getTime() < new Date(mainQuoteData.deadline).getTime()
+              ) {
+                mainQuoteData.deadline = qd.deadline;
+              }
+            }
+          }
+
+          if (qd.status !== 'finalizada') {
+            anyOpen = true;
+            const formattedItems = (qd.items || []).map(item => ({
+              ...item,
+              _token: tk,
+              _quote_id: qd.quote_id,
+              valor_oferecido: item.valor_oferecido 
+                ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : ""
+            }));
+            allItems.push(...formattedItems);
+          }
+        }));
+
+        if (!mainQuoteData && hasErrors) {
+          throw new Error("Cotações não encontradas. Verifique se o link está correto.");
         }
 
-        const quoteData = result as unknown as QuoteData;
-        
-        if (quoteData.status === 'finalizada') {
-          setError("Esta cotação já foi encerrada e não aceita mais propostas.");
+        if (!anyOpen) {
+          setError("Todas as cotações deste link já foram encerradas e não aceitam mais propostas.");
         } else {
-          setData(quoteData);
-          // Formata os valores iniciais vindo do banco (número -> string pt-BR)
-          const formattedItems = (quoteData.items || []).map(item => ({
-            ...item,
-            valor_oferecido: item.valor_oferecido 
-              ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-              : ""
-          }));
-          setItems(formattedItems);
+          setData(mainQuoteData);
+          setItems(allItems);
         }
       } catch (err: any) {
-        console.error("Erro ao carregar cotação:", err);
-        setError(err.message || "Erro ao carregar os dados da cotação.");
+        console.error("Erro ao carregar cotações:", err);
+        setError(err.message || "Erro ao carregar os dados. Tente novamente.");
       } finally {
         setLoading(false);
       }
@@ -107,39 +138,44 @@ export default function VendorPortal() {
     // Listen for changes in THIS specific quote
     // ==========================================
     if (token) {
-      const channel = supabase
-        .channel(`vendor-portal-${token}`)
-        .on('postgres_changes' as any, 
-          { 
-            event: 'UPDATE', 
-            table: 'quotes'
-          }, 
-          (payload: any) => {
-            if (payload.new && (payload.new as any).status === 'finalizada') {
-              setError("Esta cotação já foi encerrada e não aceita mais propostas.");
+      const tokens = token.split(',');
+      const channels = tokens.map(tk => {
+        return supabase
+          .channel(`vendor-portal-${tk}`)
+          .on('postgres_changes' as any, 
+            { 
+              event: 'UPDATE', 
+              table: 'quotes'
+            }, 
+            (payload: any) => {
+              if (payload.new && (payload.new as any).status === 'finalizada') {
+                // If it's closed, we could remove just those items, or just warn. 
+                // For simplicity, we warn if ALL are closed, but here let's just trigger a reload to clean the list
+                location.reload();
+              }
             }
-          }
-        )
-        .subscribe();
+          )
+          .subscribe();
+      });
 
       return () => {
-        supabase.removeChannel(channel);
+        channels.forEach(ch => supabase.removeChannel(ch));
       };
     }
   }, [token]);
 
-  const handlePriceChange = (productId: string, value: string) => {
+  const handlePriceChange = (productId: string, itemToken: string | undefined, value: string) => {
     const formatted = formatInputToBRL(value);
     setItems(items.map(item => 
-      item.product_id === productId 
+      (item.product_id === productId && item._token === itemToken)
         ? { ...item, valor_oferecido: formatted } 
         : item
     ));
   };
 
-  const handleObsChange = (productId: string, value: string) => {
+  const handleObsChange = (productId: string, itemToken: string | undefined, value: string) => {
     setItems(items.map(item => 
-      item.product_id === productId 
+      (item.product_id === productId && item._token === itemToken)
         ? { ...item, observacoes: value } 
         : item
     ));
@@ -161,24 +197,30 @@ export default function VendorPortal() {
 
     setSaving(true);
     try {
-      const payload = items
-        .filter(i => i.valor_oferecido !== null && i.valor_oferecido !== "")
-        .map(i => {
-          // Converte "1.250,50" -> 1250.5
-          const numValue = parseFloat(i.valor_oferecido!.toString().replace(/\./g, "").replace(",", "."));
-          return {
-            product_id: i.product_id,
-            valor_oferecido: numValue,
-            observacoes: i.observacoes || ""
-          };
-        });
+      const tokens = token.split(',');
 
-      const { error: saveError } = await supabase.rpc('save_vendor_quote_items', {
-        p_token: token,
-        p_items: payload
-      });
+      await Promise.all(tokens.map(async (tk) => {
+        const payload = items
+          .filter(i => i._token === tk && i.valor_oferecido !== null && i.valor_oferecido !== "")
+          .map(i => {
+            // Converte "1.250,50" -> 1250.5
+            const numValue = parseFloat(i.valor_oferecido!.toString().replace(/\./g, "").replace(",", "."));
+            return {
+              product_id: i.product_id,
+              valor_oferecido: numValue,
+              observacoes: i.observacoes || ""
+            };
+          });
 
-      if (saveError) throw saveError;
+        if (payload.length > 0) {
+          const { error: saveError } = await supabase.rpc('save_vendor_quote_items', {
+            p_token: tk,
+            p_items: payload
+          });
+
+          if (saveError) throw saveError;
+        }
+      }));
 
       setSuccess(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -336,7 +378,7 @@ export default function VendorPortal() {
 
           <div className="space-y-4">
             {items.map((item, index) => (
-              <div key={item.product_id} className="group bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+              <div key={`${item.product_id}-${item._token}`} className="group bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 
                 <div className="flex items-center justify-between mb-3">
@@ -362,7 +404,7 @@ export default function VendorPortal() {
                         placeholder={item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG" : "Preço Unitário"}
                         className="w-full pl-9 h-10 text-sm font-bold bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
                         value={item.valor_oferecido || ""}
-                        onChange={(e) => handlePriceChange(item.product_id, e.target.value)}
+                        onChange={(e) => handlePriceChange(item.product_id, item._token, e.target.value)}
                       />
                     </div>
                     {item.unidade?.toUpperCase().startsWith('CX') && (
@@ -375,7 +417,7 @@ export default function VendorPortal() {
                     placeholder="Obs / Marca"
                     className="w-full h-10 px-3 bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-200 dark:focus:border-zinc-600 transition-all outline-none text-xs font-medium text-zinc-700 dark:text-zinc-200 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
                     value={item.observacoes || ""}
-                    onChange={(e) => handleObsChange(item.product_id, e.target.value)}
+                    onChange={(e) => handleObsChange(item.product_id, item._token, e.target.value)}
                   />
                 </div>
               </div>
