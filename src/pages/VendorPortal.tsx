@@ -28,6 +28,14 @@ interface QuoteData {
   deadline?: string;
 }
 
+function parseTokensDefensively(token: string | undefined): string[] {
+  if (!token) return [];
+  let decodedToken = token;
+  try { decodedToken = decodeURIComponent(token); } catch (e) {}
+  decodedToken = decodedToken.replace(/%2C/gi, ',');
+  return decodedToken.split(',').map(t => t.trim()).filter(Boolean);
+}
+
 export default function VendorPortal() {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
@@ -70,13 +78,7 @@ export default function VendorPortal() {
       }
 
       try {
-        // Defensive token decoding and splitting
-        let decodedToken = token;
-        try { decodedToken = decodeURIComponent(token); } catch (e) {}
-        // Fallback replacement if %2C is still present
-        decodedToken = decodedToken.replace(/%2C/gi, ',');
-        
-        const tokens = decodedToken.split(',').map(t => t.trim()).filter(Boolean);
+        const tokens = parseTokensDefensively(token);
         const allItems: QuoteItem[] = [];
         let anyOpen = false;
         let mainQuoteData: QuoteData | null = null;
@@ -158,7 +160,7 @@ export default function VendorPortal() {
     // Listen for changes in THIS specific quote
     // ==========================================
     if (token) {
-      const tokens = token.split(',');
+      const tokens = parseTokensDefensively(token);
       const channels = tokens.map(tk => {
         return supabase
           .channel(`vendor-portal-${tk}`)
@@ -217,7 +219,7 @@ export default function VendorPortal() {
 
     setSaving(true);
     try {
-      const tokens = token.split(',');
+      const tokens = parseTokensDefensively(token);
 
       await Promise.all(tokens.map(async (tk) => {
         const payload = items
