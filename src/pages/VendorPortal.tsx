@@ -70,47 +70,66 @@ export default function VendorPortal() {
       }
 
       try {
-        const tokens = token.split(',');
+        // Defensive token decoding and splitting
+        let decodedToken = token;
+        try { decodedToken = decodeURIComponent(token); } catch (e) {}
+        // Fallback replacement if %2C is still present
+        decodedToken = decodedToken.replace(/%2C/gi, ',');
+        
+        const tokens = decodedToken.split(',').map(t => t.trim()).filter(Boolean);
         const allItems: QuoteItem[] = [];
         let anyOpen = false;
         let mainQuoteData: QuoteData | null = null;
         let hasErrors = false;
 
         await Promise.all(tokens.map(async (tk) => {
-          const { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
-          
-          if (rpcError || !result) {
-            console.error("Erro no token", tk, rpcError);
-            hasErrors = true;
-            return;
-          }
+          try {
+            // Defensive check for valid UUID format before sending to Postgres
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+            if (!uuidRegex.test(tk)) {
+              console.error("Invalid UUID token format:", tk);
+              hasErrors = true;
+              return;
+            }
 
-          const qd = result as unknown as QuoteData;
-          if (!mainQuoteData) {
-            mainQuoteData = { ...qd }; // Shallow copy para permitir mutação do deadline
-          } else {
-            // Assume sempre o menor prazo (a data mais próxima/menor)
-            if (qd.deadline) {
-              if (
-                !mainQuoteData.deadline || 
-                new Date(qd.deadline).getTime() < new Date(mainQuoteData.deadline).getTime()
-              ) {
-                mainQuoteData.deadline = qd.deadline;
+            const { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
+            
+            if (rpcError || !result) {
+              console.error("Erro no token", tk, rpcError);
+              hasErrors = true;
+              return;
+            }
+
+            const qd = result as unknown as QuoteData;
+            if (!mainQuoteData) {
+              mainQuoteData = { ...qd }; // Shallow copy para permitir mutação do deadline
+            } else {
+              // Assume sempre o menor prazo (a data mais próxima/menor)
+              if (qd.deadline) {
+                if (
+                  !mainQuoteData.deadline || 
+                  new Date(qd.deadline).getTime() < new Date(mainQuoteData.deadline).getTime()
+                ) {
+                  mainQuoteData.deadline = qd.deadline;
+                }
               }
             }
-          }
 
-          if (qd.status === 'ativa' || qd.status === 'ativo') {
-            anyOpen = true;
-            const formattedItems = (qd.items || []).map(item => ({
-              ...item,
-              _token: tk,
-              _quote_id: qd.quote_id,
-              valor_oferecido: item.valor_oferecido 
-                ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                : ""
-            }));
-            allItems.push(...formattedItems);
+            if (qd.status === 'ativa' || qd.status === 'ativo') {
+              anyOpen = true;
+              const formattedItems = (qd.items || []).map(item => ({
+                ...item,
+                _token: tk,
+                _quote_id: qd.quote_id,
+                valor_oferecido: item.valor_oferecido 
+                  ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                  : ""
+              }));
+              allItems.push(...formattedItems);
+            }
+          } catch (e) {
+            console.error("Erro processando token", tk, e);
+            hasErrors = true;
           }
         }));
 
