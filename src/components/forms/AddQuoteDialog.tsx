@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { QuickCreateProduct } from "@/components/forms/QuickCreateProduct";
+import { QuickCreateSupplier } from "@/components/forms/QuickCreateSupplier";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -202,6 +204,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [lastUsedUnit, setLastUsedUnit] = useState("kg");
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
   const [focusedSupplierId, setFocusedSupplierId] = useState<string | null>(null);
+
+  // Estados para cadastro rápido inline
+  const [showQuickCreateProduct, setShowQuickCreateProduct] = useState(false);
+  const [showQuickCreateSupplier, setShowQuickCreateSupplier] = useState(false);
 
   // Estados para agendamento
   const [isScheduled, setIsScheduled] = useState(false);
@@ -416,6 +422,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setProductSearch("");
       setSupplierSearch("");
       setProducts([]);
+      setShowQuickCreateProduct(false);
+      setShowQuickCreateSupplier(false);
     }
   }, [open, activeTab]);
 
@@ -775,7 +783,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
                           {/* Formulário de Adição - Lado Esquerdo */}
-                          <div className="flex flex-col space-y-4">
+                          <div className="flex flex-col space-y-4 h-full overflow-y-auto custom-scrollbar pr-2 select-none">
                             <div className="pb-1 border-b border-border/50">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Plus className="h-5 w-5 text-brand flex-shrink-0" />
@@ -877,19 +885,50 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     </div>
                                   )}
 
-                                  {/* Estado Vazio/Nenhum Resultado */}
-                                  {showProductSuggestions && productSearch.length >= 1 && products.length === 0 && !selectedProduct && !isSearchingProducts && (
+                                  {/* Estado Vazio/Nenhum Resultado - Com opção de cadastro rápido */}
+                                  {showProductSuggestions && productSearch.length >= 1 && products.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
                                     <div className={cn(
-                                      "absolute z-[100] w-full mt-2 rounded-xl shadow-xl p-6 text-center animate-in fade-in slide-in-from-top-2",
+                                      "w-full mt-2 rounded-xl border-dashed p-4 text-center animate-in fade-in slide-in-from-top-2",
                                       ds.colors.surface.card,
                                       ds.colors.border.default,
-                                      "border"
+                                      "border-2"
                                     )}>
-                                      <Package className={cn("h-8 w-8 mx-auto mb-2 opacity-50", ds.colors.text.muted)} />
-                                      <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.muted, "uppercase tracking-widest")}>
+                                      <Package className={cn("h-6 w-6 mx-auto mb-2 opacity-40", ds.colors.text.muted)} />
+                                      <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.muted, "uppercase tracking-widest mb-3")}>
                                         Nenhum produto encontrado
                                       </p>
+                                      <Button
+                                        type="button"
+                                        onClick={() => {
+                                          setShowProductSuggestions(false);
+                                          setShowQuickCreateProduct(true);
+                                        }}
+                                        className={cn(ds.components.button.primary, "h-8 text-xs px-4")}
+                                      >
+                                        <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                        Cadastrar "{productSearch}"
+                                      </Button>
                                     </div>
+                                  )}
+
+                                  {/* Formulário inline de cadastro rápido de produto */}
+                                  {showQuickCreateProduct && (
+                                    <QuickCreateProduct
+                                      initialName={productSearch}
+                                      onCreated={(product) => {
+                                        setShowQuickCreateProduct(false);
+                                        setSelectedProduct({ id: product.id, name: product.name, unit: product.unit });
+                                        setNewProductUnit(product.unit || "kg");
+                                        setProductSearch("");
+                                        setTimeout(() => {
+                                          quantityInputRef.current?.focus();
+                                        }, 100);
+                                      }}
+                                      onCancel={() => {
+                                        setShowQuickCreateProduct(false);
+                                        productSearchRef.current?.focus();
+                                      }}
+                                    />
                                   )}
                                 </div>
                               </div>
@@ -1355,10 +1394,40 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       </button>
                                     );
                                   })}
-                                {supplierSearch.length > 0 && filteredSuppliers.length === 0 && (
-                                  <p className={cn("p-4 text-center", ds.typography.size.sm, ds.colors.text.secondary)}>
-                                    Nenhum resultado para "{supplierSearch}"
-                                  </p>
+                                {supplierSearch.length > 0 && filteredSuppliers.length === 0 && !showQuickCreateSupplier && (
+                                  <div className="p-4 text-center space-y-3">
+                                    <Building2 className={cn("h-6 w-6 mx-auto opacity-40", ds.colors.text.muted)} />
+                                    <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.muted, "uppercase tracking-widest")}>
+                                      Nenhum resultado para "{supplierSearch}"
+                                    </p>
+                                    <Button
+                                      type="button"
+                                      onClick={() => setShowQuickCreateSupplier(true)}
+                                      className={cn(ds.components.button.primary, "h-8 text-xs px-4")}
+                                    >
+                                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                                      Cadastrar "{supplierSearch}"
+                                    </Button>
+                                  </div>
+                                )}
+
+                                {/* Formulário inline de cadastro rápido de fornecedor */}
+                                {showQuickCreateSupplier && (
+                                  <QuickCreateSupplier
+                                    initialName={supplierSearch}
+                                    onCreated={(supplier) => {
+                                      setShowQuickCreateSupplier(false);
+                                      // Adicionar à lista local de fornecedores e selecionar automaticamente
+                                      const newSupplier = { id: supplier.id, name: supplier.name, contact: supplier.contact };
+                                      setSuppliers(prev => [...prev, newSupplier].sort((a, b) => a.name.localeCompare(b.name)));
+                                      handleSupplierSelect(newSupplier);
+                                      setSupplierSearch("");
+                                    }}
+                                    onCancel={() => {
+                                      setShowQuickCreateSupplier(false);
+                                      supplierSearchRef.current?.focus();
+                                    }}
+                                  />
                                 )}
                               </div>
                             )}

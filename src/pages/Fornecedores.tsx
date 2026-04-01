@@ -82,7 +82,7 @@ function Fornecedores() {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
-  const { suppliers, isLoading: suppliersLoading, deleteSupplier, updateSupplier, refetch: invalidateCache } = useSuppliers();
+  const { suppliers, isLoading: suppliersLoading, deleteSupplier, updateSupplierAsync, refetch: invalidateCache } = useSuppliers();
 
   const { paginate } = usePagination<Supplier>({
     initialItemsPerPage: isMobile ? 8 : 10
@@ -119,8 +119,8 @@ function Fornecedores() {
     invalidateCache();
   };
 
-  const handleEditSupplier = (id: string, data: SupplierFormData) => {
-    updateSupplier({
+  const handleEditSupplier = async (id: string, data: SupplierFormData) => {
+    await updateSupplierAsync({
       supplierId: id,
       data
     });

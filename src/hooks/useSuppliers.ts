@@ -302,18 +302,32 @@ export function useSuppliers() {
         status?: "active" | "inactive" | "pending",
       } 
     }) => {
+      // Parse limit: strip currency formatting ("R$ 25.000,00" -> numeric)
+      let parsedLimit: number | null = null;
+      if (data.limit) {
+        const normalized = data.limit.replace(/[R$\s\.]/g, '').replace(',', '.');
+        const parsed = parseFloat(normalized);
+        parsedLimit = isNaN(parsed) ? null : parsed;
+      }
+
+      const updatePayload: Record<string, any> = {
+        name: data.name,
+        contact: data.contact,
+        phone: data.phone || null,
+        email: data.email || null,
+        address: data.address || null,
+        limit: parsedLimit,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only include status if explicitly provided
+      if (data.status) {
+        updatePayload.status = data.status;
+      }
+
       const { error } = await supabase
         .from('suppliers')
-        .update({
-          name: data.name,
-          contact: data.contact,
-          phone: data.phone || null,
-          email: data.email || null,
-          address: data.address || null,
-          limit: data.limit ?? null,
-          status: data.status ?? undefined,
-          updated_at: new Date().toISOString()
-        })
+        .update(updatePayload)
         .eq('id', supplierId);
 
       if (error) throw error;
@@ -325,10 +339,11 @@ export function useSuppliers() {
         description: "Fornecedor atualizado com sucesso",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('[useSuppliers] Update failed:', error?.message, error?.details, error?.hint, error);
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o fornecedor",
+        description: `Não foi possível atualizar o fornecedor: ${error?.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     },
@@ -340,6 +355,7 @@ export function useSuppliers() {
     error,
     deleteSupplier: deleteMutation.mutate,
     updateSupplier: updateMutation.mutate,
+    updateSupplierAsync: updateMutation.mutateAsync,
     refetch: () => queryClient.invalidateQueries({ queryKey: ['suppliers'] }),
   };
 }

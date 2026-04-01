@@ -5,6 +5,7 @@ import * as z from "zod";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { designSystem } from "@/styles/design-system";
+import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -37,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
 import { Building2, X } from "lucide-react";
 
 const supplierSchema = z.object({
@@ -67,7 +67,7 @@ interface EditSupplierDialogProps {
   supplier: Supplier | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (id: string, data: SupplierFormData) => void;
+  onEdit: (id: string, data: SupplierFormData) => void | Promise<void>;
 }
 
 export default function EditSupplierDialog({
@@ -79,6 +79,7 @@ export default function EditSupplierDialog({
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const scrollPositionRef = useRef<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
@@ -106,14 +107,17 @@ export default function EditSupplierDialog({
     }
   }, [supplier, form]);
 
-  const onSubmit = (data: SupplierFormData) => {
-    if (supplier) {
-      onEdit(supplier.id, data);
-      toast({
-        title: "Fornecedor atualizado",
-        description: `${data.name} foi atualizado com sucesso.`,
-      });
+  const onSubmit = async (data: SupplierFormData) => {
+    if (!supplier || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onEdit(supplier.id, data);
       onOpenChange(false);
+    } catch (error) {
+      // Error toast is handled by useSuppliers mutation
+      console.error('[EditSupplierDialog] Submit error:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -328,9 +332,17 @@ export default function EditSupplierDialog({
               <Button
                 type="submit"
                 form="edit-supplier-form"
+                disabled={isSubmitting}
                 className={designSystem.components.button.primary}
               >
-                Salvar Alterações
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  'Salvar Alterações'
+                )}
               </Button>
             </div>
           </div>
