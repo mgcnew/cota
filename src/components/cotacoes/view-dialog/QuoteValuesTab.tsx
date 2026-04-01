@@ -90,25 +90,50 @@ export function QuoteValuesTab({
     setOtherOpenQuotes([]);
     setUseGroupedLink(false);
 
-    if (!selectedSupplier || !quoteId) return;
-
     const fetchOtherQuotes = async () => {
+      if (!selectedSupplier || !quoteId) return;
+
+      console.log("🔍 [QuoteValues] Scanning other quotes for supplier:", selectedSupplier);
+
       try {
         const { data, error } = await supabase
           .from('quote_suppliers')
-          .select('access_token, quotes!inner(id, nome_cotacao, status, data_inicio)')
+          .select(`
+            quote_id,
+            access_token,
+            quotes!inner (
+              id,
+              status,
+              data_inicio
+            )
+          `)
           .eq('supplier_id', selectedSupplier)
-          .in('quotes.status', ['ativo', 'ativa'])
-          .neq('quotes.id', quoteId);
+          .neq('quote_id', quoteId)
+          .in('quotes.status', ['ativa', 'ativo', 'aberto', 'pendente']);
 
-        if (!error && data) {
-          setOtherOpenQuotes(data.filter(d => d.access_token));
+        if (error) {
+          console.error("❌ [QuoteValues] Error fetching other quotes:", error);
+          return;
         }
+
+        console.log("📊 [QuoteValues] Other quotes found for supplier:", data);
+
+        const formatted = (data || []).map((q: any) => {
+          const quoteInfo = Array.isArray(q.quotes) ? q.quotes[0] : q.quotes;
+          return {
+            id: q.quote_id,
+            token: q.access_token,
+            status: quoteInfo?.status || 'desconhecido'
+          };
+        }).filter(q => q.token);
+        
+        console.log("✅ [QuoteValues] Formatted other quotes with tokens:", formatted);
+        setOtherOpenQuotes(formatted);
       } catch (err) {
-        console.error("Erro ao buscar outras cotações do fornecedor", err);
+        console.error("❌ [QuoteValues] Unexpected error scanning quotes:", err);
       }
     };
-    
+
     fetchOtherQuotes();
   }, [selectedSupplier, quoteId]);
 
@@ -214,13 +239,10 @@ export function QuoteValuesTab({
         if (accessToken) {
           const baseUrl = window.location.origin;
           
-          let finalToken = accessToken;
-          if (useGroupedLink && otherOpenQuotes.length > 0) {
-            const extraTokens = otherOpenQuotes.map(q => q.access_token);
-            finalToken = [accessToken, ...extraTokens].join(',');
-          }
+          const currentToken = currentSupplier.accessToken || currentSupplier.access_token;
+          const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
-          msg += `\n${baseUrl}/responder/${finalToken}\n\n`;
+          msg += `\n${baseUrl}/responder/${tokens}\n\n`;
           
           if (useGroupedLink && otherOpenQuotes.length > 0) {
             msg += `🛡️ *Acesso Unificado:* Criamos um link único reunindo todos os itens que precisamos cotar com você no momento. Suas informações estão totalmente seguras.`;
@@ -247,26 +269,18 @@ export function QuoteValuesTab({
           description: error?.message || "Erro de validação ou conexão",
           variant: "destructive" 
         });
-        
-        // TEMPORARIAMENTE: Não vamos abrir o WhatsApp manual automaticamente quando houver falha,
-        // para que possamos ler a mensagem de erro da API na tela.
       }
     } else {
       console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
-      console.log('[WhatsApp DEBUG] Motivo:', !configured ? 'API não configurada' : 'Sem telefone');
-      // Modo manual original
       let msg = await generateWhatsAppMessage(supplierName, products, !!accessToken);
 
       if (accessToken) {
         const baseUrl = window.location.origin;
         
-        let finalToken = accessToken;
-        if (useGroupedLink && otherOpenQuotes.length > 0) {
-          const extraTokens = otherOpenQuotes.map(q => q.access_token);
-          finalToken = [accessToken, ...extraTokens].join(',');
-        }
+        const currentToken = currentSupplier.accessToken || currentSupplier.access_token;
+        const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
-        msg += `\n${baseUrl}/responder/${finalToken}\n\n`;
+        msg += `\n${baseUrl}/responder/${tokens}\n\n`;
         
         if (useGroupedLink && otherOpenQuotes.length > 0) {
             msg += `🛡️ *Acesso Unificado:* Criamos um link único reunindo todos os itens que precisamos cotar com você no momento. Suas informações estão totalmente seguras.`;
@@ -433,6 +447,36 @@ export function QuoteValuesTab({
                   <p className="text-lg font-black text-foreground tracking-tight truncate" title={currentSupplier?.nome}>{currentSupplier?.nome}</p>
                 </div>
               </div>
+
+              {otherOpenQuotes.length > 0 && (
+                <div className="hidden lg:flex items-center gap-3 mr-6 animate-in slide-in-from-right-4">
+                  <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800 text-[10px] font-black uppercase tracking-tighter">
+                    {otherOpenQuotes.length} vínculo{otherOpenQuotes.length > 1 ? 's' : ''} encontrado{otherOpenQuotes.length > 1 ? 's' : ''}
+                  </Badge>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button 
+                          onClick={() => setUseGroupedLink(!useGroupedLink)}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shrink-0",
+                            useGroupedLink 
+                              ? "bg-amber-600 text-white shadow-md shadow-amber-600/20" 
+                              : "bg-white dark:bg-zinc-800 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 hover:bg-amber-50"
+                          )}
+                        >
+                          <Check className={cn("h-3.5 w-3.5", useGroupedLink ? "opacity-100" : "opacity-0 w-0 h-0 hidden")} />
+                          {useGroupedLink ? "Agrupamento Ativado" : "Agrupar Link Unificado"}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-amber-900 text-white border-amber-800 text-xs max-w-xs shadow-xl rounded-xl">
+                        As outras cotações serão resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
+
               <div className="text-right flex flex-col items-end flex-shrink-0">
                 <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Valor Proposto</p>
                 <div className="flex items-baseline gap-1">
@@ -463,43 +507,26 @@ export function QuoteValuesTab({
               </div>
             </div>
 
-            {otherOpenQuotes.length > 0 && currentSupplier?.accessToken && (
-              <div className="mx-5 my-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between shadow-sm flex-shrink-0 animate-in fade-in zoom-in-95">
-                <div className="flex gap-3">
-                   <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center shrink-0">
-                     <LinkIcon className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                   </div>
-                   <div>
-                     <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
-                       Vínculo Encontrado
-                     </p>
-                     <p className="text-[10px] text-amber-700 dark:text-amber-400/80 leading-relaxed font-medium">
-                       Este fornecedor possui <strong className="text-amber-900 dark:text-amber-300">{otherOpenQuotes.length}</strong> outra{otherOpenQuotes.length > 1 ? 's' : ''} cotaç{otherOpenQuotes.length > 1 ? 'ões' : 'ão'} em andamento.
-                     </p>
-                   </div>
+            {/* Banner de mobile/tablet para link unificado */}
+            {otherOpenQuotes.length > 0 && (
+              <div className="lg:hidden px-4 py-2 bg-amber-50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/30 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <LinkIcon className="h-3.5 w-3.5 text-amber-600" />
+                  <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-tight">
+                    {otherOpenQuotes.length} cotação{otherOpenQuotes.length > 1 ? 's' : ''} extra{otherOpenQuotes.length > 1 ? 's' : ''}
+                  </span>
                 </div>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button 
-                        onClick={() => setUseGroupedLink(!useGroupedLink)}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 transition-all shrink-0 w-full sm:w-auto justify-center",
-                          useGroupedLink 
-                            ? "bg-amber-600 text-white shadow-md shadow-amber-600/20" 
-                            : "bg-white dark:bg-zinc-800 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 hover:bg-amber-50"
-                        )}
-                      >
-                        <Check className={cn("h-3.5 w-3.5", useGroupedLink ? "opacity-100" : "opacity-0 w-0 h-0 hidden")} />
-                        {useGroupedLink ? "Agrupamento Ativado" : "Agrupar Link Unificado"}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="bg-amber-900 text-white border-amber-800 text-xs max-w-xs shadow-xl rounded-xl">
-                      As outras cotações serão resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <button 
+                  onClick={() => setUseGroupedLink(!useGroupedLink)}
+                  className={cn(
+                    "px-2 py-1 rounded-md text-[10px] font-black uppercase transition-all",
+                    useGroupedLink 
+                      ? "bg-amber-600 text-white" 
+                      : "bg-white dark:bg-zinc-800 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                  )}
+                >
+                  {useGroupedLink ? "Agrupado" : "Agrupar"}
+                </button>
               </div>
             )}
 
