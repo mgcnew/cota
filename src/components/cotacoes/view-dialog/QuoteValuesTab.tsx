@@ -98,7 +98,7 @@ export function QuoteValuesTab({
           .from('quote_suppliers')
           .select('access_token, quotes!inner(id, nome_cotacao, status, data_inicio)')
           .eq('supplier_id', selectedSupplier)
-          .eq('quotes.status', 'ativo')
+          .in('quotes.status', ['ativo', 'ativa'])
           .neq('quotes.id', quoteId);
 
         if (!error && data) {

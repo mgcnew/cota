@@ -100,7 +100,7 @@ export default function VendorPortal() {
             }
           }
 
-          if (qd.status === 'ativo') {
+          if (qd.status === 'ativa' || qd.status === 'ativo') {
             anyOpen = true;
             const formattedItems = (qd.items || []).map(item => ({
               ...item,
