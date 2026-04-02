@@ -151,13 +151,35 @@ export function generateQuoteExportMessage(
   m += suppliersNames.map(s => "• " + s).join("\n");
   m += "\n\n" + SEP + "\n\n";
 
-  m += "📊 *RESUMO EXECUTIVO FINANCEIRO*\n";
-  m += "💰 Valor Final Cotação: *" + fmtCurrency(melhorTotal) + "*\n\n";
-  
-  if (potentialSavings && potentialSavings > 0) {
-    m += "📉 Economia de Mercado: *" + fmtCurrency(potentialSavings) + "*\n";
+  m += "📋 *CONQUISTAS DE NEGOCIAÇÃO*\n";
+  const negotiationWins = groupedData.flatMap(g => 
+    g.items
+      .filter(i => (i.priceSequence?.length || 0) > 1 || (i.allPrices?.length > 1))
+      .map(i => {
+        const initial = i.priceSequence?.[0] || (i.allPrices?.[0]?.valor_inicial) || i.bestPrice;
+        const final = i.bestPrice;
+        const diff = initial - final;
+        if (diff <= 0) return null;
+        return { 
+          name: i.productName || i.product_name, 
+          initial, 
+          final, 
+          economy: diff * i.quantidade,
+          percent: ((diff / initial) * 100).toFixed(0)
+        };
+      })
+  ).filter(Boolean) as any[];
+
+  if (negotiationWins.length > 0) {
+    m += negotiationWins.slice(0, 10).map(w => 
+      `✅ *${w.name}*\n   De ${fmtCurrency(w.initial)} por *${fmtCurrency(w.final)}* (-${w.percent}%)\n   Economia: *+ ${fmtCurrency(w.economy)}*`
+    ).join("\n\n") + "\n";
+    if (negotiationWins.length > 10) m += `_(... e outros ${negotiationWins.length - 10} itens negociados)_\n`;
+  } else {
+    m += "_Pedidos fechados no lance inicial._\n";
   }
-  
+  m += "\n" + SEP + "\n\n";
+
   m += "🚀 *ECONOMIA REAL NEGOCIADA: " + fmtCurrency(totalSavings) + "*\n";
   m += "_(Redução bruta alcançada nas negociações)_\n\n";
   

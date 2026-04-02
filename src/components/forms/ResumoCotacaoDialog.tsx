@@ -55,11 +55,23 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     
     const history = item.price_history || [];
     const currentPrice = item.valor_oferecido;
+    const initialPrice = item.valor_inicial;
+    
+    // Inicia a sequência com o valor inicial (primeiro de todos)
+    const sequencePrices: number[] = [];
+    if (initialPrice > 0) {
+      sequencePrices.push(initialPrice);
+    }
     
     const seq = [...history].sort((a: any, b: any) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
-    const sequencePrices = seq.map((h: any) => h.old_price);
+    seq.forEach((h: any) => {
+      // Evita duplicar o valor inicial se ele já estiver na sequência
+      if (sequencePrices.length === 0 || sequencePrices[sequencePrices.length - 1] !== h.old_price) {
+        sequencePrices.push(h.old_price);
+      }
+    });
     
-    if (sequencePrices.length === 0 || sequencePrices[sequencePrices.length - 1] !== currentPrice) {
+    if (sequencePrices.length === 0 || Math.abs(sequencePrices[sequencePrices.length - 1] - currentPrice) > 0.001) {
       sequencePrices.push(currentPrice);
     }
     
@@ -498,37 +510,50 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
                           {/* Bloco de Negociação */}
                           {hasNegotiation ? (
-                            <div className={cn("mt-3 rounded-lg p-3 border", isCapturing ? "bg-emerald-50/50 border-emerald-200" : "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/60")}>
+                            <div className={cn("mt-3 rounded-lg p-3 border", isCapturing ? "bg-brand/5 border-brand/20" : "bg-brand/5 dark:bg-brand/10 border-brand/20")}>
                               <div className="flex justify-between items-center mb-2">
-                                <span className={cn("text-[10px] uppercase tracking-widest font-bold flex items-center gap-1.5", isCapturing ? "text-emerald-700" : "text-emerald-700 dark:text-emerald-400")}>
-                                  <TrendingDown className="h-3.5 w-3.5" /> Histórico de Lances (Valor Unit.)
+                                <span className={cn("text-[10px] uppercase tracking-widest font-black flex items-center gap-1.5", isCapturing ? "text-brand" : "text-brand")}>
+                                  <TrendingDown className="h-3.5 w-3.5" /> Negociação com Sucesso
                                 </span>
-                                <span className={cn("text-[10px] uppercase font-black tracking-wider", isCapturing ? "text-emerald-700" : "text-emerald-600 dark:text-emerald-400")}>
-                                  Economia no item: +{formatCurrency(totalEcon)}
-                                </span>
+                                <div className="flex flex-col items-end">
+                                  <span className={cn("text-[10px] uppercase font-black tracking-wider", isCapturing ? "text-emerald-700" : "text-emerald-600 dark:text-emerald-400")}>
+                                    Ganho Real: {formatCurrency(totalEcon)}
+                                  </span>
+                                  <span className="text-[9px] font-bold text-zinc-500 uppercase">
+                                    Redução de {((econUnit / initialPrice) * 100).toFixed(1)}% capturada
+                                  </span>
+                                </div>
                               </div>
-                              <div className={cn("flex items-center flex-wrap gap-2 text-xs font-medium", isCapturing ? "text-emerald-800" : "text-emerald-800 dark:text-emerald-300")}>
-                                {p.priceSequence.map((val: number, sIdx: number) => {
-                                  const isLast = sIdx === p.priceSequence.length - 1;
-                                  return (
-                                    <span key={sIdx} className="flex items-center gap-2">
-                                      <span className={cn(
-                                        "px-2 py-0.5 rounded flex items-center",
-                                        isLast 
-                                          ? (isCapturing ? "bg-emerald-200 text-emerald-900 font-bold" : "bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-emerald-100 font-bold") 
-                                          : (isCapturing ? "line-through text-emerald-600/70" : "line-through text-emerald-600/70 dark:text-emerald-400/50")
-                                      )}>
-                                        {formatCurrency(val)}
-                                      </span>
-                                      {!isLast && <ArrowRight className="h-3 w-3 opacity-50" />}
-                                    </span>
-                                  );
-                                })}
+                              
+                              <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
+                                <div className="flex items-center gap-1.5 min-w-max">
+                                  {p.priceSequence.map((val: number, sIdx: number) => {
+                                    const isFirst = sIdx === 0;
+                                    const isLast = sIdx === p.priceSequence.length - 1;
+                                    
+                                    return (
+                                      <div key={sIdx} className="flex items-center gap-1.5">
+                                        <div className={cn(
+                                          "px-2 py-1 rounded-md text-[11px] font-black flex flex-col items-center min-w-[70px]",
+                                          isLast 
+                                            ? "bg-brand text-black shadow-sm" 
+                                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 line-through opacity-60"
+                                        )}>
+                                          <span className="text-[7px] uppercase tracking-tighter leading-none mb-0.5">
+                                            {isFirst ? "1ª Oferta" : isLast ? "Fechado" : `${sIdx + 1}ª Rodada`}
+                                          </span>
+                                          {formatCurrency(val)}
+                                        </div>
+                                        {!isLast && <ArrowRight className="h-3 w-3 text-zinc-300" />}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
                             </div>
                           ) : (
-                            <div className={cn("mt-2 rounded bg-zinc-50 px-3 py-1.5 flex items-center text-[10px] text-zinc-500 font-medium uppercase tracking-wider", isCapturing ? "border border-zinc-200" : "dark:bg-zinc-900")}>
-                              <Info className="h-3 w-3 mr-1.5" /> Fornecedor fechou no primeiro lance (Sem recuo)
+                            <div className={cn("mt-2 rounded bg-zinc-50 px-3 py-1.5 flex items-center text-[10px] text-zinc-500 font-medium uppercase tracking-wider", isCapturing ? "border border-zinc-200" : "dark:bg-zinc-900 border border-zinc-100/5 dark:border-zinc-800")}>
+                              <Info className="h-3.5 w-3.5 mr-2 text-zinc-400" /> Item fechado pelo lance inicial (Sem recuo necessário)
                             </div>
                           )}
 

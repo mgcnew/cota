@@ -80,10 +80,13 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
       text += `*${idx + 1}. ${item.productName}*\n`;
       text += `- Fornecedor: ${item.supplierName}\n`;
       text += `- Volume/Peso: ${item.quantity} ${item.unit}\n`;
-      text += `- Oferta Inicial: ${formatCurrency(item.precoInicial)}${item.precoFinal < item.precoInicial ? ' (Recuo detectado)' : ''}\n`;
-      text += `- Preço Fechado: *${formatCurrency(item.precoFinal)}*\n`;
-      if (item.economia > 0) {
-         text += `- Economia Negociada: *+ ${formatCurrency(item.economia)}*\n`;
+      
+      if (item.precoInicial > item.precoFinal) {
+        text += `- Oferta Inicial: ${formatCurrency(item.precoInicial)} 🔥 *Negociado!*\n`;
+        text += `- Preço Fechado: *${formatCurrency(item.precoFinal)}* (-${(( (item.precoInicial - item.precoFinal) / item.precoInicial) * 100).toFixed(0)}%)\n`;
+        text += `- Economia Real: *+ ${formatCurrency(item.economia)}*\n`;
+      } else {
+        text += `- Preço de Fechamento: *${formatCurrency(item.precoFinal)}* (Lance Inicial)\n`;
       }
       text += `\n`;
     });
