@@ -225,9 +225,11 @@ export function QuoteValuesTab({
     [fornecedores, selectedSupplier]
   );
 
-  const handleWhatsApp = async (e: React.MouseEvent, supplierName: string, phone?: string, accessToken?: string) => {
+  const handleWhatsApp = async (e: React.MouseEvent, supplierId: string, supplierName: string, phone?: string, accessToken?: string) => {
     e.stopPropagation();
     
+    // Busca o fornecedor correto pelo ID passado (não depende do state selectedSupplier)
+    const targetSupplier = fornecedores.find((f: any) => f.id === supplierId);
     const configured = isWhatsAppConfigured();
     
     if (configured && phone) {
@@ -239,7 +241,7 @@ export function QuoteValuesTab({
         if (accessToken) {
           const baseUrl = window.location.origin;
           
-          const currentToken = currentSupplier.accessToken || currentSupplier.access_token;
+          const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
           const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
           msg += `\n${baseUrl}/responder/${tokens}\n\n`;
@@ -277,7 +279,7 @@ export function QuoteValuesTab({
       if (accessToken) {
         const baseUrl = window.location.origin;
         
-        const currentToken = currentSupplier.accessToken || currentSupplier.access_token;
+        const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
         const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
         msg += `\n${baseUrl}/responder/${tokens}\n\n`;
@@ -382,7 +384,12 @@ export function QuoteValuesTab({
                       </span>
                     </div>
                     <div
-                      onClick={(e) => handleWhatsApp(e, fornecedor.nome, fornecedor.phone, fornecedor.accessToken)}
+                      onClick={(e) => {
+                        // Auto-seleciona o fornecedor antes de enviar
+                        setSelectedSupplier(fornecedor.id);
+                        setEditingProductId(null);
+                        handleWhatsApp(e, fornecedor.id, fornecedor.nome, fornecedor.phone, fornecedor.accessToken);
+                      }}
                       className={cn(
                         "flex items-center justify-center p-1.5 rounded-lg transition-colors border cursor-pointer",
                         isSelected

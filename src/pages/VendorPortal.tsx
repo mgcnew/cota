@@ -431,7 +431,7 @@ export default function VendorPortal() {
                     </div>
                     {item.unidade?.toUpperCase().startsWith('CX') && (
                       <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold px-1">
-                        * Informe o valor do QUILO
+                        * Informe o valor do QUILO ou da UNIDADE
                       </span>
                     )}
                   </div>
