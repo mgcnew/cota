@@ -64,8 +64,14 @@ function PedidosTab() {
       fornecedor: order.supplier_name,
       total: `R$ ${Number(order.total_value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       status: order.status,
-      dataPedido: new Date(order.order_date).toLocaleDateString('pt-BR'),
-      dataEntrega: order.delivery_date ? new Date(order.delivery_date).toLocaleDateString('pt-BR') : '',
+      dataPedido: (() => {
+        const [y, m, d] = order.order_date.split('-').map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+      })(),
+      dataEntrega: order.delivery_date ? (() => {
+        const [y, m, d] = order.delivery_date.split('-').map(Number);
+        return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+      })() : '',
       itens: order.items?.length || 0,
       produtos: order.items?.map((item: any) => item.product_name) || [],
       observacoes: order.observations || "",
@@ -101,8 +107,11 @@ function PedidosTab() {
       }
       
       // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
-      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(a.dataPedido.split('/').reverse().join('-')).getTime();
-      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(b.dataPedido.split('/').reverse().join('-')).getTime();
+      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
+      const [da, ma, ya] = a.dataPedido.split('/').map(Number);
+      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(ya, ma - 1, da).getTime();
+      const [db, mb, yb] = b.dataPedido.split('/').map(Number);
+      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(yb, mb - 1, db).getTime();
       
       return bDate - aDate;
     });

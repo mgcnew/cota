@@ -337,6 +337,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         supplier_name: selectedSupplier?.name || '',
         total_value: total,
         status: 'pendente',
+        order_date: format(new Date(), 'yyyy-MM-dd'),
         delivery_date: format(dataEntrega, 'yyyy-MM-dd'),
         observations: observacoes
       }).select().single();
@@ -949,7 +950,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           selected={dataEntrega}
                           onSelect={setDataEntrega} 
                           locale={ptBR}
-                          disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} 
+                          disabled={(date) => date < new Date(format(new Date(), 'yyyy-MM-dd'))} 
                         />
                       </PopoverContent>
                     </Popover>

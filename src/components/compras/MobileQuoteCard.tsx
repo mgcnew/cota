@@ -44,7 +44,8 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
     
     const hoje = new Date();
     const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
-    const dataFim = new Date(cotacao.dataFim.split('/').reverse().join('-'));
+    const [df, mf, yf] = cotacao.dataFim.split(/[\/-]/).map(Number);
+    const dataFim = new Date(yf, mf - 1, df);
     const isVencendo = cotacao.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
     
     return { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores };

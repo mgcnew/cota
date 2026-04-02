@@ -134,15 +134,19 @@ function CotacoesTab() {
     const totalFornecedores = cotacao.fornecedoresParticipantes?.length || 0;
     const isProntaParaDecisao = cotacao.statusReal === "ativa" && totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
 
+    const [df, mf, yf] = cotacao.dataFim.split('/').map(Number);
+    const dataFim = new Date(yf, mf - 1, df);
     const hoje = new Date();
     const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
-    const dataFim = new Date(cotacao.dataFim.split('/').reverse().join('-'));
     const isVencendo = cotacao.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
 
     return { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores };
   }, []);
 
   const filteredCotacoes = useMemo(() => {
+    const hoje = new Date();
+    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+
     const filtered = cotacoes.filter(c => {
       const matchesSearch = c.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || c.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
 
@@ -154,9 +158,8 @@ function CotacoesTab() {
       }
 
       if (statusFilter === "vencendo") {
-        const hoje = new Date();
-        const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
-        const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
+        const [d, m, y] = c.dataFim.split('/').map(Number);
+        const dataFim = new Date(y, m - 1, d);
         return matchesSearch && c.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
       }
 
@@ -175,8 +178,10 @@ function CotacoesTab() {
       
       // Se ambos têm o mesmo status, ordena pela data mais recente (priorizando a última cotação)
       // Usando created_at real se disponível, caso contrário recai na data de início
-      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(a.dataInicio.split('/').reverse().join('-')).getTime();
-      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(b.dataInicio.split('/').reverse().join('-')).getTime();
+      const [da, ma, ya] = a.dataInicio.split('/').map(Number);
+      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(ya, ma - 1, da).getTime();
+      const [db, mb, yb] = b.dataInicio.split('/').map(Number);
+      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(yb, mb - 1, db).getTime();
       
       return bDate - aDate;
     });

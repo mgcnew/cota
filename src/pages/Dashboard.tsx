@@ -51,7 +51,11 @@ function Dashboard() {
 
     const vencendo = cotacoes.filter(c => {
       if (c.statusReal !== "ativa") return false;
-      const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
+      
+      // Parse local sem offset UTC/ISO
+      const [d, m, y] = c.dataFim.split('/').map(Number);
+      const dataFim = new Date(y, m - 1, d);
+      
       return dataFim <= em48h && dataFim >= hoje;
     });
 

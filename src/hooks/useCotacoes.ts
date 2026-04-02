@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 import { PricingUnit } from '@/utils/priceNormalization';
 
 export interface FornecedorParticipante {
@@ -337,6 +338,14 @@ export function useCotacoes() {
           }
         }
 
+        // Funçao auxiliar para formatar data sem offset UTC
+        const formatLocal = (dateStr: string) => {
+          if (!dateStr) return "-";
+          const [y, m, d] = dateStr.split('-').map(Number);
+          const date = new Date(y, m - 1, d);
+          return format(date, "dd/MM/yyyy");
+        };
+
         return {
           id: quote.id,
           produto: produtosTexto || "Sem produtos",
@@ -345,8 +354,8 @@ export function useCotacoes() {
           quantidade: `${items.length || 0} produto(s)`,
           status: quote.status,
           statusReal,
-          dataInicio: new Date(quote.data_inicio).toLocaleDateString("pt-BR"),
-          dataFim: new Date(quote.data_fim).toLocaleDateString("pt-BR"),
+          dataInicio: formatLocal(quote.data_inicio),
+          dataFim: formatLocal(quote.data_fim),
           dataPlanejada: quote.data_planejada,
           fornecedores: fornecedoresParticipantes.length,
           melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
@@ -805,7 +814,7 @@ export function useCotacoes() {
             supplier_id: supplierId,
             supplier_name: supplierData.name,
             total_value: totalValue,
-            order_date: new Date().toISOString().split('T')[0],
+            order_date: format(new Date(), 'yyyy-MM-dd'),
             delivery_date: deliveryDate,
             status: "pendente",
             observations: observations || null,

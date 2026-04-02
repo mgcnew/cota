@@ -204,7 +204,12 @@ function PriceHistoryList({ history }: { history: any[] }) {
                       <p className={cn("font-bold text-sm", ds.colors.text.primary)}>{item.supplier}</p>
                     </div>
                     <div className="w-[20%] pl-2">
-                      <p className={cn("text-xs font-medium", ds.colors.text.secondary)}>{new Date(item.date).toLocaleDateString("pt-BR")}</p>
+                      <p className={cn("text-xs font-medium", ds.colors.text.secondary)}>
+                        {(() => {
+                          const [y, m, d] = item.date.split('T')[0].split('-').map(Number);
+                          return new Date(y, m - 1, d).toLocaleDateString("pt-BR");
+                        })()}
+                      </p>
                     </div>
                     <div className="w-[20%] text-right px-2">
                       <span className={cn("font-black italic text-base", ds.colors.text.primary)}>
@@ -241,7 +246,8 @@ function SupplierComparison({ orders, quotes }: { orders: any[]; quotes: any[] }
         data[name].count += 1;
         
         if (o.packaging_orders?.order_date && o.created_at) {
-          const orderDate = new Date(o.packaging_orders.order_date);
+          const [y, m, d] = o.packaging_orders.order_date.split('T')[0].split('-').map(Number);
+          const orderDate = new Date(y, m - 1, d);
           const createdAt = new Date(o.created_at);
           data[name].leadTimes.push(Math.max(0, Math.ceil((createdAt.getTime() - orderDate.getTime()) / (1000 * 3600 * 24))));
         }
@@ -391,7 +397,10 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
                     <div className="w-[40%] pl-2">
                       <p className={cn("text-xs font-bold flex items-center gap-1.5 opacity-60", ds.colors.text.secondary)}>
                         <Calendar className="h-3 w-3" />
-                        {new Date(order.order_date).toLocaleDateString('pt-BR')}
+                        {(() => {
+                          const [y, m, d] = order.order_date.split('T')[0].split('-').map(Number);
+                          return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+                        })()}
                       </p>
                     </div>
                     <div className="w-[15%] flex justify-center items-center pl-2">
@@ -562,7 +571,8 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
     const leadTimes = orders
       .filter((o: any) => o.packaging_orders?.order_date && o.created_at)
       .map((o: any) => {
-        const orderDate = new Date(o.packaging_orders.order_date);
+        const [y, m, d] = o.packaging_orders.order_date.split('T')[0].split('-').map(Number);
+        const orderDate = new Date(y, m - 1, d);
         const createdAt = new Date(o.created_at);
         return Math.max(0, Math.ceil((createdAt.getTime() - orderDate.getTime()) / (1000 * 3600 * 24)));
       });
@@ -615,7 +625,11 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
     const history: Array<{ date: string; price: number; supplier: string; type: "quote" | "order" }> = [];
     quotes.forEach((q: any) => { history.push({ date: q.created_at, price: q.custo_por_unidade || 0, supplier: q.supplier?.name || "Desconhecido", type: "quote" }); });
     orders.forEach((o: any) => { history.push({ date: o.packaging_orders?.order_date || o.created_at, price: o.valor_unitario || 0, supplier: o.packaging_orders?.supplier_name || "Desconhecido", type: "order" }); });
-    return history.filter(h => h.price > 0).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 20);
+    return history.filter(h => h.price > 0).sort((a, b) => {
+      const [ay, am, ad] = a.date.split('T')[0].split('-').map(Number);
+      const [by, bm, bd] = b.date.split('T')[0].split('-').map(Number);
+      return new Date(by, bm - 1, bd).getTime() - new Date(ay, am - 1, ad).getTime();
+    }).slice(0, 20);
   }, [quotes, orders]);
 
   const isLoading = quotesLoading || ordersLoading;

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useMemo } from "react";
+import { format } from "date-fns";
 
 interface AnalyticsFilters {
   startDate?: Date;
@@ -47,10 +48,10 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
         .order('created_at', { ascending: false });
 
       if (startDate) {
-        query = query.gte('data_inicio', startDate.toISOString().split('T')[0]);
+        query = query.gte('data_inicio', format(startDate, 'yyyy-MM-dd'));
       }
       if (endDate) {
-        query = query.lte('data_fim', endDate.toISOString().split('T')[0]);
+        query = query.lte('data_fim', format(endDate, 'yyyy-MM-dd'));
       }
 
       const { data, error } = await query;
@@ -94,10 +95,10 @@ export const useAnalytics = (filters: AnalyticsFilters = {}) => {
         .select('*');
 
       if (startDate) {
-        query = query.gte('order_date', startDate.toISOString().split('T')[0]);
+        query = query.gte('order_date', format(startDate, 'yyyy-MM-dd'));
       }
       if (endDate) {
-        query = query.lte('order_date', endDate.toISOString().split('T')[0]);
+        query = query.lte('order_date', format(endDate, 'yyyy-MM-dd'));
       }
 
       const { data, error } = await query;

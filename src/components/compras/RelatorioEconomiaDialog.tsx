@@ -28,9 +28,23 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
     const end = endOfDay(parseISO(endDate));
     
     return pedidos.filter(p => {
-      // Pedidos criados no período
-      const pDate = new Date(p.order_date.split('/').reverse().join('-'));
-      return isWithinInterval(pDate, { start, end });
+      // Pedidos criados no período - TRATAMENTO DE DATA SEM OFFSET UTC
+      const dateStr = p.order_date;
+      let pDate;
+      
+      if (dateStr.includes('/')) {
+        const [d, m, y] = dateStr.split('/').map(Number);
+        pDate = new Date(y, m - 1, d);
+      } else {
+        // Assume YYYY-MM-DD
+        const [y, m, d] = dateStr.split('-').map(Number);
+        pDate = new Date(y, m - 1, d);
+      }
+      
+      // Reseta horário para comparar apenas a data (início do dia local)
+      const pDateLocal = startOfDay(pDate);
+      
+      return isWithinInterval(pDateLocal, { start, end });
     });
   }, [pedidos, startDate, endDate]);
 

@@ -551,8 +551,14 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
 // Shared UI components for Analysis
 function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) {
   const combined = useMemo(() => {
-    const q = quotes.map(x => ({ ...x, type: 'quote', date: new Date(x.date) }));
-    const o = orders.map(x => ({ ...x, type: 'order', date: new Date(x.orders.order_date), price: x.unit_price, supplier: x.orders.supplier_name }));
+    const q = quotes.map(x => {
+      const [y, m, d] = x.date.split('T')[0].split(/[\/-]/).map(Number);
+      return { ...x, type: 'quote', date: new Date(y, m - 1, d) };
+    });
+    const o = orders.map(x => {
+      const [y, m, d] = x.orders.order_date.split('T')[0].split(/[\/-]/).map(Number);
+      return { ...x, type: 'order', date: new Date(y, m - 1, d), price: x.unit_price, supplier: x.orders.supplier_name };
+    });
     return [...q, ...o].sort((a, b) => b.date.getTime() - a.date.getTime());
   }, [quotes, orders]);
 
@@ -673,7 +679,10 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
                     <div className="w-[40%] pl-2">
                       <p className={cn("text-xs font-bold flex items-center gap-1.5 opacity-60", designSystem.colors.text.secondary)}>
                         <Calendar className="h-3 w-3" />
-                        {new Date(order.order_date).toLocaleDateString('pt-BR')}
+                        {(() => {
+                          const [y, m, d] = order.order_date.split('T')[0].split(/[\/-]/).map(Number);
+                          return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+                        })()}
                       </p>
                     </div>
                     <div className="w-[15%] flex justify-center items-center pl-2">

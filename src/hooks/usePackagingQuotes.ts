@@ -62,7 +62,10 @@ export function usePackagingQuotes() {
             supplierId: s.supplier_id,
             supplierName: s.supplier_name,
             status: s.status as "pendente" | "respondido",
-            dataResposta: s.data_resposta ? new Date(s.data_resposta).toLocaleDateString('pt-BR') : null,
+            dataResposta: s.data_resposta ? (() => {
+              const [y, m, d] = s.data_resposta.split('T')[0].split('-').map(Number);
+              return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+            })() : null,
             observacoes: s.observacoes,
             itens: supplierItemsList.map((si: any) => ({
               id: si.id,
@@ -99,8 +102,14 @@ export function usePackagingQuotes() {
         return {
           id: quote.id,
           status: quote.status,
-          dataInicio: new Date(quote.data_inicio).toLocaleDateString('pt-BR'),
-          dataFim: new Date(quote.data_fim).toLocaleDateString('pt-BR'),
+          dataInicio: (() => {
+            const [y, m, d] = quote.data_inicio.split('-').map(Number);
+            return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+          })(),
+          dataFim: (() => {
+            const [y, m, d] = quote.data_fim.split('-').map(Number);
+            return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+          })(),
           observacoes: quote.observacoes,
           itens: items.map((item: any) => ({
             id: item.id,

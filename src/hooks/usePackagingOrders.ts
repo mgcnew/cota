@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 import type { PackagingOrderDisplay, PackagingOrderItemDisplay } from '@/types/packaging';
 
 export function usePackagingOrders() {
@@ -62,9 +63,15 @@ export function usePackagingOrders() {
           totalValue: order.total_value || 0,
           economiaEstimada: order.economia_estimada || 0,
           status: order.status,
-          orderDate: new Date(order.order_date).toLocaleDateString('pt-BR'),
+          orderDate: (() => {
+            const [y, m, d] = order.order_date.split('-').map(Number);
+            return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+          })(),
           deliveryDate: order.delivery_date 
-            ? new Date(order.delivery_date).toLocaleDateString('pt-BR') 
+            ? (() => {
+                const [y, m, d] = order.delivery_date.split('-').map(Number);
+                return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+              })()
             : null,
           observations: order.observations,
           itens,
@@ -119,7 +126,7 @@ export function usePackagingOrders() {
           total_value: totalValue,
           economia_estimada: data.economiaEstimada || 0,
           status: 'pendente',
-          order_date: new Date().toISOString().split('T')[0],
+          order_date: format(new Date(), 'yyyy-MM-dd'),
           delivery_date: data.deliveryDate,
           observations: data.observations || null,
         })
@@ -214,7 +221,7 @@ export function usePackagingOrders() {
           supplier_name: data.supplierName,
           total_value: totalValue,
           status: 'pendente',
-          order_date: new Date().toISOString().split('T')[0],
+          order_date: format(new Date(), 'yyyy-MM-dd'),
           delivery_date: data.deliveryDate,
           observations: data.observations || null,
         })

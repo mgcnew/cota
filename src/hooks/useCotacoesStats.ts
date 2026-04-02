@@ -20,7 +20,8 @@ export function useCotacoesStats(cotacoes: Quote[], pedidos: Pedido[]) {
     const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
     const vencendo = cotacoes.filter(c => {
       if (c.statusReal !== "ativa") return false;
-      const dataFim = new Date(c.dataFim.split('/').reverse().join('-'));
+      const [df, mf, yf] = c.dataFim.split(/[\/-]/).map(Number);
+      const dataFim = new Date(yf, mf - 1, df);
       return dataFim <= em48h && dataFim >= hoje;
     }).length;
 

@@ -11,6 +11,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import type { Estatisticas } from "@/types/reports";
 
@@ -111,19 +112,30 @@ export function useDatePeriod(): UseDatePeriodReturn {
         setLoading(true);
       }
 
-      const startDateStr = startDate?.toISOString().split('T')[0];
-      const endDateStr = endDate?.toISOString().split('T')[0];
-
       // Load data in parallel for better performance
+      let quotesQuery = supabase.from("quotes")
+        .select("id, status, data_inicio, data_fim, quote_suppliers(valor_oferecido, supplier_id), quote_items(product_id)");
+      
+      if (startDate) {
+        quotesQuery = quotesQuery.gte('data_inicio', format(startDate, 'yyyy-MM-dd'));
+      }
+      if (endDate) {
+        quotesQuery = quotesQuery.lte('data_fim', format(endDate, 'yyyy-MM-dd'));
+      }
+
+      let ordersQuery = supabase.from("orders")
+        .select("id, order_date, total_value, status");
+      
+      if (startDate) {
+        ordersQuery = ordersQuery.gte('order_date', format(startDate, 'yyyy-MM-dd'));
+      }
+      if (endDate) {
+        ordersQuery = ordersQuery.lte('order_date', format(endDate, 'yyyy-MM-dd'));
+      }
+
       const [quotesResult, ordersResult, suppliersResult, productsResult] = await Promise.all([
-        supabase.from("quotes")
-          .select("id, status, data_inicio, data_fim, quote_suppliers(valor_oferecido, supplier_id), quote_items(product_id)")
-          .gte("data_inicio", startDateStr)
-          .lte("data_fim", endDateStr),
-        supabase.from("orders")
-          .select("id, order_date, total_value, status")
-          .gte("order_date", startDateStr)
-          .lte("order_date", endDateStr),
+        quotesQuery,
+        ordersQuery,
         supabase.from("suppliers").select("id, name"),
         supabase.from("products").select("id, name, category")
       ]);
