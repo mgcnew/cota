@@ -759,17 +759,9 @@ export function useCotacoes() {
             const supplierItem = supplierItems.find((si: any) => si.product_id === item.product_id);
             const valorEscolhido = supplierItem?.valor_oferecido || 0;
             
-            // Encontrar o MAIOR valor cotado para este produto entre todos os fornecedores (considerando valor inicial e atual)
-            const valoresParaProduto = (allSupplierItems || [])
-              .filter((si: any) => si.product_id === item.product_id)
-              .flatMap((si: any) => [
-                Number(si.valor_oferecido) || 0,
-                Number(si.valor_inicial) || 0
-              ])
-              .filter(val => val > 0);
-            
-            const maiorValor = valoresParaProduto.length > 0 ? Math.max(...valoresParaProduto) : valorEscolhido;
-            const diferencaPorUnidade = maiorValor - valorEscolhido;
+            // Economia Real: Comparar o valor final com o primeiro valor que este fornecedor específico mandou (link ou manual inicial)
+            const valorInicialVencedor = Number(supplierItem?.valor_inicial) || valorEscolhido;
+            const diferencaPorUnidade = valorInicialVencedor - valorEscolhido;
             const quantidade = parseFloat(item.quantidade?.toString().replace(',', '.') || '0') || 1;
             
             // Economia estimada = diferença × quantidade pedida
@@ -792,7 +784,7 @@ export function useCotacoes() {
               quantidade_entregue: null, // será preenchido na entrega
               unidade_entregue: null,
               valor_unitario_cotado: valorEscolhido,
-              maior_valor_cotado: maiorValor,
+              maior_valor_cotado: valorInicialVencedor,
               brand_id: supplierItem?.brand_id || null
             };
           });

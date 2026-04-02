@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useCotacoesStats } from "@/hooks/useCotacoesStats";
 import { CotacoesListDesktop } from "./CotacoesListDesktop";
 import { MobileQuoteCard } from "./MobileQuoteCard";
+import { RelatorioEconomiaDialog } from "./RelatorioEconomiaDialog";
 
 import {
   AddQuoteDialogLazy,
@@ -43,6 +44,7 @@ function CotacoesTab() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [gerenciarDialogOpen, setGerenciarDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [relatorioDialogOpen, setRelatorioDialogOpen] = useState(false);
   const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -180,26 +182,9 @@ function CotacoesTab() {
     });
   }, [cotacoes, debouncedSearchTerm, statusFilter]);
 
-  const { exportToCSV } = useExportCSV();
-
   const handleExportQuotes = useCallback(() => {
-    if (filteredCotacoes.length === 0) {
-      toast({ title: "Nenhuma cotação", variant: "destructive" });
-      return;
-    }
-    const data = filteredCotacoes.map(c => ({
-      id: c.id.substring(0, 8),
-      produto: c.produto,
-      status: c.statusReal,
-      melhorPreco: c.melhorPreco
-    }));
-    exportToCSV({
-      filename: 'cotacoes',
-      data,
-      columns: { id: 'ID', produto: 'Produto', status: 'Status', melhorPreco: 'Melhor Preço' }
-    });
-    toast({ title: "Exportado!" });
-  }, [filteredCotacoes, toast, exportToCSV]);
+    setRelatorioDialogOpen(true);
+  }, []);
 
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
 
@@ -282,7 +267,7 @@ function CotacoesTab() {
             size="icon"
             onClick={handleExportQuotes}
             className={cn("h-11 w-11 rounded-lg border-zinc-200 dark:border-zinc-800", designSystem.components.button.secondary)}
-            title="Exportar CSV"
+            title="Relatório de Economia e Resultados"
           >
             <Download className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
           </Button>
@@ -403,6 +388,7 @@ function CotacoesTab() {
         quote={selectedQuote}
       />
       <DeleteQuoteDialogLazy open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} quote={selectedQuote} onDelete={(id) => { deleteQuote.mutate(id); setDeleteDialogOpen(false); }} trigger={<div />} />
+      <RelatorioEconomiaDialog open={relatorioDialogOpen} onOpenChange={setRelatorioDialogOpen} />
     </div>
   );
 }
