@@ -781,9 +781,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     {/* Produtos Tab */}
                     <TabsContent value="produtos" className="h-full m-0">
                       <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
                           {/* Formulário de Adição - Lado Esquerdo */}
-                          <div className="flex flex-col space-y-4 h-full overflow-y-auto custom-scrollbar pr-2 select-none">
+                          <div className="flex flex-col space-y-4 h-full min-h-0 overflow-y-auto scrollbar-hide pr-2 select-none flex-shrink-0 lg:flex-shrink">
                             <div className="pb-1 border-b border-border/50">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Plus className="h-5 w-5 text-brand flex-shrink-0" />
@@ -1022,14 +1022,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           </div>
 
                           {/* Lista de Produtos - Lado Direito */}
-                          <div className="flex flex-col space-y-4">
-                            <div className="pb-1 border-b border-border/50">
+                          <div className="flex flex-col space-y-4 h-full min-h-0 overflow-hidden">
+                            <div className="pb-1 border-b border-border/50 flex-shrink-0">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
                                 <span className="truncate">Produtos Adicionados ({fields.length})</span>
                               </h3>
                             </div>
-                            <div className="space-y-4 pt-2">
+                            <div className="flex-1 min-h-0 pt-2">
                               {fields.length === 0 ? (
                                 <div className={cn("text-center py-8", ds.colors.text.secondary)}>
                                   <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
@@ -1037,7 +1037,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
                                 </div>
                               ) : (
-                                <ScrollArea className="h-[400px] pr-2">
+                                <div className="h-full overflow-y-auto scrollbar-hide pr-2">
                                   <div className="space-y-3">
                                     {fields.map((field, index) => (
                                       <div key={field.id} className={cn(
@@ -1049,7 +1049,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         <div className="p-2 sm:p-2.5">
                                           <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1 min-w-0">
-                                              <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-xs sm:text-sm truncate")}>
+                                              <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-xs sm:text-sm break-words")}>
                                                 {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
                                               </h4>
                                               <div className={cn("text-[11px] sm:text-xs text-muted-foreground mt-0.5 flex items-center gap-2")}>
@@ -1076,7 +1076,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       </div>
                                     ))}
                                   </div>
-                                </ScrollArea>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -1090,7 +1090,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                         {/* Esquerda: Periodo */}
                         <div className={cn(
-                          "flex flex-col gap-5 p-5 sm:p-6 lg:w-[320px] xl:w-[360px] flex-shrink-0 overflow-y-auto pb-24 custom-scrollbar",
+                          "flex flex-col gap-5 p-5 sm:p-6 lg:w-[320px] xl:w-[360px] flex-shrink-0 overflow-y-auto pb-24 scrollbar-hide",
                           "lg:border-r border-border/50 bg-card rounded-l-2xl"
                         )}>
                           <div className="flex items-center gap-2">
@@ -1344,7 +1344,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               </div>
                           </div>
 
-                          <div className="flex-1 overflow-y-auto p-2 custom-scrollbar pb-20">
+                          <div className="flex-1 overflow-y-auto p-2 scrollbar-hide pb-20">
                             {supplierSearch.length === 0 && selectedSuppliers.length === 0 ? (
                               <div className="h-full flex flex-col items-center justify-center gap-2 p-6 text-center">
                                 <Search className={cn("h-8 w-8 opacity-20", ds.colors.text.secondary)} />
