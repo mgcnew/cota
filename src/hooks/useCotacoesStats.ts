@@ -55,13 +55,20 @@ export function useCotacoesStats(cotacoes: Quote[], pedidos: Pedido[]) {
         });
 
         if (winnerId) {
-          const winnerItem = supplierItems.find((i: any) => i?.supplier_id === winnerId && i?.product_id === qi.product_id);
-          const history = winnerItem?.price_history || [];
-          const firstPrice = history.length > 0 ? history[0].old_price : (winnerItem?.valor_oferecido || 0);
-          
-          if (firstPrice > bestPrice) {
-            economiaNegotiated += (firstPrice - bestPrice) * (Number(qi.quantidade) || 0);
-          }
+        const winnerItem = supplierItems.find((i: any) => i?.supplier_id === winnerId && i?.product_id === qi.product_id);
+        
+        // A base para economia é o PRIMEIRO valor que o fornecedor mandou (valor_inicial)
+        // Se não houver valor_inicial (caso legado), recai no primeiro do price_history
+        const firstPrice = Number(winnerItem?.valor_inicial) || 
+                          (winnerItem?.price_history && winnerItem.price_history.length > 0 ? Number(winnerItem.price_history[0].old_price) : 0);
+        
+        const finalPrice = Number(winnerItem?.valor_oferecido) || 0;
+
+        if (firstPrice > 0 && finalPrice > 0 && firstPrice > finalPrice) {
+          const qtyStr = qi.quantidade?.toString() || '0';
+          const quantity = parseFloat(qtyStr.replace(',', '.')) || 0;
+          economiaNegotiated += (firstPrice - finalPrice) * quantity;
+        }
         }
       });
     });

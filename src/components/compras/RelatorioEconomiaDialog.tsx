@@ -147,7 +147,8 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
         <div class="subtitle">Período referenciado: ${format(parseISO(startDate), "dd/MM/yyyy")} a ${format(parseISO(endDate), "dd/MM/yyyy")}</div>
         
         <div class="summary">
-          Total de Economia Real (Negociada): ${formatCurrency(totalEconomy)} (Volume total no período)
+          ROI de Negociação (Economia Real): ${formatCurrency(totalEconomy)} <br/>
+          <small style="font-weight: normal; font-size: 0.8em; color: #555;">(Cálculo: [Preço Inicial - Preço Negociado] x Volume Total Comprado)</small>
         </div>
 
         <table>
@@ -156,9 +157,10 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
               <th>Produto</th>
               <th>Fornecedor</th>
               <th>Peso/Qtd</th>
-              <th>(R$) Oferecido 1º</th>
-              <th>(R$) Fechamento</th>
-              <th>Economia Negociada</th>
+              <th>(R$) Oferta 1º</th>
+              <th>(R$) Fechado</th>
+              <th>Econ. Unitária</th>
+              <th>Econ. Total</th>
             </tr>
           </thead>
           <tbody>
@@ -169,7 +171,8 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
                 <td>${item.quantity} ${item.unit}</td>
                 <td>${formatCurrency(item.precoInicial)}</td>
                 <td><strong>${formatCurrency(item.precoFinal)}</strong></td>
-                <td class="${item.economia > 0 ? 'economy' : ''}">${item.economia > 0 ? '+ ' + formatCurrency(item.economia) : '-'}</td>
+                <td style="color: #22c55e;">${item.precoInicial > item.precoFinal ? formatCurrency(item.precoInicial - item.precoFinal) : '-'}</td>
+                <td class="${item.economia > 0 ? 'economy' : ''}">${item.economia > 0 ? formatCurrency(item.economia) : '-'}</td>
               </tr>
             `).join('')}
           </tbody>
