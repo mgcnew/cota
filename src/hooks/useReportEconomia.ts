@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatLocalDate } from '@/lib/utils';
 
 interface EconomiaData {
   periodo: string;
@@ -17,8 +18,8 @@ export const useReportEconomia = () => {
   const generateReport = useCallback(async (startDate: Date, endDate: Date) => {
     setLoading(true);
     try {
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      const startDateStr = formatLocalDate(startDate);
+      const endDateStr = formatLocalDate(endDate);
 
       // Buscar cotações finalizadas com fornecedores
       const { data: quotes, error } = await supabase

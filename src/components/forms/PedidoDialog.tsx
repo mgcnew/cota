@@ -688,8 +688,10 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             <span className={cn(
                               ds.typography.size.xs,
                               ds.typography.weight.bold,
-                              "text-brand"
-                            )}>R$ {item.valorUnitario.toFixed(2)}</span>
+                              item.valorUnitario > 0 ? "text-brand" : "text-zinc-500 italic"
+                            )}>
+                              {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                            </span>
                             <span className={cn(
                               ds.typography.size.xs,
                               ds.typography.weight.bold,

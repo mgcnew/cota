@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatLocalDate } from '@/lib/utils';
 
 interface PedidosData {
   periodo: string;
@@ -20,8 +21,8 @@ export const useReportPedidos = () => {
   const generateReport = useCallback(async (startDate: Date, endDate: Date) => {
     setLoading(true);
     try {
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      const startDateStr = formatLocalDate(startDate);
+      const endDateStr = formatLocalDate(endDate);
 
       // Buscar pedidos no período
       const { data: orders, error } = await supabase

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useCompany } from "@/hooks/useCompany";
 import { designSystem } from "@/styles/design-system";
 import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
+import { Switch } from "@/components/ui/switch";
 
 interface QuoteConversionTabProps {
   products: any[];
@@ -39,6 +40,7 @@ export function QuoteConversionTab({
   const [productSelections, setProductSelections] = useState<Record<string, string>>({});
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
+  const [allowItemsWithoutPrice, setAllowItemsWithoutPrice] = useState(false);
 
   useEffect(() => {
     // Inicializa as seleções apenas uma vez quando os produtos carregarem
@@ -225,7 +227,7 @@ export function QuoteConversionTab({
               } else if (val === "unico") {
                 const supplierTotals = fornecedores.map((f: any) => {
                   const total = products.reduce((sum: number, p: any) => sum + getSupplierProductValue(f.id, p.product_id), 0);
-                  const hasAll = !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0);
+                  const hasAll = allowItemsWithoutPrice || !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0);
                   return { id: f.id, total, hasAll };
                 }).filter(s => s.hasAll).sort((a, b) => a.total - b.total);
                 if (supplierTotals.length > 0) {
@@ -245,9 +247,15 @@ export function QuoteConversionTab({
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-center gap-2 px-1">
-            <ShoppingCart className="h-4 w-4 text-brand" />
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Itens e Fornecedores</h4>
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4 text-brand" />
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Itens e Fornecedores</h4>
+            </div>
+            <div className="flex items-center gap-2">
+               <span className="text-[10px] font-bold text-muted-foreground mr-1">Permitir item sem oferta</span>
+               <Switch checked={allowItemsWithoutPrice} onCheckedChange={setAllowItemsWithoutPrice} className="scale-75 data-[state=checked]:bg-brand" />
+            </div>
           </div>
           
           <div className="bg-card border border-border rounded-xl shadow-sm">
@@ -275,8 +283,10 @@ export function QuoteConversionTab({
                           <SelectValue placeholder="Fornecedor..." />
                         </SelectTrigger>
                         <SelectContent className="rounded-xl border-border">
-                          {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
-                            <SelectItem key={f.id} value={f.id} className="text-[11px] sm:text-xs font-bold uppercase">{safeStr(f.nome)}</SelectItem>
+                          {fornecedores.filter((f: any) => allowItemsWithoutPrice || getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
+                            <SelectItem key={f.id} value={f.id} className="text-[11px] sm:text-xs font-bold uppercase">
+                              {safeStr(f.nome)} {getSupplierProductValue(f.id, product.product_id) > 0 ? '' : '(Sem Oferta)'}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -294,60 +304,7 @@ export function QuoteConversionTab({
                 );
               })}
             </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 px-1">
-            <ShoppingCart className="h-4 w-4 text-brand" />
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Itens e Fornecedores</h4>
-          </div>
-          
-          <div className="bg-card border border-border rounded-xl shadow-sm">
-            <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 px-3 py-2 bg-muted/40 border-b border-border items-center hidden sm:grid">
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1">Produto</span>
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor Alocado</span>
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-1">Subtotal</span>
-            </div>
-            <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
-              {products.map((product: any) => {
-                const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-                const selectedSupplierId = productSelections[product.product_id];
-                const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
-                const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
-
-                return (
-                  <div key={product.product_id} className={cn("grid grid-cols-1 sm:grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 p-2 sm:px-3 items-center transition-colors hover:bg-muted/10", isBest ? "bg-brand/5" : "")}>
-                    <div className="min-w-0 pl-1">
-                      <p className="font-bold text-[10px] sm:text-[11px] text-foreground truncate">{safeStr(product.product_name)}</p>
-                      <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">{safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
-                    </div>
-                    <div>
-                      <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                        <SelectTrigger className="w-full h-7 rounded-md font-bold text-[10px] border-border/70 bg-background hover:bg-muted/50 transition-colors">
-                          <SelectValue placeholder="Fornecedor..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-border">
-                          {fornecedores.filter((f: any) => getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
-                            <SelectItem key={f.id} value={f.id} className="text-[11px] sm:text-xs font-bold uppercase">{safeStr(f.nome)}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pr-1 gap-1">
-                      <p className="text-[8px] font-bold text-muted-foreground uppercase sm:hidden block">Subtotal:</p>
-                      <div className="flex items-center gap-1">
-                        {isBest && <Trophy className="h-2.5 w-2.5 text-brand" />}
-                        <p className={cn("text-[10px] sm:text-[11px] font-black", isBest ? "text-brand" : "text-foreground")}>
-                          R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+              </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border/50 shadow-sm relative overflow-hidden">

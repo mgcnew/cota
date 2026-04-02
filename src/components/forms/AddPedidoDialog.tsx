@@ -212,14 +212,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
   const handleAddProduct = () => {
     const productName = selectedProduct ? selectedProduct.name : productSearch.trim();
-    if (!productName || !newProductQuantity || !newProductPrice) {
-      toast({ title: "Erro", description: "Preencha todos os campos", variant: "destructive" });
+    const quantidade = parseDecimalInput(newProductQuantity);
+    const preco = newProductPrice ? parseFloat(newProductPrice.replace(',', '.')) : 0;
+    
+    if (!quantidade || quantidade <= 0) {
+      toast({ title: "Erro", description: "Quantidade inválida", variant: "destructive" });
       return;
     }
-    const quantidade = parseDecimalInput(newProductQuantity);
-    const preco = parseFloat(newProductPrice.replace(',', '.'));
-    if (!quantidade || quantidade <= 0 || !preco || preco <= 0) {
-      toast({ title: "Erro", description: "Valores inválidos", variant: "destructive" });
+    
+    if (!productName) {
+      toast({ title: "Erro", description: "Informe o produto", variant: "destructive" });
       return;
     }
     
@@ -538,7 +540,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         {/* Step: Produtos */}
         {activeStep === "produtos" && (
           <div className="h-full p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 h-full">
               
               {/* Adicionar Produto */}
               <Card className={cn(ds.components.card.root, "overflow-visible")}>
@@ -561,8 +563,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
                         onFocus={(e) => {
-                          if (productSearch.trim().length >= 3) {
+                          if (productSearch.trim().length >= 3 && searchedProducts.length > 0) {
                             setShowProductSuggestions(true);
+                          } else {
+                            setShowProductSuggestions(false);
                           }
                           handleInputFocus(e);
                         }}
@@ -630,7 +634,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     </div>
 
                     <div className={cn(ds.components.input.group, "col-span-6 sm:col-span-3")}>
-                      <Label className={ds.components.input.label}>Preço Unit. *</Label>
+                      <Label className={ds.components.input.label}>Preço Unit.</Label>
                       <div className="relative">
                         <span className={cn(
                           "absolute left-3 top-1/2 -translate-y-1/2",
@@ -654,7 +658,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
                   <Button 
                     onClick={handleAddProduct} 
-                    disabled={(!selectedProduct && productSearch.trim().length < 2) || !newProductQuantity || !newProductPrice}
+                    disabled={(!selectedProduct && productSearch.trim().length < 2) || !newProductQuantity}
                     className={cn(ds.components.button.primary, "w-full h-10")}
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -664,7 +668,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               </Card>
 
               {/* Lista de Itens */}
-              <Card className={cn(ds.components.card.root, "h-full max-h-[500px] lg:max-h-none flex flex-col")}>
+              <Card className={cn(ds.components.card.root, "min-h-[200px] max-h-[350px] lg:max-h-none lg:h-full flex flex-col overflow-hidden")}>
                 <CardHeader className={cn(ds.components.card.header, "flex-shrink-0")}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
                     <span className="flex items-center gap-2">
@@ -719,7 +723,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                               )}>
                                 <span>{item.quantidade} {item.unidade}</span>
                                 <span>×</span>
-                                <span>R$ {item.valorUnitario.toFixed(2)}</span>
+                                <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
+                                  {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                                </span>
                               </div>
                             </div>
                             <div className="text-right ml-auto px-1">

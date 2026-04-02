@@ -62,7 +62,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +97,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDate } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 
@@ -524,9 +524,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         .from("quotes")
         .insert({
           company_id: companyData.company_id,
-          data_inicio: data.dataInicio.toISOString().split('T')[0],
-          data_fim: data.dataFim.toISOString().split('T')[0],
-          data_planejada: data.dataPlanejada?.toISOString() || null,
+          data_inicio: formatLocalDate(data.dataInicio),
+          data_fim: formatLocalDate(data.dataFim),
+          data_planejada: data.dataPlanejada ? data.dataPlanejada.toISOString() : null,
           observacoes: data.observacoes || null,
           status: quoteStatus
         })
@@ -1151,15 +1151,26 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         </Button>
                                       </FormControl>
                                     </PopoverTrigger>
-                                    <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border")} align="start">
+                                    <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border shadow-2xl overflow-hidden rounded-2xl")} align="start">
                                       <Calendar
                                         mode="single"
                                         selected={field.value}
                                         onSelect={field.onChange}
+                                        locale={ptBR}
                                         disabled={(date) => {
                                           const today = new Date();
                                           today.setHours(0, 0, 0, 0);
                                           return date < today;
+                                        }}
+                                        classNames={{
+                                          day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                          day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
+                                          day: cn(
+                                            buttonVariants({ variant: "ghost" }),
+                                            "h-9 w-9 p-0 font-medium aria-selected:opacity-100 hover:bg-brand/10 hover:text-brand rounded-xl transition-all"
+                                          ),
+                                          day_disabled: "text-muted-foreground/30 opacity-40 cursor-not-allowed",
+                                          day_outside: "text-muted-foreground/20 opacity-30",
                                         }}
                                         initialFocus
                                       />
@@ -1174,34 +1185,34 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                             />
                           ) : (
                             <div className="flex flex-col gap-4">
-                              {/* Atalhos rapidos */}
-                              <div className="grid grid-cols-4 gap-1.5">
-                                {[
-                                  { label: "Hoje", days: 0 },
-                                  { label: "3d", days: 3 },
-                                  { label: "7d", days: 7 },
-                                  { label: "15d", days: 15 },
-                                ].map(({ label, days }) => (
-                                  <button
-                                    key={label}
-                                    type="button"
-                                    onClick={() => {
-                                      const hoje = new Date();
-                                      const fim = new Date(hoje);
-                                      fim.setDate(hoje.getDate() + days);
-                                      form.setValue("dataInicio", hoje);
-                                      form.setValue("dataFim", fim);
-                                    }}
-                                    className={cn(
-                                      "h-8 rounded-lg text-xs font-medium border transition-colors",
-                                      days === 7
-                                        ? "border-brand/50 bg-brand/10 text-brand"
-                                        : cn(ds.colors.surface.section, ds.colors.border.subtle, ds.colors.text.secondary, "hover:border-brand/30 hover:text-brand")
-                                    )}
-                                  >
-                                    {label}
-                                  </button>
-                                ))}
+                              <div className="space-y-2">
+                                <label className={ds.components.input.label}>Atalho de Período</label>
+                                <Select onValueChange={(val) => {
+                                  const days = parseInt(val);
+                                  const hoje = new Date();
+                                  hoje.setHours(0, 0, 0, 0);
+                                  const fim = new Date(hoje);
+                                  fim.setDate(hoje.getDate() + days);
+                                  form.setValue("dataInicio", hoje);
+                                  form.setValue("dataFim", fim);
+                                  
+                                  toast({
+                                    title: "⏱️ Período aplicado",
+                                    description: `Cotação definida para ${days === 0 ? 'hoje' : days + ' dias'}`,
+                                    duration: 2000,
+                                  });
+                                }}>
+                                  <SelectTrigger className={cn(ds.components.input.root, "w-full h-10")}>
+                                    <SelectValue placeholder="Escolha um período rápido" />
+                                  </SelectTrigger>
+                                  <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border shadow-xl")}>
+                                    <SelectItem value="0">Somente hoje</SelectItem>
+                                    <SelectItem value="3">Próximos 3 dias</SelectItem>
+                                    <SelectItem value="7">Próximos 7 dias (Padrão)</SelectItem>
+                                    <SelectItem value="15">Próximos 15 dias</SelectItem>
+                                    <SelectItem value="30">Próximos 30 dias</SelectItem>
+                                  </SelectContent>
+                                </Select>
                               </div>
 
                               {/* Campos de data */}
@@ -1230,12 +1241,23 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border")} align="start">
+                                        <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border shadow-2xl overflow-hidden rounded-2xl")} align="start">
                                           <Calendar
                                             mode="single"
                                             selected={field.value}
                                             onSelect={field.onChange}
+                                            locale={ptBR}
                                             disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                                            classNames={{
+                                              day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                              day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
+                                              day: cn(
+                                                buttonVariants({ variant: "ghost" }),
+                                                "h-9 w-9 p-0 font-medium aria-selected:opacity-100 hover:bg-brand/10 hover:text-brand rounded-xl transition-all"
+                                              ),
+                                              day_disabled: "text-muted-foreground/30 opacity-40 cursor-not-allowed",
+                                              day_outside: "text-muted-foreground/20 opacity-30",
+                                            }}
                                             initialFocus
                                           />
                                         </PopoverContent>
@@ -1268,16 +1290,27 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             </Button>
                                           </FormControl>
                                         </PopoverTrigger>
-                                        <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border")} align="start">
+                                        <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border shadow-2xl overflow-hidden rounded-2xl")} align="start">
                                           <Calendar
                                             mode="single"
                                             selected={field.value}
                                             onSelect={field.onChange}
+                                            locale={ptBR}
                                             disabled={(date) => {
                                               const dataIn = form.getValues("dataInicio") || new Date();
                                               const d = new Date(dataIn);
                                               d.setHours(0, 0, 0, 0);
                                               return date < d;
+                                            }}
+                                            classNames={{
+                                              day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                              day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
+                                              day: cn(
+                                                buttonVariants({ variant: "ghost" }),
+                                                "h-9 w-9 p-0 font-medium aria-selected:opacity-100 hover:bg-brand/10 hover:text-brand rounded-xl transition-all"
+                                              ),
+                                              day_disabled: "text-muted-foreground/30 opacity-40 cursor-not-allowed",
+                                              day_outside: "text-muted-foreground/20 opacity-30",
                                             }}
                                             initialFocus
                                           />

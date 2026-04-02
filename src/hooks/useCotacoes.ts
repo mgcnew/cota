@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { PricingUnit } from '@/utils/priceNormalization';
+import { formatLocalDate } from '@/lib/utils';
 
 export interface FornecedorParticipante {
   id: string;
@@ -614,8 +615,8 @@ export function useCotacoes() {
       const { error: quoteError } = await supabase
         .from("quotes")
         .update({
-          data_inicio: data.dataInicio.toISOString().split('T')[0],
-          data_fim: data.dataFim.toISOString().split('T')[0],
+          data_inicio: formatLocalDate(data.dataInicio),
+          data_fim: formatLocalDate(data.dataFim),
           observacoes: data.observacoes || null,
           status: data.status
         })

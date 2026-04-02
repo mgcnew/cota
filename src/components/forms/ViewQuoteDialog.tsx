@@ -569,19 +569,21 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
             price: supplierItem?.valor_oferecido || 0,
             isBest: false
           };
-        })
-        .filter(s => s.price > 0);
+        });
 
-      if (supplierOptions.length > 0) {
-        const minPrice = Math.min(...supplierOptions.map(s => s.price));
+      // Calcular o melhor preço entre as opções com preço > 0
+      const validOptions = supplierOptions.filter(s => s.price > 0);
+      if (validOptions.length > 0) {
+        const minPrice = Math.min(...validOptions.map(s => s.price));
         supplierOptions.forEach(option => {
-          if (option.price === minPrice) {
+          if (option.price > 0 && option.price === minPrice) {
             option.isBest = true;
           }
         });
       }
 
       const bestSupplierOption = supplierOptions.find(option => option.isBest);
+      const hasPrice = validOptions.length > 0;
 
       return {
         productId: item.product_id,
@@ -590,7 +592,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
         unit: item.unidade,
         selectedSupplierId: bestSupplierOption?.supplierId || "",
         selectedSupplierName: bestSupplierOption?.supplierName || "",
-        supplierOptions
+        supplierOptions,
+        isActuallyIncluded: hasPrice
       };
     });
   };
@@ -602,25 +605,26 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       return;
     }
 
-    const hasMultipleProducts = productSelections.length > 1;
-    const hasTiedBestPrices = productSelections.some(selection =>
-      selection.supplierOptions.filter(option => option.isBest).length > 1
-    );
+    // Sempre mostrar o diálogo de seleção se houver mais de um produto,
+    // para permitir que o usuário escolha quais incluir (com ou sem preço)
+    const shouldShowSelectionDialog = productSelections.length > 1 || 
+      productSelections.some(selection => 
+        selection.supplierOptions.filter(option => option.isBest).length > 1
+      );
 
-    if (hasMultipleProducts || hasTiedBestPrices) {
+    if (shouldShowSelectionDialog) {
       const initialSelections = new Map<string, { supplierId: string; supplierName: string }>();
       productSelections.forEach(selection => {
+        // Se tiver o "isActuallyIncluded" (tem preço), pré-seleciona o melhor.
+        // Se não tiver, deixa vazio ou o melhor se existir algum zero.
         if (selection.selectedSupplierId) {
           initialSelections.set(selection.productId, {
             supplierId: selection.selectedSupplierId,
             supplierName: selection.selectedSupplierName
           });
         } else if (selection.supplierOptions.length > 0) {
-          const fallback = selection.supplierOptions[0];
-          initialSelections.set(selection.productId, {
-            supplierId: fallback.supplierId,
-            supplierName: fallback.supplierName
-          });
+          // Se não tem melhor preço, não pré-seleciona ninguém no map de ativos se for sem preço
+          // O diálogo cuidará de marcar como incluído ou não
         }
       });
 
@@ -714,11 +718,23 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     if (selectedSupplierForConversion && onConvertToOrder) {
       // Fluxo simples: 1 fornecedor com todos os produtos
       if (!currentQuote) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const allProductIds = products.map((p: any) => p.product_id);
+      
+      // Usar a seleção detalhada se existir, senão usar todos (fallback)
+      let productIds: string[] = [];
+      if (selectedSuppliers && selectedSuppliers.size > 0) {
+        selectedSuppliers.forEach((selection, productId) => {
+          if (selection.supplierId === selectedSupplierForConversion.id) {
+            productIds.push(productId);
+          }
+        });
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        productIds = products.map((p: any) => p.product_id);
+      }
+
       onConvertToOrder(currentQuote.id, [{
         supplierId: selectedSupplierForConversion.id,
-        productIds: allProductIds,
+        productIds: productIds,
         deliveryDate,
         observations
       }]);
@@ -747,17 +763,29 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
   // Get products for conversion dialog
   const getConversionProducts = () => {
-    if (!bestSupplier) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return products.map((product: any) => {
-      const value = getSupplierProductValue(bestSupplier.id, product.product_id);
-      return {
-        id: product.product_id,
-        name: product.product_name,
-        quantity: product.quantidade,
-        value: value
-      };
-    });
+    if (!selectedSupplierForConversion) return [];
+    
+    // Filtra os produtos que foram designados para este fornecedor no diálogo de seleção
+    const designatedProductIds = Array.from(selectedSuppliers.entries())
+      .filter(([_, sel]) => sel.supplierId === selectedSupplierForConversion.id)
+      .map(([productId]) => productId);
+
+    // Se não há designações detalhadas, usa todos os produtos
+    const finalProductIds = designatedProductIds.length > 0 
+      ? designatedProductIds 
+      : products.map((p: any) => p.product_id);
+
+    return products
+      .filter((p: any) => finalProductIds.includes(p.product_id))
+      .map((product: any) => {
+        const value = getSupplierProductValue(selectedSupplierForConversion.id, product.product_id);
+        return {
+          id: product.product_id,
+          name: product.product_name,
+          quantity: product.quantidade,
+          value: value
+        };
+      });
   };
 
   // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
@@ -1571,46 +1599,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
               <SelectSupplierPerProductDialog
                 open={showSelectSupplierDialog}
                 onOpenChange={setShowSelectSupplierDialog}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                products={products.map((item: any) => {
-                  const supplierOptions = currentQuote.fornecedoresParticipantes
-                    .map(fornecedor => {
-                      const supplierItem = (currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || []).find(
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        (si: any) => si.supplier_id === fornecedor.id && si.product_id === item.product_id
-                      );
-
-                      return {
-                        supplierId: fornecedor.id,
-                        supplierName: fornecedor.nome,
-                        price: supplierItem?.valor_oferecido || 0,
-                        isBest: false
-                      };
-                    })
-                    .filter(s => s.price > 0);
-
-                  if (supplierOptions.length > 0) {
-                    const minPrice = Math.min(...supplierOptions.map(s => s.price));
-                    supplierOptions.forEach(s => {
-                      if (s.price === minPrice) {
-                        s.isBest = true;
-                      }
-                    });
-                  }
-
-                  const bestSupplier = supplierOptions.find(s => s.isBest);
-                  const selection = selectedSuppliers.get(item.product_id);
-
-                  return {
-                    productId: item.product_id,
-                    productName: item.product_name,
-                    quantity: item.quantidade,
-                    unit: item.unidade,
-                    selectedSupplierId: selection?.supplierId || bestSupplier?.supplierId || '',
-                    selectedSupplierName: selection?.supplierName || bestSupplier?.supplierName || '',
-                    supplierOptions
-                  };
-                })}
+                products={buildProductSelections()}
                 onConfirm={handleSupplierSelectionConfirm}
               />
             )}
@@ -1623,7 +1612,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 quote={currentQuote}
                 supplier={selectedSupplierForConversion}
                 products={getConversionProducts()}
-                totalValue={bestSupplier?.totalValue || 0}
+                totalValue={getConversionProducts().reduce((sum, p) => sum + p.value, 0)}
                 onConfirm={handleConfirmConversion}
                 isLoading={isUpdating}
               />

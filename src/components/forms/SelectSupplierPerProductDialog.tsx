@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Combobox } from "@/components/ui/combobox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package, Award, AlertCircle, X } from "lucide-react";
+import { Package, Award, AlertCircle, X, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface SupplierOption {
   supplierId: string;
@@ -22,6 +25,7 @@ interface ProductSelection {
   selectedSupplierId: string;
   selectedSupplierName: string;
   supplierOptions: SupplierOption[];
+  isActuallyIncluded?: boolean;
 }
 
 interface SelectSupplierPerProductDialogProps {
@@ -41,6 +45,32 @@ export function SelectSupplierPerProductDialog({
     new Map(products.map(p => [p.productId, { supplierId: p.selectedSupplierId, supplierName: p.selectedSupplierName }]))
   );
 
+  const [includedItems, setIncludedItems] = useState<Set<string>>(
+    new Set(products.filter(p => p.isActuallyIncluded).map(p => p.productId))
+  );
+
+  const toggleInclude = (productId: string) => {
+    const newIncluded = new Set(includedItems);
+    if (newIncluded.has(productId)) {
+      newIncluded.delete(productId);
+    } else {
+      newIncluded.add(productId);
+      
+      // Se estamos incluindo e não tem fornecedor selecionado, tenta o melhor ou o primeiro
+      const selection = selections.get(productId);
+      if (!selection || !selection.supplierId) {
+        const product = products.find(p => p.productId === productId);
+        if (product && product.supplierOptions.length > 0) {
+          const best = product.supplierOptions.find(s => s.isBest) || product.supplierOptions[0];
+          const newSelections = new Map(selections);
+          newSelections.set(productId, { supplierId: best.supplierId, supplierName: best.supplierName });
+          setSelections(newSelections);
+        }
+      }
+    }
+    setIncludedItems(newIncluded);
+  };
+
   const handleSelectionChange = (productId: string, supplierId: string) => {
     const product = products.find(p => p.productId === productId);
     const supplier = product?.supplierOptions.find(s => s.supplierId === supplierId);
@@ -54,6 +84,7 @@ export function SelectSupplierPerProductDialog({
 
   const calculateTotal = () => {
     return products.reduce((total, product) => {
+      if (!includedItems.has(product.productId)) return total;
       const selection = selections.get(product.productId);
       const supplier = product.supplierOptions.find(s => s.supplierId === selection?.supplierId);
       return total + (supplier?.price || 0);
@@ -62,6 +93,7 @@ export function SelectSupplierPerProductDialog({
 
   const calculateBestTotal = () => {
     return products.reduce((total, product) => {
+      if (!includedItems.has(product.productId)) return total;
       const bestSupplier = product.supplierOptions.find(s => s.isBest);
       return total + (bestSupplier?.price || 0);
     }, 0);
@@ -69,15 +101,17 @@ export function SelectSupplierPerProductDialog({
 
   const hasNonOptimalSelection = () => {
     return products.some(product => {
+      if (!includedItems.has(product.productId)) return false;
       const selection = selections.get(product.productId);
       const selectedSupplier = product.supplierOptions.find(s => s.supplierId === selection?.supplierId);
-      return selectedSupplier && !selectedSupplier.isBest;
+      return selectedSupplier && !selectedSupplier.isBest && selectedSupplier.price > 0;
     });
   };
 
   const getSupplierGroups = () => {
     const groups = new Map<string, string[]>();
     selections.forEach((selection, productId) => {
+      if (!includedItems.has(productId)) return;
       const product = products.find(p => p.productId === productId);
       if (product) {
         if (!groups.has(selection.supplierId)) {
@@ -132,6 +166,7 @@ export function SelectSupplierPerProductDialog({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50 dark:bg-gray-800/50 border-b border-slate-200 dark:border-gray-700">
+                    <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 w-10">Inc.</TableHead>
                     <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[140px]">Produto</TableHead>
                     <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[70px]">Qtd</TableHead>
                     <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[260px]">Fornecedor</TableHead>
@@ -142,13 +177,31 @@ export function SelectSupplierPerProductDialog({
                   {products.map((product) => {
                     const selection = selections.get(product.productId);
                     const selectedSupplier = product.supplierOptions.find(s => s.supplierId === selection?.supplierId);
-                    
+                    const isIncluded = includedItems.has(product.productId);
+
                     return (
-                      <TableRow key={product.productId} className="hover:bg-slate-50 dark:hover:bg-gray-700/50">
+                      <TableRow key={product.productId} className={cn(
+                        "hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors",
+                        !isIncluded && "opacity-60 bg-slate-50/30 dark:bg-gray-900/10"
+                      )}>
                         <TableCell className="px-2 py-2">
-                          <p className="font-semibold text-xs text-slate-900 dark:text-white truncate" title={product.productName}>
-                            {product.productName}
-                          </p>
+                          <Checkbox 
+                            checked={isIncluded}
+                            onCheckedChange={() => toggleInclude(product.productId)}
+                            className="h-4 w-4 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                          />
+                        </TableCell>
+                        <TableCell className="px-2 py-2">
+                          <div className="flex flex-col">
+                            <p className={cn("font-bold text-xs truncate", isIncluded ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-gray-600")} title={product.productName}>
+                              {product.productName}
+                            </p>
+                            {!product.isActuallyIncluded && isIncluded && (
+                              <span className="text-[9px] text-amber-600 dark:text-amber-400 font-medium uppercase leading-tight">
+                                Sem preço cotado
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell className="px-2 py-2">
                           <span className="text-[10px] text-slate-600 dark:text-gray-400 whitespace-nowrap">
@@ -158,14 +211,20 @@ export function SelectSupplierPerProductDialog({
                         <TableCell className="px-2 py-2">
                           <div className="flex items-center gap-1.5 flex-wrap sm:flex-nowrap">
                             <Combobox
+                              disabled={!isIncluded}
                               options={product.supplierOptions.map(s => ({
                                 value: s.supplierId,
-                                label: `${s.supplierName} - R$ ${s.price.toFixed(2)}${s.isBest ? ' ⭐' : ''}`
+                                label: s.price > 0 
+                                  ? `${s.supplierName} - R$ ${s.price.toFixed(2)}${s.isBest ? ' ⭐' : ''}`
+                                  : `${s.supplierName} - (Sem preço registrado)`
                               }))}
                               value={selection?.supplierId || ''}
                               onValueChange={(value) => handleSelectionChange(product.productId, value)}
                               placeholder="Selecione"
-                              className="w-full min-w-[180px] text-xs"
+                              className={cn(
+                                "w-full min-w-[180px] text-xs",
+                                !selection?.supplierId && isIncluded && "border-red-300 dark:border-red-900 shadow-sm shadow-red-100"
+                              )}
                             />
                             {selectedSupplier?.isBest && (
                               <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-[10px] whitespace-nowrap flex-shrink-0 px-1.5 py-0.5">
@@ -176,12 +235,12 @@ export function SelectSupplierPerProductDialog({
                           </div>
                         </TableCell>
                         <TableCell className="px-2 py-2 text-right">
-                          <span className={`font-bold text-xs whitespace-nowrap ${
-                            selectedSupplier?.isBest 
-                              ? 'text-emerald-600 dark:text-emerald-400' 
-                              : 'text-slate-900 dark:text-white'
-                          }`}>
-                            R$ {selectedSupplier?.price.toFixed(2) || '0.00'}
+                          <span className={cn(
+                            "font-bold text-xs whitespace-nowrap",
+                            selectedSupplier?.isBest ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-900 dark:text-white',
+                            !isIncluded && "text-slate-300 dark:text-gray-700"
+                          )}>
+                            {selectedSupplier ? `R$ ${selectedSupplier.price.toFixed(2)}` : '---'}
                           </span>
                         </TableCell>
                       </TableRow>
@@ -227,7 +286,17 @@ export function SelectSupplierPerProductDialog({
               Cancelar
             </Button>
             <Button 
-              onClick={() => onConfirm(selections)}
+              disabled={includedItems.size === 0 || Array.from(includedItems).some(id => !selections.get(id)?.supplierId)}
+              onClick={() => {
+                const finalSelections = new Map<string, { supplierId: string; supplierName: string }>();
+                includedItems.forEach(productId => {
+                  const selection = selections.get(productId);
+                  if (selection && selection.supplierId) {
+                    finalSelections.set(productId, selection);
+                  }
+                });
+                onConfirm(finalSelections);
+              }}
               className="flex-1 bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white"
             >
               Confirmar e Continuar
