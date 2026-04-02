@@ -40,18 +40,27 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
 
     filteredPedidos.forEach(pedido => {
       (pedido.items || []).forEach(item => {
-        const precoInicial = item.maior_valor_cotado || item.unit_price;
+        // LÓGICA DE ECONOMIA REAL NEGOCIADA
+        // Se maior_valor_cotado for igual ao preço final ou nulo, economia é zero (legado)
+        // Se o maior_valor_cotado for absurdo (muito maior) em itens legados, 
+        // mas não temos histórico de lances, preferimos ser conservadores.
+        let precoInicial = item.maior_valor_cotado || item.unit_price;
         const precoFinal = item.unit_price;
+
+        const isKgOrUn = ['kg', 'un', 'unid', 'unidade'].includes((item.unidade_pedida || '').toLowerCase().trim());
+        const showUnitWarning = !isKgOrUn;
         
         let diferenca = precoInicial - precoFinal;
         if (diferenca < 0) diferenca = 0;
         
-        // A economia é (Preço Inicial - Preço Final) * Quantidade
+        // Se a diferença for zero, não houve negociação registrada ou é item legado
         const economia = diferenca * (item.quantity || 1);
         
         if (economia > 0) {
           totalEconomy += economia;
         }
+
+        const reductionPercent = precoInicial > 0 ? ((precoInicial - precoFinal) / precoInicial) * 100 : 0;
 
         itemsList.push({
           productName: item.product_name,
@@ -61,6 +70,8 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
           precoInicial,
           precoFinal,
           economia,
+          reductionPercent,
+          showUnitWarning
         });
       });
     });
@@ -79,12 +90,16 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
     itemsList.forEach((item, idx) => {
       text += `*${idx + 1}. ${item.productName}*\n`;
       text += `- Fornecedor: ${item.supplierName}\n`;
-      text += `- Volume/Peso: ${item.quantity} ${item.unit}\n`;
+      text += `- Volume/Peso: ${item.quantity} ${item.unit}${item.showUnitWarning ? ' (Aferido/KG)' : ''}\n`;
       
       if (item.precoInicial > item.precoFinal) {
-        text += `- Oferta Inicial: ${formatCurrency(item.precoInicial)} 🔥 *Negociado!*\n`;
-        text += `- Preço Fechado: *${formatCurrency(item.precoFinal)}* (-${(( (item.precoInicial - item.precoFinal) / item.precoInicial) * 100).toFixed(0)}%)\n`;
-        text += `- Economia Real: *+ ${formatCurrency(item.economia)}*\n`;
+        text += `- Oferta Inicial (Vencedor): ${formatCurrency(item.precoInicial)}\n`;
+        text += `- Preço Fechado: *${formatCurrency(item.precoFinal)}* (-${item.reductionPercent.toFixed(1)}%)\n`;
+        text += `- Economia Unitária: *${formatCurrency(item.precoInicial - item.precoFinal)} /kg*\n`;
+        text += `- Economia Total: *+ ${formatCurrency(item.economia)}*\n`;
+        if (item.showUnitWarning) {
+          text += `_Obs: Desconto negociado sobre o Peso (KG), não sobre a unidade de embalagem (${item.unit})._\n`;
+        }
       } else {
         text += `- Preço de Fechamento: *${formatCurrency(item.precoFinal)}* (Lance Inicial)\n`;
       }
@@ -160,20 +175,25 @@ export function RelatorioEconomiaDialog({ open, onOpenChange }: RelatorioEconomi
               <th>Produto</th>
               <th>Fornecedor</th>
               <th>Peso/Qtd</th>
-              <th>(R$) Oferta 1º</th>
-              <th>(R$) Fechado</th>
-              <th>Econ. Unitária</th>
+              <th>Oferta 1º (Vencedor)</th>
+              <th>Preço Fechado</th>
+              <th>Redução (%)</th>
+              <th>Econ. Unit.</th>
               <th>Econ. Total</th>
             </tr>
           </thead>
           <tbody>
             ${itemsList.map(item => `
               <tr>
-                <td>${item.productName}</td>
-                <td>${item.supplierName}</td>
-                <td>${item.quantity} ${item.unit}</td>
+                <td style="font-size: 0.85em;">${item.productName}</td>
+                <td style="font-size: 0.8em; color: #666;">${item.supplierName}</td>
+                <td>
+                  ${item.quantity} ${item.unit}
+                  ${item.showUnitWarning ? '<br/><span style="font-size: 8px; color: #e11d48; font-weight: bold;">(DESC. POR KG)</span>' : ''}
+                </td>
                 <td>${formatCurrency(item.precoInicial)}</td>
                 <td><strong>${formatCurrency(item.precoFinal)}</strong></td>
+                <td style="color: #22c55e; font-size: 0.85em;">${item.reductionPercent > 0 ? item.reductionPercent.toFixed(1) + '%' : '-'}</td>
                 <td style="color: #22c55e;">${item.precoInicial > item.precoFinal ? formatCurrency(item.precoInicial - item.precoFinal) : '-'}</td>
                 <td class="${item.economia > 0 ? 'economy' : ''}">${item.economia > 0 ? formatCurrency(item.economia) : '-'}</td>
               </tr>
