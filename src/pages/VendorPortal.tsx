@@ -244,17 +244,24 @@ export default function VendorPortal() {
         }
       }));
 
-      setSuccess(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Evita conflito de DOM: primeiro para o loading, depois transiciona para sucesso
+      setSaving(false);
+      // Aguarda o React finalizar o render antes de trocar a tela inteira
+      requestAnimationFrame(() => {
+        setSuccess(true);
+        // Scroll somente após o React montar a tela de sucesso
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
     } catch (err: any) {
       console.error("Erro ao salvar:", err);
+      setSaving(false);
       toast({
         title: "Falha ao enviar",
         description: "Não foi possível processar sua proposta no momento.",
         variant: "destructive"
       });
-    } finally {
-      setSaving(false);
     }
   };
 
