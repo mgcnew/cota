@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle2, AlertCircle, Send, Quote, Mail, ShieldCheck } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Send, Quote, Mail, ShieldCheck, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// ... existing interfaces ... //
 interface QuoteItem {
   product_id: string;
   product_name: string;
@@ -42,6 +43,7 @@ export default function VendorPortal() {
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +51,12 @@ export default function VendorPortal() {
   const [data, setData] = useState<QuoteData | null>(null);
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isDark, setIsDark] = useState(false);
+
+  // Manipular timer do Splash
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSplash(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Detect browser dark mode preference and react to changes
   useEffect(() => {
@@ -293,13 +301,37 @@ export default function VendorPortal() {
     isDark ? "dark" : ""
   );
 
-  if (loading) {
+  if (showSplash || loading) {
     return (
       <div className={rootClasses}>
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center p-4 transition-colors">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400 mx-auto" />
-            <p className="text-zinc-500 dark:text-zinc-400 font-medium">Carregando cotação segura...</p>
+        <div className="min-h-screen bg-zinc-900 flex flex-col items-center justify-center p-4 transition-colors relative overflow-hidden">
+          {/* Background effects */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-600/10 blur-[120px]" />
+            <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] rounded-full bg-indigo-600/10 blur-[120px]" />
+          </div>
+
+          <div className="relative z-10 flex flex-col items-center animate-in fade-in zoom-in duration-1000">
+            {/* Logo */}
+            <div className="flex z-10 items-center justify-center gap-3 mb-6">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-blue-500/20">
+                <Box className="w-7 h-7 text-white" />
+              </div>
+              <h1 className="text-4xl font-black tracking-tight text-white">
+                Cotá<span className="text-blue-500">JA</span>
+              </h1>
+            </div>
+
+            <p className="text-zinc-400 font-medium tracking-wide text-sm uppercase text-center mb-10">
+              Módulo Fornecedor
+            </p>
+
+            <div className="flex flex-col items-center gap-3">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+              <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em] animate-pulse">
+                Preparando Ambiente Seguro
+              </p>
+            </div>
           </div>
         </div>
       </div>
