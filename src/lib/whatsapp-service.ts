@@ -273,11 +273,17 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   const CLIENT_CNPJ = "63.195.471/0001-12";
 
   // Format items list
+  let totalPedido = 0;
   const itemsList = (order.order_items || [])
     .map((item: any) => {
       const qty = item.quantidade || item.quantity || 1;
       const unit = item.unidade || item.unit || "un";
-      return `  • ${item.product_name || "Produto"} — *${qty} ${unit}*`;
+      const price = Number(item.unit_price) || 0;
+      totalPedido += qty * price;
+      
+      const formattedPrice = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      return `  • ${item.product_name || "Produto"} — *${qty} ${unit} a R$ ${formattedPrice}*`;
     })
     .join("\n");
 
@@ -298,6 +304,10 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   msg += SEP + "\n";
   msg += itemsList + "\n\n";
 
+  if (totalPedido > 0) {
+    msg += `*Valor Total Estimado:* R$ ${totalPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n`;
+  }
+
   if (order.observations) {
     msg += SEP + "\n";
     msg += `📝 *OBSERVAÇÕES*\n`;
@@ -305,8 +315,8 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   }
 
   msg += SEP + "\n";
-  msg += `📅 *PRAZO DE ENTREGA*\n`;
-  msg += `Por favor, informe o *prazo de entrega disponível* para os itens acima.\n\n`;
+  msg += `📅 *CONFIRMAÇÃO E ENTREGA*\n`;
+  msg += `Por favor, nos envie o *comprovante do pedido / espelho da nota* e informe o *prazo de entrega disponível*.\n\n`;
 
   msg += SEP + "\n";
   msg += `Aguardamos seu retorno. Qualquer dúvida estamos à disposição!\n\n`;
