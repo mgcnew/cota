@@ -275,8 +275,8 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   // Format items list
   const itemsList = (order.order_items || [])
     .map((item: any) => {
-      const qty = item.quantidade || 1;
-      const unit = item.unidade || "un";
+      const qty = item.quantidade || item.quantity || 1;
+      const unit = item.unidade || item.unit || "un";
       return `  • ${item.product_name || "Produto"} — *${qty} ${unit}*`;
     })
     .join("\n");
