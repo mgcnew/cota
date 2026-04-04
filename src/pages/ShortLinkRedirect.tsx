@@ -20,7 +20,7 @@ export default function ShortLinkRedirect() {
         const { data, error } = await supabase
           .from("short_links")
           .select("original_tokens")
-          .eq("short_id", id)
+          .eq("id", id)
           .single();
 
         if (error || !data) {
