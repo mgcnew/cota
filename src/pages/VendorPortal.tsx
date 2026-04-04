@@ -265,6 +265,9 @@ export default function VendorPortal() {
 
       // Evita conflito de DOM: primeiro para o loading, depois transiciona para sucesso
       setSaving(false);
+      // Fecha a tela de confirmação para permitir que a tela de sucesso apareça
+      setIsConfirming(false);
+      
       // Aguarda o React finalizar o render antes de trocar a tela inteira
       requestAnimationFrame(() => {
         setSuccess(true);
