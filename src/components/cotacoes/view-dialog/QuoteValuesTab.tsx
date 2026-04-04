@@ -272,7 +272,7 @@ export function QuoteValuesTab({
         
         // Adiciona link do portal se existir token
         if (accessToken) {
-          const baseUrl = window.location.origin;
+          const baseUrl = "https://cotaja.vercel.app";
           const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
           const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
@@ -319,7 +319,7 @@ export function QuoteValuesTab({
       let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
 
       if (accessToken) {
-        const baseUrl = window.location.origin;
+        const baseUrl = "https://cotaja.vercel.app";
         const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
         const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
