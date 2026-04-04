@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -67,13 +67,31 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
   const contact = fullSupplierData?.contact || supplier.supplierName;
   const hasPhone = !!phone;
 
-  const message = useMemo(
-    () => buildPackagingQuoteMessage(supplier.supplierName, contact, items),
-    [supplier.supplierName, contact, items]
-  );
+  const [message, setMessage] = useState<string>("");
 
-  const cleanPhone = phone?.replace(/\D/g, "") || "";
-  const waUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
+  useEffect(() => {
+    const gen = async () => {
+      const accessToken = supplier.supplierId;
+      let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
+      
+      if (accessToken) {
+        const baseUrl = "https://cotaja.vercel.app";
+        const { data: existing } = await supabase
+          .from('short_links')
+          .select('short_id')
+          .eq('original_tokens', accessToken)
+          .maybeSingle();
+
+        if (existing?.short_id) {
+          msg += `\n${baseUrl}/r/${existing.short_id}\n\n`;
+        } else {
+          msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
+        }
+      }
+      setMessage(msg);
+    };
+    gen();
+  }, [contact, items, supplier.supplierId]);
 
   const handleSendWhatsApp = useCallback(async () => {
     if (!phone) return;

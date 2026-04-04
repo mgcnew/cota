@@ -30,8 +30,7 @@ import { SupplierListDesktop } from "@/components/suppliers/SupplierListDesktop"
 import { useSupplierStats } from "@/hooks/useSupplierStats";
 import { supabase } from "@/integrations/supabase/client";
 import { generateWhatsAppMessage } from "@/lib/gemini";
-import type { Supplier } from "@/hooks/useSuppliers";
-import type { Quote } from "@/hooks/useQuotes";
+import type { Quote } from "@/hooks/useCotacoes";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
