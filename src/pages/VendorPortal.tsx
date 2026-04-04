@@ -26,6 +26,7 @@ interface QuoteData {
   company_id: string;
   items: QuoteItem[];
   deadline?: string;
+  created_at?: string;
 }
 
 function parseTokensDefensively(token: string | undefined): string[] {
@@ -42,6 +43,7 @@ export default function VendorPortal() {
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [data, setData] = useState<QuoteData | null>(null);
@@ -113,6 +115,16 @@ export default function VendorPortal() {
                   new Date(qd.deadline).getTime() < new Date(mainQuoteData.deadline).getTime()
                 ) {
                   mainQuoteData.deadline = qd.deadline;
+                }
+              }
+
+              // Assume a data de criação mais antiga
+              if ((qd as any).created_at) {
+                if (
+                  !mainQuoteData.created_at ||
+                  new Date((qd as any).created_at).getTime() < new Date(mainQuoteData.created_at).getTime()
+                ) {
+                  mainQuoteData.created_at = (qd as any).created_at;
                 }
               }
             }
@@ -203,7 +215,7 @@ export default function VendorPortal() {
     ));
   };
 
-  const handleSubmit = async () => {
+  const handleReview = () => {
     if (!token) return;
     
     const hasAnyPrice = items.some(i => i.valor_oferecido !== null && i.valor_oferecido !== "" && Number(i.valor_oferecido?.toString().replace(",", ".")) > 0);
@@ -217,6 +229,13 @@ export default function VendorPortal() {
       return;
     }
 
+    setIsConfirming(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSubmit = async () => {
+    if (!token) return;
+    
     setSaving(true);
     try {
       const tokens = parseTokensDefensively(token);
@@ -299,6 +318,80 @@ export default function VendorPortal() {
             <Button onClick={() => window.location.reload()} className="w-full bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 h-12 rounded-xl font-bold transition-all active:scale-95">
               Tentar Novamente
             </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isConfirming) {
+    return (
+      <div className={rootClasses}>
+        <div className="relative min-h-screen w-full bg-zinc-50 dark:bg-zinc-900 flex flex-col items-center justify-center p-6 md:p-12 transition-colors animate-in fade-in duration-500 overflow-hidden">
+          <div className="w-full max-w-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-3xl p-8 md:p-10 text-center shadow-xl shadow-zinc-200/50 dark:shadow-black/30 space-y-8 relative z-10">
+            
+            <div className="mx-auto w-16 h-16 bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shadow-inner">
+              <ShieldCheck className="h-8 w-8" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+                Confirme as Informações
+              </h2>
+              <p className="text-zinc-500 dark:text-zinc-400 font-medium text-sm">
+                Antes de enviar sua cotação, verifique os dados de faturamento para os quais os pedidos serão emitidos.
+              </p>
+            </div>
+
+            <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl p-6 border border-zinc-100 dark:border-zinc-700/50 text-left space-y-4 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-blue-400" />
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Dados para Faturamento</p>
+                <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">Novo Boi João Dias Mercadão LTDA</p>
+                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">CNPJ: 63.195.471/0001-12</p>
+              </div>
+
+              <div className="h-px w-full bg-zinc-200/60 dark:bg-zinc-700/60" />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Data da Cotação</p>
+                  <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                    {data?.created_at ? new Date(data.created_at).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Prazo de Resposta</p>
+                  <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
+                    {data?.deadline ? new Date(data.deadline).toLocaleDateString('pt-BR') : 'Sem prazo'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsConfirming(false)} 
+                disabled={saving}
+                className="w-full h-12 rounded-xl text-zinc-600 dark:text-zinc-300 font-bold border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+              >
+                Voltar e Editar
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={saving}
+                className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold shadow-lg shadow-blue-600/20"
+              >
+                {saving ? (
+                  <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                ) : (
+                  <span className="flex items-center justify-center gap-2">
+                    <Send className="h-4 w-4" /> Confirmar e Enviar
+                  </span>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -477,7 +570,7 @@ export default function VendorPortal() {
               <span className="text-sm font-black text-blue-400">{itemsFilled} / {items.length} itens</span>
             </div>
             <Button 
-              onClick={handleSubmit} 
+              onClick={handleReview} 
               disabled={saving}
               className="flex-1 sm:flex-none h-10 px-6 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
             >
