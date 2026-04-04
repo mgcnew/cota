@@ -318,6 +318,36 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   msg += `📅 *CONFIRMAÇÃO E ENTREGA*\n`;
   msg += `Por favor, nos envie o *comprovante do pedido / espelho da nota* e informe o *prazo de entrega disponível*.\n\n`;
 
+  // --- LOGIC FOR SHORT LINK ---
+  const originalTokens = `order_${orderId}`;
+  let shortId = "";
+  try {
+    const { data: existingLink } = await supabase
+      .from('short_links')
+      .select('short_id')
+      .eq('original_tokens', originalTokens)
+      .maybeSingle();
+
+    shortId = existingLink?.short_id;
+
+    if (!shortId) {
+      shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await supabase
+        .from('short_links')
+        .insert([{ short_id: shortId, original_tokens: originalTokens }]);
+    }
+  } catch (err) {
+    console.error("Erro gerando short link do pedido", err);
+  }
+
+  if (shortId) {
+    const orderPortalUrl = `https://cotaja.vercel.app/r/${shortId}`;
+    msg += SEP + "\n";
+    msg += `🔗 *ACESSO AO PORTAL DO PEDIDO*\n`;
+    msg += `Acesse o link abaixo para visualizar os itens de forma mais clara e anexar o *comprovante do pedido* diretamente pelo portal:\n`;
+    msg += `${orderPortalUrl}\n\n`;
+  }
+
   msg += SEP + "\n";
   msg += `Aguardamos seu retorno. Qualquer dúvida estamos à disposição!\n\n`;
   msg += `_Atenciosamente,_\n`;

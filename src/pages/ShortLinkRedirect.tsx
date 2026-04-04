@@ -20,7 +20,7 @@ export default function ShortLinkRedirect() {
         const { data, error } = await supabase
           .from("short_links")
           .select("original_tokens")
-          .eq("id", id)
+          .eq("short_id", id)
           .single();
 
         if (error || !data) {
@@ -29,8 +29,15 @@ export default function ShortLinkRedirect() {
           return;
         }
 
-        // Redireciona para a página de resposta original
-        navigate(`/responder/${data.original_tokens}`, { replace: true });
+        const tokens = data.original_tokens || "";
+        
+        if (tokens.startsWith("order_")) {
+          const orderId = tokens.replace("order_", "");
+          navigate(`/pedido/${orderId}`, { replace: true });
+        } else {
+          // Redireciona para a página de resposta original (cotação)
+          navigate(`/responder/${tokens}`, { replace: true });
+        }
       } catch (err) {
         console.error("[ShortLink] Falha crítica:", err);
         setError(true);
