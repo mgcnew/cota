@@ -224,8 +224,39 @@ export function QuoteValuesTab({
     fornecedores.find((f: any) => f.id === selectedSupplier),
     [fornecedores, selectedSupplier]
   );
+  
+  // Função auxiliar para encurtar links
+  const getShortLink = async (originalTokens: string) => {
+    try {
+      // 1. Verifica se já existe um link para esses tokens
+      const { data: existing } = await supabase
+        .from('short_links')
+        .select('id')
+        .eq('original_tokens', originalTokens)
+        .maybeSingle();
+        
+      if (existing) return existing.id;
+      
+      // 2. Se não existir, cria um novo código curto de 6 dígitos
+      const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      
+      const { error } = await supabase
+        .from('short_links')
+        .insert([{ id: shortId, original_tokens: originalTokens }]);
+        
+      if (error) {
+        console.error("[ShortLink] Erro ao criar:", error);
+        return null;
+      }
+      
+      return shortId;
+    } catch (err) {
+      console.error("[ShortLink] Falha:", err);
+      return null;
+    }
+  };
 
-  const handleWhatsApp = async (e: React.MouseEvent, supplierId: string, supplierName: string, phone?: string, accessToken?: string) => {
+  const handleWhatsApp = async (e: React.MouseEvent, supplierId: string, supplierName: string, contactPerson?: string, phone?: string, accessToken?: string) => {
     e.stopPropagation();
     
     // Busca o fornecedor correto pelo ID passado (não depende do state selectedSupplier)
@@ -234,22 +265,32 @@ export function QuoteValuesTab({
     
     if (configured && phone) {
       try {
-        toast({ title: "Enviando cotação para o WhatsApp...", description: `Fornecedor: ${supplierName}` });
-        let msg = await generateWhatsAppMessage(supplierName, products, !!accessToken);
+        toast({ title: "Enviando cotação para o WhatsApp...", description: `Para: ${contactPerson || supplierName}` });
+        // Prioritize the salesperson's name for the message greeting
+        const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
+        let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
         
         // Adiciona link do portal se existir token
         if (accessToken) {
           const baseUrl = window.location.origin;
-          
           const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
           const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
-          msg += `\n${baseUrl}/responder/${tokens}\n\n`;
+          // Tenta encurtar o link
+          console.log('[WhatsApp DEBUG] Gerando link curto para:', tokens);
+          const shortId = await getShortLink(tokens);
+          
+          if (shortId) {
+            msg += `\n${baseUrl}/r/${shortId}\n\n`;
+          } else {
+            // Fallback para link longo se falhar
+            msg += `\n${baseUrl}/responder/${tokens}\n\n`;
+          }
           
           if (useGroupedLink && otherOpenQuotes.length > 0) {
-            msg += `🛡️ *Acesso Unificado:* Criamos um link único reunindo todos os itens que precisamos cotar com você no momento. Suas informações estão totalmente seguras.`;
+            msg += `🛡️ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
           } else {
-            msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
+            msg += `🛡️ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
           }
         }
         
@@ -274,20 +315,27 @@ export function QuoteValuesTab({
       }
     } else {
       console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
-      let msg = await generateWhatsAppMessage(supplierName, products, !!accessToken);
+      const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
+      let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
 
       if (accessToken) {
         const baseUrl = window.location.origin;
-        
         const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
         const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
-        msg += `\n${baseUrl}/responder/${tokens}\n\n`;
+        // Tenta encurtar o link (modo manual)
+        const shortId = await getShortLink(tokens);
+        
+        if (shortId) {
+          msg += `\n${baseUrl}/r/${shortId}\n\n`;
+        } else {
+          msg += `\n${baseUrl}/responder/${tokens}\n\n`;
+        }
         
         if (useGroupedLink && otherOpenQuotes.length > 0) {
-            msg += `🛡️ *Acesso Unificado:* Criamos um link único reunindo todos os itens que precisamos cotar com você no momento. Suas informações estão totalmente seguras.`;
+          msg += `🛡️ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
         } else {
-            msg += `🛡️ *Link Seguro:* Este é o acesso exclusivo para sua empresa e expira em breve. Suas informações estão totalmente seguras e criptografadas.`;
+          msg += `🛡️ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
         }
       }
 
@@ -388,7 +436,7 @@ export function QuoteValuesTab({
                         // Auto-seleciona o fornecedor antes de enviar
                         setSelectedSupplier(fornecedor.id);
                         setEditingProductId(null);
-                        handleWhatsApp(e, fornecedor.id, fornecedor.nome, fornecedor.phone, fornecedor.accessToken);
+                        handleWhatsApp(e, fornecedor.id, fornecedor.nome, fornecedor.contact || fornecedor.contato, fornecedor.phone, fornecedor.accessToken);
                       }}
                       className={cn(
                         "flex items-center justify-center p-1.5 rounded-lg transition-colors border cursor-pointer",

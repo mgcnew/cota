@@ -25,6 +25,7 @@ const Auth = lazy(() => import("./pages/Auth"));
 const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const VendorPortal = lazy(() => import("@/pages/VendorPortal"));
+const ShortLinkRedirect = lazy(() => import("@/pages/ShortLinkRedirect"));
 
 // Prefetch function for probable next pages (Requirements 16.5)
 const prefetchDashboard = () => import("./pages/Dashboard");
@@ -79,6 +80,7 @@ const App = () => {
                 <Route path="/auth" element={<PageWrapper><Auth /></PageWrapper>} />
                 <Route path="/accept-invite" element={<PageWrapper><AcceptInvite /></PageWrapper>} />
                 <Route path="/responder/:token" element={<PageWrapper><VendorPortal /></PageWrapper>} />
+                <Route path="/r/:id" element={<PageWrapper><ShortLinkRedirect /></PageWrapper>} />
 
                 {/* Rotas protegidas - with ErrorBoundary */}
                 <Route

@@ -380,13 +380,13 @@ export async function generateWhatsAppMessage(
   items: any[],
   withPortalLink: boolean = false
 ): Promise<string> {
-  let msg = `*COTAÇÃO*\n\n`;
-  msg += `Olá *${sellerName}*, tudo bem?\n`;
-  msg += `Estamos fazendo as compras da semana. `;
+  let msg = `Olá *${sellerName}*! Como vai?\n\n`;
+  msg += `Estamos abrindo as cotações oficiais desta semana para o *Mercadão Novo Boi João Dias*.\n`;
+  msg += `Queremos garantir as melhores condições com você! 🤝\n\n`;
 
   if (withPortalLink) {
-    msg += `Gostaríamos de receber seus valores através do nosso novo portal oficial de cotações. É mais rápido e seguro.\n\n`;
-    msg += `🚀 *Acesse os itens e responda no link abaixo:*`;
+    msg += `Poderia responder pelo nosso portal oficial? É super rápido, seguro e nos ajuda a agilizar o fechamento do seu pedido hoje.\n\n`;
+    msg += `🚀 *Acesse os itens aqui:*`;
   } else {
     const itemList = items.map((i) => `- ${i.quantidade} ${i.unidade} de ${i.product_name || i.productName || i.produto}`).join('\n');
     msg += `Poderia nos enviar seus valores para os seguintes itens?\n\n${itemList}\n\nObrigado!`;
