@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle2, AlertCircle, Send, Quote, Mail, ShieldCheck, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { sendWhatsApp } from "@/lib/whatsapp-service";
 
 // ... existing interfaces ... //
 interface QuoteItem {
@@ -270,6 +271,12 @@ export default function VendorPortal() {
           if (saveError) throw saveError;
         }
       }));
+
+      // Notificar o setor de compras
+      if (data?.supplier_name) {
+        const notifyMsg = `🔔 *Nova Resposta de Cotação!*\n\nO fornecedor *${data.supplier_name}* acaba de preencher uma cotação no portal.\n\nOs preços já estão disponíveis no sistema para conferência.`;
+        await sendWhatsApp("11966670314", notifyMsg, data.company_id);
+      }
 
       // Evita conflito de DOM: primeiro para o loading, depois transiciona para sucesso
       setSaving(false);

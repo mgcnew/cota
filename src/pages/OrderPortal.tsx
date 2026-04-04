@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+import { sendWhatsApp } from "@/lib/whatsapp-service";
 
 export default function OrderPortal() {
   const { id } = useParams();
@@ -67,6 +68,14 @@ export default function OrderPortal() {
         .eq("id", id);
         
       if (error) throw error;
+      
+      // Notificar o setor de compras
+      if (supplier?.name) {
+        const orderNum = order.id?.substring(0, 8);
+        const notifyMsg = `✅ *Pedido Confirmado!*\n\nO fornecedor *${supplier.name}* acaba de confirmar o recebimento do pedido *#${orderNum}* no portal.\n\nAcompanhe o status no painel administrativo.`;
+        await sendWhatsApp("11966670314", notifyMsg, order.company_id);
+      }
+
       setSuccess(true);
       toast.success("Pedido confirmado com sucesso!");
     } catch (err) {
