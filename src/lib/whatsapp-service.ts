@@ -273,13 +273,11 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   const CLIENT_CNPJ = "63.195.471/0001-12";
 
   // Format items list
-  let totalPedido = 0;
   const itemsList = (order.order_items || [])
     .map((item: any) => {
       const qty = item.quantidade || item.quantity || 1;
       const unit = item.unidade || item.unit || "un";
       const price = Number(item.unit_price) || 0;
-      totalPedido += qty * price;
       
       const formattedPrice = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       
@@ -303,10 +301,6 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   msg += `🛒 *ITENS SOLICITADOS*\n`;
   msg += SEP + "\n";
   msg += itemsList + "\n\n";
-
-  if (totalPedido > 0) {
-    msg += `*Valor Total Estimado:* R$ ${totalPedido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n`;
-  }
 
   if (order.observations) {
     msg += SEP + "\n";

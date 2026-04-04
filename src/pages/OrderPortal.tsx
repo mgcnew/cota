@@ -77,15 +77,6 @@ export default function OrderPortal() {
     }
   };
 
-  const calculateTotal = () => {
-    if (!order?.order_items) return 0;
-    return order.order_items.reduce((acc: number, item: any) => {
-      const qty = item.quantidade || item.quantity || 1;
-      const price = Number(item.unit_price) || 0;
-      return acc + (qty * price);
-    }, 0);
-  };
-
   // Splash Screen Modal (Premium Feel)
   if (showSplash || loading) {
     return (
@@ -255,11 +246,6 @@ export default function OrderPortal() {
                         x R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-black text-sm text-foreground">
-                        R$ {(qty * price).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                      </p>
-                    </div>
                   </div>
                 );
               })}
@@ -274,16 +260,6 @@ export default function OrderPortal() {
                 <p className="text-sm font-medium text-orange-800 dark:text-orange-200">{order.observations}</p>
               </div>
             )}
-          </div>
-          
-          <div className="p-6 bg-muted/30 border-t border-border/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div>
-              <p className="text-xs font-black text-muted-foreground uppercase tracking-widest">Valor Estimado</p>
-              <p className="text-2xl font-black text-brand">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-            </div>
-            <div className="text-xs text-muted-foreground/60 w-full sm:w-auto text-center sm:text-right">
-              Não inclui frete ou impostos se aplicável
-            </div>
           </div>
         </Card>
       </div>
