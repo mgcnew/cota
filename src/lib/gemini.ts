@@ -378,18 +378,31 @@ REGRAS:
 export async function generateWhatsAppMessage(
   sellerName: string,
   items: any[],
-  withPortalLink: boolean = false
+  withPortalLink: boolean = false,
+  isPackaging: boolean = false
 ): Promise<string> {
   let msg = `Olá *${sellerName}*! Como vai?\n\n`;
-  msg += `Estamos abrindo as cotações oficiais desta semana para o *Mercadão Novo Boi João Dias*.\n`;
+  
+  if (isPackaging) {
+    msg += `Estamos abrindo as cotações oficiais de *EMBALAGENS* desta semana para o *Mercadão Novo Boi João Dias*.\n`;
+  } else {
+    msg += `Estamos abrindo as cotações oficiais desta semana para o *Mercadão Novo Boi João Dias*.\n`;
+  }
+  
   msg += `Queremos garantir as melhores condições com você! 🤝\n\n`;
 
   if (withPortalLink) {
     msg += `Poderia responder pelo nosso portal oficial? É super rápido, seguro e nos ajuda a agilizar o fechamento do seu pedido hoje.\n\n`;
     msg += `🚀 *Acesse os itens aqui:*`;
   } else {
-    const itemList = items.map((i) => `- ${i.quantidade} ${i.unidade} de ${i.product_name || i.productName || i.produto}`).join('\n');
-    msg += `Poderia nos enviar seus valores para os seguintes itens?\n\n${itemList}\n\nObrigado!`;
+    msg += `Poderia nos enviar seus valores para os seguintes itens?\n\n`;
+    const itemList = items.map((i) => {
+      const name = i.product_name || i.productName || i.produto || i.packagingName || i.nome;
+      const qty = i.quantidade || i.quantity || "";
+      const unit = i.unidade || i.unit || "";
+      return `- ${qty} ${unit} ${name}`;
+    }).join('\n');
+    msg += `${itemList}\n\nObrigado!`;
   }
   
   return msg;

@@ -11,6 +11,8 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { sendWhatsApp } from "@/lib/whatsapp-service";
+import { generateWhatsAppMessage } from "@/lib/gemini";
+import { supabase } from "@/integrations/supabase/client";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 import type { Supplier } from "@/hooks/useSuppliers";
 
@@ -23,43 +25,30 @@ interface WhatsappTabProps {
   availableSuppliers: Supplier[];
 }
 
-function buildPackagingQuoteMessage(
-  supplierName: string,
-  contactName: string,
-  items: { packagingName: string }[]
-): string {
-  const SEP = "─────────────────────";
-  const itemsList = items
-    .map((i) => `  • ${i.packagingName}`)
-    .join("\n");
+/**
+ * Helper to generate or retrieve a short link
+ */
+async function getShortLink(tokens: string): Promise<string | null> {
+  try {
+    const slug = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const { data: existing } = await supabase
+      .from('short_links')
+      .select('short_id')
+      .eq('original_tokens', tokens)
+      .single();
+    
+    if (existing) return existing.short_id;
 
-  let msg = `Olá, *${contactName || supplierName}*! 👋\n\n`;
-  msg += `Tudo bem?\n\n`;
-  msg += `${SEP}\n`;
-  msg += `📦 *SOLICITAÇÃO DE COTAÇÃO — EMBALAGENS*\n`;
-  msg += `${SEP}\n\n`;
+    const { error } = await supabase
+      .from('short_links')
+      .insert([{ short_id: slug, original_tokens: tokens }]);
 
-  msg += `*Comprador:*\n`;
-  msg += `🏢 ${CLIENT_RAZAO}\n`;
-  msg += `CNPJ: ${CLIENT_CNPJ}\n\n`;
-
-  msg += `*Para:* ${supplierName}\n\n`;
-
-  msg += `${SEP}\n`;
-  msg += `🗂️ *ITENS PARA COTAÇÃO*\n`;
-  msg += `${SEP}\n`;
-  msg += `${itemsList}\n\n`;
-
-  msg += `${SEP}\n`;
-  msg += `Por favor, envie os *preços por unidade* para cada item acima.\n\n`;
-  msg += `Inclua informações como *gramatura*, *dimensões* e *quantidade mínima por embalagem (fardo/caixa)* se aplicável.\n\n`;
-  msg += `${SEP}\n`;
-  msg += `Aguardamos seu retorno. Qualquer dúvida, estamos à disposição! 😊\n\n`;
-  msg += `_Atenciosamente,_\n`;
-  msg += `*${CLIENT_NAME}*\n`;
-  msg += `_Setor de Compras_`;
-
-  return msg;
+    if (error) throw error;
+    return slug;
+  } catch (err) {
+    console.error("Erro ao encurtar link:", err);
+    return null;
+  }
 }
 
 interface SupplierRowProps {
@@ -90,27 +79,59 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
     if (!phone) return;
     setSending(true);
     try {
-      const result = await sendWhatsApp(phone, message) as any;
+      const accessToken = supplier.supplierId; // Usamos o ID do fornecedor como token se não houver um específico
+      let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
+
+      if (accessToken) {
+        const baseUrl = "https://cotaja.vercel.app";
+        const shortId = await getShortLink(accessToken);
+        
+        if (shortId) {
+          msg += `\n${baseUrl}/r/${shortId}\n\n`;
+        } else {
+          msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
+        }
+      }
+
+      const result = await sendWhatsApp(phone, msg) as any;
       if (result?.success) {
         toast({ title: "✅ Enviado via Evolution API!", description: `Mensagem enviada para ${supplier.supplierName}.` });
         onMarkSent(supplier.supplierId);
       } else {
         // Fallback: abre no navegador
+        const cleanPhone = phone.replace(/\D/g, "");
+        const waUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`;
         window.open(waUrl, "_blank");
         onMarkSent(supplier.supplierId);
       }
-    } catch {
-      window.open(waUrl, "_blank");
-      onMarkSent(supplier.supplierId);
+    } catch (err) {
+      console.error("Erro ao enviar:", err);
+      toast({ title: "Erro ao enviar", description: "Tentando abrir WhatsApp manual...", variant: "destructive" });
     } finally {
       setSending(false);
     }
-  }, [phone, message, waUrl, supplier, onMarkSent]);
+  }, [phone, contact, items, supplier, onMarkSent]);
 
-  const handleOpenWa = useCallback(() => {
+  const handleOpenWa = useCallback(async () => {
+    if (!phone) return;
+    const accessToken = supplier.supplierId;
+    let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
+    
+    if (accessToken) {
+      const baseUrl = "https://cotaja.vercel.app";
+      const shortId = await getShortLink(accessToken);
+      if (shortId) {
+        msg += `\n${baseUrl}/r/${shortId}\n\n`;
+      } else {
+        msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
+      }
+    }
+
+    const cleanPhone = phone.replace(/\D/g, "");
+    const waUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(waUrl, "_blank");
     onMarkSent(supplier.supplierId);
-  }, [waUrl, supplier.supplierId, onMarkSent]);
+  }, [phone, contact, items, supplier.supplierId, onMarkSent]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(message);

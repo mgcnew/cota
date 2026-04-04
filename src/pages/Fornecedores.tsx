@@ -28,6 +28,10 @@ import { VirtualList } from "@/components/responsive/VirtualList";
 import { FornecedoresSkeleton, ExpandableSupplierCard } from "@/components/suppliers";
 import { SupplierListDesktop } from "@/components/suppliers/SupplierListDesktop";
 import { useSupplierStats } from "@/hooks/useSupplierStats";
+import { supabase } from "@/integrations/supabase/client";
+import { generateWhatsAppMessage } from "@/lib/gemini";
+import type { Supplier } from "@/hooks/useSuppliers";
+import type { Quote } from "@/hooks/useQuotes";
 import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
@@ -134,22 +138,32 @@ function Fornecedores() {
     invalidateCache();
   };
 
-  // Optimized WhatsApp message generator (memoized) - Requirement 4.3
-  const generateWhatsAppMessage = useCallback((supplierName: string, contactName: string) => {
-    const currentHour = new Date().getHours();
-    let greeting = "";
-    if (currentHour >= 5 && currentHour < 12) {
-      greeting = "Bom dia";
-    } else if (currentHour >= 12 && currentHour < 18) {
-      greeting = "Boa tarde";
-    } else {
-      greeting = "Boa noite";
-    }
-    const message = `${greeting}, ${contactName}! Sou da equipe de compras da empresa. Gostaria de conversar sobre uma oportunidade de negócio com ${supplierName}. Podemos conversar?`;
-    return encodeURIComponent(message);
-  }, []);
+  /**
+   * Helper to generate or retrieve a short link
+   */
+  async function getShortLink(tokens: string): Promise<string | null> {
+    try {
+      const slug = Math.random().toString(36).substring(2, 8).toUpperCase();
+      const { data: existing } = await supabase
+        .from('short_links')
+        .select('short_id')
+        .eq('original_tokens', tokens)
+        .maybeSingle();
+      
+      if (existing) return existing.short_id;
 
-  // Optimized WhatsApp handler with < 100ms response (Requirement 4.3)
+      const { error } = await supabase
+        .from('short_links')
+        .insert([{ short_id: slug, original_tokens: tokens }]);
+
+      if (error) throw error;
+      return slug;
+    } catch (err) {
+      console.error("Erro ao encurtar link:", err);
+      return null;
+    }
+  }
+
   const openWhatsApp = useCallback(async (supplier: Supplier) => {
     if (!canViewSensitiveData) {
       toast({
@@ -169,16 +183,33 @@ function Fornecedores() {
       return;
     }
 
-    // Gerar mensagem
-    const message = decodeURIComponent(generateWhatsAppMessage(supplier.name, supplier.contact));
+    // Busca se existe alguma cotação ativa para este fornecedor para mandar o link
+    const activeQuote = (supplier as any).activeQuotes?.[0];
+    const accessToken = activeQuote?.token || activeQuote?.accessToken || activeQuote?.access_token;
+    
+    // Gerar mensagem persuasiva (Requirement 4.3)
+    let msg = await generateWhatsAppMessage(supplier.contact || supplier.name, [], !!accessToken);
+
+    if (accessToken) {
+      const baseUrl = "https://cotaja.vercel.app";
+      const shortId = await getShortLink(accessToken);
+      
+      if (shortId) {
+        msg += `\n${baseUrl}/r/${shortId}\n\n`;
+      } else {
+        msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
+      }
+      msg += `🛡️ *Link Seguro:* Acesso exclusivo para o Mercadão Novo Boi João Dias.\n\n`;
+    }
+    
+    msg += `Equipe de Compras`;
 
     // Tenta enviar via API de serviço padronizada
     try {
       const { sendWhatsApp } = await import("@/lib/whatsapp-service");
       toast({ title: "Iniciando conversa via WhatsApp..." });
       
-      // Tenta enviar via API (pode falhar se não houver configuração, o que disparará o fallback)
-      const res = await sendWhatsApp(supplier.phone, message) as any;
+      const res = await sendWhatsApp(supplier.phone, msg) as any;
       
       if (res.success) {
         toast({ title: "Mensagem enviada com sucesso!" });
@@ -190,9 +221,9 @@ function Fornecedores() {
 
     // Fallback manual original
     const cleanPhone = supplier.phone.replace(/\D/g, '');
-    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(whatsappUrl, '_blank');
-  }, [canViewSensitiveData, generateWhatsAppMessage]);
+  }, [canViewSensitiveData]);
 
   const handleAddQuote = () => {
     toast({
