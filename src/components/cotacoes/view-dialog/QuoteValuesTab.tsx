@@ -44,7 +44,7 @@ export function QuoteValuesTab({
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const editInputRef = useRef<HTMLInputElement>(null);
-  const [supplierSearch, setSupplierSearch] = useState("");
+  const [productSearch, setProductSearch] = useState("");
   const [showMobileValues, setShowMobileValues] = useState(false);
   
   // Agrupamento de cotações
@@ -215,10 +215,11 @@ export function QuoteValuesTab({
     }, 0);
   }, [products, supplierItems]);
 
-  const filteredSuppliers = useMemo(() => {
-    if (!supplierSearch) return fornecedores;
-    return fornecedores.filter((f: any) => f.nome.toLowerCase().includes(supplierSearch.toLowerCase()));
-  }, [fornecedores, supplierSearch]);
+  const filteredProducts = useMemo(() => {
+    if (!productSearch) return products;
+    // Pega tanto o nome do produto quanto algo relacionado se necessário
+    return products.filter((p: any) => p.product_name.toLowerCase().includes(productSearch.toLowerCase()));
+  }, [products, productSearch]);
 
   const currentSupplier = useMemo(() =>
     fornecedores.find((f: any) => f.id === selectedSupplier),
@@ -362,17 +363,17 @@ export function QuoteValuesTab({
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-brand transition-colors" />
             <Input
-              placeholder="Filtro rápido..."
-              value={supplierSearch}
-              onChange={e => setSupplierSearch(e.target.value)}
+              placeholder="Pesquisar produto..."
+              value={productSearch}
+              onChange={e => setProductSearch(e.target.value)}
               className="pl-9 h-9 rounded-xl text-xs bg-background border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand"
             />
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1.5">
-          {filteredSuppliers.length > 0 ? (
-              filteredSuppliers.map((fornecedor: any) => {
+          {fornecedores.length > 0 ? (
+              fornecedores.map((fornecedor: any) => {
               const total = calcularTotalFornecedor(fornecedor.id);
               const totalInicial = calcularTotalInicialFornecedor(fornecedor.id);
               const economiaTotal = totalInicial > total ? totalInicial - total : 0;
@@ -597,7 +598,7 @@ export function QuoteValuesTab({
             )}
 
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-1 pb-16">
-              {products.map((product: any, index: number) => {
+              {filteredProducts.map((product: any, index: number) => {
                 const currentValue = getCurrentProductValue(selectedSupplier, product.product_id);
                 const isEditing = editingProductId === product.product_id;
                 const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
