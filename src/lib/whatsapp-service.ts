@@ -318,17 +318,17 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   try {
     const { data: existingLink } = await supabase
       .from('short_links')
-      .select('short_id')
+      .select('id')
       .eq('original_tokens', originalTokens)
       .maybeSingle();
 
-    shortId = existingLink?.short_id;
+    shortId = existingLink?.id;
 
     if (!shortId) {
       shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
       await supabase
         .from('short_links')
-        .insert([{ short_id: shortId, original_tokens: originalTokens }]);
+        .insert([{ id: shortId, original_tokens: originalTokens }]);
     }
   } catch (err) {
     console.error("Erro gerando short link do pedido", err);

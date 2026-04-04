@@ -231,18 +231,18 @@ export function QuoteValuesTab({
       // 1. Verifica se já existe um link para esses tokens
       const { data: existing } = await supabase
         .from('short_links')
-        .select('short_id')
+        .select('id')
         .eq('original_tokens', originalTokens)
         .maybeSingle();
         
-      if (existing) return existing.short_id;
+      if (existing) return existing.id;
       
       // 2. Se não existir, cria um novo código curto de 6 dígitos
       const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
       
       const { error } = await supabase
         .from('short_links')
-        .insert([{ short_id: shortId, original_tokens: originalTokens }]);
+        .insert([{ id: shortId, original_tokens: originalTokens }]);
         
       if (error) {
         console.error("[ShortLink] Erro ao criar:", error);

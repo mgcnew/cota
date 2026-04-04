@@ -33,15 +33,15 @@ async function getShortLink(tokens: string): Promise<string | null> {
     const slug = Math.random().toString(36).substring(2, 8).toUpperCase();
     const { data: existing } = await supabase
       .from('short_links')
-      .select('short_id')
+      .select('id')
       .eq('original_tokens', tokens)
       .single();
     
-    if (existing) return existing.short_id;
+    if (existing) return existing.id;
 
     const { error } = await supabase
       .from('short_links')
-      .insert([{ short_id: slug, original_tokens: tokens }]);
+      .insert([{ id: slug, original_tokens: tokens }]);
 
     if (error) throw error;
     return slug;
