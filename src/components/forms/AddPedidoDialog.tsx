@@ -71,6 +71,8 @@ const STEPS = [
 
 import { usePackagingItems } from "@/hooks/usePackagingItems";
 import { useSuppliers } from "@/hooks/useSuppliers";
+import { QuickCreateProduct } from "./QuickCreateProduct";
+import { QuickCreateSupplier } from "./QuickCreateSupplier";
 
 export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [] }: AddPedidoDialogProps) {
   const isMobile = useIsMobile();
@@ -82,7 +84,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   // Data Hooks
   const [searchedProducts, setSearchedProducts] = useState<any[]>([]);
   const [isSearchingProducts, setIsSearchingProducts] = useState(false);
-  const { suppliers, isLoading: suppliersLoading } = useSuppliers();
+  const { suppliers, isLoading: suppliersLoading, refetch: refetchSuppliers } = useSuppliers();
 
   // Form states
   const [activeStep, setActiveStep] = useState("produtos");
@@ -106,6 +108,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const [newProductUnit, setNewProductUnit] = useState("un");
   const [newProductPrice, setNewProductPrice] = useState("");
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
+  const [showQuickCreateProduct, setShowQuickCreateProduct] = useState(false);
+  const [showQuickCreateSupplier, setShowQuickCreateSupplier] = useState(false);
 
   // Refs
   const productSearchRef = useRef<HTMLInputElement>(null);
@@ -194,6 +198,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setSelectedProduct(null);
     setNewProductQuantity("");
     setNewProductPrice("");
+    setShowQuickCreateProduct(false);
+    setShowQuickCreateSupplier(false);
   };
 
   const loadLastPrices = async () => {
@@ -582,14 +588,53 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           {searchedProducts.map((p, i) => renderProductItem(p, i))}
                         </div>
                       )}
-                      {showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && (
+                      {showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
                         <div className={cn(
-                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl p-4 text-center z-[100] animate-in fade-in zoom-in-95",
+                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl p-6 text-center z-[100] animate-in fade-in zoom-in-95",
                           ds.colors.surface.card,
                           ds.colors.border.default,
                           "border"
                         )}>
-                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>Nenhum produto encontrado</p>
+                          <Package className={cn("h-8 w-8 mx-auto mb-2 opacity-20", ds.colors.text.secondary)} />
+                          <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.secondary, "mb-4")}>
+                            Este produto não consta no sistema
+                          </p>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setShowProductSuggestions(false);
+                              setShowQuickCreateProduct(true);
+                            }}
+                            className={cn(ds.components.button.primary, "h-8 text-xs px-4 mx-auto")}
+                          >
+                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                            Cadastrar "{productSearch}"
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Formulário inline de cadastro rápido de produto */}
+                      {showQuickCreateProduct && (
+                        <div className={cn(
+                          "mt-4 p-4 rounded-xl border border-dashed animate-in fade-in slide-in-from-top-2",
+                          ds.colors.border.default
+                        )}>
+                          <QuickCreateProduct
+                            initialName={productSearch}
+                            onCreated={(product) => {
+                              setShowQuickCreateProduct(false);
+                              setSelectedProduct({ id: product.id, name: product.name, unit: product.unit });
+                              setNewProductUnit(product.unit || 'un');
+                              setProductSearch("");
+                              setTimeout(() => {
+                                quantityInputRef.current?.focus();
+                              }, 100);
+                            }}
+                            onCancel={() => {
+                              setShowQuickCreateProduct(false);
+                              productSearchRef.current?.focus();
+                            }}
+                          />
                         </div>
                       )}
                       {isSearchingProducts && (
@@ -856,10 +901,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         </div>
                       )}
 
-                      {/* Mensagem quando não há resultados */}
-                      {supplierSearch && filteredSuppliers.length === 0 && (
+                      {/* Mensagem quando não há resultados - Com opção de cadastro rápido */}
+                      {supplierSearch && filteredSuppliers.length === 0 && !showQuickCreateSupplier && (
                         <div className={cn(
-                          "absolute top-full left-0 right-0 mt-2 z-[100] p-8 rounded-xl border text-center",
+                          "absolute top-full left-0 right-0 mt-2 z-[100] p-8 rounded-xl border text-center animate-in fade-in zoom-in-95",
                           ds.colors.surface.card,
                           ds.colors.border.default,
                           "shadow-xl"
@@ -868,8 +913,42 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           <p className={cn(
                             ds.typography.size.sm,
                             ds.typography.weight.medium,
-                            ds.colors.text.secondary
-                          )}>Nenhum fornecedor encontrado</p>
+                            ds.colors.text.secondary,
+                            "mb-4"
+                          )}>Fornecedor não encontrado</p>
+                          <Button
+                            type="button"
+                            onClick={() => setShowQuickCreateSupplier(true)}
+                            className={cn(ds.components.button.primary, "h-8 text-xs px-4 mx-auto")}
+                          >
+                            <Plus className="h-3.5 w-3.5 mr-1.5" />
+                            Cadastrar "{supplierSearch}"
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Formulário inline de cadastro rápido de fornecedor */}
+                      {showQuickCreateSupplier && (
+                        <div className={cn(
+                          "mt-4 p-4 rounded-xl border border-dashed animate-in fade-in slide-in-from-top-2",
+                          ds.colors.border.default
+                        )}>
+                          <QuickCreateSupplier
+                            initialName={supplierSearch}
+                            onCreated={async (supplier) => {
+                              setShowQuickCreateSupplier(false);
+                              // Refresh da lista de fornecedores
+                              if (refetchSuppliers) await refetchSuppliers();
+                              
+                              // Selecionar o novo fornecedor
+                              setFornecedor(supplier.id);
+                              setSupplierSearch("");
+                            }}
+                            onCancel={() => {
+                              setShowQuickCreateSupplier(false);
+                              supplierSearchRef.current?.focus();
+                            }}
+                          />
                         </div>
                       )}
                     </div>

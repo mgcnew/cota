@@ -78,12 +78,12 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
         const baseUrl = "https://cotaja.vercel.app";
         const { data: existing } = await supabase
           .from('short_links')
-          .select('short_id')
+          .select('id')
           .eq('original_tokens', accessToken)
           .maybeSingle();
 
-        if (existing?.short_id) {
-          msg += `\n${baseUrl}/r/${existing.short_id}\n\n`;
+        if (existing?.id) {
+          msg += `\n${baseUrl}/r/${existing.id}\n\n`;
         } else {
           msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
         }
