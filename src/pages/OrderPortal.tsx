@@ -30,25 +30,28 @@ export default function OrderPortal() {
       if (!id) return;
       
       try {
-        const { data: orderData, error: orderErr } = await supabase
-          .from("orders")
-          .select("*, order_items(*)")
-          .eq("id", id)
-          .single();
+        // Usa a RPC pública (SECURITY DEFINER) para contornar o RLS de usuários anônimos
+        const { data: rawData, error: orderErr } = await supabase
+          .rpc("get_public_order_data", { p_order_id: id });
 
         if (orderErr) throw orderErr;
-
-        if (orderData?.supplier_id) {
-          const { data: supplierData } = await supabase
-            .from("suppliers")
-            .select("*")
-            .eq("id", orderData.supplier_id)
-            .single();
-            
-          setSupplier(supplierData);
+        if (!rawData) {
+          setOrder(null);
+          return;
         }
 
-        setOrder(orderData);
+        // A RPG retorna um JSON com as entidades
+        const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+        const orderData = parsed.order;
+        const itemsData = parsed.order_items || [];
+        const supplierData = parsed.supplier;
+
+        if (orderData) {
+          setOrder({ ...orderData, order_items: itemsData });
+          if (supplierData) {
+            setSupplier(supplierData);
+          }
+        }
       } catch (err) {
         console.error("Erro ao carregar pedido:", err);
       } finally {
@@ -62,12 +65,12 @@ export default function OrderPortal() {
   const handleConfirmOrder = async () => {
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: 'confirmado' })
-        .eq("id", id);
+      // Usa a RPC pública
+      const { data: successData, error } = await supabase
+        .rpc("public_confirm_order", { p_order_id: id });
         
       if (error) throw error;
+      if (!successData) throw new Error("Falha ao confirmar o pedido");
       
       // Notificar o setor de compras
       if (supplier?.name) {
