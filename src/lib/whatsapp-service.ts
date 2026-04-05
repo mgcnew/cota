@@ -23,40 +23,34 @@ export async function sendWhatsApp(
     }
 
     if (targetCompanyId) {
-      const config = await getWhatsAppConfig(targetCompanyId);
-      
-      // Se tiver configuração da Evolution API
-      if (config?.api_url && config?.api_key && config?.instance_name) {
-        const endpoint = `${config.api_url}/message/sendText/${config.instance_name}`;
-        const response = await fetch(endpoint, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": config.api_key
-          },
-          body: JSON.stringify({
-            number: phone.replace(/\D/g, ""), // Número sem formatação para Evolution
-            text: message,
-            delay: 1200,
-            linkPreview: false
-          })
-        });
+      try {
+        const config = await getWhatsAppConfig(targetCompanyId);
+        
+        // Se tiver configuração da Evolution API
+        if (config?.api_url && config?.api_key && config?.instance_name) {
+          const endpoint = `${config.api_url}/message/sendText/${config.instance_name}`;
+          const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": config.api_key
+            },
+            body: JSON.stringify({
+              number: phone.replace(/\D/g, ""), // Número sem formatação para Evolution
+              text: message,
+              delay: 1200,
+              linkPreview: false
+            })
+          });
 
-        const contentType = response.headers.get("content-type");
-        if (response.ok) {
-          return { success: true };
-        } else {
-          let errorMsg = "Erro na Evolution API";
-          if (contentType && contentType.includes("application/json")) {
-            const errData = await response.json().catch(() => ({}));
-            errorMsg = errData.message || errorMsg;
-          } else {
-            const text = await response.text();
-            console.error("Resposta não JSON:", text.substring(0, 100));
-            errorMsg = `Erro na API (Status ${response.status}): Verifique se a URL da instância está correta.`;
+          if (response.ok) {
+            return { success: true };
           }
-          throw new Error(errorMsg);
+          // Caso a Evolution API retorne erro, registraremos no log mas tentaremos o fallback abaixo
+          console.warn("Evolution API falhou, tentando fallback W-API...");
         }
+      } catch (e) {
+        console.error("Erro ao tentar Evolution API:", e);
       }
     }
 
