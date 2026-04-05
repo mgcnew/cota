@@ -69,7 +69,7 @@ export function ConfirmWhatsAppOrderDialog({
       const { data: order } = await supabase.from('orders').select('company_id').eq('id', pedido!.id).single();
       const config = await getWhatsAppConfig(order!.company_id);
       
-      const result = await sendWhatsAppMessage(config, phone, message);
+      const result = await sendWhatsAppMessage(config, phone, message, order!.company_id);
       if (result.success) {
         toast({ title: "✅ Pedido enviado pelo WhatsApp!" });
         onOpenChange(false);

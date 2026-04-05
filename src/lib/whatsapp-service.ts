@@ -6,7 +6,11 @@ const fmtCurrency = (v: number) =>
 
 export const DEFAULT_PHONE_NUMBER = "11966670314";
 
-export async function sendWhatsApp(phone: string, message: string, company_id?: string) {
+export async function sendWhatsApp(
+  phone: string, 
+  message: string, 
+  company_id?: string
+): Promise<{ success: boolean; error?: string }> {
   try {
     let targetCompanyId = company_id;
 
@@ -57,7 +61,8 @@ export async function sendWhatsApp(phone: string, message: string, company_id?: 
     }
 
     // Fallback para W-API.app (Legado ou VITE_ envs)
-    return await sendMsg(phone, message);
+    const result = await sendMsg(phone, message);
+    return { success: result.status === 200 || !!result.success };
   } catch (error: any) {
     console.error("Erro no envio de WhatsApp:", error);
     return { success: false, error: error.message };
@@ -239,14 +244,10 @@ export async function saveWhatsAppConfig(config: {
 export async function sendWhatsAppMessage(
   _config: any,
   phone: string,
-  message: string
+  message: string,
+  company_id?: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    await sendMsg(phone, message);
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
+  return await sendWhatsApp(phone, message, company_id);
 }
 
 export async function generateOrderMessage(orderId: string): Promise<{ message: string; phone: string }> {
