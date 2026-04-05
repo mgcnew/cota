@@ -16,6 +16,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { DeleteQuoteDialogLazy } from "@/components/forms/LazyDialogs";
 import { supabase } from "@/integrations/supabase/client";
+import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 
 // Lazy loading dos componentes das abas
 const QuoteSummaryTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteSummaryTab").then(m => ({ default: m.QuoteSummaryTab })));
@@ -153,6 +154,29 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
     return item?.valor_oferecido || 0;
   }, [supplierItems]);
+
+  const getNormalizedTotalPrice = useCallback((supplierId: string, productId: string): number => {
+    const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
+    if (!item || !item.valor_oferecido || item.valor_oferecido <= 0) return 0;
+
+    const product = products.find((p: any) => p.product_id === productId);
+    if (!product) return 0;
+
+    try {
+      const priceMetadata: PriceMetadata = {
+        valorOferecido: item.valor_oferecido,
+        unidadePreco: item.unidade_preco || 'un',
+        fatorConversao: item.fator_conversao || undefined,
+        quantidadePorEmbalagem: item.quantidade_por_embalagem || undefined,
+      };
+
+      const normalized = normalizePrice(priceMetadata, product.quantidade, product.unidade);
+      return normalized.valorTotal;
+    } catch (error) {
+      console.error('Error normalizing total price:', error);
+      return item.valor_oferecido * product.quantidade;
+    }
+  }, [supplierItems, products]);
 
   const getBestPriceInfoForProduct = useCallback((productId: string) => {
     let bestPrice = Infinity;
@@ -658,6 +682,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   isMobile={isMobile}
                   safeStr={safeStr}
                   getBestPriceInfoForProduct={getBestPriceInfoForProduct}
+                  getNormalizedTotalPrice={getNormalizedTotalPrice}
+                  getSupplierProductValue={getSupplierProductValue}
                   isReadOnly={isFinalizada}
                 />
               )}

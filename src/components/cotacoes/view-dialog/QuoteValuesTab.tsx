@@ -27,6 +27,7 @@ interface QuoteValuesTabProps {
   safeStr: (val: any) => string;
   getBestPriceInfoForProduct: (productId: string) => { bestPrice: number; bestSupplierId: string | null };
   getNormalizedTotalPrice: (supplierId: string, productId: string) => number;
+  getSupplierProductValue: (supplierId: string, productId: string) => number;
   isReadOnly?: boolean;
 }
 
@@ -41,6 +42,7 @@ export function QuoteValuesTab({
   safeStr,
   getBestPriceInfoForProduct,
   getNormalizedTotalPrice,
+  getSupplierProductValue,
   isReadOnly = false
 }: QuoteValuesTabProps) {
   const { toast } = useToast();
@@ -142,10 +144,6 @@ export function QuoteValuesTab({
     fetchOtherQuotes();
   }, [selectedSupplier, quoteId]);
 
-  const getSupplierProductValue = useCallback((supplierId: string, productId: string): number => {
-    const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === productId);
-    return item?.valor_oferecido || 0;
-  }, [supplierItems]);
 
   const getCurrentProductValue = useCallback((supplierId: string, productId: string): number => {
     if (selectedSupplier === supplierId && editedValues[productId] !== undefined) {
@@ -240,7 +238,7 @@ export function QuoteValuesTab({
           fatorConversao: item?.fator_conversao || undefined,
           quantidadePorEmbalagem: item?.quantidade_por_embalagem || undefined,
         }, product.quantidade, product.unidade);
-        return sum + normalized.totalValue;
+        return sum + normalized.valorTotal;
       } catch {
         return sum + (val * product.quantidade);
       }

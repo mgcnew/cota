@@ -327,7 +327,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       };
 
       const normalized = normalizePrice(priceMetadata, product.quantidade, product.unidade);
-      return normalized.totalValue;
+      return normalized.valorTotal;
     } catch (error) {
       console.error('Error normalizing total price:', error);
       return item.valor_oferecido * product.quantidade;
@@ -1582,6 +1582,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           safeStr={safeStr}
                           getBestPriceInfoForProduct={getBestPriceInfoForProduct}
                           getNormalizedTotalPrice={getNormalizedTotalPrice}
+                          getSupplierProductValue={getSupplierProductValue}
                         />
                       </TabsContent>
 
