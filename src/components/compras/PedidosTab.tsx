@@ -210,6 +210,7 @@ function PedidosTab() {
               <SelectContent>
                 <SelectItem value="all">Todos os Status</SelectItem>
                 <SelectItem value="pendente">🟡 Pendentes</SelectItem>
+                <SelectItem value="enviado">🛫 Enviados</SelectItem>
                 <SelectItem value="confirmado">🟢 Confirmados</SelectItem>
                 <SelectItem value="entregue">🔵 Entregues</SelectItem>
                 <SelectItem value="cancelado">🔴 Cancelados</SelectItem>
