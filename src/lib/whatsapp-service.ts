@@ -272,45 +272,11 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   const CLIENT_RAZAO_SOCIAL = "Novo Boi Dias Mercadão Ltda";
   const CLIENT_CNPJ = "63.195.471/0001-12";
 
-  // Format items list
-  const itemsList = (order.order_items || [])
-    .map((item: any) => {
-      const qty = item.quantidade || item.quantity || 1;
-      const unit = item.unidade || item.unit || "un";
-      const price = Number(item.unit_price) || 0;
-      
-      const formattedPrice = price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      
-      return `  • ${item.product_name || "Produto"} — *${qty} ${unit} a R$ ${formattedPrice}*`;
-    })
-    .join("\n");
-
   let msg = `Olá, *${contactName}*! 👋\n\n`;
-  msg += `Tudo bem?\n\n`;
-  msg += SEP + "\n";
-  msg += `📦 *PEDIDO DE COMPRA*\n`;
-  msg += SEP + "\n\n";
-
-  msg += `*Comprador:*\n`;
-  msg += `🏢 ${CLIENT_RAZAO_SOCIAL}\n`;
-  msg += `CNPJ: ${CLIENT_CNPJ}\n\n`;
-
-  msg += `*Pedido para:* ${supplierName}\n\n`;
-
-  msg += SEP + "\n";
-  msg += `🛒 *ITENS SOLICITADOS*\n`;
-  msg += SEP + "\n";
-  msg += itemsList + "\n\n";
-
-  if (order.observations) {
-    msg += SEP + "\n";
-    msg += `📝 *OBSERVAÇÕES*\n`;
-    msg += order.observations + "\n\n";
-  }
-
-  msg += SEP + "\n";
-  msg += `📅 *CONFIRMAÇÃO E ENTREGA*\n`;
-  msg += `Por favor, nos envie o *comprovante do pedido / espelho da nota* e informe o *prazo de entrega disponível*.\n\n`;
+  msg += `Tudo bem? Somos do *Novo Boi João Dias Mercadão Ltda*.\n\n`;
+  msg += `Temos um *novo pedido de compra* para você!\n\n`;
+  msg += `Para garantir que não haja divergências e que você tenha certeza absoluta do que está confirmando (itens, quantidades e valores acordados), geramos um resumo detalhado em nosso portal seguro.\n\n`;
+  msg += `Assim protegemos ambas as partes de erros na separação ou faturamento.\n\n`;
 
   // --- LOGIC FOR SHORT LINK ---
   const originalTokens = `order_${orderId}`;
@@ -336,13 +302,12 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
 
   if (shortId) {
     const orderPortalUrl = `https://cotaja.vercel.app/r/${shortId}`;
-    msg += SEP + "\n";
-    msg += `🔗 *ACESSO AO PORTAL DO PEDIDO*\n`;
-    msg += `Acesse o link abaixo para visualizar os itens de forma mais clara e anexar o *comprovante do pedido* diretamente pelo portal:\n`;
+    msg += `👇 **CLIQUE AQUI PARA VER E CONFIRMAR:**\n`;
     msg += `${orderPortalUrl}\n\n`;
   }
 
   msg += SEP + "\n";
+  msg += `Por favor, pedimos que sempre abra o link e confirme para que fique registrado no nosso sistema e possamos dar andamento na liberação de pagamento e recebimento.\n\n`;
   msg += `Aguardamos seu retorno. Qualquer dúvida estamos à disposição!\n\n`;
   msg += `_Atenciosamente,_\n`;
   msg += `*${CLIENT_RAZAO_SOCIAL}*\n`;

@@ -163,18 +163,23 @@ export default function OrderPortal() {
             <Card className="border-0 shadow-xl shadow-zinc-200/50 dark:shadow-none bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl relative overflow-hidden rounded-3xl">
               <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-brand/80 via-brand to-brand/80"></div>
               <CardContent className="p-8">
-                <div className="flex justify-between items-center pb-6 border-b border-zinc-100 dark:border-zinc-800/50 mb-6">
+                <div className="flex flex-col gap-4 pb-6 border-b border-zinc-100 dark:border-zinc-800/50 mb-6">
                   <div>
-                    <h3 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-1">Empresa</h3>
-                    <p className="font-black text-zinc-900 dark:text-zinc-100">Novo Boi João Dias</p>
+                    <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Empresa</h3>
+                    <p className="font-black text-zinc-900 dark:text-zinc-100">NOVO BOI JOÃO DIAS MERCADÃO LTDA</p>
+                    <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 mt-0.5">CNPJ: 63.195.471/0001-12</p>
+                  </div>
+                  <div className="bg-orange-50 dark:bg-orange-950/20 p-3 rounded-xl border border-orange-100 dark:border-orange-900/30">
+                    <h3 className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1">Endereço de Entrega</h3>
+                    <p className="text-sm font-bold text-orange-900 dark:text-orange-100">Rua Itapaiuna 2919 - Jardim Morumbi</p>
                   </div>
                 </div>
 
                 <div className="space-y-4 mb-8">
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-zinc-500">Status</span>
-                    <span className="text-sm font-black text-brand bg-brand/10 px-3 py-1 rounded-full uppercase tracking-wider">
-                      Confirmado
+                    <span className="text-sm font-black text-brand bg-brand/10 px-3 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4" /> Confirmado
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
@@ -185,11 +190,12 @@ export default function OrderPortal() {
                   </div>
                 </div>
 
-                <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/50 flex justify-center">
-                  <div className="text-center">
-                    <p className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-1">Poder de Operação e Finanças</p>
-                    <p className="text-[10px] text-zinc-500 font-medium font-mono">CotaJA Technology</p>
+                <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800/50 flex flex-col items-center justify-center text-center">
+                  <div className="w-48 h-auto mb-4 opacity-90 mix-blend-multiply dark:mix-blend-normal">
+                    <img src="/images/logo-joao-dias-transparent.png" alt="Novo Boi João Dias" className="w-full h-auto object-contain" />
                   </div>
+                  <h4 className="text-lg font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight mb-2">Muito obrigado pela parceria!</h4>
+                  <p className="text-xs text-zinc-500 font-medium">Seu pedido foi registrado em nosso sistema e será processado para recebimento.</p>
                 </div>
               </CardContent>
             </Card>
