@@ -46,8 +46,14 @@ export function usePedidosStats(pedidos: OrderData[]) {
       items.forEach(item => {
         if (item.quantidade_entregue && item.unit_price && item.valor_unitario_cotado) {
           const diff = item.unit_price - item.valor_unitario_cotado;
+          
+          // Calcular o fator de embalagem implícito
+          const baseUnitCost = (item.valor_unitario_cotado || item.unit_price) * (item.quantidade_pedida || item.quantity || 1);
+          const computedFactor = baseUnitCost > 0 ? Math.round((item.total_price || baseUnitCost) / baseUnitCost) : 1;
+          const fatorEmbalagem = computedFactor < 1 ? 1 : computedFactor;
+
           // Se diff > 0, pagamos mais. Se diff < 0, pagamos menos que o negociado.
-          variacaoFaturadoTotal += diff * item.quantidade_entregue;
+          variacaoFaturadoTotal += diff * item.quantidade_entregue * fatorEmbalagem;
         }
       });
     });

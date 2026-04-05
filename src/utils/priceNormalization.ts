@@ -91,7 +91,10 @@ export function normalizePrice(
   }
   
   // Calculate total price for the purchase quantity
-  const valorTotal = valorUnitario * purchaseQuantity;
+  // If purchase unit is boxes and we have units/box, calculate total: boxes × units/box × price/unit
+  const isBoxPurchase = purchaseUnit.toLowerCase().startsWith('cx');
+  const packagingFactor = (isBoxPurchase && price.quantidadePorEmbalagem) ? price.quantidadePorEmbalagem : 1;
+  const valorTotal = valorUnitario * purchaseQuantity * packagingFactor;
   
   return {
     valorUnitario,
@@ -167,14 +170,15 @@ export function calculateEconomy(
     normalizePrice(price, purchaseQuantity, purchaseUnit)
   );
   
-  // Find min and max unit prices
+  // Find min and max unit prices for meta information
   const unitPrices = normalizedPrices.map((np) => np.valorUnitario);
   const melhorPreco = Math.min(...unitPrices);
   const piorPreco = Math.max(...unitPrices);
   
-  // Economy = (max - min) × quantity
-  // This represents the total savings by choosing the best supplier
-  const economiaReal = (piorPreco - melhorPreco) * purchaseQuantity;
+  // Economy = difference between highest total price offered and lowest total price
+  // This correctly accounts for packaging factors (units per box) if they differ or exist
+  const totalPrices = normalizedPrices.map((np) => np.valorTotal);
+  const economiaReal = Math.max(...totalPrices) - Math.min(...totalPrices);
   
   return {
     economiaReal,

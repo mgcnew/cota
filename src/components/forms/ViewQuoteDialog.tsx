@@ -246,8 +246,9 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   ): {
     unidadePreco: import("@/utils/priceNormalization").PricingUnit | null;
     fatorConversao: number | null;
+    quantidadePorEmbalagem: number | null;
   } => {
-    if (!currentQuote) return { unidadePreco: null, fatorConversao: null };
+    if (!currentQuote) return { unidadePreco: null, fatorConversao: null, quantidadePorEmbalagem: null };
     const supplierItems =
       currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || [];
     const item = supplierItems.find(
@@ -257,6 +258,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     return {
       unidadePreco: item?.unidade_preco || null,
       fatorConversao: item?.fator_conversao || null,
+      quantidadePorEmbalagem: item?.quantidade_por_embalagem || null,
     };
   };
 
@@ -300,6 +302,35 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     } catch (error) {
       console.error('Error normalizing price:', error);
       return item.valor_oferecido;
+    }
+  };
+
+  // Get normalized total price for a supplier item
+  const getNormalizedTotalPrice = (supplierId: string, productId: string): number => {
+    if (!currentQuote) return 0;
+    const supplierItems = currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || [];
+    const item = supplierItems.find(
+      (item: any) => item.supplier_id === supplierId && item.product_id === productId
+    );
+    
+    if (!item || !item.valor_oferecido || item.valor_oferecido <= 0) return 0;
+
+    const product = products.find((p: any) => p.product_id === productId);
+    if (!product) return 0;
+
+    try {
+      const priceMetadata: PriceMetadata = {
+        valorOferecido: item.valor_oferecido,
+        unidadePreco: item.unidade_preco || 'un',
+        fatorConversao: item.fator_conversao || undefined,
+        quantidadePorEmbalagem: item.quantidade_por_embalagem || undefined,
+      };
+
+      const normalized = normalizePrice(priceMetadata, product.quantidade, product.unidade);
+      return normalized.totalValue;
+    } catch (error) {
+      console.error('Error normalizing total price:', error);
+      return item.valor_oferecido * product.quantidade;
     }
   };
 
@@ -534,9 +565,10 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       let total = 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       products.forEach((product: any) => {
-        const value = getSupplierProductValue(fornecedor.id, product.product_id);
-        if (value > 0) {
-          total += value;
+        // Use normalized total price to account for quantities and packaging
+        const productTotal = getNormalizedTotalPrice(fornecedor.id, product.product_id);
+        if (productTotal > 0) {
+          total += productTotal;
         }
       });
 
@@ -1527,6 +1559,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           currentQuote={currentQuote}
                           bestSupplier={bestSupplier}
                           getSupplierProductValue={getSupplierProductValue}
+                          getNormalizedTotalPrice={getNormalizedTotalPrice}
                         />
                       </TabsContent>
 
@@ -1538,7 +1571,9 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           supplierItems={currentQuote._supplierItems || currentQuote._raw?.quote_supplier_items || []}
                           onUpdateSupplierProductValue={(params: any) => {
                             if (onUpdateSupplierProductValue) {
-                              return onUpdateSupplierProductValue(params.quoteId, params.supplierId, params.productId, params.newValue);
+                              return onUpdateSupplierProductValue(params.quoteId, params.supplierId, params.productId, params.newValue, {
+                                quantidadePorEmbalagem: params.quantidadePorEmbalagem
+                              });
                             }
                             return Promise.resolve();
                           }}
@@ -1546,6 +1581,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           isMobile={isMobile}
                           safeStr={safeStr}
                           getBestPriceInfoForProduct={getBestPriceInfoForProduct}
+                          getNormalizedTotalPrice={getNormalizedTotalPrice}
                         />
                       </TabsContent>
 
@@ -1560,6 +1596,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                           handleConvertToOrder={handleConvertToOrder}
                           isUpdating={isUpdating}
                           getNormalizedUnitPrice={getNormalizedUnitPrice}
+                          getNormalizedTotalPrice={getNormalizedTotalPrice}
                           getSupplierItemPricingMetadata={getSupplierItemPricingMetadata}
                         />
                       </TabsContent>

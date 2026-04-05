@@ -18,6 +18,7 @@ interface QuoteComparisonTabProps {
     isUpdating: boolean;
     readOnly?: boolean;
     getNormalizedUnitPrice?: (supplierId: string, productId: string) => number;
+    getNormalizedTotalPrice?: (supplierId: string, productId: string) => number;
     getSupplierItemPricingMetadata?: (supplierId: string, productId: string) => { unidadePreco: any; fatorConversao: number | null };
 }
 
@@ -31,6 +32,7 @@ export function QuoteComparisonTab({
     isUpdating,
     readOnly = false,
     getNormalizedUnitPrice,
+    getNormalizedTotalPrice,
     getSupplierItemPricingMetadata
 }: QuoteComparisonTabProps) {
     // Helper function to get normalized unit price with fallback
@@ -40,6 +42,15 @@ export function QuoteComparisonTab({
         }
         // Fallback: return original value if normalized price function not provided
         return getSupplierProductValue(supplierId, productId);
+    };
+
+    // Helper function to get normalized total price with fallback
+    const getNormalizedTotal = (supplierId: string, productId: string, quantity: number): number => {
+        if (getNormalizedTotalPrice) {
+            return getNormalizedTotalPrice(supplierId, productId);
+        }
+        // Fallback: value * quantity
+        return getSupplierProductValue(supplierId, productId) * quantity;
     };
 
     // Helper function to get pricing metadata with fallback
@@ -106,10 +117,8 @@ export function QuoteComparisonTab({
                                         </div>
                                     </th>
                                     {currentQuote?.fornecedoresParticipantes.map(fornecedor => {
-                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         const totalValue = products.reduce((sum: number, product: any) => {
-                                            const value = getSupplierProductValue(fornecedor.id, product.product_id);
-                                            return sum + (value || 0);
+                                            return sum + getNormalizedTotal(fornecedor.id, product.product_id, product.quantidade);
                                         }, 0);
                                         const isWinning = bestSupplier?.id === fornecedor.id;
 

@@ -45,7 +45,8 @@ BEGIN
                     'unidade', qi.unidade,
                     'valor_oferecido', qsi.valor_oferecido,
                     'observacoes', qsi.observacoes,
-                    'updated_by_type', qsi.updated_by_type
+                    'updated_by_type', qsi.updated_by_type,
+                    'quantidade_por_caixa', qsi.quantidade_por_embalagem
                 )
             )
             FROM quote_items qi
@@ -76,6 +77,7 @@ DECLARE
     v_old_valor NUMERIC;
     v_valor_inicial NUMERIC;
     v_price_history JSONB;
+    v_qtd_caixa NUMERIC;
 BEGIN
     -- Validar token
     SELECT q.id, qs.supplier_id, q.status
@@ -103,6 +105,12 @@ BEGIN
           AND supplier_id = v_supplier_id 
           AND product_id = (item->>'product_id')::UUID;
 
+        -- Parse quantidade_por_caixa from JSON (may be null)
+        v_qtd_caixa := NULL;
+        IF item->>'quantidade_por_caixa' IS NOT NULL AND item->>'quantidade_por_caixa' != '' THEN
+            v_qtd_caixa := (item->>'quantidade_por_caixa')::NUMERIC;
+        END IF;
+
         -- Update history if value changed
         IF v_old_valor IS NOT NULL AND v_old_valor > 0 AND v_old_valor != (item->>'valor_oferecido')::NUMERIC THEN
           v_price_history := COALESCE(v_price_history, '[]'::JSONB) || jsonb_build_object(
@@ -127,6 +135,7 @@ BEGIN
             price_history,
             observacoes, 
             updated_by_type,
+            quantidade_por_embalagem,
             updated_at
         ) VALUES (
             v_quote_id,
@@ -137,6 +146,7 @@ BEGIN
             v_price_history,
             item->>'observacoes',
             'fornecedor',
+            v_qtd_caixa,
             NOW()
         )
         ON CONFLICT (quote_id, supplier_id, product_id) 
@@ -146,6 +156,7 @@ BEGIN
             price_history = EXCLUDED.price_history,
             observacoes = EXCLUDED.observacoes,
             updated_by_type = 'fornecedor',
+            quantidade_por_embalagem = COALESCE(EXCLUDED.quantidade_por_embalagem, quote_supplier_items.quantidade_por_embalagem),
             updated_at = NOW();
     END LOOP;
 

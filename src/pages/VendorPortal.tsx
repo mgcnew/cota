@@ -16,6 +16,7 @@ interface QuoteItem {
   unidade: string;
   valor_oferecido: string | number | null;
   observacoes: string | null;
+  quantidade_por_caixa: string;
   _token?: string;
   _quote_id?: string;
 }
@@ -146,7 +147,8 @@ export default function VendorPortal() {
                 _quote_id: qd.quote_id,
                 valor_oferecido: item.valor_oferecido 
                   ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : ""
+                  : "",
+                quantidade_por_caixa: item.quantidade_por_caixa ? String(item.quantidade_por_caixa) : ""
               }));
               allItems.push(...formattedItems);
             }
@@ -255,10 +257,12 @@ export default function VendorPortal() {
           .map(i => {
             // Converte "1.250,50" -> 1250.5
             const numValue = parseFloat(i.valor_oferecido!.toString().replace(/\./g, "").replace(",", "."));
+            const qtdCaixa = i.quantidade_por_caixa ? parseInt(i.quantidade_por_caixa, 10) : null;
             return {
               product_id: i.product_id,
               valor_oferecido: numValue,
-              observacoes: i.observacoes || ""
+              observacoes: i.observacoes || "",
+              quantidade_por_caixa: (qtdCaixa && qtdCaixa > 0) ? qtdCaixa : null
             };
           });
 
@@ -565,16 +569,36 @@ export default function VendorPortal() {
                       <input
                         type="text"
                         inputMode="decimal"
-                        placeholder={item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG" : "Preço Unitário"}
+                        placeholder={item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG ou UN" : "Preço Unitário"}
                         className="w-full pl-9 h-10 text-sm font-bold bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
                         value={item.valor_oferecido || ""}
                         onChange={(e) => handlePriceChange(item.product_id, item._token, e.target.value)}
                       />
                     </div>
                     {item.unidade?.toUpperCase().startsWith('CX') && (
-                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold px-1">
-                        * Informe o valor do QUILO ou da UNIDADE
-                      </span>
+                      <>
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold px-1">
+                          * Informe o valor do QUILO ou da UNIDADE
+                        </span>
+                        <div className="relative group/qty">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-300 dark:text-zinc-600 font-bold text-[10px] group-focus-within/qty:text-blue-600 dark:group-focus-within/qty:text-blue-400 transition-colors">QTD</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="Qtd por caixa (opcional)"
+                            className="w-full pl-11 h-9 text-xs font-bold bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/50 dark:border-amber-800/30 rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500 dark:focus:border-amber-400 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                            value={item.quantidade_por_caixa || ""}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/\D/g, "");
+                              setItems(items.map(it =>
+                                (it.product_id === item.product_id && it._token === item._token)
+                                  ? { ...it, quantidade_por_caixa: val }
+                                  : it
+                              ));
+                            }}
+                          />
+                        </div>
+                      </>
                     )}
                   </div>
                   <input

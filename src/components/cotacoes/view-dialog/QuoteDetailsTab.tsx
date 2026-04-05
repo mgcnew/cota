@@ -10,25 +10,26 @@ interface QuoteDetailsTabProps {
     currentQuote: Quote | null;
     bestSupplier: { id: string; nome: string; totalValue: number } | null;
     getSupplierProductValue: (supplierId: string, productId: string) => number;
+    getNormalizedTotalPrice: (supplierId: string, productId: string) => number;
 }
 
 export function QuoteDetailsTab({
     products,
     currentQuote,
     bestSupplier,
-    getSupplierProductValue
+    getSupplierProductValue,
+    getNormalizedTotalPrice
 }: QuoteDetailsTabProps) {
     if (!currentQuote) return null;
 
-    // Calcula os totais de todos os fornecedores que responderam para traçar a estatística da IA multiplicando pela quantidade
+    // Calcula os totais de todos os fornecedores que responderam para traçar a estatística da IA
     const supplierTotals = currentQuote.fornecedoresParticipantes
         .filter(f => f.status === 'respondido')
         .map(fornecedor => {
             let total = 0;
             products.forEach(p => {
-                const value = getSupplierProductValue(fornecedor.id, p.product_id) || 0;
-                const qtd = Number(p.quantidade) || 1;
-                total += value * qtd;
+                const productTotal = getNormalizedTotalPrice(fornecedor.id, p.product_id);
+                total += productTotal;
             });
             return { ...fornecedor, total };
         })
@@ -178,9 +179,7 @@ export function QuoteDetailsTab({
                                         {currentQuote.fornecedoresParticipantes.map((fornecedor, index) => {
                                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                             const totalValue = products.reduce((sum: number, product: any) => {
-                                                const value = getSupplierProductValue(fornecedor.id, product.product_id);
-                                                const qtd = Number(product.quantidade) || 1;
-                                                return sum + ((value || 0) * qtd);
+                                                return sum + getNormalizedTotalPrice(fornecedor.id, product.product_id);
                                             }, 0);
                                             const isBest = bestSupplier && fornecedor.id === bestSupplier.id;
 

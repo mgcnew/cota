@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { PricingUnit } from '@/utils/priceNormalization';
+import { PricingUnit, normalizePrice } from '@/utils/priceNormalization';
 import { formatLocalDate } from '@/lib/utils';
 
 export interface FornecedorParticipante {
@@ -471,7 +471,9 @@ export function useCotacoes() {
             price_history: newHistory,
             unidade_preco: unidadePreco ?? null,
             fator_conversao: fatorConversao ?? null,
-            quantidade_por_embalagem: quantidadePorEmbalagem ?? null,
+            // Only overwrite quantidade_por_embalagem if explicitly provided
+            // This prevents buyer edits from erasing supplier-provided values
+            ...(quantidadePorEmbalagem !== undefined ? { quantidade_por_embalagem: quantidadePorEmbalagem } : {}),
             brand_id: brandId ?? null,
             updated_by_type: 'comprador'
           })
@@ -768,17 +770,33 @@ export function useCotacoes() {
           .map((item: any) => {
             const supplierItem = supplierItems.find((si: any) => si.product_id === item.product_id);
             const valorEscolhido = supplierItem?.valor_oferecido || 0;
-            
-            // Economia Real: Comparar o valor final com o primeiro valor que este fornecedor específico mandou (link ou manual inicial)
             const valorInicialVencedor = Number(supplierItem?.valor_inicial) || valorEscolhido;
-            const diferencaPorUnidade = valorInicialVencedor - valorEscolhido;
+            const unidadePreco = (supplierItem?.unidade_preco || item.unidade || 'un') as PricingUnit;
             const quantidade = parseFloat(item.quantidade?.toString().replace(',', '.') || '0') || 1;
             
-            // Economia estimada = diferença × quantidade pedida
-            const economiaItem = diferencaPorUnidade * quantidade;
+            // Usar o utilitário de normalização para o valor escolhido
+            const normalizedEscolhido = normalizePrice({
+              valorOferecido: valorEscolhido,
+              unidadePreco: unidadePreco,
+              fatorConversao: supplierItem?.fator_conversao || supplierItem?.quantidade_por_embalagem || undefined,
+              quantidadePorEmbalagem: supplierItem?.quantidade_por_embalagem || undefined,
+            }, quantidade, item.unidade || 'un');
+
+            // Usar o utilitário de normalização para o valor inicial (se houver)
+            const normalizedInicial = normalizePrice({
+              valorOferecido: valorInicialVencedor,
+              unidadePreco: unidadePreco,
+              fatorConversao: supplierItem?.fator_conversao || supplierItem?.quantidade_por_embalagem || undefined,
+              quantidadePorEmbalagem: supplierItem?.quantidade_por_embalagem || undefined,
+            }, quantidade, item.unidade || 'un');
+
+            // Economia estimada = diferença entre os totais normalizados
+            const economiaItem = normalizedInicial.valorTotal - normalizedEscolhido.valorTotal;
             economiaEstimada += economiaItem;
-            diferencaPrecoTotal += diferencaPorUnidade;
-            totalValue += valorEscolhido * quantidade;
+            
+            // Valor total do item no pedido (já normalizado para refletir o custo real)
+            const itemTotalPrice = normalizedEscolhido.valorTotal;
+            totalValue += itemTotalPrice;
             
             return {
               order_id: '', // será preenchido depois
@@ -787,7 +805,7 @@ export function useCotacoes() {
               quantity: quantidade,
               unit: item.unidade || 'un',
               unit_price: valorEscolhido,
-              total_price: valorEscolhido * quantidade,
+              total_price: itemTotalPrice,
               // Novos campos para economia
               quantidade_pedida: quantidade,
               unidade_pedida: item.unidade || 'un',

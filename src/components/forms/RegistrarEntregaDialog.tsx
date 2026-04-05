@@ -35,6 +35,7 @@ interface ItemEntrega {
   valorUnitario: number; // Preço acordado originalmente
   valorFaturado: number; // Preço real cobrado na NFe
   maiorValor: number; // Teto para cálculo da economia
+  fatorEmbalagem: number; // Fator de caixa (implícito pelo total_price vs unit_price)
 }
 
 export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
@@ -45,17 +46,26 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   useEffect(() => {
     if (pedido?.items) {
       setItensEntrega(
-        pedido.items.map(item => ({
-          itemId: item.id || '',
-          productName: item.product_name,
-          quantidadePedida: item.quantidade_pedida || item.quantity,
-          unidadePedida: item.unidade_pedida || 'un',
-          quantidadeEntregue: item.quantidade_entregue || 0,
-          unidadeEntregue: item.unidade_entregue || 'kg',
-          valorUnitario: item.valor_unitario_cotado || item.unit_price,
-          valorFaturado: item.unit_price, // Iniciamos com o valor que estava no pedido (que já pode ter sido alterado da cotação)
-          maiorValor: item.maior_valor_cotado || item.unit_price,
-        }))
+        pedido.items.map(item => {
+          const quantidadePedida = item.quantidade_pedida || item.quantity || 1;
+          const numUnit = Number(item.valor_unitario_cotado || item.unit_price) || 1;
+          const baseUnitCost = numUnit * quantidadePedida;
+          const computedFactor = baseUnitCost > 0 ? Math.round(Number(item.total_price || baseUnitCost) / baseUnitCost) : 1;
+          const fatorEmbalagem = computedFactor < 1 ? 1 : computedFactor;
+
+          return {
+            itemId: item.id || '',
+            productName: item.product_name,
+            quantidadePedida: item.quantidade_pedida || item.quantity,
+            unidadePedida: item.unidade_pedida || 'un',
+            quantidadeEntregue: item.quantidade_entregue || 0,
+            unidadeEntregue: item.unidade_entregue || 'kg',
+            valorUnitario: item.valor_unitario_cotado || item.unit_price,
+            valorFaturado: item.unit_price, // Iniciamos com o valor que estava no pedido (que já pode ter sido alterado da cotação)
+            maiorValor: item.maior_valor_cotado || item.unit_price,
+            fatorEmbalagem,
+          };
+        })
       );
     }
   }, [pedido]);
@@ -64,7 +74,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const economiaEsperada = useMemo(() => {
     return itensEntrega.reduce((sum, item) => {
       if (item.maiorValor > item.valorUnitario) {
-        return sum + ((item.maiorValor - item.valorUnitario) * item.quantidadePedida);
+        return sum + ((item.maiorValor - item.valorUnitario) * item.quantidadePedida * item.fatorEmbalagem);
       }
       return sum;
     }, 0);
@@ -75,7 +85,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     return itensEntrega.reduce((sum, item) => {
       if (item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado) {
         const diferenca = item.maiorValor - item.valorFaturado;
-        return sum + (diferenca * item.quantidadeEntregue);
+        return sum + (diferenca * item.quantidadeEntregue * item.fatorEmbalagem);
       }
       return sum;
     }, 0);
@@ -84,7 +94,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   // Valor total baseado na quantidade entregue multiplicada pelo valor REAL da Nfe
   const valorTotalEntregue = useMemo(() => {
     return itensEntrega.reduce((sum, item) => {
-      return sum + (item.quantidadeEntregue * item.valorFaturado);
+      return sum + (item.quantidadeEntregue * item.valorFaturado * item.fatorEmbalagem);
     }, 0);
   }, [itensEntrega]);
 
@@ -116,6 +126,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
         quantidadeEntregue: item.quantidadeEntregue,
         unidadeEntregue: item.unidadeEntregue,
         valorFaturado: item.valorFaturado,
+        fatorEmbalagem: item.fatorEmbalagem,
       }));
 
     if (itensParaAtualizar.length === 0) return;
@@ -230,7 +241,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                       </p>
                       {veioDeCotacao && item.maiorValor > item.valorUnitario && (
                         <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                          Econ. R$ {(item.maiorValor - item.valorUnitario).toFixed(2)}/{item.unidadeEntregue}
+                          Econ. R$ {((item.maiorValor - item.valorUnitario) * item.fatorEmbalagem).toFixed(2)}/{item.unidadeEntregue}
                         </p>
                       )}
                     </div>

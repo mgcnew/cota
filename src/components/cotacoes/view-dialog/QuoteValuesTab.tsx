@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
+import { Package } from "lucide-react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
 import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { LastPaidPricesTooltip } from "./LastPaidPricesTooltip";
 import { generateWhatsAppMessage } from "@/lib/gemini";
 import { sendWhatsAppMessage, isWhatsAppConfigured } from "@/lib/whatsapp-service";
+import { normalizePrice } from "@/utils/priceNormalization";
 
 interface QuoteValuesTabProps {
   products: any[];
@@ -24,6 +26,7 @@ interface QuoteValuesTabProps {
   isMobile: boolean;
   safeStr: (val: any) => string;
   getBestPriceInfoForProduct: (productId: string) => { bestPrice: number; bestSupplierId: string | null };
+  getNormalizedTotalPrice: (supplierId: string, productId: string) => number;
   isReadOnly?: boolean;
 }
 
@@ -37,6 +40,7 @@ export function QuoteValuesTab({
   isMobile,
   safeStr,
   getBestPriceInfoForProduct,
+  getNormalizedTotalPrice,
   isReadOnly = false
 }: QuoteValuesTabProps) {
   const { toast } = useToast();
@@ -46,6 +50,7 @@ export function QuoteValuesTab({
   const editInputRef = useRef<HTMLInputElement>(null);
   const [productSearch, setProductSearch] = useState("");
   const [showMobileValues, setShowMobileValues] = useState(false);
+  const [editedQtdPerBox, setEditedQtdPerBox] = useState<Record<string, string>>({});
   
   // Agrupamento de cotações
   const [otherOpenQuotes, setOtherOpenQuotes] = useState<any[]>([]);
@@ -157,11 +162,18 @@ export function QuoteValuesTab({
       ? currentValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
       : "";
     setEditedValues(prev => ({ ...prev, [productId]: formatted }));
-  }, [isReadOnly]);
+    // Load existing qtd/box if available
+    const existingItem = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === productId);
+    const existingQtd = existingItem?.quantidade_por_embalagem;
+    if (existingQtd && existingQtd > 0) {
+      setEditedQtdPerBox(prev => ({ ...prev, [productId]: String(Math.floor(existingQtd)) }));
+    }
+  }, [isReadOnly, supplierItems, selectedSupplier]);
 
   const handleSaveEdit = useCallback(async (productId: string, nextProductId?: string) => {
     if (selectedSupplier && editedValues[productId] !== undefined) {
       const newValue = parseBRLToNumber(editedValues[productId]);
+      const qtdPerBox = editedQtdPerBox[productId] ? parseInt(editedQtdPerBox[productId], 10) : undefined;
 
       // Atualização otimista: avança para o próximo campo IMEDIATAMENTE
       if (nextProductId) {
@@ -171,9 +183,14 @@ export function QuoteValuesTab({
           ? nextVal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           : "";
         setEditedValues({ [nextProductId]: formatted });
+        // Load existing qtd/box for next product
+        const existingItem = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === nextProductId);
+        const existingQtd = existingItem?.quantidade_por_embalagem;
+        setEditedQtdPerBox(existingQtd && existingQtd > 0 ? { [nextProductId]: String(Math.floor(existingQtd)) } : {});
       } else {
         setEditingProductId(null);
         setEditedValues({});
+        setEditedQtdPerBox({});
       }
 
       // Salva no banco em background (sem bloquear a UI)
@@ -182,18 +199,20 @@ export function QuoteValuesTab({
           quoteId,
           supplierId: selectedSupplier,
           productId,
-          newValue
+          newValue,
+          quantidadePorEmbalagem: (qtdPerBox && qtdPerBox > 0) ? qtdPerBox : undefined
         });
         onRefresh();
       } catch {
         toast({ title: "Erro ao salvar valor", variant: "destructive" });
       }
     }
-  }, [selectedSupplier, editedValues, quoteId, onUpdateSupplierProductValue, onRefresh, toast, getSupplierProductValue]);
+  }, [selectedSupplier, editedValues, editedQtdPerBox, quoteId, onUpdateSupplierProductValue, onRefresh, toast, getSupplierProductValue, supplierItems]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingProductId(null);
     setEditedValues({});
+    setEditedQtdPerBox({});
   }, []);
 
 
@@ -204,14 +223,27 @@ export function QuoteValuesTab({
 
   const calcularTotalFornecedor = useCallback((supplierId: string) => {
     return products.reduce((sum: number, product: any) =>
-      sum + getSupplierProductValue(supplierId, product.product_id), 0);
-  }, [products, getSupplierProductValue]);
+      sum + getNormalizedTotalPrice(supplierId, product.product_id), 0);
+  }, [products, getNormalizedTotalPrice]);
 
   const calcularTotalInicialFornecedor = useCallback((supplierId: string) => {
     return products.reduce((sum: number, product: any) => {
       const item = supplierItems.find((i: any) => i?.supplier_id === supplierId && i?.product_id === product.product_id);
       const val = Number(item?.valor_inicial) || Number(item?.valor_oferecido) || 0;
-      return sum + val;
+      
+      if (val === 0) return sum;
+
+      try {
+        const normalized = normalizePrice({
+          valorOferecido: val,
+          unidadePreco: item?.unidade_preco || 'un',
+          fatorConversao: item?.fator_conversao || undefined,
+          quantidadePorEmbalagem: item?.quantidade_por_embalagem || undefined,
+        }, product.quantidade, product.unidade);
+        return sum + normalized.totalValue;
+      } catch {
+        return sum + (val * product.quantidade);
+      }
     }, 0);
   }, [products, supplierItems]);
 
@@ -623,27 +655,58 @@ export function QuoteValuesTab({
                           <p className="text-[10px] font-bold text-zinc-500 uppercase mt-0.5">{product.quantidade} {product.unidade}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="relative group/input">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 group-focus-within/input:text-brand transition-colors">R$</span>
-                            <Input
-                              ref={editInputRef}
-                              type="text"
-                              inputMode="numeric"
-                              value={editedValues[product.product_id] || ""}
-                              onChange={(e) => handleInputChange(product.product_id, e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === 'Tab') {
-                                  e.preventDefault();
-                                  const nextProduct = products[index + 1];
-                                  handleSaveEdit(product.product_id, nextProduct?.product_id);
-                                }
-                                if (e.key === 'Escape') handleCancelEdit();
-                              }}
-                              className={cn(
-                                designSystem.components.input.root,
-                                "w-36 h-10 pl-9 rounded-xl text-center font-black text-sm border-brand/30 focus:border-brand focus:ring-1 focus:ring-brand/20"
-                              )}
-                            />
+                          <div className="flex flex-col gap-1">
+                            <div className="relative group/input">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 group-focus-within/input:text-brand transition-colors">R$</span>
+                              <Input
+                                ref={editInputRef}
+                                type="text"
+                                inputMode="numeric"
+                                value={editedValues[product.product_id] || ""}
+                                onChange={(e) => handleInputChange(product.product_id, e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === 'Tab') {
+                                    e.preventDefault();
+                                    const nextProduct = products[index + 1];
+                                    handleSaveEdit(product.product_id, nextProduct?.product_id);
+                                  }
+                                  if (e.key === 'Escape') handleCancelEdit();
+                                }}
+                                className={cn(
+                                  designSystem.components.input.root,
+                                  "w-36 h-10 pl-9 rounded-xl text-center font-black text-sm border-brand/30 focus:border-brand focus:ring-1 focus:ring-brand/20"
+                                )}
+                              />
+                            </div>
+                            {product.unidade?.toUpperCase().startsWith('CX') && (
+                              <div className="relative group/qtd">
+                                <span className="absolute left-2 top-1/2 -translate-y-1/2">
+                                  <Package className="h-3 w-3 text-amber-500" />
+                                </span>
+                                <Input
+                                  type="text"
+                                  inputMode="numeric"
+                                  placeholder="Qtd/cx"
+                                  value={editedQtdPerBox[product.product_id] || ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, "");
+                                    setEditedQtdPerBox(prev => ({ ...prev, [product.product_id]: val }));
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === 'Tab') {
+                                      e.preventDefault();
+                                      const nextProduct = products[index + 1];
+                                      handleSaveEdit(product.product_id, nextProduct?.product_id);
+                                    }
+                                    if (e.key === 'Escape') handleCancelEdit();
+                                  }}
+                                  className={cn(
+                                    designSystem.components.input.root,
+                                    "w-36 h-8 pl-7 rounded-lg text-center font-bold text-xs border-amber-300/50 bg-amber-50/30 dark:bg-amber-900/10 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 placeholder:text-amber-400/60"
+                                  )}
+                                />
+                              </div>
+                            )}
                           </div>
                           <div className="flex gap-1">
                             <Button size="icon" className="h-10 w-10 rounded-xl bg-brand hover:bg-brand/90 text-black shadow-lg shadow-brand/10" onClick={() => handleSaveEdit(product.product_id)}>
