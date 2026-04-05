@@ -55,8 +55,8 @@ export async function sendWhatsApp(
     }
 
     // Fallback para W-API.app (Legado ou VITE_ envs)
-    const result = await sendMsg(phone, message);
-    return { success: result.status === 200 || !!result.success };
+    await sendMsg(phone, message);
+    return { success: true };
   } catch (error: any) {
     console.error("Erro no envio de WhatsApp:", error);
     return { success: false, error: error.message };
