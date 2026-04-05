@@ -280,7 +280,7 @@ function PedidosTab() {
         pedido={pedidoToWhatsApp}
         onConfirm={() => {
           if (pedidoToWhatsApp) {
-            updatePedidoStatus({ pedidoId: pedidoToWhatsApp.id, status: 'confirmado' });
+            updatePedidoStatus({ pedidoId: pedidoToWhatsApp.id, status: 'enviado' });
           }
         }}
       />

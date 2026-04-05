@@ -156,7 +156,7 @@ BEGIN
             price_history = EXCLUDED.price_history,
             observacoes = EXCLUDED.observacoes,
             updated_by_type = 'fornecedor',
-            quantidade_por_embalagem = COALESCE(EXCLUDED.quantidade_por_embalagem, quote_supplier_items.quantidade_por_embalagem),
+            quantidade_por_embalagem = EXCLUDED.quantidade_por_embalagem,
             updated_at = NOW();
     END LOOP;
 

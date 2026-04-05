@@ -243,19 +243,28 @@ export default function OrderPortal() {
               Itens do Pedido ({order.order_items?.length || 0})
             </h4>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {order.order_items?.map((item: any, i: number) => {
                 const qty = item.quantidade || item.quantity || 1;
                 const price = Number(item.unit_price) || 0;
+                const subtotal = qty * price;
                 return (
-                  <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-background border border-border/50 shadow-sm hover:border-brand/30 transition-colors">
-                    <div className="min-w-0 pr-4">
-                      <p className="font-bold text-sm text-foreground truncate">{item.product_name}</p>
-                      <p className="text-xs text-muted-foreground font-medium mt-0.5">
-                        <span className="font-black text-brand bg-brand/10 px-1.5 py-0.5 rounded mr-1">
+                  <div key={i} className="flex justify-between items-center p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-border/50 shadow-sm hover:border-brand/40 transition-all group">
+                    <div className="min-w-0 pr-4 flex-1">
+                      <p className="font-bold text-sm text-foreground truncate group-hover:text-brand transition-colors">{item.product_name}</p>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <span className="text-[10px] font-black text-brand bg-brand/10 border border-brand/20 px-2 py-0.5 rounded-full uppercase tracking-widest">
                           {qty} {item.unidade || item.unit || "un"}
                         </span>
-                        x R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                          x R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5 opacity-60">Subtotal</p>
+                      <p className="font-black text-sm text-zinc-900 dark:text-zinc-100">
+                        R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
@@ -263,13 +272,29 @@ export default function OrderPortal() {
               })}
             </div>
 
+            {/* Total Summary */}
+            <div className="mt-8 p-6 rounded-[2rem] bg-zinc-900 dark:bg-zinc-800 border-2 border-brand/20 shadow-2xl shadow-brand/10 group overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand/10 blur-[50px] rounded-full -mr-16 -mt-16 group-hover:bg-brand/20 transition-all duration-700"></div>
+              <div className="relative z-10 flex justify-between items-center">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black text-brand uppercase tracking-[0.2em]">Total do Pedido</p>
+                  <p className="text-2xl font-black text-white tracking-tight">
+                    R$ {(order.total_value || order.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-brand flex items-center justify-center shadow-lg shadow-brand/40 group-hover:scale-110 transition-transform">
+                  <CheckCircle2 className="h-6 w-6 text-brand-foreground" />
+                </div>
+              </div>
+            </div>
+
             {order.observations && (
-              <div className="mt-6 p-4 rounded-xl bg-orange-50/50 dark:bg-orange-950/20 border border-orange-200/50 dark:border-orange-900/30">
-                <p className="text-xs font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <AlertCircle className="h-3 w-3" />
-                  Observações
+              <div className="mt-6 p-5 rounded-2xl bg-orange-50/50 dark:bg-orange-950/20 border border-orange-200/50 dark:border-orange-900/30">
+                <p className="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1.5 flex items-center gap-2">
+                  <AlertCircle className="h-3.5 w-3.5" />
+                  Observações do Comprador
                 </p>
-                <p className="text-sm font-medium text-orange-800 dark:text-orange-200">{order.observations}</p>
+                <p className="text-sm font-medium text-orange-800 dark:text-orange-200 leading-relaxed">{order.observations}</p>
               </div>
             )}
           </div>

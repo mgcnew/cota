@@ -90,7 +90,7 @@ export function ConfirmWhatsAppOrderDialog({
         <DialogHeader>
           <DialogTitle>Enviar Pedido p/ Fornecedor</DialogTitle>
           <DialogDescription>
-            Como você enviou (ou vai enviar) o pedido pelo WhatsApp, o status será alterado para <b>Confirmado</b>.
+            Ao enviar o pedido pelo WhatsApp, o status será alterado para <b>Enviado</b>. O status mudará para <b>Confirmado</b> assim que o fornecedor clicar no link de confirmação.
           </DialogDescription>
         </DialogHeader>
         
