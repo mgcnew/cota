@@ -108,24 +108,30 @@ export default function VendorPortal() {
               return;
             }
 
+            console.log("Iniciando busca do token:", tk);
+            
             let { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
             
+            if (rpcError) console.log("Erro na cotação padrão:", rpcError.message);
+
             // Tentativa backup: Se não achou na cotação normal (ou deu erro), tenta na de embalagens
             if (rpcError || !result) {
-              console.log("Cotação padrão não encontrada ou erro. Tentando embalagens para o token:", tk);
+              console.log("Cotação padrão não encontrada. Tentando embalagens...");
               const { data: pkgResult, error: pkgError } = await supabase.rpc('get_packaging_vendor_quote_data', { p_token: tk });
               
+              if (pkgError) {
+                console.error("Erro específico ao buscar embalagens:", pkgError);
+              }
+
               if (!pkgError && pkgResult) {
-                console.log("Cotação de embalagens encontrada!");
+                console.log("Cotação de embalagens carregada com sucesso!");
                 result = pkgResult;
                 rpcError = null;
-              } else if (pkgError) {
-                console.error("Erro ao buscar embalagens:", pkgError);
               }
             }
 
             if (rpcError || !result) {
-              console.error("Erro no token", tk, rpcError);
+              console.error("Falha final no token", tk, { result, rpcError });
               hasErrors = true;
               return;
             }
