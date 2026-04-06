@@ -52,7 +52,11 @@ async function getShortLink(tokens: string): Promise<string | null> {
 }
 
 interface SupplierRowProps {
-  supplier: { supplierId: string; supplierName: string };
+  supplier: { 
+    supplierId: string; 
+    supplierName: string; 
+    access_token?: string 
+  };
   fullSupplierData?: Supplier;
   items: { packagingName: string }[];
   isSent: boolean;
@@ -71,7 +75,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
 
   useEffect(() => {
     const gen = async () => {
-      const accessToken = supplier.supplierId;
+      const accessToken = supplier.access_token || supplier.supplierId;
       let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
       
       if (accessToken) {
@@ -91,13 +95,13 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
       setMessage(msg);
     };
     gen();
-  }, [contact, items, supplier.supplierId]);
+  }, [contact, items, supplier.supplierId, supplier.access_token]);
 
   const handleSendWhatsApp = useCallback(async () => {
     if (!phone) return;
     setSending(true);
     try {
-      const accessToken = supplier.supplierId; // Usamos o ID do fornecedor como token se não houver um específico
+      const accessToken = supplier.access_token || supplier.supplierId;
       let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
 
       if (accessToken) {

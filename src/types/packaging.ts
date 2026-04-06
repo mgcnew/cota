@@ -39,6 +39,7 @@ export interface PackagingQuoteSupplier {
   status: string;
   data_resposta: string | null;
   observacoes: string | null;
+  access_token?: string;
   created_at: string;
 }
 
@@ -89,6 +90,7 @@ export interface PackagingSupplierDisplay {
   observacoes: string | null;
   itens: PackagingSupplierItemDisplay[];
   custoTotalEstimado: number;
+  access_token?: string;
 }
 
 export interface PackagingSupplierItemDisplay {

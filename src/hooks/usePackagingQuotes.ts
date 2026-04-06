@@ -80,6 +80,7 @@ export function usePackagingQuotes() {
               custoPorUnidade: si.custo_por_unidade,
             })),
             custoTotalEstimado: custoTotal,
+            access_token: s.access_token,
           };
         });
 

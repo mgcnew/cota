@@ -19,6 +19,7 @@ interface QuoteItem {
   quantidade_por_caixa: string;
   _token?: string;
   _quote_id?: string;
+  is_packaging?: boolean;
 }
 
 interface QuoteData {
@@ -30,6 +31,7 @@ interface QuoteData {
   items: QuoteItem[];
   deadline?: string;
   created_at?: string;
+  is_packaging?: boolean;
 }
 
 function parseTokensDefensively(token: string | undefined): string[] {
@@ -106,8 +108,18 @@ export default function VendorPortal() {
               return;
             }
 
-            const { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
+            let { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
             
+            // Tentativa backup: Se não achou na cotação normal, tenta na de embalagens
+            if ((rpcError || !result) && rpcError?.message?.includes('não encontrada')) {
+              console.log("Tentando buscar cotação de embalagens para o token", tk);
+              const { data: pkgResult, error: pkgError } = await supabase.rpc('get_packaging_vendor_quote_data', { p_token: tk });
+              if (!pkgError && pkgResult) {
+                result = pkgResult;
+                rpcError = null;
+              }
+            }
+
             if (rpcError || !result) {
               console.error("Erro no token", tk, rpcError);
               hasErrors = true;
@@ -139,12 +151,13 @@ export default function VendorPortal() {
               }
             }
 
-            if (qd.status === 'ativa' || qd.status === 'ativo') {
+            if (qd.status === 'ativa' || qd.status === 'ativo' || qd.status === 'pendente') {
               anyOpen = true;
               const formattedItems = (qd.items || []).map(item => ({
                 ...item,
                 _token: tk,
                 _quote_id: qd.quote_id,
+                is_packaging: qd.is_packaging,
                 valor_oferecido: item.valor_oferecido 
                   ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                   : "",
@@ -267,7 +280,10 @@ export default function VendorPortal() {
           });
 
         if (payload.length > 0) {
-          const { error: saveError } = await supabase.rpc('save_vendor_quote_items', {
+          const isPkg = items.find(i => i._token === tk)?.is_packaging;
+          const rpcName = isPkg ? 'save_packaging_vendor_quote_items' : 'save_vendor_quote_items';
+
+          const { error: saveError } = await supabase.rpc(rpcName, {
             p_token: tk,
             p_items: payload
           });
