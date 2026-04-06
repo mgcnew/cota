@@ -94,10 +94,10 @@ export function CategorySelectForm({
                 if (!open) setOpen(true);
               }}
               onFocus={() => {
-                setOpen(true);
+                if (!open) setOpen(true);
               }}
               onClick={() => {
-                setOpen(true);
+                if (!open) setOpen(true);
               }}
               placeholder="PESQUISAR OU CRIAR CATEGORIA..."
               className="pl-10 pr-10 h-11 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all focus:ring-orange-400/20 uppercase font-medium"
@@ -114,12 +114,13 @@ export function CategorySelectForm({
           </div>
         </PopoverAnchor>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl" 
+          className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-[100]" 
           align="start"
+          sideOffset={5}
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
-          <Command className="bg-transparent" shouldFilter={false}>
-            <CommandList className="max-h-[300px]">
+          <Command className="bg-transparent h-full max-h-[300px]" shouldFilter={false}>
+            <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar">
               {isLoading ? (
                 <div className="flex items-center justify-center p-6">
                   <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
