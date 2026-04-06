@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo.png', 'robots.txt'],
+      includeAssets: ['favicon.ico', 'pwa-icon.png', 'robots.txt'],
       manifest: {
         name: 'CotaçõesPro',
         short_name: 'CotaçõesPro',
@@ -42,12 +42,12 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         icons: [
           {
-            src: 'logo.png',
+            src: 'pwa-icon.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: 'logo.png',
+            src: 'pwa-icon.png',
             sizes: '512x512',
             type: 'image/png'
           }
