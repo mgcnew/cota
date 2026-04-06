@@ -97,6 +97,7 @@ export default function VendorPortal() {
         let anyOpen = false;
         let mainQuoteData: QuoteData | null = null;
         let hasErrors = false;
+        let lastError: any = null;
 
         await Promise.all(tokens.map(async (tk) => {
           try {
@@ -132,6 +133,7 @@ export default function VendorPortal() {
 
             if (rpcError || !result) {
               console.error("Falha final no token", tk, { result, rpcError });
+              lastError = rpcError || { message: 'Token não encontrado ou inválido' };
               hasErrors = true;
               return;
             }
@@ -182,7 +184,7 @@ export default function VendorPortal() {
         }));
 
         if (!mainQuoteData && hasErrors) {
-          const rawError = JSON.stringify(rpcError || pkError);
+          const rawError = lastError ? JSON.stringify(lastError) : "Nenhum dado retornado";
           throw new Error("Erro no Banco: " + rawError);
         }
 
