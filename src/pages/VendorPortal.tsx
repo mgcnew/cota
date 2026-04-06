@@ -111,12 +111,12 @@ export default function VendorPortal() {
 
             console.log("Iniciando busca do token:", tk);
             
-            let { data: result, error: rpcError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
+            let { data: result, error: tokenError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
             
-            if (rpcError) console.log("Erro na cotação padrão:", rpcError.message);
+            if (tokenError) console.log("Erro na cotação padrão:", tokenError.message);
 
             // Tentativa backup: Se não achou na cotação normal (ou deu erro), tenta na de embalagens
-            if (rpcError || !result) {
+            if (tokenError || !result) {
               console.log("Cotação padrão não encontrada. Tentando embalagens...");
               const { data: pkgResult, error: pkgError } = await supabase.rpc('get_packaging_vendor_quote_data', { p_token: tk });
               
@@ -127,13 +127,13 @@ export default function VendorPortal() {
               if (!pkgError && pkgResult) {
                 console.log("Cotação de embalagens carregada com sucesso!");
                 result = pkgResult;
-                rpcError = null;
+                tokenError = null;
               }
             }
 
-            if (rpcError || !result) {
-              console.error("Falha final no token", tk, { result, rpcError });
-              lastError = rpcError || { message: 'Token não encontrado ou inválido' };
+            if (tokenError || !result) {
+              console.error("Falha final no token", tk, { result, tokenError });
+              lastError = tokenError || { message: 'Token não encontrado ou inválido' };
               hasErrors = true;
               return;
             }
