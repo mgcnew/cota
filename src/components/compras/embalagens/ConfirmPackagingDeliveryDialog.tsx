@@ -46,7 +46,8 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
     });
   };
 
-  const parseBRLToNumber = (value: string) => {
+  const parseBRLToNumber = (value: string | undefined | null) => {
+    if (!value || typeof value !== 'string') return 0;
     return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
   };
 
