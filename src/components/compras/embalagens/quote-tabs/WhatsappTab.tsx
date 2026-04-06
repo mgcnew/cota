@@ -136,7 +136,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
 
   const handleOpenWa = useCallback(async () => {
     if (!phone) return;
-    const accessToken = supplier.supplierId;
+    const accessToken = supplier.access_token || supplier.supplierId;
     let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
     
     if (accessToken) {
