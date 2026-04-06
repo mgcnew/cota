@@ -182,7 +182,7 @@ export default function VendorPortal() {
         }));
 
         if (!mainQuoteData && hasErrors) {
-          throw new Error("Cotações não encontradas. Verifique se o link está correto.");
+          throw new Error("Cotação não encontrada ou link inválido. Por favor, verifique se o link está correto.");
         }
 
         if (!anyOpen) {
