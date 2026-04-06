@@ -245,6 +245,7 @@ export default function OrderPortal() {
              {order.order_items?.map((item: any, i: number) => {
                const qty = item.quantidade || item.quantity || 1;
                const price = Number(item.unit_price) || 0;
+               const isBox = (item.unidade || item.unit || '').toUpperCase().includes('CX');
                const subtotal = qty * price;
                return (
                  <div key={i} className="group relative bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800 p-4 rounded-xl flex items-center justify-between hover:border-blue-500/40 transition-all shadow-sm">
@@ -258,17 +259,27 @@ export default function OrderPortal() {
                         <span className="text-[10px] font-black bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 px-2 min-w-[50px] py-0.5 rounded-md text-center border border-zinc-200 dark:border-zinc-700">
                           {qty} {item.unidade || item.unit || "un"}
                         </span>
-                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest italic">
+                        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest italic flex items-center gap-1.5">
                           @ R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          {isBox && <span className="text-blue-500 font-black not-italic text-[9px]">(Preço por KG/UN)</span>}
                         </span>
                      </div>
                    </div>
 
                    <div className="text-right">
-                      <p className="text-[9px] font-black text-zinc-200 dark:text-zinc-700 uppercase tracking-widest mb-0.5">Subtotal</p>
-                      <p className="text-sm font-black text-zinc-900 dark:text-zinc-50 tabular-nums font-sans">
-                        R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      <p className="text-[9px] font-black text-zinc-300 dark:text-zinc-700 uppercase tracking-widest mb-0.5">
+                        {isBox ? "Peso a Confirmar" : "Subtotal"}
                       </p>
+                      {isBox ? (
+                        <div className="flex flex-col items-end">
+                          <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 animate-pulse">A confirmar</p>
+                          <p className="text-[8px] font-bold text-zinc-400 uppercase">Preço p/ KG</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm font-black text-zinc-900 dark:text-zinc-50 tabular-nums font-sans">
+                          R$ {subtotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
+                      )}
                    </div>
                  </div>
                );
@@ -280,10 +291,19 @@ export default function OrderPortal() {
         <section className="mt-10 bg-zinc-900 dark:bg-zinc-800 rounded-[1.5rem] p-8 text-white relative overflow-hidden group border border-white/5 shadow-xl">
            <div className="relative z-10 flex items-center justify-between">
               <div className="text-left">
-                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] mb-1">Montante do Pedido</p>
-                <p className="text-3xl font-black italic tracking-tighter font-sans">
-                  R$ {(order.total_value || order.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] mb-1">
+                  {order.order_items?.some((it: any) => (it.unidade || it.unit || '').toUpperCase().includes('CX')) 
+                    ? "Montante Estimado" 
+                    : "Montante do Pedido"}
                 </p>
+                <p className="text-3xl font-black italic tracking-tighter font-sans">
+                  {order.order_items?.some((it: any) => (it.unidade || it.unit || '').toUpperCase().includes('CX')) 
+                    ? "Valor Sob Medida" 
+                    : `R$ ${(order.total_value || order.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                </p>
+                {order.order_items?.some((it: any) => (it.unidade || it.unit || '').toUpperCase().includes('CX')) && (
+                  <p className="text-[9px] font-bold text-zinc-500 mt-2 uppercase tracking-widest italic">* Itens por KG serão pesados no recebimento</p>
+                )}
               </div>
               <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
                 <ShoppingCart className="h-7 w-7 text-white" />

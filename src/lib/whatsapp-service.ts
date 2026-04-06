@@ -270,8 +270,35 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   let msg = `Olá, *${contactName}*! 👋\n\n`;
   msg += `Tudo bem? Somos do *Novo Boi João Dias Mercadão Ltda*.\n\n`;
   msg += `Temos um *novo pedido de compra* para você!\n\n`;
-  msg += `Para garantir que não haja divergências e que você tenha certeza absoluta do que está confirmando (itens, quantidades e valores acordados), geramos um resumo detalhado em nosso portal seguro.\n\n`;
-  msg += `Assim protegemos ambas as partes de erros na separação ou faturamento.\n\n`;
+
+  // --- LISTING ITEMS ---
+  const items = order.order_items || [];
+  if (items.length > 0) {
+    msg += `📦 *ITENS DO PEDIDO:*\n\n`;
+    
+    items.forEach((item: any) => {
+      const isBox = (item.unit || item.unidade || '').toUpperCase().includes('CX');
+      const unitLabel = (item.unit || item.unidade || 'un').toUpperCase();
+      const quantity = item.quantity || 1;
+      const unitPrice = item.unit_price || 0;
+      const total = quantity * unitPrice;
+
+      msg += `• *${(item.product_name || "Produto").toUpperCase()}*\n`;
+      msg += `  Qtd: ${quantity} ${unitLabel}\n`;
+      
+      if (isBox) {
+        msg += `  💰 Valor: *${fmtCurrency(unitPrice)}* (Preço por KG/UN)\n`;
+        msg += `  ⚠️ _Favor confirmar o peso e valor total do item._\n`;
+      } else {
+        msg += `  💰 Valor: ${fmtCurrency(unitPrice)} | Total: *${fmtCurrency(total)}*\n`;
+      }
+      msg += `\n`;
+    });
+    
+    msg += SEP + "\n\n";
+  }
+
+  msg += `Para garantir que não haja divergências e que você tenha certeza absoluta do que está confirmando, geramos um link para você ver o pedido completo e dar o aceite:\n\n`;
 
   // --- LOGIC FOR SHORT LINK ---
   const originalTokens = `order_${orderId}`;
@@ -301,7 +328,6 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
     msg += `${orderPortalUrl}\n\n`;
   }
 
-  msg += SEP + "\n";
   msg += `Por favor, pedimos que sempre abra o link e confirme para que fique registrado no nosso sistema e possamos dar andamento na liberação de pagamento e recebimento.\n\n`;
   msg += `Aguardamos seu retorno. Qualquer dúvida estamos à disposição!\n\n`;
   msg += `_Atenciosamente,_\n`;
