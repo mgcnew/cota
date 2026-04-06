@@ -182,7 +182,8 @@ export default function VendorPortal() {
         }));
 
         if (!mainQuoteData && hasErrors) {
-          throw new Error("Cotação não encontrada ou link inválido. Por favor, verifique se o link está correto.");
+          const rawError = JSON.stringify(rpcError || pkError);
+          throw new Error("Erro no Banco: " + rawError);
         }
 
         if (!anyOpen) {
