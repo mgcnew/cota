@@ -194,6 +194,11 @@ export default function VendorPortal() {
       } catch (err: any) {
         console.error("Erro ao carregar cotações:", err);
         setError(err.message || "Erro ao carregar os dados. Tente novamente.");
+        toast({
+          title: "Erro Técnico",
+          description: err.message,
+          variant: "destructive"
+        });
       } finally {
         setLoading(false);
       }
