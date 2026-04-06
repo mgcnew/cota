@@ -4,7 +4,6 @@ import {
   Tags, 
   Loader2, 
   Plus,
-  Search,
   X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,7 +22,6 @@ import {
   PopoverContent,
   PopoverAnchor,
 } from "@/components/ui/popover";
-import { capitalize } from "@/lib/text-utils";
 
 interface CategorySelectFormProps {
   value: string;
@@ -43,18 +41,18 @@ export function CategorySelectForm({
   onCategoryAdded 
 }: CategorySelectFormProps) {
   const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState(value ? capitalize(value) : "");
+  const [searchValue, setSearchValue] = useState(value ? value.toUpperCase() : "");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const availableCategories = categories.filter(cat => cat !== "all");
 
   const filteredCategories = availableCategories.filter(cat => 
-    cat.toLowerCase().includes(searchValue.toLowerCase())
+    cat.toUpperCase().includes(searchValue.toUpperCase())
   );
 
   useEffect(() => {
     if (value) {
-      setSearchValue(capitalize(value));
+      setSearchValue(value.toUpperCase());
     } else {
       setSearchValue("");
     }
@@ -62,15 +60,16 @@ export function CategorySelectForm({
 
   const handleCreate = () => {
     if (!searchValue.trim()) return;
-    const newCat = searchValue.trim();
+    const newCat = searchValue.trim().toUpperCase();
     onCategoryAdded?.(newCat);
     onChange(newCat);
     setOpen(false);
   };
 
   const handleSelect = (category: string) => {
-    onChange(category);
-    setSearchValue(capitalize(category));
+    const formattedCat = category.toUpperCase();
+    onChange(formattedCat);
+    setSearchValue(formattedCat);
     setOpen(false);
   };
 
@@ -78,11 +77,12 @@ export function CategorySelectForm({
     onChange("");
     setSearchValue("");
     inputRef.current?.focus();
+    setOpen(true);
   };
 
   return (
     <div className={cn("relative w-full", className)}>
-      <Popover open={open && searchValue.length > 0} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverAnchor asChild>
           <div className="relative group">
             <Tags className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-orange-600 dark:text-orange-400 shrink-0 z-10" />
@@ -90,14 +90,17 @@ export function CategorySelectForm({
               ref={inputRef}
               value={searchValue}
               onChange={(e) => {
-                setSearchValue(e.target.value);
+                setSearchValue(e.target.value.toUpperCase());
                 if (!open) setOpen(true);
               }}
               onFocus={() => {
-                if (searchValue.length > 0) setOpen(true);
+                setOpen(true);
               }}
-              placeholder="Digite a categoria..."
-              className="pl-10 pr-10 h-11 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all focus:ring-orange-400/20"
+              onClick={() => {
+                setOpen(true);
+              }}
+              placeholder="PESQUISAR OU CRIAR CATEGORIA..."
+              className="pl-10 pr-10 h-11 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all focus:ring-orange-400/20 uppercase font-medium"
             />
             {searchValue && (
               <button
@@ -127,19 +130,21 @@ export function CategorySelectForm({
                     <CommandEmpty className="p-0">
                       <div className="p-4 text-center">
                         <p className="text-xs text-gray-500 mb-3">Nenhuma categoria encontrada</p>
-                        <Button 
-                          size="sm" 
-                          className="w-full bg-orange-600 hover:bg-orange-700 text-white gap-2 rounded-lg shadow-md"
-                          onClick={handleCreate}
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                          Criar "{searchValue}"
-                        </Button>
+                        {searchValue.trim().length > 0 && (
+                          <Button 
+                            size="sm" 
+                            className="w-full bg-orange-600 hover:bg-orange-700 text-white gap-2 rounded-lg shadow-md"
+                            onClick={handleCreate}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                            CRIAR "{searchValue.toUpperCase()}"
+                          </Button>
+                        )}
                       </div>
                     </CommandEmpty>
                   ) : (
                     <>
-                      <CommandGroup heading="Resultados">
+                      <CommandGroup heading="Categorias Existentes">
                         {filteredCategories.map((category) => (
                           <CommandItem
                             key={category}
@@ -151,25 +156,25 @@ export function CategorySelectForm({
                               <Check
                                 className={cn(
                                   "h-4 w-4 text-orange-600 shrink-0",
-                                  (value || "").toLowerCase() === category.toLowerCase() ? "opacity-100" : "opacity-0"
+                                  (value || "").toUpperCase() === category.toUpperCase() ? "opacity-100" : "opacity-0"
                                 )}
                               />
-                              <span className="truncate font-medium text-sm">{capitalize(category)}</span>
+                              <span className="truncate font-bold text-xs uppercase">{category}</span>
                             </div>
                           </CommandItem>
                         ))}
                       </CommandGroup>
 
-                      {!availableCategories.some(c => c.toLowerCase() === searchValue.toLowerCase()) && (
+                      {searchValue.trim().length > 0 && !availableCategories.some(c => c.toUpperCase() === searchValue.toUpperCase()) && (
                         <>
                           <CommandSeparator />
                           <CommandGroup heading="Ação">
                             <CommandItem
                               onSelect={handleCreate}
-                              className="flex items-center gap-2 py-3 cursor-pointer rounded-lg mx-1 my-0.5 text-orange-600 font-medium"
+                              className="flex items-center gap-2 py-3 cursor-pointer rounded-lg mx-1 my-0.5 text-orange-600 font-bold"
                             >
                               <Plus className="h-4 w-4" />
-                              <span>Criar nova categoria: "{searchValue}"</span>
+                              <span>CRIAR NOVA: "{searchValue.toUpperCase()}"</span>
                             </CommandItem>
                           </CommandGroup>
                         </>

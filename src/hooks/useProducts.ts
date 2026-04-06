@@ -249,7 +249,15 @@ export function useProducts() {
 
       if (error) throw error;
 
-      const uniqueCategories = Array.from(new Set(data.map(p => p.category)));
+      // Deduplicar, padronizar para maiúsculo e ordenar categorias
+      const uniqueCategories = Array.from(
+        new Set(
+          data
+            .map(p => p.category?.trim().toUpperCase())
+            .filter((cat): cat is string => !!cat)
+        )
+      ).sort();
+
       return ["all", ...uniqueCategories];
     },
   });
@@ -288,8 +296,8 @@ export function useProducts() {
       const { error } = await supabase
         .from('products')
         .update({
-          name: data.name,
-          category: data.category,
+          name: data.name.trim(),
+          category: data.category.trim().toUpperCase(),
           unit: data.unit,
           brand_id: data.brand_id || null,
           barcode: data.barcode || null,
