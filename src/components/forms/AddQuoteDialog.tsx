@@ -975,6 +975,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       <SelectItem value="pct">pct</SelectItem>
                                       <SelectItem value="l">l</SelectItem>
                                       <SelectItem value="ml">ml</SelectItem>
+                                      <SelectItem value="metade">metade</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>

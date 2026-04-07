@@ -1298,6 +1298,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                           <SelectItem value="l">Litro</SelectItem>
                                                           <SelectItem value="ml">Mililitro</SelectItem>
                                                           <SelectItem value="pct">Pacote</SelectItem>
+                                                          <SelectItem value="metade">Metade</SelectItem>
                                                         </SelectContent>
                                                       </Select>
                                                       <FormMessage className="text-[10px]" />

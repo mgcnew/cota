@@ -530,6 +530,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                             <SelectItem value="pct">Pacote (pct)</SelectItem>
                             <SelectItem value="lt">Litro (lt)</SelectItem>
                             <SelectItem value="gar">Garrafa (gar)</SelectItem>
+                            <SelectItem value="metade">Metade (metade)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

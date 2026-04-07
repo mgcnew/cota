@@ -8,7 +8,7 @@
  */
 
 // Pricing unit types supported by the system
-export type PricingUnit = 'kg' | 'un' | 'cx' | 'pct';
+export type PricingUnit = 'kg' | 'un' | 'cx' | 'pct' | 'metade';
 
 // Base units for normalization (kg for weight, un for count)
 export type BaseUnit = 'kg' | 'un';
@@ -112,6 +112,7 @@ const UNIT_LABELS: Record<PricingUnit, string> = {
   un: '/un',
   cx: '/cx',
   pct: '/pct',
+  metade: '/metade',
 };
 
 /**

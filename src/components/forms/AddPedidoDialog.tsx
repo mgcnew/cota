@@ -674,6 +674,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           <SelectItem value="g">g</SelectItem>
                           <SelectItem value="l">l</SelectItem>
                           <SelectItem value="ml">ml</SelectItem>
+                          <SelectItem value="metade">metade</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

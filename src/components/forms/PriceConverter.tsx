@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 
 export interface ConversionMetadata {
   convertedValue: number;
-  targetUnit: 'kg' | 'un';
+  targetUnit: 'kg' | 'un' | 'metade';
   conversionFactor: number;
 }
 
@@ -35,14 +35,14 @@ export function PriceConverter({
   const [open, setOpen] = useState(false);
   const [pricePerBox, setPricePerBox] = useState("");
   const [quantityPerBox, setQuantityPerBox] = useState("");
-  const [conversionUnit, setConversionUnit] = useState<"kg" | "un">(
-    productUnit === "kg" ? "kg" : productUnit === "un" ? "un" : "kg"
+  const [conversionUnit, setConversionUnit] = useState<"kg" | "un" | "metade">(
+    productUnit === "kg" ? "kg" : productUnit === "un" ? "un" : productUnit === "metade" ? "metade" : "kg"
   );
   const [result, setResult] = useState<number | null>(null);
 
   // Atualizar unidade de conversão quando a unidade do produto mudar
   useEffect(() => {
-    if (productUnit === "kg" || productUnit === "un") {
+    if (productUnit === "kg" || productUnit === "un" || productUnit === "metade") {
       setConversionUnit(productUnit);
     } else {
       // Se for caixa, usar kg como padrão
@@ -140,7 +140,7 @@ export function PriceConverter({
                   Calculadora de Preços
                 </h3>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                  Caixa → {conversionUnit === "kg" ? "kg" : "unidade"}
+                  Caixa → {conversionUnit === "kg" ? "kg" : conversionUnit === "metade" ? "metade" : "unidade"}
                 </p>
               </div>
             </div>
@@ -223,14 +223,14 @@ export function PriceConverter({
                     </span>
                   </div>
                   <Badge variant="outline" className="bg-white dark:bg-gray-800 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-300 text-[10px] px-1.5 py-0 h-4">
-                    {conversionUnit === "kg" ? "kg" : "un"}
+                    {conversionUnit === "kg" ? "kg" : conversionUnit === "metade" ? "metade" : "un"}
                   </Badge>
                 </div>
                 <div className="text-xl font-bold text-emerald-700 dark:text-emerald-300">
                   R$ {result.toFixed(2)}
                 </div>
                 <div className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-0.5">
-                  por {conversionUnit === "kg" ? "quilograma" : "unidade"}
+                  por {conversionUnit === "kg" ? "quilograma" : conversionUnit === "metade" ? "metade" : "unidade"}
                 </div>
               </div>
             )}

@@ -291,6 +291,7 @@ export function QuoteEditTab({
                     <SelectItem value="kg" className="text-xs font-bold">KG</SelectItem>
                     <SelectItem value="cx" className="text-xs font-bold">CAIXA</SelectItem>
                     <SelectItem value="pct" className="text-xs font-bold">PACOTE</SelectItem>
+                    <SelectItem value="metade" className="text-xs font-bold">METADE</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button onClick={handleAddProduct} disabled={!selectedProductToAdd} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">

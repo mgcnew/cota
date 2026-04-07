@@ -203,6 +203,7 @@ export function QuickCreateProduct({ initialName, onCreated, onCancel }: QuickCr
                 <SelectItem value="pct">pct</SelectItem>
                 <SelectItem value="l">l</SelectItem>
                 <SelectItem value="ml">ml</SelectItem>
+                <SelectItem value="metade">metade</SelectItem>
               </SelectContent>
             </Select>
           </div>

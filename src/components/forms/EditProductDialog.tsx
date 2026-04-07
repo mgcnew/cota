@@ -347,6 +347,7 @@ function EditProductDialogInternal({
                           <SelectItem value="un">Unidade (un)</SelectItem>
                           <SelectItem value="kg">Quilograma (kg)</SelectItem>
                           <SelectItem value="cx">Caixa (cx)</SelectItem>
+                          <SelectItem value="metade">Metade (metade)</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
