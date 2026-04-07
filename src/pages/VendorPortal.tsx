@@ -905,10 +905,12 @@ export default function VendorPortal() {
                           <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 dark:bg-zinc-950 rounded-xl">
                             <div className="flex flex-col">
                               <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Custo por Unidade</span>
-                              <span className="text-[9px] text-zinc-500 font-medium">R$ {pkgPrice.toFixed(2)} ÷ {pkgUnits} un</span>
+                              <span className="text-[9px] text-zinc-500 font-medium">
+                                R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(pkgPrice)} ÷ {pkgUnits} un
+                              </span>
                             </div>
                             <span className="text-lg font-black text-white tracking-tight">
-                              R$ {costPerUnit.toFixed(4)}
+                              R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(costPerUnit)}
                               <span className="text-[9px] font-black text-zinc-500 ml-0.5">/un</span>
                             </span>
                           </div>
