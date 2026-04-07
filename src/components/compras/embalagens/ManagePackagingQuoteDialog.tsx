@@ -30,6 +30,8 @@ import {
   TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info,
   Copy, Check, MessageCircle
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -78,6 +80,7 @@ export function ManagePackagingQuoteDialog({
   
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("resumo");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingItem, setEditingItem] = useState<{ supplierId: string; packagingId: string } | null>(null);
@@ -130,6 +133,47 @@ export function ManagePackagingQuoteDialog({
       }, 100);
     }
   }, [editingItem, open]);
+  
+  // Realtime subscription for packaging data
+  useEffect(() => {
+    if (!open || !quote?.id) return;
+    
+    console.log("Ativando Realtime para cotação:", quote.id);
+    
+    const channel = supabase
+      .channel(`packaging-realtime-${quote.id}`)
+      .on(
+        'postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'packaging_supplier_items',
+          filter: `quote_id=eq.${quote.id}`
+        }, 
+        () => {
+          console.log("Mudança detectada em itens!");
+          queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+        }
+      )
+      .on(
+        'postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'packaging_quote_suppliers',
+          filter: `quote_id=eq.${quote.id}`
+        }, 
+        () => {
+          console.log("Mudança detectada em status do fornecedor!");
+          queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [open, quote?.id, queryClient]);
 
   useEffect(() => {
     if (open && quote && quote.fornecedores.length > 0 && !selectedSupplier) {
