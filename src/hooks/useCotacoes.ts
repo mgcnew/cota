@@ -70,6 +70,10 @@ function getDefaultPricingUnit(productUnit?: string): PricingUnit {
   return 'un';
 }
 
+// Global flag to prevent multiple subscriptions across hook instances
+let isRealtimeSubscribed = false;
+let globalChannel: ReturnType<typeof supabase.channel> | null = null;
+
 export function useCotacoes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -79,10 +83,14 @@ export function useCotacoes() {
   // Listen for changes in quotes, suppliers and prices
   // ==========================================
   useEffect(() => {
+    // Prevent multiple components from creating duplicate listeners
+    if (isRealtimeSubscribed) return;
+
     console.log("🔄 Realtime: Ativando canais de escuta...");
+    isRealtimeSubscribed = true;
     
     // Inscreve-se apenas uma vez para todos os canais relevantes
-    const channel = supabase
+    globalChannel = supabase
       .channel('quotes-realtime-global')
       .on('postgres_changes' as any, { event: '*', table: 'quotes' }, (payload: any) => {
         console.log("⚡ Realtime Update [quotes]:", payload.eventType);
@@ -105,8 +113,7 @@ export function useCotacoes() {
       });
 
     return () => {
-      console.log("🔌 Realtime: Removendo canais de escuta...");
-      supabase.removeChannel(channel);
+      // Keep it alive globally to prevent thrashing
     };
   }, [queryClient]);
 

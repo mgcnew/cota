@@ -9,6 +9,10 @@ import type {
   PackagingComparison 
 } from '@/types/packaging';
 
+// Global flag to prevent multiple subscriptions across hook instances
+let isRealtimeSubscribed = false;
+let globalChannel: ReturnType<typeof supabase.channel> | null = null;
+
 export function usePackagingQuotes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -18,23 +22,27 @@ export function usePackagingQuotes() {
   // Listen for changes in packaging quotes/items
   // ==========================================
   useEffect(() => {
-    console.log("🔄 Realtime: Ativando canais de escuta para EMBALAGENS...");
+    // Prevent multiple components from creating duplicate listeners
+    if (isRealtimeSubscribed) return;
     
-    const channel = supabase
+    console.log("🔄 Realtime: Ativando canais de escuta para EMBALAGENS...");
+    isRealtimeSubscribed = true;
+    
+    globalChannel = supabase
       .channel('packaging-quotes-realtime-global')
-      .on('postgres_changes' as any, { event: '*', table: 'packaging_quotes' }, (payload: any) => {
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_quotes' }, (payload: any) => {
         console.log("⚡ Realtime Update [packaging_quotes]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
-      .on('postgres_changes' as any, { event: '*', table: 'packaging_quote_items' }, (payload: any) => {
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_quote_items' }, (payload: any) => {
         console.log("⚡ Realtime Update [packaging_quote_items]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
-      .on('postgres_changes' as any, { event: '*', table: 'packaging_quote_suppliers' }, (payload: any) => {
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_quote_suppliers' }, (payload: any) => {
         console.log("⚡ Realtime Update [packaging_quote_suppliers]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
-      .on('postgres_changes' as any, { event: '*', table: 'packaging_supplier_items' }, (payload: any) => {
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_supplier_items' }, (payload: any) => {
         console.log("⚡ Realtime Update [packaging_supplier_items]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
@@ -43,8 +51,9 @@ export function usePackagingQuotes() {
       });
 
     return () => {
-      console.log("🔌 Packaging Realtime: Removendo canais de escuta...");
-      supabase.removeChannel(channel);
+      // In a real app we might want to clean this up when ALL components unmount,
+      // but for SPA keeping it alive is fine, or we could just leave it.
+      // We will only let it unsubscribe if we want to reset it.
     };
   }, [queryClient]);
 
@@ -410,6 +419,21 @@ export function usePackagingQuotes() {
 
   const deleteQuote = useMutation({
     mutationFn: async (quoteId: string) => {
+      // Remover itens associados em ordem reversa para evitar falha de chave estrangeira (FK Constraint)
+      
+      // 1. Remover vinculo em possíveis orders
+      await (supabase.from('packaging_orders' as any).update({ quote_id: null }).eq('quote_id', quoteId) as any);
+      
+      // 2. Remover supplier items
+      await (supabase.from('packaging_supplier_items' as any).delete().eq('quote_id', quoteId) as any);
+      
+      // 3. Remover quote suppliers
+      await (supabase.from('packaging_quote_suppliers' as any).delete().eq('quote_id', quoteId) as any);
+      
+      // 4. Remover quote items
+      await (supabase.from('packaging_quote_items' as any).delete().eq('quote_id', quoteId) as any);
+
+      // 5. Por fim, excluir a cotação
       const { error } = await (supabase
         .from('packaging_quotes' as any)
         .delete()
