@@ -133,47 +133,6 @@ export function ManagePackagingQuoteDialog({
       }, 100);
     }
   }, [editingItem, open]);
-  
-  // Realtime subscription for packaging data
-  useEffect(() => {
-    if (!open || !quote?.id) return;
-    
-    console.log("Ativando Realtime para cotação:", quote.id);
-    
-    const channel = supabase
-      .channel(`packaging-realtime-${quote.id}`)
-      .on(
-        'postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'packaging_supplier_items',
-          filter: `quote_id=eq.${quote.id}`
-        }, 
-        () => {
-          console.log("Mudança detectada em itens!");
-          queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
-        }
-      )
-      .on(
-        'postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'packaging_quote_suppliers',
-          filter: `quote_id=eq.${quote.id}`
-        }, 
-        () => {
-          console.log("Mudança detectada em status do fornecedor!");
-          queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [open, quote?.id, queryClient]);
 
   useEffect(() => {
     if (open && quote && quote.fornecedores.length > 0 && !selectedSupplier) {

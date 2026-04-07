@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +12,41 @@ import type {
 export function usePackagingQuotes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // ==========================================
+  // REALTIME SUBSCRIPTION
+  // Listen for changes in packaging quotes/items
+  // ==========================================
+  useEffect(() => {
+    console.log("🔄 Realtime: Ativando canais de escuta para EMBALAGENS...");
+    
+    const channel = supabase
+      .channel('packaging-quotes-realtime-global')
+      .on('postgres_changes' as any, { event: '*', table: 'packaging_quotes' }, (payload: any) => {
+        console.log("⚡ Realtime Update [packaging_quotes]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'packaging_quote_items' }, (payload: any) => {
+        console.log("⚡ Realtime Update [packaging_quote_items]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'packaging_quote_suppliers' }, (payload: any) => {
+        console.log("⚡ Realtime Update [packaging_quote_suppliers]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      })
+      .on('postgres_changes' as any, { event: '*', table: 'packaging_supplier_items' }, (payload: any) => {
+        console.log("⚡ Realtime Update [packaging_supplier_items]:", payload.eventType);
+        queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
+      })
+      .subscribe((status) => {
+        console.log("📡 Packaging Realtime Status:", status);
+      });
+
+    return () => {
+      console.log("🔌 Packaging Realtime: Removendo canais de escuta...");
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   const { data: quotes = [], isLoading, error } = useQuery({
     queryKey: ['packaging-quotes'],
