@@ -11,6 +11,9 @@ import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 
+import { ConfirmWhatsAppPackagingOrderDialog } from "@/components/forms/ConfirmWhatsAppPackagingOrderDialog";
+import { supabase } from "@/integrations/supabase/client";
+
 interface PackagingOrderDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,6 +33,14 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
   const IconComponent = order.status === "pendente" ? Clock : order.status === "confirmado" ? CheckCircle2 : order.status === "entregue" ? Truck : Clock;
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [whatsAppOpen, setWhatsAppOpen] = useState(false);
+
+  const handleWhatsAppConfirm = async () => {
+    // Atualiza status local se necessário, no banco o dialogo ja vai fazer
+    try {
+      await supabase.from('packaging_orders').update({status: 'enviado'}).eq('id', order.id);
+    } catch(err) {}
+  };
 
   const handleCopyOrderSummary = useCallback(() => {
     if (!order) return;
@@ -159,6 +170,15 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
               <Button 
                 variant="outline" 
                 size="sm" 
+                className="h-8 gap-2 rounded-lg border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-[10px] uppercase tracking-wider"
+                onClick={() => setWhatsAppOpen(true)}
+                title="Enviar via WhatsApp"
+              >
+                WhatsApp
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
                 className="h-8 gap-2 rounded-lg border-border hover:bg-muted font-bold text-[10px] uppercase tracking-wider"
                 onClick={handleCopyOrderSummary}
                 title="Copiar Resumo"
@@ -267,6 +287,12 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
           )}
         </div>
       </DialogContent>
+      <ConfirmWhatsAppPackagingOrderDialog 
+        open={whatsAppOpen} 
+        onOpenChange={setWhatsAppOpen} 
+        pedido={order} 
+        onConfirm={handleWhatsAppConfirm} 
+      />
     </Dialog>
   );
 }

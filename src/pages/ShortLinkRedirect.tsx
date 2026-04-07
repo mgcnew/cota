@@ -31,7 +31,10 @@ export default function ShortLinkRedirect() {
 
         const tokens = data.original_tokens || "";
         
-        if (tokens.startsWith("order_")) {
+        if (tokens.startsWith("pkg_order_")) {
+          const orderId = tokens.replace("pkg_order_", "");
+          navigate(`/rp/${orderId}`, { replace: true });
+        } else if (tokens.startsWith("order_")) {
           const orderId = tokens.replace("order_", "");
           navigate(`/pedido/${orderId}`, { replace: true });
         } else {

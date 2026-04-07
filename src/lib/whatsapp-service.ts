@@ -337,6 +337,123 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
   return { message: msg, phone: supplier?.phone || "" };
 }
 
+export async function generatePackagingOrderMessage(orderId: string): Promise<{ message: string; phone: string }> {
+  // Busca o pedido de embalagem
+  const { data: order } = await supabase
+    .from("packaging_orders")
+    .select("*, suppliers(*)")
+    .eq("id", orderId)
+    .single();
+
+  if (!order) throw new Error("Pedido de embalagem não encontrado");
+
+  let qs: any = null;
+  if (order.quote_id && order.supplier_id) {
+    const { data: qsData } = await supabase
+      .from("packaging_quote_suppliers")
+      .select("id")
+      .eq("quote_id", order.quote_id)
+      .eq("supplier_id", order.supplier_id)
+      .single();
+    qs = qsData;
+  }
+
+  const supplierId = order.supplier_id;
+  const supplier = order.suppliers;
+
+  let items: any[] = [];
+  if (qs?.id) {
+    const { data: quoteItems } = await supabase
+      .from("packaging_supplier_items")
+      .select("*, packaging_quote_items(*)")
+      .eq("quote_supplier_id", qs.id);
+    if (quoteItems) items = quoteItems;
+  } else {
+    // Busca na packaging_order_items se não houver quote vinculada ou não achou qs
+    const { data: directItems } = await supabase
+      .from("packaging_order_items")
+      .select("*")
+      .eq("order_id", order.id);
+    if (directItems) {
+      items = directItems.map(di => ({
+        packaging_quote_items: { product_name: di.packaging_name },
+        unidade_venda: di.unidade_compra,
+        quantidade_unidades_estimada: di.quantidade,
+        quantidade_venda: di.quantidade_por_unidade
+      }));
+    }
+  }
+
+  const SEP = "─────────────────────";
+  const supplierName = supplier?.name || "Prezado(a) Fornecedor(a)";
+  const contactName = supplier?.contact || supplierName;
+
+  // Client details
+  const CLIENT_RAZAO_SOCIAL = "Novo Boi Dias Mercadão Ltda";
+  const CLIENT_CNPJ = "63.195.471/0001-12";
+
+  let msg = `Olá, *${contactName}*! 👋\n\n`;
+  msg += `Tudo bem? Somos do *Novo Boi João Dias Mercadão Ltda*.\n\n`;
+  msg += `Temos um *novo pedido de compra de EMBALAGENS* para você!\n\n`;
+
+  // --- LISTING ITEMS ---
+  if (items && items.length > 0) {
+    msg += `📦 *ITENS DO PEDIDO:*\n\n`;
+    
+    items.forEach((item: any) => {
+      const prodName = item.packaging_quote_items?.product_name || "Embalagem";
+      const unitLabel = item.unidade_venda || 'un';
+      const quantity = item.quantidade_unidades_estimada || 1;
+      const qtVenda = item.quantidade_venda;
+
+      msg += `• *${prodName.toUpperCase()}*\n`;
+      msg += `  ${qtVenda ? `Peso/Volume: ${qtVenda}${unitLabel} | ` : ''}Qtd Est.: ${quantity} un\n`;
+      msg += `  ⚠️ _Favor confirmar todas as especificações e quantidades no link._\n\n`;
+    });
+    
+    msg += SEP + "\n\n";
+  }
+
+  msg += `Para garantir que não haja divergências e que você tenha certeza absoluta do que está confirmando, geramos um link para você ver as especificações negociadas e dar o aceite:\n\n`;
+
+  // --- LOGIC FOR SHORT LINK ---
+  const originalTokens = `pkg_order_${orderId}`;
+  let shortId = "";
+  try {
+    const { data: existingLink } = await supabase
+      .from('short_links')
+      .select('id')
+      .eq('original_tokens', originalTokens)
+      .maybeSingle();
+
+    shortId = existingLink?.id;
+
+    if (!shortId) {
+      shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+      await supabase
+        .from('short_links')
+        .insert([{ id: shortId, original_tokens: originalTokens }]);
+    }
+  } catch (err) {
+    console.error("Erro gerando short link do pedido de embalagem", err);
+  }
+
+  if (shortId) {
+    const orderPortalUrl = `https://cotaja.vercel.app/r/${shortId}`;
+    msg += `👇 **CLIQUE AQUI PARA VER E CONFIRMAR:**\n`;
+    msg += `${orderPortalUrl}\n\n`;
+  }
+
+  msg += `Atenção: Os dados de faturamento são CNPJ: *${CLIENT_CNPJ}* / Razão Social: *${CLIENT_RAZAO_SOCIAL}*.\n\n`;
+  msg += `Por favor, pedimos que sempre abra o link e confirme para que fique registrado no nosso sistema e possamos dar andamento na recepção do material.\n\n`;
+  msg += `Qualquer dúvida estamos à disposição!\n\n`;
+  msg += `_Atenciosamente,_\n`;
+  msg += `*${CLIENT_RAZAO_SOCIAL}*\n`;
+  msg += `_Setor de Compras_`;
+
+  return { message: msg, phone: supplier?.phone || "" };
+}
+
 export async function sendQuoteViaWhatsApp(params: {
   quoteId: string;
   supplierIds: string[];
