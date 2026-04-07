@@ -75,7 +75,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
 
   useEffect(() => {
     const gen = async () => {
-      const accessToken = supplier.access_token || supplier.supplierId;
+      const accessToken = supplier.access_token;
       let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
       
       if (accessToken) {
@@ -101,7 +101,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
     if (!phone) return;
     setSending(true);
     try {
-      const accessToken = supplier.access_token || supplier.supplierId;
+      const accessToken = supplier.access_token;
       let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
 
       if (accessToken) {
@@ -136,7 +136,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
 
   const handleOpenWa = useCallback(async () => {
     if (!phone) return;
-    const accessToken = supplier.access_token || supplier.supplierId;
+    const accessToken = supplier.access_token;
     let msg = await generateWhatsAppMessage(contact, items, !!accessToken, true);
     
     if (accessToken) {
@@ -188,6 +188,11 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
               ) : (
                 <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1">
                   <AlertCircle className="h-2.5 w-2.5" />Sem telefone cadastrado
+                </span>
+              )}
+              {!supplier.access_token && (
+                <span className="text-[10px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1 underline underline-offset-2 animate-pulse" title="Link indisponível. Recarregue a página ou sincronize.">
+                  <AlertCircle className="h-2.5 w-2.5" />Link indisponível
                 </span>
               )}
               {isSent && (

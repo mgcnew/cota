@@ -113,27 +113,26 @@ export default function VendorPortal() {
             
             let { data: result, error: tokenError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
             
-            if (tokenError) console.log("Erro na cotação padrão:", tokenError.message);
+            if (tokenError) console.log("Erro na cotação padrão (possível redirecionamento para embalagens):", tokenError.message);
 
             // Tentativa backup: Se não achou na cotação normal (ou deu erro), tenta na de embalagens
             if (tokenError || !result) {
-              console.log("Cotação padrão não encontrada. Tentando embalagens...");
               const { data: pkgResult, error: pkgError } = await supabase.rpc('get_packaging_vendor_quote_data', { p_token: tk });
               
-              if (pkgError) {
-                console.error("Erro específico ao buscar embalagens:", pkgError);
-              }
-
-              if (!pkgError && pkgResult) {
+              if (pkgResult) {
                 console.log("Cotação de embalagens carregada com sucesso!");
                 result = pkgResult;
-                tokenError = null;
+                tokenError = null; // Limpa o erro da cotação padrão já que achamos a de embalagens
+              } else if (pkgError) {
+                console.error("Erro ao buscar embalagens:", pkgError);
+                // Se o erro for de token inválido em ambos, mantemos o primeiro erro ou o mais descritivo
+                lastError = pkgError || tokenError;
               }
             }
 
-            if (tokenError || !result) {
-              console.error("Falha final no token", tk, { result, tokenError });
-              lastError = tokenError || { message: 'Token não encontrado ou inválido' };
+            if (!result) {
+              console.error("Falha final no token", tk, { result, tokenError, lastError });
+              lastError = lastError || tokenError || { message: 'Token não encontrado ou inválido' };
               hasErrors = true;
               return;
             }
