@@ -1,14 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle2, AlertCircle, Send, Quote, Mail, ShieldCheck, Box } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Send, Quote, Mail, ShieldCheck, Box, ChevronDown, ChevronUp, Scale, Hash, Info, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sendWhatsApp } from "@/lib/whatsapp-service";
 
-// ... existing interfaces ... //
+interface HistoryVariant {
+  quantidade_venda: number;
+  quantidade_unidades_estimada: number;
+  unidade_venda: string;
+  gramatura: number | null;
+  dimensoes: string | null;
+  valor_total: number;
+}
+
 interface QuoteItem {
   product_id: string;
   product_name: string;
@@ -20,6 +28,15 @@ interface QuoteItem {
   _token?: string;
   _quote_id?: string;
   is_packaging?: boolean;
+  quantidade_venda?: number | string | null;
+  quantidade_unidades_estimada?: number | string | null;
+  unidade_venda?: string | null;
+  gramatura?: number | string | null;
+  dimensoes?: string | null;
+  last_spec?: HistoryVariant | null;
+  history_variants?: HistoryVariant[];
+  _spec_confirmed?: boolean; // true = confirmou dados antigos, false = quer alterar
+  _spec_expanded?: boolean;
 }
 
 interface QuoteData {
@@ -55,6 +72,47 @@ export default function VendorPortal() {
   const [data, setData] = useState<QuoteData | null>(null);
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isDark, setIsDark] = useState(false);
+
+  // Helpers para packaging detail fields
+  const updateItemField = useCallback((productId: string, itemToken: string | undefined, field: string, value: any) => {
+    setItems(prev => prev.map(item =>
+      (item.product_id === productId && item._token === itemToken)
+        ? { ...item, [field]: value }
+        : item
+    ));
+  }, []);
+
+  const applyVariant = useCallback((productId: string, itemToken: string | undefined, variant: HistoryVariant) => {
+    setItems(prev => prev.map(item =>
+      (item.product_id === productId && item._token === itemToken)
+        ? {
+            ...item,
+            quantidade_venda: variant.quantidade_venda || '',
+            quantidade_unidades_estimada: variant.quantidade_unidades_estimada || '',
+            unidade_venda: variant.unidade_venda || 'kg',
+            gramatura: variant.gramatura || '',
+            dimensoes: variant.dimensoes || '',
+            _spec_confirmed: true,
+          }
+        : item
+    ));
+  }, []);
+
+  const confirmSpec = useCallback((productId: string, itemToken: string | undefined, confirmed: boolean) => {
+    setItems(prev => prev.map(item =>
+      (item.product_id === productId && item._token === itemToken)
+        ? { ...item, _spec_confirmed: confirmed, _spec_expanded: !confirmed }
+        : item
+    ));
+  }, []);
+
+  const toggleSpecExpanded = useCallback((productId: string, itemToken: string | undefined) => {
+    setItems(prev => prev.map(item =>
+      (item.product_id === productId && item._token === itemToken)
+        ? { ...item, _spec_expanded: !item._spec_expanded }
+        : item
+    ));
+  }, []);
 
   // Manipular timer do Splash
   useEffect(() => {
@@ -164,16 +222,29 @@ export default function VendorPortal() {
 
             if (qd.status === 'ativa' || qd.status === 'ativo' || qd.status === 'pendente') {
               anyOpen = true;
-              const formattedItems = (qd.items || []).map(item => ({
-                ...item,
-                _token: tk,
-                _quote_id: qd.quote_id,
-                is_packaging: qd.is_packaging,
-                valor_oferecido: item.valor_oferecido 
-                  ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : "",
-                quantidade_por_caixa: item.quantidade_por_caixa ? String(item.quantidade_por_caixa) : ""
-              }));
+              const formattedItems = (qd.items || []).map(item => {
+                // Para itens de embalagem com histórico, pré-preencher com last_spec
+                const spec = item.last_spec as HistoryVariant | null;
+                const hasCurrentData = item.quantidade_venda || item.quantidade_unidades_estimada;
+                return {
+                  ...item,
+                  _token: tk,
+                  _quote_id: qd.quote_id,
+                  is_packaging: qd.is_packaging || item.is_packaging, // Try both root and item level
+                  valor_oferecido: item.valor_oferecido 
+                    ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                    : "",
+                  quantidade_por_caixa: item.quantidade_por_caixa ? String(item.quantidade_por_caixa) : "",
+                  // Pré-preencher com dados já salvos nesta cotação, ou do last_spec
+                  quantidade_venda: hasCurrentData ? (item.quantidade_venda || '') : (spec?.quantidade_venda || ''),
+                  quantidade_unidades_estimada: hasCurrentData ? (item.quantidade_unidades_estimada || '') : (spec?.quantidade_unidades_estimada || ''),
+                  unidade_venda: hasCurrentData ? (item.unidade_venda || 'kg') : (spec?.unidade_venda || 'kg'),
+                  gramatura: hasCurrentData ? (item.gramatura || '') : (spec?.gramatura || ''),
+                  dimensoes: hasCurrentData ? (item.dimensoes || '') : (spec?.dimensoes || ''),
+                  _spec_confirmed: hasCurrentData ? true : (spec ? undefined : undefined), // undefined = never asked
+                  _spec_expanded: !spec && !hasCurrentData, // auto-expand if no history
+                };
+              });
               allItems.push(...formattedItems);
             }
           } catch (e) {
@@ -285,15 +356,32 @@ export default function VendorPortal() {
         const payload = items
           .filter(i => i._token === tk && i.valor_oferecido !== null && i.valor_oferecido !== "")
           .map(i => {
-            // Converte "1.250,50" -> 1250.5
             const numValue = parseFloat(i.valor_oferecido!.toString().replace(/\./g, "").replace(",", "."));
             const qtdCaixa = i.quantidade_por_caixa ? parseInt(i.quantidade_por_caixa, 10) : null;
-            return {
+
+            // Base payload (cotação geral)
+            const base: any = {
               product_id: i.product_id,
               valor_oferecido: numValue,
               observacoes: i.observacoes || "",
               quantidade_por_caixa: (qtdCaixa && qtdCaixa > 0) ? qtdCaixa : null
             };
+
+            // Campos extras para embalagens
+            if (i.is_packaging) {
+              base.product_name = i.product_name;
+              base.unidade = i.unidade_venda || 'kg';
+              base.quantidade_venda = i.quantidade_venda ? parseFloat(String(i.quantidade_venda).replace(",", ".")) : null;
+              base.quantidade_unidades_estimada = (i.quantidade_unidades_estimada && !isNaN(parseInt(String(i.quantidade_unidades_estimada)))) 
+                ? parseInt(String(i.quantidade_unidades_estimada), 10) 
+                : null;
+              base.gramatura = (i.gramatura && !isNaN(parseFloat(String(i.gramatura).replace(",", ".")))) 
+                ? parseFloat(String(i.gramatura).replace(",", ".")) 
+                : null;
+              base.dimensoes = i.dimensoes || null;
+            }
+
+            return base;
           });
 
         if (payload.length > 0) {
@@ -578,7 +666,19 @@ export default function VendorPortal() {
           </div>
 
           <div className="space-y-4">
-            {items.map((item, index) => (
+            {items.map((item, index) => {
+              const isPkg = !!item.is_packaging;
+              const hasHistory = isPkg && !!item.last_spec;
+              const variants = (item.history_variants || []) as HistoryVariant[];
+              const isExpanded = item._spec_expanded;
+              const specConfirmed = item._spec_confirmed;
+
+              // Custo por unidade em tempo real
+              const pkgPrice = item.valor_oferecido ? parseFloat(String(item.valor_oferecido).replace(/\./g, '').replace(',', '.')) : 0;
+              const pkgUnits = item.quantidade_unidades_estimada ? parseInt(String(item.quantidade_unidades_estimada), 10) : 0;
+              const costPerUnit = pkgPrice > 0 && pkgUnits > 0 ? pkgPrice / pkgUnits : null;
+
+              return (
               <div key={`${item.product_id}-${item._token}`} className="group bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 dark:bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                 
@@ -586,9 +686,12 @@ export default function VendorPortal() {
                   <span className="text-[9px] font-black text-zinc-300 dark:text-zinc-600 uppercase tracking-widest">
                     #{String(index + 1).padStart(2, '0')}
                   </span>
-                  <Badge className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-600 rounded-md px-2 h-6 text-[10px] font-bold shadow-none">
-                    {item.quantidade} {item.unidade}
-                  </Badge>
+                  <div className="flex items-center gap-1.5">
+                    {isPkg && <Badge className="bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800 rounded-md px-1.5 h-5 text-[9px] font-black shadow-none">EMBALAGEM</Badge>}
+                    <Badge className="bg-zinc-100 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-300 border-zinc-200 dark:border-zinc-600 rounded-md px-2 h-6 text-[10px] font-bold shadow-none">
+                      {item.quantidade} {item.unidade}
+                    </Badge>
+                  </div>
                 </div>
 
                 <h3 className="text-base font-extrabold text-zinc-900 dark:text-zinc-50 mb-3 leading-tight">
@@ -602,13 +705,13 @@ export default function VendorPortal() {
                       <input
                         type="text"
                         inputMode="decimal"
-                        placeholder={item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG ou UN" : "Preço Unitário"}
+                        placeholder={isPkg ? "Preço do Pacote/Fardo" : (item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG ou UN" : "Preço Unitário")}
                         className="w-full pl-9 h-10 text-sm font-bold bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
                         value={item.valor_oferecido || ""}
                         onChange={(e) => handlePriceChange(item.product_id, item._token, e.target.value)}
                       />
                     </div>
-                    {item.unidade?.toUpperCase().startsWith('CX') && (
+                    {!isPkg && item.unidade?.toUpperCase().startsWith('CX') && (
                       <>
                         <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold px-1">
                           * Informe o valor do QUILO ou da UNIDADE
@@ -641,8 +744,182 @@ export default function VendorPortal() {
                     onChange={(e) => handleObsChange(item.product_id, item._token, e.target.value)}
                   />
                 </div>
+
+                {/* ==================== SEÇÃO EMBALAGEM: Detalhes + Smart Memory ==================== */}
+                {isPkg && (
+                  <div className="mt-3 border-t border-zinc-100 dark:border-zinc-700/50 pt-3">
+                    {/* Botão de expandir/colapsar */}
+                    <button
+                      type="button"
+                      onClick={() => toggleSpecExpanded(item.product_id, item._token)}
+                      className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-700/30 transition-colors group/expand"
+                    >
+                      <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+                        <Scale className="h-3 w-3" />
+                        Detalhes da Embalagem
+                        <span className="text-zinc-400 dark:text-zinc-500 font-medium normal-case tracking-normal">(recomendado)</span>
+                      </span>
+                      {isExpanded 
+                        ? <ChevronUp className="h-3.5 w-3.5 text-zinc-400" />
+                        : <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
+                      }
+                    </button>
+
+                    {isExpanded && (
+                      <div className="mt-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {/* Banner de memória: dados da última cotação */}
+                        {hasHistory && specConfirmed === undefined && (
+                          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 rounded-xl p-3 space-y-2">
+                            <div className="flex items-start gap-2">
+                              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300">
+                                  Dados da última cotação preenchidos automaticamente
+                                </p>
+                                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+                                  Peso: {item.last_spec?.quantidade_venda || '—'}{item.last_spec?.unidade_venda || 'kg'} · 
+                                  Qtd: {item.last_spec?.quantidade_unidades_estimada || '—'} unidades
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() => confirmSpec(item.product_id, item._token, true)}
+                                className="flex-1 h-8 text-[10px] font-black uppercase tracking-widest rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors flex items-center justify-center gap-1"
+                              >
+                                <CheckCircle2 className="h-3 w-3" /> Continua igual
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => confirmSpec(item.product_id, item._token, false)}
+                                className="flex-1 h-8 text-[10px] font-black uppercase tracking-widest rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/40 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors flex items-center justify-center gap-1"
+                              >
+                                <RefreshCw className="h-3 w-3" /> Mudou
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Chips de variantes históricas (quando clicou "Mudou") */}
+                        {specConfirmed === false && variants.length > 0 && (
+                          <div className="space-y-1.5">
+                            <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-1">Valores anteriores:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {variants.map((v, vi) => (
+                                <button
+                                  key={vi}
+                                  type="button"
+                                  onClick={() => applyVariant(item.product_id, item._token, v)}
+                                  className="px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 dark:hover:bg-blue-950/40 transition-colors"
+                                >
+                                  {v.quantidade_venda}{v.unidade_venda} · {v.quantidade_unidades_estimada}un
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Campos editáveis (sempre visíveis quando expandido, editáveis quando não confirmado) */}
+                        {(specConfirmed !== true || !hasHistory) && (
+                          <div className="grid grid-cols-2 gap-2.5">
+                            {/* Peso do Pacote */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-1 flex items-center gap-1">
+                                <Scale className="h-2.5 w-2.5" /> Peso (kg)
+                              </label>
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Ex: 2.5"
+                                className="w-full h-9 px-3 text-xs font-bold bg-blue-50/50 dark:bg-blue-950/10 border border-blue-200/40 dark:border-blue-800/30 rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400"
+                                value={item.quantidade_venda || ''}
+                                onChange={(e) => updateItemField(item.product_id, item._token, 'quantidade_venda', e.target.value)}
+                              />
+                            </div>
+                            {/* Qtd de Unidades */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-1 flex items-center gap-1">
+                                <Hash className="h-2.5 w-2.5" /> Qtd Unidades
+                              </label>
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Ex: 800"
+                                className="w-full h-9 px-3 text-xs font-bold bg-blue-50/50 dark:bg-blue-950/10 border border-blue-200/40 dark:border-blue-800/30 rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400"
+                                value={item.quantidade_unidades_estimada || ''}
+                                onChange={(e) => updateItemField(item.product_id, item._token, 'quantidade_unidades_estimada', e.target.value.replace(/\D/g, ''))}
+                              />
+                            </div>
+                            {/* Unidade de Venda */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-1">Vende como</label>
+                              <select
+                                className="w-full h-9 px-2 text-xs font-bold bg-blue-50/50 dark:bg-blue-950/10 border border-blue-200/40 dark:border-blue-800/30 rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 appearance-none"
+                                value={item.unidade_venda || 'kg'}
+                                onChange={(e) => updateItemField(item.product_id, item._token, 'unidade_venda', e.target.value)}
+                              >
+                                <option value="kg">KG</option>
+                                <option value="un">Unidade</option>
+                                <option value="fardo">Fardo</option>
+                                <option value="pacote">Pacote</option>
+                                <option value="bobina">Bobina</option>
+                                <option value="rolo">Rolo</option>
+                                <option value="caixa">Caixa</option>
+                              </select>
+                            </div>
+                            {/* Espessura */}
+                            <div className="space-y-1">
+                              <label className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-1">Espessura (mm)</label>
+                              <input
+                                type="text"
+                                inputMode="decimal"
+                                placeholder="Ex: 0.08"
+                                className="w-full h-9 px-3 text-xs font-bold bg-blue-50/50 dark:bg-blue-950/10 border border-blue-200/40 dark:border-blue-800/30 rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400"
+                                value={item.gramatura || ''}
+                                onChange={(e) => updateItemField(item.product_id, item._token, 'gramatura', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Resumo quando confirmou "continua igual" */}
+                        {specConfirmed === true && hasHistory && (
+                          <div className="flex items-center justify-between px-2 py-1.5 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg border border-emerald-100 dark:border-emerald-800/30">
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                              <CheckCircle2 className="h-3 w-3" />
+                              {item.quantidade_venda}{item.unidade_venda} · {item.quantidade_unidades_estimada} unidades
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => confirmSpec(item.product_id, item._token, false)}
+                              className="text-[9px] font-bold text-blue-600 dark:text-blue-400 underline underline-offset-2 hover:text-blue-800"
+                            >
+                              Alterar
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Cálculo de custo por unidade em tempo real */}
+                        {costPerUnit !== null && (
+                          <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 dark:bg-zinc-950 rounded-xl">
+                            <div className="flex flex-col">
+                              <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Custo por Unidade</span>
+                              <span className="text-[9px] text-zinc-500 font-medium">R$ {pkgPrice.toFixed(2)} ÷ {pkgUnits} un</span>
+                            </div>
+                            <span className="text-lg font-black text-white tracking-tight">
+                              R$ {costPerUnit.toFixed(4)}
+                              <span className="text-[9px] font-black text-zinc-500 ml-0.5">/un</span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* -- FOOTER -- */}
