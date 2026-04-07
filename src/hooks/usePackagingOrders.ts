@@ -1,12 +1,45 @@
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import type { PackagingOrderDisplay, PackagingOrderItemDisplay } from '@/types/packaging';
 
+// Global flag to prevent multiple subscriptions
+let isRealtimeSubscribed = false;
+
 export function usePackagingOrders() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Ativar Realtime para Pedidos de Embalagem
+  useEffect(() => {
+    if (isRealtimeSubscribed) return;
+    
+    isRealtimeSubscribed = true;
+    
+    const channel = supabase
+      .channel('packaging-orders-realtime')
+      .on('postgres_changes' as any, { 
+        event: '*', 
+        schema: 'public', 
+        table: 'packaging_orders' 
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['packaging-orders'] });
+      })
+      .on('postgres_changes' as any, { 
+        event: '*', 
+        schema: 'public', 
+        table: 'packaging_order_items' 
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['packaging-orders'] });
+      })
+      .subscribe();
+
+    return () => {
+      // Mantemos o canal aberto para sincronização global durante a sessão
+    };
+  }, [queryClient]);
 
   const { data: orders = [], isLoading, error } = useQuery({
     queryKey: ['packaging-orders'],
