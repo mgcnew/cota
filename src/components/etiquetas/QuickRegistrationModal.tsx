@@ -54,36 +54,65 @@ export function QuickRegistrationModal({
   const fetchProductInfo = async (code: string) => {
     setIsSearching(true);
     try {
-      // Open Food Facts API (Global)
-      // Try multiple regions if needed
-      let response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+      // 1. Tentar Open Food Facts BR (localizado)
+      let response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${code}.json`);
       let data = await response.json();
-
-      // If not found in world, try Brazil specific endpoint
-      if (data.status === 0) {
-         response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${code}.json`);
-         data = await response.json();
+      
+      let name = "";
+      if (data.status === 1 && data.product) {
+         name = data.product.product_name_pt || 
+                data.product.product_name || 
+                data.product.generic_name_pt || 
+                data.product.generic_name || 
+                "";
       }
 
-      if (data.status === 1 && data.product) {
-         // Try to get the Portuguese name first, then generic name, then product name
-         const name = data.product.product_name_pt || 
-                      data.product.product_name || 
-                      data.product.generic_name_pt || 
-                      data.product.generic_name || 
-                      "";
-         
-         if (name) {
-           setProductName(name);
-           toast({ 
-            title: "Produto encontrado!", 
-            description: name,
-            className: "bg-blue-50 border-blue-200 text-blue-800"
-           });
-         }
+      // Se falhar no Brasil, tentar global
+      if (!name) {
+          response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+          data = await response.json();
+          if (data.status === 1 && data.product) {
+              name = data.product.product_name_pt || data.product.product_name || "";
+          }
+      }
+
+      // 2. Fallback Secundário: UPCItemDB (API global de códigos de barra grátis)
+      if (!name) {
+          try {
+             const responseUpc = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
+             const dataUpc = await responseUpc.json();
+             if (dataUpc.code === 'OK' && dataUpc.items && dataUpc.items.length > 0) {
+                 name = dataUpc.items[0].title;
+             }
+          } catch(e) {
+             console.warn("UPC fallback error", e);
+          }
+      }
+
+      if (name) {
+        setProductName(name);
+        toast({ 
+         title: "Produto encontrado automaticamente!", 
+         description: name,
+         className: "bg-blue-50 border-blue-200 text-blue-800"
+        });
+        // Não foca o input quando acha, para não abrir o teclado e tampar o botão "Salvar"
+      } else {
+        toast({
+          title: "Produto não localizado",
+          description: "Por favor, digite o nome manualmente.",
+        });
+        // Auto-focus somente se não encontrou, porque ele será obrigado a digitar
+        setTimeout(() => {
+          nameInputRef.current?.focus();
+        }, 300);
       }
     } catch (e) {
       console.error("Error fetching product", e);
+      // Focar caso ocorra um erro fatal na busca
+      setTimeout(() => {
+        nameInputRef.current?.focus();
+      }, 300);
     } finally {
       setIsSearching(false);
     }
@@ -105,24 +134,26 @@ export function QuickRegistrationModal({
           await stopScanner();
         }
 
-        const html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID);
+        const html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID, {
+          formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.QR_CODE
+          ],
+          verbose: false
+        });
         scannerRef.current = html5QrCode;
 
         await html5QrCode.start(
           { facingMode: "environment" },
           {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
+            fps: 15, // Increase FPS slightly for faster detection
             aspectRatio: 1.0,
-            formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.QR_CODE
-            ]
+            // qrbox removed to scan full frame
           },
           (decodedText) => {
             if (mounted) {
@@ -182,20 +213,13 @@ export function QuickRegistrationModal({
   const handleScanSuccess = async (decodedText: string) => {
     // Haptic feedback
     if (navigator.vibrate) navigator.vibrate(200);
-    
-    // Play sound (optional, browser policy might block)
-    // const audio = new Audio('/scan-beep.mp3');
-    // audio.play().catch(() => {});
 
     await stopScanner();
     setBarcode(decodedText);
-    fetchProductInfo(decodedText);
     setStep('form');
     
-    // Auto-focus name input
-    setTimeout(() => {
-      nameInputRef.current?.focus();
-    }, 300);
+    // Busca na API, a decisão de auto-focar agora fica por conta do retorno da API
+    fetchProductInfo(decodedText);
   };
 
   const handleRescan = () => {
@@ -204,24 +228,27 @@ export function QuickRegistrationModal({
     setProductName("");
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (keepScanning = false) => {
     if (!productName.trim() || !barcode.trim()) return;
 
     setIsSaving(true);
     try {
       const success = await onSave(productName, barcode);
       if (success) {
-        // Show success visual feedback
         toast({
           title: "Sucesso!",
           description: "Produto cadastrado.",
           className: "bg-green-50 border-green-200 text-green-800",
         });
         
-        // Reset to scan mode for next item (productivity flow)
-        setStep('scan');
-        setBarcode("");
-        setProductName("");
+        if (keepScanning) {
+          // Reset directly to scan mode for next item (productivity flow)
+          setStep('scan');
+          setBarcode("");
+          setProductName("");
+        } else {
+          onOpenChange(false);
+        }
       }
     } catch (error) {
       console.error(error);
@@ -232,7 +259,7 @@ export function QuickRegistrationModal({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      handleSubmit();
+      handleSubmit(true); // Fast confirm on Enter
     }
   };
 
@@ -266,17 +293,22 @@ export function QuickRegistrationModal({
 
             <div id={SCANNER_ELEMENT_ID} className="w-full h-full" />
             
-            {/* Visual Guide Overlay */}
+            {/* Visual Guide Overlay - Full Screen Style */}
             {isScanning && (
-              <div className="absolute inset-0 pointer-events-none border-[2px] border-white/20">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-40 border-2 border-primary rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)]">
-                  <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-primary -mt-1 -ml-1"></div>
-                  <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-primary -mt-1 -mr-1"></div>
-                  <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-primary -mb-1 -ml-1"></div>
-                  <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-primary -mb-1 -mr-1"></div>
-                  
-                  {/* Scanning Line Animation */}
-                  <div className="absolute top-0 left-0 w-full h-0.5 bg-red-500 animate-[scan_2s_infinite]"></div>
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Subtle corner guides */}
+                <div className="absolute top-4 left-4 w-8 h-8 border-t-4 border-l-4 border-primary/60 rounded-tl-xl"></div>
+                <div className="absolute top-4 right-4 w-8 h-8 border-t-4 border-r-4 border-primary/60 rounded-tr-xl"></div>
+                <div className="absolute bottom-4 left-4 w-8 h-8 border-b-4 border-l-4 border-primary/60 rounded-bl-xl"></div>
+                <div className="absolute bottom-4 right-4 w-8 h-8 border-b-4 border-r-4 border-primary/60 rounded-br-xl"></div>
+                
+                {/* Horizontal Scanning Line */}
+                <div className="absolute left-0 right-0 h-[2px] bg-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-[scan-full_3s_infinite]"></div>
+                
+                <div className="absolute bottom-8 left-0 right-0 text-center">
+                  <span className="bg-black/40 backdrop-blur-md text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
+                    Aponte para qualquer lugar da tela
+                  </span>
                 </div>
               </div>
             )}
@@ -335,28 +367,35 @@ export function QuickRegistrationModal({
 
            <div className="flex-1"></div>
 
-           <div className="grid grid-cols-2 gap-3 mt-4">
-             <Button variant="outline" onClick={handleRescan} className="h-12">
-               Cancelar
-             </Button>
+           <div className="grid grid-cols-1 gap-3 mt-4">
              <Button 
-               onClick={handleSubmit} 
+               onClick={() => handleSubmit(true)} 
                disabled={!productName || !barcode || isSaving}
-               className={cn("h-12 font-bold", designSystem.components.button.primary)}
+               className={cn("h-16 font-black text-lg uppercase tracking-wider", designSystem.components.button.primary)}
              >
-               {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-               Salvar
+               {isSaving ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Save className="h-5 w-5 mr-2" />}
+               Salvar e Próximo
              </Button>
+             
+             <div className="grid grid-cols-2 gap-3">
+               <Button variant="outline" onClick={() => handleSubmit(false)} disabled={!productName || !barcode || isSaving} className="h-12 font-bold">
+                 <CheckCircle2 className="h-4 w-4 mr-2" />
+                 Apenas Salvar
+               </Button>
+               <Button variant="ghost" onClick={handleRescan} className="h-12">
+                 Cancelar
+               </Button>
+             </div>
            </div>
         </div>
       </div>
       
       <style>{`
-        @keyframes scan {
-          0% { top: 0; opacity: 0; }
-          10% { opacity: 1; }
-          90% { opacity: 1; }
-          100% { top: 100%; opacity: 0; }
+        @keyframes scan-full {
+          0% { top: 10%; opacity: 0; }
+          20% { opacity: 1; }
+          80% { opacity: 1; }
+          100% { top: 90%; opacity: 0; }
         }
       `}</style>
     </ResponsiveModal>
