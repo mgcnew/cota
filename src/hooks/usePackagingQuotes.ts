@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -291,9 +291,9 @@ export function usePackagingQuotes() {
       dimensoes?: string;
     }) => {
       // Calcular custo por unidade
-      const custoPorUnidade = data.quantidadeUnidadesEstimada > 0 
-        ? data.valorTotal / data.quantidadeUnidadesEstimada 
-        : null;
+      const custoPorUnidade = (data.quantidadeUnidadesEstimada || 1) > 0 
+        ? data.valorTotal / (data.quantidadeUnidadesEstimada || 1) 
+        : data.valorTotal;
 
       console.log('Atualizando supplier_item:', {
         quoteId: data.quoteId,
@@ -455,7 +455,7 @@ export function usePackagingQuotes() {
   });
 
   // Função para gerar comparativo de preços
-  const getComparison = (quote: PackagingQuoteDisplay): PackagingComparison[] => {
+  const getComparison = useCallback((quote: PackagingQuoteDisplay): PackagingComparison[] => {
     const comparisons: PackagingComparison[] = [];
 
     for (const item of quote.itens) {
@@ -464,17 +464,20 @@ export function usePackagingQuotes() {
       for (const fornecedor of quote.fornecedores) {
         const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
         
-        if (supplierItem && supplierItem.custoPorUnidade && supplierItem.custoPorUnidade > 0) {
+        // Calcular preço unitário de forma resiliente
+        const price = supplierItem?.custoPorUnidade || (supplierItem?.valorTotal ? (supplierItem.valorTotal / (supplierItem.quantidadeUnidadesEstimada || 1)) : 0);
+
+        if (price > 0) {
           fornecedoresComPreco.push({
             supplierId: fornecedor.supplierId,
             supplierName: fornecedor.supplierName,
-            valorTotal: supplierItem.valorTotal || 0,
-            unidadeVenda: supplierItem.unidadeVenda || '',
-            quantidadeVenda: supplierItem.quantidadeVenda || 0,
-            quantidadeUnidades: supplierItem.quantidadeUnidadesEstimada || 0,
-            custoPorUnidade: supplierItem.custoPorUnidade,
-            gramatura: supplierItem.gramatura,
-            dimensoes: supplierItem.dimensoes,
+            valorTotal: supplierItem?.valorTotal || 0,
+            unidadeVenda: supplierItem?.unidadeVenda || '',
+            quantidadeVenda: supplierItem?.quantidadeVenda || 0,
+            quantidadeUnidades: supplierItem?.quantidadeUnidadesEstimada || 0,
+            custoPorUnidade: price,
+            gramatura: supplierItem?.gramatura,
+            dimensoes: supplierItem?.dimensoes,
             isMelhorPreco: false,
             diferencaPercentual: 0,
           });
@@ -504,7 +507,7 @@ export function usePackagingQuotes() {
     }
 
     return comparisons;
-  };
+  }, []);
 
   // Adicionar fornecedor à cotação
   const addQuoteSupplier = useMutation({

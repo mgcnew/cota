@@ -180,13 +180,18 @@ export function ManagePackagingQuoteDialog({
 
       quote.fornecedores.forEach(fornecedor => {
         const supplierItem = fornecedor.itens.find(si => si.packagingId === item.packagingId);
-        if (supplierItem?.custoPorUnidade && supplierItem.custoPorUnidade > 0) {
+        // Relaxed condition: include if has unit cost OR has total value
+        const price = supplierItem?.custoPorUnidade || (supplierItem?.valorTotal ? (supplierItem.valorTotal / (supplierItem.quantidadeUnidadesEstimada || 1)) : 0);
+        
+        if (price > 0) {
           allPrices.push({
-            supplierId: fornecedor.supplierId, supplierName: fornecedor.supplierName,
-            custoPorUnidade: supplierItem.custoPorUnidade, valorTotal: supplierItem.valorTotal || 0
+            supplierId: fornecedor.supplierId, 
+            supplierName: fornecedor.supplierName,
+            custoPorUnidade: price, 
+            valorTotal: supplierItem?.valorTotal || 0
           });
-          if (supplierItem.custoPorUnidade < bestPrice) {
-            bestPrice = supplierItem.custoPorUnidade;
+          if (price < bestPrice) {
+            bestPrice = price;
             bestSupplierId = fornecedor.supplierId;
             bestSupplierName = fornecedor.supplierName;
           }
@@ -197,7 +202,15 @@ export function ManagePackagingQuoteDialog({
       const worstPrice = allPrices.length > 0 ? allPrices[allPrices.length - 1].custoPorUnidade : 0;
       const savings = worstPrice > 0 && bestPrice < Infinity ? worstPrice - bestPrice : 0;
 
-      return { packagingId: item.packagingId, packagingName: item.packagingName, bestPrice: bestPrice === Infinity ? 0 : bestPrice, bestSupplierId, bestSupplierName, allPrices, savings };
+      return { 
+        packagingId: item.packagingId, 
+        packagingName: item.packagingName, 
+        bestPrice: bestPrice === Infinity ? 0 : bestPrice, 
+        bestSupplierId, 
+        bestSupplierName, 
+        allPrices, 
+        savings 
+      };
     });
   }, [quote]);
 
@@ -407,8 +420,8 @@ export function ManagePackagingQuoteDialog({
     if (!editingItem || !quote) return;
     await updateSupplierItem.mutateAsync({
       quoteId: quote.id, supplierId: editingItem.supplierId, packagingId: editingItem.packagingId,
-      valorTotal: parseFloat(formData.valorTotal) || 0, unidadeVenda: formData.unidadeVenda,
-      quantidadeVenda: parseFloat(formData.quantidadeVenda) || 0, quantidadeUnidadesEstimada: parseInt(formData.quantidadeUnidadesEstimada) || 0,
+      valorTotal: parseFloat(formData.valorTotal.replace(',', '.')) || 0, unidadeVenda: formData.unidadeVenda,
+      quantidadeVenda: parseFloat(formData.quantidadeVenda.replace(',', '.')) || 1, quantidadeUnidadesEstimada: parseInt(formData.quantidadeUnidadesEstimada) || 1,
       gramatura: formData.gramatura ? parseFloat(formData.gramatura) : undefined, dimensoes: formData.dimensoes || undefined,
     });
     setEditingItem(null);
@@ -1131,7 +1144,7 @@ export function ManagePackagingQuoteDialog({
                       const supplierItem = fornecedor?.itens.find(si => si.packagingId === item.packagingId);
                       const isEditing = editingItem?.supplierId === selectedSupplier && editingItem?.packagingId === item.packagingId;
                       const bestData = bestPricesData.find(b => b.packagingId === item.packagingId);
-                      const isBestPrice = bestData?.bestSupplierId === selectedSupplier;
+                      const isBestPrice = bestData && bestData.bestPrice > 0 && bestData.bestSupplierId === selectedSupplier;
 
                       return (
                         <Card key={item.packagingId} className={cn("p-4 transition-all border shadow-sm rounded-xl", 
