@@ -18,6 +18,16 @@ import {
 } from "@/components/ui/dialog";
 
 import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+
+import {
   Form,
   FormControl,
   FormField,
@@ -158,6 +168,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
+  const [showMobileCart, setShowMobileCart] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -729,9 +740,27 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               Passo {currentTabIndex + 1}: <span className={ds.typography.weight.medium}>{tabs[currentTabIndex]?.label}</span>
             </p>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-7 w-7 rounded-full")}>
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {isMobile && currentTabIndex === 0 && (
+              <Button 
+                type="button"
+                variant="outline" 
+                size="icon" 
+                onClick={() => setShowMobileCart(true)} 
+                className={cn(ds.components.button.secondary, "h-8 w-8 relative border-brand/20 bg-brand/5 text-brand flex-shrink-0")}
+              >
+                <Package className="h-4 w-4" />
+                {fields.length > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-brand text-zinc-950 text-[10px] w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold">
+                    {fields.length}
+                  </span>
+                )}
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-8 w-8 rounded-full flex-shrink-0")}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -1017,7 +1046,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           </div>
 
                           {/* Lista de Produtos - Lado Direito */}
-                          <div className="flex flex-col space-y-4 h-full min-h-0 overflow-hidden relative z-[10]">
+                          <div className="hidden lg:flex flex-col space-y-4 h-full min-h-0 overflow-hidden relative z-[10]">
                             <div className="pb-1 border-b border-border/50 flex-shrink-0">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
@@ -1658,6 +1687,78 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
           </div>
         </div>
+      )}
+
+      {/* Mobile Cart Drawer */}
+      {isMobile && (
+        <Drawer open={showMobileCart} onOpenChange={setShowMobileCart}>
+          <DrawerContent className="max-h-[85vh]">
+            <DrawerHeader className="border-b border-border/50 pb-4">
+              <DrawerTitle className="text-left flex items-center gap-2">
+                <Package className="h-5 w-5 text-brand" />
+                Produtos Adicionados ({fields.length})
+              </DrawerTitle>
+              <DrawerDescription className="text-left">
+                Edite ou remova os produtos que você já incluiu na cotação.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 overflow-y-auto min-h-[50vh]">
+              {fields.length === 0 ? (
+                <div className={cn("text-center py-8", ds.colors.text.secondary)}>
+                  <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                  <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
+                  <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className={cn(
+                      ds.colors.surface.card,
+                      ds.colors.border.subtle,
+                      "border rounded-xl transition-all"
+                    )}>
+                      <div className="p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-sm break-words")}>
+                              {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
+                            </h4>
+                            <div className={cn("text-xs text-muted-foreground mt-1 flex items-center gap-2")}>
+                              <span className={cn(
+                                ds.typography.fontFamily.mono,
+                                ds.colors.surface.card,
+                                "px-1.5 rounded border font-medium",
+                                ds.colors.text.primary
+                              )}>
+                                {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            className={cn(ds.components.button.danger, "h-9 w-9 p-0 flex-shrink-0 rounded-lg bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-600 dark:text-red-400")}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <DrawerFooter className="border-t border-border/50 pt-4">
+              <DrawerClose asChild>
+                <Button variant="outline" className={cn(ds.components.button.secondary, "w-full")}>
+                  Fechar Lista
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       )}
     </>
   );
