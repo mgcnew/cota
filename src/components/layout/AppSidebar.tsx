@@ -420,7 +420,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             variant="ghost"
             size="icon"
             aria-label="Menu"
-            className="md:hidden fixed top-3 left-3 z-[100] h-12 w-12 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/5 shadow-xl active:scale-90 transition-all group overflow-hidden touch-manipulation"
+            className="md:hidden fixed top-3 right-3 z-[100] h-12 w-12 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/5 shadow-xl active:scale-90 transition-all group overflow-hidden touch-manipulation"
           >
             <div className="relative w-6 h-6">
               <span className={cn(
@@ -439,9 +439,9 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           </Button>
         </SheetTrigger>
         <SheetContent
-          side="left"
+          side="right"
           className={cn(
-            "p-0 w-[85%] max-w-[300px] border-r border-white/5 shadow-2xl",
+            "p-0 w-[85%] max-w-[300px] border-l border-white/5 shadow-2xl",
             "bg-gradient-to-b from-background/95 to-background/98 backdrop-blur-2xl"
           )}
         >
