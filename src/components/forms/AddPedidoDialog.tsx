@@ -112,6 +112,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
   const [showQuickCreateProduct, setShowQuickCreateProduct] = useState(false);
   const [showQuickCreateSupplier, setShowQuickCreateSupplier] = useState(false);
+  const [showMobileProductSearch, setShowMobileProductSearch] = useState(false);
 
   // Refs
   const productSearchRef = useRef<HTMLInputElement>(null);
@@ -588,11 +589,24 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                       <Input 
                         ref={productSearchRef}
-                        placeholder="Buscar produto..." 
+                        placeholder={isMobile ? "Tocar para buscar produto..." : "Buscar produto..."} 
                         value={selectedProduct ? selectedProduct.name : productSearch}
-                        onChange={(e) => { setProductSearch(e.target.value); setSelectedProduct(null); }}
+                        readOnly={isMobile}
+                        onClick={() => {
+                          if (isMobile) setShowMobileProductSearch(true);
+                        }}
+                        onChange={(e) => { 
+                          if (!isMobile) {
+                            setProductSearch(e.target.value); 
+                            setSelectedProduct(null); 
+                          }
+                        }}
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
                         onFocus={(e) => {
+                          if (isMobile) {
+                            setShowMobileProductSearch(true);
+                            return;
+                          }
                           if (productSearch.trim().length >= 3 && searchedProducts.length > 0) {
                             setShowProductSuggestions(true);
                           } else {
@@ -602,7 +616,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         }}
                         className={cn(ds.components.input.root, "pl-10")} 
                       />
-                      {showProductSuggestions && searchedProducts.length > 0 && !selectedProduct && (
+                      {!isMobile && showProductSuggestions && searchedProducts.length > 0 && !selectedProduct && (
                         <div className={cn(
                           "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl max-h-[250px] overflow-y-auto z-[200] custom-scrollbar animate-in fade-in zoom-in-95 duration-200",
                           ds.colors.surface.card,
@@ -612,7 +626,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           {searchedProducts.map((p, i) => renderProductItem(p, i))}
                         </div>
                       )}
-                      {showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
+                      {!isMobile && showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
                         <div className={cn(
                           "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl p-6 text-center z-[100] animate-in fade-in zoom-in-95",
                           ds.colors.surface.card,
@@ -1404,6 +1418,93 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 Continuar Editando
               </Button>
             </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
+      
+      {/* Mobile Product Search Drawer */}
+      <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
+        <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
+          <DrawerHeader className="border-b border-border/40 pb-4 px-4 overflow-visible flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  autoFocus
+                  placeholder="Nome do produto..."
+                  className={cn(ds.components.input.root, "pl-10 h-11 text-base rounded-xl")}
+                  value={productSearch}
+                  onChange={(e) => {
+                    setProductSearch(e.target.value);
+                    setSelectedProduct(null);
+                  }}
+                />
+              </div>
+              <DrawerClose asChild>
+                <Button variant="ghost" className="px-2 font-bold text-brand text-xs uppercase tracking-widest whitespace-nowrap">Fechar</Button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
+            {isSearchingProducts ? (
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Buscando...</p>
+              </div>
+            ) : searchedProducts.length > 0 ? (
+              <div className="grid grid-cols-1 gap-2">
+                {searchedProducts.map((p, index) => (
+                   <button
+                    key={p.id}
+                    onClick={() => {
+                      selectProductFromList(p);
+                      setShowMobileProductSearch(false);
+                    }}
+                    className={cn(
+                      "w-full flex items-center gap-4 p-4 rounded-2xl text-left border transition-all active:scale-[0.98]",
+                      ds.colors.surface.section,
+                      ds.colors.border.default,
+                      "hover:bg-brand/5 hover:border-brand/30 transition-colors"
+                    )}
+                   >
+                    <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center flex-shrink-0 shadow-sm border border-brand/10">
+                      <Package className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, "text-foreground truncate")}>{p.name}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-1">{p.unit || 'unidade'}</p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-brand/30" />
+                   </button>
+                ))}
+              </div>
+            ) : productSearch.trim().length >= 3 ? (
+              <div className="p-10 text-center flex flex-col items-center">
+                <div className="w-20 h-20 rounded-3xl bg-brand/5 flex items-center justify-center mb-6 shadow-inner">
+                   <Package className="h-10 w-10 text-brand/30" />
+                </div>
+                <p className="text-base font-bold text-foreground">Produto não encontrado</p>
+                <p className="text-xs text-muted-foreground mt-2 mb-8 max-w-[200px] mx-auto">Gostaria de cadastrar "{productSearch}" no sistema agora?</p>
+                <Button
+                  onClick={() => {
+                    setShowMobileProductSearch(false);
+                    setShowQuickCreateProduct(true);
+                  }}
+                  className={cn(ds.components.button.primary, "h-12 w-full max-w-[240px] rounded-2xl shadow-lg shadow-brand/20")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Cadastrar Produto
+                </Button>
+              </div>
+            ) : (
+               <div className="py-20 text-center flex flex-col items-center">
+                  <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                    <Search className="h-5 w-5 text-zinc-400" />
+                  </div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">Aguardando busca...</p>
+               </div>
+            )}
           </div>
         </DrawerContent>
       </Drawer>
