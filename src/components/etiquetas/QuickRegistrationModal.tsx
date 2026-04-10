@@ -271,12 +271,15 @@ export function QuickRegistrationModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
         className={cn(
-          "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
+          "p-0 gap-0 overflow-hidden shadow-xl flex flex-col m-0",
           ds.colors.surface.page,
           ds.colors.border.default,
-          isMobile 
-            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0" 
-            : "w-[96vw] max-w-[600px] h-auto max-h-[90vh] rounded-2xl"
+          // Mobile first (full screen)
+          "fixed inset-0 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none",
+          "translate-x-0 translate-y-0 top-0 left-0 right-0 bottom-0", 
+          // Desktop overrides
+          "sm:inset-auto sm:w-[96vw] sm:max-w-[600px] sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border",
+          "sm:top-[50%] sm:left-[50%] sm:-translate-x-[50%] sm:-translate-y-[50%]"
         )}
         hideClose={isMobile}
       >
@@ -332,7 +335,7 @@ export function QuickRegistrationModal({
         </div>
 
         {/* ─── Content ─── */}
-        <div className="flex-1 overflow-y-auto flex flex-col">
+        <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
           
           {/* Scanner View */}
           {mode === 'scanner' && (

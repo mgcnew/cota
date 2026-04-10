@@ -37,6 +37,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  PopoverAnchor,
 } from "@/components/ui/popover";
 import {
   Select,
@@ -776,7 +777,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
                           {/* Formulário de Adição - Lado Esquerdo */}
-                          <div className="flex flex-col space-y-4 h-full min-h-0 overflow-y-auto scrollbar-hide pr-2 select-none flex-shrink-0 lg:flex-shrink">
+                          <div className={cn(
+                            "flex flex-col space-y-4 h-full min-h-0 overflow-y-auto scrollbar-hide pr-2 select-none flex-shrink-0 lg:flex-shrink relative z-[20]",
+                            "pb-20 sm:pb-0" // Espaço extra para o botão no mobile
+                          )}>
                             <div className="pb-1 border-b border-border/50">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Plus className="h-5 w-5 text-brand flex-shrink-0" />
@@ -787,96 +791,94 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               {/* Seletor de Produto com Autocomplete Dinâmico */}
                               <div className={ds.components.input.group}>
                                 <label className={ds.components.input.label}>Produto *</label>
-                                <div className="relative group">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-                                  <Input
-                                    ref={productSearchRef}
-                                    placeholder="Digite o nome do produto..."
-                                    value={selectedProduct ? selectedProduct.name : productSearch}
-                                    onChange={(e) => {
-                                      setProductSearch(e.target.value);
-                                      setSelectedProduct(null);
-                                      setShowProductSuggestions(true);
-                                    }}
-                                    onFocus={(e) => {
-                                      setShowProductSuggestions(true);
-                                      handleInputFocus(e);
-                                    }}
-                                    onBlur={() => {
-                                      // Timeout para permitir o clique nas sugestões
-                                      setTimeout(() => setShowProductSuggestions(false), 200);
-                                    }}
-                                    onKeyDown={handleProductKeyDown}
-                                    className={cn(ds.components.input.root, "pl-10 h-9 text-sm")}
-                                    tabIndex={0}
-                                  />
+                                <Popover open={showProductSuggestions && products.length > 0 && !selectedProduct}>
+                                  <PopoverAnchor asChild>
+                                    <div className="relative group">
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                                      <Input
+                                        ref={productSearchRef}
+                                        placeholder="Digite o nome do produto..."
+                                        value={selectedProduct ? selectedProduct.name : productSearch}
+                                        onChange={(e) => {
+                                          setProductSearch(e.target.value);
+                                          setSelectedProduct(null);
+                                          setShowProductSuggestions(true);
+                                        }}
+                                        onFocus={(e) => {
+                                          setShowProductSuggestions(true);
+                                          handleInputFocus(e);
+                                        }}
+                                        onBlur={() => {
+                                          setTimeout(() => setShowProductSuggestions(false), 200);
+                                        }}
+                                        onKeyDown={handleProductKeyDown}
+                                        className={cn(ds.components.input.root, "pl-10 h-9 text-sm")}
+                                        tabIndex={0}
+                                      />
 
-                                  {/* Lista de Sugestões Autocomplete */}
-                                  {showProductSuggestions && products.length > 0 && !selectedProduct && (
-                                    <div
-                                      ref={productListRef}
-                                      className={cn(
-                                        "absolute z-[100] w-full mt-2 rounded-2xl shadow-xl max-h-64 overflow-auto animate-in fade-in slide-in-from-top-2 custom-scrollbar",
-                                        ds.colors.surface.card,
-                                        ds.colors.border.default,
-                                        "border"
+                                      {/* Indicador de Carregamento Dinâmico */}
+                                      {isSearchingProducts && (
+                                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                          <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                                        </div>
                                       )}
-                                    >
-                                      <div className="p-2 space-y-1">
-                                        {products.map((product, index) => (
-                                          <button
-                                            key={product.id}
-                                            type="button"
-                                            onClick={() => {
-                                              setSelectedProduct(product);
-                                              if (product.unit) {
-                                                setNewProductUnit(product.unit);
-                                              }
-                                              setProductSearch("");
-                                              setShowProductSuggestions(false);
-                                              setHighlightedProductIndex(-1);
-                                              setTimeout(() => {
-                                                quantityInputRef.current?.focus();
-                                                quantityInputRef.current?.select();
-                                              }, 50);
-                                            }}
-                                            onMouseEnter={() => setHighlightedProductIndex(index)}
-                                            className={cn(
-                                              "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
-                                              (highlightedProductIndex === index)
-                                                ? "bg-brand/10 text-brand"
-                                                : cn(
-                                                  ds.colors.surface.hover,
-                                                  ds.colors.text.primary
-                                                ),
-                                            )}
-                                          >
-                                            <div className={cn(
-                                              "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
-                                              highlightedProductIndex === index
-                                                ? "bg-brand/20 text-brand"
-                                                : cn(
-                                                  ds.colors.surface.section,
-                                                  ds.colors.text.secondary
-                                                )
-                                            )}>
-                                              <Package className="h-4 w-4" />
-                                            </div>
-                                            <div className="flex flex-col min-w-0">
-                                              <span className="font-medium truncate">{product.name}</span>
-                                            </div>
-                                          </button>
-                                        ))}
-                                      </div>
                                     </div>
-                                  )}
+                                  </PopoverAnchor>
 
-                                  {/* Indicador de Carregamento Dinâmico */}
-                                  {isSearchingProducts && (
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                      <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                                  <PopoverContent 
+                                    className="p-1 w-[var(--radix-popover-trigger-width)] max-h-64 overflow-auto custom-scrollbar border shadow-2xl z-[1000] rounded-xl bg-card"
+                                    align="start"
+                                    sideOffset={5}
+                                    onOpenAutoFocus={(e) => e.preventDefault()}
+                                  >
+                                    <div className="p-1 space-y-1">
+                                      {products.map((product, index) => (
+                                        <button
+                                          key={product.id}
+                                          type="button"
+                                          onClick={() => {
+                                            setSelectedProduct(product);
+                                            if (product.unit) {
+                                              setNewProductUnit(product.unit);
+                                            }
+                                            setProductSearch("");
+                                            setShowProductSuggestions(false);
+                                            setHighlightedProductIndex(-1);
+                                            setTimeout(() => {
+                                              quantityInputRef.current?.focus();
+                                              quantityInputRef.current?.select();
+                                            }, 50);
+                                          }}
+                                          onMouseEnter={() => setHighlightedProductIndex(index)}
+                                          className={cn(
+                                            "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
+                                            (highlightedProductIndex === index)
+                                              ? "bg-brand/10 text-brand"
+                                              : cn(
+                                                ds.colors.surface.hover,
+                                                ds.colors.text.primary
+                                              ),
+                                          )}
+                                        >
+                                          <div className={cn(
+                                            "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
+                                            highlightedProductIndex === index
+                                              ? "bg-brand/20 text-brand"
+                                              : cn(
+                                                ds.colors.surface.section,
+                                                ds.colors.text.secondary
+                                              )
+                                          )}>
+                                            <Package className="h-4 w-4" />
+                                          </div>
+                                          <div className="flex flex-col min-w-0">
+                                            <span className="font-medium truncate text-xs sm:text-sm">{product.name}</span>
+                                          </div>
+                                        </button>
+                                      ))}
                                     </div>
-                                  )}
+                                  </PopoverContent>
+                                </Popover>
 
                                   {/* Estado Vazio/Nenhum Resultado - Com opção de cadastro rápido */}
                                   {showProductSuggestions && productSearch.length >= 1 && products.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
@@ -923,7 +925,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       }}
                                     />
                                   )}
-                                </div>
                               </div>
 
                               {/* Quantidade e Unidade */}
@@ -1016,7 +1017,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           </div>
 
                           {/* Lista de Produtos - Lado Direito */}
-                          <div className="flex flex-col space-y-4 h-full min-h-0 overflow-hidden">
+                          <div className="flex flex-col space-y-4 h-full min-h-0 overflow-hidden relative z-[10]">
                             <div className="pb-1 border-b border-border/50 flex-shrink-0">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
