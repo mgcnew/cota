@@ -14,6 +14,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -96,6 +104,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
 
   // New item states
+  const [showMobileCart, setShowMobileCart] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("un");
@@ -472,15 +481,38 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             </div>
           </div>
 
-          <Button 
-            type="button" 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => handleOpenChange(false)}
-            className={cn(ds.components.button.ghost, ds.components.button.size.icon, "ml-2")}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            {isMobile && activeStep === "produtos" && itens.length > 0 && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowMobileCart(true)}
+                className="relative h-10 w-10 border-brand/20 bg-brand/5 text-brand hover:bg-brand/10 hover:text-brand transition-colors"
+                title="Ver itens adicionados"
+              >
+                <Package className="h-5 w-5" />
+                <Badge 
+                  className={cn(
+                    "absolute -top-2 -right-2 h-5 min-w-[20px] flex items-center justify-center px-1 rounded-full",
+                    "bg-red-500 text-white border-2 border-white",
+                    "text-[10px] font-bold shadow-sm"
+                  )}
+                >
+                  {itens.length}
+                </Badge>
+              </Button>
+            )}
+
+            <Button 
+              type="button" 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => handleOpenChange(false)}
+              className={cn(ds.components.button.ghost, ds.components.button.size.icon, "ml-2")}
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
         
         <div className="mt-4">
@@ -706,7 +738,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               </Card>
 
               {/* Lista de Itens */}
-              <Card className={cn(ds.components.card.root, "min-h-[200px] max-h-[350px] lg:max-h-none lg:h-full flex flex-col overflow-hidden")}>
+              <Card className={cn(ds.components.card.root, "hidden lg:flex flex-col min-h-[200px] max-h-[350px] lg:max-h-none lg:h-full overflow-hidden")}>
                 <CardHeader className={cn(ds.components.card.header, "flex-shrink-0")}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
                     <span className="flex items-center gap-2">
@@ -1267,22 +1299,114 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   );
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent 
-        className={cn(
-          "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
-          ds.colors.surface.page,
-          ds.colors.border.default,
-          // Mobile: Full Screen
-          isMobile 
-            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0 p-0" 
-            : "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] rounded-2xl"
-        )}
-        onKeyDown={handleKeyDown}
-        hideClose={isMobile} // Custom close button is in header
-      >
-        {content}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent 
+          className={cn(
+            "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
+            ds.colors.surface.page,
+            ds.colors.border.default,
+            // Mobile: Full Screen
+            isMobile 
+              ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0 p-0" 
+              : "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] rounded-2xl"
+          )}
+          onKeyDown={handleKeyDown}
+          hideClose={isMobile} // Custom close button is in header
+        >
+          {content}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Mobile Shopping Cart Drawer */}
+      <Drawer open={showMobileCart && isMobile} onOpenChange={setShowMobileCart}>
+        <DrawerContent className={cn("max-h-[85vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default)}>
+          <DrawerHeader className="text-left border-b border-border/40 pb-4">
+            <div className="flex items-center justify-between">
+              <DrawerTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, "flex items-center gap-2")}>
+                <Package className="h-5 w-5 text-brand" />
+                Itens do Pedido
+              </DrawerTitle>
+              <Badge variant="secondary" className="bg-brand/10 text-brand hover:bg-brand/20 border-brand/20">
+                {itens.length} itens
+              </Badge>
+            </div>
+            <DrawerDescription className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+              Revise e gerencie os itens do seu pedido
+            </DrawerDescription>
+          </DrawerHeader>
+          
+          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+            {itens.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-center">
+                <Package className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                <p className="text-sm font-medium text-foreground">Nenhum produto adicionado</p>
+                <p className="text-xs text-muted-foreground mt-1">Busque e adicione produtos no formulário.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {itens.map((item, index) => (
+                  <div key={index} className={cn(
+                    "flex flex-col gap-2 p-3 rounded-lg border shadow-sm",
+                    "bg-background/50",
+                    ds.colors.border.default
+                  )}>
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="flex items-start gap-2 min-w-0 flex-1">
+                        <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-secondary text-secondary-foreground text-xs font-bold mt-0.5">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-bold text-foreground leading-tight">{item.produto}</p>
+                          <div className="flex items-center gap-1.5 mt-1 text-[12px] text-muted-foreground flex-wrap">
+                            <span className="bg-secondary/50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                              {item.quantidade} <span className="opacity-70">{item.unidade}</span>
+                            </span>
+                            <span>×</span>
+                            <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
+                              {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => {
+                          setItens(itens.filter((_, i) => i !== index));
+                          if (itens.length === 1) setShowMobileCart(false); // Fecha se remover o último
+                        }}
+                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex justify-end items-center pt-2 border-t border-border/40 mt-1">
+                       <p className="text-[14px] font-bold text-foreground">
+                         R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                       </p>
+                    </div>
+                  </div>
+                )).reverse()}
+              </div>
+            )}
+          </div>
+          
+          <div className="p-4 border-t border-border bg-background/50 flex-shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+             <div className="flex justify-between items-center mb-4">
+               <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total do Pedido</span>
+               <span className="text-xl font-bold text-brand">
+                 R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
+               </span>
+             </div>
+             <DrawerClose asChild>
+              <Button className={cn(ds.components.button.primary, "w-full h-11")} onClick={() => setShowMobileCart(false)}>
+                Continuar Editando
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
