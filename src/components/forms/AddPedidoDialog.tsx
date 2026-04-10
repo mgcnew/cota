@@ -570,7 +570,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         {/* Step: Produtos */}
         {activeStep === "produtos" && (
           <div className="h-full p-6 overflow-y-auto custom-scrollbar">
-            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 h-full">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 pb-60 lg:pb-0">
               
               {/* Adicionar Produto */}
               <Card className={cn(ds.components.card.root, "overflow-visible")}>
@@ -846,8 +846,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {/* Step: Fornecedor */}
         {activeStep === "fornecedor" && (
-          <div className="h-full p-6 overflow-visible">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full content-start overflow-visible">
+          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 content-start pb-60 lg:pb-0">
               
               {/* Selecionar Fornecedor */}
               <Card className={cn(ds.components.card.root, "overflow-visible")}>
