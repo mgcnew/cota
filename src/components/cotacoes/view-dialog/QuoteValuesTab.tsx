@@ -1,7 +1,16 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import { Package } from "lucide-react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2 } from "lucide-react";
+import { 
+  Drawer, 
+  DrawerClose, 
+  DrawerContent, 
+  DrawerDescription, 
+  DrawerFooter, 
+  DrawerHeader, 
+  DrawerTitle 
+} from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -382,8 +391,7 @@ export function QuoteValuesTab({
     <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
       {/* Sidebar - Lista de Fornecedores */}
       <div className={cn(
-        "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10",
-        isMobile && showMobileValues ? "hidden" : "flex"
+        "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10 h-full",
       )}>
         <div className="p-3 border-b border-border/50 bg-card/50">
           <div className="flex items-center gap-2 mb-3">
@@ -505,20 +513,9 @@ export function QuoteValuesTab({
           )}
         </div>
       </div>
-
-      {/* Área Principal - Valores */}
-      <div className={cn(
-        "flex-1 flex flex-col bg-background overflow-hidden",
-        isMobile && !showMobileValues ? "hidden" : "flex"
-      )}>
-        {isMobile && (
-          <div className="flex items-center gap-2 p-4 border-b border-border/50 bg-card">
-            <Button variant="ghost" className="h-9 px-2 rounded-xl" onClick={() => setShowMobileValues(false)}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              <span className="text-xs font-bold">Trocar Fornecedor</span>
-            </Button>
-          </div>
-        )}
+      {/* Área Principal - Valores (Desktop) */}
+      {!isMobile && (
+        <div className="flex-1 flex flex-col bg-background overflow-hidden">
 
         {selectedSupplier ? (
           <>
@@ -903,9 +900,215 @@ export function QuoteValuesTab({
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
             <Building2 className="h-12 w-12 text-zinc-400 mb-6" />
             <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase">Selecione um fornecedor</h3>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase max-w-[200px] mt-2 leading-relaxed">Clique em um fornecedor na lista ao lado para iniciar a negociação.</p>
           </div>
         )}
       </div>
+      )}
+
+      {/* Mobile Negotiate Drawer (Cart Pattern) */}
+      {isMobile && (
+        <Drawer open={showMobileValues && !!selectedSupplier} onOpenChange={setShowMobileValues}>
+          <DrawerContent className="max-h-[95vh] flex flex-col bg-background">
+            <DrawerHeader className="border-b border-border/10 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 pr-2 overflow-hidden">
+                  <div className="p-2 rounded-xl bg-brand/10 shrink-0">
+                    <Building2 className="h-5 w-5 text-brand" />
+                  </div>
+                  <div className="min-w-0">
+                    <DrawerTitle className="text-sm font-black text-foreground uppercase tracking-tight truncate">
+                      {currentSupplier?.nome}
+                    </DrawerTitle>
+                    <DrawerDescription className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-2">
+                       Negociação Direta
+                       {currentSupplier?.phone && (
+                          <span className="flex items-center gap-1 text-emerald-500">
+                            <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                            WhatsApp Ativo
+                          </span>
+                       )}
+                    </DrawerDescription>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Total</p>
+                  <p className="text-lg font-black text-brand tracking-tighter">
+                    {formatCurrency(calcularTotalFornecedor(selectedSupplier || ''))}
+                  </p>
+                </div>
+              </div>
+            </DrawerHeader>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 custom-scrollbar">
+               {otherOpenQuotes.length > 0 && (
+                  <div className="mb-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200/50 p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="h-4 w-4 text-amber-600" />
+                      <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-tight">
+                        {otherOpenQuotes.length} outras cotações vinculadas
+                      </span>
+                    </div>
+                    <button 
+                      onClick={() => setUseGroupedLink(!useGroupedLink)}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all shadow-sm",
+                        useGroupedLink 
+                          ? "bg-amber-600 text-white" 
+                          : "bg-white dark:bg-zinc-800 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800"
+                      )}
+                    >
+                      {useGroupedLink ? "Agrupado" : "Agrupar"}
+                    </button>
+                  </div>
+                )}
+
+                {filteredProducts.map((product: any, productIndex: number) => {
+                  const currentValue = getCurrentProductValue(selectedSupplier || '', product.product_id);
+                  const isEditing = editingProductId === product.product_id;
+                  const { bestSupplierId } = getBestPriceInfoForProduct(product.product_id);
+                  const isBest = currentValue > 0 && selectedSupplier === bestSupplierId;
+
+                  return (
+                    <div
+                      key={product.product_id}
+                      className={cn(
+                        "p-4 rounded-2xl border transition-all duration-200",
+                        isBest ? "bg-brand/5 border-brand/30 shadow-sm" : "bg-card/50 border-border/40"
+                      )}
+                    >
+                      <div className="flex items-start justify-between gap-3 mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-[13px] font-black text-foreground uppercase tracking-tight truncate leading-tight">
+                            {safeStr(product.product_name)}
+                          </h4>
+                          <p className="text-[10px] font-bold text-zinc-500 uppercase mt-1">
+                            {product.quantidade} {product.unidade}
+                          </p>
+                        </div>
+                        {isBest && (
+                          <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full text-[10px] font-black shadow-lg shadow-brand/20">
+                            🏆
+                          </div>
+                        )}
+                      </div>
+
+                      {isEditing ? (
+                        <div className="flex items-center gap-2 animate-in slide-in-from-bottom-2 duration-200">
+                           <div className="flex-1 relative group/input">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 group-focus-within/input:text-brand">R$</span>
+                            <Input
+                              ref={editInputRef}
+                              type="text"
+                              inputMode="numeric"
+                              value={editedValues[product.product_id] || ""}
+                              onChange={(e) => handleInputChange(product.product_id, e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === 'Tab') {
+                                  e.preventDefault();
+                                  const nextProduct = products[productIndex + 1];
+                                  handleSaveEdit(product.product_id, nextProduct?.product_id);
+                                }
+                                if (e.key === 'Escape') handleCancelEdit();
+                              }}
+                              className="w-full h-11 pl-9 rounded-xl font-black text-lg border-brand/50 bg-background focus:ring-1 focus:ring-brand shadow-inner"
+                              autoFocus
+                            />
+                          </div>
+                          <Button 
+                            size="icon" 
+                            className="h-11 w-11 rounded-xl bg-brand text-black shadow-lg shadow-brand/20 active:scale-95 transition-transform" 
+                            onClick={() => handleSaveEdit(product.product_id)}
+                          >
+                            <Check className="h-6 w-6 stroke-[3.5px]" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div 
+                          className="flex items-center justify-between bg-background/50 border border-border/30 rounded-xl p-3 cursor-pointer hover:border-brand/30 transition-colors"
+                          onClick={() => handleStartEdit(product.product_id, currentValue)}
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Valor Unitário</span>
+                            <span className={cn(
+                              "text-lg font-black tracking-tight",
+                              currentValue > 0 ? (isBest ? "text-brand" : "text-foreground") : "text-zinc-300"
+                            )}>
+                              {currentValue > 0 ? formatCurrency(currentValue) : "Definir Valor"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             {(() => {
+                                const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                const isFromSupplier = itemData?.updated_by_type === 'fornecedor';
+                                return (
+                                  <div className={cn(
+                                    "px-2 py-1 rounded-md text-[9px] font-black uppercase border shadow-sm",
+                                    isFromSupplier 
+                                      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                                      : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                                  )}>
+                                    {isFromSupplier ? "Portal" : "Manual"}
+                                  </div>
+                                );
+                             })()}
+                             <div className="p-1.5 rounded-lg bg-brand/10 text-brand border border-brand/20">
+                               <Edit2 className="h-3.5 w-3.5" />
+                             </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {isEditing && product.unidade?.toUpperCase().startsWith('CX') && (
+                        <div className="mt-2 flex items-center gap-2 animate-in slide-in-from-top-2">
+                           <div className="flex-1 relative group/qtd">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2">
+                                <Package className="h-3.5 w-3.5 text-amber-500" />
+                              </span>
+                              <Input
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="Produtos por caixa..."
+                                value={editedQtdPerBox[product.product_id] || ""}
+                                onChange={(e) => {
+                                  const val = e.target.value.replace(/\D/g, "");
+                                  setEditedQtdPerBox(prev => ({ ...prev, [product.product_id]: val }));
+                                }}
+                                className="w-full h-9 pl-9 rounded-lg font-bold text-xs border-amber-300/50 bg-amber-50/30 focus:border-amber-500"
+                              />
+                           </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                <div className="py-8 text-center opacity-40">
+                  <Package className="h-8 w-8 mx-auto mb-2 text-zinc-300" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Fim da Lista de Produtos</p>
+                </div>
+            </div>
+
+            <DrawerFooter className="border-t border-border/10 p-4 bg-card/30">
+              <div className="flex gap-3">
+                <DrawerClose asChild>
+                  <Button variant="outline" className="flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest bg-background border-border shadow-sm">
+                    Fechar
+                  </Button>
+                </DrawerClose>
+                <Button 
+                  variant="default" 
+                  className="flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest bg-brand text-black shadow-lg shadow-brand/20"
+                  onClick={(e) => handleWhatsApp(e, selectedSupplier || '', currentSupplier?.nome || '', currentSupplier?.contact || currentSupplier?.contato, currentSupplier?.phone, currentSupplier?.accessToken)}
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </Button>
+              </div>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      )}
     </div>
   );
 }
