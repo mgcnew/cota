@@ -7,7 +7,6 @@ import * as z from "zod";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { designSystem, designSystem as ds } from "@/styles/design-system";
 import {
   Dialog,
@@ -17,12 +16,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerTrigger,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+
 import {
   Form,
   FormControl,
@@ -160,7 +154,6 @@ interface AddQuoteDialogProps {
 export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddQuoteDialogProps) {
   console.log("[AddQuoteDialog] Componente renderizado. Open state:", externalOpen);
   const isMobile = useIsMobile();
-  const keyboardOffset = useKeyboardOffset();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
@@ -1668,36 +1661,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     </>
   );
 
-  // Mobile: Usar Drawer
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={setOpen}>
-        {trigger && (
-          <DrawerTrigger asChild>
-            {trigger}
-          </DrawerTrigger>
-        )}
-        <DrawerContent
-          className={cn(
-            "rounded-t-2xl p-0 overflow-hidden flex flex-col",
-            ds.colors.surface.card,
-            ds.colors.border.default,
-            "border-t"
-          )}
-          style={{
-            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
-            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
-          }}
-        >
-          <DrawerTitle className="sr-only">Nova Cotação</DrawerTitle>
-          {modalInnerContent}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  // Desktop: Usar Dialog
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && (
@@ -1708,9 +1671,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       <DialogContent
         hideClose
         className={cn(
-          "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] p-0 flex flex-col [&>button]:hidden",
+          "p-0 flex flex-col [&>button]:hidden",
           designSystem.components.modal.content,
-          "rounded-xl sm:rounded-2xl border backdrop-blur-xl"
+          "border backdrop-blur-xl",
+          isMobile
+            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0"
+            : "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] rounded-xl sm:rounded-2xl"
         )}
         onKeyDown={handleModalKeyDown}
       >
