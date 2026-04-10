@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,18 +8,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Plus, Trash2, Loader2, Building2, Calendar, Package, FileText, 
   Save, ShoppingCart, X, Search, ClipboardList, Download,
-  DollarSign, Star, Trophy
+  DollarSign
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 
@@ -43,7 +42,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const { toast } = useToast();
   const { user } = useAuth();
   const isMobile = useIsMobile();
-  const keyboardOffset = useKeyboardOffset();
+
   
   const [activeTab, setActiveTab] = useState("itens");
   
@@ -388,7 +387,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     </div>
   );
 
-  // Footer content shared between Dialog and Drawer
+  // Footer content
   const footerContent = (
     <div className="flex items-center justify-between w-full">
       <Button 
@@ -415,1114 +414,465 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         ) : (
           <>
             <Save className="h-4 w-4" />
-            {isReadOnly ? 'Pedido Entregue' : 'Salvar Alterações'}
+            Salvar Alterações
           </>
         )}
       </Button>
     </div>
   );
 
-  // Mobile: Render as Drawer (bottom sheet)
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent 
-          className={cn(
-            "flex flex-col backdrop-blur-xl border-t rounded-t-3xl shadow-2xl animate-in slide-in-from-bottom duration-300",
-            ds.colors.surface.page,
-            ds.colors.border.default
-          )}
-          style={{ 
-            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
-            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
-          }}
-        >
-          <DrawerHeader className={cn(
-            "text-left border-b px-6 py-5 backdrop-blur-md flex-shrink-0",
-            ds.colors.surface.section,
-            ds.colors.border.default
-          )}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                {headerContent}
-              </div>
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className={cn(
+          "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
+          ds.colors.surface.page,
+          ds.colors.border.default,
+          // Mobile: Full Screen
+          isMobile 
+            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0 p-0" 
+            : "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[1000px] h-[95vh] sm:h-[90vh] max-h-[850px] rounded-2xl"
+        )}
+        hideClose={isMobile}
+      >
+        <div className={cn(
+          "flex-shrink-0 border-b px-6 py-5 flex items-center justify-between",
+          ds.colors.surface.section,
+          ds.colors.border.default
+        )}>
+          {headerContent}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleDownloadHtml}
+              className={cn(ds.components.button.ghost, "h-9 w-9 text-brand hover:text-brand hover:bg-brand/10")}
+              title="Exportar pedido"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            {isMobile && (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleDownloadHtml}
-                className={cn(ds.components.button.ghost, "h-9 w-9 text-brand hover:text-brand hover:bg-brand/10")}
-                title="Exportar pedido"
+                onClick={() => onOpenChange(false)}
+                className={cn(ds.components.button.ghost, "h-9 w-9")}
               >
-                <Download className="h-4 w-4" />
+                <X className="h-4 w-4" />
               </Button>
-            </div>
-          </DrawerHeader>
-          
-          {/* Tabs com design refinado para mobile */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <div className="px-4 pt-4 flex-shrink-0">
-              <TabsList className={cn(
-                ds.components.tabs.clean.list,
-                "grid grid-cols-2 gap-1 h-12 p-1"
-              )}>
-                <TabsTrigger value="itens" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
-                  <Package className="h-3.5 w-3.5" />Itens
-                </TabsTrigger>
-                <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-1")}>
-                  <ClipboardList className="h-3.5 w-3.5" />Resumo
-                </TabsTrigger>
-              </TabsList>
-            </div>
+            )}
+          </div>
+        </div>
 
-            {/* Tab: Itens (Edição) */}
-            <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
-              <div className="space-y-4">
-                {/* Card de Detalhes do Pedido */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <div className="px-6 pt-4 flex-shrink-0">
+            <TabsList className={cn(
+              ds.components.tabs.clean.list,
+              "grid grid-cols-2 gap-1 h-11 p-1"
+            )}>
+              <TabsTrigger value="itens" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
+                <Package className="h-4 w-4" />Itens do Pedido
+              </TabsTrigger>
+              <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
+                <ClipboardList className="h-4 w-4" />Resumo e Dados
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="itens" className="flex-1 overflow-auto m-0 p-6 custom-scrollbar">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className={ds.components.card.root}>
                   <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-4">
                       <div className={ds.components.input.group}>
                         <Label className={ds.components.input.label}>Fornecedor</Label>
                         <Select value={fornecedor} onValueChange={setFornecedor} disabled={isReadOnly}>
-                          <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
+                          <SelectTrigger className={cn(ds.components.input.root, "h-11")}>
                             <SelectValue placeholder="Selecione" />
                           </SelectTrigger>
                           <SelectContent className={cn(
                             ds.colors.surface.card,
                             ds.colors.border.default,
-                            "border backdrop-blur-xl"
+                            "border shadow-xl backdrop-blur-xl"
                           )}>
                             {suppliers.map(s => (
-                              <SelectItem 
-                                key={s.id} 
-                                value={s.id} 
-                                className={cn(
-                                  ds.typography.size.sm,
-                                  ds.typography.weight.bold
-                                )}
-                              >
-                                {s.name}
-                              </SelectItem>
+                              <SelectItem key={s.id} value={s.id} className="font-bold">{s.name}</SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
                       <div className={ds.components.input.group}>
-                        <Label className={ds.components.input.label}>Entrega</Label>
+                        <Label className={ds.components.input.label}>Data de Entrega</Label>
                         <Input 
                           type="date" 
                           value={dataEntrega} 
                           onChange={e => setDataEntrega(e.target.value)} 
                           onFocus={handleInputFocus}
                           disabled={isReadOnly}
-                          className={cn(ds.components.input.root, "h-10")} 
+                          className={cn(ds.components.input.root, "h-11 shadow-sm")} 
                         />
                       </div>
                     </div>
-                    
-                    {!isReadOnly && (
-                      <div className={cn(
-                        "pt-4 border-t space-y-3",
-                        ds.colors.border.default
-                      )}>
-                        <Label className={cn(
-                          ds.components.input.label,
-                          "text-brand"
-                        )}>Adicionar Produto</Label>
-                        <div className="relative overflow-visible">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-                          <Input
-                            ref={newProductInputRef}
-                            placeholder="Buscar produto..."
-                            value={newProductSearch}
-                            onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
-                            onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                            onFocus={(e) => {
-                              if (newProductSearch.trim().length >= 3) {
-                                setShowProductSuggestions(true);
-                              }
-                              handleInputFocus(e);
-                            }}
-                            className={cn(ds.components.input.root, "pl-10 h-10")}
-                          />
-                          {showProductSuggestions && products.length > 0 && !newProduct && (
-                            <div className={cn(
-                              "absolute top-full left-0 right-0 mt-1 max-h-[200px] overflow-y-auto rounded-xl shadow-2xl z-[200] animate-in fade-in zoom-in-95 duration-200 border custom-scrollbar",
-                              ds.colors.surface.card,
-                              ds.colors.border.default
-                            )}>
-                              {filteredNewProducts.map((p, idx) => (
-                                <button
-                                  key={p.id}
-                                  onClick={() => { 
-                                    setNewProduct(p); 
-                                    setNewProductSearch(p.name); 
-                                    setNewProductUnit(p.unit || 'un');
-                                    setProducts([]);
-                                    newQuantityInputRef.current?.focus(); 
-                                  }}
-                                  className={cn(
-                                    "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
-                                    highlightedIndex === idx 
-                                      ? "bg-brand/10 text-brand" 
-                                      : ds.colors.surface.hover,
-                                    ds.colors.border.default,
-                                    "border-b last:border-none"
-                                  )}
-                                >
-                                  <div className="flex flex-col min-w-0 flex-1">
-                                    <span className={cn(
-                                      ds.typography.size.sm,
-                                      ds.typography.weight.bold,
-                                      "truncate"
-                                    )}>{p.name}</span>
-                                    {p.unit && (
-                                      <span className={cn(
-                                        ds.typography.size.xs,
-                                        ds.colors.text.secondary,
-                                        "mt-0.5"
-                                      )}>{p.unit}</span>
-                                    )}
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
+                  </CardContent>
+                </Card>
 
-                          {showProductSuggestions && newProductSearch.trim().length >= 3 && filteredNewProducts.length === 0 && !newProduct && !loading && (
-                            <div className={cn(
-                              "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl p-4 text-center z-[100] animate-in fade-in zoom-in-95",
-                              ds.colors.surface.card,
-                              ds.colors.border.default,
-                              "border"
-                            )}>
-                              <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>Nenhum produto encontrado</p>
-                            </div>
-                          )}
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-4")}>
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Status do Pedido</Label>
+                      <Select value={status} onValueChange={setStatus} disabled={isReadOnly}>
+                        <SelectTrigger className={cn(ds.components.input.root, "h-11")}>
+                          <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent className={cn(
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "border shadow-xl backdrop-blur-xl"
+                        )}>
+                          {statusOptions.map(opt => (
+                            <SelectItem key={opt.value} value={opt.value} className="font-bold">{opt.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {!isReadOnly && (
+                <Card className={cn(ds.components.card.root, "border-brand/20 bg-brand/5 shadow-sm overflow-visible")}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-4 pt-4 overflow-visible")}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+                        <Plus className="h-4 w-4 text-zinc-950" />
+                      </div>
+                      <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, "text-brand uppercase tracking-wider")}>
+                        Adicionar Novo Item
+                      </span>
+                    </div>
+                    
+                    <div className="relative overflow-visible">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                      <Input
+                        ref={newProductInputRef}
+                        placeholder="Pesquisar produto no catálogo..."
+                        value={newProductSearch}
+                        onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
+                        onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
+                        onFocus={(e) => {
+                          if (newProductSearch.trim().length >= 3) setShowProductSuggestions(true);
+                          handleInputFocus(e);
+                        }}
+                        className={cn(ds.components.input.root, "pl-10 h-11 bg-background/50")}
+                      />
+                      
+                      {showProductSuggestions && products.length > 0 && !newProduct && (
+                        <div className={cn(
+                          "absolute top-full left-0 right-0 mt-2 max-h-[250px] overflow-y-auto rounded-xl shadow-2xl z-[200] border animate-in fade-in zoom-in-95 duration-200 custom-scrollbar",
+                          ds.colors.surface.card,
+                          ds.colors.border.default
+                        )}>
+                          {filteredNewProducts.map((p, idx) => (
+                            <button
+                              key={p.id}
+                              onClick={() => { 
+                                setNewProduct(p); 
+                                setNewProductSearch(p.name); 
+                                setNewProductUnit(p.unit || 'un');
+                                setProducts([]);
+                                newQuantityInputRef.current?.focus(); 
+                              }}
+                              className={cn(
+                                "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all border-b last:border-none",
+                                highlightedIndex === idx ? "bg-brand/10 text-brand" : ds.colors.surface.hover,
+                                ds.colors.border.default
+                              )}
+                            >
+                              <div className="flex flex-col min-w-0">
+                                <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, "truncate")}>{p.name}</span>
+                                <span className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>{p.unit || 'un'}</span>
+                              </div>
+                            </button>
+                          ))}
                         </div>
-                        <div className="grid grid-cols-6 gap-2">
-                          <Input
-                            ref={newQuantityInputRef}
-                            type="number"
-                            placeholder="Qtd"
-                            value={newQuantity}
-                            onChange={(e) => setNewQuantity(e.target.value)}
-                            onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                            className={cn(ds.components.input.root, "col-span-2 text-center")}
-                          />
-                          <div className="col-span-2">
-                            <Select value={newProductUnit} onValueChange={setNewProductUnit}>
-                              <SelectTrigger className={cn(ds.components.input.root, "h-10 px-2")}>
-                                <SelectValue placeholder="Un" />
-                              </SelectTrigger>
-                              <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border backdrop-blur-xl")}>
-                                {['un', 'kg', 'pct', 'cx', 'g', 'l', 'ml'].map(u => (
-                                  <SelectItem key={u} value={u} className="text-xs uppercase font-bold">{u}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-7 gap-3">
+                      <div className="col-span-3 lg:col-span-2">
+                        <Input
+                          ref={newQuantityInputRef}
+                          type="number"
+                          placeholder="Quantidade"
+                          value={newQuantity}
+                          onChange={(e) => setNewQuantity(e.target.value)}
+                          onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
+                          onFocus={handleInputFocus}
+                          className={cn(ds.components.input.root, "h-11 text-center")}
+                        />
+                      </div>
+                      <div className="col-span-2 lg:col-span-2">
+                        <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                          <SelectTrigger className={cn(ds.components.input.root, "h-11")}>
+                            <SelectValue placeholder="Un" />
+                          </SelectTrigger>
+                          <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border shadow-xl")}>
+                            {['un', 'kg', 'pct', 'cx', 'g', 'l', 'ml', 'metade'].map(u => (
+                              <SelectItem key={u} value={u} className="font-bold uppercase">{u}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-2 lg:col-span-2">
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500">R$</span>
                           <Input
                             ref={newPriceInputRef}
                             placeholder="Preço"
                             value={newPrice}
                             onChange={(e) => setNewPrice(e.target.value)}
                             onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                            className={cn(ds.components.input.root, "col-span-1 text-center px-1")}
+                            onFocus={handleInputFocus}
+                            className={cn(ds.components.input.root, "pl-8 h-11 text-center font-bold")}
                           />
-                          <Button 
-                            onClick={handleAddNewItem} 
-                            size="icon" 
-                            className={cn(ds.components.button.primary, "h-10 w-10 flex-shrink-0")}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </Button>
                         </div>
                       </div>
-                    )}
+                      <Button 
+                        onClick={handleAddNewItem} 
+                        className={cn(ds.components.button.primary, "h-11 col-span-7 lg:col-span-1")}
+                      >
+                        <Plus className="h-4 w-4 mr-2 lg:mr-0" />
+                        <span className="lg:hidden">Adicionar Item</span>
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
+              )}
 
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={cn(
-                    ds.typography.size.sm,
-                    ds.typography.weight.bold,
-                    ds.colors.text.secondary,
-                    "uppercase tracking-wider"
-                  )}>Itens do Pedido</span>
-                  <Badge className={cn(
-                    ds.components.badge.base,
-                    "bg-brand/10 text-brand border-brand/20"
-                  )}>
-                    {itens.length}
-                  </Badge>
+                  <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                    <Package className="h-4 w-4 text-zinc-500" />
+                  </div>
+                  <h3 className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider")}>
+                    Lista de Produtos
+                  </h3>
                 </div>
-                
-                <div className="space-y-2 pb-4">
-                  {itens.length === 0 ? (
-                    <div className={cn(
-                      "text-center py-12 border border-dashed rounded-xl flex flex-col items-center justify-center",
-                      ds.colors.border.default,
-                      ds.colors.surface.section
-                    )}>
-                      <Package className="h-8 w-8 opacity-20 mb-2" />
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.secondary,
-                        "uppercase tracking-wider"
-                      )}>Nenhum item</p>
-                    </div>
-                  ) : itens.map((item, index) => (
-                    <Card key={index} className={ds.components.card.root}>
-                      <CardContent className={cn(ds.components.card.body, "flex items-center gap-3 py-3")}>
-                        <div className="flex-1 min-w-0">
-                          <p className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            ds.colors.text.primary,
-                            "truncate"
-                          )}>{item.produto}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={cn(
-                              ds.typography.size.xs,
-                              ds.typography.weight.bold,
-                              item.valorUnitario > 0 ? "text-brand" : "text-zinc-500 italic"
-                            )}>
-                              {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
-                            </span>
-                            <span className={cn(
-                              ds.typography.size.xs,
-                              ds.typography.weight.bold,
-                              ds.colors.text.secondary
-                            )}>× {item.quantidade} {item.unidade}</span>
-                          </div>
+                <Badge className={cn(ds.components.badge.base, "bg-brand/10 text-brand border-brand/20 px-3 py-1")}>
+                  {itens.length} {itens.length === 1 ? 'Item' : 'Itens'}
+                </Badge>
+              </div>
+
+              <div className="space-y-3">
+                {itens.map((item, index) => (
+                  <Card key={index} className={cn(
+                    ds.components.card.root,
+                    "hover:shadow-md transition-shadow group overflow-hidden border-l-4",
+                    item.valorUnitario > 0 ? "border-l-brand" : "border-l-zinc-300 dark:border-l-zinc-700"
+                  )}>
+                    <CardContent className={cn(ds.components.card.body, "flex items-center gap-4 py-4")}>
+                      <div className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-bold",
+                        ds.colors.surface.section,
+                        ds.colors.text.secondary
+                      )}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
+                          {item.produto}
+                        </p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, item.valorUnitario > 0 ? "text-brand" : "text-zinc-500 italic")}>
+                            {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                          </span>
+                          <span className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+                            × {item.quantidade} {item.unidade}
+                          </span>
                         </div>
-                        <div className="text-right">
-                          <p className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            ds.colors.text.primary
-                          )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                        </div>
+                      </div>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>
+                          R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        </p>
                         {!isReadOnly && (
                           <Button 
                             variant="ghost" 
                             size="icon" 
                             onClick={() => setItens(itens.filter((_, i) => i !== index))} 
-                            className={cn(ds.components.button.danger, "h-8 w-8")}
+                            className={cn(ds.components.button.danger, "h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity")}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
-                {/* Total Mobile */}
-                <Card className={cn(
-                  ds.components.card.root,
-                  "bg-brand/5 border-brand/20"
-                )}>
-                  <CardContent className={cn(ds.components.card.body, "flex justify-between items-center")}>
-                    <div className="flex flex-col">
-                      <span className={cn(
-                        ds.typography.size.xs,
-                        ds.typography.weight.bold,
-                        "text-brand",
-                        "uppercase tracking-wider mb-1"
-                      )}>Total do Pedido</span>
-                      <div className="flex items-baseline gap-1">
-                        <span className={cn(
-                          ds.typography.size.sm,
-                          ds.typography.weight.bold,
-                          ds.colors.text.secondary,
-                          "uppercase"
-                        )}>R$</span>
-                        <span className={cn(
-                          ds.typography.size["2xl"],
-                          ds.typography.weight.bold,
-                          ds.colors.text.primary
-                        )}>
-                          {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </span>
                       </div>
-                    </div>
-                    <div className={cn(
-                      "w-12 h-12 rounded-xl flex items-center justify-center",
-                      "bg-brand text-zinc-950 shadow-lg shadow-brand/20"
-                    )}>
-                      <DollarSign className="h-6 w-6" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            {/* Tab: Resumo (Visualização) */}
-            <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-4 custom-scrollbar">
-              <div className="space-y-4">
-                {/* Cards de resumo mobile */}
-                <div className="grid grid-cols-2 gap-3">
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-                          <Building2 className="h-4 w-4 text-brand" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          ds.colors.text.secondary,
-                          "uppercase tracking-wider"
-                        )}>Fornecedor</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary,
-                        "truncate"
-                      )}>{selectedSupplier?.name || pedido?.fornecedor || '-'}</p>
                     </CardContent>
                   </Card>
-                  
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                          <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "text-blue-600 dark:text-blue-400",
-                          "uppercase tracking-wider"
-                        )}>Entrega</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary
-                      )}>{formatDate(dataEntrega || pedido?.dataEntrega)}</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                          <Package className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "text-purple-600 dark:text-purple-400",
-                          "uppercase tracking-wider"
-                        )}>Itens</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary
-                      )}>{itens.length} produto(s)</p>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className={cn(
-                    ds.components.card.root,
-                    "bg-brand/5 border-brand/20"
-                  )}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-2")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center">
-                          <DollarSign className="h-4 w-4 text-brand" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "text-brand",
-                          "uppercase tracking-wider"
-                        )}>Total</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.base,
-                        ds.typography.weight.bold,
-                        "text-brand"
-                      )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Status atual mobile */}
-                <Card className={ds.components.card.root}>
-                  <CardContent className={cn(
-                    ds.components.card.body,
-                    "flex flex-col items-center justify-center gap-3 py-6"
-                  )}>
-                    <span className={cn(
-                      ds.typography.size.xs,
-                      ds.typography.weight.bold,
-                      ds.colors.text.secondary,
-                      "uppercase tracking-wider"
-                    )}>Status do Pedido</span>
-                    {getStatusBadge(status || pedido?.status || 'pendente')}
-                  </CardContent>
-                </Card>
-
-                {/* Observações mobile */}
-                {observacoes && (
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-brand" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.sm,
-                          ds.typography.weight.bold,
-                          ds.colors.text.primary
-                        )}>Observações</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.colors.text.primary,
-                        "whitespace-pre-wrap leading-relaxed pl-10"
-                      )}>{observacoes}</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-
-          <DrawerFooter className={cn(
-            "border-t px-4 py-3 backdrop-blur-md flex-shrink-0",
-            ds.colors.surface.section,
-            ds.colors.border.default
-          )}>
-            {footerContent}
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  // Desktop: Render as Dialog (centered modal)
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
-        hideClose
-        className={cn(
-          "w-[95vw] max-w-[1100px] h-[85vh] max-h-[700px] overflow-hidden p-0 gap-0",
-          "backdrop-blur-xl shadow-2xl rounded-2xl [&>button]:hidden animate-in fade-in zoom-in-95 duration-300 flex flex-col",
-          ds.colors.surface.page,
-          ds.colors.border.default,
-          "border"
-        )}
-      >
-        {/* Tabs com design refinado */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          {/* Header compacto com Tabs integradas */}
-          <div className={cn(
-            "flex-shrink-0 border-b backdrop-blur-md",
-            ds.colors.surface.section,
-            ds.colors.border.default
-          )}>
-            {/* Top Bar: Título, Tabs e Botão Fechar */}
-            <div className="flex items-center justify-between px-6 py-4 h-16">
-              <div className="flex items-center gap-6 flex-1 min-w-0">
-                {/* Título */}
-                {headerContent}
-
-                {/* Tabs List Integrada na mesma linha */}
-                <TabsList className={cn(ds.components.tabs.clean.list, "ml-auto")}>
-                  <TabsTrigger value="itens" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
-                    <Package className="h-4 w-4" />Itens
-                  </TabsTrigger>
-                  <TabsTrigger value="resumo" className={cn(ds.components.tabs.clean.trigger, "gap-2")}>
-                    <ClipboardList className="h-4 w-4" />Resumo
-                  </TabsTrigger>
-                </TabsList>
+                ))}
               </div>
 
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleDownloadHtml}
-                  className={cn(ds.components.button.ghost, "h-9 w-9 text-brand hover:text-brand hover:bg-brand/10")}
-                  title="Exportar pedido"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-                
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => onOpenChange(false)} 
-                  className={cn(
-                    ds.components.button.ghost,
-                    ds.components.button.size.icon
-                  )}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Fechar</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Tab: Itens (Edição) */}
-          <TabsContent value="itens" className={cn(
-            "flex-1 overflow-hidden !m-0 p-0",
-            "data-[state=active]:flex data-[state=active]:flex-col"
-          )}>
-            <div className="flex-1 flex gap-0 overflow-hidden">
-              {/* Coluna Esquerda: Formulário de Detalhes e Adicionar Produto */}
-              <div className={cn(
-                "w-[320px] flex-shrink-0 flex flex-col overflow-y-auto custom-scrollbar p-6 gap-6",
-                ds.colors.surface.section
-              )}>
-                {/* Detalhes do Pedido */}
-                <div className="space-y-4">
-                  <h3 className={cn(
-                    ds.typography.size.sm,
-                    ds.typography.weight.bold,
-                    ds.colors.text.primary,
-                    "uppercase tracking-wider"
-                  )}>Detalhes do Pedido</h3>
-                  
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Fornecedor *</Label>
-                    <Select value={fornecedor} onValueChange={setFornecedor} disabled={isReadOnly}>
-                      <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
-                      <SelectContent className={cn(
-                        ds.colors.surface.card,
-                        ds.colors.border.default,
-                        "border backdrop-blur-xl"
-                      )}>
-                        {suppliers.map(s => (
-                          <SelectItem 
-                            key={s.id} 
-                            value={s.id} 
-                            className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold
-                            )}
-                          >
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Data de Entrega *</Label>
-                    <Input 
-                      type="date" 
-                      value={dataEntrega} 
-                      onChange={e => setDataEntrega(e.target.value)} 
-                      disabled={isReadOnly}
-                      className={cn(ds.components.input.root, "h-10")} 
-                    />
-                  </div>
-
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Status</Label>
-                    <Select value={status} onValueChange={setStatus} disabled={isReadOnly}>
-                      <SelectTrigger className={cn(ds.components.input.root, "h-10")}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className={cn(
-                        ds.colors.surface.card,
-                        ds.colors.border.default,
-                        "border backdrop-blur-xl"
-                      )}>
-                        {statusOptions.map(opt => (
-                          <SelectItem 
-                            key={opt.value} 
-                            value={opt.value}
-                            className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold
-                            )}
-                          >
-                            {opt.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Observações</Label>
-                    <Textarea 
-                      value={observacoes} 
-                      onChange={e => setObservacoes(e.target.value)} 
-                      placeholder="Observações sobre o pedido..."
-                      disabled={isReadOnly}
-                      className={cn(ds.components.input.root, "min-h-[80px] resize-none")}
-                    />
-                  </div>
-                </div>
-
-                {!isReadOnly && (
-                  <>
-                    {/* Divisor */}
-                    <div className={ds.components.separator.horizontal} />
-
-                    {/* Adicionar Produto */}
-                    <div className="space-y-4">
-                      <h3 className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        "text-brand",
-                        "uppercase tracking-wider"
-                      )}>Adicionar Produto</h3>
-                      
-                      <div className={ds.components.input.group}>
-                        <Label className={ds.components.input.label}>Produto</Label>
-                        <div className="relative group">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-                          <Input
-                            ref={newProductInputRef}
-                            placeholder="Buscar produto..."
-                            value={newProductSearch}
-                            onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
-                            onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
-                            className={cn(ds.components.input.root, "pl-10")}
-                          />
-                          {filteredNewProducts.length > 0 && !newProduct && (
-                            <div className={cn(
-                              "absolute z-50 w-full mt-2 rounded-xl shadow-xl max-h-48 overflow-auto custom-scrollbar",
-                              ds.colors.surface.card,
-                              ds.colors.border.default,
-                              "border"
-                            )}>
-                              {filteredNewProducts.map((p, idx) => (
-                                <button
-                                  key={p.id}
-                                  onClick={() => { 
-                                    setNewProduct(p); 
-                                    setNewProductSearch(p.name); 
-                                    setNewProductUnit(p.unit || 'un');
-                                    setProducts([]);
-                                    newQuantityInputRef.current?.focus(); 
-                                  }}
-                                  className={cn(
-                                    "w-full px-4 py-3 text-left flex items-center justify-between gap-3 transition-all",
-                                    highlightedIndex === idx 
-                                      ? "bg-brand/10 text-brand" 
-                                      : ds.colors.surface.hover,
-                                    ds.colors.border.default,
-                                    "border-b last:border-none"
-                                  )}
-                                >
-                                  <div className="flex flex-col min-w-0 flex-1">
-                                    <span className={cn(
-                                      ds.typography.size.sm,
-                                      ds.typography.weight.bold,
-                                      "truncate"
-                                    )}>{p.name}</span>
-                                    {p.brand_name && (
-                                      <span className={cn(
-                                        ds.typography.size.xs,
-                                        ds.colors.text.secondary
-                                      )}>{p.brand_name}</span>
-                                    )}
-                                  </div>
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className={ds.components.input.group}>
-                          <Label className={ds.components.input.label}>Qtd</Label>
-                          <Input
-                            ref={newQuantityInputRef}
-                            type="number"
-                            placeholder="0"
-                            value={newQuantity}
-                            onChange={(e) => setNewQuantity(e.target.value)}
-                            onKeyDown={(e) => handleNewItemKeyDown(e, 'quantity')}
-                            className={ds.components.input.root}
-                          />
-                        </div>
-                        <div className={ds.components.input.group}>
-                          <Label className={ds.components.input.label}>Unid.</Label>
-                          <Select value={newProductUnit} onValueChange={setNewProductUnit}>
-                            <SelectTrigger className={ds.components.input.root}>
-                              <SelectValue placeholder="Un" />
-                            </SelectTrigger>
-                            <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border backdrop-blur-xl")}>
-                              {['un', 'kg', 'pct', 'cx', 'g', 'l', 'ml'].map(u => (
-                                <SelectItem key={u} value={u} className="uppercase font-bold">{u}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className={ds.components.input.group}>
-                          <Label className={ds.components.input.label}>Preço Unit.</Label>
-                          <Input
-                            ref={newPriceInputRef}
-                            placeholder="0,00"
-                            value={newPrice}
-                            onChange={(e) => setNewPrice(e.target.value)}
-                            onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
-                            className={ds.components.input.root}
-                          />
-                        </div>
-                      </div>
-
-                      <Button 
-                        onClick={handleAddNewItem} 
-                        disabled={!newProduct || !newQuantity || !newPrice}
-                        className={cn(ds.components.button.primary, "w-full")}
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar Item
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Coluna Direita: Lista de Itens */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <div className={cn(
-                  "px-6 py-4 border-b flex items-center justify-between",
-                  ds.colors.border.default
-                )}>
+              {/* Total */}
+              <Card className={cn(ds.components.card.root, "bg-brand/5 border-brand/20")}>
+                <CardContent className={cn(ds.components.card.body, "flex items-center justify-between")}>
                   <div className="flex items-center gap-2">
-                    <h3 className={cn(
+                    <DollarSign className="h-5 w-5 text-brand" />
+                    <span className={cn(
                       ds.typography.size.sm,
                       ds.typography.weight.bold,
-                      ds.colors.text.primary,
+                      "text-brand",
                       "uppercase tracking-wider"
-                    )}>Itens do Pedido</h3>
-                    <Badge className={cn(
-                      ds.components.badge.base,
-                      "bg-brand/10 text-brand border-brand/20"
-                    )}>
-                      {itens.length}
-                    </Badge>
+                    )}>Total</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={cn(
-                      ds.typography.size.xs,
-                      ds.typography.weight.bold,
-                      ds.colors.text.secondary,
-                      "uppercase tracking-wider"
-                    )}>Total:</span>
-                    <span className={cn(
-                      ds.typography.size.base,
-                      ds.typography.weight.bold,
-                      "text-brand"
-                    )}>
-                      R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                </div>
-
-                <ScrollArea className="flex-1">
-                  <div className="p-6 space-y-3">
-                    {itens.length === 0 ? (
-                      <div className={cn(
-                        "text-center py-16 border border-dashed rounded-xl flex flex-col items-center justify-center",
-                        ds.colors.border.default,
-                        ds.colors.surface.section
-                      )}>
-                        <Package className="h-12 w-12 opacity-20 mb-3" />
-                        <p className={cn(
-                          ds.typography.size.sm,
-                          ds.typography.weight.bold,
-                          ds.colors.text.secondary,
-                          "uppercase tracking-wider"
-                        )}>Nenhum item adicionado</p>
-                      </div>
-                    ) : itens.map((item, index) => (
-                      <Card key={index} className={ds.components.card.root}>
-                        <CardContent className={cn(ds.components.card.body, "flex items-center gap-4 py-4")}>
-                          <div className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-                            "bg-brand/10 text-brand",
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold
-                          )}>
-                            {index + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold,
-                              ds.colors.text.primary,
-                              "truncate"
-                            )}>{item.produto}</p>
-                            <div className="flex items-center gap-3 mt-1">
-                              <span className={cn(
-                                ds.typography.size.xs,
-                                ds.typography.weight.bold,
-                                ds.colors.text.secondary
-                              )}>{item.quantidade} {item.unidade}</span>
-                              <span className={cn(
-                                ds.typography.size.xs,
-                                ds.colors.text.secondary
-                              )}>×</span>
-                              <span className={cn(
-                                ds.typography.size.xs,
-                                ds.typography.weight.bold,
-                                "text-brand"
-                              )}>R$ {item.valorUnitario.toFixed(2)}</span>
-                            </div>
-                          </div>
-                          <div className="text-right flex-shrink-0">
-                            <p className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold,
-                              ds.colors.text.primary
-                            )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                          </div>
-                          {!isReadOnly && (
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              onClick={() => setItens(itens.filter((_, i) => i !== index))} 
-                              className={cn(ds.components.button.danger, "h-9 w-9")}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+                  <p className={cn(
+                    ds.typography.size.base,
+                    ds.typography.weight.bold,
+                    "text-brand"
+                  )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
-          {/* Tab: Resumo (Visualização) */}
-          <TabsContent value="resumo" className={cn(
-            "flex-1 overflow-hidden !m-0 p-0",
-            "data-[state=active]:flex data-[state=active]:flex-col"
-          )}>
-            <ScrollArea className="flex-1">
-              <div className="p-4 space-y-4">
-                {/* Cards de Estatísticas */}
-                <div className="grid grid-cols-4 gap-4">
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
-                          <Building2 className="h-5 w-5 text-brand" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          ds.colors.text.secondary,
-                          "uppercase tracking-wider"
-                        )}>Fornecedor</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary,
-                        "truncate"
-                      )}>{selectedSupplier?.name || '-'}</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                          <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "text-blue-600 dark:text-blue-400",
-                          "uppercase tracking-wider"
-                        )}>Entrega</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary
-                      )}>{formatDate(dataEntrega)}</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                          <Package className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "text-purple-600 dark:text-purple-400",
-                          "uppercase tracking-wider"
-                        )}>Itens</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary
-                      )}>{itens.length} produto(s)</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className={cn(
-                    ds.components.card.root,
-                    "bg-brand/5 border-brand/20"
-                  )}>
-                    <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-brand/20 flex items-center justify-center">
-                          <DollarSign className="h-5 w-5 text-brand" />
-                        </div>
-                        <span className={cn(
-                          ds.typography.size.xs,
-                          ds.typography.weight.bold,
-                          "text-brand",
-                          "uppercase tracking-wider"
-                        )}>Total</span>
-                      </div>
-                      <p className={cn(
-                        ds.typography.size.lg,
-                        ds.typography.weight.bold,
-                        "text-brand"
-                      )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Lista de Itens */}
+          {/* Tab: Resumo */}
+          <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-6 custom-scrollbar">
+            <div className="space-y-4">
+              {/* Cards de Estatísticas */}
+              <div className={cn("grid gap-4", isMobile ? "grid-cols-2" : "grid-cols-4")}>
                 <Card className={ds.components.card.root}>
-                  <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                    <div className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-brand" />
-                      <h3 className={cn(
-                        ds.typography.size.sm,
-                        ds.typography.weight.bold,
-                        ds.colors.text.primary,
-                        "uppercase tracking-wider"
-                      )}>Itens do Pedido</h3>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {itens.map((item, index) => (
-                        <div 
-                          key={index} 
-                          className={cn(
-                            "flex items-center justify-between p-3 rounded-lg",
-                            ds.colors.surface.section
-                          )}
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className={cn(
-                              "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                              "bg-brand/10 text-brand",
-                              ds.typography.size.xs,
-                              ds.typography.weight.bold
-                            )}>
-                              {index + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className={cn(
-                                ds.typography.size.sm,
-                                ds.typography.weight.bold,
-                                ds.colors.text.primary,
-                                "truncate"
-                              )}>{item.produto}</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className={cn(
-                                  ds.typography.size.xs,
-                                  ds.colors.text.secondary
-                                )}>{item.quantidade} {item.unidade}</span>
-                                <span className={cn(
-                                  ds.typography.size.xs,
-                                  ds.colors.text.secondary
-                                )}>×</span>
-                                <span className={cn(
-                                  ds.typography.size.xs,
-                                  ds.typography.weight.bold,
-                                  "text-brand"
-                                )}>R$ {item.valorUnitario.toFixed(2)}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <p className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            ds.colors.text.primary
-                          )}>R$ {(item.quantidade * item.valorUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Status e Observações */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Card className={ds.components.card.root}>
-                    <CardContent className={cn(
-                      ds.components.card.body,
-                      "flex flex-col items-center justify-center gap-3 py-8"
-                    )}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center">
+                        <Building2 className="h-5 w-5 text-brand" />
+                      </div>
                       <span className={cn(
                         ds.typography.size.xs,
                         ds.typography.weight.bold,
                         ds.colors.text.secondary,
                         "uppercase tracking-wider"
-                      )}>Status do Pedido</span>
-                      {getStatusBadge(status)}
-                    </CardContent>
-                  </Card>
+                      )}>Fornecedor</span>
+                    </div>
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.primary,
+                      "truncate"
+                    )}>{selectedSupplier?.name || '-'}</p>
+                  </CardContent>
+                </Card>
 
-                  {observacoes && (
-                    <Card className={ds.components.card.root}>
-                      <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4 text-brand" />
-                          <span className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            ds.colors.text.primary
-                          )}>Observações</span>
-                        </div>
-                        <p className={cn(
-                          ds.typography.size.sm,
-                          ds.colors.text.primary,
-                          "whitespace-pre-wrap leading-relaxed"
-                        )}>{observacoes}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        "text-blue-600 dark:text-blue-400",
+                        "uppercase tracking-wider"
+                      )}>Entrega</span>
+                    </div>
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.primary
+                    )}>{formatDate(dataEntrega)}</p>
+                  </CardContent>
+                </Card>
+
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                        <Package className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        "text-emerald-600 dark:text-emerald-400",
+                        "uppercase tracking-wider"
+                      )}>Itens</span>
+                    </div>
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.typography.weight.bold,
+                      ds.colors.text.primary
+                    )}>{itens.length} produto(s)</p>
+                  </CardContent>
+                </Card>
+
+                <Card className={cn(ds.components.card.root, "bg-brand/5 border-brand/20")}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-brand/20 flex items-center justify-center">
+                        <DollarSign className="h-5 w-5 text-brand" />
+                      </div>
+                      <span className={cn(
+                        ds.typography.size.xs,
+                        ds.typography.weight.bold,
+                        "text-brand",
+                        "uppercase tracking-wider"
+                      )}>Total</span>
+                    </div>
+                    <p className={cn(
+                      ds.typography.size.lg,
+                      ds.typography.weight.bold,
+                      "text-brand"
+                    )}>R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </CardContent>
+                </Card>
               </div>
-            </ScrollArea>
-          </TabsContent>
 
-          {/* Footer */}
-          <div className={cn(
-            "flex-shrink-0 border-t px-6 py-4",
-            ds.colors.surface.section,
-            ds.colors.border.default
-          )}>
-            {footerContent}
-          </div>
+              {/* Status */}
+              <Card className={ds.components.card.root}>
+                <CardContent className={cn(
+                  ds.components.card.body,
+                  "flex flex-col items-center justify-center gap-3 py-8"
+                )}>
+                  <span className={cn(
+                    ds.typography.size.xs,
+                    ds.typography.weight.bold,
+                    ds.colors.text.secondary,
+                    "uppercase tracking-wider"
+                  )}>Status do Pedido</span>
+                  {getStatusBadge(status || pedido?.status || 'pendente')}
+                </CardContent>
+              </Card>
+
+              {/* Observações */}
+              {observacoes && (
+                <Card className={ds.components.card.root}>
+                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-brand" />
+                      <span className={cn(
+                        ds.typography.size.sm,
+                        ds.typography.weight.bold,
+                        ds.colors.text.primary
+                      )}>Observações</span>
+                    </div>
+                    <p className={cn(
+                      ds.typography.size.sm,
+                      ds.colors.text.primary,
+                      "whitespace-pre-wrap leading-relaxed"
+                    )}>{observacoes}</p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </TabsContent>
         </Tabs>
+
+        {/* Footer */}
+        <div className={cn(
+          "flex-shrink-0 border-t px-6 py-4",
+          ds.colors.surface.section,
+          ds.colors.border.default
+        )}>
+          {footerContent}
+        </div>
       </DialogContent>
     </Dialog>
   );

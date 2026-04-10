@@ -51,12 +51,12 @@ const DialogContent = React.forwardRef<
 >(({ className, children, hideClose, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-4">
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
           "relative z-50 w-full max-w-lg gap-4 border bg-background p-6 shadow-lg sm:rounded-lg overflow-hidden flex flex-col",
-          "max-h-[95vh]",
+          "max-h-full sm:max-h-[95vh]",
           className,
         )}
         {...props}

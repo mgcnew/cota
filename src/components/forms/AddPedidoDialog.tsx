@@ -6,13 +6,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -456,10 +449,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     </button>
   );
 
-  const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
-  const DialogHeaderComponent = isMobile ? DrawerHeader : DialogHeader;
-  const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
-  const DialogDescriptionComponent = isMobile ? DrawerDescription : DialogDescription;
+  const DialogHeaderComponent = DialogHeader;
+  const DialogTitleComponent = DialogTitle;
+  const DialogDescriptionComponent = DialogDescription;
 
   const content = (
     <>
@@ -1274,37 +1266,20 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     </>
   );
 
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerContent 
-          className={cn(
-            "flex flex-col p-0 gap-0 overflow-hidden border-t transition-all duration-200",
-            ds.colors.surface.page,
-            ds.colors.border.default
-          )}
-          style={{ 
-            height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
-            maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '95vh',
-            paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
-          }}
-        >
-          {content}
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent 
         className={cn(
-          "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px]",
-          "p-0 gap-0 overflow-hidden border shadow-md rounded-2xl flex flex-col",
+          "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
           ds.colors.surface.page,
-          ds.colors.border.default
+          ds.colors.border.default,
+          // Mobile: Full Screen
+          isMobile 
+            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0 p-0" 
+            : "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] rounded-2xl"
         )}
         onKeyDown={handleKeyDown}
+        hideClose={isMobile} // Custom close button is in header
       >
         {content}
       </DialogContent>
