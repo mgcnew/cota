@@ -592,8 +592,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         placeholder={isMobile ? "Tocar para buscar produto..." : "Buscar produto..."} 
                         value={selectedProduct ? selectedProduct.name : productSearch}
                         readOnly={isMobile}
-                        onClick={() => {
-                          if (isMobile) setShowMobileProductSearch(true);
+                        onClick={(e) => {
+                          if (isMobile) {
+                            e.currentTarget.blur();
+                            setShowMobileProductSearch(true);
+                          }
                         }}
                         onChange={(e) => { 
                           if (!isMobile) {
@@ -604,6 +607,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
                         onFocus={(e) => {
                           if (isMobile) {
+                            e.target.blur();
                             setShowMobileProductSearch(true);
                             return;
                           }
@@ -741,7 +745,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </div>
 
                   <Button 
-                    onClick={handleAddProduct} 
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleAddProduct();
+                    }} 
                     disabled={(!selectedProduct && productSearch.trim().length < 2) || !newProductQuantity}
                     className={cn(ds.components.button.primary, "w-full h-10")}
                   >
@@ -1329,12 +1337,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           hideClose={isMobile} // Custom close button is in header
         >
           {content}
-        </DialogContent>
-      </Dialog>
-      
-      {/* Mobile Shopping Cart Drawer */}
-      <Drawer open={showMobileCart && isMobile} onOpenChange={setShowMobileCart}>
-        <DrawerContent className={cn("max-h-[85vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default)}>
+          
+          {/* Mobile Shopping Cart Drawer */}
+          <Drawer open={showMobileCart && isMobile} onOpenChange={setShowMobileCart}>
+            <DrawerContent className={cn("max-h-[85vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default)}>
           <DrawerHeader className="text-left border-b border-border/40 pb-4">
             <div className="flex items-center justify-between">
               <DrawerTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, "flex items-center gap-2")}>
@@ -1508,6 +1514,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           </div>
         </DrawerContent>
       </Drawer>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

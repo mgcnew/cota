@@ -28,7 +28,7 @@ import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { 
   Package, Building2, DollarSign, CheckCircle2, Clock, 
   TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info,
-  Copy, Check, MessageCircle
+  Copy, Check, MessageCircle, ShoppingCart
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,6 +48,7 @@ import { TabSkeleton, ValoresTabSkeleton } from "./quote-tabs/TabSkeleton";
 const ComparativoTab = lazy(() => import("./quote-tabs/ComparativoTab").then(m => ({ default: m.ComparativoTab })));
 const ExportarTab = lazy(() => import("./quote-tabs/ExportarTab").then(m => ({ default: m.ExportarTab })));
 const WhatsappTab = lazy(() => import("./quote-tabs/WhatsappTab").then(m => ({ default: m.WhatsappTab })));
+const ConvertTab = lazy(() => import("./quote-tabs/ConvertTab").then(m => ({ default: m.ConvertTab })));
 
 
 interface Props {
@@ -934,6 +935,9 @@ export function ManagePackagingQuoteDialog({
               <TabsTrigger value="whatsapp" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
                 <MessageCircle className="h-3 w-3" />WhatsApp
               </TabsTrigger>
+              <TabsTrigger value="converter" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-brand/10 data-[state=active]:text-brand data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-brand/30 text-muted-foreground hover:text-foreground hover:bg-muted">
+                <ShoppingCart className="h-3 w-3" />Pedido
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -1359,6 +1363,18 @@ export function ManagePackagingQuoteDialog({
                 onGeneratePDF={handleGeneratePDF}
                 onDownloadHtml={handleDownloadHtml}
                 generateHtmlComparative={generateHtmlComparative}
+              />
+            </Suspense>
+          </TabsContent>
+
+          {/* Tab Converter em Pedido */}
+          <TabsContent value="converter" className="flex-1 overflow-hidden m-0 p-0 bg-background">
+            <Suspense fallback={<TabSkeleton />}>
+              <ConvertTab 
+                quote={quote}
+                onConversionComplete={() => {
+                  // Refresh data after conversion
+                }}
               />
             </Suspense>
           </TabsContent>
