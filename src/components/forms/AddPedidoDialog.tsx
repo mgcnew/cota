@@ -253,7 +253,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setProductSearch("");
     toast({ title: "Produto adicionado", duration: 1500 });
     
-    setTimeout(() => productSearchRef.current?.focus(), 50);
+    // Only focus on desktop to avoid triggering mobile drawers/keyboard issues
+    if (!isMobile) {
+      setTimeout(() => productSearchRef.current?.focus(), 50);
+    }
   };
 
   const selectProductFromList = (product: any) => {
@@ -383,12 +386,30 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }
   };
 
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) handleReset();
-    onOpenChange(isOpen);
-  };
+  // Reset state when opening/closing
+  useEffect(() => {
+    if (!open) {
+      handleReset();
+    } else {
+      loadLastPrices();
+      if (preSelectedProducts.length > 0) {
+        const preSelectedItems: PedidoItem[] = preSelectedProducts.map(p => ({
+          produto: p.product_name,
+          quantidade: p.quantity,
+          unidade: p.unit,
+          valorUnitario: p.estimated_price || 0,
+          product_id: p.product_id
+        }));
+        setItens(preSelectedItems);
+        setActiveStep("fornecedor");
+      }
+    }
+  }, [open, preSelectedProducts]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onOpenChange(false);
+    }
     if (e.altKey && e.key === 'ArrowRight' && canProceed() && currentStepIndex < STEPS.length - 1) {
       e.preventDefault();
       handleNext();
@@ -401,7 +422,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       e.preventDefault();
       handleSubmit();
     }
-  }, [activeStep, currentStepIndex, itens, fornecedor, dataEntrega]);
+  };
 
   // Scroll into view helper para inputs
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -508,7 +529,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               type="button" 
               variant="ghost" 
               size="icon" 
-              onClick={() => handleOpenChange(false)}
+              onClick={() => onOpenChange(false)}
               className={cn(ds.components.button.ghost, ds.components.button.size.icon, "ml-2")}
             >
               <X className="h-5 w-5" />
@@ -1321,201 +1342,205 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   );
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent 
-          className={cn(
-            "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
-            ds.colors.surface.page,
-            ds.colors.border.default,
-            // Mobile: Full Screen
-            isMobile 
-              ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0 p-0" 
-              : "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] rounded-2xl"
-          )}
-          onKeyDown={handleKeyDown}
-          hideClose={isMobile} // Custom close button is in header
-        >
-          {content}
-          
-          {/* Mobile Shopping Cart Drawer */}
-          <Drawer open={showMobileCart && isMobile} onOpenChange={setShowMobileCart}>
-            <DrawerContent className={cn("max-h-[85vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default)}>
-          <DrawerHeader className="text-left border-b border-border/40 pb-4">
-            <div className="flex items-center justify-between">
-              <DrawerTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, "flex items-center gap-2")}>
-                <Package className="h-5 w-5 text-brand" />
-                Itens do Pedido
-              </DrawerTitle>
-              <Badge variant="secondary" className="bg-brand/10 text-brand hover:bg-brand/20 border-brand/20">
-                {itens.length} itens
-              </Badge>
-            </div>
-            <DrawerDescription className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
-              Revise e gerencie os itens do seu pedido
-            </DrawerDescription>
-          </DrawerHeader>
-          
-          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-            {itens.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center">
-                <Package className="h-12 w-12 text-muted-foreground/30 mb-3" />
-                <p className="text-sm font-medium text-foreground">Nenhum produto adicionado</p>
-                <p className="text-xs text-muted-foreground mt-1">Busque e adicione produtos no formulário.</p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent 
+        className={cn(
+          "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
+          ds.colors.surface.page,
+          ds.colors.border.default,
+          // Mobile: Full Screen
+          isMobile 
+            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0 p-0" 
+            : "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] rounded-2xl"
+        )}
+        onKeyDown={handleKeyDown}
+        hideClose={isMobile} // Custom close button is in header
+      >
+        {/* Adiciona títulos acessíveis */}
+        <div className="sr-only">
+          <DialogTitle>Novo Pedido Geral</DialogTitle>
+          <DialogDescription>Crie um novo pedido de compra</DialogDescription>
+        </div>
+
+        {content}
+        
+        {/* Mobile Shopping Cart Drawer - Renderizado como filho do DialogContent para manter contexto de interação */}
+        <Drawer open={showMobileCart && isMobile} onOpenChange={setShowMobileCart}>
+          <DrawerContent className={cn("max-h-[85vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default)}>
+            <DrawerHeader className="text-left border-b border-border/40 pb-4">
+              <div className="flex items-center justify-between">
+                <DrawerTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, "flex items-center gap-2")}>
+                  <Package className="h-5 w-5 text-brand" />
+                  Itens do Pedido
+                </DrawerTitle>
+                <Badge variant="secondary" className="bg-brand/10 text-brand hover:bg-brand/20 border-brand/20">
+                  {itens.length} itens
+                </Badge>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {itens.map((item, index) => (
-                  <div key={index} className={cn(
-                    "flex flex-col gap-2 p-3 rounded-lg border shadow-sm",
-                    "bg-background/50",
-                    ds.colors.border.default
-                  )}>
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex items-start gap-2 min-w-0 flex-1">
-                        <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-secondary text-secondary-foreground text-xs font-bold mt-0.5">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-bold text-foreground leading-tight">{item.produto}</p>
-                          <div className="flex items-center gap-1.5 mt-1 text-[12px] text-muted-foreground flex-wrap">
-                            <span className="bg-secondary/50 px-1.5 py-0.5 rounded flex items-center gap-1">
-                              {item.quantidade} <span className="opacity-70">{item.unidade}</span>
-                            </span>
-                            <span>×</span>
-                            <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
-                              {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
-                            </span>
+              <DrawerDescription className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+                Revise e gerencie os itens do seu pedido
+              </DrawerDescription>
+            </DrawerHeader>
+            
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              {itens.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center">
+                  <Package className="h-12 w-12 text-muted-foreground/30 mb-3" />
+                  <p className="text-sm font-medium text-foreground">Nenhum produto adicionado</p>
+                  <p className="text-xs text-muted-foreground mt-1">Busque e adicione produtos no formulário.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {itens.map((item, index) => (
+                    <div key={index} className={cn(
+                      "flex flex-col gap-2 p-3 rounded-lg border shadow-sm",
+                      "bg-background/50",
+                      ds.colors.border.default
+                    )}>
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex items-start gap-2 min-w-0 flex-1">
+                          <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-secondary text-secondary-foreground text-xs font-bold mt-0.5">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-bold text-foreground leading-tight">{item.produto}</p>
+                            <div className="flex items-center gap-1.5 mt-1 text-[12px] text-muted-foreground flex-wrap">
+                              <span className="bg-secondary/50 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                {item.quantidade} <span className="opacity-70">{item.unidade}</span>
+                              </span>
+                              <span>×</span>
+                              <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
+                                {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                              </span>
+                            </div>
                           </div>
                         </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          onClick={() => {
+                            setItens(itens.filter((_, i) => i !== index));
+                            if (itens.length === 1) setShowMobileCart(false); // Fecha se remover o último
+                          }}
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => {
-                          setItens(itens.filter((_, i) => i !== index));
-                          if (itens.length === 1) setShowMobileCart(false); // Fecha se remover o último
-                        }}
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex justify-end items-center pt-2 border-t border-border/40 mt-1">
+                         <p className="text-[14px] font-bold text-foreground">
+                           R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                         </p>
+                      </div>
                     </div>
-                    <div className="flex justify-end items-center pt-2 border-t border-border/40 mt-1">
-                       <p className="text-[14px] font-bold text-foreground">
-                         R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
-                       </p>
-                    </div>
-                  </div>
-                )).reverse()}
-              </div>
-            )}
-          </div>
-          
-          <div className="p-4 border-t border-border bg-background/50 flex-shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
-             <div className="flex justify-between items-center mb-4">
-               <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total do Pedido</span>
-               <span className="text-xl font-bold text-brand">
-                 R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
-               </span>
-             </div>
-             <DrawerClose asChild>
-              <Button className={cn(ds.components.button.primary, "w-full h-11")} onClick={() => setShowMobileCart(false)}>
-                Continuar Editando
-              </Button>
-            </DrawerClose>
-          </div>
-        </DrawerContent>
-      </Drawer>
-      
-      {/* Mobile Product Search Drawer */}
-      <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
-        <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
-          <DrawerHeader className="border-b border-border/40 pb-4 px-4 overflow-visible flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  autoFocus
-                  placeholder="Nome do produto..."
-                  className={cn(ds.components.input.root, "pl-10 h-11 text-base rounded-xl")}
-                  value={productSearch}
-                  onChange={(e) => {
-                    setProductSearch(e.target.value);
-                    setSelectedProduct(null);
-                  }}
-                />
-              </div>
-              <DrawerClose asChild>
-                <Button variant="ghost" className="px-2 font-bold text-brand text-xs uppercase tracking-widest whitespace-nowrap">Fechar</Button>
+                  )).reverse()}
+                </div>
+              )}
+            </div>
+            
+            <div className="p-4 border-t border-border bg-background/50 flex-shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+               <div className="flex justify-between items-center mb-4">
+                 <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total do Pedido</span>
+                 <span className="text-xl font-bold text-brand">
+                   R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
+                 </span>
+               </div>
+               <DrawerClose asChild>
+                <Button className={cn(ds.components.button.primary, "w-full h-11")} onClick={() => setShowMobileCart(false)}>
+                  Continuar Editando
+                </Button>
               </DrawerClose>
             </div>
-          </DrawerHeader>
-
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
-            {isSearchingProducts ? (
-              <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Buscando...</p>
-              </div>
-            ) : searchedProducts.length > 0 ? (
-              <div className="grid grid-cols-1 gap-2">
-                {searchedProducts.map((p, index) => (
-                   <button
-                    key={p.id}
-                    onClick={() => {
-                      selectProductFromList(p);
-                      setShowMobileProductSearch(false);
+          </DrawerContent>
+        </Drawer>
+        
+        {/* Mobile Product Search Drawer */}
+        <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
+          <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
+            <DrawerHeader className="border-b border-border/40 pb-4 px-4 overflow-visible flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    autoFocus
+                    placeholder="Nome do produto..."
+                    className={cn(ds.components.input.root, "pl-10 h-11 text-base rounded-xl")}
+                    value={productSearch}
+                    onChange={(e) => {
+                      setProductSearch(e.target.value);
+                      setSelectedProduct(null);
                     }}
-                    className={cn(
-                      "w-full flex items-center gap-4 p-4 rounded-2xl text-left border transition-all active:scale-[0.98]",
-                      ds.colors.surface.section,
-                      ds.colors.border.default,
-                      "hover:bg-brand/5 hover:border-brand/30 transition-colors"
-                    )}
-                   >
-                    <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center flex-shrink-0 shadow-sm border border-brand/10">
-                      <Package className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, "text-foreground truncate")}>{p.name}</p>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-1">{p.unit || 'unidade'}</p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-brand/30" />
-                   </button>
-                ))}
-              </div>
-            ) : productSearch.trim().length >= 3 ? (
-              <div className="p-10 text-center flex flex-col items-center">
-                <div className="w-20 h-20 rounded-3xl bg-brand/5 flex items-center justify-center mb-6 shadow-inner">
-                   <Package className="h-10 w-10 text-brand/30" />
+                  />
                 </div>
-                <p className="text-base font-bold text-foreground">Produto não encontrado</p>
-                <p className="text-xs text-muted-foreground mt-2 mb-8 max-w-[200px] mx-auto">Gostaria de cadastrar "{productSearch}" no sistema agora?</p>
-                <Button
-                  onClick={() => {
-                    setShowMobileProductSearch(false);
-                    setShowQuickCreateProduct(true);
-                  }}
-                  className={cn(ds.components.button.primary, "h-12 w-full max-w-[240px] rounded-2xl shadow-lg shadow-brand/20")}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Cadastrar Produto
-                </Button>
+                <DrawerClose asChild>
+                  <Button variant="ghost" className="px-2 font-bold text-brand text-xs uppercase tracking-widest whitespace-nowrap">Fechar</Button>
+                </DrawerClose>
               </div>
-            ) : (
-               <div className="py-20 text-center flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
-                    <Search className="h-5 w-5 text-zinc-400" />
+            </DrawerHeader>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-3">
+              {isSearchingProducts ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Buscando...</p>
+                </div>
+              ) : searchedProducts.length > 0 ? (
+                <div className="grid grid-cols-1 gap-2">
+                  {searchedProducts.map((p, index) => (
+                     <button
+                      key={p.id}
+                      onClick={() => {
+                        selectProductFromList(p);
+                        setShowMobileProductSearch(false);
+                      }}
+                      className={cn(
+                        "w-full flex items-center gap-4 p-4 rounded-2xl text-left border transition-all active:scale-[0.98]",
+                        ds.colors.surface.section,
+                        ds.colors.border.default,
+                        "hover:bg-brand/5 hover:border-brand/30 transition-colors"
+                      )}
+                     >
+                      <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center flex-shrink-0 shadow-sm border border-brand/10">
+                        <Package className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, "text-foreground truncate")}>{p.name}</p>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mt-1">{p.unit || 'unidade'}</p>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-brand/30" />
+                     </button>
+                  ))}
+                </div>
+              ) : productSearch.trim().length >= 3 ? (
+                <div className="p-10 text-center flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-3xl bg-brand/5 flex items-center justify-center mb-6 shadow-inner">
+                     <Package className="h-10 w-10 text-brand/30" />
                   </div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">Aguardando busca...</p>
-               </div>
-            )}
-          </div>
-        </DrawerContent>
-      </Drawer>
-        </DialogContent>
-      </Dialog>
-    </>
+                  <p className="text-base font-bold text-foreground">Produto não encontrado</p>
+                  <p className="text-xs text-muted-foreground mt-2 mb-8 max-w-[200px] mx-auto">Gostaria de cadastrar "{productSearch}" no sistema agora?</p>
+                  <Button
+                    onClick={() => {
+                      setShowMobileProductSearch(false);
+                      setShowQuickCreateProduct(true);
+                    }}
+                    className={cn(ds.components.button.primary, "h-12 w-full max-w-[240px] rounded-2xl shadow-lg shadow-brand/20")}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Cadastrar Produto
+                  </Button>
+                </div>
+              ) : (
+                 <div className="py-20 text-center flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-2xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+                      <Search className="h-5 w-5 text-zinc-400" />
+                    </div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">Aguardando busca...</p>
+                 </div>
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </DialogContent>
+    </Dialog>
   );
 }
