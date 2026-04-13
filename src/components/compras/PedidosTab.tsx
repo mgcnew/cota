@@ -10,7 +10,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
 import PedidoDialog from "@/components/forms/PedidoDialog";

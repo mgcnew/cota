@@ -22,7 +22,7 @@ import { ViewToggle } from "@/components/ui/view-toggle";
 import { cn } from "@/lib/utils";
 import { useListaComprasLogic } from "@/hooks/useListaComprasLogic";
 
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 export default function ListaCompras() {
   const { toast } = useToast();
@@ -286,3 +286,4 @@ export default function ListaCompras() {
     </PageWrapper>
   );
 }
+

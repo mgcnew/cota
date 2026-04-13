@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 export type StatusType = 
   | "active" | "inactive" | "pending" | "completed" | "expired" | "cancelled"
@@ -83,3 +83,4 @@ export const StatusBadge = memo(function StatusBadge({ status, className, custom
     </Badge>
   );
 });
+

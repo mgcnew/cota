@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 // Status configuration using Design System tokens
 const statusConfig = {
@@ -143,3 +143,4 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
     </div>
   );
 });
+

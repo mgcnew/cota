@@ -6,7 +6,7 @@ import {
   ShoppingCart, Trash2, Package, Truck, Clock, CheckCircle, XCircle, AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 export interface OrderData {
   id: string;

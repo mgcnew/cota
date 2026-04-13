@@ -14,7 +14,7 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useAnotacoes } from "@/hooks/useAnotacoes";
 import { NoteCard } from "@/components/notes/NoteCard";
 import { CreateNoteDialog } from "@/components/notes/CreateNoteDialog";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { useState } from "react";
@@ -271,3 +271,4 @@ export default function Anotacoes() {
     </PageWrapper>
   );
 }
+

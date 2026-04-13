@@ -27,7 +27,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 // Hooks & Components
 import { useContagemEstoque } from "@/hooks/useContagemEstoque";
@@ -371,3 +371,4 @@ export default function ContagemEstoque() {
     </PageWrapper>
   );
 }
+

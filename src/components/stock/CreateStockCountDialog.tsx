@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ClipboardList, Package, Sparkles, CheckCircle, Building2, Loader2, FileBox, Plus, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { ds } from "@/styles/design-system"; // Using ds alias as per previous files
+import { designSystem as ds } from "@/styles/design-system"; // Using ds alias as per previous files
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 
@@ -292,3 +292,4 @@ export function CreateStockCountDialog({
     </Dialog>
   );
 }
+

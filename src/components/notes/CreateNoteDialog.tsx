@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Importance, Note } from "@/hooks/useNotes";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { StickyNote, AlertCircle, FileText, MessageSquare, Plus, Check, Tag } from "lucide-react";
@@ -219,3 +219,4 @@ export function CreateNoteDialog({
     </Dialog>
   );
 }
+

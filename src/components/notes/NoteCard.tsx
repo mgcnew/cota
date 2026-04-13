@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, MessageSquare, Clock, Edit, Trash2, CheckCircle2, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Note, Importance } from "@/hooks/useNotes";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 const categoryConfig: Record<string, { color: string; bg: string; border: string }> = {
   "Geral": {
@@ -162,3 +162,4 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
     </CSSSlideIn>
   );
 });
+

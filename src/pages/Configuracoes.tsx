@@ -16,7 +16,7 @@ import { Shield, CreditCard } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 // Lazy load heavy settings components
 const CompanyInfo = lazy(() => import("@/components/settings/CompanyInfo").then(m => ({ default: m.CompanyInfo })));
@@ -587,3 +587,4 @@ export default function Configuracoes() {
     </PageWrapper>
   );
 }
+
