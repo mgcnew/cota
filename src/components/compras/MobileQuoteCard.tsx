@@ -1,18 +1,13 @@
-import { memo, useState, useCallback } from "react";
+import { memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { StatusSelect, QUOTE_STATUS_OPTIONS } from "@/components/ui/status-select";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { 
-  ClipboardList, CheckCircle2, AlertTriangle, Building2, MoreVertical, 
-  Eye, ShoppingCart, Trash2, ChevronDown, ChevronUp, Calendar, DollarSign
+  ClipboardList, CheckCircle, AlertCircle, Building2, 
+  Trash2, Calendar, DollarSign, Eye, Clock, Package
 } from "lucide-react";
-import { 
-  Collapsible, 
-  CollapsibleContent, 
-  CollapsibleTrigger 
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { designSystem as ds } from "@/styles/design-system";
 import type { Quote } from "@/hooks/useCotacoes";
 
 interface MobileQuoteCardProps {
@@ -25,19 +20,26 @@ interface MobileQuoteCardProps {
   isUpdating?: boolean;
 }
 
+const abbreviateName = (name: string, maxLength: number = 24) => {
+  if (name.length <= maxLength) return name;
+  const words = name.split(' ');
+  if (words.length === 1) return name.substring(0, maxLength - 3) + '...';
+  if (words.length >= 2) {
+    const abbreviated = `${words[0]} ... ${words[words.length - 1]}`;
+    if (abbreviated.length <= maxLength) return abbreviated;
+  }
+  return name.substring(0, maxLength - 3) + '...';
+};
+
 export const MobileQuoteCard = memo(function MobileQuoteCard({
   cotacao,
   cotacaoNumero,
   onView,
   onManage,
   onDelete,
-  onUpdateStatus,
-  isUpdating
 }: MobileQuoteCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Helper para verificar status especial da cotação
-  const getQuoteSpecialStatus = (cotacao: Quote) => {
+  const specialStatus = useMemo(() => {
     const fornecedoresRespondidos = cotacao.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
     const totalFornecedores = cotacao.fornecedoresParticipantes?.length || 0;
     const isProntaParaDecisao = cotacao.statusReal === "ativa" && totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
@@ -49,166 +51,134 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
     const isVencendo = cotacao.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
     
     return { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores };
+  }, [cotacao]);
+
+  const { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores } = specialStatus;
+  const isClosed = cotacao.status === "concluida" || cotacao.status === "finalizada";
+
+  const getStatusIcon = () => {
+    if (isProntaParaDecisao) return <CheckCircle className="h-5 w-5" />;
+    if (isVencendo) return <AlertCircle className="h-5 w-5" />;
+    return <ClipboardList className="h-5 w-5" />;
   };
 
-  const { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores } = getQuoteSpecialStatus(cotacao);
-
   return (
-    <Collapsible
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
+    <div 
       className={cn(
-        "bg-white dark:bg-gray-800/50 rounded-xl border p-3 shadow-sm overflow-hidden transition-all duration-200",
-        isProntaParaDecisao 
-          ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-800' 
-          : isVencendo 
-            ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800'
-            : 'border-gray-200 dark:border-gray-700/30'
+        "bg-white dark:bg-card/80 backdrop-blur-md rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm overflow-hidden touch-manipulation relative",
       )}
     >
-      {/* Indicador de status especial */}
-      {isProntaParaDecisao && (
-        <div className="flex items-center gap-1.5 mb-2 text-emerald-600 dark:text-emerald-400 px-1">
-          <CheckCircle2 className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-semibold uppercase">Pronta para decisão</span>
-        </div>
-      )}
-      {isVencendo && !isProntaParaDecisao && (
-        <div className="flex items-center gap-1.5 mb-2 text-amber-600 dark:text-amber-400 px-1">
-          <AlertTriangle className="h-3.5 w-3.5" />
-          <span className="text-[10px] font-semibold uppercase">Vencendo em breve</span>
-        </div>
-      )}
-      
-      <div className="flex items-start justify-between gap-3 mb-2 px-1">
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-            isProntaParaDecisao 
-              ? 'bg-emerald-100 dark:bg-emerald-900/30' 
-              : 'bg-teal-100 dark:bg-teal-900/30'
-          )}>
-            {isProntaParaDecisao ? (
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-            ) : (
-              <ClipboardList className="h-5 w-5 text-teal-600" />
-            )}
+      <div className="p-4">
+        {/* Header: Product, ID, Price */}
+        <div className="flex justify-between items-start mb-3 gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative">
+              <div className={cn(
+                "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                isProntaParaDecisao 
+                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400"
+                  : isVencendo
+                    ? "bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"
+                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400"
+              )}>
+                {getStatusIcon()}
+              </div>
+              {isProntaParaDecisao && (
+                <div className="absolute -top-1 -right-1 bg-white dark:bg-background rounded-full">
+                  <div className="bg-emerald-500 rounded-full w-3.5 h-3.5 border-2 border-white dark:border-zinc-950 animate-pulse" />
+                </div>
+              )}
+              {isVencendo && !isProntaParaDecisao && (
+                <div className="absolute -top-1 -right-1 bg-white dark:bg-background rounded-full">
+                  <div className="bg-amber-500 rounded-full w-3.5 h-3.5 border-2 border-white dark:border-zinc-950 animate-pulse" />
+                </div>
+              )}
+            </div>
+            
+            <div className="min-w-0">
+              <h3 className={cn("text-sm truncate", ds.typography.weight.bold, ds.colors.text.primary)}>
+                <CapitalizedText>{abbreviateName(cotacao.produtoResumo || cotacao.produto)}</CapitalizedText>
+              </h3>
+              <p className={cn("text-[10px] uppercase font-mono tracking-tight opacity-70", ds.colors.text.secondary)}>
+                #{cotacaoNumero.toString().padStart(4, '0')}
+              </p>
+            </div>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-semibold text-sm truncate text-gray-900 dark:text-white">
-              <CapitalizedText>{cotacao.produtoResumo || cotacao.produto}</CapitalizedText>
-            </p>
-            <p className="text-xs text-muted-foreground">#{cotacaoNumero.toString().padStart(4, '0')}</p>
+          
+          <div className="text-right flex-shrink-0">
+            <div className={cn("text-sm", ds.components.dataDisplay.money)}>{cotacao.melhorPreco || 'R$ 0,00'}</div>
+            <div className={cn("text-[9px] uppercase tracking-wider", ds.colors.text.muted)}>melhor preço</div>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-2 mb-2 px-1">
-        <StatusSelect
-          value={cotacao.status}
-          options={QUOTE_STATUS_OPTIONS}
-          onChange={(newStatus) => onUpdateStatus(cotacao.id, newStatus)}
-          isLoading={isUpdating}
-          disabled={cotacao.status === 'finalizada'}
-        />
-        <Badge variant="outline" className={cn(
-          "text-xs",
-          fornecedoresRespondidos === totalFornecedores && totalFornecedores > 0
-            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-700'
-            : ''
-        )}>
-          <Building2 className="h-3 w-3 mr-1" />{fornecedoresRespondidos}/{totalFornecedores}
-        </Badge>
-      </div>
+        {/* Info Row: Status, Suppliers, Deadline */}
+        <div className="flex items-center justify-between mb-4 bg-zinc-50/80 dark:bg-zinc-800/40 rounded-xl p-2.5">
+          <StatusBadge status={cotacao.statusReal || cotacao.status} />
+          
+          <div className="flex items-center gap-3">
+            <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
+              <Building2 className="w-3.5 h-3.5" />
+              <span className="font-bold">{fornecedoresRespondidos}/{totalFornecedores}</span>
+            </div>
+            
+            <div className={cn("flex items-center gap-1.5", isVencendo ? "text-amber-500 font-bold" : ds.components.dataDisplay.secondary)}>
+              {isVencendo ? <AlertCircle className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />}
+              <span className="text-[11px]">
+                {cotacao.dataFim || '-'}
+              </span>
+            </div>
+          </div>
+        </div>
 
-      <div className="flex justify-between text-xs px-1 mb-2">
-        <span className="text-muted-foreground flex items-center gap-1">
-          <DollarSign className="h-3 w-3" />
-          Melhor: <span className="font-semibold text-green-600 dark:text-green-400">{cotacao.melhorPreco || 'R$ 0,00'}</span>
-        </span>
-        <span className={cn(
-          "flex items-center gap-1",
-          isVencendo ? 'text-amber-600 font-semibold' : 'text-muted-foreground'
-        )}>
-          <Calendar className="h-3 w-3" />
-          Fim: {cotacao.dataFim || '-'}
-        </span>
-      </div>
-
-      {/* Expand/Collapse Button */}
-      <CollapsibleTrigger asChild>
-        <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px] mt-2 rounded-b-lg"
-        >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Menos detalhes</span>
-            </>
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          {isClosed ? (
+            <Button 
+              className={cn(
+                "flex-1 h-10 rounded-xl touch-target active:scale-[0.98] transition-transform",
+                ds.components.button.primary
+              )}
+              onClick={() => onView(cotacao)}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              Resumo da Decisão
+            </Button>
           ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Mais detalhes</span>
-            </>
+            <Button 
+              className={cn(
+                "flex-1 h-10 rounded-xl touch-target active:scale-[0.98] transition-transform",
+                ds.components.button.primary
+              )}
+              onClick={() => onManage(cotacao)}
+            >
+              <ClipboardList className="w-4 h-4 mr-2" />
+              {isProntaParaDecisao ? "Fechar Cotação" : "Negociar Cotação"}
+            </Button>
           )}
-        </button>
-      </CollapsibleTrigger>
-
-      {/* Expandable Actions */}
-      <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-3 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50/50 dark:bg-gray-900/20">
-          <div className="grid grid-cols-2 gap-2 pt-3">
-            {(cotacao.status === "concluida" || cotacao.status === "finalizada") ? (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-10 touch-target active:scale-95 transition-transform col-span-2"
-                onClick={() => onView(cotacao)}
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Resumo
-              </Button>
-            ) : (
-              <>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className={cn(
-                    "h-10 touch-target active:scale-95 transition-transform",
-                    isProntaParaDecisao ? "col-span-1" : "col-span-2"
-                  )}
-                  onClick={() => onManage(cotacao)}
-                >
-                  <ClipboardList className="h-4 w-4 mr-2" />
-                  Negociar Cotação
-                </Button>
-                
-                {isProntaParaDecisao && (
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    className="h-10 touch-target active:scale-95 transition-transform text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200"
-                    onClick={() => onManage(cotacao)}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Converter
-                  </Button>
-                )}
-
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform col-span-2"
-                  onClick={() => onDelete(cotacao)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir
-                </Button>
-              </>
-            )}
-          </div>
+          
+          {!isClosed && (
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0"
+              onClick={() => onDelete(cotacao)}
+              aria-label="Excluir cotação"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.cotacao.id === nextProps.cotacao.id &&
+    prevProps.cotacao.status === nextProps.cotacao.status &&
+    prevProps.cotacao.statusReal === nextProps.cotacao.statusReal &&
+    prevProps.cotacao.melhorPreco === nextProps.cotacao.melhorPreco &&
+    prevProps.cotacao.fornecedores === nextProps.cotacao.fornecedores &&
+    prevProps.cotacao.dataFim === nextProps.cotacao.dataFim &&
+    prevProps.cotacaoNumero === nextProps.cotacaoNumero
   );
 });

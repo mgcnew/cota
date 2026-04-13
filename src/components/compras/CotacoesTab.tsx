@@ -13,7 +13,7 @@ import { Plus, Filter, TrendingDown, Clock, CheckCircle2, ShoppingCart, FileText
 import { SearchInput } from "@/components/ui/search-input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
@@ -253,39 +253,68 @@ function CotacoesTab() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-            {/* Mobile: reduced width to fit "Nova Cotação" button */}
-            <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-              <SelectTrigger className="w-[130px] sm:w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os Status</SelectItem>
-              <SelectItem value="ativa">🟢 Ativas</SelectItem>
-              <SelectItem value="pendente">🟡 Pendentes</SelectItem>
-              <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
-              <SelectItem value="vencendo">⚠️ Vencendo em 48h</SelectItem>
-              <SelectItem value="concluida">🔵 Concluídas</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={handleExportQuotes}
-            className={cn("h-11 w-11 rounded-lg border-zinc-200 dark:border-zinc-800", designSystem.components.button.secondary)}
-            title="Relatório de Economia e Resultados"
-          >
-            <Download className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
-          </Button>
-          <Button
-            onClick={() => setAddDialogOpen(true)}
-            className={cn(designSystem.components.button.primary, "h-11 px-6 rounded-lg shrink-0")}
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            Nova Cotação
-          </Button>
+            <div className="hidden md:block">
+              <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
+                <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  <SelectItem value="ativa">🟢 Ativas</SelectItem>
+                  <SelectItem value="pendente">🟡 Pendentes</SelectItem>
+                  <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
+                  <SelectItem value="vencendo">⚠️ Vencendo em 48h</SelectItem>
+                  <SelectItem value="concluida">🔵 Concluídas</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handleExportQuotes}
+              className={cn("h-11 w-11 rounded-lg border-zinc-200 dark:border-zinc-800", ds.components.button.secondary)}
+              title="Relatório de Economia e Resultados"
+            >
+              <Download className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
+            </Button>
+            <Button
+              onClick={() => setAddDialogOpen(true)}
+              className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Nova Cotação
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Mobile Filter Chips */}
+      <div className="md:hidden flex overflow-x-auto gap-2 pb-2 mb-4 -mx-1 px-1 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <style dangerouslySetInnerHTML={{__html: `
+          .md\\:hidden::-webkit-scrollbar { display: none; }
+        `}} />
+        {[
+          { value: 'all', label: 'Todos' },
+          { value: 'ativa', label: 'Ativas' },
+          { value: 'pendente', label: 'Pendentes' },
+          { value: 'prontas', label: 'Prontas' },
+          { value: 'vencendo', label: 'Vencendo' },
+          { value: 'concluida', label: 'Concluídas' },
+        ].map(status => (
+          <button
+            key={status.value}
+            onClick={() => handleStatusFilterChange(status.value)}
+            className={cn(
+              "px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors border touch-manipulation active:scale-95",
+              statusFilter === status.value 
+                ? "bg-brand text-white border-brand shadow-md" 
+                : "bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800/40 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
+            )}
+          >
+            {status.label}
+          </button>
+        ))}
+      </div>
 
       {/* Alerts */}
       {(stats.prontasParaDecisao > 0 || stats.vencendo > 0) && (
@@ -296,10 +325,10 @@ function CotacoesTab() {
                 <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
+                <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
                   {stats.prontasParaDecisao} cotação(ões) pronta(s)
                 </p>
-                <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores já responderam</p>
+                <p className={cn("text-xs", ds.colors.text.secondary)}>Todos os fornecedores já responderam</p>
               </div>
               <Button
                 size="sm"
@@ -318,10 +347,10 @@ function CotacoesTab() {
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
+                <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
                   {stats.vencendo} cotação(ões) para vencer
                 </p>
-                <p className={cn("text-xs", designSystem.colors.text.secondary)}>Prazo termina em menos de 48h</p>
+                <p className={cn("text-xs", ds.colors.text.secondary)}>Prazo termina em menos de 48h</p>
               </div>
               <Button
                 size="sm"
