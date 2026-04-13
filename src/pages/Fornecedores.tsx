@@ -17,6 +17,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { MetricCard } from "@/components/ui/metric-card";
+import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
+import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ViewToggle } from "@/components/ui/view-toggle";
 import { DataPagination } from "@/components/ui/data-pagination";
@@ -290,40 +292,73 @@ function Fornecedores() {
           </div>
 
           {/* Metrics Grid */}
-          <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-6">
-            <MetricCard
-              title="Fornecedores"
-              value={stats.total}
-              icon={Building2}
-              trend={{ value: "+15", label: "novos este mês", type: "positive" }}
-              variant="info"
-              className="hover:scale-[1.02] transition-transform"
-            />
-            <MetricCard
-              title="Ativos"
-              value={stats.active}
-              icon={TrendingUp}
-              trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
-              variant="success"
-              className="hover:scale-[1.02] transition-transform"
-            />
-            <MetricCard
-              title="Limite Total"
-              value={stats.totalLimit}
-              icon={DollarSign}
-              trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
-              variant="default"
-              className="hover:scale-[1.02] transition-transform"
-            />
-            <MetricCard
-              title="Cotações"
-              value={stats.activeQuotes}
-              icon={FileText}
-              trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
-              variant="warning"
-              className="hover:scale-[1.02] transition-transform"
-            />
-          </ResponsiveGrid>
+          {isMobile ? (
+            <MobileMetricRibbon className="mb-6 mt-2">
+              <MobileMetricCard
+                title="Fornecedores"
+                value={stats.total}
+                icon={Building2}
+                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
+                variant="info"
+              />
+              <MobileMetricCard
+                title="Ativos"
+                value={stats.active}
+                icon={TrendingUp}
+                trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
+                variant="success"
+              />
+              <MobileMetricCard
+                title="Limite Total"
+                value={stats.totalLimit}
+                icon={DollarSign}
+                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
+                variant="default"
+              />
+              <MobileMetricCard
+                title="Cotações"
+                value={stats.activeQuotes}
+                icon={FileText}
+                trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
+                variant="warning"
+              />
+            </MobileMetricRibbon>
+          ) : (
+            <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-6">
+              <MetricCard
+                title="Fornecedores"
+                value={stats.total}
+                icon={Building2}
+                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
+                variant="info"
+                className="hover:scale-[1.02] transition-transform"
+              />
+              <MetricCard
+                title="Ativos"
+                value={stats.active}
+                icon={TrendingUp}
+                trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
+                variant="success"
+                className="hover:scale-[1.02] transition-transform"
+              />
+              <MetricCard
+                title="Limite Total"
+                value={stats.totalLimit}
+                icon={DollarSign}
+                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
+                variant="default"
+                className="hover:scale-[1.02] transition-transform"
+              />
+              <MetricCard
+                title="Cotações"
+                value={stats.activeQuotes}
+                icon={FileText}
+                trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
+                variant="warning"
+                className="hover:scale-[1.02] transition-transform"
+              />
+            </ResponsiveGrid>
+          )}
 
           {/* Unified Actions Bar */}
           <div className="mb-6">

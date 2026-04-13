@@ -6,12 +6,17 @@ import { designSystem as ds } from "@/styles/design-system";
 interface MobileMetricCardProps {
   title: string;
   value: string | number;
-  subtitle: string;
+  subtitle?: string;
   icon: LucideIcon;
   variant?: "default" | "success" | "warning" | "error" | "info";
   onClick?: () => void;
   pulse?: boolean;
   isEmpty?: boolean;
+  trend?: {
+    value: string | number;
+    label: string;
+    type: "positive" | "negative" | "neutral";
+  };
 }
 
 const VARIANT_STYLES = {
@@ -76,6 +81,7 @@ export const MobileMetricCard = memo(function MobileMetricCard({
   onClick,
   pulse = false,
   isEmpty = false,
+  trend,
 }: MobileMetricCardProps) {
   const v = VARIANT_STYLES[variant];
 
@@ -164,15 +170,29 @@ export const MobileMetricCard = memo(function MobileMetricCard({
         >
           {value}
         </h3>
-        <p
-          className={cn(
-            "text-[11px] font-medium leading-tight",
-            v.textMuted,
-            DARK_TEXT_MUTED
-          )}
-        >
-          {subtitle}
-        </p>
+        {trend ? (
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span className={cn(
+              "text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center",
+              "bg-white/20 text-white"
+            )}>
+              {trend.value}
+            </span>
+            <span className={cn("text-[10px] leading-tight", v.textMuted, DARK_TEXT_MUTED)}>
+              {trend.label}
+            </span>
+          </div>
+        ) : subtitle ? (
+          <p
+            className={cn(
+              "text-[11px] font-medium leading-tight",
+              v.textMuted,
+              DARK_TEXT_MUTED
+            )}
+          >
+            {subtitle}
+          </p>
+        ) : null}
       </div>
 
       {/* Bottom accent line – Dark mode brand indicator on hover */}

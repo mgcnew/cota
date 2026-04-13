@@ -35,7 +35,7 @@ export const MobileMetricRibbon = memo(function MobileMetricRibbon({
   return (
     <div className={cn("relative w-full", className)}>
       {/* Right gradient fade – hints at more content */}
-      <div className="pointer-events-none absolute right-0 top-0 h-full w-12 z-10 bg-gradient-to-l from-background to-transparent" />
+      {/* Removemos o gradient fade para atender ao pedido do usuário de visual sem degrade */}
 
       {/* Embla viewport */}
       <div

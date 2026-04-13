@@ -92,7 +92,7 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
-              <div className="p-1.5 sm:p-2 bg-gradient-to-br from-primary to-primary-light rounded-lg shadow-sm">
+              <div className="p-1.5 sm:p-2 bg-primary rounded-lg shadow-sm">
                 <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               </div>
               <span className="font-semibold text-foreground truncate">Evolução das Cotações</span>
@@ -112,7 +112,7 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
           {data?.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs">
               <div className="flex items-center gap-1 sm:gap-2">
-                <div className="w-2 h-2 rounded-full bg-purple-500" />
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
                 <span className="text-muted-foreground">Cotações:</span>
                 <span className="font-semibold text-foreground">{Math.round(stats.avgCotacoes)}</span>
                 <TrendIndicator value={stats.trendCotacoes} />
@@ -131,7 +131,7 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
       <CardContent className="p-1 sm:p-2 pt-2 sm:pt-3">
         {isLoading ? (
           <div className="flex items-center justify-center h-[200px] sm:h-[280px]">
-            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-purple-500" />
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-blue-500" />
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={chartHeight}>
@@ -140,9 +140,9 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
               <XAxis dataKey={dataKey} stroke="#9ca3af" fontSize={isMobile ? 10 : 11} tickLine={false} axisLine={false} />
               <YAxis stroke="#9ca3af" fontSize={isMobile ? 10 : 11} tickLine={false} axisLine={false} width={isMobile ? 28 : 35} />
               <Tooltip contentStyle={TOOLTIP_STYLE} labelStyle={LABEL_STYLE} />
-              <Line type="monotone" dataKey="cotacoes" name="Cotações" stroke="#7C3AED" strokeWidth={isMobile ? 2 : 2.5}
-                dot={isMobile ? false : { r: 4, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
-                activeDot={{ r: 5, fill: '#7C3AED', strokeWidth: 2, stroke: '#fff' }}
+              <Line type="monotone" dataKey="cotacoes" name="Cotações" stroke="#2563EB" strokeWidth={isMobile ? 2 : 2.5}
+                dot={isMobile ? false : { r: 4, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}
+                activeDot={{ r: 5, fill: '#2563EB', strokeWidth: 2, stroke: '#fff' }}
                 isAnimationActive={false}
               />
               <Line type="monotone" dataKey="fornecedores" name="Fornecedores" stroke="#22C55E" strokeWidth={isMobile ? 2 : 2.5}

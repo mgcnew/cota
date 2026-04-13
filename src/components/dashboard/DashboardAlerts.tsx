@@ -25,7 +25,7 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo }: Dashboard
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Cotações Prontas para Decisão */}
       {prontasParaDecisao.length > 0 && (
-        <Card className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/20 border-emerald-200 dark:border-emerald-800 transition-smooth hover:shadow-md">
+        <Card className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 transition-smooth hover:shadow-md">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-emerald-500 shadow-sm">
               <CheckCircle2 className="h-5 w-5 text-white" />
@@ -63,7 +63,7 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo }: Dashboard
 
       {/* Cotações Vencendo */}
       {vencendo.length > 0 && (
-        <Card className="p-4 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/20 border-amber-200 dark:border-amber-800 transition-smooth hover:shadow-md">
+        <Card className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 transition-smooth hover:shadow-md">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-amber-500 shadow-sm">
               <AlertTriangle className="h-5 w-5 text-white" />

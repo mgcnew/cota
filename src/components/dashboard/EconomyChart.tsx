@@ -80,7 +80,7 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
-              <div className="p-1.5 sm:p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg shadow-sm">
+              <div className="p-1.5 sm:p-2 bg-emerald-600 rounded-lg shadow-sm">
                 <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white" />
               </div>
               <span className="font-semibold text-foreground truncate">Economia Gerada</span>

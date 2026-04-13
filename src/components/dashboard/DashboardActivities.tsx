@@ -34,7 +34,7 @@ export const DashboardActivities = memo(({ recentQuotes, recentOrders, onViewAll
       <div className="p-4 border-b border-border flex-shrink-0">
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-            <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg shadow-sm">
+            <div className="p-2 bg-zinc-500 dark:bg-zinc-600 rounded-lg shadow-sm">
               <Clock className="w-4 h-4 text-white" />
             </div>
             Últimas Atividades
