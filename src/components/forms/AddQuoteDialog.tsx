@@ -218,10 +218,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Estados para agendamento
   const [isScheduled, setIsScheduled] = useState(false);
 
-  // Estados mobile-specific
-  const [showMobileProductSearch, setShowMobileProductSearch] = useState(false);
-  const [showMobileCart, setShowMobileCart] = useState(false);
-
   // Refs para auto-foco
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productSearchRef = useRef<HTMLInputElement>(null);
