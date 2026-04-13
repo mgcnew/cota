@@ -6,6 +6,7 @@ import {
   ShoppingCart, Trash2, Package, Truck, Clock, CheckCircle, XCircle, AlertCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ds } from "@/styles/design-system";
 
 export interface OrderData {
   id: string;
@@ -30,7 +31,7 @@ export interface MobileOrderCardProps {
   pedido: OrderData;
   onManage: (pedido: OrderData) => void;
   onDelete: (pedido: OrderData) => void;
-  onUpdateStatus?: (pedidoId: string, status: string) => void; // Kept for interface compatibility
+  onUpdateStatus?: (pedidoId: string, status: string) => void; 
   className?: string;
 }
 
@@ -59,8 +60,6 @@ const abbreviateSupplierName = (name: string, maxLength: number = 22) => {
 
 /**
  * MobileOrderCard - Memoized card component for displaying orders on mobile.
- * 
- * Uses React.memo to prevent unnecessary re-renders when parent component updates.
  * Optimized for mobile with direct 'Gerenciar' button and 'Delayed' alert.
  */
 export const MobileOrderCard = memo(function MobileOrderCard({
@@ -85,8 +84,8 @@ export const MobileOrderCard = memo(function MobileOrderCard({
   return (
     <div 
       className={cn(
-        "bg-white dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm overflow-hidden touch-manipulation relative",
-        isDelayed && "border-l-[3px] border-l-red-500",
+        "bg-white dark:bg-card/80 backdrop-blur-md rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm overflow-hidden touch-manipulation relative",
+        isDelayed && "border-l-[4px] border-l-red-500",
         className
       )}
     >
@@ -95,43 +94,43 @@ export const MobileOrderCard = memo(function MobileOrderCard({
         <div className="flex justify-between items-start mb-3 gap-2">
           <div className="flex items-center gap-3 min-w-0">
             <div className="relative">
-              <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 flex-shrink-0">
+              <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-500 dark:text-zinc-400 flex-shrink-0">
                 {getStatusIcon(pedido.status)}
               </div>
               {isDelayed && (
-                <div className="absolute -top-1 -right-1 bg-white dark:bg-zinc-900 rounded-full">
-                  <div className="bg-red-500 rounded-full w-3.5 h-3.5 border-2 border-white dark:border-zinc-900 animate-pulse" />
+                <div className="absolute -top-1 -right-1 bg-white dark:bg-background rounded-full">
+                  <div className="bg-red-500 rounded-full w-3.5 h-3.5 border-2 border-white dark:border-zinc-950 animate-pulse" />
                 </div>
               )}
             </div>
             
             <div className="min-w-0">
-              <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
+              <h3 className={cn("text-sm truncate", ds.typography.weight.bold, ds.colors.text.primary)}>
                 {capitalize(abbreviateSupplierName(pedido.fornecedor))}
               </h3>
-              <p className="text-xs text-zinc-500 font-mono tracking-tight">#{pedido.id.substring(0, 7)}</p>
+              <p className={cn("text-[10px] uppercase font-mono tracking-tight opacity-70", ds.colors.text.secondary)}>#{pedido.id.substring(0, 7)}</p>
             </div>
           </div>
           
           <div className="text-right flex-shrink-0">
-            <div className="font-bold text-sm text-emerald-600 dark:text-emerald-400">{pedido.total}</div>
-            <div className="text-[10px] text-zinc-500 uppercase tracking-wider">{pedido.dataPedido}</div>
+            <div className={cn("text-sm", ds.components.dataDisplay.money)}>{pedido.total}</div>
+            <div className={cn("text-[9px] uppercase tracking-wider", ds.colors.text.muted)}>{pedido.dataPedido}</div>
           </div>
         </div>
 
         {/* Info Row: Status, Items, Delivery */}
-        <div className="flex items-center justify-between mb-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-lg p-2.5">
+        <div className="flex items-center justify-between mb-4 bg-zinc-50/80 dark:bg-zinc-800/40 rounded-xl p-2.5">
           <StatusBadge status={pedido.status} />
           
-          <div className="flex items-center gap-3 text-xs">
-            <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+          <div className="flex items-center gap-3">
+            <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
               <Package className="w-3.5 h-3.5" />
-              <span className="font-medium">{pedido.itens}</span>
+              <span className="font-bold">{pedido.itens}</span>
             </div>
             
-            <div className={cn("flex items-center gap-1.5", isDelayed ? "text-red-500 font-medium" : "text-zinc-600 dark:text-zinc-400")}>
-              {isDelayed ? <AlertCircle className="w-3.5 h-3.5" /> : <Truck className="w-3.5 h-3.5" />}
-              <span className={cn(!isDelayed && "font-medium")}>
+            <div className={cn("flex items-center gap-1.5", isDelayed ? "text-red-500 font-bold" : ds.components.dataDisplay.secondary)}>
+              {isDelayed ? <AlertCircle className="w-3.5 h-3.5" /> : <Clock className="w-3.5 h-3.5" />}
+              <span className="text-[11px]">
                 {isDelayed ? 'Atrasado' : (pedido.dataEntrega || '-')}
               </span>
             </div>
@@ -141,7 +140,10 @@ export const MobileOrderCard = memo(function MobileOrderCard({
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
           <Button 
-            className="flex-1 h-10 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 touch-target active:scale-[0.98] transition-transform"
+            className={cn(
+              "flex-1 h-10 rounded-xl touch-target active:scale-[0.98] transition-transform",
+              ds.components.button.primary
+            )}
             onClick={() => onManage(pedido)}
           >
             <ShoppingCart className="w-4 h-4 mr-2" />
@@ -151,7 +153,7 @@ export const MobileOrderCard = memo(function MobileOrderCard({
           <Button
             size="icon"
             variant="outline"
-            className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 disabled:opacity-50"
+            className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 disabled:opacity-50"
             onClick={() => onDelete(pedido)}
             disabled={pedido.status === 'entregue'}
             aria-label="Excluir pedido"

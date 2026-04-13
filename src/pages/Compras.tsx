@@ -103,7 +103,9 @@ function Compras() {
     <PageWrapper>
       {/* Mobile Bottom Navigation Bar */}
       {isMobile && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 pb-safe shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.1)]">
+        <div className={cn(
+          "md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#16181C]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800/50 pb-safe shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.15)]",
+        )}>
           <div className="flex items-center justify-between px-2 py-2">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.value;
@@ -114,8 +116,8 @@ function Compras() {
                   className={cn(
                     "relative flex items-center justify-center gap-2 h-12 transition-all duration-300 rounded-full touch-manipulation",
                     isActive 
-                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 px-4 flex-1 shadow-sm" 
-                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 px-3 flex-shrink-0"
+                      ? "bg-brand text-white px-4 flex-1 shadow-md" 
+                      : "text-zinc-500 hover:text-brand dark:text-zinc-400 dark:hover:text-zinc-100 px-3 flex-shrink-0"
                   )}
                   aria-label={tab.label}
                 >
@@ -170,7 +172,7 @@ function Compras() {
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
           {/* Desktop Tabs Navigation (Hidden on Mobile) */}
-          <div className="hidden md:block pb-1 border-b border-zinc-200/70 dark:border-zinc-900 bg-transparent">
+          <div className="hidden md:block pb-1 border-b border-zinc-200/70 dark:border-zinc-800 bg-transparent">
             <TabsList className={designSystem.components.tabs.clean.list}>
               {TABS.map((tab) => (
                 <TabsTrigger

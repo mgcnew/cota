@@ -205,7 +205,7 @@ function PedidosTab() {
           <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
             <div className="hidden md:block">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -229,7 +229,7 @@ function PedidosTab() {
         </div>
       </div>
 
-      {/* Mobile Filter Chips */}
+        {/* Mobile Filter Chips */}
       <div className="md:hidden flex overflow-x-auto gap-2 pb-2 mb-4 -mx-1 px-1 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         <style dangerouslySetInnerHTML={{__html: `
           .md\\:hidden::-webkit-scrollbar { display: none; }
@@ -246,10 +246,10 @@ function PedidosTab() {
             key={status.value}
             onClick={() => setStatusFilter(status.value)}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors border touch-manipulation active:scale-95",
+              "px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors border touch-manipulation active:scale-95",
               statusFilter === status.value 
-                ? "bg-zinc-900 text-white border-zinc-900 dark:bg-white dark:text-zinc-900 dark:border-white shadow-sm" 
-                : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800/50 dark:border-zinc-700/50 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                ? "bg-brand text-white border-brand shadow-md" 
+                : "bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800/40 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
             )}
           >
             {status.label}

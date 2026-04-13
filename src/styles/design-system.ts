@@ -298,7 +298,7 @@ export const designSystem = {
         // Badges/Status Indicators
         badge: {
             base: "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-            active: "border-transparent bg-brand text-zinc-950 hover:bg-brand/80", // Brand
+            active: "border-transparent bg-brand text-white hover:bg-brand/80", // Brand
             outline: "text-zinc-500 border-zinc-200 dark:border-zinc-800 dark:text-zinc-400",
             secondary: "border-transparent bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-50",
             destructive: "border-transparent bg-red-50 text-red-600 hover:bg-red-100 border border-red-100",
@@ -308,12 +308,12 @@ export const designSystem = {
         // Abas (Tabs) 
         tabs: {
             list: "inline-flex h-10 items-center justify-center rounded-xl bg-zinc-100/50 dark:bg-zinc-800/40 p-1 text-muted-foreground w-full sm:w-auto backdrop-blur-sm border border-zinc-200/50 dark:border-zinc-700/30",
-            trigger: "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-zinc-950 dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-md text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100",
+            trigger: "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-white dark:data-[state=active]:bg-zinc-700 data-[state=active]:text-brand dark:data-[state=active]:text-zinc-50 data-[state=active]:shadow-md text-zinc-500 hover:text-brand dark:text-zinc-400 dark:hover:text-zinc-100",
             content: "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             // Variante "Clean" para Navegação de Topo (100% transparente SEMPRE)
             clean: {
                 list: "inline-flex h-auto items-center justify-start !bg-transparent !bg-none p-0 gap-4 md:gap-8 w-full border-none !border-0 shadow-none !shadow-none backdrop-blur-none !bg-opacity-0",
-                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
+                trigger: "relative h-11 px-0 pb-4 pt-2 text-sm font-bold transition-all rounded-none border-b-2 border-transparent bg-transparent !bg-transparent !bg-none shadow-none !shadow-none text-zinc-500 dark:text-zinc-400 hover:text-brand dark:hover:text-zinc-100 data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:!bg-transparent data-[state=active]:!shadow-none"
             }
         },
 
@@ -334,7 +334,7 @@ export const designSystem = {
             results: "text-[13px] font-medium text-zinc-500 dark:text-zinc-400 order-2 sm:order-1",
             controls: "flex items-center gap-3 order-1 sm:order-2",
             item: "flex items-center justify-center min-w-[36px] h-9 rounded-lg border text-[13px] font-semibold transition-all duration-200",
-            active: "bg-brand border-brand text-zinc-950",
+            active: "bg-brand border-brand text-white",
             inactive: "bg-white dark:bg-card border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-card/50",
             disabled: "opacity-40 pointer-events-none",
             nav: "flex items-center gap-1.5",
