@@ -168,7 +168,7 @@ function PedidosTab() {
     updatePedidoStatus({ pedidoId, status });
   }, [updatePedidoStatus, pedidos]);
 
-  if (isLoading) return <div className="flex items-center justify-center py-24"><Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} /></div>;
+  if (isLoading) return <div className="flex items-center justify-center py-24"><Loader2 className={cn("h-8 w-8 animate-spin", ds.colors.text.primary)} /></div>;
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
@@ -220,7 +220,7 @@ function PedidosTab() {
             </div>
             <Button
               onClick={() => setAddDialogOpen(true)}
-              className={cn(designSystem.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+              className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
             >
               <Plus className="h-4 w-4 mr-1.5" />
               Novo Pedido
