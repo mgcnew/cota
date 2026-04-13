@@ -16,6 +16,13 @@ const PedidosTab = lazy(() => import("@/components/compras/PedidosTab"));
 const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
 const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
 const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
+const TABS = [
+  { value: "cotacoes", icon: FileText, label: "Cotações" },
+  { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
+  { value: "lista", icon: ShoppingBasket, label: "Lista" },
+  { value: "embalagens", icon: Package, label: "Embalagens" },
+  { value: "analise", icon: BarChart3, label: "Análise" }
+];
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-24">
@@ -33,14 +40,14 @@ function Compras() {
   // Sync tab with URL
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && (tab === "cotacoes" || tab === "pedidos" || tab === "analise" || tab === "lista" || tab === "embalagens")) {
+    if (tab && TABS.some(t => t.value === tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setSearchParams({ tab: value });
+    setSearchParams({ tab: value }, { replace: true });
   };
 
   // Atalhos de teclado
@@ -94,7 +101,38 @@ function Compras() {
 
   return (
     <PageWrapper>
-      <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
+      {/* Mobile Bottom Navigation Bar */}
+      {isMobile && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800 pb-safe shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.1)]">
+          <div className="flex items-center justify-between px-2 py-2">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => handleTabChange(tab.value)}
+                  className={cn(
+                    "relative flex items-center justify-center gap-2 h-12 transition-all duration-300 rounded-full touch-manipulation",
+                    isActive 
+                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 px-4 flex-1 shadow-sm" 
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 px-3 flex-shrink-0"
+                  )}
+                  aria-label={tab.label}
+                >
+                  <tab.icon className={cn("h-[18px] w-[18px] shrink-0 transition-transform duration-300", isActive && "scale-110")} />
+                  {isActive && (
+                    <span className="text-[13px] font-semibold tracking-tight whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
+                      {tab.label}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
         {/* Header da Página */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -131,20 +169,10 @@ function Compras() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
-          {/* Tabs - Estilizadas conforme Design System Clean */}
-          <div className={cn(
-            "pb-1 border-b !bg-transparent !bg-none",
-            designSystem.colors.border.subtle,
-            isMobile ? "sticky top-0 z-10 bg-background/95 backdrop-blur-sm -mx-4 px-4 overflow-x-auto scrollbar-none" : ""
-          )}>
+          {/* Desktop Tabs Navigation (Hidden on Mobile) */}
+          <div className="hidden md:block pb-1 border-b border-zinc-200/70 dark:border-zinc-900 bg-transparent">
             <TabsList className={designSystem.components.tabs.clean.list}>
-              {[
-                { value: "cotacoes", icon: FileText, label: "Cotações" },
-                { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
-                { value: "lista", icon: ShoppingBasket, label: "Lista" },
-                { value: "embalagens", icon: Package, label: "Embalagens" },
-                { value: "analise", icon: BarChart3, label: "Análise" }
-              ].map((tab) => (
+              {TABS.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
@@ -160,13 +188,15 @@ function Compras() {
             </TabsList>
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 md:mt-6 overflow-hidden">
             <Suspense fallback={<TabLoader />}>
-              {activeTab === "cotacoes" && <CotacoesTab />}
-              {activeTab === "pedidos" && <PedidosTab />}
-              {activeTab === "analise" && <AnaliseTab />}
-              {activeTab === "lista" && <ListaComprasTab />}
-              {activeTab === "embalagens" && <EmbalagensTab />}
+              <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-2 md:slide-in-from-right-4 duration-300 ease-out fill-mode-forwards">
+                {activeTab === "cotacoes" && <CotacoesTab />}
+                {activeTab === "pedidos" && <PedidosTab />}
+                {activeTab === "analise" && <AnaliseTab />}
+                {activeTab === "lista" && <ListaComprasTab />}
+                {activeTab === "embalagens" && <EmbalagensTab />}
+              </div>
             </Suspense>
           </div>
         </Tabs>
