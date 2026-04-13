@@ -218,6 +218,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Estados para agendamento
   const [isScheduled, setIsScheduled] = useState(false);
 
+  // Estados mobile-specific
+  const [showMobileProductSearch, setShowMobileProductSearch] = useState(false);
+  const [showMobileCart, setShowMobileCart] = useState(false);
+
   // Refs para auto-foco
   const quantityInputRef = useRef<HTMLInputElement>(null);
   const productSearchRef = useRef<HTMLInputElement>(null);
@@ -430,6 +434,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setProducts([]);
       setShowQuickCreateProduct(false);
       setShowQuickCreateSupplier(false);
+      setShowMobileProductSearch(false);
+      setShowMobileCart(false);
     }
   }, [open, activeTab]);
 
@@ -727,7 +733,785 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     return "pending";
   };
 
-  // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
+  // ═══════════════════════════════════════════════════════════
+  // MOBILE-SPECIFIC CONTENT — Linear flow, large touch targets
+  // ═══════════════════════════════════════════════════════════
+  const mobileContent = (
+    <>
+      {/* Mobile Header — minimal, sticky */}
+      <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          {currentTabIndex > 0 ? (
+            <button
+              type="button"
+              onClick={handlePrevious}
+              className={cn("w-8 h-8 rounded-full flex items-center justify-center", ds.colors.surface.section)}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className={cn("w-8 h-8 rounded-full flex items-center justify-center", ds.colors.surface.section)}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+          <div>
+            <h2 className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
+              {currentTabIndex === 0 ? "Produtos" : currentTabIndex === 1 ? "Período & Fornecedores" : "Revisão"}
+            </h2>
+            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+              Passo {currentTabIndex + 1} de {tabs.length}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {currentTabIndex === 0 && fields.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowMobileCart(true)}
+              className={cn(
+                "relative w-9 h-9 rounded-full flex items-center justify-center",
+                "bg-brand/10 text-brand"
+              )}
+            >
+              <Package className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 bg-brand text-zinc-950 text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center font-bold">
+                {fields.length}
+              </span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Progress bar — thin, clean */}
+      <div className="flex gap-1.5 px-4 pb-3">
+        {tabs.map((_, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              "h-1 rounded-full flex-1 transition-all duration-300",
+              idx < currentTabIndex ? "bg-brand" : idx === currentTabIndex ? "bg-brand/50" : "bg-muted"
+            )}
+          />
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className={cn("animate-spin h-10 w-10 border-4 rounded-full mx-auto mb-3", "border-muted", "border-t-brand")} />
+            <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>Carregando...</p>
+          </div>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form
+            id="quote-form-mobile"
+            onSubmit={form.handleSubmit((data) => onSubmit(data, false))}
+            className="flex flex-col flex-1 min-h-0 overflow-hidden"
+          >
+            {/* ── STEP 1: Products ── */}
+            {activeTab === "produtos" && (
+              <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                {/* Quick add area */}
+                <div className="px-4 pb-3 space-y-3 flex-shrink-0">
+                  {/* Product selector */}
+                  <div
+                    onClick={() => setShowMobileProductSearch(true)}
+                    className={cn(
+                      "flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer active:scale-[0.98] transition-all",
+                      selectedProduct
+                        ? "border-brand/30 bg-brand/5"
+                        : cn(ds.colors.surface.card, ds.colors.border.default)
+                    )}
+                  >
+                    <div className={cn(
+                      "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
+                      selectedProduct ? "bg-brand/15 text-brand" : ds.colors.surface.section
+                    )}>
+                      {selectedProduct ? <Check className="h-5 w-5" /> : <Search className="h-5 w-5 text-zinc-400" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(
+                        ds.typography.size.sm,
+                        selectedProduct ? cn(ds.typography.weight.semibold, ds.colors.text.primary) : ds.colors.text.secondary
+                      )}>
+                        {selectedProduct ? selectedProduct.name : "Toque para buscar produto..."}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-zinc-300 flex-shrink-0" />
+                  </div>
+
+                  {/* Quantity + Unit — only show when product is selected */}
+                  {selectedProduct && (
+                    <div className="flex gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                      <div className="flex-1">
+                        <Input
+                          ref={quantityInputRef}
+                          placeholder="Qtd"
+                          type="number"
+                          inputMode="decimal"
+                          value={newProductQuantity}
+                          onChange={(e) => setNewProductQuantity(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              if (selectedProduct && newProductQuantity && newProductUnit) {
+                                handleAddNewProduct();
+                              }
+                            }
+                          }}
+                          className={cn(ds.components.input.root, "h-12 text-base text-center")}
+                          autoFocus
+                        />
+                      </div>
+                      <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                        <SelectTrigger className={cn(ds.components.input.root, "w-24 h-12 text-base")}>
+                          <SelectValue placeholder="Un" />
+                        </SelectTrigger>
+                        <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border")}>
+                          <SelectItem value="kg">kg</SelectItem>
+                          <SelectItem value="g">g</SelectItem>
+                          <SelectItem value="un">un</SelectItem>
+                          <SelectItem value="cx">cx</SelectItem>
+                          <SelectItem value="pct">pct</SelectItem>
+                          <SelectItem value="l">l</SelectItem>
+                          <SelectItem value="ml">ml</SelectItem>
+                          <SelectItem value="metade">metade</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        onClick={handleAddNewProduct}
+                        disabled={!newProductQuantity || !newProductUnit}
+                        className={cn(ds.components.button.primary, "h-12 w-12 p-0 flex-shrink-0")}
+                      >
+                        <Plus className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Product list — scrollable */}
+                <div className="flex-1 overflow-y-auto px-4 pb-24">
+                  {fields.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-4", ds.colors.surface.section)}>
+                        <Package className="h-8 w-8 text-zinc-300" />
+                      </div>
+                      <p className={cn(ds.typography.weight.medium, ds.colors.text.secondary)}>Nenhum produto adicionado</p>
+                      <p className={cn(ds.typography.size.xs, ds.colors.text.muted, "mt-1")}>Toque acima para buscar e adicionar</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {fields.map((field, index) => (
+                        <div
+                          key={field.id}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-xl border transition-all",
+                            ds.colors.surface.card,
+                            ds.colors.border.subtle
+                          )}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
+                              {form.watch(`produtos.${index}.produtoNome`)}
+                            </p>
+                            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
+                              {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                            </p>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => remove(index)}
+                            className="h-8 w-8 p-0 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg flex-shrink-0"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 2: Period & Suppliers ── */}
+            {activeTab === "periodo_fornecedores" && (
+              <div className="flex-1 overflow-y-auto px-4 pb-24">
+                <div className="space-y-5">
+                  {/* Period shortcuts */}
+                  <div className="space-y-2">
+                    <label className={cn(ds.components.input.label, "flex items-center gap-2")}>
+                      <Clock className="h-3.5 w-3.5 text-brand" />
+                      Prazo da Cotação
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { label: "Hoje", value: "0" },
+                        { label: "3 dias", value: "3" },
+                        { label: "7 dias", value: "7" },
+                        { label: "15 dias", value: "15" },
+                        { label: "30 dias", value: "30" },
+                      ].map((preset) => {
+                        const days = parseInt(preset.value);
+                        const currentEnd = form.watch("dataFim");
+                        const currentStart = form.watch("dataInicio");
+                        const diffDays = currentEnd && currentStart
+                          ? Math.round((currentEnd.getTime() - currentStart.getTime()) / (1000 * 60 * 60 * 24))
+                          : 7;
+                        const isActive = diffDays === days;
+                        return (
+                          <button
+                            key={preset.value}
+                            type="button"
+                            onClick={() => {
+                              const hoje = new Date();
+                              hoje.setHours(0, 0, 0, 0);
+                              const fim = new Date(hoje);
+                              fim.setDate(hoje.getDate() + days);
+                              form.setValue("dataInicio", hoje);
+                              form.setValue("dataFim", fim);
+                            }}
+                            className={cn(
+                              "py-2.5 px-3 rounded-xl text-sm font-medium border transition-all active:scale-95",
+                              isActive
+                                ? "bg-brand/10 border-brand/30 text-brand"
+                                : cn(ds.colors.surface.card, ds.colors.border.subtle, ds.colors.text.secondary)
+                            )}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {/* Period display */}
+                    <p className={cn(ds.typography.size.xs, ds.colors.text.muted, "text-center pt-1")}>
+                      {form.watch("dataInicio") && form.watch("dataFim")
+                        ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                        : "Selecione um período"}
+                    </p>
+                  </div>
+
+                  {/* Schedule toggle */}
+                  <div className={cn(
+                    "flex items-center justify-between p-3 rounded-xl border",
+                    ds.colors.surface.section,
+                    ds.colors.border.subtle
+                  )}>
+                    <div>
+                      <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>
+                        Agendar cotação
+                      </p>
+                      <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                        {isScheduled ? "Será criada como planejada" : "Inicia imediatamente"}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={isScheduled}
+                      onCheckedChange={(checked) => {
+                        setIsScheduled(checked);
+                        if (!checked) form.setValue("dataPlanejada", undefined);
+                      }}
+                      className="data-[state=checked]:bg-brand"
+                    />
+                  </div>
+
+                  {isScheduled && (
+                    <FormField
+                      control={form.control}
+                      name="dataPlanejada"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className={ds.components.input.label}>Data de Ativação *</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    ds.components.button.secondary,
+                                    "w-full justify-start font-normal h-12",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value
+                                    ? format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                                    : <span>Selecione a data</span>}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className={cn(ds.colors.surface.card, ds.colors.border.default, "w-auto p-0 border shadow-2xl overflow-hidden rounded-2xl")} align="center">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                locale={ptBR}
+                                disabled={(date) => {
+                                  const today = new Date();
+                                  today.setHours(0, 0, 0, 0);
+                                  return date < today;
+                                }}
+                                classNames={{
+                                  day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                  day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
+                                  day: cn(
+                                    buttonVariants({ variant: "ghost" }),
+                                    "h-9 w-9 p-0 font-medium aria-selected:opacity-100 hover:bg-brand/10 hover:text-brand rounded-xl transition-all"
+                                  ),
+                                  day_disabled: "text-muted-foreground/30 opacity-40 cursor-not-allowed",
+                                  day_outside: "text-muted-foreground/20 opacity-30",
+                                }}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* Suppliers */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className={cn(ds.components.input.label, "flex items-center gap-2 mb-0")}>
+                        <Building2 className="h-3.5 w-3.5 text-brand" />
+                        Fornecedores
+                        {selectedSuppliers.length > 0 && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-brand text-zinc-950">
+                            {selectedSuppliers.length}
+                          </span>
+                        )}
+                      </label>
+                      {supplierSearch.length > 0 && filteredSuppliers.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleSelectAllSuppliers}
+                          className={cn(ds.typography.size.xs, "text-brand")}
+                        >
+                          {filteredSuppliers.every(s => selectedSuppliers.some(sel => sel.id === s.id))
+                            ? "Desmarcar"
+                            : "Selecionar todos"}
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                      <Input
+                        ref={supplierSearchRef}
+                        placeholder="Buscar fornecedor..."
+                        value={supplierSearch}
+                        onChange={(e) => {
+                          setSupplierSearch(e.target.value);
+                          if (e.target.value.length > 0) setHighlightedSupplierIndex(0);
+                          else setHighlightedSupplierIndex(-1);
+                        }}
+                        className={cn(ds.components.input.root, "pl-10 h-12 text-base")}
+                      />
+                    </div>
+
+                    {/* Selected suppliers chips */}
+                    {selectedSuppliers.length > 0 && supplierSearch.length === 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedSuppliers.map((s) => (
+                          <button
+                            key={s.id}
+                            type="button"
+                            onClick={() => handleSupplierRemove(s.id)}
+                            className={cn(
+                              "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all active:scale-95",
+                              "bg-brand/10 border-brand/20 text-brand"
+                            )}
+                          >
+                            {s.name}
+                            <X className="h-3 w-3" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Supplier list */}
+                    {supplierSearch.length > 0 && (
+                      <div className="space-y-1">
+                        {filteredSuppliers.length > 0 ? (
+                          filteredSuppliers.map((supplier) => {
+                            const isSelected = selectedSuppliers.some(s => s.id === supplier.id);
+                            return (
+                              <button
+                                key={supplier.id}
+                                type="button"
+                                onClick={() => isSelected ? handleSupplierRemove(supplier.id) : handleSupplierSelect(supplier)}
+                                className={cn(
+                                  "w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left active:scale-[0.98]",
+                                  isSelected
+                                    ? "border-brand/30 bg-brand/10"
+                                    : cn(ds.colors.surface.card, "border-transparent")
+                                )}
+                              >
+                                <div className={cn(
+                                  "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
+                                  isSelected ? "bg-brand border-brand text-zinc-950" : ds.colors.border.default
+                                )}>
+                                  {isSelected && <Check className="h-3 w-3" />}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
+                                    {supplier.name}
+                                  </p>
+                                  {supplier.contact && (
+                                    <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "truncate")}>
+                                      {supplier.contact}
+                                    </p>
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })
+                        ) : !showQuickCreateSupplier ? (
+                          <div className="p-4 text-center space-y-3">
+                            <Building2 className={cn("h-6 w-6 mx-auto opacity-40", ds.colors.text.muted)} />
+                            <p className={cn(ds.typography.size.xs, ds.colors.text.muted)}>Nenhum resultado</p>
+                            <Button
+                              type="button"
+                              onClick={() => setShowQuickCreateSupplier(true)}
+                              className={cn(ds.components.button.primary, "h-10 text-sm")}
+                            >
+                              <Plus className="h-4 w-4 mr-1.5" />
+                              Cadastrar "{supplierSearch}"
+                            </Button>
+                          </div>
+                        ) : null}
+
+                        {showQuickCreateSupplier && (
+                          <QuickCreateSupplier
+                            initialName={supplierSearch}
+                            onCreated={(supplier) => {
+                              setShowQuickCreateSupplier(false);
+                              const newSupplier = { id: supplier.id, name: supplier.name, contact: supplier.contact };
+                              setSuppliers(prev => [...prev, newSupplier].sort((a, b) => a.name.localeCompare(b.name)));
+                              handleSupplierSelect(newSupplier);
+                              setSupplierSearch("");
+                            }}
+                            onCancel={() => {
+                              setShowQuickCreateSupplier(false);
+                              supplierSearchRef.current?.focus();
+                            }}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 3: Review ── */}
+            {activeTab === "detalhes" && (
+              <div className="flex-1 overflow-y-auto px-4 pb-24">
+                <div className="space-y-4">
+                  {/* Products summary */}
+                  <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Package className="h-4 w-4 text-brand" />
+                      <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                        Produtos ({fields.length})
+                      </h3>
+                    </div>
+                    <div className="space-y-2">
+                      {fields.map((field, index) => (
+                        <div key={field.id} className="flex justify-between items-center text-sm">
+                          <span className={cn(ds.colors.text.secondary, "truncate pr-3")}>
+                            {form.watch(`produtos.${index}.produtoNome`)}
+                          </span>
+                          <span className={cn(ds.typography.weight.medium, ds.colors.text.primary, "flex-shrink-0")}>
+                            {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Period summary */}
+                  <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock className="h-4 w-4 text-brand" />
+                      <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>Prazos</h3>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className={ds.colors.text.secondary}>Duração:</span>
+                        <span className={cn(ds.typography.weight.medium, ds.colors.text.primary)}>
+                          {form.watch("dataInicio") && form.watch("dataFim")
+                            ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                            : "Não definida"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className={ds.colors.text.secondary}>Agendamento:</span>
+                        <span className={cn(ds.typography.weight.medium, isScheduled ? "text-brand" : ds.colors.text.primary)}>
+                          {isScheduled ? "Planejado" : "Imediato"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Suppliers summary */}
+                  <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Building2 className="h-4 w-4 text-brand" />
+                      <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                        Fornecedores ({selectedSuppliers.length})
+                      </h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedSuppliers.map(s => (
+                        <span key={s.id} className={cn(
+                          "px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold border",
+                          ds.colors.surface.section, ds.colors.border.subtle, ds.colors.text.secondary
+                        )}>
+                          {s.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Observations */}
+                  <div className="space-y-2">
+                    <label className={ds.components.input.label}>Observações (opcional)</label>
+                    <Textarea
+                      placeholder="Alguma observação para os fornecedores?"
+                      value={form.watch("observacoes") || ""}
+                      onChange={(e) => form.setValue("observacoes", e.target.value)}
+                      className={cn(ds.components.input.root, "min-h-[80px] text-sm")}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Bottom Action Bar ── */}
+            <div className={cn(
+              "fixed bottom-0 left-0 right-0 p-4 border-t z-40",
+              ds.colors.surface.card, ds.colors.border.default,
+              "safe-area-bottom"
+            )}>
+              {currentTabIndex === tabs.length - 1 ? (
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className={cn(ds.components.button.primary, "w-full h-12 text-base")}
+                >
+                  {isSubmitting ? (
+                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Salvando...</>
+                  ) : (
+                    <><Check className="mr-2 h-5 w-5" />Finalizar Cotação</>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!canProceedToNext()}
+                  className={cn(ds.components.button.primary, "w-full h-12 text-base")}
+                >
+                  Próximo
+                  <ChevronRight className="ml-2 h-5 w-5" />
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+      )}
+
+      {isSubmitting && (
+        <div className={cn(
+          "absolute inset-0 backdrop-blur-sm z-50 flex items-center justify-center",
+          "bg-background/80"
+        )}>
+          <div className="text-center space-y-3">
+            <div className={cn("animate-spin h-12 w-12 border-4 rounded-full mx-auto", "border-border", "border-t-brand")} />
+            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Mobile Cart Drawer — reused from desktop */}
+      <Drawer open={showMobileCart} onOpenChange={setShowMobileCart}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="border-b border-border/50 pb-4">
+            <DrawerTitle className="text-left flex items-center gap-2">
+              <Package className="h-5 w-5 text-brand" />
+              Produtos Adicionados ({fields.length})
+            </DrawerTitle>
+            <DrawerDescription className="text-left">
+              Edite ou remova os produtos.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="p-4 overflow-y-auto min-h-[50vh]">
+            {fields.length === 0 ? (
+              <div className={cn("text-center py-8", ds.colors.text.secondary)}>
+                <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {fields.map((field, index) => (
+                  <div key={field.id} className={cn(
+                    ds.colors.surface.card, ds.colors.border.subtle,
+                    "border rounded-xl"
+                  )}>
+                    <div className="p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-sm break-words")}>
+                            {form.watch(`produtos.${index}.produtoNome`)}
+                          </h4>
+                          <p className={cn("text-xs mt-1", ds.colors.text.secondary)}>
+                            {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => remove(index)}
+                          className="h-9 w-9 p-0 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg flex-shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <DrawerFooter className="border-t border-border/50 pt-4">
+            <DrawerClose asChild>
+              <Button variant="outline" className={cn(ds.components.button.secondary, "w-full")}>Fechar Lista</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Mobile Product Search Drawer */}
+      <Drawer open={showMobileProductSearch} onOpenChange={setShowMobileProductSearch}>
+        <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
+          <DrawerHeader className="border-b border-border/50 pb-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <DrawerTitle className="text-left text-brand flex items-center gap-2">
+                  <Search className="h-5 w-5" />
+                  Buscar Produto
+                </DrawerTitle>
+                <DrawerDescription className="text-left">
+                  Procure pelo produto que deseja adicionar.
+                </DrawerDescription>
+              </div>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                  <X className="h-4 w-4" />
+                </Button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+
+          <div className="p-4 space-y-4 flex-1 flex flex-col min-h-0 bg-background/30">
+            <div className="relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+              <Input
+                autoFocus
+                placeholder="Nome do produto..."
+                value={productSearch}
+                onChange={(e) => setProductSearch(e.target.value)}
+                className={cn(ds.components.input.root, "pl-10 h-12 text-base")}
+              />
+              {isSearchingProducts && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                </div>
+              )}
+            </div>
+
+            <ScrollArea className="flex-1 -mx-4 px-4 overflow-y-auto pr-2">
+              <div className="space-y-2 pb-10">
+                {productSearch.length === 0 ? (
+                  <div className="py-12 text-center space-y-3 opacity-60">
+                    <div className={cn("w-12 h-12 rounded-full mx-auto flex items-center justify-center", ds.colors.surface.section)}>
+                      <Search className="h-6 w-6 text-zinc-400" />
+                    </div>
+                    <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>Comece a digitar para buscar</p>
+                  </div>
+                ) : products.length > 0 ? (
+                  products.map((product) => (
+                    <Button
+                      key={product.id}
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedProduct(product);
+                        if (product.unit) setNewProductUnit(product.unit);
+                        setProductSearch("");
+                        setShowMobileProductSearch(false);
+                        setTimeout(() => quantityInputRef.current?.focus(), 150);
+                      }}
+                      className={cn(
+                        "w-full h-auto py-3 px-4 justify-start text-left flex items-center gap-4 transition-all rounded-xl border border-transparent hover:border-brand/20 hover:bg-brand/5 active:scale-[0.98]",
+                        ds.colors.surface.card
+                      )}
+                    >
+                      <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", ds.colors.surface.section)}>
+                        <Package className="h-5 w-5 text-zinc-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "truncate text-base")}>{product.name}</p>
+                        {product.unit && (
+                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>Unidade: {product.unit}</p>
+                        )}
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-zinc-300" />
+                    </Button>
+                  ))
+                ) : !isSearchingProducts ? (
+                  <div className="py-10 text-center space-y-6">
+                    <div className="space-y-2">
+                      <div className={cn("w-16 h-16 rounded-full mx-auto flex items-center justify-center", ds.colors.surface.section)}>
+                        <Package className="h-8 w-8 text-zinc-300" />
+                      </div>
+                      <p className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary)}>Nenhum produto encontrado</p>
+                      <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>Não encontramos "{productSearch}".</p>
+                    </div>
+                    <Button
+                      variant="default"
+                      onClick={() => {
+                        setShowMobileProductSearch(false);
+                        setShowQuickCreateProduct(true);
+                      }}
+                      className={cn(ds.components.button.primary, "w-full max-w-xs mx-auto h-12")}
+                    >
+                      <Plus className="h-5 w-5 mr-2" />
+                      Cadastrar "{productSearch}"
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            </ScrollArea>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    </>
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // DESKTOP CONTENT — Tabs, side-by-side layout (unchanged)
+  // ═══════════════════════════════════════════════════════════
   const modalInnerContent = (
     <>
       {/* Minimal Header & Stepper */}
@@ -1905,9 +2689,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0"
             : "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] rounded-xl sm:rounded-2xl"
         )}
-        onKeyDown={handleModalKeyDown}
+        onKeyDown={!isMobile ? handleModalKeyDown : undefined}
       >
-        {modalInnerContent}
+        {isMobile ? mobileContent : modalInnerContent}
       </DialogContent>
     </Dialog>
   );
