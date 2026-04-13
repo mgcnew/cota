@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Trophy, TrendingUp, History, Info } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { designSystem } from '@/styles/design-system';
+import { designSystem as ds } from '@/styles/design-system';
 import { cn } from '@/lib/utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -49,9 +49,9 @@ export const DashboardIntelligenceBoard = memo(({
   return (
     <div className="flex flex-col gap-6 h-full">
       {/* 1. Ranking de Parceiros */}
-      <Card className={cn(designSystem.components.card.root, "flex flex-col")}>
+      <Card className={cn(ds.components.card.root, "flex flex-col")}>
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <h2 className={cn(designSystem.typography.size.sm, designSystem.typography.weight.bold, "flex items-center gap-2")}>
+          <h2 className={cn(ds.typography.size.sm, ds.typography.weight.bold, "flex items-center gap-2")}>
             <Trophy className="w-4 h-4 text-amber-500" />
             Top Parceiros do Mês
           </h2>
@@ -71,22 +71,22 @@ export const DashboardIntelligenceBoard = memo(({
                     )}>
                       {idx + 1}
                     </span>
-                    <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.semibold, "truncate max-w-[120px]")}>
+                    <p className={cn(ds.typography.size.sm, ds.typography.weight.semibold, "truncate max-w-[120px]")}>
                       <CapitalizedText>{supplier.name}</CapitalizedText>
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+                    <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary)}>
                       {supplier.quotes} vitórias
                     </p>
                   </div>
                 </div>
                 
                 <div className="flex items-center justify-between">
-                  <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.muted)}>
+                  <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>
                     Economia média gerada
                   </span>
-                  <span className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "text-emerald-500")}>
+                  <span className={cn(ds.typography.size.xs, ds.typography.weight.bold, "text-emerald-500")}>
                     {(supplier.economiaPercentual || 0).toFixed(1)}%
                   </span>
                 </div>
@@ -101,9 +101,9 @@ export const DashboardIntelligenceBoard = memo(({
       </Card>
 
       {/* 2. Resumo de Atividades Recentes */}
-      <Card className={cn(designSystem.components.card.root, "flex flex-col flex-1")}>
+      <Card className={cn(ds.components.card.root, "flex flex-col flex-1")}>
         <div className="p-4 border-b border-border flex items-center justify-between">
-          <h2 className={cn(designSystem.typography.size.sm, designSystem.typography.weight.bold, "flex items-center gap-2")}>
+          <h2 className={cn(ds.typography.size.sm, ds.typography.weight.bold, "flex items-center gap-2")}>
             <History className="w-4 h-4 text-zinc-400" />
             Radar de Operações
           </h2>
@@ -138,16 +138,16 @@ export const DashboardIntelligenceBoard = memo(({
                         <span className={cn("text-[10px] font-bold uppercase tracking-wider", quote.status === 'ativa' ? 'text-blue-500' : quote.status === 'finalizada' ? 'text-emerald-500' : 'text-zinc-500')}>
                           {badge.label}
                         </span>
-                        <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.muted, "shrink-0 ml-auto")}>
+                        <span className={cn(ds.typography.size.xs, ds.colors.text.muted, "shrink-0 ml-auto")}>
                           {quote.date}
                         </span>
                       </div>
                       
-                      <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.bold, designSystem.colors.text.primary, "truncate")}>
+                      <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
                         <CapitalizedText>{quote.product}</CapitalizedText>
                       </p>
                       
-                      <div className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary, "mt-2 flex items-center justify-between gap-2")}>
+                      <div className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-2 flex items-center justify-between gap-2")}>
                         <div className="flex-1 truncate flex items-center gap-2">
                           {quote.bestPrice !== 'Sem ofertas' ? (
                             <>

@@ -9,7 +9,7 @@ import { useCotacoes } from '@/hooks/useCotacoes';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
 import { Button } from '@/components/ui/button';
-import { designSystem } from '@/styles/design-system';
+import { designSystem as ds } from '@/styles/design-system';
 
 import { DashboardActionRow } from '@/components/dashboard/DashboardActionRow';
 import { DashboardOperationsBoard } from '@/components/dashboard/DashboardOperationsBoard';
@@ -17,12 +17,12 @@ import { DashboardIntelligenceBoard } from '@/components/dashboard/DashboardInte
 
 // Cores para skeletons e status 
 const STATUS_STYLES: Record<string, string> = {
-  finalizada: designSystem.components.badge.success,
-  concluida: designSystem.components.badge.success,
-  entregue: designSystem.components.badge.success,
-  ativa: designSystem.components.badge.active, // Neon Green
-  pendente: designSystem.components.badge.secondary,
-  confirmado: designSystem.components.badge.active,
+  finalizada: ds.components.badge.success,
+  concluida: ds.components.badge.success,
+  entregue: ds.components.badge.success,
+  ativa: ds.components.badge.active, // Neon Green
+  pendente: ds.components.badge.secondary,
+  confirmado: ds.components.badge.active,
 };
 
 function Dashboard() {
@@ -97,7 +97,7 @@ function Dashboard() {
   if (isLoading || !metrics) {
     return (
       <PageWrapper>
-        <div className={cn(designSystem.layout.container.page, "animate-pulse")}>
+        <div className={cn(ds.layout.container.page, "animate-pulse")}>
           <div className="h-12 w-1/3 bg-muted rounded mb-8" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[1, 2, 3, 4].map(i => <div key={i} className="h-[140px] bg-muted/50 rounded-xl" />)}
@@ -113,7 +113,7 @@ function Dashboard() {
 
   return (
     <PageWrapper>
-      <div className={cn(designSystem.layout.container.page, "px-3 md:px-6 animate-in fade-in zoom-in-95 duration-500")}>
+      <div className={cn(ds.layout.container.page, "px-3 md:px-6 animate-in fade-in zoom-in-95 duration-500")}>
         
         {/* Header - Command Center Style */}
         <div className="flex flex-col gap-6 mb-8">
@@ -122,10 +122,10 @@ function Dashboard() {
               <TrendingUp className="h-6 w-6 text-brand" />
             </div>
             <div>
-              <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
+              <h1 className={cn(ds.typography.size["2xl"], "font-bold text-foreground")}>
                 Resumo de Hoje
               </h1>
-              <p className={cn(designSystem.colors.text.secondary, "text-sm mt-0.5")}>
+              <p className={cn(ds.colors.text.secondary, "text-sm mt-0.5")}>
                 Bem-vindo ao seu centro de operações.
               </p>
             </div>
@@ -133,7 +133,7 @@ function Dashboard() {
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <Button 
               onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
-              className={cn(designSystem.components.button.primary, "font-bold text-white dark:text-zinc-950")}
+              className={cn(ds.components.button.primary, "font-bold text-white dark:text-zinc-950")}
             >
               <Plus className="w-4 h-4 mr-1.5" />
               Nova Cotação
@@ -186,14 +186,14 @@ function Dashboard() {
         >
           <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1 custom-scrollbar">
             {recentQuotes.map((quote: any) => (
-              <div key={quote.id} className={cn("flex items-start gap-4 p-4 rounded-xl border bg-muted/10", designSystem.colors.border.subtle, "hover:border-primary/30 transition-colors")}>
+              <div key={quote.id} className={cn("flex items-start gap-4 p-4 rounded-xl border bg-muted/10", ds.colors.border.subtle, "hover:border-primary/30 transition-colors")}>
                 <div className={cn("w-3 h-3 rounded-full mt-1.5 flex-shrink-0", quote.status === 'ativa' ? "bg-blue-500" : quote.status === 'finalizada' ? "bg-emerald-500" : "bg-zinc-400")} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
-                    <p className={cn(designSystem.typography.size.sm, designSystem.typography.weight.bold, "truncate")}>{quote.product}</p>
-                    <span className={cn(designSystem.typography.size.xs, designSystem.colors.text.muted, "shrink-0")}>{quote.date}</span>
+                    <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, "truncate")}>{quote.product}</p>
+                    <span className={cn(ds.typography.size.xs, ds.colors.text.muted, "shrink-0")}>{quote.date}</span>
                   </div>
-                  <p className={cn(designSystem.typography.size.xs, designSystem.colors.text.secondary)}>{quote.supplier} • {quote.bestPrice}</p>
+                  <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>{quote.supplier} • {quote.bestPrice}</p>
                 </div>
               </div>
             ))}
