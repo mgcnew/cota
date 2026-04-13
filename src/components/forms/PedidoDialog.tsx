@@ -10,10 +10,19 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { Progress } from "@/components/ui/progress";
 import { 
   Plus, Trash2, Loader2, Building2, Calendar, Package, FileText, 
   Save, ShoppingCart, X, Search, ClipboardList, Download,
-  DollarSign
+  DollarSign, ChevronLeft, ChevronRight, Check
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,9 +52,25 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const { user } = useAuth();
   const isMobile = useIsMobile();
 
-  
   const [activeTab, setActiveTab] = useState("itens");
   
+  // Mobile Steps
+  const STEPS = [
+    { id: "itens", title: "Produtos", icon: Package },
+    { id: "logistica", title: "Logística", icon: Building2 },
+    { id: "resumo", title: "Resumo", icon: ClipboardList },
+  ];
+  const [activeStep, setActiveStep] = useState(STEPS[0].id);
+  const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
+  const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
+
+  // Mobile Drawer & Form states
+  const [showMobileProductSearch, setShowMobileProductSearch] = useState(false);
+  const [newMobileQuantity, setNewMobileQuantity] = useState("1");
+  const [newMobileUnit, setNewMobileUnit] = useState("un");
+  const [newMobilePrice, setNewMobilePrice] = useState("");
+  const [selectedMobileProduct, setSelectedMobileProduct] = useState<any>(null);
+
   // Form states
   const [fornecedor, setFornecedor] = useState("");
   const [dataEntrega, setDataEntrega] = useState("");
@@ -77,6 +102,35 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const [products, setProducts] = useState<any[]>([]);
 
   const calculateTotal = () => itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
+
+  // Swipe and Touch states for mobile
+  const [swipableItemId, setSwipableItemId] = useState<number | null>(null);
+  const [swipeOffset, setSwipeOffset] = useState<number>(0);
+  const swipeStartRef = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent, index: number) => {
+    swipeStartRef.current = e.touches[0].clientX;
+    setSwipableItemId(index);
+    setSwipeOffset(0);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (swipeStartRef.current === null || swipableItemId === null) return;
+    const currentX = e.touches[0].clientX;
+    const diff = currentX - swipeStartRef.current;
+    if (diff < 0) {
+      setSwipeOffset(Math.max(diff, -80));
+    } else {
+      setSwipeOffset(0);
+    }
+  };
+  const handleTouchEnd = (index: number) => {
+    if (swipeOffset < -50 && !isReadOnly) {
+      setItens(itens.filter((_, i) => i !== index));
+    }
+    swipeStartRef.current = null;
+    setSwipableItemId(null);
+    setSwipeOffset(0);
+  };
 
   // Função para exportar HTML
   const handleDownloadHtml = useCallback(() => {
@@ -420,6 +474,268 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       </Button>
     </div>
   );
+
+
+  const nextStep = () => {
+    if (currentStepIndex < STEPS.length - 1) setActiveStep(STEPS[currentStepIndex + 1].id);
+  };
+  const prevStep = () => {
+    if (currentStepIndex > 0) setActiveStep(STEPS[currentStepIndex - 1].id);
+  };
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className={cn("h-[96dvh] max-h-[96dvh] flex flex-col p-0", ds.colors.surface.page)}>
+          <div className="flex flex-col h-full relative">
+            <div className="flex-shrink-0 px-4 py-4 bg-brand text-zinc-950 flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-black/10 flex items-center justify-center">
+                    <ShoppingCart className="h-5 w-5 stroke-[2.5]" />
+                  </div>
+                  <div className="flex flex-col">
+                    <DrawerTitle className="text-zinc-950 font-bold text-lg leading-none">Ped #{pedido?.id?.substring(0, 8)}</DrawerTitle>
+                    <DrawerDescription className="text-zinc-900/70 font-medium">Editar Pedido</DrawerDescription>
+                  </div>
+                </div>
+                <DrawerClose asChild>
+                  <Button variant="ghost" size="icon" className="text-zinc-950 hover:bg-black/10 h-9 w-9 rounded-xl">
+                    <X className="h-5 w-5" />
+                  </Button>
+                </DrawerClose>
+              </div>
+              <Progress value={progress} className="h-2 bg-black/10" indicatorClassName="bg-zinc-950" />
+            </div>
+
+            <div className="flex-1 overflow-y-auto w-full custom-scrollbar pb-32">
+              {activeStep === "itens" && (
+                <div className="p-4 space-y-4">
+                  {!isReadOnly && (
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                        <Input
+                          ref={newProductInputRef}
+                          placeholder="Buscar produto celular..."
+                          value={newProductSearch}
+                          onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
+                          onFocus={(e) => {
+                            if (newProductSearch.trim().length >= 3) setShowProductSuggestions(true);
+                          }}
+                          className={cn(ds.components.input.root, "pl-10 h-12 bg-background")}
+                        />
+                        {showProductSuggestions && products.length > 0 && !newProduct && (
+                          <div className={cn(
+                            "absolute top-full left-0 right-0 mt-2 max-h-[250px] overflow-y-auto rounded-xl shadow-2xl z-[200] border",
+                            ds.colors.surface.card, ds.colors.border.default
+                          )}>
+                            {filteredNewProducts.map((p) => (
+                              <button
+                                key={p.id}
+                                onClick={() => { 
+                                  setNewProduct(p); 
+                                  setNewProductSearch(p.name); 
+                                  setNewProductUnit(p.unit || 'un');
+                                  setProducts([]);
+                                  setShowProductSuggestions(false);
+                                }}
+                                className={cn(
+                                  "w-full px-4 py-3 text-left flex items-center justify-between gap-3 border-b last:border-none",
+                                  ds.colors.surface.hover, ds.colors.border.default
+                                )}
+                              >
+                                <span className={cn(ds.typography.size.sm, ds.typography.weight.bold)}>{p.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {newProduct && (
+                        <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border bg-brand/5 border-brand/20">
+                          <div className={ds.components.input.group}>
+                            <Label className={ds.components.input.label}>Qtd ({newProductUnit})</Label>
+                            <Input
+                              type="number"
+                              value={newQuantity}
+                              onChange={(e) => setNewQuantity(e.target.value)}
+                              className={cn(ds.components.input.root, "h-11")}
+                            />
+                          </div>
+                          <div className={ds.components.input.group}>
+                            <Label className={ds.components.input.label}>Preço</Label>
+                            <Input
+                              value={newPrice}
+                              onChange={(e) => setNewPrice(e.target.value)}
+                              className={cn(ds.components.input.root, "h-11")}
+                              placeholder="R$ 0,00"
+                            />
+                          </div>
+                          <Button onClick={handleAddNewItem} className={cn(ds.components.button.primary, "col-span-2 h-11")}>
+                            Adicionar Item
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="space-y-3 mt-6">
+                    {itens.map((item, index) => (
+                      <div 
+                        key={index} 
+                        className="relative rounded-xl overflow-hidden touch-pan-y shadow-sm"
+                        onTouchStart={(e) => handleTouchStart(e, index)}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={() => handleTouchEnd(index)}
+                      >
+                        <div className="absolute inset-0 bg-red-500/20 flex items-center justify-end pr-4 pointer-events-none">
+                          <Trash2 className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div 
+                          className={cn(
+                            "relative p-4 flex items-center gap-4 transition-transform z-10 border rounded-xl",
+                            ds.colors.surface.card, ds.colors.border.default,
+                            swipableItemId === index ? "" : "duration-200"
+                          )}
+                          style={{
+                            transform: swipableItemId === index ? `translateX(${swipeOffset}px)` : 'translateX(0px)',
+                          }}
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-black/5 flex items-center justify-center font-bold text-zinc-500 flex-shrink-0">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>{item.produto}</p>
+                            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>{item.quantidade} {item.unidade} × R$ {item.valorUnitario}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary)}>
+                              R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {itens.length === 0 && (
+                      <div className="py-8 text-center border border-dashed rounded-xl border-zinc-200 dark:border-zinc-800">
+                         <Package className="h-8 w-8 text-zinc-400 mx-auto mb-2 opacity-50" />
+                         <p className="text-sm font-medium text-zinc-500">Nenhum item adicionado</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeStep === "logistica" && (
+                <div className="p-4 space-y-5">
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Fornecedor</Label>
+                    <Select value={fornecedor} onValueChange={setFornecedor} disabled={isReadOnly}>
+                      <SelectTrigger className={cn(ds.components.input.root, "h-12")}>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {suppliers.map(s => (
+                          <SelectItem key={s.id} value={s.id} className="font-bold">{s.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Data de Entrega</Label>
+                    <Input 
+                      type="date" 
+                      value={dataEntrega} 
+                      onChange={e => setDataEntrega(e.target.value)} 
+                      disabled={isReadOnly}
+                      className={cn(ds.components.input.root, "h-12")} 
+                    />
+                  </div>
+
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Status do Pedido</Label>
+                    <Select value={status} onValueChange={setStatus} disabled={isReadOnly}>
+                      <SelectTrigger className={cn(ds.components.input.root, "h-12")}>
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value} className="font-bold">{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className={ds.components.input.group}>
+                    <Label className={ds.components.input.label}>Observações</Label>
+                    <Textarea
+                      placeholder="Alguma observação?"
+                      value={observacoes}
+                      onChange={(e) => setObservacoes(e.target.value)}
+                      disabled={isReadOnly}
+                      className={cn(ds.components.input.root, "min-h-[100px] resize-none")}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {activeStep === "resumo" && (
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.default)}>
+                      <p className="text-xs font-bold text-zinc-500 mb-1 uppercase">Fornecedor</p>
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{selectedSupplier?.name || '-'}</p>
+                    </div>
+                    <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.default)}>
+                      <p className="text-xs font-bold text-zinc-500 mb-1 uppercase">Entrega</p>
+                      <p className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{formatDate(dataEntrega)}</p>
+                    </div>
+                  </div>
+
+                  <div className={cn("p-5 rounded-xl border bg-brand/5 border-brand/20", ds.colors.surface.card)}>
+                    <div className="flex items-center gap-3 mb-2">
+                       <DollarSign className="w-6 h-6 text-brand" />
+                       <p className="text-sm font-bold text-brand uppercase">Total do Pedido</p>
+                    </div>
+                    <p className="text-3xl font-black text-brand">R$ {calculateTotal().toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                  </div>
+                  
+                  <div className="pt-4">
+                    <Button
+                      variant="outline"
+                      onClick={handleDownloadHtml}
+                      className={cn(ds.components.button.secondary, "w-full h-12 gap-2 font-bold")}
+                    >
+                      <Download className="h-5 w-5" />
+                      Exportar Resumo (HTML)
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t shadow-[0_-10px_40px_rgba(0,0,0,0.1)] flex items-center justify-between gap-3">
+              <Button variant="outline" className="h-14 w-14 rounded-xl flex-shrink-0" onClick={prevStep} disabled={currentStepIndex === 0}>
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              {currentStepIndex === STEPS.length - 1 ? (
+                <Button onClick={handleSubmit} className="flex-1 h-14 rounded-xl bg-brand text-zinc-950 font-bold text-lg shadow-xl disabled:opacity-50" disabled={loading || isReadOnly}>
+                  {loading ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <Save className="h-6 w-6 mr-2" />}
+                  Finalizar Edição
+                </Button>
+              ) : (
+                <Button onClick={nextStep} className="flex-1 h-14 rounded-xl bg-brand text-zinc-950 font-bold text-lg shadow-xl outline-none">
+                  Próximo <ChevronRight className="h-6 w-6 ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
