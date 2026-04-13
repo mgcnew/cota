@@ -1,17 +1,10 @@
-import { memo, useState } from "react";
+import { memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { capitalize } from "@/lib/text-utils";
-import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { 
-  ShoppingCart, Trash2, Package, Truck, MoreVertical, Clock, CheckCircle, XCircle,
-  ChevronDown, ChevronUp
+  ShoppingCart, Trash2, Package, Truck, Clock, CheckCircle, XCircle, AlertCircle
 } from "lucide-react";
-import { 
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 export interface OrderData {
@@ -37,7 +30,7 @@ export interface MobileOrderCardProps {
   pedido: OrderData;
   onManage: (pedido: OrderData) => void;
   onDelete: (pedido: OrderData) => void;
-  onUpdateStatus?: (pedidoId: string, status: string) => void;
+  onUpdateStatus?: (pedidoId: string, status: string) => void; // Kept for interface compatibility
   className?: string;
 }
 
@@ -50,10 +43,10 @@ const getStatusIcon = (status: string) => {
     cancelado: XCircle 
   };
   const Icon = icons[status as keyof typeof icons] || Clock;
-  return <Icon className="h-4 w-4" />;
+  return <Icon className="h-5 w-5" />;
 };
 
-const abbreviateSupplierName = (name: string, maxLength: number = 25) => {
+const abbreviateSupplierName = (name: string, maxLength: number = 22) => {
   if (name.length <= maxLength) return name;
   const words = name.split(' ');
   if (words.length === 1) return name.substring(0, maxLength - 3) + '...';
@@ -67,141 +60,117 @@ const abbreviateSupplierName = (name: string, maxLength: number = 25) => {
 /**
  * MobileOrderCard - Memoized card component for displaying orders on mobile.
  * 
- * Uses React.memo to prevent unnecessary re-renders when parent component updates
- * but the order data hasn't changed.
- * 
- * Requirements: 5.2
+ * Uses React.memo to prevent unnecessary re-renders when parent component updates.
+ * Optimized for mobile with direct 'Gerenciar' button and 'Delayed' alert.
  */
 export const MobileOrderCard = memo(function MobileOrderCard({
   pedido,
   onManage,
   onDelete,
-  onUpdateStatus,
   className,
 }: MobileOrderCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Calculate if the order is delayed
+  const isDelayed = useMemo(() => {
+    if (pedido.status === 'entregue' || pedido.status === 'cancelado') return false;
+    if (!pedido.delivery_date) return false;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const delivery = new Date(pedido.delivery_date + 'T00:00:00');
+    
+    return delivery < today;
+  }, [pedido.status, pedido.delivery_date]);
 
   return (
-    <Collapsible 
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
+    <div 
       className={cn(
-        "bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 overflow-hidden shadow-sm",
-        // Touch-optimized: min 44px touch targets + visual feedback (Requirements: 18.5)
-        "touch-manipulation touch-feedback",
+        "bg-white dark:bg-zinc-900/90 backdrop-blur-sm rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm overflow-hidden touch-manipulation relative",
+        isDelayed && "border-l-[3px] border-l-red-500",
         className
       )}
     >
       <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/10 to-amber-500/10 flex items-center justify-center flex-shrink-0 border border-orange-200/50">
-              {getStatusIcon(pedido.status)}
+        {/* Header: Supplier, ID, Total */}
+        <div className="flex justify-between items-start mb-3 gap-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-zinc-600 dark:text-zinc-400 flex-shrink-0">
+                {getStatusIcon(pedido.status)}
+              </div>
+              {isDelayed && (
+                <div className="absolute -top-1 -right-1 bg-white dark:bg-zinc-900 rounded-full">
+                  <div className="bg-red-500 rounded-full w-3.5 h-3.5 border-2 border-white dark:border-zinc-900 animate-pulse" />
+                </div>
+              )}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+            
+            <div className="min-w-0">
+              <h3 className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate">
                 {capitalize(abbreviateSupplierName(pedido.fornecedor))}
-              </p>
-              <p className="text-xs text-muted-foreground font-mono">
-                #{pedido.id.substring(0, 8)}
-              </p>
+              </h3>
+              <p className="text-xs text-zinc-500 font-mono tracking-tight">#{pedido.id.substring(0, 7)}</p>
+            </div>
+          </div>
+          
+          <div className="text-right flex-shrink-0">
+            <div className="font-bold text-sm text-emerald-600 dark:text-emerald-400">{pedido.total}</div>
+            <div className="text-[10px] text-zinc-500 uppercase tracking-wider">{pedido.dataPedido}</div>
+          </div>
+        </div>
+
+        {/* Info Row: Status, Items, Delivery */}
+        <div className="flex items-center justify-between mb-4 bg-zinc-50 dark:bg-zinc-800/30 rounded-lg p-2.5">
+          <StatusBadge status={pedido.status} />
+          
+          <div className="flex items-center gap-3 text-xs">
+            <div className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+              <Package className="w-3.5 h-3.5" />
+              <span className="font-medium">{pedido.itens}</span>
+            </div>
+            
+            <div className={cn("flex items-center gap-1.5", isDelayed ? "text-red-500 font-medium" : "text-zinc-600 dark:text-zinc-400")}>
+              {isDelayed ? <AlertCircle className="w-3.5 h-3.5" /> : <Truck className="w-3.5 h-3.5" />}
+              <span className={cn(!isDelayed && "font-medium")}>
+                {isDelayed ? 'Atrasado' : (pedido.dataEntrega || '-')}
+              </span>
             </div>
           </div>
         </div>
-        
-        <div className="flex items-center gap-2 mb-3">
-          {onUpdateStatus ? (
-            <StatusSelect
-              value={pedido.status}
-              options={ORDER_STATUS_OPTIONS}
-              onChange={(newStatus) => onUpdateStatus(pedido.id, newStatus)}
-            />
-          ) : (
-            <StatusBadge status={pedido.status} />
-          )}
-          <span className="text-xs text-muted-foreground">{pedido.dataPedido}</span>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <Package className="h-3.5 w-3.5 text-orange-600" />
-            <span className="text-gray-500 dark:text-gray-400">Itens:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{pedido.itens}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Truck className="h-3.5 w-3.5 text-blue-600" />
-            <span className="text-gray-500 dark:text-gray-400">Entrega:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {pedido.dataEntrega || '-'}
-            </span>
-          </div>
-        </div>
-        
-        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700/30 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">Valor Total</span>
-          <span className="font-bold text-emerald-600 dark:text-emerald-400 text-lg">
-            {pedido.total}
-          </span>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2">
+          <Button 
+            className="flex-1 h-10 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100 touch-target active:scale-[0.98] transition-transform"
+            onClick={() => onManage(pedido)}
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            Gerenciar Pedido
+          </Button>
+          
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 disabled:opacity-50"
+            onClick={() => onDelete(pedido)}
+            disabled={pedido.status === 'entregue'}
+            aria-label="Excluir pedido"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </div>
-
-      {/* Expand/Collapse Button */}
-      <CollapsibleTrigger asChild>
-        <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
-        >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Menos detalhes</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Mais detalhes</span>
-            </>
-          )}
-        </button>
-      </CollapsibleTrigger>
-
-      {/* Expandable Actions */}
-      <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30">
-          <div className="grid grid-cols-2 gap-2 pt-3">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target active:scale-95 transition-transform"
-              onClick={() => onManage(pedido)}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Gerenciar
-            </Button>
-            
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
-              onClick={() => onDelete(pedido)}
-              disabled={pedido.status === 'entregue'}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
-            </Button>
-          </div>
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+    </div>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for memo - only re-render if these change
   return (
     prevProps.pedido.id === nextProps.pedido.id &&
     prevProps.pedido.status === nextProps.pedido.status &&
     prevProps.pedido.total === nextProps.pedido.total &&
     prevProps.pedido.itens === nextProps.pedido.itens &&
     prevProps.pedido.dataEntrega === nextProps.pedido.dataEntrega &&
-    prevProps.pedido.fornecedor === nextProps.pedido.fornecedor
+    prevProps.pedido.fornecedor === nextProps.pedido.fornecedor &&
+    prevProps.pedido.delivery_date === nextProps.pedido.delivery_date
   );
 });
 
