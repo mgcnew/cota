@@ -7,7 +7,7 @@ import { TableActionGroup } from "@/components/ui/table-action-group";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { capitalize } from "@/lib/text-utils";
 import type { Product } from "@/hooks/useProducts";
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -27,48 +27,48 @@ const getProductStatus = (product: Product) => {
 };
 
 const getTrendIcon = (trend: "up" | "down" | "stable") => {
-  if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
-  if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
-  return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
+  if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 opacity-80" />;
+  if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500 opacity-70" />;
+  return <Minus className="h-3.5 w-3.5 text-zinc-300 dark:text-zinc-600" />;
 };
 
 export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory }: ProductListDesktopProps) => {
   return (
     <div className="hidden md:block overflow-x-auto w-full custom-scrollbar">
-      <Table className={designSystem.components.table.root}>
-        <TableHeader className={designSystem.components.table.header}>
+      <Table className={ds.components.table.root}>
+        <TableHeader className={ds.components.table.header}>
           <TableRow className="hover:bg-transparent border-none">
             <TableCell colSpan={9} className="px-1 pb-0 pt-0 border-none">
-              <div className={cn(designSystem.components.table.headerWrapper, designSystem.components.table.accents.brand.bg, designSystem.components.table.accents.brand.border)}>
+              <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
                 <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", designSystem.components.table.accents.brand.bg)}>
-                    <Package className={cn("h-4 w-4", designSystem.components.table.accents.brand.icon)} />
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
+                    <Package className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
                   </div>
-                  <span className={cn(designSystem.components.table.headerLabel, designSystem.components.table.accents.brand.text)}>Produto</span>
+                  <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Produto</span>
                 </div>
                 <div className="w-[12%] px-2 flex justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Categoria</span>
+                  <span className={ds.components.table.headerLabel}>Categoria</span>
                 </div>
                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Marca</span>
+                  <span className={ds.components.table.headerLabel}>Marca</span>
                 </div>
                 <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Código</span>
+                  <span className={ds.components.table.headerLabel}>Código</span>
                 </div>
                 <div className="w-[11%] px-2 flex justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Status</span>
+                  <span className={ds.components.table.headerLabel}>Status</span>
                 </div>
                 <div className="w-[10%] px-2 flex justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Preço</span>
+                  <span className={ds.components.table.headerLabel}>Preço</span>
                 </div>
                 <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Fornecedor</span>
+                  <span className={ds.components.table.headerLabel}>Fornecedor</span>
                 </div>
                 <div className="w-[8%] px-2 flex justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Cot.</span>
+                  <span className={ds.components.table.headerLabel}>Cot.</span>
                 </div>
                 <div className="w-[10%] flex justify-end items-center gap-2 px-2">
-                  <span className={designSystem.components.table.headerLabel}>Ações</span>
+                  <span className={ds.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
             </TableCell>
@@ -78,10 +78,10 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
           {products.map((product) => {
             return (
               <TableRow key={product.id} className="group border-none hover:bg-transparent">
-                <TableCell colSpan={9} className={designSystem.components.table.cell}>
+                <TableCell colSpan={9} className={ds.components.table.cell}>
                   <div className={cn(
-                    designSystem.components.table.row,
-                    designSystem.components.table.rowWrapper
+                    ds.components.table.row,
+                    ds.components.table.rowWrapper
                   )}>
                     <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
                       <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-border/40">
@@ -98,18 +98,18 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className={designSystem.components.dataDisplay.highlight}>{capitalize(product.name)}</div>
+                        <div className={ds.components.dataDisplay.highlight}>{capitalize(product.name)}</div>
                       </div>
                     </div>
 
                     <div className="w-[12%] px-2 flex justify-center items-center">
-                      <span className={designSystem.components.dataDisplay.category}>
+                      <span className={ds.components.dataDisplay.category}>
                         {capitalize(product.category)}
                       </span>
                     </div>
 
                     <div className="hidden lg:flex w-[12%] px-2 flex-col justify-center items-center gap-1">
-                      <span className={cn("truncate max-w-full", designSystem.components.dataDisplay.secondary)}>
+                      <span className={cn("truncate max-w-full", ds.components.dataDisplay.secondary)}>
                         {capitalize(product.brand_name || "—")}
                       </span>
                       {product.brand_rating ? (
@@ -125,7 +125,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                     </div>
 
                     <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
-                      <span className={designSystem.components.dataDisplay.code}>
+                      <span className={ds.components.dataDisplay.code}>
                         {product.barcode || "—"}
                       </span>
                     </div>
@@ -134,16 +134,16 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                       <StatusBadge status={getProductStatus(product)} />
                     </div>
 
-                    <div className="w-[10%] px-2 flex justify-center items-center gap-1.5 bg-zinc-50/50 dark:bg-zinc-800/20 py-1.5 rounded-lg mx-1">
+                    <div className="w-[10%] px-2 flex justify-center items-center gap-1.5">
                       <div className="flex flex-col items-end">
-                        <span className={designSystem.components.dataDisplay.money}>{product.lastOrderPrice}</span>
-                        <span className={designSystem.components.dataDisplay.secondary}>unidade</span>
+                        <span className={ds.components.dataDisplay.money}>{product.lastOrderPrice}</span>
+                        <span className={ds.components.dataDisplay.secondary}>unidade</span>
                       </div>
                       {getTrendIcon(product.trend)}
                     </div>
 
                     <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
-                      <span className={cn("text-sm truncate max-w-[120px]", designSystem.colors.text.secondary)} title={capitalize(product.bestSupplier || "")}>
+                      <span className={cn("text-sm truncate max-w-[120px]", ds.colors.text.secondary)} title={capitalize(product.bestSupplier || "")}>
                         {capitalize(product.bestSupplier || "—")}
                       </span>
                     </div>

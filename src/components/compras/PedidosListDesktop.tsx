@@ -7,7 +7,7 @@ import { capitalize } from "@/lib/text-utils";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { OrderData } from "@/hooks/usePedidosStats";
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from '@/components/ui/status-badge';
 
@@ -30,34 +30,34 @@ export const PedidosListDesktop = memo(({
 }: PedidosListDesktopProps) => {
   return (
     <div className="hidden md:block overflow-x-auto w-full custom-scrollbar">
-      <Table className={designSystem.components.table.root}>
-        <TableHeader className={designSystem.components.table.header}>
+      <Table className={ds.components.table.root}>
+        <TableHeader className={ds.components.table.header}>
           <TableRow className="hover:bg-transparent border-none">
             <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
-              <div className={cn(designSystem.components.table.headerWrapper, designSystem.components.table.accents.brand.bg, designSystem.components.table.accents.brand.border)}>
+              <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
                 <div className="w-[15%] flex items-center gap-3">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", designSystem.components.table.accents.brand.bg)}>
-                    <ShoppingCart className={cn("h-4 w-4", designSystem.components.table.accents.brand.icon)} />
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
+                    <ShoppingCart className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
                   </div>
-                  <span className={cn(designSystem.components.table.headerLabel, designSystem.components.table.accents.brand.text)}>Pedido</span>
+                  <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Pedido</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Fornecedor</span>
+                  <span className={ds.components.table.headerLabel}>Fornecedor</span>
                 </div>
                 <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Status</span>
+                  <span className={ds.components.table.headerLabel}>Status</span>
                 </div>
                 <div className="w-[15%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Valor Total</span>
+                  <span className={ds.components.table.headerLabel}>Valor Total</span>
                 </div>
                 <div className="w-[12%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Itens</span>
+                  <span className={ds.components.table.headerLabel}>Itens</span>
                 </div>
                 <div className="w-[15%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Previsão Entrega</span>
+                  <span className={ds.components.table.headerLabel}>Previsão Entrega</span>
                 </div>
                 <div className="w-[11%] flex justify-end items-center gap-2 px-2">
-                  <span className={designSystem.components.table.headerLabel}>Ações</span>
+                  <span className={ds.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
             </TableCell>
@@ -66,10 +66,10 @@ export const PedidosListDesktop = memo(({
         <TableBody>
           {pedidos.map((pedido) => (
             <TableRow key={pedido.id} className="group border-none hover:bg-transparent">
-              <TableCell colSpan={7} className={designSystem.components.table.cell}>
+              <TableCell colSpan={7} className={ds.components.table.cell}>
                 <div className={cn(
-                  designSystem.components.table.row,
-                  designSystem.components.table.rowWrapper
+                  ds.components.table.row,
+                  ds.components.table.rowWrapper
                 )}>
                   {/* Pedido # */}
                   <div className="w-[15%] flex items-center gap-3">
@@ -77,10 +77,10 @@ export const PedidosListDesktop = memo(({
                       <ShoppingCart className="h-4 w-4 text-brand" />
                     </div>
                     <div>
-                      <span className={designSystem.components.dataDisplay.code}>
+                      <span className={ds.components.dataDisplay.code}>
                         #{pedido.id.substring(0, 8)}
                       </span>
-                      <p className={designSystem.components.dataDisplay.secondary}>
+                      <p className={ds.components.dataDisplay.secondary}>
                         {pedido.dataPedido}
                       </p>
                     </div>
@@ -88,8 +88,8 @@ export const PedidosListDesktop = memo(({
 
                   {/* Fornecedor */}
                   <div className="w-[20%] pl-2 min-w-0 flex flex-col">
-                    <span className={designSystem.components.dataDisplay.highlight}>{capitalize(pedido.fornecedor)}</span>
-                    <span className={designSystem.components.dataDisplay.secondary}>#{pedido.id.substring(0, 4)}</span>
+                    <span className={ds.components.dataDisplay.highlight}>{capitalize(pedido.fornecedor)}</span>
+                    <span className={ds.components.dataDisplay.secondary}>#{pedido.id.substring(0, 4)}</span>
                   </div>
 
                   {/* Status Select */}
@@ -106,24 +106,24 @@ export const PedidosListDesktop = memo(({
                   {/* Valor Total */}
                   <div className="w-[15%] pl-2">
                     <div className="flex flex-col">
-                      <span className={designSystem.components.dataDisplay.money}>
+                      <span className={ds.components.dataDisplay.money}>
                         {pedido.total}
                       </span>
-                      <span className={designSystem.components.dataDisplay.secondary}>Data: {pedido.dataPedido}</span>
+                      <span className={ds.components.dataDisplay.secondary}>Data: {pedido.dataPedido}</span>
                     </div>
                   </div>
 
                   {/* Itens Tooltip */}
                   <div className="w-[12%] pl-2 flex items-center gap-1.5">
-                    <span className={designSystem.components.dataDisplay.highlight}>{pedido.itens}</span>
-                    <span className={designSystem.components.dataDisplay.secondary}>prod.</span>
+                    <span className={ds.components.dataDisplay.highlight}>{pedido.itens}</span>
+                    <span className={ds.components.dataDisplay.secondary}>prod.</span>
                     {pedido.produtos && pedido.produtos.length > 0 && (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Info className="h-3.5 w-3.5 text-zinc-400 cursor-help" />
                           </TooltipTrigger>
-                          <TooltipContent side="top" className={designSystem.components.tooltip.content}>
+                          <TooltipContent side="top" className={ds.components.tooltip.content}>
                             <p className="font-bold mb-1">Itens do pedido:</p>
                             <ul className="space-y-0.5">
                               {pedido.detalhesItens.map((item, idx) => (
@@ -138,7 +138,7 @@ export const PedidosListDesktop = memo(({
 
                   {/* Entrega */}
                   <div className="w-[15%] pl-2">
-                    <div className={cn("flex items-center gap-1.5", designSystem.components.dataDisplay.secondary)}>
+                    <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
                       <Truck className="h-3.5 w-3.5 opacity-50" />
                       {pedido.dataEntrega || '-'}
                     </div>
@@ -148,7 +148,7 @@ export const PedidosListDesktop = memo(({
                   <div className="w-[11%] flex justify-end items-center px-2">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className={cn(designSystem.components.button.size.icon, designSystem.components.button.ghost)}>
+                        <Button variant="ghost" size="icon" className={cn(ds.components.button.size.icon, ds.components.button.ghost)}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>

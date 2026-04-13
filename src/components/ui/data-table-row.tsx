@@ -1,12 +1,12 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 
 interface DataTableRowProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   isHeader?: boolean;
-  accentColor?: keyof typeof designSystem.components.table.accents;
+  accentColor?: keyof typeof ds.components.table.accents;
 }
 
 export function DataTableRow({
@@ -16,7 +16,7 @@ export function DataTableRow({
   className,
   ...props
 }: DataTableRowProps) {
-  const tableStyles = designSystem.components.table;
+  const tableStyles = ds.components.table;
   const accent = tableStyles.accents[accentColor as keyof typeof tableStyles.accents] || tableStyles.accents.orange;
 
   if (isHeader) {
@@ -63,7 +63,7 @@ export function DataTableHeaderCell({
   className,
   ...props
 }: DataTableHeaderCellProps) {
-  const tableStyles = designSystem.components.table;
+  const tableStyles = ds.components.table;
   const accent = tableStyles.accents[accentColor as keyof typeof tableStyles.accents] || tableStyles.accents.orange;
 
   return (
