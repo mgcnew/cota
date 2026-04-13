@@ -7,7 +7,7 @@ import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcu
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { designSystem } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 
 // Lazy load tab contents for better performance
@@ -26,7 +26,7 @@ const TABS = [
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-24">
-    <Loader2 className={cn("h-8 w-8 animate-spin", designSystem.colors.text.primary)} />
+    <Loader2 className={cn("h-8 w-8 animate-spin", ds.colors.text.primary)} />
   </div>
 );
 
@@ -134,14 +134,14 @@ function Compras() {
         </div>
       )}
 
-      <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
+      <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
         {/* Header da Página */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className={cn("p-2.5 rounded-xl border transition-all", designSystem.components.card.root)}>
+            <div className={cn("p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
               <ShoppingBag className="h-6 w-6 text-brand" />
             </div>
-            <h1 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
+            <h1 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary)}>
               Compras
             </h1>
           </div>
@@ -150,16 +150,16 @@ function Compras() {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className={designSystem.components.button.ghost}>
+                  <Button variant="ghost" size="icon" className={ds.components.button.ghost}>
                     <Keyboard className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className={designSystem.components.tooltip.content}>
+                <TooltipContent side="bottom" className={ds.components.tooltip.content}>
                   <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
                   <ul className="text-xs space-y-1">
                     {shortcuts.map((s, i) => (
                       <li key={i} className="flex justify-between gap-3">
-                        <span className={designSystem.colors.text.secondary}>{s.description}</span>
+                        <span className={ds.colors.text.secondary}>{s.description}</span>
                         <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
                       </li>
                     ))}
@@ -173,12 +173,12 @@ function Compras() {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
           {/* Desktop Tabs Navigation (Hidden on Mobile) */}
           <div className="hidden md:block pb-1 border-b border-zinc-200/70 dark:border-zinc-800 bg-transparent">
-            <TabsList className={designSystem.components.tabs.clean.list}>
+            <TabsList className={ds.components.tabs.clean.list}>
               {TABS.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className={designSystem.components.tabs.clean.trigger}
+                  className={ds.components.tabs.clean.trigger}
                 >
                   <tab.icon className={cn("h-4 w-4 mr-2", activeTab === tab.value ? "text-brand" : "opacity-70")} />
                   {tab.label}
@@ -208,4 +208,5 @@ function Compras() {
 }
 
 export default memo(Compras);
+
 
