@@ -7,7 +7,7 @@ import * as z from "zod";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { designSystem, designSystem as ds } from "@/styles/design-system";
+import { designSystem as ds } from "@/styles/design-system";
 import {
   Dialog,
   DialogContent,
@@ -2679,7 +2679,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         hideClose
         className={cn(
           "p-0 flex flex-col [&>button]:hidden",
-          designSystem.components.modal.content,
+          ds.components.modal.content,
           "border backdrop-blur-xl",
           isMobile
             ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0"
