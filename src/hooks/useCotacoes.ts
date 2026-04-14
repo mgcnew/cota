@@ -74,12 +74,25 @@ function getDefaultPricingUnit(productUnit?: string): PricingUnit {
 let isRealtimeSubscribed = false;
 let globalChannel: ReturnType<typeof supabase.channel> | null = null;
 
+// Phase 2: Deduplication guard — tracks when the last local mutation completed
+// If realtime fires within this window, we skip the invalidation (mutation already handled it)
+let lastMutationTimestamp = 0;
+const DEDUP_WINDOW_MS = 3000;
+
+function markMutationComplete() {
+  lastMutationTimestamp = Date.now();
+}
+
+function shouldSkipRealtimeInvalidation(): boolean {
+  return (Date.now() - lastMutationTimestamp) < DEDUP_WINDOW_MS;
+}
+
 export function useCotacoes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
   // ==========================================
-  // REALTIME SUBSCRIPTION
+  // REALTIME SUBSCRIPTION (Phase 2: with dedup guard)
   // Listen for changes in quotes, suppliers and prices
   // ==========================================
   useEffect(() => {
@@ -88,26 +101,23 @@ export function useCotacoes() {
 
     console.log("🔄 Realtime: Ativando canais de escuta...");
     isRealtimeSubscribed = true;
+
+    const handleRealtimeEvent = (table: string, payload: any) => {
+      if (shouldSkipRealtimeInvalidation()) {
+        console.log(`⏭️ Realtime [${table}]: Skipped (mutation just completed)`);
+        return;
+      }
+      console.log(`⚡ Realtime Update [${table}]:`, payload.eventType);
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+    };
     
     // Inscreve-se apenas uma vez para todos os canais relevantes
     globalChannel = supabase
       .channel('quotes-realtime-global')
-      .on('postgres_changes' as any, { event: '*', table: 'quotes' }, (payload: any) => {
-        console.log("⚡ Realtime Update [quotes]:", payload.eventType);
-        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
-      })
-      .on('postgres_changes' as any, { event: '*', table: 'quote_items' }, (payload: any) => {
-        console.log("⚡ Realtime Update [quote_items]:", payload.eventType);
-        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
-      })
-      .on('postgres_changes' as any, { event: '*', table: 'quote_suppliers' }, (payload: any) => {
-        console.log("⚡ Realtime Update [quote_suppliers]:", payload.eventType);
-        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
-      })
-      .on('postgres_changes' as any, { event: '*', table: 'quote_supplier_items' }, (payload: any) => {
-        console.log("⚡ Realtime Update [quote_supplier_items]:", payload.eventType);
-        queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
-      })
+      .on('postgres_changes' as any, { event: '*', table: 'quotes' }, (payload: any) => handleRealtimeEvent('quotes', payload))
+      .on('postgres_changes' as any, { event: '*', table: 'quote_items' }, (payload: any) => handleRealtimeEvent('quote_items', payload))
+      .on('postgres_changes' as any, { event: '*', table: 'quote_suppliers' }, (payload: any) => handleRealtimeEvent('quote_suppliers', payload))
+      .on('postgres_changes' as any, { event: '*', table: 'quote_supplier_items' }, (payload: any) => handleRealtimeEvent('quote_supplier_items', payload))
       .subscribe((status) => {
         console.log("📡 Realtime Status:", status);
       });
@@ -384,6 +394,7 @@ export function useCotacoes() {
   });
 
   // Mutation to update supplier value for a specific product
+  // Phase 1: Optimistic Updates — UI updates instantly, syncs in background
   // Requirements: 1.3, 4.2 - Accept and save pricing unit metadata
   const updateSupplierProductValue = useMutation({
     mutationFn: async ({ 
@@ -545,15 +556,74 @@ export function useCotacoes() {
       }
       console.log('✅ Status do fornecedor atualizado');
     },
-    onSuccess: async () => {
-      // Usar refetchQueries para forçar atualização imediata
-      await queryClient.refetchQueries({ queryKey: ['cotacoes'] });
+    // Phase 1: Optimistic update — update cache BEFORE server responds
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['cotacoes'] });
+
+      // Snapshot the previous value for rollback
+      const previousCotacoes = queryClient.getQueryData(['cotacoes']);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['cotacoes'], (old: any[] | undefined) => {
+        if (!old) return old;
+        return old.map((cotacao: any) => {
+          if (cotacao.id !== variables.quoteId) return cotacao;
+
+          // Update _supplierItems with new value
+          const updatedSupplierItems = (cotacao._supplierItems || []).map((item: any) => {
+            if (item.supplier_id === variables.supplierId && item.product_id === variables.productId) {
+              return { ...item, valor_oferecido: variables.newValue };
+            }
+            return item;
+          });
+
+          // Update fornecedoresParticipantes totals
+          const updatedParticipantes = (cotacao.fornecedoresParticipantes || []).map((f: any) => {
+            if (f.id !== variables.supplierId) return f;
+            // Recalculate total for this supplier
+            const supplierValues = updatedSupplierItems
+              .filter((si: any) => si.supplier_id === variables.supplierId)
+              .map((si: any) => Number(si.valor_oferecido) || 0)
+              .filter((v: number) => v > 0);
+            const totalValue = supplierValues.reduce((sum: number, val: number) => sum + val, 0);
+            return { ...f, valorOferecido: totalValue, status: 'respondido' as const };
+          });
+
+          // Recalculate melhorPreco
+          const allValues = updatedParticipantes
+            .map((f: any) => f.valorOferecido)
+            .filter((v: number) => v > 0);
+          const melhorValor = allValues.length > 0 ? Math.min(...allValues) : 0;
+          const melhorFornecedor = updatedParticipantes.find((f: any) => f.valorOferecido === melhorValor);
+
+          return {
+            ...cotacao,
+            _supplierItems: updatedSupplierItems,
+            fornecedoresParticipantes: updatedParticipantes,
+            melhorPreco: melhorValor > 0 ? `R$ ${melhorValor.toFixed(2)}` : "R$ 0.00",
+            melhorFornecedor: melhorFornecedor?.nome || "Aguardando",
+          };
+        });
+      });
+
+      return { previousCotacoes };
+    },
+    onSuccess: () => {
+      // Phase 2: Mark mutation as complete to prevent realtime double-fetch
+      markMutationComplete();
+      // Non-blocking background sync to ensure data consistency
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({
         title: "Valor atualizado",
         description: "O valor oferecido foi atualizado com sucesso.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: any, _variables, context) => {
+      // Phase 1: Rollback to previous state on error
+      if (context?.previousCotacoes) {
+        queryClient.setQueryData(['cotacoes'], context.previousCotacoes);
+      }
       console.error('❌ Erro na mutation:', error);
       toast({
         title: "Erro ao atualizar",
@@ -587,6 +657,7 @@ export function useCotacoes() {
       if (error) throw error;
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({
         title: "Cotação excluída",
@@ -678,6 +749,7 @@ export function useCotacoes() {
       }
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({
         title: "Cotação atualizada",
@@ -881,6 +953,7 @@ export function useCotacoes() {
       return { orderIds: createdOrderIds, totalValue: totalValueAllOrders, economiaEstimada: totalEconomiaEstimada };
     },
     onSuccess: (data) => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ["cotacoes"] });
       queryClient.invalidateQueries({ queryKey: ["pedidos"] });
       const count = data.orderIds.length;
@@ -930,6 +1003,7 @@ export function useCotacoes() {
       if (error) throw error;
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
     },
     onError: (error) => {
@@ -967,6 +1041,7 @@ export function useCotacoes() {
       if (error) throw error;
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({ title: "Produto adicionado à cotação!" });
     },
@@ -1011,6 +1086,7 @@ export function useCotacoes() {
         .eq("product_id", productId);
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({ title: "Produto removido da cotação!" });
     },
@@ -1045,6 +1121,7 @@ export function useCotacoes() {
       if (error) throw error;
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({ title: "Fornecedor adicionado à cotação!" });
     },
@@ -1089,6 +1166,7 @@ export function useCotacoes() {
         .eq("supplier_id", supplierId);
     },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
       toast({ title: "Fornecedor removido da cotação!" });
     },
