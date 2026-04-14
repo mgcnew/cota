@@ -34,6 +34,26 @@ export interface Pedido {
   items?: PedidoItem[];
 }
 
+// Global flag to prevent multiple subscriptions across hook instances
+let isRealtimeSubscribed = false;
+let globalChannel: ReturnType<typeof supabase.channel> | null = null;
+
+// Deduplication guard — tracks when the last local mutation completed
+// If realtime fires within this window, we skip the invalidation (mutation already handled it)
+let lastMutationTimestamp = 0;
+const DEDUP_WINDOW_MS = 3000;
+
+function markMutationComplete() {
+  lastMutationTimestamp = Date.now();
+  console.log("🕒 Mutation marked as complete in usePedidos");
+}
+
+function shouldSkipRealtimeInvalidation(): boolean {
+  const skip = (Date.now() - lastMutationTimestamp) < DEDUP_WINDOW_MS;
+  if (skip) console.log("⏭️ Skipped redundant Realtime refetch in usePedidos");
+  return skip;
+}
+
 export function usePedidos() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -43,18 +63,26 @@ export function usePedidos() {
   // Listen for changes in orders and their items
   // ==========================================
   useEffect(() => {
-    const channel = supabase
+    if (isRealtimeSubscribed && globalChannel) return;
+
+    console.log("📡 Initializing Unified Realtime for Pedidos...");
+    isRealtimeSubscribed = true;
+
+    globalChannel = supabase
       .channel('orders-realtime-global')
-      .on('postgres_changes' as any, { event: '*', table: 'orders' }, () => {
+      .on('postgres_changes' as any, { event: '*', table: 'orders' }, (payload: any) => {
+        if (shouldSkipRealtimeInvalidation()) return;
+        console.log("🔄 Orders changed (Realtime), invalidating...", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       })
       .on('postgres_changes' as any, { event: '*', table: 'order_items' }, () => {
+        if (shouldSkipRealtimeInvalidation()) return;
         queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       })
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      // Keep alive for other hook instances
     };
   }, [queryClient]);
 
@@ -143,17 +171,33 @@ export function usePedidos() {
 
       if (error) throw error;
     },
+    onMutate: async (pedidoId) => {
+      await queryClient.cancelQueries({ queryKey: ['pedidos'] });
+      const previousPedidos = queryClient.getQueryData<Pedido[]>(['pedidos']);
+      
+      if (previousPedidos) {
+        queryClient.setQueryData<Pedido[]>(['pedidos'], 
+          previousPedidos.filter(p => p.id !== pedidoId)
+        );
+      }
+      
+      return { previousPedidos };
+    },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       toast({
         title: "Sucesso",
         description: "Pedido excluído com sucesso",
       });
     },
-    onError: (error) => {
+    onError: (error, _pedidoId, context) => {
+      if (context?.previousPedidos) {
+        queryClient.setQueryData(['pedidos'], context.previousPedidos);
+      }
       toast({
         title: "Erro",
-        description: "Não foi possível excluir o pedido",
+        description: error instanceof Error ? error.message : "Não foi possível excluir o pedido",
         variant: "destructive",
       });
     },
@@ -181,17 +225,33 @@ export function usePedidos() {
 
       if (error) throw error;
     },
+    onMutate: async ({ pedidoId, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['pedidos'] });
+      const previousPedidos = queryClient.getQueryData<Pedido[]>(['pedidos']);
+      
+      if (previousPedidos) {
+        queryClient.setQueryData<Pedido[]>(['pedidos'], 
+          previousPedidos.map(p => p.id === pedidoId ? { ...p, status } : p)
+        );
+      }
+      
+      return { previousPedidos };
+    },
     onSuccess: () => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       toast({
         title: "Status atualizado",
         description: "O status do pedido foi atualizado",
       });
     },
-    onError: (error) => {
+    onError: (error, _variables, context) => {
+      if (context?.previousPedidos) {
+        queryClient.setQueryData(['pedidos'], context.previousPedidos);
+      }
       toast({
         title: "Erro",
-        description: "Não foi possível atualizar o status",
+        description: error instanceof Error ? error.message : "Não foi possível atualizar o status",
         variant: "destructive",
       });
     },
@@ -274,6 +334,7 @@ export function usePedidos() {
       return { economiaReal };
     },
     onSuccess: (data) => {
+      markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ['pedidos'] });
       toast({
         title: "Entrega registrada!",

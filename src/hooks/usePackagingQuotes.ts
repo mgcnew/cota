@@ -13,6 +13,22 @@ import type {
 let isRealtimeSubscribed = false;
 let globalChannel: ReturnType<typeof supabase.channel> | null = null;
 
+// Deduplication guard — tracks when the last local mutation completed
+// If realtime fires within this window, we skip invalidation (mutation already handled it)
+let lastMutationTimestamp = 0;
+const DEDUP_WINDOW_MS = 3000;
+
+function markMutationComplete() {
+  lastMutationTimestamp = Date.now();
+  console.log("🕒 Mutation marked as complete in usePackagingQuotes");
+}
+
+function shouldSkipRealtimeInvalidation(): boolean {
+  const skip = (Date.now() - lastMutationTimestamp) < DEDUP_WINDOW_MS;
+  if (skip) console.log("⏭️ Skipped redundant Realtime refetch in usePackagingQuotes");
+  return skip;
+}
+
 export function usePackagingQuotes() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -23,27 +39,31 @@ export function usePackagingQuotes() {
   // ==========================================
   useEffect(() => {
     // Prevent multiple components from creating duplicate listeners
-    if (isRealtimeSubscribed) return;
+    if (isRealtimeSubscribed && globalChannel) return;
     
-    console.log("🔄 Realtime: Ativando canais de escuta para EMBALAGENS...");
+    console.log("📡 Initializing Unified Realtime for Embalagens...");
     isRealtimeSubscribed = true;
     
     globalChannel = supabase
       .channel('packaging-quotes-realtime-global')
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_quotes' }, (payload: any) => {
-        console.log("⚡ Realtime Update [packaging_quotes]:", payload.eventType);
+        if (shouldSkipRealtimeInvalidation()) return;
+        console.log("🔄 Realtime [packaging_quotes]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_quote_items' }, (payload: any) => {
-        console.log("⚡ Realtime Update [packaging_quote_items]:", payload.eventType);
+        if (shouldSkipRealtimeInvalidation()) return;
+        console.log("🔄 Realtime [packaging_quote_items]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_quote_suppliers' }, (payload: any) => {
-        console.log("⚡ Realtime Update [packaging_quote_suppliers]:", payload.eventType);
+        if (shouldSkipRealtimeInvalidation()) return;
+        console.log("🔄 Realtime [packaging_quote_suppliers]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'packaging_supplier_items' }, (payload: any) => {
-        console.log("⚡ Realtime Update [packaging_supplier_items]:", payload.eventType);
+        if (shouldSkipRealtimeInvalidation()) return;
+        console.log("🔄 Realtime [packaging_supplier_items]:", payload.eventType);
         queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       })
       .subscribe((status) => {
@@ -51,9 +71,7 @@ export function usePackagingQuotes() {
       });
 
     return () => {
-      // In a real app we might want to clean this up when ALL components unmount,
-      // but for SPA keeping it alive is fine, or we could just leave it.
-      // We will only let it unsubscribe if we want to reset it.
+      // Keep alive for other hook instances
     };
   }, [queryClient]);
 
@@ -265,8 +283,9 @@ export function usePackagingQuotes() {
 
       return quote;
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Cotação de embalagem criada com sucesso!' });
     },
     onError: (error: any) => {
@@ -389,12 +408,75 @@ export function usePackagingQuotes() {
         console.error('Erro ao atualizar status do fornecedor:', supplierError);
       }
     },
-    onSuccess: async () => {
-      // Usar refetchQueries para forçar atualização imediata
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ['packaging-quotes'] });
+      const previousQuotes = queryClient.getQueryData<PackagingQuoteDisplay[]>(['packaging-quotes']);
+
+      if (previousQuotes) {
+        const updatedQuotes = previousQuotes.map(quote => {
+          if (quote.id !== newData.quoteId) return quote;
+
+          const updatedFornecedores = quote.fornecedores.map(f => {
+            if (f.supplierId !== newData.supplierId) return f;
+
+            const custoPorUnidade = (newData.quantidadeUnidadesEstimada || 1) > 0 
+              ? newData.valorTotal / (newData.quantidadeUnidadesEstimada || 1) 
+              : newData.valorTotal;
+
+            const updatedItens = f.itens.map(item => {
+              if (item.packagingId !== newData.packagingId) return item;
+              return {
+                ...item,
+                valorTotal: newData.valorTotal,
+                unidadeVenda: newData.unidadeVenda,
+                quantidadeVenda: newData.quantidadeVenda,
+                quantidadeUnidadesEstimada: newData.quantidadeUnidadesEstimada,
+                gramatura: newData.gramatura,
+                dimensoes: newData.dimensoes,
+                custoPorUnidade
+              };
+            });
+
+            const custoTotal = updatedItens.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
+
+            return {
+              ...f,
+              status: "respondido" as const,
+              dataResposta: new Date().toLocaleDateString('pt-BR'),
+              itens: updatedItens,
+              custoTotalEstimado: custoTotal
+            };
+          });
+
+          // Recalcular indicadores da cotação
+          const fornecedoresComPreco = updatedFornecedores.filter(f => f.custoTotalEstimado > 0);
+          const melhorValor = fornecedoresComPreco.length > 0 
+            ? Math.min(...fornecedoresComPreco.map(f => f.custoTotalEstimado))
+            : 0;
+          const melhorFornecedor = updatedFornecedores.find(f => f.custoTotalEstimado === melhorValor);
+
+          return {
+            ...quote,
+            fornecedores: updatedFornecedores,
+            melhorPreco: melhorValor > 0 ? formatCurrency(melhorValor) : '-',
+            melhorFornecedor: melhorFornecedor?.supplierName || '-'
+          };
+        });
+
+        queryClient.setQueryData(['packaging-quotes'], updatedQuotes);
+      }
+
+      return { previousQuotes };
+    },
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Valor atualizado com sucesso!' });
     },
-    onError: (error: any) => {
+    onError: (error: any, _variables, context) => {
+      if (context?.previousQuotes) {
+        queryClient.setQueryData(['packaging-quotes'], context.previousQuotes);
+      }
       toast({
         title: 'Erro ao atualizar valor',
         description: error.message,
@@ -412,8 +494,9 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
     },
   });
 
@@ -441,11 +524,27 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onMutate: async (quoteId) => {
+      await queryClient.cancelQueries({ queryKey: ['packaging-quotes'] });
+      const previousQuotes = queryClient.getQueryData<PackagingQuoteDisplay[]>(['packaging-quotes']);
+
+      if (previousQuotes) {
+        queryClient.setQueryData(['packaging-quotes'], 
+          previousQuotes.filter(q => q.id !== quoteId)
+        );
+      }
+
+      return { previousQuotes };
+    },
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Cotação excluída com sucesso!' });
     },
-    onError: (error: any) => {
+    onError: (error: any, _variables, context) => {
+      if (context?.previousQuotes) {
+        queryClient.setQueryData(['packaging-quotes'], context.previousQuotes);
+      }
       toast({
         title: 'Erro ao excluir cotação',
         description: error.message,
@@ -543,8 +642,9 @@ export function usePackagingQuotes() {
           .insert(supplierItemsToInsert) as any);
       }
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Fornecedor adicionado!' });
     },
     onError: (error: any) => {
@@ -571,8 +671,9 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Fornecedor removido!' });
     },
     onError: (error: any) => {
@@ -613,8 +714,9 @@ export function usePackagingQuotes() {
           .insert(supplierItemsToInsert) as any);
       }
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Embalagem adicionada!' });
     },
     onError: (error: any) => {
@@ -641,8 +743,9 @@ export function usePackagingQuotes() {
 
       if (error) throw error;
     },
-    onSuccess: async () => {
-      await queryClient.refetchQueries({ queryKey: ['packaging-quotes'] });
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['packaging-quotes'] });
       toast({ title: 'Embalagem removida!' });
     },
     onError: (error: any) => {
