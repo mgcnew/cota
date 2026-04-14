@@ -4,22 +4,34 @@ import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ClipboardList, Package, Sparkles, CheckCircle, Building2, Loader2, FileBox, Plus, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClipboardList, Package, Sparkles, CheckCircle, Building2, Loader2, FileBox, Plus, ArrowRight, MapPin, User, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { designSystem as ds } from "@/styles/design-system"; // Using ds alias as per previous files
+import { designSystem as ds } from "@/styles/design-system";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+import { useStockSectors } from "@/hooks/useStockSectors";
 
 interface CreateStockCountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (data: { orderId?: string; notes?: string }) => Promise<void>;
+  onCreate: (data: { 
+    orderId?: string; 
+    notes?: string;
+    inventory_sector?: string;
+    counter_name?: string;
+    inventory_type?: 'geral' | 'embalagem';
+    is_monthly_balance?: boolean;
+  }) => Promise<void>;
   isLoading: boolean;
   availableOrders: any[];
   loadingOrders: boolean;
   loadOrders: () => void;
   trigger?: React.ReactNode;
+  defaultInventoryType?: 'geral' | 'embalagem';
 }
 
 export function CreateStockCountDialog({
@@ -30,13 +42,19 @@ export function CreateStockCountDialog({
   availableOrders,
   loadingOrders,
   loadOrders,
-  trigger
+  trigger,
+  defaultInventoryType = 'geral'
 }: CreateStockCountDialogProps) {
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
+  const { sectors, isLoading: isLoadingSectors } = useStockSectors();
   const [selectedOrderId, setSelectedOrderId] = useState("");
-  const [countType, setCountType] = useState<"from_order" | "from_scratch">("from_order");
+  const [countType, setCountType] = useState<"from_order" | "from_scratch">("from_scratch");
   const [countNotes, setCountNotes] = useState("");
+  
+  const [inventorySector, setInventorySector] = useState("");
+  const [counterName, setCounterName] = useState("");
+  const [isMonthlyBalance, setIsMonthlyBalance] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -44,14 +62,21 @@ export function CreateStockCountDialog({
       // Reset state on open
       setSelectedOrderId("");
       setCountNotes("");
-      setCountType("from_order");
+      setCountType("from_scratch");
+      setInventorySector("");
+      setCounterName("");
+      setIsMonthlyBalance(false);
     }
   }, [open]);
 
   const handleCreate = async () => {
     await onCreate({
       orderId: countType === "from_order" ? selectedOrderId : undefined,
-      notes: countNotes || undefined
+      notes: countNotes || undefined,
+      inventory_sector: inventorySector || undefined,
+      counter_name: counterName || undefined,
+      inventory_type: defaultInventoryType,
+      is_monthly_balance: isMonthlyBalance
     });
   };
 
@@ -219,6 +244,66 @@ export function CreateStockCountDialog({
             )}
           </div>
         )}
+
+        {/* Informações da Contagem */}
+        <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
+          <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
+            <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
+            Detalhes da Contagem
+          </h3>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className={ds.typography.size.sm}>Setor</Label>
+              <Select value={inventorySector} onValueChange={setInventorySector}>
+                <SelectTrigger className={ds.components.input.root}>
+                  <SelectValue placeholder="Selecione um setor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {isLoadingSectors ? (
+                    <div className="p-2 text-sm text-muted-foreground flex items-center justify-center">
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Carregando...
+                    </div>
+                  ) : (
+                    sectors.filter(s => s.is_active).map(sector => (
+                      <SelectItem key={sector.id} value={sector.name}>{sector.name}</SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className={ds.typography.size.sm}>Nome do Conferente</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  value={counterName}
+                  onChange={(e) => setCounterName(e.target.value)}
+                  placeholder="Nome de quem está contando"
+                  className={cn(ds.components.input.root, "pl-9")}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
+                  <Scale className="w-4 h-4 text-brand" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium">Balanço Mensal</h4>
+                  <p className="text-xs text-muted-foreground">Esta contagem é para fechamento?</p>
+                </div>
+              </div>
+              <Switch
+                checked={isMonthlyBalance}
+                onCheckedChange={setIsMonthlyBalance}
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Notes */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>

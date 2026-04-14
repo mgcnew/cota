@@ -19,10 +19,12 @@ import {
   Activity,
   Eye,
   XCircle,
+  FileText,
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
 import { ViewStockCountDialog } from "@/components/stock/ViewStockCountDialog";
+import { ConsolidatedReportDialog } from "@/components/stock/ConsolidatedReportDialog";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -93,6 +95,7 @@ export default function ContagemEstoque() {
   const [selectedCount, setSelectedCount] = useState<string | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
 
   // Handlers
   const handleCreateCount = async ({ orderId, notes }: { orderId?: string; notes?: string }) => {
@@ -227,6 +230,14 @@ export default function ContagemEstoque() {
             </SelectContent>
           </Select>
           <Button
+            onClick={() => setReportDialogOpen(true)}
+            variant="outline"
+            className="w-full sm:w-auto h-11 border-brand/20 hover:bg-brand/5 dark:border-brand/30 dark:hover:bg-brand/10 text-brand"
+          >
+            <FileText className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Relatório</span>
+          </Button>
+          <Button
             onClick={() => setCreateDialogOpen(true)}
             className={cn(ds.components.button.primary, "w-full sm:w-auto h-11")}
           >
@@ -294,13 +305,25 @@ export default function ContagemEstoque() {
 
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
-                      <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Tipo</span>
-                      <span className="text-xs font-medium">{(count as any).order ? "Pedido" : "Avulso"}</span>
+                      <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Setor / Tipo</span>
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs font-medium truncate">{(count as any).sector?.name || "Geral"}</span>
+                        <div className="flex gap-1">
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+                            {(count as any).order ? "Pedido" : "Avulso"}
+                          </Badge>
+                          {(count as any).is_monthly_balance && (
+                            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 bg-emerald-50 text-emerald-700">
+                              Mensal
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    {count.notes && (
+                    {(count as any).counter_name && (
                       <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
-                        <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Obs</span>
-                        <span className="text-xs font-medium truncate block">{count.notes}</span>
+                        <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Respondente</span>
+                        <span className="text-xs font-medium truncate block">{(count as any).counter_name}</span>
                       </div>
                     )}
                   </div>
@@ -366,6 +389,12 @@ export default function ContagemEstoque() {
           open={viewDialogOpen}
           onOpenChange={setViewDialogOpen}
           stockCountId={selectedCount}
+        />
+
+        {/* Report Dialog */}
+        <ConsolidatedReportDialog
+          open={reportDialogOpen}
+          onOpenChange={setReportDialogOpen}
         />
       </div>
     </PageWrapper>

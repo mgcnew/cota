@@ -35,16 +35,19 @@ export function useStockCountItems(stockCountId: string) {
       id,
       quantity_existing,
       quantity_counted,
+      unit,
       notes,
     }: {
       id: string;
       quantity_existing?: number;
       quantity_counted?: number;
+      unit?: string;
       notes?: string;
     }) => {
       const updateData: any = {};
       if (quantity_existing !== undefined) updateData.quantity_existing = quantity_existing;
       if (quantity_counted !== undefined) updateData.quantity_counted = quantity_counted;
+      if (unit !== undefined) updateData.unit = unit;
       if (notes !== undefined) updateData.notes = notes;
 
       const { data, error } = await supabase
@@ -75,12 +78,14 @@ export function useStockCountItems(stockCountId: string) {
       id: string;
       quantity_existing?: number;
       quantity_counted?: number;
+      unit?: string;
       notes?: string;
     }>) => {
       const promises = updates.map(update => {
         const updateData: any = {};
         if (update.quantity_existing !== undefined) updateData.quantity_existing = update.quantity_existing;
         if (update.quantity_counted !== undefined) updateData.quantity_counted = update.quantity_counted;
+        if (update.unit !== undefined) updateData.unit = update.unit;
         if (update.notes !== undefined) updateData.notes = update.notes;
 
         return supabase

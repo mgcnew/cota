@@ -15,10 +15,19 @@ export interface StockCount {
   updated_at: string;
   completed_at?: string;
   completed_by?: string;
+  inventory_sector?: string;
+  counter_name?: string;
+  inventory_type: 'geral' | 'embalagem';
+  is_monthly_balance: boolean;
+  reference_date: string;
   order?: {
     id: string;
     supplier_name: string;
     order_date: string;
+  } | null;
+  sector?: {
+    id: string;
+    name: string;
   } | null;
 }
 
@@ -27,16 +36,22 @@ export interface StockCountItem {
   stock_count_id: string;
   order_item_id?: string;
   product_id?: string;
+  packaging_item_id?: string;
   product_name: string;
   sector_id: string;
   quantity_ordered: number;
   quantity_existing: number;
   quantity_counted: number;
+  unit: string;
   notes?: string;
   photo_url?: string;
   sector?: {
     id: string;
     name: string;
+  };
+  product?: {
+    name: string;
+    category_id?: string;
   };
 }
 
@@ -72,6 +87,10 @@ export function useStockCounts() {
             id,
             supplier_name,
             order_date
+          ),
+          sector:stock_sectors(
+            id,
+            name
           )
         `)
         .order('created_at', { ascending: false })
@@ -124,6 +143,11 @@ export function useStockCounts() {
           user_id: user.id,
           notes: data.notes,
           status: 'pendente',
+          inventory_sector: (data as any).inventory_sector,
+          counter_name: (data as any).counter_name,
+          inventory_type: (data as any).inventory_type || 'geral',
+          is_monthly_balance: (data as any).is_monthly_balance || false,
+          reference_date: (data as any).reference_date || new Date().toISOString(),
         })
         .select()
         .single();

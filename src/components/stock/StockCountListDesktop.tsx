@@ -65,7 +65,8 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
           <TableRow className="bg-muted/40 hover:bg-muted/40">
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Fornecedor</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Data</TableHead>
-            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Tipo</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Setor / Tipo</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Respondente</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Status</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Observações</TableHead>
             <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Ações</TableHead>
@@ -88,16 +89,32 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
                 {format(new Date(count.count_date), "dd/MM/yyyy", { locale: ptBR })}
               </TableCell>
               <TableCell>
-                <Badge
-                  variant="outline"
-                  className={
-                    count.order
-                      ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800"
-                      : "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
-                  }
-                >
-                  {count.order ? "Pedido" : "Avulso"}
-                </Badge>
+                <div className="flex flex-col gap-1">
+                  <span className="text-sm font-medium">
+                    {count.sector?.name || "Geral"}
+                  </span>
+                  <div className="flex gap-1">
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "text-[10px] px-1 py-0",
+                        count.order
+                          ? "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-400 dark:border-purple-800"
+                          : "bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
+                      )}
+                    >
+                      {count.order ? "Pedido" : "Avulso"}
+                    </Badge>
+                    {count.is_monthly_balance && (
+                      <Badge variant="outline" className="text-[10px] px-1 py-0 bg-emerald-50 text-emerald-700 border-emerald-200">
+                        Mensal
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-muted-foreground text-sm">
+                {count.counter_name || "—"}
               </TableCell>
               <TableCell>{getStatusBadge(count.status)}</TableCell>
               <TableCell className="max-w-[200px] truncate text-muted-foreground text-sm">

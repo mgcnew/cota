@@ -11,6 +11,7 @@ export function useContagemEstoque() {
   
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [inventoryTypeFilter, setInventoryTypeFilter] = useState<"all" | "geral" | "embalagem">("all");
   const debouncedSearch = useDebounce(searchTerm, 300);
 
   const { stockCounts, isLoading, createStockCount, updateStockCount, deleteStockCount } = useStockCounts();
@@ -19,13 +20,17 @@ export function useContagemEstoque() {
 
   // Stats
   const stats = useMemo(() => {
-    const total = stockCounts.length;
-    const pendentes = stockCounts.filter((c) => c.status === "pendente").length;
-    const emAndamento = stockCounts.filter((c) => c.status === "em_andamento").length;
-    const finalizadas = stockCounts.filter((c) => c.status === "finalizada").length;
+    const counts = inventoryTypeFilter === "all" 
+      ? stockCounts 
+      : stockCounts.filter(c => c.inventory_type === inventoryTypeFilter);
+      
+    const total = counts.length;
+    const pendentes = counts.filter((c) => c.status === "pendente").length;
+    const emAndamento = counts.filter((c) => c.status === "em_andamento").length;
+    const finalizadas = counts.filter((c) => c.status === "finalizada").length;
 
     return { total, pendentes, emAndamento, finalizadas };
-  }, [stockCounts]);
+  }, [stockCounts, inventoryTypeFilter]);
 
   // Filter counts
   const filteredCounts = useMemo(() => {
@@ -34,13 +39,16 @@ export function useContagemEstoque() {
         (count as any).order?.supplier_name
           ?.toLowerCase()
           .includes(debouncedSearch.toLowerCase()) ||
+        count.inventory_sector?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        count.counter_name?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         count.notes?.toLowerCase().includes(debouncedSearch.toLowerCase());
 
       const matchesStatus = statusFilter === "all" || count.status === statusFilter;
+      const matchesType = inventoryTypeFilter === "all" || count.inventory_type === inventoryTypeFilter;
 
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesType;
     });
-  }, [stockCounts, debouncedSearch, statusFilter]);
+  }, [stockCounts, debouncedSearch, statusFilter, inventoryTypeFilter]);
 
   // Load available orders
   const loadOrders = async () => {
@@ -73,6 +81,8 @@ export function useContagemEstoque() {
     setSearchTerm,
     statusFilter,
     setStatusFilter,
+    inventoryTypeFilter,
+    setInventoryTypeFilter,
     stockCounts,
     filteredCounts,
     stats,

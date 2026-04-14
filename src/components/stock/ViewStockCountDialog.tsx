@@ -56,6 +56,8 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
   const [newSectorName, setNewSectorName] = useState("");
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editQty, setEditQty] = useState(0);
+  const [editUnit, setEditUnit] = useState("UN");
+  const [unit, setUnit] = useState("UN");
   // Loading states for immediate visual feedback - Requirements: 15.3
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
@@ -63,7 +65,16 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
   const count = stockCountId ? stockCounts.find((c) => c.id === stockCountId) : null;
   const canEdit = count?.status === "pendente" || count?.status === "em_andamento";
   const isFromOrder = !!count?.order_id;
+  const isMonthlyBalance = count?.is_monthly_balance;
+  const inventoryType = count?.inventory_type || 'geral';
   const debouncedSearch = useDebounce(productSearch, 300);
+
+  // Set unit when product selected
+  useEffect(() => {
+    if (selectedProduct) {
+      setUnit(selectedProduct.unit || (inventoryType === 'embalagem' ? 'PCT' : 'UN'));
+    }
+  }, [selectedProduct, inventoryType]);
 
   // Carregar produtos do pedido (apenas para contagem de pedido)
   useEffect(() => {
@@ -155,6 +166,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
         sectorId: i.sector_id,
         sectorName: sectors.find((s) => s.id === i.sector_id)?.name || "Desconhecido",
         qty: i.quantity_counted,
+        unit: i.unit || "UN",
       }));
   }, [selectedProduct, items, sectors]);
 
@@ -166,6 +178,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
       string,
       {
         name: string;
+        unit: string;
         sectors: { sectorName: string; qty: number }[];
         total: number;
         items: { id: string; sectorId: string; qty: number }[];
@@ -173,9 +186,9 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
     >();
     items.forEach((item) => {
       if (item.quantity_counted > 0) {
-        const key = item.order_item_id || item.product_id || item.product_name;
+        const key = `${item.order_item_id || item.product_id || item.product_name}-${item.unit}`;
         if (!map.has(key)) {
-          map.set(key, { name: item.product_name, sectors: [], total: 0, items: [] });
+          map.set(key, { name: item.product_name, unit: item.unit || "UN", sectors: [], total: 0, items: [] });
         }
         const p = map.get(key)!;
         const sectorName = sectors.find((s) => s.id === item.sector_id)?.name || "Desconhecido";
@@ -226,6 +239,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
       quantity_ordered: selectedProduct.quantity,
       quantity_existing: 0,
       quantity_counted: quantity,
+      unit: unit,
     };
     
     try {
@@ -261,6 +275,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
         await updateItem.mutateAsync({
           id: existing.id,
           quantity_counted: (existing.quantity_counted || 0) + quantity,
+          unit: unit,
         });
       } else {
         await supabase.from("stock_count_items").insert(itemData);
@@ -320,7 +335,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
   const handleSaveEdit = async () => {
     if (!editingItemId) return;
     try {
-      await updateItem.mutateAsync({ id: editingItemId, quantity_counted: editQty });
+      await updateItem.mutateAsync({ id: editingItemId, quantity_counted: editQty, unit: editUnit });
       queryClient.invalidateQueries({ queryKey: ["stock-count-items", stockCountId] });
       setEditingItemId(null);
       // Immediate visual feedback - Requirements: 15.3
@@ -369,10 +384,10 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
       y += 6;
       doc.setFont("helvetica", "normal");
       p.sectors.forEach((s) => {
-        doc.text(`  ${s.sectorName}: ${s.qty} un`, 25, y);
+        doc.text(`  ${s.sectorName}: ${s.qty} ${(p as any).unit || 'un'}`, 25, y);
         y += 5;
       });
-      doc.text(`  Total: ${p.total} un`, 25, y);
+      doc.text(`  Total: ${p.total} ${(p as any).unit || 'un'}`, 25, y);
       y += 8;
       if (y > 270) {
         doc.addPage();
@@ -393,11 +408,11 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
     summaryData.forEach((p) => {
       msg += `*${p.name}*\n`;
       p.sectors.forEach((s) => {
-        msg += `  • ${s.sectorName}: ${s.qty} un\n`;
+        msg += `  • ${s.sectorName}: ${s.qty} ${(p as any).unit || 'un'}\n`;
       });
-      msg += `  Total: ${p.total} un\n\n`;
+      msg += `  Total: ${p.total} ${(p as any).unit || 'un'}\n\n`;
     });
-    msg += `*TOTAL GERAL: ${grandTotal} unidades*`;
+    msg += `*TOTAL GERAL: ${grandTotal} itens*`;
     window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -429,10 +444,15 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
               )}
             </DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-orange-100 mt-1">
-            {format(new Date(count.created_at), "dd/MM/yyyy", { locale: ptBR })}
-            {count.notes && ` • ${count.notes}`}
-          </p>
+          <div className="flex flex-col gap-0.5 mt-1">
+            <p className="text-sm text-orange-100">
+              {format(new Date(count.created_at), "dd/MM/yyyy", { locale: ptBR })}
+              {count.sector?.name && ` • Setor: ${count.sector.name}`}
+              {count.counter_name && ` • Respondente: ${count.counter_name}`}
+              {isMonthlyBalance && " • [Balanço Mensal]"}
+            </p>
+            {count.notes && <p className="text-sm text-orange-50/80 italic">"{count.notes}"</p>}
+          </div>
           <div className="flex flex-wrap gap-2 mt-3">
             <Button size="sm" variant="secondary" onClick={() => setShowSummary(true)} disabled={summaryData.length === 0}>
               <FileText className="w-4 h-4 mr-1" /> Resumo
@@ -626,8 +646,8 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                         <div className="flex gap-2">
                           <Input
                             type="number"
-                            inputMode="numeric"
-                            pattern="[0-9]*"
+                            inputMode="decimal"
+                            step="0.001"
                             placeholder="Quantidade"
                             value={quantity || ""}
                             onChange={(e) => setQuantity(Number(e.target.value))}
@@ -635,6 +655,18 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                             autoFocus
                             disabled={isSaving}
                           />
+                          <Select value={unit} onValueChange={setUnit}>
+                            <SelectTrigger className="w-[100px] h-12">
+                              <SelectValue placeholder="UN" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="KG">KG</SelectItem>
+                              <SelectItem value="UN">UN</SelectItem>
+                              <SelectItem value="PCT">PCT</SelectItem>
+                              <SelectItem value="CX">CX</SelectItem>
+                              <SelectItem value="METADE">METADE</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button 
                             onClick={handleAddQty} 
                             disabled={!selectedSector || quantity <= 0 || isSaving}
@@ -674,13 +706,25 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                                     {/* Edit quantity input optimized for mobile - Requirements: 15.1, 15.2 */}
                                     <Input
                                       type="number"
-                                      inputMode="numeric"
-                                      pattern="[0-9]*"
+                                      inputMode="decimal"
+                                      step="0.001"
                                       value={editQty}
                                       onChange={(e) => setEditQty(Number(e.target.value))}
-                                      className="w-24 h-10 text-center font-semibold"
+                                      className="w-24 h-10 text-center font-semibold flex-1"
                                       autoFocus
                                     />
+                                    <Select value={editUnit} onValueChange={setEditUnit}>
+                                      <SelectTrigger className="w-[80px] h-10">
+                                        <SelectValue placeholder="UN" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="KG">KG</SelectItem>
+                                        <SelectItem value="UN">UN</SelectItem>
+                                        <SelectItem value="PCT">PCT</SelectItem>
+                                        <SelectItem value="CX">CX</SelectItem>
+                                        <SelectItem value="METADE">METADE</SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                     <Button size="sm" onClick={handleSaveEdit} className="h-10 min-h-[44px] touch-manipulation">
                                       Salvar
                                     </Button>
@@ -690,7 +734,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                                   </>
                                 ) : (
                                   <>
-                                    <span className="font-medium">{sq.qty} un</span>
+                                    <span className="font-medium">{sq.qty} {sq.unit.toLowerCase()}</span>
                                     {canEdit && (
                                       <>
                                         {/* Touch-optimized action buttons - min 44x44px - Requirements: 15.2 */}
@@ -701,6 +745,7 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                                           onClick={() => {
                                             setEditingItemId(sq.id);
                                             setEditQty(sq.qty);
+                                            setEditUnit(sq.unit);
                                           }}
                                         >
                                           <Edit2 className="w-4 h-4" />
@@ -755,13 +800,13 @@ export function ViewStockCountDialog({ open, onOpenChange, stockCountId }: Props
                     {p.sectors.map((s, j) => (
                       <div key={j} className="flex justify-between text-sm">
                         <span className="text-muted-foreground">{s.sectorName}</span>
-                        <span>{s.qty} un</span>
+                        <span>{s.qty} {(p as any).unit?.toLowerCase() || 'un'}</span>
                       </div>
                     ))}
                   </div>
                   <div className="mt-2 pt-2 border-t flex justify-between font-medium">
                     <span>Total</span>
-                    <span>{p.total} un</span>
+                    <span>{p.total} {(p as any).unit?.toLowerCase() || 'un'}</span>
                   </div>
                 </div>
               ))}
