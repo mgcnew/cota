@@ -25,6 +25,8 @@ import { usePedidosStats, OrderData } from "@/hooks/usePedidosStats";
 import { PedidosListDesktop } from "./PedidosListDesktop";
 import { MobileOrderCard } from "@/components/pedidos/MobileOrderCard";
 import { ConfirmWhatsAppOrderDialog } from "@/components/forms/ConfirmWhatsAppOrderDialog";
+import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
+import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 
 function PedidosTab() {
   const { isMobile } = useBreakpoint();
@@ -173,22 +175,43 @@ function PedidosTab() {
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Metrics */}
-      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-        <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
-        <MetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
-        <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
-        <MetricCard
-          title="Economia Real"
-          value={stats.economiaRealFormatada}
-          icon={TrendingDown}
-          variant="success"
-          trend={{
-            value: stats.variacaoFaturadoFormatada,
-            label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
-            type: stats.variacaoType
-          }}
-        />
-      </ResponsiveGrid>
+      {isMobile ? (
+        <div className="mb-4 -mx-1">
+          <MobileMetricRibbon>
+            <MobileMetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
+            <MobileMetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
+            <MobileMetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
+            <MobileMetricCard
+              title="Economia Real"
+              value={stats.economiaRealFormatada}
+              icon={TrendingDown}
+              variant="success"
+              trend={{
+                value: stats.variacaoFaturadoFormatada,
+                label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
+                type: stats.variacaoType
+              }}
+            />
+          </MobileMetricRibbon>
+        </div>
+      ) : (
+        <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
+          <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
+          <MetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
+          <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
+          <MetricCard
+            title="Economia Real"
+            value={stats.economiaRealFormatada}
+            icon={TrendingDown}
+            variant="success"
+            trend={{
+              value: stats.variacaoFaturadoFormatada,
+              label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
+              type: stats.variacaoType
+            }}
+          />
+        </ResponsiveGrid>
+      )}
 
       {/* Filters & Actions */}
       <div className="mb-6">

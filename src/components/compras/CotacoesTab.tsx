@@ -26,6 +26,8 @@ import { useCotacoesStats } from "@/hooks/useCotacoesStats";
 import { CotacoesListDesktop } from "./CotacoesListDesktop";
 import { MobileQuoteCard } from "./MobileQuoteCard";
 import { RelatorioEconomiaDialog } from "./RelatorioEconomiaDialog";
+import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
+import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 
 import {
   AddQuoteDialogLazy,
@@ -198,47 +200,78 @@ function CotacoesTab() {
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       {/* Metrics */}
-      <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-        <MetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
-        
-        <MetricCard
-          title="Adesão de Fornecedores"
-          value={stats.adesaoFormatada}
-          icon={Users}
-          variant="success"
-          trend={{
-            value: `${stats.prontasParaDecisao} prontas`,
-            label: "p/ fechar",
-            type: "positive"
-          }}
-          onClick={() => handleStatusFilterChange("prontas")}
-        />
+      {isMobile ? (
+        <div className="mb-4 -mx-1">
+          <MobileMetricRibbon>
+            <MobileMetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
+            <MobileMetricCard 
+              title="Adesão Fornecedores" 
+              value={stats.adesaoFormatada} 
+              icon={Users} 
+              variant="success" 
+              trend={{ value: `${stats.prontasParaDecisao} prontas`, label: "p/ fechar", type: "positive" }} 
+              onClick={() => handleStatusFilterChange("prontas")}
+            />
+            <MobileMetricCard
+              title="Ações Urgentes"
+              value={stats.vencendo}
+              icon={Zap}
+              variant="warning"
+              trend={{ value: "Vencendo", label: "em 48h", type: "neutral" }}
+              onClick={() => handleStatusFilterChange("vencendo")}
+            />
+            <MobileMetricCard
+              title="Economia Negociada"
+              value={stats.economiaTrabalhoFormatada}
+              icon={Sparkles}
+              variant="success"
+              trend={{ value: stats.economiaPotencialFormatada, label: "mercado", type: "neutral" }}
+            />
+          </MobileMetricRibbon>
+        </div>
+      ) : (
+        <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
+          <MetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
+          
+          <MetricCard
+            title="Adesão de Fornecedores"
+            value={stats.adesaoFormatada}
+            icon={Users}
+            variant="success"
+            trend={{
+              value: `${stats.prontasParaDecisao} prontas`,
+              label: "p/ fechar",
+              type: "positive"
+            }}
+            onClick={() => handleStatusFilterChange("prontas")}
+          />
 
-        <MetricCard
-          title="Ações Urgentes"
-          value={stats.vencendo}
-          icon={Zap}
-          variant="warning"
-          trend={{
-            value: "Vencendo",
-            label: "em 48h",
-            type: "neutral"
-          }}
-          onClick={() => handleStatusFilterChange("vencendo")}
-        />
+          <MetricCard
+            title="Ações Urgentes"
+            value={stats.vencendo}
+            icon={Zap}
+            variant="warning"
+            trend={{
+              value: "Vencendo",
+              label: "em 48h",
+              type: "neutral"
+            }}
+            onClick={() => handleStatusFilterChange("vencendo")}
+          />
 
-        <MetricCard
-          title="Economia Real Negociada"
-          value={stats.economiaTrabalhoFormatada}
-          icon={Sparkles}
-          variant="success"
-          trend={{
-            value: stats.economiaPotencialFormatada,
-            label: "mercado",
-            type: "neutral"
-          }}
-        />
-      </ResponsiveGrid>
+          <MetricCard
+            title="Economia Real Negociada"
+            value={stats.economiaTrabalhoFormatada}
+            icon={Sparkles}
+            variant="success"
+            trend={{
+              value: stats.economiaPotencialFormatada,
+              label: "mercado",
+              type: "neutral"
+            }}
+          />
+        </ResponsiveGrid>
+      )}
 
       {/* Filters & Actions */}
       <div className="mb-6">

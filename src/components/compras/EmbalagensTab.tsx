@@ -30,6 +30,8 @@ import type { PackagingQuoteDisplay } from "@/types/packaging";
 import { designSystem } from "@/styles/design-system";
 
 import { MobilePackagingQuoteCard } from "./embalagens/MobilePackagingQuoteCard";
+import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
+import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 
 // Dialogs e componentes
 import {
@@ -280,29 +282,60 @@ function EmbalagensTab() {
       {activeSubTab === "cotacoes" && (
         <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
           {/* Métricas */}
-          <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-            <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
-            <MetricCard
-              title="Prontas p/ Decisão"
-              value={stats.prontasParaDecisao.toString()}
-              icon={CheckCircle2}
-              variant="success"
-              onClick={() => setStatusFilter("prontas")}
-            />
-            <MetricCard
-              title="Concluídas"
-              value={stats.concluidas.toString()}
-              icon={CircleCheck}
-              variant="warning"
-              onClick={() => setStatusFilter("concluida")}
-            />
-            <MetricCard
-              title="Economia Acumulada"
-              value={formatCurrency(stats.economiaTotal)}
-              icon={TrendingDown}
-              variant="success"
-            />
-          </ResponsiveGrid>
+          {isMobile ? (
+            <MobileMetricRibbon>
+              <MobileMetricCard
+                title="Cotações Ativas"
+                value={stats.ativas.toString()}
+                icon={PackageOpen}
+                variant="info"
+              />
+              <MobileMetricCard
+                title="Prontas p/ Decisão"
+                value={stats.prontasParaDecisao.toString()}
+                icon={CheckCircle2}
+                variant="success"
+                onClick={() => setStatusFilter("prontas")}
+              />
+              <MobileMetricCard
+                title="Concluídas"
+                value={stats.concluidas.toString()}
+                icon={CircleCheck}
+                variant="warning"
+                onClick={() => setStatusFilter("concluida")}
+              />
+              <MobileMetricCard
+                title="Economia Acumulada"
+                value={formatCurrency(stats.economiaTotal)}
+                icon={TrendingDown}
+                variant="success"
+              />
+            </MobileMetricRibbon>
+          ) : (
+            <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
+              <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
+              <MetricCard
+                title="Prontas p/ Decisão"
+                value={stats.prontasParaDecisao.toString()}
+                icon={CheckCircle2}
+                variant="success"
+                onClick={() => setStatusFilter("prontas")}
+              />
+              <MetricCard
+                title="Concluídas"
+                value={stats.concluidas.toString()}
+                icon={CircleCheck}
+                variant="warning"
+                onClick={() => setStatusFilter("concluida")}
+              />
+              <MetricCard
+                title="Economia Acumulada"
+                value={formatCurrency(stats.economiaTotal)}
+                icon={TrendingDown}
+                variant="success"
+              />
+            </ResponsiveGrid>
+          )}
 
           {/* Filtros */}
           <div className="mb-6">

@@ -15,6 +15,8 @@ import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { PackagingOrderDetailsDialog } from "./PackagingOrderDetailsDialog";
 import { ConfirmPackagingDeliveryDialog } from "./ConfirmPackagingDeliveryDialog";
 import { MobilePackagingOrderCard } from "./MobilePackagingOrderCard";
+import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
+import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 import {
   ShoppingCart, Plus, Trash2, Calendar, DollarSign,
   Building2, MoreVertical, CheckCircle2, Clock,
@@ -115,12 +117,21 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
 
   return (
     <div className="space-y-6">
-      <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-        <MetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
-        <MetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
-        <MetricCard title="Confirmados" value={stats.confirmados.toString()} icon={CheckCircle2} variant="info" />
-        <MetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
-      </ResponsiveGrid>
+      {isMobile ? (
+        <MobileMetricRibbon>
+          <MobileMetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
+          <MobileMetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
+          <MobileMetricCard title="Confirmados" value={stats.confirmados.toString()} icon={CheckCircle2} variant="info" />
+          <MobileMetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
+        </MobileMetricRibbon>
+      ) : (
+        <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
+          <MetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
+          <MetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
+          <MetricCard title="Confirmados" value={stats.confirmados.toString()} icon={CheckCircle2} variant="info" />
+          <MetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
+        </ResponsiveGrid>
+      )}
 
       <div className="mb-6">
         <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
