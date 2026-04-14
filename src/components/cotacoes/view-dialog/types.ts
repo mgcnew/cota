@@ -49,6 +49,7 @@ export interface Quote {
     melhorFornecedor: string;
     economia: string;
     fornecedoresParticipantes: FornecedorParticipante[];
+    whatsapp_sent_at?: string | null;
     _raw?: any;
     _supplierItems?: any[];
 }

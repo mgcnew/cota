@@ -498,11 +498,27 @@ export async function sendQuoteViaWhatsApp(params: {
       const finalMessage = customMessage + linkMsg;
 
       await sendMsg(phone, finalMessage);
+      
+      // Registrar log no quote_suppliers
+      await supabase
+        .from("quote_suppliers")
+        .update({ last_whatsapp_at: new Date().toISOString() })
+        .eq("quote_id", quoteId)
+        .eq("supplier_id", supplierId);
+
       sent++;
     } catch (e: any) {
       failed++;
       errors.push((qs.supplier_name || "Fornecedor") + ": " + e.message);
     }
+  }
+
+  // Se pelo menos um foi enviado, atualiza o status geral da cotação
+  if (sent > 0) {
+    await supabase
+      .from("quotes")
+      .update({ whatsapp_sent_at: new Date().toISOString() })
+      .eq("id", quoteId);
   }
 
   return { success: sent > 0, sent, failed, errors };

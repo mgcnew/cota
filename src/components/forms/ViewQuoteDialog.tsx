@@ -864,14 +864,27 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                             variant="outline"
                             size="sm"
                             onClick={() => setWhatsappSendOpen(true)}
-                            className={`${isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs'} bg-green-500/10 hover:bg-green-500/20 border-green-200/50 text-green-700 dark:text-green-400`}
+                            className={cn(
+                              isMobile ? 'h-9 px-3 text-sm' : 'h-8 px-3 text-xs',
+                              currentQuote.whatsapp_sent_at 
+                                ? "bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-800 text-green-700 dark:text-green-400"
+                                : "bg-green-500/10 hover:bg-green-500/20 border-green-200/50 text-green-700 dark:text-green-400"
+                            )}
                           >
-                            <MessageSquare className={`${isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} mr-1.5`} />
-                            {!isMobile && 'WhatsApp'}
+                            {currentQuote.whatsapp_sent_at ? (
+                              <Check className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5', "mr-1.5")} />
+                            ) : (
+                              <MessageSquare className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5', "mr-1.5")} />
+                            )}
+                            {!isMobile && (currentQuote.whatsapp_sent_at ? 'Enviado' : 'WhatsApp')}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Enviar cotação via WhatsApp</p>
+                          <p>
+                            {currentQuote.whatsapp_sent_at 
+                              ? `Enviado em ${format(new Date(currentQuote.whatsapp_sent_at), "dd/MM 'às' HH:mm", { locale: ptBR })}`
+                              : "Enviar cotação via WhatsApp"}
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

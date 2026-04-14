@@ -53,6 +53,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CompanySelector } from "./CompanySelector";
+import { WhatsAppNotificationBell } from "@/components/whatsapp/WhatsAppNotificationBell";
 
 interface AppSidebarProps {
   onOpenAI?: () => void;
@@ -393,6 +394,9 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Notificações WhatsApp */}
+        <WhatsAppNotificationBell />
 
       </div>
     </div>
