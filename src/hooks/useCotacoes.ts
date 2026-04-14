@@ -904,35 +904,77 @@ export function useCotacoes() {
           ? diferencaPrecoTotal / orderItemsWithEconomia.length 
           : 0;
 
-        // Create the order with quote_id and economia
-        const { data: orderData, error: orderError } = await supabase
+        // Verificar se já existe um pedido PENDENTE para este fornecedor
+        const { data: existingOrder, error: queryError } = await supabase
           .from("orders")
-          .insert({
-            company_id: companyData.company_id,
-            supplier_id: supplierId,
-            supplier_name: supplierData.name,
-            total_value: totalValue,
-            order_date: format(new Date(), 'yyyy-MM-dd'),
-            delivery_date: deliveryDate,
-            status: "pendente",
-            observations: observations || null,
-            // Novos campos
-            quote_id: quoteId,
-            economia_estimada: economiaEstimada,
-            economia_real: 0, // será calculado na entrega
-            diferenca_preco_kg: diferencaMedia,
-          })
-          .select()
-          .single();
+          .select("id, total_value, economia_estimada, observations")
+          .eq("company_id", companyData.company_id)
+          .eq("supplier_id", supplierId)
+          .eq("status", "pendente")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        if (orderError) throw orderError;
+        if (queryError) throw queryError;
 
-        createdOrderIds.push(orderData.id);
+        let currentOrderId = '';
+
+        if (existingOrder) {
+          // Mesclar observações se existirem
+          let mergedObservations = existingOrder.observations || '';
+          if (observations && observations !== '') {
+            mergedObservations = mergedObservations ? `${mergedObservations} | ${observations}` : observations;
+          }
+
+          // Atualizar pedido pendente existente
+          const { data: orderData, error: orderError } = await supabase
+            .from("orders")
+            .update({
+              total_value: (existingOrder.total_value || 0) + totalValue,
+              economia_estimada: (existingOrder.economia_estimada || 0) + economiaEstimada,
+              observations: mergedObservations || null,
+            })
+            .eq("id", existingOrder.id)
+            .select()
+            .single();
+
+          if (orderError) throw orderError;
+          currentOrderId = orderData.id;
+        } else {
+          // Create the order with quote_id and economia
+          const { data: orderData, error: orderError } = await supabase
+            .from("orders")
+            .insert({
+              company_id: companyData.company_id,
+              supplier_id: supplierId,
+              supplier_name: supplierData.name,
+              total_value: totalValue,
+              order_date: format(new Date(), 'yyyy-MM-dd'),
+              delivery_date: deliveryDate,
+              status: "pendente",
+              observations: observations || null,
+              // Novos campos
+              quote_id: quoteId,
+              economia_estimada: economiaEstimada,
+              economia_real: 0, // será calculado na entrega
+              diferenca_preco_kg: diferencaMedia,
+            })
+            .select()
+            .single();
+
+          if (orderError) throw orderError;
+          currentOrderId = orderData.id;
+        }
+
+        // Add to created list only if it's new, though returning all involved orders is fine
+        if (!createdOrderIds.includes(currentOrderId)) {
+          createdOrderIds.push(currentOrderId);
+        }
 
         // Create order items with economia data
         const orderItems = orderItemsWithEconomia.map(item => ({
           ...item,
-          order_id: orderData.id,
+          order_id: currentOrderId,
         }));
 
         const { error: orderItemsError } = await supabase
