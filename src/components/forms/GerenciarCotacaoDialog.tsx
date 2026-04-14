@@ -83,6 +83,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     removeQuoteItem,
     addQuoteSupplier,
     removeQuoteSupplier,
+    updateQuoteItemQuantity,
     convertToOrder,
     deleteQuote,
     isUpdating
@@ -723,6 +724,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     });
                   }}
                   onRemoveQuoteSupplier={(supplierId) => removeQuoteSupplier.mutateAsync({ quoteId: quote.id, supplierId })}
+                  onUpdateQuoteItemQuantity={(productId, quantidade, unidade) => updateQuoteItemQuantity.mutateAsync({ quoteId: quote.id, productId, quantidade, unidade })}
                   quoteId={quote.id}
                   safeStr={safeStr}
                 />

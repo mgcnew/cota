@@ -1175,6 +1175,45 @@ export function useCotacoes() {
       toast({ title: "Erro ao remover fornecedor", variant: "destructive" });
     }
   });
+  // Mutation to update product quantity/unit in quote
+  const updateQuoteItemQuantity = useMutation({
+    mutationFn: async ({ quoteId, productId, quantidade, unidade }: { quoteId: string; productId: string; quantidade: number; unidade: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
+
+      const { error } = await supabase
+        .from("quote_items")
+        .update({ 
+          quantidade: String(quantidade), 
+          unidade 
+        })
+        .eq("quote_id", quoteId)
+        .eq("product_id", productId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      toast({ title: "Quantidade atualizada!" });
+    },
+    onError: (error: any) => {
+      console.error("Erro ao atualizar quantidade:", error);
+      toast({ title: "Erro ao atualizar quantidade", description: error.message, variant: "destructive" });
+    }
+  });
 
   return {
     cotacoes,
@@ -1190,6 +1229,16 @@ export function useCotacoes() {
     removeQuoteItem,
     addQuoteSupplier,
     removeQuoteSupplier,
-    isUpdating: updateSupplierProductValue.isPending || deleteQuote.isPending || updateQuote.isPending || updateQuoteStatus.isPending || convertToOrder.isPending || addQuoteItem.isPending || removeQuoteItem.isPending || addQuoteSupplier.isPending || removeQuoteSupplier.isPending,
+    updateQuoteItemQuantity,
+    isUpdating: updateSupplierProductValue.isPending || 
+      deleteQuote.isPending || 
+      updateQuote.isPending || 
+      updateQuoteStatus.isPending || 
+      convertToOrder.isPending || 
+      addQuoteItem.isPending || 
+      removeQuoteItem.isPending || 
+      addQuoteSupplier.isPending || 
+      removeQuoteSupplier.isPending ||
+      updateQuoteItemQuantity.isPending,
   };
 }

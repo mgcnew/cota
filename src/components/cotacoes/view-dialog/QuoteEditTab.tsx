@@ -20,6 +20,7 @@ interface QuoteEditTabProps {
   onRemoveQuoteItem: (productId: string) => Promise<void>;
   onAddQuoteSupplier: (supplierId: string) => Promise<void>;
   onRemoveQuoteSupplier: (supplierId: string) => Promise<void>;
+  onUpdateQuoteItemQuantity: (productId: string, quantidade: number, unidade: string) => Promise<void>;
   quoteId: string;
   safeStr: (val: any) => string;
 }
@@ -33,6 +34,7 @@ export function QuoteEditTab({
   onRemoveQuoteItem,
   onAddQuoteSupplier,
   onRemoveQuoteSupplier,
+  onUpdateQuoteItemQuantity,
   quoteId,
   safeStr
 }: QuoteEditTabProps) {
@@ -311,7 +313,40 @@ export function QuoteEditTab({
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[11px] font-black text-foreground uppercase tracking-tight truncate">{safeStr(p.product_name)}</span>
-                      <span className="text-[9px] font-bold text-muted-foreground uppercase">{safeStr(p.quantidade)} {safeStr(p.unidade)}</span>
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <Input 
+                          type="number" 
+                          defaultValue={p.quantidade} 
+                          className="w-14 h-6 text-[10px] p-1 font-black bg-background border-border/50 focus:border-brand/50 focus:ring-0 rounded-md transition-all h-auto"
+                          onClick={(e) => e.stopPropagation()}
+                          onBlur={(e) => {
+                            const val = Number(e.target.value);
+                            if (val !== Number(p.quantidade)) {
+                              onUpdateQuoteItemQuantity(p.product_id, val, p.unidade);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              (e.target as HTMLInputElement).blur();
+                            }
+                          }}
+                        />
+                        <Select 
+                          defaultValue={p.unidade || "un"} 
+                          onValueChange={(val) => onUpdateQuoteItemQuantity(p.product_id, Number(p.quantidade), val)}
+                        >
+                          <SelectTrigger className="w-16 h-6 text-[9px] font-black uppercase p-1 bg-background border-border/50 focus:border-brand/50 rounded-md transition-all h-auto">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-xl border-border">
+                            <SelectItem value="un" className="text-[10px] font-bold">UN</SelectItem>
+                            <SelectItem value="kg" className="text-[10px] font-bold">KG</SelectItem>
+                            <SelectItem value="cx" className="text-[10px] font-bold">CX</SelectItem>
+                            <SelectItem value="pct" className="text-[10px] font-bold">PCT</SelectItem>
+                            <SelectItem value="metade" className="text-[10px] font-bold">MT</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteItem(p.product_id)} className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all">
