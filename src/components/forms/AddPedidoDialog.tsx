@@ -653,12 +653,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       />
                       {!isMobile && showProductSuggestions && searchedProducts.length > 0 && !selectedProduct && (
                         <div className={cn(
-                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl max-h-[250px] overflow-y-auto z-[200] custom-scrollbar animate-in fade-in zoom-in-95 duration-200",
+                          "absolute top-full left-0 right-0 mt-2 rounded-xl shadow-2xl z-[200] overflow-hidden animate-in fade-in zoom-in-95 duration-200",
                           ds.colors.surface.card,
                           ds.colors.border.default,
                           "border"
                         )}>
-                          {searchedProducts.map((p, i) => renderProductItem(p, i))}
+                          <ScrollArea className="max-h-[250px] w-full">
+                            <div className="p-1">
+                              {searchedProducts.map((p, i) => renderProductItem(p, i))}
+                            </div>
+                          </ScrollArea>
                         </div>
                       )}
                       {!isMobile && showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
@@ -927,55 +931,57 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       {/* Dropdown de resultados - posicionado absolutamente */}
                       {debouncedSupplierSearch && filteredSuppliers.length > 0 && (
                         <div className={cn(
-                          "absolute top-full left-0 right-0 mt-2 z-[100] rounded-xl border shadow-xl max-h-[280px] overflow-y-auto custom-scrollbar",
+                          "absolute top-full left-0 right-0 mt-2 z-[100] rounded-xl border shadow-xl overflow-hidden",
                           ds.colors.surface.card,
                           ds.colors.border.default
                         )}>
-                          <div className="p-2 space-y-1.5">
-                            {filteredSuppliers.map(s => (
-                              <button
-                                key={s.id}
-                                onClick={() => {
-                                  setFornecedor(s.id);
-                                  setSupplierSearch("");
-                                }}
-                                className={cn(
-                                  "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 group",
-                                  fornecedor === s.id 
-                                    ? "bg-brand text-brand-foreground shadow-lg shadow-brand/20" 
-                                    : cn(
-                                        ds.colors.surface.hover,
-                                        ds.colors.text.primary
-                                      )
-                                )}
-                              >
-                                <div className={cn(
-                                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                                  fornecedor === s.id 
-                                    ? "bg-brand-foreground/10 text-brand-foreground" 
-                                    : cn(ds.colors.surface.section, ds.colors.text.secondary)
-                                )}>
-                                  <Building2 className="h-4 w-4" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className={cn(
-                                    ds.typography.size.sm,
-                                    ds.typography.weight.bold,
-                                    "truncate",
-                                    fornecedor === s.id && "text-brand-foreground"
-                                  )}>{s.name}</p>
-                                  {s.contact && (
-                                    <p className={cn(
-                                      ds.typography.size.xs,
-                                      "truncate opacity-70 mt-0.5",
-                                      fornecedor === s.id ? "text-brand-foreground" : ds.colors.text.secondary
-                                    )}>{s.contact}</p>
+                          <ScrollArea className="max-h-[280px] w-full">
+                            <div className="p-2 space-y-1.5">
+                              {filteredSuppliers.map(s => (
+                                <button
+                                  key={s.id}
+                                  onClick={() => {
+                                    setFornecedor(s.id);
+                                    setSupplierSearch("");
+                                  }}
+                                  className={cn(
+                                    "w-full p-3 rounded-lg text-left transition-all flex items-center gap-3 group",
+                                    fornecedor === s.id 
+                                      ? "bg-brand text-brand-foreground shadow-lg shadow-brand/20" 
+                                      : cn(
+                                          ds.colors.surface.hover,
+                                          ds.colors.text.primary
+                                        )
                                   )}
-                                </div>
-                                {fornecedor === s.id && <Check className="h-4 w-4 text-brand-foreground flex-shrink-0" />}
-                              </button>
-                            ))}
-                          </div>
+                                >
+                                  <div className={cn(
+                                    "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                                    fornecedor === s.id 
+                                      ? "bg-brand-foreground/10 text-brand-foreground" 
+                                      : cn(ds.colors.surface.section, ds.colors.text.secondary)
+                                  )}>
+                                    <Building2 className="h-4 w-4" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className={cn(
+                                      ds.typography.size.sm,
+                                      ds.typography.weight.bold,
+                                      "truncate",
+                                      fornecedor === s.id && "text-brand-foreground"
+                                    )}>{s.name}</p>
+                                    {s.contact && (
+                                      <p className={cn(
+                                        ds.typography.size.xs,
+                                        "truncate opacity-70 mt-0.5",
+                                        fornecedor === s.id ? "text-brand-foreground" : ds.colors.text.secondary
+                                      )}>{s.contact}</p>
+                                    )}
+                                  </div>
+                                  {fornecedor === s.id && <Check className="h-4 w-4 text-brand-foreground flex-shrink-0" />}
+                                </button>
+                              ))}
+                            </div>
+                          </ScrollArea>
                         </div>
                       )}
 

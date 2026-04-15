@@ -260,7 +260,10 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   const renderProductItem = (p: any, index: number) => (
     <button
       key={p.id}
-      onClick={() => selectProductFromList(p)}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        selectProductFromList(p);
+      }}
       className={cn(
         "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-800 last:border-none",
         highlightedProductIndex === index 
@@ -444,8 +447,12 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                       />
                       {/* Dropdown de resultados */}
                       {filteredProducts.length > 0 && !selectedProduct && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl max-h-[200px] overflow-y-auto z-50">
-                          {filteredProducts.map((p, i) => renderProductItem(p, i))}
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                          <ScrollArea className="max-h-[200px] w-full">
+                            <div className="p-1">
+                              {filteredProducts.map((p, i) => renderProductItem(p, i))}
+                            </div>
+                          </ScrollArea>
                         </div>
                       )}
                     </div>
