@@ -48,6 +48,28 @@ function PedidosTab() {
   // States para o envio no WhatsApp
   const [whatsAppDialogOpen, setWhatsAppDialogOpen] = useState(false);
   const [pedidoToWhatsApp, setPedidoToWhatsApp] = useState<OrderData | null>(null);
+  
+  const [initialSupplierId, setInitialSupplierId] = useState<string | null>(null);
+
+  // Interceptar URL param para abrir modal de novo pedido
+  useEffect(() => {
+    const isNew = searchParams.get("open") === "new";
+    const supplierId = searchParams.get("supplierId");
+    
+    if (isNew) {
+      if (supplierId) {
+        setInitialSupplierId(supplierId);
+      }
+      setTimeout(() => {
+        setAddDialogOpen(true);
+        setSearchParams(prev => {
+          prev.delete("open");
+          prev.delete("supplierId");
+          return prev;
+        }, { replace: true });
+      }, 100);
+    }
+  }, [searchParams, setSearchParams]);
 
   // Ouvir evento de atalho de teclado para novo pedido
   useEffect(() => {
@@ -316,7 +338,15 @@ function PedidosTab() {
       />
 
       {/* Dialogs */}
-      <AddPedidoDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} onAdd={() => { refetch(); setAddDialogOpen(false); }} />
+      <AddPedidoDialog 
+        open={addDialogOpen} 
+        onOpenChange={(open) => {
+          setAddDialogOpen(open);
+          if (!open) setInitialSupplierId(null);
+        }} 
+        onAdd={() => { refetch(); setAddDialogOpen(false); setInitialSupplierId(null); }} 
+        defaultSupplierId={initialSupplierId}
+      />
       {selectedPedido && (
         <>
           <PedidoDialog open={pedidoDialogOpen} onOpenChange={setPedidoDialogOpen} pedido={selectedPedido} onEdit={() => refetch()} />

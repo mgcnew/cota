@@ -14,6 +14,7 @@ import { designSystem as ds } from '@/styles/design-system';
 import { DashboardActionRow } from '@/components/dashboard/DashboardActionRow';
 import { DashboardOperationsBoard } from '@/components/dashboard/DashboardOperationsBoard';
 import { DashboardIntelligenceBoard } from '@/components/dashboard/DashboardIntelligenceBoard';
+import { DashboardAlerts } from '@/components/dashboard/DashboardAlerts';
 
 // Cores para skeletons e status 
 const STATUS_STYLES: Record<string, string> = {
@@ -150,6 +151,11 @@ function Dashboard() {
         </div>
 
         {/* Linha 1: Prioridades de Ação Focadas no "Agora" */}
+        <DashboardAlerts 
+          prontasParaDecisao={[]}
+          vencendo={[]}
+          scheduledSuppliers={dashboardData?.scheduledSuppliers}
+        />
         <DashboardActionRow 
           prontasParaDecisao={quotesStats.prontasParaDecisao}
           vencendo={quotesStats.vencendo}

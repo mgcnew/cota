@@ -48,6 +48,7 @@ const supplierSchema = z.object({
   address: z.string().trim().max(200, "Endereço muito longo").optional(),
   limit: z.string().trim().min(1, "Limite é obrigatório"),
   status: z.enum(["active", "inactive", "pending"]),
+  delivery_schedule: z.array(z.number()).optional(),
 });
 
 type SupplierFormData = z.infer<typeof supplierSchema>;
@@ -61,6 +62,7 @@ interface Supplier {
   address?: string;
   limit: string;
   status: "active" | "inactive" | "pending";
+  delivery_schedule?: number[];
 }
 
 interface EditSupplierDialogProps {
@@ -90,6 +92,7 @@ export default function EditSupplierDialog({
       address: "",
       limit: "",
       status: "active",
+      delivery_schedule: [],
     },
   });
 
@@ -103,6 +106,7 @@ export default function EditSupplierDialog({
         address: supplier.address || "",
         limit: supplier.limit,
         status: supplier.status,
+        delivery_schedule: supplier.delivery_schedule || [],
       });
     }
   }, [supplier, form]);
@@ -272,6 +276,52 @@ export default function EditSupplierDialog({
 
             {/* Seção: Status & Limites */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
+              <FormField
+                control={form.control}
+                name="delivery_schedule"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={designSystem.typography.size.sm}>Dias de Pedido (Cronograma)</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { id: 1, label: 'Seg' },
+                          { id: 2, label: 'Ter' },
+                          { id: 3, label: 'Qua' },
+                          { id: 4, label: 'Qui' },
+                          { id: 5, label: 'Sex' },
+                          { id: 6, label: 'Sáb' },
+                          { id: 0, label: 'Dom' },
+                        ].map((day) => {
+                          const isSelected = field.value?.includes(day.id);
+                          return (
+                            <button
+                              key={day.id}
+                              type="button"
+                              onClick={() => {
+                                const newValue = isSelected
+                                  ? field.value?.filter((v) => v !== day.id) || []
+                                  : [...(field.value || []), day.id];
+                                field.onChange(newValue);
+                              }}
+                              className={cn(
+                                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                              )}
+                            >
+                              {day.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}

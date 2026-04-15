@@ -907,12 +907,44 @@ export function useDashboard() {
     return dailyDataArray;
   }, [data]);
 
+  const scheduledSuppliers = useMemo(() => {
+    if (!data) return [];
+    
+    const hoje = new Date();
+    const diaDaSemanaStr = hoje.getDay(); // 0 = Domingo, 1 = Segunda, ...
+    
+    const inicioDoDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0);
+    const fimDoDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
+
+    return data.suppliers
+      .filter((supplier: any) => {
+        // Verifica se hoje é dia de pedido para o fornecedor
+        const schedule = supplier.delivery_schedule || [];
+        if (!schedule.includes(diaDaSemanaStr)) return false;
+
+        // Verifica se já existe pedido feito hoje
+        const pedidosHoje = data.orders.filter((order: any) => {
+          if (order.supplier_id !== supplier.id) return false;
+          const orderDate = new Date(order.order_date || order.created_at);
+          return orderDate >= inicioDoDia && orderDate <= fimDoDia;
+        });
+
+        // Retorna apenas se não houver pedidos hoje (ou seja, alerta pendente)
+        return pedidosHoje.length === 0;
+      })
+      .map((supplier: any) => ({
+        id: supplier.id,
+        name: supplier.name,
+      }));
+  }, [data]);
+
   return {
     metrics,
     recentQuotes,
     topSuppliers,
     monthlyData,
     dailyData,
+    scheduledSuppliers,
     isLoading,
   };
 }

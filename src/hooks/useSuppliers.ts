@@ -17,6 +17,7 @@ export interface Supplier {
   phone?: string;
   email?: string;
   address?: string;
+  delivery_schedule?: number[];
   updated_at?: string;
 }
 
@@ -217,6 +218,7 @@ export function useSuppliers() {
           phone: s.phone || undefined, // Ativado para todos, pois é necessário para o WhatsApp
           email: maskSensitiveData ? undefined : (s.email || undefined),
           address: maskSensitiveData ? undefined : (s.address || undefined),
+          delivery_schedule: s.delivery_schedule || [],
           updated_at: s.updated_at || s.created_at,
           _lastCompletedOrderTimestamp: lastCompletedOrderTimestamp, // Internal field for sorting
         };
@@ -234,6 +236,7 @@ export function useSuppliers() {
             rating: 0,
             status: "active" as const,
             phone: s.phone || undefined,
+            delivery_schedule: s.delivery_schedule || [],
             updated_at: s.updated_at || s.created_at,
           };
         }
@@ -299,6 +302,7 @@ export function useSuppliers() {
         email?: string,
         address?: string,
         limit?: string,
+        delivery_schedule?: number[],
         status?: "active" | "inactive" | "pending",
       } 
     }) => {
@@ -317,6 +321,7 @@ export function useSuppliers() {
         email: data.email || null,
         address: data.address || null,
         limit: parsedLimit,
+        delivery_schedule: data.delivery_schedule,
         updated_at: new Date().toISOString()
       };
 

@@ -46,6 +46,7 @@ const supplierSchema = z.object({
   phone: z.string().trim().max(20, "Telefone muito longo").optional().or(z.literal("")),
   email: z.string().trim().email("Email inválido").max(255, "Email muito longo").optional().or(z.literal("")),
   address: z.string().trim().max(200, "Endereço muito longo").optional().or(z.literal("")),
+  delivery_schedule: z.array(z.number()).optional(),
 });
 
 type SupplierFormData = z.infer<typeof supplierSchema>;
@@ -79,6 +80,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
       phone: "",
       email: "",
       address: "",
+      delivery_schedule: [],
     },
   });
 
@@ -146,6 +148,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           phone: data.phone || null,
           email: data.email || null,
           address: data.address || null,
+          delivery_schedule: data.delivery_schedule,
         });
 
       if (error) throw error;
@@ -374,6 +377,60 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                   )}
                 />
               </div>
+            </div>
+
+            {/* Seção: Status & Limites (Cronograma) */}
+            <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
+              <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
+                <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
+                Cronograma de Pedidos
+              </h3>
+
+              <FormField
+                control={form.control}
+                name="delivery_schedule"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className={designSystem.typography.size.sm}>Dias de Pedido na Semana</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { id: 1, label: 'Seg' },
+                          { id: 2, label: 'Ter' },
+                          { id: 3, label: 'Qua' },
+                          { id: 4, label: 'Qui' },
+                          { id: 5, label: 'Sex' },
+                          { id: 6, label: 'Sáb' },
+                          { id: 0, label: 'Dom' },
+                        ].map((day) => {
+                          const isSelected = field.value?.includes(day.id);
+                          return (
+                            <button
+                              key={day.id}
+                              type="button"
+                              onClick={() => {
+                                const newValue = isSelected
+                                  ? field.value?.filter((v) => v !== day.id) || []
+                                  : [...(field.value || []), day.id];
+                                field.onChange(newValue);
+                              }}
+                              className={cn(
+                                "px-3 py-1.5 rounded-md text-sm font-medium transition-colors cursor-pointer",
+                                isSelected
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                              )}
+                            >
+                              {day.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             {/* Dica de preenchimento */}

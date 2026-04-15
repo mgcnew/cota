@@ -62,6 +62,7 @@ interface AddPedidoDialogProps {
   onOpenChange: (open: boolean) => void;
   onAdd: (pedido: any) => void;
   preSelectedProducts?: any[];
+  defaultSupplierId?: string | null;
 }
 
 const STEPS = [
@@ -75,7 +76,7 @@ import { useSuppliers } from "@/hooks/useSuppliers";
 import { QuickCreateProduct } from "./QuickCreateProduct";
 import { QuickCreateSupplier } from "./QuickCreateSupplier";
 
-export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [] }: AddPedidoDialogProps) {
+export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelectedProducts = [], defaultSupplierId }: AddPedidoDialogProps) {
   const isMobile = useIsMobile();
   const keyboardOffset = useKeyboardOffset();
   const { toast } = useToast();
@@ -140,6 +141,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         setActiveStep("fornecedor");
       } else {
         handleReset();
+        if (defaultSupplierId) {
+          setFornecedor(defaultSupplierId);
+        }
         setTimeout(() => productSearchRef.current?.focus(), 100);
       }
     }
@@ -404,6 +408,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         }));
         setItens(preSelectedItems);
         setActiveStep("fornecedor");
+      } else {
+        if (defaultSupplierId) {
+          setFornecedor(defaultSupplierId);
+        }
       }
     }
   }, [open, preSelectedProducts]);

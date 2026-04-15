@@ -160,9 +160,10 @@ interface AddQuoteDialogProps {
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  defaultSupplierId?: string | null;
 }
 
-export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange }: AddQuoteDialogProps) {
+export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange, defaultSupplierId }: AddQuoteDialogProps) {
   console.log("[AddQuoteDialog] Componente renderizado. Open state:", externalOpen);
   const isMobile = useIsMobile();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -463,7 +464,16 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         .select("id, name, contact")
         .order("name");
 
-      if (suppliersRes.data) setSuppliers(suppliersRes.data);
+      if (suppliersRes.data) {
+        setSuppliers(suppliersRes.data);
+        if (defaultSupplierId && selectedSuppliers.length === 0) {
+          const defaultSup = suppliersRes.data.find(s => s.id === defaultSupplierId);
+          if (defaultSup) {
+            setSelectedSuppliers([defaultSup]);
+            form.setValue("fornecedoresIds", [defaultSup.id]);
+          }
+        }
+      }
     } catch (error) {
       console.error("Erro ao carregar dados iniciais:", error);
     } finally {

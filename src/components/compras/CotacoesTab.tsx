@@ -51,6 +51,26 @@ function CotacoesTab() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("filter") || "all");
+  const [initialSupplierId, setInitialSupplierId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const isNew = searchParams.get("open") === "new";
+    const supplierId = searchParams.get("supplierId");
+    
+    if (isNew) {
+      if (supplierId) {
+        setInitialSupplierId(supplierId);
+      }
+      setTimeout(() => {
+        setAddDialogOpen(true);
+        setSearchParams(prev => {
+          prev.delete("open");
+          prev.delete("supplierId");
+          return prev;
+        }, { replace: true });
+      }, 100);
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     const filter = searchParams.get("filter");
@@ -445,8 +465,10 @@ function CotacoesTab() {
         open={addDialogOpen}
         onOpenChange={(open) => {
           setAddDialogOpen(open);
+          if (!open) setInitialSupplierId(null);
         }}
-        onAdd={() => { refetch(); setAddDialogOpen(false); }}
+        onAdd={() => { refetch(); setAddDialogOpen(false); setInitialSupplierId(null); }}
+        defaultSupplierId={initialSupplierId}
       />
       <ResumoCotacaoDialogLazy open={viewDialogOpen} onOpenChange={setViewDialogOpen} quote={selectedQuote} />
       <GerenciarCotacaoDialogLazy
