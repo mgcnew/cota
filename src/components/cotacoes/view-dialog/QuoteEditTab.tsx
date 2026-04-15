@@ -232,8 +232,8 @@ export function QuoteEditTab({
   };
 
   return (
-    <div className="flex flex-col w-full bg-background">
-      <div className="p-4 space-y-4 pb-16">
+    <div className="flex flex-col w-full bg-background overflow-visible">
+      <div className="p-4 space-y-4 pb-40 overflow-visible">
         {/* Gestão de Produtos */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
@@ -264,7 +264,7 @@ export function QuoteEditTab({
                 />
 
                 {dynamicProducts.length > 0 && !selectedProduct && (
-                  <div ref={productListRef} className="absolute z-50 w-full mt-2 bg-popover border border-border rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                  <div ref={productListRef} className="absolute left-0 right-0 top-full z-[100] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
                     {dynamicProducts.map((p: any, index: number) => (
                       <button
                         key={p.id}
@@ -389,7 +389,7 @@ export function QuoteEditTab({
               />
 
               {filteredSuppliers.length > 0 && !selectedSupplier && (
-                <div ref={supplierListRef} className="absolute z-50 w-full mt-2 bg-popover border border-border rounded-xl shadow-2xl max-h-60 overflow-y-auto p-1 custom-scrollbar">
+                <div ref={supplierListRef} className="absolute left-0 right-0 top-full z-[100] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[250px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
                   {filteredSuppliers.map((s: any, index: number) => (
                     <button
                       key={s.id}

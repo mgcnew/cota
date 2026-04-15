@@ -658,7 +658,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 relative bg-background/50 flex flex-col">
+        <div className="flex-1 min-h-0 relative bg-background/50 flex flex-col overflow-visible">
           <Suspense fallback={<TabSkeleton type={activeTab} />}>
             <TabsContent value="resumo" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'resumo' && (
@@ -706,7 +706,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="editar" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
+            <TabsContent value="editar" className="flex-1 min-h-0 m-0 p-0 overflow-visible data-[state=active]:flex flex-col">
               {activeTab === 'editar' && (
                 <QuoteEditTab
                   products={products}
