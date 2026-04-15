@@ -1494,7 +1494,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
                           {/* Formulário de Adição - Lado Esquerdo */}
                           <div className={cn(
-                            "flex flex-col space-y-4 h-full min-h-0 overflow-y-auto scrollbar-hide pr-2 select-none flex-shrink-0 lg:flex-shrink relative z-[20]",
+                            "flex flex-col space-y-4 h-full min-h-0 pr-2 select-none flex-shrink-0 lg:flex-shrink relative z-[20]",
                             "pb-20 sm:pb-0" // Espaço extra para o botão no mobile
                           )}>
                             <div className="pb-1 border-b border-border/50">

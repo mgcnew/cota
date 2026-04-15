@@ -601,7 +601,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         
         {/* Step: Produtos */}
         {activeStep === "produtos" && (
-          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+          <div className="h-full p-6">
             <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 pb-60 lg:pb-0">
               
               {/* Adicionar Produto */}
@@ -1143,7 +1143,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {/* Step: Confirmar */}
         {activeStep === "confirmar" && (
-          <div className="h-full p-6 overflow-y-auto custom-scrollbar">
+          <div className="h-full p-6">
              <div className="max-w-2xl mx-auto space-y-6">
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

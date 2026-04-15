@@ -381,7 +381,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
         
         {/* Step: Informações */}
         {activeStep === "info" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar flex flex-col justify-start">
+          <div className="h-full p-4 sm:p-6 flex flex-col justify-start">
              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
               <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
@@ -415,7 +415,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
 
         {/* Step: Itens */}
         {activeStep === "itens" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
+          <div className="h-full p-4 sm:p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
               
               {/* Adicionar Item */}
