@@ -16,12 +16,14 @@ const PedidosTab = lazy(() => import("@/components/compras/PedidosTab"));
 const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
 const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
 const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
+const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
 const TABS = [
   { value: "cotacoes", icon: FileText, label: "Cotações" },
   { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
   { value: "lista", icon: ShoppingBasket, label: "Lista" },
   { value: "embalagens", icon: Package, label: "Embalagens" },
-  { value: "analise", icon: BarChart3, label: "Análise" }
+  { value: "analise", icon: BarChart3, label: "Análise" },
+  { value: "calculadora", icon: Keyboard, label: "Calculadora" }
 ];
 
 const TabLoader = () => (
@@ -54,28 +56,33 @@ function Compras() {
   const shortcuts = useMemo(() => [
     {
       key: '1',
-      action: () => handleTabChange('cotacoes'),
+      action: () => activeTab !== 'calculadora' && handleTabChange('cotacoes'),
       description: 'Ir para Cotações'
     },
     {
       key: '2',
-      action: () => handleTabChange('pedidos'),
+      action: () => activeTab !== 'calculadora' && handleTabChange('pedidos'),
       description: 'Ir para Pedidos'
     },
     {
       key: '3',
-      action: () => handleTabChange('lista'),
+      action: () => activeTab !== 'calculadora' && handleTabChange('lista'),
       description: 'Ir para Lista'
     },
     {
       key: '4',
-      action: () => handleTabChange('embalagens'),
+      action: () => activeTab !== 'calculadora' && handleTabChange('embalagens'),
       description: 'Ir para Embalagens'
     },
     {
       key: '5',
-      action: () => handleTabChange('analise'),
+      action: () => activeTab !== 'calculadora' && handleTabChange('analise'),
       description: 'Ir para Análise'
+    },
+    {
+      key: '6',
+      action: () => handleTabChange('calculadora'),
+      description: 'Ir para Calculadora'
     },
     {
       key: 'n',
@@ -198,6 +205,7 @@ function Compras() {
                 {activeTab === "analise" && <AnaliseTab />}
                 {activeTab === "lista" && <ListaComprasTab />}
                 {activeTab === "embalagens" && <EmbalagensTab />}
+                {activeTab === "calculadora" && <ProcurementCalculator />}
               </div>
             </Suspense>
           </div>
