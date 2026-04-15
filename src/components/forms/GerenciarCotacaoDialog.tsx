@@ -706,7 +706,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               )}
             </TabsContent>
 
-            <TabsContent value="editar" className="flex-1 min-h-0 m-0 p-0 overflow-visible data-[state=active]:flex flex-col">
+            <TabsContent value="editar" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
               {activeTab === 'editar' && (
                 <QuoteEditTab
                   products={products}

@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { Plus, Trash2, Package, Building2, Search, Star, Trophy, X } from "lucide-react";
+import { Plus, Trash2, Package, Building2, Search, Star, Trophy, X, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -47,24 +47,25 @@ export function QuoteEditTab({
   const [productSearch, setProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
-  const debouncedProductSearch = useDebounce(productSearch, 300);
+  const debouncedProductSearch = useDebounce(productSearch, 150);
   const productSearchRef = useRef<HTMLInputElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
 
   const [supplierSearch, setSupplierSearch] = useState("");
   const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
   const [highlightedSupplierIndex, setHighlightedSupplierIndex] = useState(-1);
-  const debouncedSupplierSearch = useDebounce(supplierSearch, 300);
+  const debouncedSupplierSearch = useDebounce(supplierSearch, 150);
   const supplierSearchRef = useRef<HTMLInputElement>(null);
   const supplierListRef = useRef<HTMLDivElement>(null);
 
   const [dynamicProducts, setDynamicProducts] = useState<any[]>([]);
   const [isSearchingProducts, setIsSearchingProducts] = useState(false);
+  const [isSearchingSuppliers, setIsSearchingSuppliers] = useState(false);
 
   // Busca reativa de produtos via Supabase
   useEffect(() => {
     const searchProducts = async () => {
-      if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) {
+      if (!debouncedProductSearch || debouncedProductSearch.trim().length < 1) {
         setDynamicProducts([]);
         return;
       }
@@ -79,9 +80,8 @@ export function QuoteEditTab({
 
         if (error) throw error;
         
-        // Filtra produtos que já estão na cotação
-        const filtered = (data || []).filter(p => !products.some(qp => qp.product_id === p.id));
-        setDynamicProducts(filtered);
+        // Mantemos a lista original para feedback visual, similar ao modal de nova cotação
+        setDynamicProducts(data || []);
       } catch (error) {
         console.error("Erro na busca de produtos:", error);
       } finally {
@@ -99,29 +99,41 @@ export function QuoteEditTab({
     }, 300);
   };
 
-  const suppliersNotInQuote = useMemo(() =>
-    availableSuppliers.filter((s: any) => !fornecedores.some((f: any) => f.id === s.id)),
-    [availableSuppliers, fornecedores]
-  );
+  const productsNotInQuote = useMemo(() => {
+    return availableProducts.filter(p => !products.some(pi => pi.product_id === p.id));
+  }, [availableProducts, products]);
 
-  const availableProductsNotInQuote = useMemo(() =>
-    availableProducts.filter((p: any) => !products.some((qp: any) => qp.product_id === p.id)),
-    [availableProducts, products]
-  );
+  const suppliersNotInQuote = useMemo(() => {
+    return availableSuppliers.filter(s => !fornecedores.some(f => f.id === s.id));
+  }, [availableSuppliers, fornecedores]);
 
-  const filteredProducts = useMemo(() => {
-    if (!debouncedProductSearch || debouncedProductSearch.trim().length < 2) return [];
-    return availableProductsNotInQuote
-      .filter((p: any) => safeStr(p.name).toLowerCase().includes(debouncedProductSearch.toLowerCase()))
+  const filteredProductsLocal = useMemo(() => {
+    if (!productSearch || productSearch.trim().length < 1) return [];
+    return productsNotInQuote
+      .filter((p: any) => safeStr(p.name).toLowerCase().includes(productSearch.toLowerCase()))
       .slice(0, 30);
-  }, [availableProductsNotInQuote, debouncedProductSearch, safeStr]);
+  }, [productsNotInQuote, productSearch, safeStr]);
 
   const filteredSuppliers = useMemo(() => {
-    if (!debouncedSupplierSearch || debouncedSupplierSearch.trim().length < 2) return [];
+    if (!supplierSearch || supplierSearch.trim().length < 1) return [];
     return suppliersNotInQuote
-      .filter((s: any) => safeStr(s.name).toLowerCase().includes(debouncedSupplierSearch.toLowerCase()))
+      .filter((s: any) => safeStr(s.name).toLowerCase().includes(supplierSearch.toLowerCase()))
       .slice(0, 30);
-  }, [suppliersNotInQuote, debouncedSupplierSearch, safeStr]);
+  }, [suppliersNotInQuote, supplierSearch, safeStr]);
+
+  // Combinar produtos locais e dinâmicos (evitando duplicatas)
+  const allProducts = useMemo(() => {
+    const combined = [...dynamicProducts];
+    filteredProductsLocal.forEach(p => {
+      if (!combined.some(cp => cp.id === p.id)) {
+        combined.push(p);
+      }
+    });
+
+    // Filtro final rigoroso para evitar que produtos já na cotação apareçam (inclusive do Supabase)
+    return combined.filter(p => !products.some(pi => pi.product_id === p.id));
+  }, [dynamicProducts, filteredProductsLocal, products]);
+
 
   useEffect(() => {
     setHighlightedProductIndex(-1);
@@ -232,8 +244,11 @@ export function QuoteEditTab({
   };
 
   return (
-    <div className="flex flex-col w-full bg-background overflow-visible">
-      <div className="p-4 space-y-4 pb-40 overflow-visible">
+    <div className="bg-background">
+      <div className={cn(
+        "p-4 space-y-4 transition-all duration-300",
+        ((productSearch.length > 0 && !selectedProduct) || (supplierSearch.length > 0 && !selectedSupplier)) ? "pb-80" : "pb-10"
+      )}>
         {/* Gestão de Produtos */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
@@ -263,21 +278,33 @@ export function QuoteEditTab({
                   className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
                 />
 
-                {dynamicProducts.length > 0 && !selectedProduct && (
-                  <div ref={productListRef} className="absolute left-0 right-0 top-full z-[100] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
-                    {dynamicProducts.map((p: any, index: number) => (
-                      <button
-                        key={p.id}
-                        onClick={() => selectProductFromList(p)}
-                        onMouseEnter={() => setHighlightedProductIndex(index)}
-                        className={cn(
-                          "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
-                          highlightedProductIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
-                        )}
-                      >
-                        <span className="font-black tracking-tight truncate uppercase">{safeStr(p.name)}</span>
-                      </button>
-                    ))}
+                {isSearchingProducts && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  </div>
+                )}
+
+              {productSearch.length > 0 && !selectedProduct && (
+                <div ref={productListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
+                  {allProducts.length > 0 ? (
+                    allProducts.map((p: any, index: number) => (
+                        <button
+                          key={p.id}
+                          onClick={() => selectProductFromList(p)}
+                          onMouseEnter={() => setHighlightedProductIndex(index)}
+                          className={cn(
+                            "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
+                            highlightedProductIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
+                          )}
+                        >
+                          <span className="font-black tracking-tight truncate uppercase">{safeStr(p.name)}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="p-3 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                        Nenhum produto encontrado
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -388,21 +415,33 @@ export function QuoteEditTab({
                 className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
               />
 
-              {filteredSuppliers.length > 0 && !selectedSupplier && (
-                <div ref={supplierListRef} className="absolute left-0 right-0 top-full z-[100] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[250px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
-                  {filteredSuppliers.map((s: any, index: number) => (
-                    <button
-                      key={s.id}
-                      onClick={() => selectSupplierFromList(s)}
-                      onMouseEnter={() => setHighlightedSupplierIndex(index)}
-                      className={cn(
-                        "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
-                        highlightedSupplierIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
-                      )}
-                    >
-                      <span className="font-black tracking-tight truncate uppercase">{safeStr(s.name)}</span>
-                    </button>
-                  ))}
+              {isSearchingSuppliers && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                </div>
+              )}
+
+              {supplierSearch.length > 0 && !selectedSupplier && (
+                <div ref={supplierListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[250px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
+                  {filteredSuppliers.length > 0 ? (
+                    filteredSuppliers.map((supplier: any, index: number) => (
+                      <button
+                        key={supplier.id}
+                        onClick={() => selectSupplierFromList(supplier)}
+                        onMouseEnter={() => setHighlightedSupplierIndex(index)}
+                        className={cn(
+                          "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
+                          highlightedSupplierIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
+                        )}
+                      >
+                        <span className="font-black tracking-tight truncate uppercase">{safeStr(supplier.name)}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <div className="p-3 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
+                      Nenhum fornecedor encontrado
+                    </div>
+                  )}
                 </div>
               )}
             </div>
