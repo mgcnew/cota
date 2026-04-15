@@ -54,11 +54,11 @@ export function useProducts() {
       // Implementar paginação para carregar todos os produtos
       const pageSize = 1000; // Tamanho máximo por página
       const totalPages = Math.ceil(totalCount / pageSize);
-      const allProducts = [];
+      let allProducts: any[] = [];
 
       console.log('[PRODUCTS DEBUG] Loading products in', totalPages, 'pages of', pageSize, 'items each');
 
-      // Carregar todos os produtos em lotes
+      // Carregar todos os produtos em lotes com ordenação estável (created_at + id)
       for (let page = 0; page < totalPages; page++) {
         const from = page * pageSize;
         const to = from + pageSize - 1;
@@ -69,6 +69,7 @@ export function useProducts() {
           .from('products')
           .select('*, brands(id, name, manual_rating)')
           .order('created_at', { ascending: false })
+          .order('id', { ascending: true })
           .range(from, to)
           .abortSignal(signal);
 
@@ -77,6 +78,22 @@ export function useProducts() {
         if (pageData && pageData.length > 0) {
           allProducts.push(...pageData);
           console.log(`[PRODUCTS DEBUG] Loaded ${pageData.length} products from page ${page + 1}`);
+        }
+      }
+
+      // Verificar se carregamos todos os produtos — se não, fazer fallback com query única
+      if (allProducts.length < totalCount) {
+        console.warn(`[PRODUCTS DEBUG] Pagination mismatch: expected ${totalCount}, got ${allProducts.length}. Retrying with single query...`);
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('products')
+          .select('*, brands(id, name, manual_rating)')
+          .order('created_at', { ascending: false })
+          .order('id', { ascending: true })
+          .abortSignal(signal);
+
+        if (!fallbackError && fallbackData) {
+          allProducts = fallbackData;
+          console.log(`[PRODUCTS DEBUG] Fallback loaded ${allProducts.length} products`);
         }
       }
 

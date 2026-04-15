@@ -31,6 +31,7 @@ import { designSystem } from "@/styles/design-system";
 import { cn, normalizeText } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 // Lazy load dialogs for better initial load performance
 const AddProductDialog = lazy(() => import("@/components/forms/AddProductDialog").then(m => ({ default: m.AddProductDialog })));
@@ -88,15 +89,75 @@ function Produtos() {
     }
   }, [loading, user]);
 
+  // Busca direta no Supabase como fallback (quando a busca local pode não ter todos os produtos)
+  const [dbSearchResults, setDbSearchResults] = useState<Product[]>([]);
+  const [isDbSearching, setIsDbSearching] = useState(false);
+
+  useEffect(() => {
+    if (!debouncedSearchQuery || debouncedSearchQuery.trim().length < 2) {
+      setDbSearchResults([]);
+      return;
+    }
+
+    const searchDb = async () => {
+      setIsDbSearching(true);
+      try {
+        const { data, error } = await supabase
+          .from('products')
+          .select('id, name, category, unit, brand_id, brand_name, barcode, image_url, created_at, updated_at')
+          .ilike('name', `%${debouncedSearchQuery}%`)
+          .order('name')
+          .limit(50);
+
+        if (error) throw error;
+
+        // Converter resultados do DB para o formato Product
+        const dbProducts: Product[] = (data || []).map(p => ({
+          id: p.id,
+          name: p.name,
+          category: p.category,
+          unit: p.unit || 'un',
+          brand_id: p.brand_id,
+          brand_name: p.brand_name,
+          barcode: p.barcode,
+          image_url: p.image_url,
+          lastOrderPrice: 'R$ 0,00',
+          bestSupplier: '-',
+          quotesCount: 0,
+          lastUpdate: new Date(p.created_at).toLocaleDateString('pt-BR'),
+          trend: 'stable' as const,
+          updated_at: p.updated_at || p.created_at,
+        }));
+
+        setDbSearchResults(dbProducts);
+      } catch (error) {
+        console.error('[PRODUCTS] Fallback DB search error:', error);
+        setDbSearchResults([]);
+      } finally {
+        setIsDbSearching(false);
+      }
+    };
+
+    searchDb();
+  }, [debouncedSearchQuery]);
+
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(safeProducts) || safeProducts.length === 0) {
+      // Se não há produtos locais mas temos resultados do DB, usar esses
+      if (dbSearchResults.length > 0) {
+        const categoryNormalized = normalizeText(selectedCategory);
+        return dbSearchResults.filter(product => {
+          const matchesCategory = categoryNormalized === "all" || normalizeText(product.category || '') === categoryNormalized;
+          return matchesCategory;
+        });
+      }
       return [];
     }
 
     const searchNormalized = normalizeText(debouncedSearchQuery);
     const categoryNormalized = normalizeText(selectedCategory);
 
-    return safeProducts.filter(product => {
+    let localResults = safeProducts.filter(product => {
       const productNameNormalized = normalizeText(product.name);
       const productCategoryNormalized = normalizeText(product.category || '');
       const productBrandNormalized = normalizeText(product.brand_name || '');
@@ -109,13 +170,32 @@ function Produtos() {
       const matchesCategory = categoryNormalized === "all" || productCategoryNormalized === categoryNormalized;
       
       return matchesSearch && matchesCategory;
-    }).sort((a, b) => {
+    });
+
+    // Mesclar resultados do DB que não estão na lista local
+    if (searchNormalized && dbSearchResults.length > 0) {
+      const localIds = new Set(localResults.map(p => p.id));
+      const extraFromDb = dbSearchResults.filter(dbP => {
+        if (localIds.has(dbP.id)) return false;
+        const matchesCategory = categoryNormalized === "all" || normalizeText(dbP.category || '') === categoryNormalized;
+        return matchesCategory;
+      });
+
+      if (extraFromDb.length > 0) {
+        // Enriquecer dados do DB com dados completos do cache se possível
+        const allProductsMap = new Map(safeProducts.map(p => [p.id, p]));
+        const enriched = extraFromDb.map(dbP => allProductsMap.get(dbP.id) || dbP);
+        localResults = [...localResults, ...enriched];
+      }
+    }
+
+    return localResults.sort((a, b) => {
       // Sort by most recently modified
       const aDate = new Date(a.updated_at || 0).getTime();
       const bDate = new Date(b.updated_at || 0).getTime();
       return bDate - aDate;
     });
-  }, [safeProducts, debouncedSearchQuery, selectedCategory]);
+  }, [safeProducts, debouncedSearchQuery, selectedCategory, dbSearchResults]);
 
   // Counts for tabs
   const counts = useMemo(() => {
