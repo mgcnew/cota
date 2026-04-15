@@ -377,7 +377,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-hidden relative bg-gray-50 dark:bg-black">
+      <div className="flex-1 relative bg-gray-50 dark:bg-black">
         
         {/* Step: Informações */}
         {activeStep === "info" && (

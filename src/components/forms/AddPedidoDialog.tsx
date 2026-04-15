@@ -597,7 +597,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       </div>
 
       {/* Content */}
-      <div className={cn("flex-1 overflow-hidden relative", ds.colors.surface.page)}>
+      <div className={cn("flex-1 relative", ds.colors.surface.page)}>
         
         {/* Step: Produtos */}
         {activeStep === "produtos" && (

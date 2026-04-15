@@ -1478,9 +1478,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       ) : (
         <div className="flex flex-col h-full overflow-hidden">
           <Form {...form}>
-            <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full overflow-hidden">
+            <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
               {/* Content Area - Now with more space */}
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1">
                 <AnimatedTabContent
                   value={activeTab}
                   activeTab={activeTab}
@@ -1489,7 +1489,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 >
                   <Tabs value={activeTab} onValueChange={changeTab} className="w-full h-full">
                     {/* Produtos Tab */}
-                    <TabsContent value="produtos" className="h-full m-0">
+                    <TabsContent value="produtos" className="h-full m-0 overflow-visible">
                       <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
                           {/* Formulário de Adição - Lado Esquerdo */}
@@ -1545,8 +1545,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                                       {/* Dropdown de Sugestões com Scroll Nativo */}
                                       {showProductSuggestions && products.length > 0 && !selectedProduct && (
-                                        <div className="absolute top-full left-0 right-0 mt-2 p-0 border shadow-2xl z-[1000] rounded-xl bg-card overflow-hidden animate-in fade-in slide-in-from-top-2">
-                                          <div className="max-h-[300px] w-full overflow-y-auto custom-scrollbar">
+                                          <div className="absolute top-full left-0 right-0 mt-1 p-0 border shadow-2xl z-[1000] rounded-xl bg-card overflow-hidden animate-in fade-in slide-in-from-top-2 border-brand/20">
+                                            <div className="max-h-[250px] w-full overflow-y-auto custom-scrollbar">
                                             <div className="p-1 space-y-1">
                                               {products.map((product, index) => (
                                                 <button
