@@ -1553,7 +1553,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     sideOffset={5}
                                     onOpenAutoFocus={(e) => e.preventDefault()}
                                   >
-                                    <ScrollArea className="max-h-[300px] w-full">
+                                    <div className="max-h-[300px] w-full overflow-y-auto custom-scrollbar">
                                       <div className="p-1 space-y-1">
                                         {products.map((product, index) => (
                                           <button
@@ -1601,7 +1601,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           </button>
                                         ))}
                                       </div>
-                                    </ScrollArea>
+                                    </div>
                                   </PopoverContent>
                                 </Popover>
 

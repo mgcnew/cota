@@ -658,11 +658,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           ds.colors.border.default,
                           "border"
                         )}>
-                          <ScrollArea className="max-h-[250px] w-full">
+                          <div className="max-h-[250px] w-full overflow-y-auto custom-scrollbar">
                             <div className="p-1">
                               {searchedProducts.map((p, i) => renderProductItem(p, i))}
                             </div>
-                          </ScrollArea>
+                          </div>
                         </div>
                       )}
                       {!isMobile && showProductSuggestions && productSearch.trim().length >= 3 && searchedProducts.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
