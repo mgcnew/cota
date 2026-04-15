@@ -1507,8 +1507,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               {/* Seletor de Produto com Autocomplete Dinâmico */}
                               <div className={ds.components.input.group}>
                                 <label className={ds.components.input.label}>Produto *</label>
-                                <Popover open={showProductSuggestions && products.length > 0 && !selectedProduct}>
-                                  <PopoverAnchor asChild>
                                     <div className="relative group">
                                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
                                       <Input
@@ -1544,66 +1542,62 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           <Loader2 className="h-4 w-4 animate-spin text-brand" />
                                         </div>
                                       )}
-                                    </div>
-                                  </PopoverAnchor>
 
-                                  <PopoverContent 
-                                    className="p-0 w-[var(--radix-popover-trigger-width)] border shadow-2xl z-[1000] rounded-xl bg-card overflow-hidden"
-                                    align="start"
-                                    sideOffset={5}
-                                    onOpenAutoFocus={(e) => e.preventDefault()}
-                                  >
-                                    <div className="max-h-[300px] w-full overflow-y-auto custom-scrollbar">
-                                      <div className="p-1 space-y-1">
-                                        {products.map((product, index) => (
-                                          <button
-                                            key={product.id}
-                                            type="button"
-                                            onMouseDown={(e) => {
-                                              e.preventDefault();
-                                              setSelectedProduct(product);
-                                              if (product.unit) {
-                                                setNewProductUnit(product.unit);
-                                              }
-                                              setProductSearch("");
-                                              setShowProductSuggestions(false);
-                                              setHighlightedProductIndex(-1);
-                                              setTimeout(() => {
-                                                quantityInputRef.current?.focus();
-                                                quantityInputRef.current?.select();
-                                              }, 50);
-                                            }}
-                                            onMouseEnter={() => setHighlightedProductIndex(index)}
-                                            className={cn(
-                                              "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
-                                              (highlightedProductIndex === index)
-                                                ? "bg-brand/10 text-brand"
-                                                : cn(
-                                                  ds.colors.surface.hover,
-                                                  ds.colors.text.primary
-                                                ),
-                                            )}
-                                          >
-                                            <div className={cn(
-                                              "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
-                                              highlightedProductIndex === index
-                                                ? "bg-brand/20 text-brand"
-                                                : cn(
-                                                  ds.colors.surface.section,
-                                                  ds.colors.text.secondary
-                                                )
-                                            )}>
-                                              <Package className="h-4 w-4" />
+                                      {/* Dropdown de Sugestões com Scroll Nativo */}
+                                      {showProductSuggestions && products.length > 0 && !selectedProduct && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 p-0 border shadow-2xl z-[1000] rounded-xl bg-card overflow-hidden animate-in fade-in slide-in-from-top-2">
+                                          <div className="max-h-[300px] w-full overflow-y-auto custom-scrollbar">
+                                            <div className="p-1 space-y-1">
+                                              {products.map((product, index) => (
+                                                <button
+                                                  key={product.id}
+                                                  type="button"
+                                                  onMouseDown={(e) => {
+                                                    e.preventDefault();
+                                                    setSelectedProduct(product);
+                                                    if (product.unit) {
+                                                      setNewProductUnit(product.unit);
+                                                    }
+                                                    setProductSearch("");
+                                                    setShowProductSuggestions(false);
+                                                    setHighlightedProductIndex(-1);
+                                                    setTimeout(() => {
+                                                      quantityInputRef.current?.focus();
+                                                      quantityInputRef.current?.select();
+                                                    }, 50);
+                                                  }}
+                                                  onMouseEnter={() => setHighlightedProductIndex(index)}
+                                                  className={cn(
+                                                    "w-full px-4 py-2.5 text-left text-sm flex items-center gap-3 transition-all rounded-xl",
+                                                    (highlightedProductIndex === index)
+                                                      ? "bg-brand/10 text-brand"
+                                                      : cn(
+                                                        ds.colors.surface.hover,
+                                                        ds.colors.text.primary
+                                                      ),
+                                                  )}
+                                                >
+                                                  <div className={cn(
+                                                    "w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm",
+                                                    highlightedProductIndex === index
+                                                      ? "bg-brand/20 text-brand"
+                                                      : cn(
+                                                        ds.colors.surface.section,
+                                                        ds.colors.text.secondary
+                                                      )
+                                                  )}>
+                                                    <Package className="h-4 w-4" />
+                                                  </div>
+                                                  <div className="flex flex-col min-w-0">
+                                                    <span className="font-medium truncate text-xs sm:text-sm">{product.name}</span>
+                                                  </div>
+                                                </button>
+                                              ))}
                                             </div>
-                                            <div className="flex flex-col min-w-0">
-                                              <span className="font-medium truncate text-xs sm:text-sm">{product.name}</span>
-                                            </div>
-                                          </button>
-                                        ))}
-                                      </div>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
-                                  </PopoverContent>
-                                </Popover>
 
                                   {/* Estado Vazio/Nenhum Resultado - Com opção de cadastro rápido */}
                                   {showProductSuggestions && productSearch.length >= 1 && products.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
