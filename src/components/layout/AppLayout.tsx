@@ -33,7 +33,7 @@ export function AppLayout() {
       <div className="flex flex-col w-full min-h-screen relative">
         <main
           className={cn(
-            "flex-1 w-full pb-20 md:pb-4 pt-16 md:pt-4 overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+            "flex-1 w-full pb-20 md:pb-4 pt-12 md:pt-4 overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
             isSidebarExpanded ? "md:pl-[17.25rem] pr-4" : "md:pl-[6.25rem] md:pr-4"
           )}
         >
