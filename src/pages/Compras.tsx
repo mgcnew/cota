@@ -144,43 +144,44 @@ function Compras() {
       <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
         {/* Page Header - Standardized with Dashboard Style */}
         <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
-              <ShoppingBag className="h-6 w-6 text-brand" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
+                <ShoppingBag className="h-6 w-6 text-brand" />
+              </div>
+              <div>
+                <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
+                  Compras
+                </h1>
+                <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
+                  Gerencie cotações e pedidos de compra
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                Compras
-              </h1>
-              <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                Gerencie cotações e pedidos de compra
-              </p>
-            </div>
-          </div>
-        </div>
 
-          {!isMobile && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className={ds.components.button.ghost}>
-                    <Keyboard className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className={ds.components.tooltip.content}>
-                  <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
-                  <ul className="text-xs space-y-1">
-                    {shortcuts.map((s, i) => (
-                      <li key={i} className="flex justify-between gap-3">
-                        <span className={ds.colors.text.secondary}>{s.description}</span>
-                        <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
-                      </li>
-                    ))}
-                  </ul>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+            {!isMobile && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="ghost" size="icon" className={ds.components.button.ghost}>
+                      <Keyboard className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className={ds.components.tooltip.content}>
+                    <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
+                    <ul className="text-xs space-y-1">
+                      {shortcuts.map((s, i) => (
+                        <li key={i} className="flex justify-between gap-3">
+                          <span className={ds.colors.text.secondary}>{s.description}</span>
+                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
+                        </li>
+                      ))}
+                    </ul>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
