@@ -185,30 +185,44 @@ const calculateQuoteEconomics = (supplierTotals: SupplierTotals[], quote?: any):
 };
 
 export function useDashboard() {
+  // 1. Calculate the date range (last 6 months) for recent analysis
+  const sixMonthsAgo = useMemo(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 6);
+    return d.toISOString().split('T')[0];
+  }, []);
+
   const { data, isLoading } = useQuery({
     queryKey: ['dashboard'],
     queryFn: async () => {
-      // 1. Fetch main data first to get quote IDs
+      // 2. Parallel fetching with date filters to reduce payload
       const [quotesRes, suppliersRes, ordersRes] = await Promise.all([
-        supabase.from("quotes").select(`*, quote_items(*), quote_suppliers(*)`).order("created_at", { ascending: false }),
-        supabase.from("suppliers").select("*"),
-        supabase.from("orders").select("*").order("order_date", { ascending: false }),
+        supabase
+          .from("quotes")
+          .select(`id, status, created_at, data_planejada, data_inicio, data_fim, quote_items(product_id, product_name, quantidade, unidade), quote_suppliers(supplier_id, supplier_name, status, data_resposta)`)
+          .gte('created_at', sixMonthsAgo)
+          .order("created_at", { ascending: false }),
+        supabase.from("suppliers").select("id, name"),
+        supabase
+          .from("orders")
+          .select("*")
+          .gte('created_at', sixMonthsAgo)
+          .order("order_date", { ascending: false }),
       ]);
 
       if (quotesRes.error) throw quotesRes.error;
       const quotes = quotesRes.data || [];
       const quoteIds = quotes.map(q => q.id);
 
-      // 2. Fetch supplier items for only THESE quotes in chunks to avoid URL size limits if many quotes
+      // 3. Optimized chunked fetching for supplier items (only recent quotes)
       let allSupplierItems: any[] = [];
       if (quoteIds.length > 0) {
-        // Fetch items for all quotes - grouping by chunks of 100 just in case
-        const chunkSize = 100;
+        const chunkSize = 50; // Smaller chunks for better responsiveness
         for (let i = 0; i < quoteIds.length; i += chunkSize) {
           const chunk = quoteIds.slice(i, i + chunkSize);
           const { data: items, error: itemsError } = await supabase
             .from("quote_supplier_items")
-            .select("*")
+            .select("quote_id, supplier_id, product_id, valor_oferecido, unidade_preco, fator_conversao, quantidade_por_embalagem")
             .in("quote_id", chunk);
           
           if (!itemsError && items) {
@@ -217,10 +231,17 @@ export function useDashboard() {
         }
       }
 
-      // 3. Integrate quote_supplier_items into quotes
+      // 4. Efficient integration using a Map for O(1) lookups
+      const itemsByQuote = new Map();
+      allSupplierItems.forEach(item => {
+        const list = itemsByQuote.get(item.quote_id) || [];
+        list.push(item);
+        itemsByQuote.set(item.quote_id, list);
+      });
+
       const quotesWithSupplierItems = quotes.map(quote => ({
         ...quote,
-        quote_supplier_items: allSupplierItems.filter(item => item.quote_id === quote.id)
+        quote_supplier_items: itemsByQuote.get(quote.id) || []
       }));
 
       return {
@@ -230,6 +251,8 @@ export function useDashboard() {
         orders: ordersRes.data || [],
       };
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000, // Sync with persistQueryClient
   });
 
   // OPTIMIZED: Memoize expensive calculations

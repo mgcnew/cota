@@ -131,9 +131,11 @@ export function useCotacoes() {
     queryKey: ['cotacoes'],
     queryFn: async () => {
       try {
-        console.log("📊 Fetching quotes...");
-        
-        // Fetch quotes with related data - ordenar por data de criação (mais recentes primeiro)
+        // Fetch quotes with related data (last 6 months only)
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        const dateFilter = sixMonthsAgo.toISOString().split('T')[0];
+
         const { data: quotesData, error: quotesError } = await supabase
           .from("quotes")
           .select(`
@@ -141,6 +143,7 @@ export function useCotacoes() {
             quote_items(*),
             quote_suppliers(*, access_token)
           `)
+          .gte('created_at', dateFilter)
           .order("created_at", { ascending: false });
 
         if (quotesError) {

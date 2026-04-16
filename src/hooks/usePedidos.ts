@@ -92,6 +92,10 @@ export function usePedidos() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
+      const sixMonthsAgo = new Date();
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      const dateFilter = sixMonthsAgo.toISOString().split('T')[0];
+
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
@@ -110,6 +114,7 @@ export function usePedidos() {
             maior_valor_cotado
           )
         `)
+        .gte('created_at', dateFilter)
         .order('created_at', { ascending: false });
 
       if (ordersError) throw ordersError;
