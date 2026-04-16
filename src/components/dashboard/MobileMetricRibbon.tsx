@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
 
@@ -17,26 +17,8 @@ export const MobileMetricRibbon = memo(function MobileMetricRibbon({
     dragFree: false,
   });
 
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-    setScrollSnaps(emblaApi.scrollSnapList());
-    emblaApi.on("select", onSelect);
-    return () => { emblaApi.off("select", onSelect); };
-  }, [emblaApi, onSelect]);
-
   return (
     <div className={cn("relative w-full", className)}>
-      {/* Right gradient fade – hints at more content */}
-      {/* Removemos o gradient fade para atender ao pedido do usuário de visual sem degrade */}
-
       {/* Embla viewport */}
       <div
         className="overflow-hidden cursor-grab active:cursor-grabbing"
@@ -46,25 +28,6 @@ export const MobileMetricRibbon = memo(function MobileMetricRibbon({
           {children}
         </div>
       </div>
-
-      {/* Scroll dots indicator */}
-      {scrollSnaps.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-3">
-          {scrollSnaps.map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => emblaApi?.scrollTo(idx)}
-              className={cn(
-                "rounded-full transition-all duration-300",
-                idx === selectedIndex
-                  ? "w-4 h-1.5 bg-brand"
-                  : "w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-600"
-              )}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 });
