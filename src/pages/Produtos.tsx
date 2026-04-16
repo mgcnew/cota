@@ -94,7 +94,7 @@ function Produtos() {
   const [isDbSearching, setIsDbSearching] = useState(false);
 
   useEffect(() => {
-    if (!debouncedSearchQuery || debouncedSearchQuery.trim().length < 2) {
+    if (!debouncedSearchQuery || debouncedSearchQuery.trim().length < 1) {
       setDbSearchResults([]);
       return;
     }
@@ -105,7 +105,7 @@ function Produtos() {
         const { data, error } = await supabase
           .from('products')
           .select('id, name, category, unit, brand_id, brand_name, barcode, image_url, created_at, updated_at')
-          .ilike('name', `%${debouncedSearchQuery}%`)
+          .or(`name.ilike.%${debouncedSearchQuery}%,barcode.ilike.%${debouncedSearchQuery}%`)
           .order('name')
           .limit(50);
 
@@ -142,57 +142,62 @@ function Produtos() {
   }, [debouncedSearchQuery]);
 
   const filteredProducts = useMemo(() => {
-    if (!Array.isArray(safeProducts) || safeProducts.length === 0) {
-      // Se não há produtos locais mas temos resultados do DB, usar esses
-      if (dbSearchResults.length > 0) {
-        const categoryNormalized = normalizeText(selectedCategory);
-        return dbSearchResults.filter(product => {
-          const matchesCategory = categoryNormalized === "all" || normalizeText(product.category || '') === categoryNormalized;
-          return matchesCategory;
-        });
-      }
-      return [];
-    }
-
     const searchNormalized = normalizeText(debouncedSearchQuery);
     const categoryNormalized = normalizeText(selectedCategory);
 
-    let localResults = safeProducts.filter(product => {
+    // Filter logic specialized for inclusion
+    const isMatch = (product: Product) => {
       const productNameNormalized = normalizeText(product.name);
       const productCategoryNormalized = normalizeText(product.category || '');
       const productBrandNormalized = normalizeText(product.brand_name || '');
+      const productBarcode = (product.barcode || '').toLowerCase();
 
       const matchesSearch = !searchNormalized || 
                             productNameNormalized.includes(searchNormalized) || 
                             productCategoryNormalized.includes(searchNormalized) ||
-                            productBrandNormalized.includes(searchNormalized);
+                            productBrandNormalized.includes(searchNormalized) ||
+                            productBarcode.includes(searchNormalized);
       
       const matchesCategory = categoryNormalized === "all" || productCategoryNormalized === categoryNormalized;
       
+      return { matchesSearch, matchesCategory };
+    };
+
+    // 1. Start with local search
+    let results = safeProducts.filter(p => {
+      const { matchesSearch, matchesCategory } = isMatch(p);
+      // If searching, we show if it matches search (even if category mismatch) 
+      // ONLY if there are no matches within the category.
+      // But for simplicity and to follow the user requirement "localize todos",
+      // if there's a search query, we'll weigh the search match higher.
       return matchesSearch && matchesCategory;
     });
 
-    // Mesclar resultados do DB que não estão na lista local
-    if (searchNormalized && dbSearchResults.length > 0) {
-      const localIds = new Set(localResults.map(p => p.id));
-      const extraFromDb = dbSearchResults.filter(dbP => {
-        if (localIds.has(dbP.id)) return false;
-        const matchesCategory = categoryNormalized === "all" || normalizeText(dbP.category || '') === categoryNormalized;
-        return matchesCategory;
-      });
+    // 2. If we have a search query but local results are empty OR category match is empty,
+    // we try to relax category filter to show all search matches
+    if (searchNormalized && (results.length === 0 || categoryNormalized !== "all")) {
+      const allSearchMatches = safeProducts.filter(p => isMatch(p).matchesSearch);
+      if (allSearchMatches.length > 0) {
+        results = allSearchMatches;
+      }
+    }
 
+    // 3. Merge DB search results
+    if (searchNormalized && dbSearchResults.length > 0) {
+      const existingIds = new Set(results.map(p => p.id));
+      const extraFromDb = dbSearchResults.filter(dbP => !existingIds.has(dbP.id));
+      
       if (extraFromDb.length > 0) {
         // Enriquecer dados do DB com dados completos do cache se possível
         const allProductsMap = new Map(safeProducts.map(p => [p.id, p]));
         const enriched = extraFromDb.map(dbP => allProductsMap.get(dbP.id) || dbP);
-        localResults = [...localResults, ...enriched];
+        results = [...results, ...enriched];
       }
     }
 
-    return localResults.sort((a, b) => {
-      // Sort by most recently modified
-      const aDate = new Date(a.updated_at || 0).getTime();
-      const bDate = new Date(b.updated_at || 0).getTime();
+    return results.sort((a, b) => {
+      const aDate = new Date(a.updated_at || a.created_at || 0).getTime();
+      const bDate = new Date(b.updated_at || b.created_at || 0).getTime();
       return bDate - aDate;
     });
   }, [safeProducts, debouncedSearchQuery, selectedCategory, dbSearchResults]);

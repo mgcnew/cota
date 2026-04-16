@@ -486,8 +486,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     try {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, unit')
-        .ilike('name', `%${term}%`)
+        .select('id, name, unit, barcode')
+        .or(`name.ilike.%${term}%,barcode.ilike.%${term}%`)
         .order('name')
         .limit(10);
 

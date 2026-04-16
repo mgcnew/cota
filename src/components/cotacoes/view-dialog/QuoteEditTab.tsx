@@ -74,8 +74,8 @@ export function QuoteEditTab({
       try {
         const { data, error } = await supabase
           .from('products')
-          .select('id, name, brand_name, brand_rating, brand_score, unit')
-          .ilike('name', `%${debouncedProductSearch}%`)
+          .select('id, name, brand_name, brand_rating, brand_score, unit, barcode')
+          .or(`name.ilike.%${debouncedProductSearch}%,barcode.ilike.%${debouncedProductSearch}%`)
           .limit(30);
 
         if (error) throw error;
@@ -110,7 +110,11 @@ export function QuoteEditTab({
   const filteredProductsLocal = useMemo(() => {
     if (!productSearch || productSearch.trim().length < 1) return [];
     return productsNotInQuote
-      .filter((p: any) => safeStr(p.name).toLowerCase().includes(productSearch.toLowerCase()))
+      .filter((p: any) => {
+        const nameMatch = safeStr(p.name).toLowerCase().includes(productSearch.toLowerCase());
+        const barcodeMatch = p.barcode && p.barcode.toLowerCase().includes(productSearch.toLowerCase());
+        return nameMatch || barcodeMatch;
+      })
       .slice(0, 30);
   }, [productsNotInQuote, productSearch, safeStr]);
 
