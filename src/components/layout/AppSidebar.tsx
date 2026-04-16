@@ -450,33 +450,29 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           )}
         >
           <div className="w-full h-full flex flex-col">
-            {/* Mobile Header - Premium Glass Effect */}
-            <div className="relative px-6 pt-10 pb-6 flex flex-col items-center gap-4 overflow-hidden">
-              <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-brand/10 to-transparent pointer-events-none opacity-30" />
-              
-              <div 
-                onClick={() => {
-                  setProfileDialogOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="relative z-10 p-1 rounded-2xl bg-white shadow-xl ring-4 ring-brand/5 w-20 h-20 active:scale-95 transition-transform cursor-pointer overflow-hidden"
-              >
-                <img 
-                  src="/logo.png" 
-                  alt="Logo Empresa" 
-                  className="w-full h-full object-contain"
-                />
+            {/* Mobile Header - Compact & Premium */}
+            <div className="px-6 py-6 flex items-center justify-between border-b border-white/5 bg-background/50 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+                <div 
+                  onClick={() => {
+                    navigate('/dashboard');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="p-1.5 rounded-xl bg-white shadow-md ring-1 ring-brand/10 w-10 h-10 active:scale-95 transition-transform cursor-pointer overflow-hidden"
+                >
+                  <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-foreground tracking-tight">Cota Aki</h3>
+                  <p className="text-[10px] text-muted-foreground font-medium opacity-70">Sistema Gestor</p>
+                </div>
               </div>
-              
-              <div className="relative z-10 text-center space-y-1">
-                <h3 className="font-bold text-lg text-foreground tracking-tight">Cota Aki</h3>
-                <p className="text-xs text-muted-foreground font-medium opacity-80 uppercase tracking-widest px-2 py-0.5 bg-muted rounded-full">Sistema Gestor</p>
-              </div>
+              <WhatsAppNotificationBell />
             </div>
 
-            {/* Mobile Menu Items - Focused Layout */}
-            <nav className="flex-1 py-4 px-4 overflow-y-auto overscroll-contain custom-scrollbar">
-              <div className="space-y-1 px-1">
+            {/* Mobile Menu Items - Optimized Density */}
+            <nav className="flex-1 py-4 px-3 overflow-y-auto overscroll-contain custom-scrollbar bg-transparent">
+              <div className="grid grid-cols-1 gap-1">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = item.url === "/dashboard"
@@ -489,57 +485,83 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                       to={item.url}
                       onClick={handleMobileNavigation}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-4 rounded-2xl transition-all duration-150 relative",
-                        "active:scale-[0.98] active:bg-muted/30",
+                        "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200 relative group",
+                        "active:scale-[0.98]",
                         isActive
-                          ? "bg-brand/10 text-brand font-bold"
-                          : "text-muted-foreground"
+                          ? "bg-brand/10 text-brand font-bold shadow-[0_4px_12px_-4px_rgba(var(--brand-rgb),0.2)]"
+                          : "text-muted-foreground hover:bg-muted/50"
                       )}
                     >
                       {isActive && (
-                        <div className="absolute left-0 w-1 h-6 bg-brand rounded-r-full" />
+                        <div className="absolute left-1 w-1.5 h-6 bg-brand rounded-full animate-in fade-in zoom-in duration-300" />
                       )}
-                      <Icon className={cn("w-5 h-5", isActive ? "text-brand" : "opacity-80")} />
-                      <span className="text-[15px] tracking-tight">{item.title}</span>
+                      <Icon className={cn("w-5 h-5 transition-transform duration-300 group-hover:scale-110", isActive ? "text-brand" : "opacity-70 group-hover:opacity-100")} />
+                      <span className="text-sm tracking-tight">{item.title}</span>
                     </NavLink>
                   );
                 })}
               </div>
             </nav>
 
-            {/* Mobile Footer - Native Feel */}
-            <div className="mt-auto p-6 space-y-4 bg-muted/20 backdrop-blur-md rounded-t-[32px] border-t border-white/5">
-              {/* User Identity Shortcut */}
-              <div className="flex items-center gap-3 px-2 mb-2">
-                <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center text-brand font-bold text-xs ring-2 ring-brand/5 shrink-0">
-                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-foreground truncate">{profile?.full_name || "Usuário"}</p>
-                  <p className="text-[10px] text-muted-foreground truncate opacity-70">Avançar para Perfil</p>
-                </div>
-              </div>
+            {/* Mobile Footer - Action Bar Icons */}
+            <div className="mt-auto p-4 bg-muted/30 backdrop-blur-xl rounded-t-[32px] border-t border-white/5">
+              <div className="flex items-center justify-around w-full">
+                {/* User Profile Avatar */}
+                <button
+                  onClick={() => {
+                    setProfileDialogOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="group relative flex flex-col items-center gap-1 p-2 active:scale-90 transition-all"
+                >
+                  <div className="relative">
+                    <UserAvatar 
+                      user={user} 
+                      profile={profile} 
+                      size="md" 
+                      className="ring-2 ring-brand/10 group-hover:ring-brand/30 transition-all shrink-0" 
+                    />
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-background rounded-full flex items-center justify-center border border-brand/20">
+                      <div className="w-2 h-2 bg-green-500 rounded-full" />
+                    </div>
+                  </div>
+                </button>
 
-              <div className="space-y-1.5">
+                {/* Theme Toggle */}
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="p-4 rounded-2xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
+                  title="Alternar Tema"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="w-6 h-6 text-brand transition-transform group-hover:rotate-45" />
+                  ) : (
+                    <Moon className="w-6 h-6 text-brand transition-transform group-hover:-rotate-12" />
+                  )}
+                </button>
+
+                {/* Settings Icon */}
                 <button
                   onClick={() => {
                     navigate('/dashboard/configuracoes');
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground transition-all active:scale-[0.98]"
+                  className="p-4 rounded-2xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
+                  title="Configurações"
                 >
-                  <Settings className="w-5 h-5 opacity-70" />
-                  <span className="text-sm font-medium">Configurações</span>
+                  <Settings className="w-6 h-6 opacity-80 group-hover:opacity-100 group-hover:rotate-45 transition-all" />
                 </button>
+
+                {/* Logout Icon */}
                 <button
                   onClick={() => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-400 font-bold hover:bg-red-500/10 transition-all active:scale-[0.98]"
+                  className="p-4 rounded-2xl text-red-500/80 hover:bg-red-500/10 active:scale-95 transition-all group"
+                  title="Sair"
                 >
-                  <LogOut className="w-5 h-5 opacity-80" />
-                  <span className="text-sm">Sair do Sistema</span>
+                  <LogOut className="w-6 h-6 opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </button>
               </div>
             </div>
