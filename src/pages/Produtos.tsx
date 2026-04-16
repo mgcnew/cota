@@ -299,23 +299,21 @@ function Produtos() {
       <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
       <PageWrapper>
         <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
-          {/* Page Header */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+          {/* Page Header - Standardized with Dashboard Style */}
+          <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
                 <Package className="h-6 w-6 text-brand" />
               </div>
               <div>
-                <h1 className={cn(designSystem.typography.size["2xl"], "font-bold text-foreground")}>
+                <h1 className={cn(designSystem.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
                   Produtos
                 </h1>
-                <p className={cn(designSystem.colors.text.secondary, "text-sm mt-0.5")}>
+                <p className={cn(designSystem.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
                   Gerencie seu catálogo de itens e categorias
                 </p>
               </div>
             </div>
-
-            <div />
           </div>
 
           {/* Métricas essenciais */}

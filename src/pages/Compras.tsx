@@ -142,16 +142,22 @@ function Compras() {
       )}
 
       <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
-        {/* Header da Página */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className={cn("p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
+        {/* Page Header - Standardized with Dashboard Style */}
+        <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
               <ShoppingBag className="h-6 w-6 text-brand" />
             </div>
-            <h1 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary)}>
-              Compras
-            </h1>
+            <div>
+              <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
+                Compras
+              </h1>
+              <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
+                Gerencie cotações e pedidos de compra
+              </p>
+            </div>
           </div>
+        </div>
 
           {!isMobile && (
             <TooltipProvider>

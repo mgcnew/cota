@@ -250,21 +250,33 @@ export default function Etiquetas() {
   return (
     <PageWrapper>
       <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-           <div>
-             <h1 className="text-2xl font-bold">Gerador de Etiquetas</h1>
-             <p className="text-sm text-muted-foreground">Crie e imprima etiquetas personalizadas</p>
-           </div>
-           <div className="flex gap-2">
-            <Button onClick={handleExportPDF} variant="outline" disabled={productsToExport.length === 0}>
+        {/* Page Header - Standardized with Dashboard Style */}
+        <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+                <Scan className="h-6 w-6 text-brand" />
+              </div>
+              <div>
+                <h1 className={cn(designSystem.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
+                  Gerador de Etiquetas
+                </h1>
+                <p className={cn(designSystem.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
+                  Crie e imprima etiquetas personalizadas
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button onClick={handleExportPDF} variant="outline" size="sm" className="flex-1 sm:flex-none h-9" disabled={productsToExport.length === 0}>
                 <Printer className="mr-2 h-4 w-4" /> 
                 Exportar PDF ({productsToExport.length})
-            </Button>
-            <Button onClick={() => setQuickModalOpen(true)} className={cn(designSystem.components.button.primary)}>
+              </Button>
+              <Button onClick={() => setQuickModalOpen(true)} size="sm" className={cn(designSystem.components.button.primary, "flex-1 sm:flex-none h-9")}>
                 <Scan className="mr-2 h-4 w-4" /> 
                 Novo Produto
-            </Button>
-           </div>
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Removed Manual Input Card in favor of Modal Workflow */}
