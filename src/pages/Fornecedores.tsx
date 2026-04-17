@@ -103,6 +103,8 @@ function Fornecedores() {
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null);
   const [historySupplier, setHistorySupplier] = useState<Supplier | null>(null);
+  const [selectedSupplierForQuote, setSelectedSupplierForQuote] = useState<string | null>(null);
+  const [isAddQuoteOpen, setIsAddQuoteOpen] = useState(false);
   const addSupplierRef = useRef<HTMLButtonElement>(null);
   const importSuppliersRef = useRef<HTMLButtonElement>(null);
 
@@ -227,11 +229,15 @@ function Fornecedores() {
   }, [canViewSensitiveData]);
 
   const handleAddQuote = () => {
-    toast({
-      title: "Cotação criada",
-      description: "A cotação foi criada e enviada aos fornecedores."
-    });
+    invalidateCache();
+    setIsAddQuoteOpen(false);
+    setSelectedSupplierForQuote(null);
   };
+
+  const handleOpenAddQuote = useCallback((supplier: Supplier) => {
+    setSelectedSupplierForQuote(supplier.id);
+    setIsAddQuoteOpen(true);
+  }, []);
 
   const filteredSuppliers = useMemo(() => {
     if (!suppliers) return [];
@@ -493,12 +499,15 @@ function Fornecedores() {
                       </div>
 
                       <div className="pt-2.5">
-                        <AddQuoteDialog onAdd={handleAddQuote} trigger={
-                          <Button size="sm" variant="outline" className="w-full h-9 transition-smooth hover:bg-muted">
-                            <Plus className="h-3.5 w-3.5 mr-1.5" />
-                            Nova Cotação
-                          </Button>
-                        } />
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="w-full h-9 transition-smooth hover:bg-muted"
+                          onClick={() => handleOpenAddQuote(supplier)}
+                        >
+                          <Plus className="h-3.5 w-3.5 mr-1.5" />
+                          Nova Cotação
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -515,9 +524,11 @@ function Fornecedores() {
                       <ExpandableSupplierCard
                         key={supplier.id}
                         supplier={supplier}
+                        onEdit={setEditingSupplier}
                         onDelete={setDeletingSupplier}
                         onWhatsApp={openWhatsApp}
                         onViewHistory={setHistorySupplier}
+                        onAddQuote={handleOpenAddQuote}
                         renderRating={renderNumericRating}
                       />
                     ))}
@@ -561,16 +572,14 @@ function Fornecedores() {
           )}
 
           {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank */}
-          {!isMobile && (
-            <Suspense fallback={null}>
-              <EditSupplierDialog
-                supplier={editingSupplier}
-                open={!!editingSupplier}
-                onOpenChange={open => { if (!open) setEditingSupplier(null); }}
-                onEdit={handleEditSupplier}
-              />
-            </Suspense>
-          )}
+          <Suspense fallback={null}>
+            <EditSupplierDialog
+              supplier={editingSupplier}
+              open={!!editingSupplier}
+              onOpenChange={open => { if (!open) setEditingSupplier(null); }}
+              onEdit={handleEditSupplier}
+            />
+          </Suspense>
 
           <Suspense fallback={null}>
             <DeleteSupplierDialog
@@ -588,6 +597,16 @@ function Fornecedores() {
               supplierId={historySupplier?.id || ""}
               open={!!historySupplier}
               onOpenChange={open => { if (!open) setHistorySupplier(null); }}
+            />
+          </Suspense>
+
+          {/* Add Quote Dialog */}
+          <Suspense fallback={null}>
+            <AddQuoteDialog
+              open={isAddQuoteOpen}
+              onOpenChange={setIsAddQuoteOpen}
+              onAdd={handleAddQuote}
+              defaultSupplierId={selectedSupplierForQuote}
             />
           </Suspense>
 

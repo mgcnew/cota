@@ -1,11 +1,24 @@
 import * as React from "react";
-import { memo, useState, useCallback } from "react";
-import { Building2, DollarSign, FileText, TrendingUp, Edit, Trash2, MessageCircle, ChevronDown, ChevronUp, Eye, Phone, Mail, MapPin } from "lucide-react";
+import { memo, useCallback } from "react";
+import { 
+  Building2, 
+  DollarSign, 
+  FileText, 
+  TrendingUp, 
+  Edit, 
+  Trash2, 
+  MessageCircle, 
+  Eye, 
+  Phone, 
+  Mail, 
+  MapPin,
+  Plus
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { capitalize } from "@/lib/text-utils";
 import { cn } from "@/lib/utils";
+import { designSystem as ds } from "@/styles/design-system";
 
 interface Supplier {
   id: string;
@@ -25,30 +38,28 @@ interface Supplier {
 
 interface ExpandableSupplierCardProps {
   supplier: Supplier;
+  onEdit?: (supplier: Supplier) => void;
   onDelete: (supplier: Supplier) => void;
   onWhatsApp: (supplier: Supplier) => void;
+  onAddQuote?: (supplier: Supplier) => void;
   onViewHistory?: (supplier: Supplier) => void;
   renderRating: (rating: number) => React.ReactNode;
 }
 
 /**
- * ExpandableSupplierCard - Mobile-optimized supplier card with expandable details
- * 
- * Features:
- * - Essential info visible by default (name, contact, status, rating)
- * - Expandable section for additional details (limit, quotes, avg price, contact info)
- * - Touch-optimized with 44x44px minimum touch targets
- * - Memoized for performance
- * 
- * Requirements: 4.2 - Info essencial visível, detalhes em accordion
+ * ExpandableSupplierCard - Redesigned Floating Supplier Card for Mobile
+ * Aligned with Procurement & Products premium design system.
  */
 export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   supplier,
+  onEdit,
   onDelete,
   onWhatsApp,
+  onAddQuote,
   onViewHistory,
   renderRating,
 }: ExpandableSupplierCardProps): JSX.Element {
+  
   const formatLimitBRL = (input: string) => {
     if (!input) return "R$ 0,00";
     const hasK = /k/i.test(input);
@@ -56,165 +67,166 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
     const value = hasK ? numeric * 1000 : numeric;
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
   };
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleDelete = useCallback(() => {
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "active": return "Ativo";
+      case "inactive": return "Inat.";
+      case "pending": return "Pend.";
+      default: return status;
+    }
+  };
+
+  const handleEdit = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit?.(supplier);
+  }, [onEdit, supplier]);
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
     onDelete(supplier);
   }, [onDelete, supplier]);
 
-  const handleWhatsApp = useCallback(() => {
+  const handleWhatsApp = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
     onWhatsApp(supplier);
   }, [onWhatsApp, supplier]);
 
-  const handleViewHistory = useCallback(() => {
+  const handleAddQuote = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onAddQuote?.(supplier);
+  }, [onAddQuote, supplier]);
+
+  const handleView = () => {
     onViewHistory?.(supplier);
-  }, [onViewHistory, supplier]);
+  };
 
   return (
-    <Collapsible 
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
-      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 shadow-sm overflow-hidden"
+    <div 
+      onClick={handleView}
+      className={cn(
+        "group relative overflow-hidden transition-all duration-300",
+        "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md",
+        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
+        "shadow-sm hover:shadow-md hover:border-brand/30 dark:hover:border-brand/30",
+        "active:scale-[0.98] cursor-pointer"
+      )}
     >
-      {/* Essential Info - Always visible */}
       <div className="p-4">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Building2 className="h-5 w-5 text-primary" />
+        {/* Header Section */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-brand/10 dark:bg-brand/20 flex items-center justify-center flex-shrink-0 border border-brand/10">
+              <Building2 className="h-5 w-5 text-brand" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
+            <div className="min-w-0">
+              <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate leading-tight">
                 {capitalize(supplier.name)}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
                 {capitalize(supplier.contact)}
               </p>
             </div>
           </div>
-        </div>
-        
-        {/* Status and Rating */}
-        <div className="flex items-center gap-2 mb-3">
-          <StatusBadge status={supplier.status} />
-          {renderRating(supplier.rating)}
-        </div>
-        
-        {/* Quick Stats - Always visible */}
-        <div className="grid grid-cols-2 gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
-            <span className="text-gray-500 dark:text-gray-400">Limite:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{formatLimitBRL(supplier.limit)}</span>
+          
+          <div className="text-right flex-shrink-0">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
+              Limite
+            </span>
+            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+              {formatLimitBRL(supplier.limit)}
+            </span>
           </div>
+        </div>
+
+        {/* Status and Analytics Row */}
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <FileText className="h-3.5 w-3.5 text-blue-600 flex-shrink-0" />
-            <span className="text-gray-500 dark:text-gray-400">Cotações:</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{supplier.totalQuotes}</span>
+            <StatusBadge 
+              status={supplier.status} 
+              customLabel={getStatusLabel(supplier.status)}
+              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider h-auto"
+            />
+            {renderRating(supplier.rating)}
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5 text-blue-500/70" />
+              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                {supplier.totalQuotes}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="h-3.5 w-3.5 text-emerald-500/70" />
+              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                {supplier.avgPrice}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+          <div className="flex-1 flex gap-2">
+            <Button
+              onClick={handleWhatsApp}
+              variant="outline"
+              className={cn(
+                "flex-1 h-11 rounded-xl",
+                "text-emerald-600 dark:text-emerald-400",
+                "border-emerald-100 dark:border-emerald-900/30",
+                "bg-emerald-50/50 dark:bg-emerald-900/10",
+                "hover:bg-emerald-100 dark:hover:bg-emerald-900/20",
+                "font-bold text-xs px-2"
+              )}
+            >
+              <MessageCircle className="h-4 w-4 mr-1.5" />
+              Zap
+            </Button>
+
+            <Button
+              onClick={handleAddQuote}
+              variant="default"
+              className={cn(
+                "flex-1 h-11 rounded-xl bg-brand hover:bg-brand/90 text-zinc-950 font-bold text-xs"
+              )}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Cotação
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleEdit}
+              variant="outline"
+              size="icon"
+              className={cn(
+                "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
+                "text-zinc-600 dark:text-zinc-400 hover:text-brand hover:border-brand",
+                "bg-zinc-50/50 dark:bg-zinc-800/30"
+              )}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              onClick={handleDelete}
+              variant="outline"
+              size="icon"
+              className={cn(
+                "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
+                "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20",
+                "bg-zinc-50/50 dark:bg-zinc-800/30"
+              )}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* Expand/Collapse Button */}
-      <CollapsibleTrigger asChild>
-        <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
-        >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Menos detalhes</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Mais detalhes</span>
-            </>
-          )}
-        </button>
-      </CollapsibleTrigger>
-
-      {/* Expandable Details */}
-      <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30">
-          {/* Additional Stats */}
-          <div className="grid grid-cols-1 gap-2 text-xs pt-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-3.5 w-3.5 text-purple-600 flex-shrink-0" />
-              <span className="text-gray-500 dark:text-gray-400">Preço Médio:</span>
-              <span className="font-semibold text-gray-900 dark:text-white">{supplier.avgPrice}</span>
-            </div>
-            {supplier.lastOrder && (
-              <div className="flex items-center gap-2">
-                <FileText className="h-3.5 w-3.5 text-orange-600 flex-shrink-0" />
-                <span className="text-gray-500 dark:text-gray-400">Último Pedido:</span>
-                <span className="font-semibold text-gray-900 dark:text-white">{supplier.lastOrder}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Contact Info */}
-          {(supplier.phone || supplier.email || supplier.address) && (
-            <div className="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700/20">
-              <p className="text-xs font-medium text-gray-700 dark:text-gray-300">Contato</p>
-              {supplier.phone && (
-                <div className="flex items-center gap-2 text-xs">
-                  <Phone className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-600 dark:text-gray-400">{supplier.phone}</span>
-                </div>
-              )}
-              {supplier.email && (
-                <div className="flex items-center gap-2 text-xs">
-                  <Mail className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-600 dark:text-gray-400 truncate">{supplier.email}</span>
-                </div>
-              )}
-              {supplier.address && (
-                <div className="flex items-center gap-2 text-xs">
-                  <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
-                  <span className="text-gray-600 dark:text-gray-400">{supplier.address}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20 border-green-200 dark:border-green-800 active:scale-95 transition-transform"
-              onClick={handleWhatsApp}
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              WhatsApp
-            </Button>
-
-            {onViewHistory && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-10 touch-target active:scale-95 transition-transform"
-                onClick={handleViewHistory}
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Histórico
-              </Button>
-            )}
-
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
-            </Button>
-          </div>
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+    </div>
   );
 });
 
