@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { QuickRegistrationModal } from "@/components/etiquetas/QuickRegistrationModal";
 import { BarcodeGenerator } from "@/components/etiquetas/BarcodeGenerator";
-import { Scan, Printer, Trash2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Scan, Printer, Trash2, Eye, EyeOff, Loader2, CheckSquare, Square, X } from "lucide-react";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobileDevice } from "@/hooks/use-mobile-device";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/auth/AuthContext";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ProductLabel {
   id: string;
@@ -47,6 +48,7 @@ export default function Etiquetas() {
   const [quickModalOpen, setQuickModalOpen] = useState(false);
   const [previewBarcode, setPreviewBarcode] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const printRef = useRef<HTMLDivElement>(null);
 
   // Fetch products
@@ -136,17 +138,26 @@ export default function Etiquetas() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm("Tem certeza que deseja excluir esta etiqueta?")) return;
     try {
         const { error } = await supabase.from('product_labels').delete().eq('id', id);
         if (error) throw error;
         
-        // Also remove from hidden set
+        // Also remove from hidden and selected sets
         if (hiddenLabelIds.has(id)) {
             setHiddenLabelIds(prev => {
                 const next = new Set(prev);
                 next.delete(id);
                 return next;
             });
+        }
+        
+        if (selectedIds.has(id)) {
+          setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
         }
         
         toast({
@@ -160,6 +171,98 @@ export default function Etiquetas() {
             description: "Erro ao remover etiqueta.",
             variant: "destructive",
         });
+    }
+  };
+
+  const handleDeleteMultiple = async () => {
+    const count = selectedIds.size;
+    if (count === 0) return;
+    
+    if (!confirm(`Tem certeza que deseja excluir ${count} etiquetas selecionadas?`)) return;
+    
+    try {
+      const { error } = await supabase
+        .from('product_labels')
+        .delete()
+        .in('id', Array.from(selectedIds));
+        
+      if (error) throw error;
+      
+      // Cleanup local state
+      setHiddenLabelIds(prev => {
+        const next = new Set(prev);
+        selectedIds.forEach(id => next.delete(id));
+        return next;
+      });
+      
+      setSelectedIds(new Set());
+      
+      toast({
+        title: "Sucesso",
+        description: `${count} etiquetas removidas com sucesso.`,
+      });
+    } catch (error) {
+      console.error('Error deleting labels:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover as etiquetas selecionadas.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    const count = products.length;
+    if (count === 0) return;
+    
+    if (!confirm(`ALERTA: Tem certeza que deseja excluir TODAS as ${count} etiquetas da sua lista? Esta ação não pode ser desfeita.`)) return;
+    
+    try {
+      setLoading(true);
+      const { error } = await supabase
+        .from('product_labels')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all (RLS handles user context)
+        
+      if (error) throw error;
+      
+      setProducts([]);
+      setHiddenLabelIds(new Set());
+      setSelectedIds(new Set());
+      
+      toast({
+        title: "Sucesso",
+        description: "Todas as etiquetas foram removidas.",
+      });
+    } catch (error) {
+      console.error('Error deleting all labels:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover todas as etiquetas.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filteredProducts.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filteredProducts.map(p => p.id)));
     }
   };
 
@@ -281,22 +384,89 @@ export default function Etiquetas() {
 
         {/* Removed Manual Input Card in favor of Modal Workflow */}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-            <TabsList className="bg-muted/50 p-1 w-full sm:w-auto flex justify-start overflow-x-auto">
-              <TabsTrigger value="all" className="flex items-center gap-2">
-                Todos
-                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold">{counts.total}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="active" className="flex items-center gap-2">
-                Ativos
-                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{counts.active}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="hidden" className="flex items-center gap-2">
-                Ocultos
-                <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400">{counts.hidden}</Badge>
-              </TabsTrigger>
-            </TabsList>
-        </Tabs>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+                <TabsList className="bg-muted/50 p-1 w-full sm:w-auto flex justify-start overflow-x-auto">
+                  <TabsTrigger value="all" className="flex items-center gap-2">
+                    Todos
+                    <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold">{counts.total}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="active" className="flex items-center gap-2">
+                    Ativos
+                    <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{counts.active}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger value="hidden" className="flex items-center gap-2">
+                    Ocultos
+                    <Badge variant="secondary" className="px-1.5 py-0 h-5 text-[10px] font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400">{counts.hidden}</Badge>
+                  </TabsTrigger>
+                </TabsList>
+            </Tabs>
+
+            {products.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleDeleteAll}
+                className="text-muted-foreground hover:text-destructive text-xs h-8 px-2"
+              >
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
+                Limpar Tudo
+              </Button>
+            )}
+          </div>
+
+          {/* Bulk Actions Toolbar */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {selectedIds.size > 0 ? (
+              <div className="flex items-center gap-2 p-1 bg-brand/5 dark:bg-brand/10 rounded-lg border border-brand/20 animate-in slide-in-from-right-4 duration-300 w-full sm:w-auto overflow-hidden">
+                <div className="flex items-center px-2 border-r border-brand/20 mr-1">
+                  <span className="text-xs font-bold text-brand whitespace-nowrap">
+                    {selectedIds.size} selecionado(s)
+                  </span>
+                </div>
+                <div className="flex gap-1 flex-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={toggleSelectAll} 
+                    className="h-8 text-xs hover:bg-brand/10 text-brand"
+                  >
+                    {selectedIds.size === filteredProducts.length ? "Desmarcar Tudo" : "Marcar Tudo"}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleDeleteMultiple}
+                    className="h-8 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive font-bold"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    Excluir
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setSelectedIds(new Set())}
+                    className="h-8 text-xs text-muted-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={toggleSelectAll}
+                className="h-9 w-full sm:w-auto border-dashed hover:border-brand hover:text-brand transition-all"
+                disabled={filteredProducts.length === 0}
+              >
+                <CheckSquare className="h-4 w-4 mr-2 text-brand" />
+                Selecionar Tudo
+              </Button>
+            )}
+          </div>
+        </div>
 
         {loading ? (
              <div className="flex justify-center py-12">
@@ -304,13 +474,15 @@ export default function Etiquetas() {
              </div>
         ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredProducts.map((product) => {
+               {filteredProducts.map((product) => {
                 const isHidden = hiddenLabelIds.has(product.id);
+                const isSelected = selectedIds.has(product.id);
                 return (
                   <Card 
                     key={product.id} 
                     className={cn(
-                      "relative group transition-all duration-300",
+                      "relative group transition-all duration-300 border-2",
+                      isSelected ? "border-brand shadow-md ring-1 ring-brand/20" : "border-transparent",
                       isHidden && "opacity-50 grayscale bg-gray-50 dark:bg-gray-900/50"
                     )}
                   >
@@ -324,6 +496,18 @@ export default function Etiquetas() {
                       <p className="font-medium text-center truncate w-full">{product.name}</p>
                       <p className="text-sm text-muted-foreground">{product.barcode}</p>
                       
+                      {/* Selection Checkbox */}
+                      <div className={cn(
+                        "absolute top-2 left-2 transition-all duration-300",
+                        isSelected ? "opacity-100 scale-110" : "opacity-0 group-hover:opacity-100 scale-100"
+                      )}>
+                        <Checkbox 
+                          checked={isSelected} 
+                          onCheckedChange={() => toggleSelect(product.id)}
+                          className="h-5 w-5 bg-white dark:bg-zinc-950 border-brand/30 data-[state=checked]:bg-brand data-[state=checked]:border-brand"
+                        />
+                      </div>
+
                       {/* Action Buttons */}
                       <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <Button 
