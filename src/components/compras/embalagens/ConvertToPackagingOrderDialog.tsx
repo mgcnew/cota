@@ -22,7 +22,7 @@ import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { 
   ShoppingCart, Package, Building2, DollarSign, Calendar, 
-import { Check, Loader2, Award, AlertCircle, ChevronDown, FileText,
+  Check, Loader2, Award, AlertCircle, ChevronDown, FileText,
   Zap, Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
