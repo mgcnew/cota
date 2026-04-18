@@ -1,20 +1,15 @@
-import { memo, useState } from "react";
+import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { Badge } from "@/components/ui/badge";
 import { 
   ShoppingCart, Eye, CheckCircle2, Truck, Trash2, 
-  DollarSign, Calendar, MoreVertical, ChevronDown, ChevronUp, Clock
+  DollarSign, Calendar, TrendingDown, Package
 } from "lucide-react";
-import { 
-  Collapsible, 
-  CollapsibleContent, 
-  CollapsibleTrigger 
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingOrderDisplay } from "@/types/packaging";
-import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 
 interface MobilePackagingOrderCardProps {
   order: PackagingOrderDisplay;
@@ -25,6 +20,10 @@ interface MobilePackagingOrderCardProps {
   onDelete: (orderId: string) => void;
 }
 
+/**
+ * MobilePackagingOrderCard - Redesigned Premium Floating Card for Packaging Orders
+ * Aligned with the application's modern floating-card design system.
+ */
 export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
   order,
   orderNumber,
@@ -33,146 +32,184 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
   onConfirmDelivery,
   onDelete
 }: MobilePackagingOrderCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = PACKAGING_ORDER_STATUS.find(s => s.value === status);
-    const colorClasses: Record<string, string> = {
-      amber: "bg-amber-100 text-amber-700 border-amber-200",
-      blue: "bg-blue-100 text-blue-700 border-blue-200",
-      green: "bg-emerald-100 text-emerald-700 border-emerald-200",
-      red: "bg-red-100 text-red-700 border-red-200",
-    };
-    const IconComponent = status === "pendente" ? Clock : status === "confirmado" ? CheckCircle2 : status === "entregue" ? Truck : Clock;
-    return (
-      <Badge variant="outline" className={cn("text-xs", colorClasses[statusConfig?.color || ""] || "")}>
-        <IconComponent className="h-3 w-3 mr-1" />
-        {statusConfig?.label || status}
-      </Badge>
-    );
-  };
+  const handleViewDetails = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onViewDetails(order);
+  }, [onViewDetails, order]);
+
+  const handleConfirm = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onUpdateStatus(order.id, 'confirmado');
+  }, [onUpdateStatus, order.id]);
+
+  const handleConfirmDelivery = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onConfirmDelivery(order);
+  }, [onConfirmDelivery, order]);
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(order.id);
+  }, [onDelete, order.id]);
+
+  const isDelivered = order.status === 'entregue';
+  const isConfirmed = order.status === 'confirmado';
+  const isPending = order.status === 'pendente';
 
   return (
-    <Collapsible
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
-      className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 shadow-sm overflow-hidden"
+    <div 
+      onClick={() => onViewDetails(order)}
+      className={cn(
+        "group relative overflow-hidden transition-all duration-300",
+        "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md",
+        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
+        "shadow-sm hover:shadow-md hover:border-brand/30 dark:hover:border-brand/30",
+        "active:scale-[0.98] cursor-pointer"
+      )}
     >
-      <div className="p-4 pb-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-100 dark:bg-gray-800/50">
-              <ShoppingCart className="h-5 w-5 text-gray-900 dark:text-white" />
+      <div className="p-4">
+        {/* Header Section */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={cn(
+              "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border transition-colors",
+              isDelivered 
+                ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700/50 text-emerald-600 dark:text-emerald-400"
+                : isConfirmed
+                ? "bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700/50 text-blue-600 dark:text-blue-400"
+                : "bg-brand/10 dark:bg-brand/20 border-brand/10 text-brand"
+            )}>
+              {isDelivered ? (
+                <CheckCircle2 className="h-5 w-5" />
+              ) : isConfirmed ? (
+                <Package className="h-5 w-5" />
+              ) : (
+                <ShoppingCart className="h-5 w-5" />
+              )}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
+            <div className="min-w-0">
+              <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate leading-tight">
                 <CapitalizedText>{order.supplierName}</CapitalizedText>
-              </p>
-              <p className="text-xs text-muted-foreground">
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
                 #{orderNumber.toString().padStart(4, '0')} • {order.orderDate}
               </p>
             </div>
           </div>
+          
+          <div className="text-right flex-shrink-0">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
+              Valor Total
+            </span>
+            <span className="text-sm font-black text-zinc-900 dark:text-zinc-100">
+              {formatCurrency(order.totalValue)}
+            </span>
+          </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1">
+        {/* Items Pills Row */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
           {order.itens.slice(0, 3).map(item => (
-            <Badge key={item.id} variant="secondary" className="text-xs">
-              {item.quantidade}x {item.packagingName}
+            <Badge 
+              key={item.id} 
+              variant="secondary" 
+              className="bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
+            >
+              <Package className="h-2.5 w-2.5 mr-1 opacity-50" />
+              {item.quantidade} {item.packagingName}
             </Badge>
           ))}
           {order.itens.length > 3 && (
-            <Badge variant="outline" className="text-xs">+{order.itens.length - 3} mais</Badge>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
-          {getStatusBadge(order.status)}
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-            <DollarSign className="h-3 w-3 mr-1" />
-            {formatCurrency(order.totalValue)}
-          </Badge>
-          {order.deliveryDate && (
-            <Badge variant="outline" className="text-xs">
-              <Calendar className="h-3 w-3 mr-1" />
-              {order.deliveryDate}
+            <Badge variant="outline" className="text-[10px] rounded-full border-zinc-200 dark:border-zinc-800 px-2 py-0.5">
+              +{order.itens.length - 3} itens
             </Badge>
           )}
         </div>
-      </div>
 
-      {/* Expand/Collapse Button */}
-      <CollapsibleTrigger asChild>
-        <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
-        >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Menos detalhes</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Mais detalhes</span>
-            </>
+        {/* Status and Metrics Row */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <StatusBadge 
+              status={order.status} 
+              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider h-auto"
+            />
+            {order.deliveryDate && !isDelivered && (
+              <span className="flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                <Calendar className="h-3 w-3" />
+                {order.deliveryDate}
+              </span>
+            )}
+          </div>
+          
+          {order.economiaEstimada > 0 && (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
+              <TrendingDown className="h-3.5 w-3.5" />
+              <span className="text-xs font-bold">
+                -{formatCurrency(order.economiaEstimada)}
+              </span>
+            </div>
           )}
-        </button>
-      </CollapsibleTrigger>
+        </div>
 
-      {/* Expandable Actions */}
-      <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50/50 dark:bg-gray-900/20">
-          <div className="grid grid-cols-2 gap-2 pt-3">
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target active:scale-95 transition-transform col-span-2"
-              onClick={() => onViewDetails(order)}
+        {/* Footer Actions */}
+        <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+          <div className="flex-1 flex gap-2">
+            <Button
+              onClick={handleViewDetails}
+              variant="outline"
+              className={cn(
+                "flex-1 h-11 rounded-xl",
+                "text-zinc-700 dark:text-zinc-300",
+                "border-zinc-200 dark:border-zinc-800",
+                "bg-zinc-50/50 dark:bg-zinc-800/30",
+                "hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
+                "font-bold text-xs"
+              )}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Ver Detalhes
+              <Eye className="h-4 w-4 mr-1.5 opacity-70" />
+              Detalhes
             </Button>
 
-            {order.status === "pendente" && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-10 touch-target active:scale-95 transition-transform text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                onClick={() => onUpdateStatus(order.id, 'confirmado')}
+            {isPending && (
+              <Button
+                onClick={handleConfirm}
+                className={cn(
+                  "flex-1 h-11 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/20"
+                )}
               >
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+                <CheckCircle2 className="h-4 w-4 mr-1.5" />
                 Confirmar
               </Button>
             )}
 
-            {(order.status === "pendente" || order.status === "confirmado") && (
-              <Button 
-                size="sm" 
-                variant="outline" 
+            {isConfirmed && (
+              <Button
+                onClick={handleConfirmDelivery}
                 className={cn(
-                  "h-10 touch-target active:scale-95 transition-transform text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200",
-                  order.status === "confirmado" ? "col-span-2" : ""
+                  "flex-1 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20"
                 )}
-                onClick={() => onConfirmDelivery(order)}
               >
-                <Truck className="h-4 w-4 mr-2" />
-                Marcar Entregue
+                <Truck className="h-4 w-4 mr-1.5" />
+                Entregue
               </Button>
             )}
-
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform col-span-2"
-              onClick={() => onDelete(order.id)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
-            </Button>
           </div>
+          
+          <Button
+            onClick={handleDelete}
+            variant="outline"
+            size="icon"
+            className={cn(
+              "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
+              "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20",
+              "bg-zinc-50/50 dark:bg-zinc-800/30"
+            )}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
   );
 });

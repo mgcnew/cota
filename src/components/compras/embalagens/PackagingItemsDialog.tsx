@@ -14,6 +14,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { usePackagingItems } from "@/hooks/usePackagingItems";
 import { Package, Plus, Trash2, Loader2, Edit2, X, Check, ArrowLeft } from "lucide-react";
 import { PACKAGING_CATEGORIES, PACKAGING_REFERENCE_UNITS } from "@/types/packaging";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface Props {
   open: boolean;
