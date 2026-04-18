@@ -187,8 +187,8 @@ export function PackagingEconomyTab() {
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
           {/* Card do Vencedor */}
           <div className={cn(
-            "p-8 rounded-3xl shadow-2xl overflow-hidden relative",
-            "bg-zinc-900 text-white"
+            "p-8 rounded-3xl shadow-2xl overflow-hidden relative border border-brand/20",
+            ds.colors.surface.card
           )}>
             {/* Background Decoration */}
             <div className="absolute right-0 top-0 w-48 h-full bg-brand/10 skew-x-[-25deg] translate-x-24 pointer-events-none" />
@@ -196,16 +196,16 @@ export function PackagingEconomyTab() {
 
             <div className="flex items-center justify-between flex-wrap gap-6 relative z-10">
               <div className="flex items-center gap-5">
-                <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 shadow-inner">
+                <div className="p-4 rounded-2xl bg-brand/5 backdrop-blur-md border border-brand/10 shadow-inner">
                   <Award className="h-10 w-10 text-brand animate-bounce-subtle" />
                 </div>
                 <div>
                   <p className="text-brand text-[10px] font-black uppercase tracking-[0.2em] mb-2 drop-shadow-sm">🏆 Fornecedor Vencedor</p>
-                  <h2 className={cn(ds.typography.size["3xl"], "font-black tracking-tighter")}>
+                  <h2 className={cn(ds.typography.size["3xl"], "font-black tracking-tighter text-zinc-900 dark:text-white")}>
                     {analysisData.vencedor.nome}
                   </h2>
                   <div className="flex items-center gap-3 mt-2">
-                    <Badge className="bg-brand/20 text-brand border-brand/30 text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
+                    <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
                       {analysisData.vencedor.itens.length} Itens Ganhos
                     </Badge>
                     <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Melhor custo-benefício</span>
@@ -213,7 +213,7 @@ export function PackagingEconomyTab() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-zinc-400 text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">Valor Total do Pedido</p>
+                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1 opacity-70">Valor Total do Pedido</p>
                 <p className="text-4xl font-black text-brand italic tracking-tighter">
                   {formatCurrency(analysisData.vencedor.totalGeral)}
                 </p>

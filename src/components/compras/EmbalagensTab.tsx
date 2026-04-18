@@ -186,14 +186,14 @@ function EmbalagensTab() {
               <Button
                 variant="outline"
                 onClick={() => setItemsDialogOpen(true)}
-                className="flex-1 md:flex-auto h-11 md:h-10 rounded-xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 shadow-sm transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
               >
                 <Package className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Gestão de Itens</span>
               </Button>
               <Button
                 onClick={() => setAddDialogOpen(true)}
-                className="flex-1 md:flex-auto h-11 md:h-10 rounded-xl bg-zinc-900 dark:bg-zinc-200 text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-300 shadow-sm transition-colors"
+                className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
               >
                 <Plus className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Nova Cotação</span>
@@ -248,7 +248,7 @@ function EmbalagensTab() {
               <Button
                 variant="outline"
                 onClick={() => setItemsDialogOpen(true)}
-                className="flex-1 sm:flex-auto h-9 rounded-xl border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 shadow-none text-sm hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm")}
               >
                 <Package className="h-4 w-4 mr-2" />
                 Gestão de Itens
@@ -257,7 +257,7 @@ function EmbalagensTab() {
             {activeSubTab === "cotacoes" && (
               <Button
                 onClick={() => setAddDialogOpen(true)}
-                className="flex-1 sm:flex-auto h-9 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-200 dark:text-zinc-900 dark:hover:bg-zinc-300 shadow-none text-sm transition-colors"
+                className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm transition-colors")}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Cotação
@@ -271,7 +271,7 @@ function EmbalagensTab() {
         <Button
           variant="outline"
           onClick={() => setItemsDialogOpen(true)}
-          className="w-full h-11 rounded-2xl bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 shadow-sm text-zinc-700 dark:text-zinc-300 my-4"
+          className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "w-full h-11 rounded-2xl shadow-sm my-4")}
         >
           <Package className="h-4 w-4 mr-2" />
           Gerenciar Itens de Embalagem

@@ -46,7 +46,7 @@ function MetricCard({ icon, label, value, subtitle, color, tooltip }: any) {
   return (
     <div className={cn(ds.components.card.root, "p-5 relative overflow-hidden group hover:scale-[1.02] transition-all", colorMap[color])}>
       <div className="flex items-center gap-3 mb-3 relative z-10">
-        <div className={cn("p-2 rounded-xl bg-white/50 dark:bg-black/20 backdrop-blur-sm shadow-sm transition-transform group-hover:rotate-12", colorMap[color])}>
+        <div className={cn("p-2 rounded-xl bg-white/50 dark:bg-white/10 backdrop-blur-sm shadow-sm transition-transform group-hover:rotate-12", colorMap[color])}>
           {icon}
         </div>
         <span className={cn(ds.typography.size.xs, ds.typography.weight.extrabold, "uppercase tracking-widest opacity-70")}>{label}</span>
@@ -77,7 +77,7 @@ function InsightCard({ icon, title, value, subtitle, color }: any) {
           <p className={cn(ds.typography.size.lg, ds.typography.weight.extrabold, ds.colors.text.primary, "tracking-tight")}>{value}</p>
           <p className={cn("text-[11px] font-bold opacity-60", ds.colors.text.secondary)}>{subtitle}</p>
         </div>
-        <div className={cn("p-3 rounded-2xl bg-white/50 dark:bg-black/20 backdrop-blur-sm shadow-sm transition-all group-hover:scale-110 group-hover:rotate-6", colorMap[color])}>
+        <div className={cn("p-3 rounded-2xl bg-white/50 dark:bg-white/10 backdrop-blur-sm shadow-sm transition-all group-hover:scale-110 group-hover:rotate-6", colorMap[color])}>
           {icon}
         </div>
       </div>
@@ -106,19 +106,18 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
     return (
       <Button 
         onClick={handleGenerate} 
-        variant="outline" 
-        className="w-full h-12 rounded-2xl bg-zinc-900 border-zinc-800 text-white hover:bg-zinc-800 hover:text-white group shadow-sm transition-all duration-500"
+        className={cn(ds.components.button.base, ds.components.button.variants.primary, "w-full h-12 rounded-2xl group shadow-sm transition-all duration-500")}
       >
-        <Sparkles className="h-4 w-4 mr-2 text-brand group-hover:scale-110 transition-transform duration-500" />
+        <Sparkles className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-500" />
         Gerar Insights com IA
       </Button>
     )
   }
 
   return (
-    <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-white shadow-xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-700">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-brand/10 blur-[80px] rounded-full mix-blend-screen -pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 blur-[60px] rounded-full mix-blend-screen -pointer-events-none" />
+    <div className={cn("p-6 rounded-2xl border shadow-xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-700", ds.colors.surface.card)}>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-brand/5 blur-[80px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 blur-[60px] rounded-full pointer-events-none" />
       
       <div className="flex flex-col gap-5 relative z-10">
         <div className="flex items-center gap-2 text-brand font-semibold text-sm">
@@ -128,15 +127,15 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
         
         {isLoading ? (
           <div className="space-y-3">
-            <div className="h-4 bg-white/5 rounded-md animate-pulse w-3/4" />
-            <div className="h-4 bg-white/5 rounded-md animate-pulse w-full" />
-            <div className="h-4 bg-white/5 rounded-md animate-pulse w-5/6" />
+            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse w-3/4" />
+            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse w-full" />
+            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse w-5/6" />
           </div>
         ) : (
-          <div className="space-y-3 text-zinc-300 text-sm leading-relaxed">
+          <div className="space-y-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
             {summary?.split('\n').filter(Boolean).map((line, i) => (
               <p key={i} className="flex gap-2 items-start">
-                <span className="text-brand opacity-80 mt-1">•</span>
+                <span className="text-brand mt-1">•</span>
                 <span>{line.replace(/^-\s*/, '')}</span>
               </p>
             ))}
@@ -638,28 +637,28 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       <div className={cn(
-        "flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative gap-4",
-        "bg-zinc-900 text-white"
+        "flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative gap-4 border border-brand/10",
+        ds.colors.surface.card
       )}>
-        <div className="absolute right-0 top-0 w-32 h-full bg-brand/10 skew-x-[-20deg] translate-x-16 pointer-events-none" />
+        <div className="absolute right-0 top-0 w-32 h-full bg-brand/5 skew-x-[-20deg] translate-x-16 pointer-events-none" />
         <div className="flex items-center gap-4 relative z-10">
-          <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+          <div className="p-3 rounded-2xl bg-brand/5 backdrop-blur-md border border-brand/10">
             <Package className="h-8 w-8 text-brand" />
           </div>
           <div>
-            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "tracking-tight")}>
+            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
               {packagingName}
             </h2>
-            <p className="text-zinc-400 text-sm font-medium">Análise detalhada de embalagem</p>
+            <p className="text-zinc-500 text-sm font-medium">Análise detalhada de embalagem</p>
           </div>
         </div>
         <div className="flex items-center gap-3 relative z-10 self-end md:self-auto">
           <Select value={timeFilter} onValueChange={setTimeFilter}>
-            <SelectTrigger className="w-40 bg-white/5 border-white/10 text-white h-10 rounded-xl">
-              <Calendar className="h-4 w-4 mr-2 opacity-50" />
+            <SelectTrigger className="w-40 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10 rounded-xl">
+              <Calendar className="h-4 w-4 mr-2 text-zinc-500" />
               <SelectValue placeholder="Período" />
             </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
+            <SelectContent className={ds.colors.surface.card}>
               <SelectItem value="7">Últimos 7 dias</SelectItem>
               <SelectItem value="30">Últimos 30 dias</SelectItem>
               <SelectItem value="90">Últimos 90 dias</SelectItem>
@@ -667,7 +666,7 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
               <SelectItem value="all">Todo o período</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-xl font-bold h-10" onClick={onClear}>
+          <Button onClick={onClear} className={cn(ds.components.button.base, ds.components.button.variants.secondary, "font-bold h-10")}>
             Fechar
           </Button>
         </div>
@@ -756,22 +755,22 @@ function SupplierPackagingAnalysis({ supplierId, supplierName, onClear }: { supp
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
       <div className={cn(
-        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative",
-        "bg-zinc-900 text-white"
+        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative border border-brand/10",
+        ds.colors.surface.card
       )}>
-        <div className="absolute right-0 top-0 w-32 h-full bg-brand/10 skew-x-[-20deg] translate-x-16 pointer-events-none" />
+        <div className="absolute right-0 top-0 w-32 h-full bg-brand/5 skew-x-[-20deg] translate-x-16 pointer-events-none" />
         <div className="flex items-center gap-4 relative z-10">
-          <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10">
+          <div className="p-3 rounded-2xl bg-brand/5 backdrop-blur-md border border-brand/10">
             <Building2 className="h-8 w-8 text-brand" />
           </div>
           <div>
-            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, "tracking-tight")}>
+            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
               {supplierName}
             </h2>
-            <p className="text-zinc-400 text-sm font-medium">Histórico do parceiro comercial (Embalagens)</p>
+            <p className="text-zinc-500 text-sm font-medium">Histórico do parceiro comercial (Embalagens)</p>
           </div>
         </div>
-        <Button variant="outline" className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" onClick={onClear}>
+        <Button onClick={onClear} className={cn(ds.components.button.base, ds.components.button.variants.secondary, "relative z-10 font-bold")}>
           Fechar Análise
         </Button>
       </div>

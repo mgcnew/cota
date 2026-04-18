@@ -270,13 +270,13 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
 
             {currentStepIndex < STEPS.length - 1 ? (
               <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
-                className="bg-brand hover:bg-brand/80 text-black font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
+                className="bg-brand hover:bg-brand/90 text-white font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
                 <span className="hidden sm:inline">Próximo</span>
                 <ChevronRight className="h-3 w-3 ml-1.5" />
               </Button>
             ) : (
               <Button type="button" size="sm" onClick={handleSubmit} disabled={addQuote.isPending}
-                className="bg-brand hover:bg-brand/80 text-black font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
+                className="bg-brand hover:bg-brand/90 text-white font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
                 {addQuote.isPending ? (
                   <><Loader2 className="h-3 w-3 animate-spin mr-1.5" /><span className="hidden sm:inline">Criando...</span></>
                 ) : (
@@ -364,7 +364,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                                     : "hover:bg-gray-50 dark:hover:bg-muted/50"
                                 )}>
                                 <Checkbox checked={isSelected}
-                                  className="data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=checked]:text-black h-4 w-4 rounded pointer-events-none" />
+                                  className="data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=checked]:text-white h-4 w-4 rounded pointer-events-none" />
                                 <div className="flex-1 min-w-0">
                                   <p className={cn("text-xs font-bold truncate", isSelected ? "text-foreground" : "text-muted-foreground")}>{item.name}</p>
                                   {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
@@ -393,7 +393,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                               : "hover:bg-gray-50 dark:hover:bg-muted/50 border border-transparent"
                           )}>
                           <Checkbox checked={isSelected}
-                            className="data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=checked]:text-black h-4 w-4 rounded pointer-events-none" />
+                            className="data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=checked]:text-white h-4 w-4 rounded pointer-events-none" />
                           <div className="flex-1 min-w-0">
                             <p className={cn("text-xs font-bold truncate", isSelected ? "text-foreground" : "text-muted-foreground")}>{item.name}</p>
                             {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
@@ -536,7 +536,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                               {suppliers.map(supplier => (
                                 <CommandItem key={supplier.id} value={supplier.name} onSelect={() => toggleSupplier(supplier.id)} className="cursor-pointer text-xs font-bold text-foreground aria-selected:bg-gray-100 dark:aria-selected:bg-gray-800 aria-selected:text-gray-900 dark:aria-selected:text-white">
                                   <div className="flex items-center gap-2 w-full">
-                                    <div className={cn("flex h-4 w-4 items-center justify-center rounded border", selectedSuppliers.includes(supplier.id) ? "bg-brand border-brand text-black" : "border-gray-300 dark:border-gray-600 opacity-50")}>
+                                    <div className={cn("flex h-4 w-4 items-center justify-center rounded border", selectedSuppliers.includes(supplier.id) ? "bg-brand border-brand text-white" : "border-gray-300 dark:border-gray-600 opacity-50")}>
                                       {selectedSuppliers.includes(supplier.id) && <Check className="h-3 w-3" />}
                                     </div>
                                     <span className="truncate">{supplier.name}</span>

@@ -158,7 +158,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
             </Select>
             <Button 
               onClick={onCreateOrder} 
-              className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+              className={cn(ds.components.button.base, ds.components.button.variants.primary, "h-11 px-6 w-full sm:w-auto")}
             >
               <Plus className="h-4 w-4 mr-2" />Novo Pedido
             </Button>
@@ -170,7 +170,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
           <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
           <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
-          <Button variant="outline" className="mt-6 rounded-xl" onClick={onCreateOrder}>
+          <Button className={cn(ds.components.button.base, ds.components.button.variants.secondary, "mt-6")} onClick={onCreateOrder}>
             <Plus className="h-4 w-4 mr-2" />Criar Primeiro Pedido
           </Button>
         </div>

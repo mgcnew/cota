@@ -108,7 +108,7 @@ export function ExportarTab({
 
         <div className="flex flex-col sm:flex-row justify-center gap-2 pt-2">
           <Button size="lg" onClick={onGeneratePDF} disabled={noData}
-            className="bg-brand hover:bg-brand/80 text-black font-bold uppercase tracking-wider text-[11px] shadow-md rounded-xl px-6 h-9">
+            className="bg-brand hover:bg-brand/90 text-white font-bold uppercase tracking-wider text-[11px] shadow-md rounded-xl px-6 h-9">
             <Download className="h-3.5 w-3.5 mr-1.5" />Baixar PDF
           </Button>
           <Button size="lg" onClick={onDownloadHtml} disabled={noData}

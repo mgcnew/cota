@@ -61,11 +61,9 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
     <div 
       onClick={() => onViewDetails(order)}
       className={cn(
-        "group relative overflow-hidden transition-all duration-300",
-        "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md",
-        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
-        "shadow-sm hover:shadow-md hover:border-brand/30 dark:hover:border-brand/30",
-        "active:scale-[0.98] cursor-pointer"
+        ds.components.card.root,
+        ds.components.card.interactive,
+        "group relative overflow-hidden"
       )}
     >
       <div className="p-4">
@@ -159,12 +157,9 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
               onClick={handleViewDetails}
               variant="outline"
               className={cn(
-                "flex-1 h-11 rounded-xl",
-                "text-zinc-700 dark:text-zinc-300",
-                "border-zinc-200 dark:border-zinc-800",
-                "bg-zinc-50/50 dark:bg-zinc-800/30",
-                "hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
-                "font-bold text-xs"
+                ds.components.button.base,
+                ds.components.button.variants.secondary,
+                "flex-1 h-11 rounded-xl font-bold text-xs"
               )}
             >
               <Eye className="h-4 w-4 mr-1.5 opacity-70" />
@@ -175,6 +170,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
               <Button
                 onClick={handleConfirm}
                 className={cn(
+                  ds.components.button.base,
                   "flex-1 h-11 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/20"
                 )}
               >
@@ -187,6 +183,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
               <Button
                 onClick={handleConfirmDelivery}
                 className={cn(
+                  ds.components.button.base,
                   "flex-1 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20"
                 )}
               >
@@ -201,9 +198,10 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
             variant="outline"
             size="icon"
             className={cn(
-              "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
-              "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20",
-              "bg-zinc-50/50 dark:bg-zinc-800/30"
+              ds.components.button.base,
+              ds.components.button.variants.secondary,
+              "h-11 w-11 rounded-xl",
+              "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20"
             )}
           >
             <Trash2 className="h-4 w-4" />

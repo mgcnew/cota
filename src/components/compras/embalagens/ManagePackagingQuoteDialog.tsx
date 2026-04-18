@@ -990,7 +990,7 @@ export function ManagePackagingQuoteDialog({
                           </SelectContent>
                         </Select>
                         <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} 
-                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-black hover:bg-brand/90 shadow-sm rounded-lg">
+                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-white hover:bg-brand/90 shadow-sm rounded-lg">
                           {addQuoteItem.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}Adicionar
                         </Button>
                       </div>
@@ -1039,7 +1039,7 @@ export function ManagePackagingQuoteDialog({
                           </SelectContent>
                         </Select>
                         <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} 
-                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-black hover:bg-brand/90 shadow-sm rounded-lg">
+                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-white hover:bg-brand/90 shadow-sm rounded-lg">
                           {addQuoteSupplier.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}Adicionar
                         </Button>
                       </div>
@@ -1053,10 +1053,10 @@ export function ManagePackagingQuoteDialog({
                         {quote.fornecedores.map((fornecedor) => (
                           <div 
                             key={fornecedor.supplierId} 
-                            className="group relative flex items-center p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 hover:border-purple-500/30 transition-all duration-300 shadow-sm"
+                            className="group relative flex items-center p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm"
                           >
-                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mr-3">
-                              <Building2 className="h-5 w-5 text-purple-600" />
+                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mr-3">
+                              <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
                             </div>
                             <div className="flex-1 min-w-0 mr-2">
                               <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight mb-1">

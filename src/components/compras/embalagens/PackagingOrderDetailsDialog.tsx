@@ -10,6 +10,7 @@ import type { PackagingOrderDisplay } from "@/types/packaging";
 import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
+import { designSystem as ds } from "@/styles/design-system";
 
 import { ConfirmWhatsAppPackagingOrderDialog } from "@/components/forms/ConfirmWhatsAppPackagingOrderDialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -163,7 +164,7 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-purple-600" />
+              <ShoppingCart className={cn("h-5 w-5", ds.colors.icon.primary)} />
               Detalhes do Pedido
             </div>
             <div className="flex items-center gap-2 mr-6">
@@ -236,7 +237,7 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
           {/* Itens do pedido */}
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Package className="h-4 w-4 text-purple-600" />
+              <Package className={cn("h-4 w-4", ds.colors.icon.primary)} />
               Itens do Pedido ({order.itens.length})
             </h3>
             <div className="border rounded-xl overflow-hidden">

@@ -138,7 +138,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
           <>
             <Button 
               onClick={() => setStep("form")} 
-              className="w-full mb-4 bg-purple-600 hover:bg-purple-700"
+              className={cn(ds.components.button.base, ds.components.button.variants.primary, "w-full mb-4")}
             >
               <Plus className="h-4 w-4 mr-2" />
               Nova Embalagem
@@ -160,16 +160,13 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                     <div 
                       key={item.id}
                       className={cn(
-                        "group relative overflow-hidden transition-all duration-300",
-                        "bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md",
-                        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
-                        "shadow-sm hover:shadow-md hover:border-purple-500/30",
-                        "p-4 flex flex-col gap-3"
+                        ds.components.card.root,
+                        "p-4 flex flex-col gap-3 group relative overflow-hidden"
                       )}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 text-purple-600">
+                          <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg, ds.components.table.accents.brand.text)}>
                             <Package className="h-5 w-5" />
                           </div>
                           <div className="min-w-0">
@@ -186,17 +183,17 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                         
                         <div className="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="icon" 
-                            className="h-9 w-9 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50" 
+                            className="h-8 w-8 text-zinc-400 hover:text-brand hover:bg-brand/10 transition-colors"
                             onClick={() => handleEdit(item)}
                           >
                             <Edit2 className="h-4 w-4 text-zinc-600" />
                           </Button>
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="icon" 
-                            className="h-9 w-9 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 bg-white/50 dark:bg-zinc-900/50" 
+                            className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors" 
                             onClick={() => handleDelete(item.id)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -207,7 +204,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                       <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/50">
                         <Badge 
                           variant="secondary" 
-                          className="bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
+                          className="bg-brand/10 text-brand text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
                         >
                           {formatReferenceUnit(item.reference_unit)}
                         </Badge>
@@ -297,7 +294,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                 <Button 
                   onClick={() => handleSubmit(false)} 
                   disabled={!canSubmit || addItem.isPending || updateItem.isPending}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  className={cn(ds.components.button.base, ds.components.button.variants.primary, "flex-1")}
                 >
                   {(addItem.isPending || updateItem.isPending) ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -312,8 +309,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                 <Button 
                   onClick={() => handleSubmit(true)} 
                   disabled={!canSubmit || addItem.isPending || updateItem.isPending}
-                  variant="outline"
-                  className="w-full border-purple-200 hover:bg-purple-50 dark:border-purple-800 dark:hover:bg-purple-950"
+                  className={cn(ds.components.button.base, ds.components.button.variants.secondary, "w-full border-brand/20 text-brand hover:bg-brand/5")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Salvar e Criar Mais
@@ -334,7 +330,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5 text-purple-600" />
+            <Package className="h-5 w-5 text-brand" />
             {step === "list" ? "Embalagens" : editingId ? "Editar Embalagem" : "Nova Embalagem"}
           </DialogTitle>
         </DialogHeader>

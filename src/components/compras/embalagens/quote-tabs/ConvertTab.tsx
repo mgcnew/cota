@@ -503,8 +503,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
             >
               <RadioGroupItem value="auto" id="convert-auto" className="sr-only" />
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                conversionMode === "auto" ? "bg-brand text-black" : "bg-muted text-muted-foreground"
+                "p-1.5 rounded-md", 
+                conversionMode === "auto" ? "bg-brand text-white" : "bg-muted text-muted-foreground"
               )}>
                 <Zap className="h-4 w-4" />
               </div>
@@ -525,8 +525,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
             >
               <RadioGroupItem value="custom" id="convert-custom" className="sr-only" />
               <div className={cn(
-                "w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                conversionMode === "custom" ? "bg-brand text-black" : "bg-muted text-muted-foreground"
+                "p-1.5 rounded-md", 
+                conversionMode === "custom" ? "bg-brand text-white" : "bg-muted text-muted-foreground"
               )}>
                 <Settings2 className="h-4 w-4" />
               </div>
@@ -756,8 +756,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
               >
                 <RadioGroupItem value="convert_only" id="send-convert-only" className="sr-only" />
                 <div className={cn(
-                  "w-9 h-9 rounded-lg flex items-center justify-center transition-colors flex-shrink-0",
-                  sendMode === "convert_only" ? "bg-brand text-black" : "bg-muted text-muted-foreground"
+                  "p-1.5 rounded-md transition-colors", 
+                  sendMode === "convert_only" ? "bg-brand text-white" : "bg-muted text-muted-foreground"
                 )}>
                   <ShoppingCart className="h-4 w-4" />
                 </div>
@@ -777,10 +777,10 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           onClick={handleSubmit}
           disabled={!deliveryDate || Object.keys(ordersBySupplier).length === 0 || isSubmitting}
           className={cn(
-            "w-full h-12 font-black uppercase tracking-wider text-sm rounded-xl shadow-lg transition-all",
-            sendMode === "convert_and_send" 
+            "h-12 w-full font-bold uppercase tracking-wider text-xs rounded-xl shadow-lg transition-all",
+            sendMode === "convert_and_send"
               ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
-              : "bg-brand hover:bg-brand/90 text-black shadow-brand/20"
+              : "bg-brand hover:bg-brand/90 text-white shadow-brand/20"
           )}
         >
           {isSubmitting ? (
