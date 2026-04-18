@@ -16,6 +16,7 @@ import { Package, Plus, Trash2, Loader2, Edit2, X, Check, ArrowLeft } from "luci
 import { PACKAGING_CATEGORIES, PACKAGING_REFERENCE_UNITS } from "@/types/packaging";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { designSystem as ds } from "@/styles/design-system";
 
 interface Props {
   open: boolean;

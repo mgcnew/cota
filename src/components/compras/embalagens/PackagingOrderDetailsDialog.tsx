@@ -164,7 +164,7 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShoppingCart className={cn("h-5 w-5", ds.colors.icon.primary)} />
+              <ShoppingCart className={cn("h-5 w-5", ds.colors.text.secondary)} />
               Detalhes do Pedido
             </div>
             <div className="flex items-center gap-2 mr-6">
@@ -237,7 +237,7 @@ export function PackagingOrderDetailsDialog({ open, onOpenChange, order }: Packa
           {/* Itens do pedido */}
           <div>
             <h3 className="font-semibold mb-3 flex items-center gap-2">
-              <Package className={cn("h-4 w-4", ds.colors.icon.primary)} />
+              <Package className={cn("h-4 w-4", ds.colors.text.secondary)} />
               Itens do Pedido ({order.itens.length})
             </h3>
             <div className="border rounded-xl overflow-hidden">

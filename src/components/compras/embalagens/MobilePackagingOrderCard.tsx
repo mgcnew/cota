@@ -8,7 +8,7 @@ import {
   DollarSign, Calendar, TrendingDown, Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatters";
+import { designSystem as ds } from "@/styles/design-system";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 
 interface MobilePackagingOrderCardProps {
