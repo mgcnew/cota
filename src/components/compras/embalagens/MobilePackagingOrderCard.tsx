@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
+import { formatCurrency } from "@/utils/formatters";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 
 interface MobilePackagingOrderCardProps {
