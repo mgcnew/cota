@@ -153,29 +153,73 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                   <p>Nenhuma embalagem cadastrada</p>
                 </div>
               ) : (
-                <div className="space-y-2 pr-4">
+                <div className="space-y-3 pr-2 pb-2">
                   {items.map((item) => (
                     <div 
                       key={item.id}
-                      className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800/50 rounded-lg border"
+                      className={cn(
+                        "group relative overflow-hidden transition-all duration-300",
+                        "bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md",
+                        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
+                        "shadow-sm hover:shadow-md hover:border-purple-500/30",
+                        "p-4 flex flex-col gap-3"
+                      )}
                     >
-                      <div className="w-9 h-9 rounded-lg bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0">
-                        <Package className="h-4 w-4 text-purple-600" />
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center flex-shrink-0 text-purple-600">
+                            <Package className="h-5 w-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-bold text-[14px] text-zinc-900 dark:text-zinc-100 truncate leading-tight">
+                              {item.name}
+                            </p>
+                            {item.description && (
+                              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-9 w-9 rounded-xl border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50" 
+                            onClick={() => handleEdit(item)}
+                          >
+                            <Edit2 className="h-4 w-4 text-zinc-600" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-9 w-9 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 bg-white/50 dark:bg-zinc-900/50" 
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">
+
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/50">
+                        <Badge 
+                          variant="secondary" 
+                          className="bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
+                        >
                           {formatReferenceUnit(item.reference_unit)}
-                          {item.category && ` • ${item.category}`}
-                        </p>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(item)}>
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600" onClick={() => handleDelete(item.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        </Badge>
+                        {item.category && (
+                          <Badge 
+                            variant="secondary" 
+                            className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
+                          >
+                            {item.category}
+                          </Badge>
+                        )}
+                        <span className="ml-auto text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">
+                          Ref: {item.id.slice(0, 4)}
+                        </span>
                       </div>
                     </div>
                   ))}

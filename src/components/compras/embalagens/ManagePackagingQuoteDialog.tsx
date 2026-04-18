@@ -874,12 +874,17 @@ export function ManagePackagingQuoteDialog({
                 </DialogTitleComponent>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge 
-                    variant={quote.status === "ativa" ? "default" : "secondary"} 
                     className={cn(
-                      "text-[8px] font-black uppercase tracking-wider h-4 px-1.5 rounded-md", 
-                      quote.status === "ativa" ? "bg-brand/10 text-brand border border-brand/20 shadow-none hover:bg-brand/20" : "bg-muted text-muted-foreground border-border"
+                      "text-[9px] font-black uppercase tracking-wider h-5 px-2 rounded-full border shadow-none",
+                      quote.status === "ativa" 
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-zinc-200/50"
                     )}
                   >
+                    <span className={cn(
+                      "w-1.5 h-1.5 rounded-full mr-1.5",
+                      quote.status === "ativa" ? "bg-emerald-500 animate-pulse" : "bg-zinc-400"
+                    )} />
                     {quote.status}
                   </Badge>
                   <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">
@@ -1045,33 +1050,36 @@ export function ManagePackagingQuoteDialog({
                       <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {quote.fornecedores.map((fornecedor, index) => (
-                          <div key={fornecedor.supplierId} className="group relative flex items-center p-3 rounded-xl border border-border/50 bg-card hover:border-brand/30 hover:bg-muted/20 transition-all shadow-sm">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center mr-3 shadow-sm">
-                              <Building2 className="h-4 w-4 text-brand" />
+                        {quote.fornecedores.map((fornecedor) => (
+                          <div 
+                            key={fornecedor.supplierId} 
+                            className="group relative flex items-center p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 hover:border-purple-500/30 transition-all duration-300 shadow-sm"
+                          >
+                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-purple-500/5 dark:bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mr-3">
+                              <Building2 className="h-5 w-5 text-purple-600" />
                             </div>
                             <div className="flex-1 min-w-0 mr-2">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <span className="text-xs font-black truncate text-foreground">{fornecedor.supplierName}</span>
-                              </div>
+                              <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight mb-1">
+                                {fornecedor.supplierName}
+                              </p>
                               {fornecedor.status === "respondido" ? (
-                                <div className="flex items-center gap-1 text-[10px] font-black text-emerald-600 dark:text-emerald-400">
-                                  <CheckCircle2 className="h-3 w-3" />
-                                  <span className="uppercase tracking-widest whitespace-nowrap">📲 VIA PORTAL</span>
-                                </div>
+                                <Badge className="bg-emerald-500/10 text-emerald-600 border-none px-2 py-0 h-4.5 rounded-full ring-1 ring-emerald-500/20">
+                                  <div className="w-1 h-1 rounded-full bg-emerald-500 mr-1.5" />
+                                  <span className="text-[9px] font-black uppercase tracking-widest">Respondido</span>
+                                </Badge>
                               ) : (
-                                <div className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground">
-                                  <Clock className="h-3 w-3" />
-                                  <span className="uppercase tracking-wide">Pendente</span>
-                                </div>
+                                <Badge className="bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-none px-2 py-0 h-4.5 rounded-full ring-1 ring-zinc-200 dark:ring-zinc-700">
+                                  <div className="w-1 h-1 rounded-full bg-zinc-400 mr-1.5" />
+                                  <span className="text-[9px] font-black uppercase tracking-widest">Pendente</span>
+                                </Badge>
                               )}
                             </div>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
                               onClick={() => handleRemoveSupplier(fornecedor.supplierId)}
                               disabled={removeQuoteSupplier.isPending}
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
+                              className="h-8 w-8 rounded-lg border-zinc-200 dark:border-zinc-800 text-zinc-400 hover:text-red-500 hover:bg-red-50 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
