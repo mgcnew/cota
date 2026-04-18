@@ -1,17 +1,13 @@
-import { memo, useState } from "react";
+import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { 
   Package, Building2, Eye, CheckCircle2, ShoppingCart, Trash2, 
-  DollarSign, ChevronDown, ChevronUp, MoreVertical, FileText
+  DollarSign, FileText, ChevronRight
 } from "lucide-react";
-import { 
-  Collapsible, 
-  CollapsibleContent, 
-  CollapsibleTrigger 
-} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { designSystem as ds } from "@/styles/design-system";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 
 interface MobilePackagingQuoteCardProps {
@@ -23,6 +19,10 @@ interface MobilePackagingQuoteCardProps {
   onConvertToOrder: (quote: PackagingQuoteDisplay) => void;
 }
 
+/**
+ * MobilePackagingQuoteCard - Redesigned Premium Floating Card for Packaging Quotes
+ * Aligned with the application's modern design system.
+ */
 export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
   quote,
   quoteNumber,
@@ -31,170 +31,213 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
   onDelete,
   onConvertToOrder
 }: MobilePackagingQuoteCardProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
 
-  const getQuoteStatus = (quote: PackagingQuoteDisplay) => {
+  const getQuoteStatusInfo = (quote: PackagingQuoteDisplay) => {
     const respondidos = quote.fornecedores.filter(f => f.status === "respondido").length;
     const total = quote.fornecedores.length;
     const isPronta = quote.status === "ativa" && respondidos === total && total > 0;
     return { respondidos, total, isPronta };
   };
 
-  const { respondidos, total, isPronta } = getQuoteStatus(quote);
+  const { respondidos, total, isPronta } = getQuoteStatusInfo(quote);
+
+  const handleManage = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onManage(quote);
+  }, [onManage, quote]);
+
+  const handleViewSummary = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onViewSummary?.(quote);
+  }, [onViewSummary, quote]);
+
+  const handleConvertToOrder = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onConvertToOrder(quote);
+  }, [onConvertToOrder, quote]);
+
+  const handleDelete = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(quote);
+  }, [onDelete, quote]);
 
   return (
-    <Collapsible
-      open={isExpanded}
-      onOpenChange={setIsExpanded}
+    <div 
+      onClick={() => onManage(quote)}
       className={cn(
-        "bg-white dark:bg-gray-800/50 rounded-xl border shadow-sm overflow-hidden transition-all duration-200",
-        isPronta 
-          ? 'border-emerald-300 dark:border-emerald-700 ring-1 ring-emerald-200 dark:ring-emerald-800' 
-          : 'border-gray-200 dark:border-gray-700/50'
+        "group relative overflow-hidden transition-all duration-300",
+        "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md",
+        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
+        "shadow-sm hover:shadow-md hover:border-brand/30 dark:hover:border-brand/30",
+        "active:scale-[0.98] cursor-pointer",
+        isPronta && "border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-500/5 shadow-md shadow-emerald-500/5"
       )}
     >
-      <div className="p-4 pb-2">
-        {isPronta && (
-          <div className="flex items-center gap-1.5 mb-2 text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 className="h-3.5 w-3.5" />
-            <span className="text-[10px] font-semibold uppercase">Pronta para decisão</span>
-          </div>
-        )}
-
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+      <div className="p-4">
+        {/* Header Section */}
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 min-w-0">
             <div className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border",
+              "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border transition-colors",
               isPronta 
-                ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700' 
-                : 'bg-gray-100 dark:bg-gray-700/50 border-gray-200 dark:border-gray-600/30'
+                ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700/50 text-emerald-600 dark:text-emerald-400"
+                : "bg-brand/10 dark:bg-brand/20 border-brand/10 text-brand"
             )}>
               {isPronta ? (
-                <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                <CheckCircle2 className="h-5 w-5" />
               ) : (
-                <Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                <Package className="h-5 w-5" />
               )}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm text-gray-900 dark:text-gray-100 truncate">
-                <CapitalizedText>
-                  {quote.itens.map(i => i.packagingName).join(', ') || 'Sem itens'}
-                </CapitalizedText>
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                #{quoteNumber.toString().padStart(4, '0')} • {quote.dataInicio} - {quote.dataFim}
+            <div className="min-w-0">
+              <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-2">
+                Cotação #{quoteNumber.toString().padStart(4, '0')}
+                {isPronta && (
+                  <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">
+                    Pronta
+                  </Badge>
+                )}
+              </h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5 flex items-center gap-1.5">
+                <Calendar className="h-3 w-3 opacity-50" />
+                Criada em {quote.dataInicio || quote.data_criacao}
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <Badge variant={quote.status === "ativa" ? "default" : "secondary"}>
-            {quote.status}
-          </Badge>
-          <div className={cn(
-            "flex items-center gap-1 px-2 py-0.5 rounded-full",
-            respondidos === total && total > 0
-              ? 'bg-emerald-50 dark:bg-emerald-900/20'
-              : 'bg-blue-50 dark:bg-blue-900/20'
-          )}>
-            <Building2 className={cn(
-              "h-3 w-3",
-              respondidos === total && total > 0
-                ? 'text-emerald-500 dark:text-emerald-400'
-                : 'text-blue-500 dark:text-blue-400'
-            )} />
+          
+          <div className="text-right flex-shrink-0">
+            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
+              Melhor Preço
+            </span>
             <span className={cn(
-              "font-semibold text-xs",
-              respondidos === total && total > 0
-                ? 'text-emerald-600 dark:text-emerald-400'
-                : 'text-blue-600 dark:text-blue-400'
+              "text-sm font-black transition-colors",
+              quote.melhorPreco !== '-' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400 dark:text-zinc-600"
             )}>
-              {respondidos}/{total}
+              {quote.melhorPreco}
             </span>
           </div>
-          {quote.melhorPreco !== '-' && (
-            <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-700">
-              <DollarSign className="h-3 w-3 mr-1" />
-              {quote.melhorPreco}
+        </div>
+
+        {/* Items Pills Row */}
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {quote.itens.slice(0, 3).map((item, idx) => (
+            <Badge 
+              key={item.id || idx} 
+              variant="secondary" 
+              className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[10px] font-bold px-2.5 py-1 rounded-full border-none"
+            >
+              <Package className="h-2.5 w-2.5 mr-1.5 opacity-50" />
+              <CapitalizedText>{item.packagingName}</CapitalizedText>
+            </Badge>
+          ))}
+          {quote.itens.length > 3 && (
+            <Badge variant="outline" className="text-[10px] rounded-full border-zinc-200 dark:border-zinc-800 px-2 py-0.5 text-zinc-500">
+              +{quote.itens.length - 3} itens
             </Badge>
           )}
-        </div>
-      </div>
-
-      {/* Expand/Collapse Button */}
-      <CollapsibleTrigger asChild>
-        <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-200 dark:border-gray-700/30 text-xs text-muted-foreground active:bg-gray-100 dark:active:bg-gray-700/50 touch-target min-h-[44px]"
-        >
-          {isExpanded ? (
-            <>
-              <ChevronUp className="h-4 w-4" />
-              <span>Menos detalhes</span>
-            </>
-          ) : (
-            <>
-              <ChevronDown className="h-4 w-4" />
-              <span>Mais detalhes</span>
-            </>
+          {quote.itens.length === 0 && (
+            <span className="text-xs text-zinc-400 italic">Nenhum item adicionado</span>
           )}
-        </button>
-      </CollapsibleTrigger>
+        </div>
 
-      {/* Expandable Actions */}
-      <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-4 pt-0 space-y-3 border-t border-gray-200 dark:border-gray-700/30 bg-gray-50/50 dark:bg-gray-900/20">
-          <div className="grid grid-cols-2 gap-2 pt-3">
-            <Button 
-              size="sm" 
-              variant="outline" 
+        {/* Status and Progress Row */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <StatusBadge 
+              status={quote.status === 'ativa' && !isPronta ? 'aberta' : quote.status} 
+              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider h-auto"
+            />
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "flex items-center gap-1.5 px-2.5 py-1 rounded-full border",
+              respondidos === total && total > 0 
+                ? "bg-brand/5 border-brand/20 text-brand" 
+                : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 text-zinc-500"
+            )}>
+              <Building2 className="h-3.5 w-3.5 opacity-70" />
+              <span className="text-[11px] font-bold">
+                {respondidos}/{total} fornecedores
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+          <div className="flex-1 flex gap-2">
+            <Button
+              onClick={handleManage}
+              variant="outline"
               className={cn(
-                "h-10 touch-target active:scale-95 transition-transform",
-                isPronta || quote.status === 'concluida' ? "col-span-1" : "col-span-2"
+                "flex-1 h-11 rounded-xl",
+                "text-zinc-700 dark:text-zinc-300",
+                "border-zinc-200 dark:border-zinc-800",
+                "bg-zinc-50/50 dark:bg-zinc-800/30",
+                "hover:bg-zinc-100 dark:hover:bg-zinc-800/50",
+                "font-bold text-xs"
               )}
-              disabled={quote.status === "concluida"}
-              onClick={() => onManage(quote)}
             >
-              <Eye className="h-4 w-4 mr-2" />
-              Negociar Cotação
+              <Eye className="h-4 w-4 mr-1.5 opacity-70" />
+              Negociar
             </Button>
-            
-            {quote.status === "concluida" && onViewSummary && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-10 touch-target active:scale-95 transition-transform text-brand hover:text-brand/80 hover:bg-brand/5 border-brand/20 col-span-1"
-                onClick={() => onViewSummary(quote)}
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Resumo
-              </Button>
-            )}
 
-            {isPronta && quote.status !== "concluida" && (
-              <Button 
-                size="sm" 
-                variant="outline" 
-                className="h-10 touch-target active:scale-95 transition-transform text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200 col-span-1"
-                onClick={() => onConvertToOrder(quote)}
+            {isPronta && quote.status !== 'concluida' && (
+              <Button
+                onClick={handleConvertToOrder}
+                className={cn(
+                  "flex-1 h-11 rounded-xl bg-brand text-zinc-950 hover:bg-brand/90 font-bold text-xs shadow-md shadow-brand/20"
+                )}
               >
-                <ShoppingCart className="h-4 w-4 mr-2" />
+                <ShoppingCart className="h-4 w-4 mr-1.5" />
                 Converter
               </Button>
             )}
 
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-10 touch-target text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800 active:scale-95 transition-transform col-span-2"
-              onClick={() => onDelete(quote)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
-            </Button>
+            {quote.status === 'concluida' && onViewSummary && (
+              <Button
+                onClick={handleViewSummary}
+                className={cn(
+                  "flex-1 h-11 rounded-xl bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-xs"
+                )}
+              >
+                <FileText className="h-4 w-4 mr-1.5" />
+                Resumo
+              </Button>
+            )}
           </div>
+          
+          <Button
+            onClick={handleDelete}
+            variant="outline"
+            size="icon"
+            className={cn(
+              "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
+              "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20",
+              "bg-zinc-50/50 dark:bg-zinc-800/30"
+            )}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
   );
 });
+
+const CircleCheck = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="16" height="16" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="3" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <polyline points="20 6 9 17 4 12"/>
+  </svg>
+);
