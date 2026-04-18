@@ -313,7 +313,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
         <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
           <DialogTitle className="flex items-center gap-3">
             <div className={cn("w-9 h-9 flex justify-center items-center rounded-xl", ds.colors.surface.card, "border", ds.colors.border.subtle)}>
-              <ShoppingCart className={cn("h-4 w-4", ds.colors.icon.primary)} />
+              <ShoppingCart className={cn("h-4 w-4", ds.colors.text.secondary)} />
             </div>
             Converter Cotação em Pedido(s)
           </DialogTitle>
@@ -475,7 +475,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                               <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
                                   <div className={cn("w-7 h-7 rounded-full flex items-center justify-center", "bg-slate-100 dark:bg-zinc-800")}>
-                                    <Building2 className={cn("h-3.5 w-3.5", ds.colors.icon.primary)} />
+                                    <Building2 className={cn("h-3.5 w-3.5", ds.colors.text.secondary)} />
                                   </div>
                                   <span className="font-medium text-sm">{orderData.supplierName}</span>
                                 </div>
@@ -515,7 +515,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                   <CollapsibleTrigger asChild>
                     <button className="w-full flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                       <div className="flex items-center gap-2">
-                        <FileText className={cn("h-4 w-4", ds.colors.icon.primary)} />
+                        <FileText className={cn("h-4 w-4", ds.colors.text.secondary)} />
                         <span className="font-medium text-sm">Detalhes</span>
                         {!deliveryDate && (
                           <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300">
@@ -561,7 +561,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                 <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <DollarSign className={cn("h-4 w-4", ds.colors.icon.primary)} />
+                      <DollarSign className={cn("h-4 w-4", ds.colors.text.secondary)} />
                       <span className="font-medium text-sm">Total Geral</span>
                       <span className="text-xs text-muted-foreground">
                         ({itemsCount} itens em {suppliersCount} pedido{suppliersCount > 1 ? 's' : ''})
