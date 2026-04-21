@@ -117,8 +117,8 @@ function Dashboard() {
       <div className={cn(ds.layout.container.page, "px-3 md:px-6 animate-in fade-in zoom-in-95 duration-500")}>
         
         {/* Header - Command Center Style */}
-        <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
-          <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-6 md:mb-10 pb-4 md:pb-8 md:border-b border-zinc-200/70 dark:border-zinc-800">
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
             <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
               <TrendingUp className="h-6 w-6 text-brand" />
             </div>
@@ -131,10 +131,11 @@ function Dashboard() {
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <Button 
               onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
-              className={cn(ds.components.button.primary, "font-bold text-white dark:text-zinc-950")}
+              className={cn(ds.components.button.primary, "flex-1 md:flex-none font-bold text-white dark:text-zinc-950")}
             >
               <Plus className="w-4 h-4 mr-1.5" />
               Nova Cotação
@@ -142,7 +143,7 @@ function Dashboard() {
             <Button 
               onClick={() => navigate('/dashboard/compras?tab=pedidos')}
               variant="outline"
-              className="flex-1 sm:flex-none border-border"
+              className="flex-1 md:flex-none border-border"
             >
               <ShoppingCart className="w-4 h-4 mr-1.5" />
               Novo Pedido
