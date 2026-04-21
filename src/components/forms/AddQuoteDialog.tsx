@@ -205,6 +205,17 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     setActiveTab(newTabId);
   };
 
+  // Efeito para focar o campo de busca mobile quando o drawer abrir
+  useEffect(() => {
+    if (showMobileProductSearch && isMobile) {
+      // Pequeno atraso para garantir que a animação do Drawer permitiu o foco
+      const timer = setTimeout(() => {
+        mobileProductSearchRef.current?.focus();
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [showMobileProductSearch, isMobile]);
+
   // Estados para o novo formulário de produto único
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
@@ -225,6 +236,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const unitSelectRef = useRef<HTMLButtonElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const supplierSearchRef = useRef<HTMLInputElement>(null);
+  const mobileProductSearchRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<QuoteFormData>({
     resolver: zodResolver(quoteSchema),
@@ -2478,6 +2490,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             <div className="relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
               <Input
+                ref={mobileProductSearchRef}
                 autoFocus
                 placeholder="Nome do produto..."
                 value={productSearch}

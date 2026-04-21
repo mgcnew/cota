@@ -1,11 +1,9 @@
 import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket, Package } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { useKeyboardShortcuts, formatShortcut } from "@/hooks/useKeyboardShortcuts";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
@@ -142,10 +140,11 @@ function Compras() {
       )}
 
       <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
-        {/* Page Header - Standardized with Dashboard Style */}
-        <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 md:gap-3">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          {/* Page Header + Inline Tabs */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-6 md:mb-10 pb-4 md:pb-8 md:border-b border-zinc-200/70 dark:border-zinc-800">
+            {/* Título */}
+            <div className="flex items-center gap-2 md:gap-3 shrink-0">
               <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
                 <ShoppingBag className="h-6 w-6 text-brand" />
               </div>
@@ -159,52 +158,27 @@ function Compras() {
               </div>
             </div>
 
-            {!isMobile && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className={ds.components.button.ghost}>
-                      <Keyboard className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className={ds.components.tooltip.content}>
-                    <p className="font-semibold text-xs mb-2">Atalhos de teclado:</p>
-                    <ul className="text-xs space-y-1">
-                      {shortcuts.map((s, i) => (
-                        <li key={i} className="flex justify-between gap-3">
-                          <span className={ds.colors.text.secondary}>{s.description}</span>
-                          <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{formatShortcut(s)}</kbd>
-                        </li>
-                      ))}
-                    </ul>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-6">
-          {/* Desktop Tabs Navigation (Hidden on Mobile) */}
-          <div className="hidden md:block pb-1 border-b border-zinc-200/70 dark:border-zinc-800 bg-transparent">
-            <TabsList className={ds.components.tabs.clean.list}>
-              {TABS.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className={ds.components.tabs.clean.trigger}
-                >
-                  <tab.icon className={cn("h-4 w-4 mr-2", activeTab === tab.value ? "text-brand" : "opacity-70")} />
-                  {tab.label}
-                  {activeTab === tab.value && (
-                    <div className="absolute bottom-[-2px] left-0 right-0 h-[2.5px] bg-brand shadow-[0_0_12px_hsl(var(--brand)/0.5)] rounded-full transition-all" />
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+            {/* Desktop Tabs - Inline com Header */}
+            <div className="hidden md:block">
+              <TabsList className={cn(ds.components.tabs.clean.list, "gap-1 md:gap-5")}>
+                {TABS.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className={cn(ds.components.tabs.clean.trigger, "text-[13px] h-10 px-0 relative data-[state=active]:border-transparent")}
+                  >
+                    <tab.icon className={cn("h-3.5 w-3.5 mr-1.5", activeTab === tab.value ? "text-brand" : "opacity-60")} />
+                    {tab.label}
+                    {activeTab === tab.value && (
+                      <div className="absolute bottom-[-33px] left-0 right-0 h-[2.5px] bg-brand shadow-[0_0_12px_hsl(var(--brand)/0.5)] rounded-full transition-all" />
+                    )}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </div>
 
-          <div className="mt-6 md:mt-6 overflow-hidden">
+          <div className="mt-2 md:mt-4 overflow-hidden">
             <Suspense fallback={<TabLoader />}>
               <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-2 md:slide-in-from-right-4 duration-300 ease-out fill-mode-forwards">
                 {activeTab === "cotacoes" && <CotacoesTab />}
