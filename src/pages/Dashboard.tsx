@@ -134,14 +134,14 @@ function Dashboard() {
           
           <div className="flex items-center gap-3 w-full md:w-auto">
             <Button 
-              onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
+              onClick={() => navigate('/dashboard/compras?tab=cotacoes&open=new')}
               className={cn(ds.components.button.primary, "flex-1 md:flex-none font-bold text-white dark:text-zinc-950")}
             >
               <Plus className="w-4 h-4 mr-1.5" />
               Nova Cotação
             </Button>
             <Button 
-              onClick={() => navigate('/dashboard/compras?tab=pedidos')}
+              onClick={() => navigate('/dashboard/compras?tab=pedidos&open=new')}
               variant="outline"
               className="flex-1 md:flex-none border-border"
             >
