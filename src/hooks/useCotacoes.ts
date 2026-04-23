@@ -1263,7 +1263,12 @@ export function useCotacoes() {
   return {
     cotacoes,
     isLoading,
-    refetch: () => queryClient.invalidateQueries({ queryKey: ['cotacoes'] }),
+    refetch: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      // Mark mutation complete AFTER invalidation resolves
+      // This prevents Realtime from triggering a redundant second fetch
+      markMutationComplete();
+    },
     updateSupplierProductValue,
     updateQuoteItemPrice: updateSupplierProductValue,
     deleteQuote,

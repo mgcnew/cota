@@ -619,6 +619,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
       if (supplierItemsError) throw supplierItemsError;
 
+      // Small delay to ensure all Supabase inserts are fully committed
+      // before triggering cache invalidation via onAdd/refetch
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       onAdd(data);
       toast({
         title: "✅ Cotação criada com sucesso",

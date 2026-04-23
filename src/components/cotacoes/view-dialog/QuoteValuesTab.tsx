@@ -940,6 +940,19 @@ export function QuoteValuesTab({
               </div>
             </DrawerHeader>
 
+            {/* Mobile Search inside Drawer */}
+            <div className="px-4 py-3 border-b border-border/10 shrink-0">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 focus-within:text-brand transition-colors" />
+                <Input
+                  placeholder="Pesquisar produto..."
+                  value={productSearch}
+                  onChange={e => setProductSearch(e.target.value)}
+                  className="pl-9 h-9 rounded-xl text-xs bg-muted/20 border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand"
+                />
+              </div>
+            </div>
+
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 custom-scrollbar">
                {otherOpenQuotes.length > 0 && (
                   <div className="mb-4 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200/50 p-3 flex items-center justify-between">
