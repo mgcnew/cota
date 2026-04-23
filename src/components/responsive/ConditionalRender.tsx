@@ -39,6 +39,15 @@ export function ConditionalRender({
   fallback = null 
 }: ConditionalRenderProps): React.ReactNode {
   const isMobile = useIsMobile();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return fallback;
+  }
   
   if (isMobile) {
     return mobile ?? fallback;
@@ -59,8 +68,13 @@ export function ConditionalRender({
  */
 export function MobileOnly({ children }: { children: React.ReactNode }): React.ReactNode {
   const isMobile = useIsMobile();
-  
-  if (!isMobile) {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || !isMobile) {
     return null;
   }
   
@@ -79,8 +93,13 @@ export function MobileOnly({ children }: { children: React.ReactNode }): React.R
  */
 export function DesktopOnly({ children }: { children: React.ReactNode }): React.ReactNode {
   const isMobile = useIsMobile();
-  
-  if (isMobile) {
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || isMobile) {
     return null;
   }
   

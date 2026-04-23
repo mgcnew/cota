@@ -112,6 +112,13 @@ export function ResponsiveModal({
   hideClose = false,
 }: ResponsiveModalProps): JSX.Element {
   const isMobile = useIsMobile();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   // Mobile: Render as Drawer (bottom sheet)
   if (isMobile) {

@@ -69,11 +69,17 @@ export function ResponsiveFormField({
   ...props
 }: ResponsiveFormFieldProps): JSX.Element {
   const { isMobile } = useBreakpoint();
+  const [mounted, setMounted] = React.useState(false);
   const id = React.useId();
   const fieldId = htmlFor || id;
 
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Determine if layout should be vertical
-  const isVertical = layout === 'vertical' || (layout === 'auto' && isMobile);
+  const isVertical = layout === 'vertical' || (layout === 'auto' && (mounted ? isMobile : false));
+  const effectiveIsMobile = mounted ? isMobile : false;
 
   return (
     <div
@@ -83,7 +89,7 @@ export function ResponsiveFormField({
         // Layout direction
         isVertical ? 'flex flex-col space-y-2' : 'flex flex-row items-center gap-4',
         // Mobile-specific: full width stacking
-        isMobile && 'space-y-2',
+        effectiveIsMobile && 'space-y-2',
         className
       )}
       {...props}
@@ -95,7 +101,7 @@ export function ResponsiveFormField({
             // Base label styling
             'text-sm font-medium',
             // Mobile: minimum 12px font size
-            isMobile ? 'text-xs min-h-[12px]' : 'text-sm',
+            effectiveIsMobile ? 'text-xs min-h-[12px]' : 'text-sm',
             // Horizontal layout: fixed width for alignment
             !isVertical && 'w-32 shrink-0',
             // Error state
@@ -112,7 +118,7 @@ export function ResponsiveFormField({
         <div
           className={cn(
             // Mobile: ensure minimum touch target height of 44px
-            isMobile && '[&_input]:min-h-[44px] [&_select]:min-h-[44px] [&_textarea]:min-h-[44px] [&_button]:min-h-[44px]',
+            effectiveIsMobile && '[&_input]:min-h-[44px] [&_select]:min-h-[44px] [&_textarea]:min-h-[44px] [&_button]:min-h-[44px]',
             // Full width inputs
             '[&_input]:w-full [&_select]:w-full [&_textarea]:w-full'
           )}
@@ -124,7 +130,7 @@ export function ResponsiveFormField({
         {helperText && !error && (
           <p className={cn(
             'text-muted-foreground mt-1',
-            isMobile ? 'text-xs' : 'text-sm'
+            effectiveIsMobile ? 'text-xs' : 'text-sm'
           )}>
             {helperText}
           </p>
@@ -134,7 +140,7 @@ export function ResponsiveFormField({
         {error && (
           <p className={cn(
             'text-destructive font-medium mt-1',
-            isMobile ? 'text-xs' : 'text-sm'
+            effectiveIsMobile ? 'text-xs' : 'text-sm'
           )}>
             {error}
           </p>

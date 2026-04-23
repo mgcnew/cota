@@ -103,7 +103,12 @@ export function ResponsiveFilters({
   resetText = "Limpar",
 }: ResponsiveFiltersProps): JSX.Element {
   const isMobile = useIsMobile();
+  const [mounted, setMounted] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const hasActiveFilters = activeFiltersCount > 0;
 
@@ -115,6 +120,8 @@ export function ResponsiveFilters({
   const handleReset = React.useCallback(() => {
     onReset?.();
   }, [onReset]);
+
+  if (!mounted) return null;
 
   // Desktop: Render filters inline
   if (!isMobile) {

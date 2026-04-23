@@ -1,6 +1,6 @@
 import { useState, useMemo, Suspense, lazy, useCallback, useEffect } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -100,7 +100,12 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Debug removido pois já confirmamos que o BD está OK
   const keyboardOffset = useKeyboardOffset();
@@ -563,7 +568,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     }
   }, [generateHtmlComparative, quote, toast]);
 
-  if (!initialQuote || !quote) return null;
+  if (!mounted || !initialQuote || !quote) return null;
 
   const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
@@ -765,6 +770,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
+          <DrawerTitle className="sr-only">Gerenciar Cotação</DrawerTitle>
+          <DrawerDescription className="sr-only">Detalhes e ações da cotação</DrawerDescription>
           {modalContent}
         </DrawerContent>
       </Drawer>
@@ -774,6 +781,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[1000px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border/50 bg-card rounded-2xl shadow-2xl">
+        <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
+        <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
         {modalContent}
       </DialogContent>
     </Dialog>

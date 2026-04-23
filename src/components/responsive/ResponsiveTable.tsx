@@ -313,6 +313,15 @@ export function ResponsiveTable<T>({
   getRowKey = (_, index) => index,
 }: ResponsiveTableProps<T>): JSX.Element {
   const { current: breakpoint } = useBreakpoint();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className={cn("w-full h-24 animate-pulse bg-muted rounded-lg", className)} />;
+  }
 
   // Show empty state
   if (!isLoading && data.length === 0) {

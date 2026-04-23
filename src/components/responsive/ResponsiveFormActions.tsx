@@ -60,6 +60,19 @@ export function ResponsiveFormActions({
   ...props
 }: ResponsiveFormActionsProps): JSX.Element {
   const { isMobile } = useBreakpoint();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className={cn("w-full flex flex-row gap-3 justify-end", className)} {...props}>
+        {children}
+      </div>
+    );
+  }
 
   // Convert children to array for manipulation
   const childArray = React.Children.toArray(children);

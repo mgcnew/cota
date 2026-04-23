@@ -166,6 +166,12 @@ interface AddQuoteDialogProps {
 export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange, defaultSupplierId }: AddQuoteDialogProps) {
   console.log("[AddQuoteDialog] Componente renderizado. Open state:", externalOpen);
   const isMobile = useIsMobile();
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
@@ -781,12 +787,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             </button>
           )}
           <div>
-            <h2 className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
+            <DialogTitle className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
               {currentTabIndex === 0 ? "Produtos" : currentTabIndex === 1 ? "Período & Fornecedores" : "Revisão"}
-            </h2>
-            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+            </DialogTitle>
+            <DialogDescription className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
               Passo {currentTabIndex + 1} de {tabs.length}
-            </p>
+            </DialogDescription>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -842,7 +848,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 <div className="px-4 pb-3 space-y-3 flex-shrink-0">
                   {/* Product selector */}
                   <div
-                    onClick={() => setShowMobileProductSearch(true)}
+                    onClick={() => {
+                      setShowMobileProductSearch(true);
+                    }}
                     className={cn(
                       "flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer active:scale-[0.98] transition-all",
                       selectedProduct
@@ -907,8 +915,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       </Select>
                       <Button
                         type="button"
-                        onPointerDown={(e) => {
-                          e.preventDefault();
+                        onClick={() => {
                           handleAddNewProduct();
                         }}
                         disabled={!newProductQuantity || !newProductUnit}
@@ -1439,12 +1446,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       <div className="px-5 md:px-6 pt-5 pb-2 flex flex-col gap-3 flex-shrink-0 bg-transparent">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className={cn(ds.typography.size["lg"], ds.typography.weight.semibold, ds.colors.text.primary, "tracking-tight")}>
+            <DialogTitle className={cn(ds.typography.size["lg"], ds.typography.weight.semibold, ds.colors.text.primary, "tracking-tight")}>
               Nova Cotação
-            </h2>
-            <p className={cn(ds.colors.text.secondary, "mt-1", ds.typography.size.sm)}>
+            </DialogTitle>
+            <DialogDescription className={cn(ds.colors.text.secondary, "mt-1", ds.typography.size.sm)}>
               Passo {currentTabIndex + 1}: <span className={ds.typography.weight.medium}>{tabs[currentTabIndex]?.label}</span>
-            </p>
+            </DialogDescription>
           </div>
           <div className="flex items-center gap-2">
             {isMobile && currentTabIndex === 0 && (
@@ -2397,207 +2404,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           </div>
         </div>
       )}
-
-      {/* Mobile Cart Drawer */}
-      {isMobile && (
-        <Drawer open={showMobileCart} onOpenChange={setShowMobileCart}>
-          <DrawerContent className="max-h-[85vh]">
-            <DrawerHeader className="border-b border-border/50 pb-4">
-              <DrawerTitle className="text-left flex items-center gap-2">
-                <Package className="h-5 w-5 text-brand" />
-                Produtos Adicionados ({fields.length})
-              </DrawerTitle>
-              <DrawerDescription className="text-left">
-                Edite ou remova os produtos que você já incluiu na cotação.
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="p-4 overflow-y-auto min-h-[50vh]">
-              {fields.length === 0 ? (
-                <div className={cn("text-center py-8", ds.colors.text.secondary)}>
-                  <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                  <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
-                  <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {fields.map((field, index) => (
-                    <div key={field.id} className={cn(
-                      ds.colors.surface.card,
-                      ds.colors.border.subtle,
-                      "border rounded-xl transition-all"
-                    )}>
-                      <div className="p-3">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-sm break-words")}>
-                              {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
-                            </h4>
-                            <div className={cn("text-xs text-muted-foreground mt-1 flex items-center gap-2")}>
-                              <span className={cn(
-                                ds.typography.fontFamily.mono,
-                                ds.colors.surface.card,
-                                "px-1.5 rounded border font-medium",
-                                ds.colors.text.primary
-                              )}>
-                                {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
-                              </span>
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => remove(index)}
-                            className={cn(ds.components.button.danger, "h-9 w-9 p-0 flex-shrink-0 rounded-lg bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/50 text-red-600 dark:text-red-400")}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <DrawerFooter className="border-t border-border/50 pt-4">
-              <DrawerClose asChild>
-                <Button variant="outline" className={cn(ds.components.button.secondary, "w-full")}>
-                  Fechar Lista
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      )}
-
-      {/* Mobile Product Search Drawer */}
-      <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
-        <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
-          <DrawerHeader className="border-b border-border/50 pb-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <DrawerTitle className="text-left text-brand flex items-center gap-2">
-                  <Search className="h-5 w-5" />
-                  Buscar Produto
-                </DrawerTitle>
-                <DrawerDescription className="text-left">
-                  Procure pelo produto que deseja adicionar.
-                </DrawerDescription>
-              </div>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                  <X className="h-4 w-4" />
-                </Button>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
-
-          <div className="p-4 space-y-4 flex-1 flex flex-col min-h-0 bg-background/30">
-            {/* Campo de Busca no Drawer */}
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
-              <Input
-                ref={mobileProductSearchRef}
-                autoFocus
-                placeholder="Nome do produto..."
-                value={productSearch}
-                onChange={(e) => setProductSearch(e.target.value)}
-                className={cn(ds.components.input.root, "pl-10 h-12 text-base")}
-              />
-              {isSearchingProducts && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  <Loader2 className="h-4 w-4 animate-spin text-brand" />
-                </div>
-              )}
-            </div>
-
-            {/* Resultados */}
-            <ScrollArea className="flex-1 -mx-4 px-4 overflow-y-auto pr-2">
-              <div className="space-y-2 pb-10">
-                {productSearch.length === 0 ? (
-                  <div className="py-12 text-center space-y-3 opacity-60">
-                    <div className={cn("w-12 h-12 rounded-full mx-auto flex items-center justify-center", ds.colors.surface.section)}>
-                      <Search className="h-6 w-6 text-zinc-400" />
-                    </div>
-                    <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
-                      Comece a digitar para buscar
-                    </p>
-                  </div>
-                ) : products.length > 0 ? (
-                  products.map((product) => (
-                    <Button
-                      key={product.id}
-                      variant="ghost"
-                      type="button"
-                      onPointerDown={(e) => {
-                        // Prevent event from bubbling or being canceled by Drawer drag logic
-                        e.preventDefault();
-                        console.log("[AddQuoteDialog] Produto selecionado mobile:", product.name);
-                        setSelectedProduct(product);
-                        if (product.unit) setNewProductUnit(product.unit);
-                        setProductSearch("");
-                        setShowMobileProductSearch(false);
-                        // Focus the quantity input after drawer closes
-                        setTimeout(() => {
-                          if (quantityInputRef.current) {
-                            quantityInputRef.current.focus();
-                          }
-                        }, 300);
-                      }}
-                      className={cn(
-                        "w-full h-auto py-3 px-4 justify-start text-left flex items-center gap-4 transition-all rounded-xl border border-transparent hover:border-brand/20 hover:bg-brand/5 active:scale-[0.98]",
-                        ds.colors.surface.card
-                      )}
-                    >
-                      <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", ds.colors.surface.section)}>
-                        <Package className="h-5 w-5 text-zinc-400" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "truncate text-base")}>
-                          {product.name}
-                        </p>
-                        {product.unit && (
-                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
-                            Unidade sugerida: {product.unit}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-zinc-300" />
-                    </Button>
-                  ))
-                ) : !isSearchingProducts ? (
-                  <div className="py-10 text-center space-y-6">
-                    <div className="space-y-2">
-                      <div className={cn("w-16 h-16 rounded-full mx-auto flex items-center justify-center", ds.colors.surface.section)}>
-                        <Package className="h-8 w-8 text-zinc-300" />
-                      </div>
-                      <p className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary)}>
-                        Nenhum produto encontrado
-                      </p>
-                      <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
-                        Não encontramos "{productSearch}" no catálogo.
-                      </p>
-                    </div>
-
-                    <Button
-                      variant="default"
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        setShowMobileProductSearch(false);
-                        setShowQuickCreateProduct(true);
-                      }}
-                      className={cn(ds.components.button.primary, "w-full max-w-xs mx-auto h-12")}
-                    >
-                      <Plus className="h-5 w-5 mr-2" />
-                      Cadastrar "{productSearch}"
-                    </Button>
-                  </div>
-                ) : null}
-              </div>
-            </ScrollArea>
-          </div>
-        </DrawerContent>
-      </Drawer>
     </>
   );
 
@@ -2620,7 +2426,132 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         )}
         onKeyDown={!isMobile ? handleModalKeyDown : undefined}
       >
-        {isMobile ? mobileContent : modalInnerContent}
+        {mounted ? (isMobile ? mobileContent : modalInnerContent) : null}
+
+        {/* Mobile Product Search Drawer — rendered at DialogContent level so it's always available */}
+        <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
+          <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
+            <DrawerHeader className="border-b border-border/50 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <DrawerTitle className="text-left text-brand flex items-center gap-2">
+                    <Search className="h-5 w-5" />
+                    Buscar Produto
+                  </DrawerTitle>
+                  <DrawerDescription className="text-left">
+                    Procure pelo produto que deseja adicionar.
+                  </DrawerDescription>
+                </div>
+                <DrawerClose asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DrawerClose>
+              </div>
+            </DrawerHeader>
+
+            <div className="p-4 space-y-4 flex-1 flex flex-col min-h-0 bg-background/30">
+              {/* Campo de Busca no Drawer */}
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                <Input
+                  ref={mobileProductSearchRef}
+                  autoFocus
+                  placeholder="Nome do produto..."
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  className={cn(ds.components.input.root, "pl-10 h-12 text-base")}
+                />
+                {isSearchingProducts && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                  </div>
+                )}
+              </div>
+
+              {/* Resultados */}
+              <ScrollArea className="flex-1 -mx-4 px-4 overflow-y-auto pr-2">
+                <div className="space-y-2 pb-10">
+                  {productSearch.length === 0 ? (
+                    <div className="py-12 text-center space-y-3 opacity-60">
+                      <div className={cn("w-12 h-12 rounded-full mx-auto flex items-center justify-center", ds.colors.surface.section)}>
+                        <Search className="h-6 w-6 text-zinc-400" />
+                      </div>
+                      <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+                        Comece a digitar para buscar
+                      </p>
+                    </div>
+                  ) : products.length > 0 ? (
+                    products.map((product) => (
+                      <Button
+                        key={product.id}
+                        variant="ghost"
+                        type="button"
+                        onClick={() => {
+                          console.log("[AddQuoteDialog] Produto selecionado mobile:", product.name);
+                          setSelectedProduct(product);
+                          if (product.unit) setNewProductUnit(product.unit);
+                          setProductSearch("");
+                          setShowMobileProductSearch(false);
+                          setTimeout(() => {
+                            if (quantityInputRef.current) {
+                              quantityInputRef.current.focus();
+                            }
+                          }, 300);
+                        }}
+                        className={cn(
+                          "w-full h-auto py-3 px-4 justify-start text-left flex items-center gap-4 transition-all rounded-xl border border-transparent hover:border-brand/20 hover:bg-brand/5 active:scale-[0.98]",
+                          ds.colors.surface.card
+                        )}
+                      >
+                        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", ds.colors.surface.section)}>
+                          <Package className="h-5 w-5 text-zinc-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "truncate text-base")}>
+                            {product.name}
+                          </p>
+                          {product.unit && (
+                            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
+                              Unidade sugerida: {product.unit}
+                            </p>
+                          )}
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-zinc-300" />
+                      </Button>
+                    ))
+                  ) : !isSearchingProducts ? (
+                    <div className="py-10 text-center space-y-6">
+                      <div className="space-y-2">
+                        <div className={cn("w-16 h-16 rounded-full mx-auto flex items-center justify-center", ds.colors.surface.section)}>
+                          <Package className="h-8 w-8 text-zinc-300" />
+                        </div>
+                        <p className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary)}>
+                          Nenhum produto encontrado
+                        </p>
+                        <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+                          Não encontramos "{productSearch}" no catálogo.
+                        </p>
+                      </div>
+
+                      <Button
+                        variant="default"
+                        onClick={() => {
+                          setShowMobileProductSearch(false);
+                          setShowQuickCreateProduct(true);
+                        }}
+                        className={cn(ds.components.button.primary, "w-full max-w-xs mx-auto h-12")}
+                      >
+                        <Plus className="h-5 w-5 mr-2" />
+                        Cadastrar "{productSearch}"
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              </ScrollArea>
+            </div>
+          </DrawerContent>
+        </Drawer>
       </DialogContent>
     </Dialog>
   );

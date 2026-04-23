@@ -33,6 +33,15 @@ export function ResponsivePagination({
   className,
 }: ResponsivePaginationProps) {
   const { isMobile } = useBreakpoint();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div className={cn("h-10 animate-pulse bg-muted rounded-md w-full max-w-[300px] mx-auto", className)} />;
+  }
 
   if (totalPages <= 1) {
     return null;

@@ -26,8 +26,13 @@ const ResponsiveTabsList = React.forwardRef<
   ResponsiveTabsListProps
 >(({ className, showMoreIndicator = true, ...props }, ref) => {
   const { isMobile } = useBreakpoint();
+  const [mounted, setMounted] = React.useState(false);
   const [showRightIndicator, setShowRightIndicator] = React.useState(false);
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const checkScroll = React.useCallback(() => {
     if (scrollContainerRef.current && isMobile) {
@@ -55,14 +60,14 @@ const ResponsiveTabsList = React.forwardRef<
         ref={ref}
         className={cn(
           "inline-flex h-10 items-center justify-start rounded-md bg-muted p-1 text-muted-foreground",
-          isMobile && "w-full overflow-x-auto scrollbar-hide",
+          mounted && isMobile && "w-full overflow-x-auto scrollbar-hide",
           className
         )}
         {...props}
       />
       
       {/* Right scroll indicator for mobile */}
-      {isMobile && showMoreIndicator && showRightIndicator && (
+      {mounted && isMobile && showMoreIndicator && showRightIndicator && (
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-muted to-transparent pointer-events-none flex items-center justify-end pr-2">
           <ChevronRight className="w-4 h-4 text-muted-foreground animate-pulse" />
         </div>
