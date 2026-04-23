@@ -907,7 +907,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       </Select>
                       <Button
                         type="button"
-                        onClick={handleAddNewProduct}
+                        onPointerDown={(e) => {
+                          e.preventDefault();
+                          handleAddNewProduct();
+                        }}
                         disabled={!newProductQuantity || !newProductUnit}
                         className={cn(ds.components.button.primary, "h-12 w-12 p-0 flex-shrink-0")}
                       >
@@ -2525,12 +2528,21 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     <Button
                       key={product.id}
                       variant="ghost"
-                      onClick={() => {
+                      type="button"
+                      onPointerDown={(e) => {
+                        // Prevent event from bubbling or being canceled by Drawer drag logic
+                        e.preventDefault();
+                        console.log("[AddQuoteDialog] Produto selecionado mobile:", product.name);
                         setSelectedProduct(product);
                         if (product.unit) setNewProductUnit(product.unit);
                         setProductSearch("");
                         setShowMobileProductSearch(false);
-                        setTimeout(() => quantityInputRef.current?.focus(), 150);
+                        // Focus the quantity input after drawer closes
+                        setTimeout(() => {
+                          if (quantityInputRef.current) {
+                            quantityInputRef.current.focus();
+                          }
+                        }, 300);
                       }}
                       className={cn(
                         "w-full h-auto py-3 px-4 justify-start text-left flex items-center gap-4 transition-all rounded-xl border border-transparent hover:border-brand/20 hover:bg-brand/5 active:scale-[0.98]",
@@ -2569,7 +2581,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                     <Button
                       variant="default"
-                      onClick={() => {
+                      onPointerDown={(e) => {
+                        e.preventDefault();
                         setShowMobileProductSearch(false);
                         setShowQuickCreateProduct(true);
                       }}
