@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2 } from "lucide-react";
+import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2, Sparkles } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -31,6 +31,7 @@ interface GerenciarCotacaoDialogProps {
 }
 
 import { Skeleton } from "@/components/ui/skeleton";
+import ResumoCotacaoDialog from "./ResumoCotacaoDialog";
 
 // Skeleton para cada aba
 const TabSkeleton = ({ type }: { type: string }) => {
@@ -71,6 +72,7 @@ import { designSystem } from "@/styles/design-system";
 
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
   const [activeTab, setActiveTab] = useState("resumo");
+  const [showResumoDialog, setShowResumoDialog] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'converter' && !open) setActiveTab('resumo');
@@ -643,9 +645,19 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => setShowResumoDialog(true)}
+                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                  title="Relatório Profissional"
+                >
+                  <Sparkles className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={handleExportHtml}
                   className="text-muted-foreground hover:text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Exportar"
+                  title="Exportar HTML"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -707,6 +719,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   getBestPriceInfoForProduct={getBestPriceInfoForProduct}
                   supplierItems={supplierItems}
                   safeStr={safeStr}
+                  onShowResumo={() => setShowResumoDialog(true)}
                 />
               )}
             </TabsContent>
@@ -779,12 +792,22 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1000px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border/50 bg-card rounded-2xl shadow-2xl">
-        <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
-        <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
-        {modalContent}
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[1000px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border/50 bg-card rounded-2xl shadow-2xl">
+          <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
+          <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
+          {modalContent}
+        </DialogContent>
+      </Dialog>
+
+      {showResumoDialog && (
+        <ResumoCotacaoDialog
+          open={showResumoDialog}
+          onOpenChange={setShowResumoDialog}
+          quote={quote}
+        />
+      )}
+    </>
   );
 }

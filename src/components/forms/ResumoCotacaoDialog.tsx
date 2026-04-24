@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
-import { generateQuoteExportMessage, sendWhatsAppMedia } from "@/lib/whatsapp-service";
+import { generateQuoteExportMessage, generateComparativeQuoteExportMessage, sendWhatsAppMedia } from "@/lib/whatsapp-service";
 import type { Quote } from "@/hooks/useCotacoes";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
   const { data: company } = useCompany();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [viewMode, setViewMode] = useState<"winners" | "comparative">("winners");
 
   const products = useMemo(() => {
     const items = (quote as any)?._raw?.quote_items || [];
@@ -112,6 +113,24 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       
       const priceSequence = getProductHistorySequence(p.product_id, winnerId);
 
+      // Coletar todos os fornecedores que deram lance para este item
+      const allOffers = fornecedores.map(f => {
+        const val = getSupplierProductValue(f.id, p.product_id);
+        const raw = quote as any;
+        const supplierItems = raw._supplierItems || raw._raw?.quote_supplier_items || [];
+        const entry = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === p.product_id);
+        const initialPrice = Number(entry?.valor_inicial) || val;
+        return {
+          supplierId: f.id,
+          supplierName: safeStr(f.nome),
+          price: val,
+          initialPrice,
+          total: val * qtd,
+          isWinner: f.id === winnerId && val > 0,
+          wasNegotiated: initialPrice > 0 && val > 0 && Math.abs(initialPrice - val) > 0.001
+        };
+      }).filter(s => s.price > 0).sort((a, b) => a.price - b.price);
+
       return {
         productId: p.product_id,
         productName: p.product_name,
@@ -121,7 +140,8 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         bestSupplier: best.supplier,
         winnerId,
         totalItem: best.price * qtd,
-        priceSequence
+        priceSequence,
+        allOffers
       };
     });
   }, [products, fornecedores]);
@@ -178,7 +198,6 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       .sort((a, b) => b.itensGanhos - a.itensGanhos || a.total - b.total);
   }, [fornecedores, produtosComVencedor]);
 
-  // Agrupar produtos por fornecedor vendedor para layout mais claro
   const groupedProdutosPorVencedor = useMemo(() => {
     const groups: Record<string, any[]> = {};
     produtosComVencedor.forEach(p => {
@@ -207,17 +226,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       if (!groups[supplierName]) {
         groups[supplierName] = { name: supplierName, items: [], total: 0 };
       }
-      
-      const raw = quote as any;
-      const supplierItems = raw._supplierItems || raw._raw?.quote_supplier_items || [];
-      const allPrices = fornecedores.map((f: any) => {
-        const item = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === p.productId);
-        const currentPrice = item?.valor_oferecido || 0;
-        const initialPrice = item?.price_history && item.price_history.length > 0 ? item.price_history[0].old_price : currentPrice;
-        return { nome: f.nome, fornecedorId: f.id, value: currentPrice, valor_inicial: initialPrice };
-      }).filter((pr: any) => pr.value > 0).sort((a: any, b: any) => a.value - b.value);
-
-      groups[supplierName].items.push({ ...p, allPrices });
+      groups[supplierName].items.push(p);
       groups[supplierName].total += p.totalItem;
     });
 
@@ -227,17 +236,24 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       return a.name.localeCompare(b.name);
     });
 
-    // Enviar economia real como prioridade no relatório de texto também
-    const economiaReport = totalEconomiaReal > 0 ? totalEconomiaReal : totalEconomiaPotencial;
-
-    const exportMsg = generateQuoteExportMessage(
-      statsExport,
-      groupedDataExport,
-      totalEconomiaReal,
-      totalMelhorPreco,
-      (quote as any).analise_ia,
-      totalEconomiaPotencial
-    );
+    const exportMsg = viewMode === 'winners' 
+      ? generateQuoteExportMessage(
+          statsExport,
+          groupedDataExport,
+          totalEconomiaReal,
+          totalMelhorPreco,
+          (quote as any).analise_ia,
+          totalEconomiaPotencial,
+          company?.name
+        )
+      : generateComparativeQuoteExportMessage(
+          statsExport,
+          produtosComVencedor,
+          totalEconomiaReal,
+          totalMelhorPreco,
+          (quote as any).analise_ia,
+          company?.name
+        );
 
     toast.promise(
       import("@/lib/whatsapp-service").then(m => m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg, company?.id)),
@@ -257,68 +273,47 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     
     setIsCapturing(true);
     try {
-      // Delay pequeno para o React aplicar as classes de "Relatorio Mode"
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 400));
       
       const canvas = await html2canvas(contentRef.current, {
         useCORS: true,
         scale: 2, 
-        backgroundColor: '#ffffff', // Forçar fundo branco e limpo para o relatório visual
+        backgroundColor: '#ffffff',
         logging: false,
         width: contentRef.current.scrollWidth,
-        height: contentRef.current.scrollHeight, // Capturar tudo (mesmo o que tem scroll)
+        height: contentRef.current.scrollHeight,
         onclone: (clonedDoc) => {
-          // Forçar modo claro no clone para o print ficar sempre profissional (diurno)
           const el = clonedDoc.querySelector('[data-capture-container="true"]') as HTMLElement;
           if (el) {
             el.classList.remove('dark');
             el.classList.add('light');
             el.style.backgroundColor = '#ffffff';
             el.style.color = '#000000';
-            
-            // Remover dark da raiz do clone
             clonedDoc.documentElement.classList.remove('dark');
             clonedDoc.body.classList.remove('dark');
           }
         }
       });
 
-      const base64Image = canvas.toDataURL("image/jpeg", 0.85); // JPEG rápido e leve
-      
-      const targetPhone = prompt("Para qual número (WhatsApp) deseja enviar o Relatório Gráfico? (Com DDD)", "");
-      
-      if (!targetPhone) {
-        setIsCapturing(false);
-        return;
-      }
+      const base64Image = canvas.toDataURL("image/jpeg", 0.9);
+      const targetPhone = prompt("Número do WhatsApp (com DDD):", "");
+      if (!targetPhone) { setIsCapturing(false); return; }
 
       const cleanPhone = targetPhone.replace(/\D/g, '');
-      if (cleanPhone.length < 10) {
-        toast.error("Número inválido");
-        setIsCapturing(false);
-        return;
-      }
-
       const result = await sendWhatsAppMedia(
         cleanPhone,
         base64Image,
-        `📊 *Relatório Gráfico de Negociação - Cotação #${safeStr(quote.id).slice(0, 8)}*\n\n_Documento emitido pelo sistema de compras._`
+        `📊 *Relatório de Negociação - Cotação #${safeStr(quote.id).slice(0, 8)}*\n\n_Documento oficial de compras._`
       );
 
-      if (result.success) {
-        toast.success("Resumo enviado com sucesso!");
-      } else {
-        throw new Error(result.error);
-      }
+      if (result.success) toast.success("Relatório enviado!");
+      else throw new Error(result.error);
     } catch (error: any) {
-      console.error("Erro ao capturar/enviar print:", error);
-      toast.error("Erro ao enviar resumo gráfico: " + error.message);
+      toast.error("Erro ao enviar: " + error.message);
     } finally {
       setIsCapturing(false);
     }
   };
-
-  const melhorFornecedor = fornecedoresRanking.length > 0 ? fornecedoresRanking[0] : null;
 
   return (
     <ResponsiveModal
@@ -328,49 +323,34 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       title="Relatório de Negociação"
       description={`Cód. #${safeStr(quote.id).slice(0, 8)}`}
       desktopMaxWidth="xl"
-      className={cn(
-        "shadow-2xl [&>button]:hidden flex flex-col overflow-hidden",
-        // Fazer a janela inteira ter fundo limpo para virar documento
-        "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800"
-      )}
+      className="shadow-2xl flex flex-col overflow-hidden bg-white dark:bg-zinc-950"
       footer={
-        <div className="flex w-full gap-2">
+        <div className="flex w-full gap-2 p-4">
           <Button
             onClick={handleSendScreenshot}
             disabled={isCapturing}
             variant="outline"
-            className="flex-1 h-10 rounded-lg border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold text-xs uppercase tracking-wider hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm"
+            className="flex-1 h-12 font-bold text-xs uppercase tracking-wider"
           >
             {isCapturing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Camera className="h-4 w-4 mr-2" />}
-            Capturar Relatório
+            Gerar Imagem do Relatório
           </Button>
           <Button
             onClick={handleWhatsAppExport}
-            className="flex-1 h-10 rounded-lg bg-[#25D366] hover:bg-[#128C7E] text-white font-black text-xs shadow-sm transition-all uppercase tracking-wider"
+            className="flex-1 h-12 bg-[#25D366] hover:bg-[#128C7E] text-white font-black text-xs uppercase tracking-wider"
           >
             <MessageCircle className="h-4 w-4 mr-2" />
-            Exportar Texto
+            Enviar como Texto
           </Button>
-          <Button
-            onClick={() => onOpenChange(false)}
-            size="sm"
-            variant="ghost"
-            className="px-4 h-10 font-bold"
-          >
+          <Button onClick={() => onOpenChange(false)} variant="ghost" className="h-12 font-bold px-6">
             Fechar
           </Button>
         </div>
       }
     >
       <div className="absolute right-3 top-3 z-50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onOpenChange(false)}
-          className={cn(ds.components.button.ghost, ds.components.button.size.icon, "!bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800")}
-        >
+        <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
           <X className="h-4 w-4" />
-          <span className="sr-only">Fechar</span>
         </Button>
       </div>
 
@@ -378,204 +358,316 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         ref={contentRef}
         data-capture-container="true"
         className={cn(
-          "w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 pb-8",
-          isCapturing ? "h-auto overflow-visible p-6 rounded-none shadow-none text-black bg-white" : "flex-1 min-h-0 overflow-y-auto px-4 py-2 custom-scrollbar",
+          "w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100",
+          isCapturing ? "h-auto overflow-visible p-10 bg-white" : "flex-1 overflow-y-auto px-6 py-4 custom-scrollbar"
         )}
-        style={isCapturing ? { width: '850px' } : undefined} // Se for capturar, crava um width bom para relatórios (A4 style)
+        style={isCapturing ? { width: '900px' } : undefined}
       >
-        <div className={cn("space-y-6 max-w-4xl mx-auto", isCapturing ? "!text-black" : "")}>
+        <div className="space-y-8 max-w-5xl mx-auto">
+          
+          {!isCapturing && (
+            <div className="flex p-1.5 bg-zinc-100 dark:bg-zinc-900 rounded-2xl w-fit mx-auto border border-zinc-200 dark:border-zinc-800 shadow-sm">
+              <button
+                onClick={() => setViewMode("winners")}
+                className={cn(
+                  "px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                  viewMode === "winners" 
+                    ? "bg-white dark:bg-zinc-800 text-brand shadow-md" 
+                    : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                )}
+              >
+                Ganhadores
+              </button>
+              <button
+                onClick={() => setViewMode("comparative")}
+                className={cn(
+                  "px-8 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all",
+                  viewMode === "comparative" 
+                    ? "bg-white dark:bg-zinc-800 text-brand shadow-md" 
+                    : "text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+                )}
+              >
+                Comparativo Completo
+              </button>
+            </div>
+          )}
 
-          {/* ── HEADER PROFISSIONAL ── */}
-          <div className={cn("flex items-start justify-between pb-4 border-b", isCapturing ? "border-zinc-300" : "border-zinc-200 dark:border-zinc-800")}>
-            <div className="flex gap-4">
-              <div className="w-12 h-12 bg-zinc-900 dark:bg-zinc-100 rounded-lg flex items-center justify-center text-white dark:text-zinc-900 font-black text-xl shadow-lg">
+          <div className="flex items-center justify-between pb-6 border-b-2 border-zinc-100 dark:border-zinc-900">
+            <div className="flex items-center gap-5">
+              <div className="w-16 h-16 bg-zinc-900 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl border-4 border-zinc-100">
                 M
               </div>
               <div>
-                <h1 className={cn("text-xl tracking-tight uppercase font-black")}>
-                  Relatório de Negociação <span className="text-zinc-400 font-normal text-sm">#{safeStr(quote.id).slice(0, 8)}</span>
+                <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900 dark:text-white">
+                  Relatório de Negociação
                 </h1>
-                <div className="flex items-center gap-3 mt-1">
-                  <StatusBadge status={quote.status} />
-                  <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                    <Calendar className="h-3 w-3" />
-                    {safeStr(quote.dataInicio)} — {safeStr(quote.dataFim)}
-                  </div>
-                </div>
+                <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                  <span className="text-brand">#{safeStr(quote.id).slice(0, 8)}</span>
+                  <span className="text-zinc-300">•</span>
+                  {safeStr(quote.dataInicio)}
+                </p>
               </div>
             </div>
-            
-            <div className="text-right">
-              <p className={cn("text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-1")}>
-                Desempenho da Cotação
+            <div className="text-right space-y-1">
+              <Badge className="bg-brand hover:bg-brand text-white font-black px-3 py-1 text-[10px] uppercase tracking-widest">
+                {quote.status}
+              </Badge>
+              <p className="text-xs font-bold text-zinc-400 uppercase tracking-tighter">
+                {fornecedoresRespondidos}/{fornecedores.length} Fornecedores Participantes
               </p>
-              <div className="flex items-center justify-end gap-2 text-sm font-semibold text-zinc-700 dark:text-zinc-300">
-                <Package className="h-4 w-4 text-zinc-400" />
-                {products.length} Itens
-                <span className="text-zinc-300 mx-1">|</span>
-                <Building2 className="h-4 w-4 text-zinc-400" />
-                {fornecedoresRespondidos}/{fornecedores.length} Fornecedores
-              </div>
             </div>
           </div>
 
-          {/* ── PAINEL DE KPI / ECONOMIA ── */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className={cn("rounded-xl p-5 border shadow-sm flex flex-col justify-center", isCapturing ? "border-emerald-200 bg-emerald-50" : "border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-900/20")}>
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingDown className={cn("h-5 w-5", isCapturing ? "text-emerald-600" : "text-emerald-600 dark:text-emerald-400")} />
-                <span className={cn("text-xs uppercase tracking-widest font-bold", isCapturing ? "text-emerald-700" : "text-emerald-700 dark:text-emerald-400")}>
-                  Economia Real Negociada
-                </span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8 border-b-2 border-zinc-100 dark:border-zinc-900">
+            <div className="bg-emerald-50 border border-emerald-100 dark:bg-emerald-900/10 dark:border-emerald-800 rounded-3xl p-6 shadow-sm relative overflow-hidden group transition-all hover:shadow-md">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 transition-all group-hover:scale-110"></div>
+              <div className="flex items-center gap-2 mb-3 relative z-10">
+                <div className="p-2 bg-emerald-500 rounded-xl text-white shadow-lg shadow-emerald-200 dark:shadow-none">
+                  <TrendingDown className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-black text-emerald-800 dark:text-emerald-400 uppercase tracking-[0.2em]">Economia Gerada</span>
               </div>
-              <p className={cn("text-3xl font-black", isCapturing ? "text-emerald-600" : "text-emerald-600 dark:text-emerald-400")}>
-                {formatCurrency(totalEconomiaReal)}
+              <p className="text-4xl font-black text-emerald-600 tracking-tighter relative z-10">
+                {formatCurrency(totalEconomiaReal || totalEconomiaPotencial)}
               </p>
-              <p className={cn("text-xs font-medium mt-1", isCapturing ? "text-emerald-600/70" : "text-emerald-600/70 dark:text-emerald-400/70")}>
-                Valor exato descontado durante as rodadas de oferta
-              </p>
+              <p className="text-[10px] font-bold text-emerald-700/60 dark:text-emerald-500/60 uppercase mt-2 relative z-10">Eficiência capturada na negociação</p>
+              
+              {/* Subtle bar chart background for premium feel */}
+              <div className="absolute bottom-0 right-0 flex items-end gap-1 p-2 opacity-10">
+                <div className="w-2 h-8 bg-emerald-500 rounded-t-sm"></div>
+                <div className="w-2 h-12 bg-emerald-500 rounded-t-sm"></div>
+                <div className="w-2 h-6 bg-emerald-500 rounded-t-sm"></div>
+                <div className="w-2 h-16 bg-emerald-500 rounded-t-sm"></div>
+              </div>
             </div>
 
-            <div className={cn("rounded-xl p-5 border shadow-sm flex flex-col justify-center", isCapturing ? "border-zinc-200 bg-zinc-50" : "border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/50")}>
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className={cn("h-5 w-5", isCapturing ? "text-zinc-600" : "text-zinc-500")} />
-                <span className={cn("text-xs uppercase tracking-widest font-bold", isCapturing ? "text-zinc-600" : "text-zinc-500")}>
-                  Total do Pedido Fechado
-                </span>
+            <div className="bg-zinc-900 border border-zinc-800 dark:bg-zinc-900 dark:border-zinc-700 rounded-3xl p-6 shadow-xl relative overflow-hidden group transition-all hover:shadow-2xl">
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12 transition-all group-hover:scale-120"></div>
+              <div className="flex items-center gap-2 mb-3 relative z-10">
+                <div className="p-2 bg-brand rounded-xl text-black shadow-lg shadow-brand/20">
+                  <DollarSign className="h-5 w-5" />
+                </div>
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Total do Pedido</span>
               </div>
-              <p className={cn("text-3xl font-black", isCapturing ? "text-zinc-900" : "text-zinc-900 dark:text-white")}>
+              <p className="text-4xl font-black text-white tracking-tighter relative z-10">
                 {formatCurrency(totalMelhorPreco)}
               </p>
-              <p className={cn("text-xs font-medium mt-1", isCapturing ? "text-zinc-500" : "text-zinc-500")}>
-                Soma de todos os itens com os melhores fornecedores
-              </p>
+              <p className="text-[10px] font-bold text-zinc-500 uppercase mt-2 relative z-10">Investimento total em {products.length} itens</p>
+              
+              <div className="absolute top-4 right-4 opacity-10 rotate-12">
+                <Package className="h-12 w-12 text-white" />
+              </div>
             </div>
           </div>
 
-          <div className={cn("w-full h-px", isCapturing ? "bg-zinc-200" : "bg-zinc-200 dark:bg-zinc-800")} />
+          {/* Supplier Performance Ranking */}
+          <div className="bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-3xl p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-sm font-black text-zinc-900 dark:text-white uppercase tracking-tight flex items-center gap-2">
+                  <Award className="h-4 w-4 text-brand" />
+                  Performance dos Fornecedores
+                </h3>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase mt-1">Ranking baseado em itens arrematados</p>
+              </div>
+              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-tighter border-zinc-300 dark:border-zinc-700">
+                Top {fornecedoresRanking.length} Participantes
+              </Badge>
+            </div>
 
-          {/* ── RESULTADOS DETALHADOS POR FORNECEDOR ── */}
-          <div className="space-y-6">
-            <h2 className={cn("text-xs uppercase tracking-widest font-bold", isCapturing ? "text-zinc-400 text-center" : "text-zinc-400")}>
-              Detalhamento da Negociação por Fornecedor (Itens Arrematados)
-            </h2>
-
-            {groupedProdutosPorVencedor.map(([supplierName, itemsGanhos], gIdx) => {
-              const totalFornecedor = itemsGanhos.reduce((acc, i) => acc + i.totalItem, 0);
-              
-              return (
-                <div key={supplierName} className={cn("rounded-xl border overflow-hidden", isCapturing ? "border-zinc-300" : "border-zinc-200 dark:border-zinc-800")}>
-                  {/* Fornecedor Header */}
-                  <div className={cn("px-4 py-3 flex items-center justify-between border-b", isCapturing ? "bg-zinc-100 border-zinc-300" : "bg-zinc-100/50 dark:bg-zinc-900/50 border-zinc-200 dark:border-zinc-800")}>
-                    <div className="flex items-center gap-2">
-                      <Award className={cn("h-5 w-5", supplierName !== 'Pendente' ? "text-brand" : "text-zinc-400")} />
-                      <h3 className={cn("font-bold text-sm", isCapturing ? "text-zinc-900" : "")}>{supplierName}</h3>
-                      <Badge variant="outline" className={cn("ml-2 text-[10px]", isCapturing ? "border-zinc-400 text-zinc-600" : "border-zinc-300 dark:border-zinc-700")}>
-                        {itemsGanhos.length} {itemsGanhos.length === 1 ? 'item' : 'itens'}
-                      </Badge>
-                    </div>
-                    <span className={cn("font-black text-sm", isCapturing ? "text-zinc-900" : "")}>
-                      {formatCurrency(totalFornecedor)}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {fornecedoresRanking.slice(0, 3).map((f, idx) => (
+                <div key={f.id} className={cn(
+                  "p-5 rounded-2xl border transition-all hover:scale-[1.02]",
+                  idx === 0 
+                    ? "bg-white dark:bg-zinc-800 border-brand/30 shadow-lg shadow-brand/5 ring-1 ring-brand/10" 
+                    : "bg-white/50 dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800"
+                )}>
+                  <div className="flex items-center justify-between mb-4">
+                    <span className={cn(
+                      "text-[10px] font-black uppercase px-2 py-0.5 rounded-full",
+                      idx === 0 ? "bg-brand text-black" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
+                    )}>
+                      #{idx + 1} Lugar
                     </span>
+                    {idx === 0 && <Sparkles className="h-3 w-3 text-brand" />}
                   </div>
+                  <h4 className="font-black text-sm text-zinc-900 dark:text-white uppercase truncate mb-1">{f.nome}</h4>
+                  <div className="flex items-end justify-between gap-2 mt-4">
+                    <div>
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase leading-none mb-1">Itens</p>
+                      <p className="text-lg font-black text-zinc-900 dark:text-white leading-none">{f.itensGanhos}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase leading-none mb-1">Valor</p>
+                      <p className="text-sm font-black text-brand leading-none">{formatCurrency(f.total)}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                  {/* Lista de Itens do Fornecedor */}
-                  <div className={cn("divide-y", isCapturing ? "divide-zinc-200" : "divide-zinc-100 dark:divide-zinc-800", isCapturing ? "bg-white" : "")}>
-                    {itemsGanhos.map((p, idx) => {
-                      const hasNegotiation = p.priceSequence && p.priceSequence.length > 1;
-                      const initialPrice = hasNegotiation ? p.priceSequence[0] : p.bestPrice;
-                      const econUnit = initialPrice - p.bestPrice;
-                      const totalEcon = econUnit * p.quantidade;
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-black text-zinc-400 uppercase tracking-[0.2em]">
+                {viewMode === "winners" ? "Vencedores por Fornecedor" : "Quadro Comparativo de Ofertas"}
+              </h2>
+              {isCapturing && (
+                <span className="text-[10px] font-bold text-zinc-300 uppercase">Documento Auditado via CotaJá</span>
+              )}
+            </div>
 
-                      return (
-                        <div key={p.productId} className={cn("p-4", isCapturing ? "hover:bg-transparent" : "hover:bg-zinc-50 dark:hover:bg-zinc-900/40")}>
-                          <div className="flex justify-between items-start mb-2">
+            {viewMode === "winners" ? (
+              <div className="space-y-6">
+                {groupedProdutosPorVencedor.map(([supplierName, items], idx) => (
+                  <div key={supplierName} className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-100 dark:border-zinc-800 shadow-sm overflow-hidden">
+                    <div className="bg-zinc-50/50 dark:bg-zinc-800/50 px-6 py-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-brand rounded-full flex items-center justify-center text-white">
+                          <Award className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <h3 className="font-black text-sm text-zinc-900 dark:text-white uppercase tracking-tight">{supplierName}</h3>
+                          <p className="text-[10px] font-bold text-zinc-400 uppercase">{items.length} itens conquistados</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-black text-zinc-900 dark:text-white">{formatCurrency(items.reduce((acc, i) => acc + i.totalItem, 0))}</p>
+                      </div>
+                    </div>
+                    <div className="divide-y divide-zinc-50 dark:divide-zinc-800">
+                      {items.map((p, pIdx) => (
+                        <div key={p.productId} className="px-6 py-4 flex items-center justify-between hover:bg-zinc-50/30 dark:hover:bg-zinc-800/30 transition-colors">
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs font-black text-zinc-300">{pIdx + 1}</span>
                             <div>
-                              <p className={cn("text-sm font-bold", isCapturing ? "text-zinc-900" : "")}>
-                                {idx + 1}. {p.productName}
-                              </p>
-                              <p className={cn("text-xs", isCapturing ? "text-zinc-600" : "text-zinc-500")}>
-                                Qtd: <span className="font-semibold">{p.quantidade} {p.unidade}</span>
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className={cn("text-sm font-bold", isCapturing ? "text-zinc-900" : "")}>
-                                {formatCurrency(p.bestPrice)} <span className={cn("font-normal text-[10px]", isCapturing ? "text-zinc-500" : "text-zinc-500")}>/ {p.unidade}</span>
-                              </p>
-                              <p className={cn("text-xs font-semibold", isCapturing ? "text-zinc-700" : "")}>
-                                Total: {formatCurrency(p.totalItem)}
+                              <p className="text-sm font-black text-zinc-800 dark:text-zinc-100 uppercase">{p.productName}</p>
+                              <p className="text-xs font-bold text-zinc-500 uppercase tracking-tighter">
+                                {p.quantidade} {p.unidade} • {formatCurrency(p.bestPrice)} / {p.unidade}
                               </p>
                             </div>
                           </div>
-
-                          {/* Bloco de Negociação */}
-                          {hasNegotiation ? (
-                            <div className={cn("mt-3 rounded-lg p-3 border", isCapturing ? "bg-brand/5 border-brand/20" : "bg-brand/5 dark:bg-brand/10 border-brand/20")}>
-                              <div className="flex justify-between items-center mb-2">
-                                <span className={cn("text-[10px] uppercase tracking-widest font-black flex items-center gap-1.5", isCapturing ? "text-brand" : "text-brand")}>
-                                  <TrendingDown className="h-3.5 w-3.5" /> Negociação com Sucesso
-                                </span>
-                                <div className="flex flex-col items-end">
-                                  <span className={cn("text-[10px] uppercase font-black tracking-wider", isCapturing ? "text-emerald-700" : "text-emerald-600 dark:text-emerald-400")}>
-                                    Ganho Real: {formatCurrency(totalEcon)}
-                                  </span>
-                                  <span className="text-[9px] font-bold text-zinc-500 uppercase">
-                                    Redução de {((econUnit / initialPrice) * 100).toFixed(1)}% capturada
-                                  </span>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar">
-                                <div className="flex items-center gap-1.5 min-w-max">
-                                  {p.priceSequence.map((val: number, sIdx: number) => {
-                                    const isFirst = sIdx === 0;
-                                    const isLast = sIdx === p.priceSequence.length - 1;
-                                    
-                                    return (
-                                      <div key={sIdx} className="flex items-center gap-1.5">
-                                        <div className={cn(
-                                          "px-2 py-1 rounded-md text-[11px] font-black flex flex-col items-center min-w-[70px]",
-                                          isLast 
-                                            ? "bg-brand text-black shadow-sm" 
-                                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-400 line-through opacity-60"
-                                        )}>
-                                          <span className="text-[7px] uppercase tracking-tighter leading-none mb-0.5">
-                                            {isFirst ? "1ª Oferta" : isLast ? "Fechado" : `${sIdx + 1}ª Rodada`}
-                                          </span>
-                                          {formatCurrency(val)}
-                                        </div>
-                                        {!isLast && <ArrowRight className="h-3 w-3 text-zinc-300" />}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className={cn("mt-2 rounded bg-zinc-50 px-3 py-1.5 flex items-center text-[10px] text-zinc-500 font-medium uppercase tracking-wider", isCapturing ? "border border-zinc-200" : "dark:bg-zinc-900 border border-zinc-100/5 dark:border-zinc-800")}>
-                              <Info className="h-3.5 w-3.5 mr-2 text-zinc-400" /> Item fechado pelo lance inicial (Sem recuo necessário)
-                            </div>
-                          )}
-
+                          <div className="text-right">
+                            <p className="text-sm font-black text-zinc-900 dark:text-white">{formatCurrency(p.totalItem)}</p>
+                            {(p.priceSequence?.length || 0) > 1 && (
+                              <Badge className="bg-emerald-50 text-emerald-600 border-emerald-100 text-[8px] h-4 px-1.5 font-black uppercase mt-1">
+                                Negociado
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {produtosComVencedor.map((p, idx) => (
+                  <div key={p.productId} className="bg-white dark:bg-zinc-900 rounded-[2rem] border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden transition-all hover:border-brand/40 group">
+                    <div className="bg-zinc-900 dark:bg-zinc-800 px-8 py-6 flex items-center justify-between group-hover:bg-zinc-950 transition-colors">
+                      <div className="flex items-center gap-5">
+                        <div className="w-12 h-12 bg-brand rounded-2xl flex items-center justify-center text-black font-black text-lg shadow-lg shadow-brand/20">
+                          {idx + 1}
+                        </div>
+                        <div>
+                          <h3 className="font-black text-base text-white uppercase tracking-wider">{p.productName}</h3>
+                          <div className="flex items-center gap-3 mt-1">
+                            <Badge variant="outline" className="text-[9px] border-zinc-700 text-zinc-400 font-bold uppercase tracking-widest px-2 py-0">
+                              {p.quantidade} {p.unidade}
+                            </Badge>
+                            <span className="text-[10px] font-black text-brand uppercase tracking-tighter">🏆 {p.bestSupplier}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-1">Total Item</p>
+                        <p className="text-2xl font-black text-white tracking-tighter leading-none">{formatCurrency(p.totalItem)}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                      <div className="grid grid-cols-[1fr_120px_140px] px-8 py-3 bg-zinc-50/50 dark:bg-zinc-800/30">
+                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Fornecedor</span>
+                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] text-right">Unitário</span>
+                        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] text-right">Total Ofertado</span>
+                      </div>
+                      {p.allOffers.map((offer, oIdx) => (
+                        <div key={offer.supplierId} className={cn(
+                          "px-8 py-5 grid grid-cols-[1fr_120px_140px] items-center transition-all",
+                          offer.isWinner 
+                            ? "bg-emerald-50/40 dark:bg-emerald-500/5 ring-1 ring-inset ring-emerald-500/20" 
+                            : "bg-white dark:bg-zinc-900/40 hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50"
+                        )}>
+                          <div className="flex items-center gap-4">
+                            <div className={cn(
+                              "w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black border-2 transition-all",
+                              offer.isWinner 
+                                ? "bg-emerald-500 border-emerald-400 text-white shadow-lg shadow-emerald-200 dark:shadow-none scale-110" 
+                                : "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-400"
+                            )}>
+                              {offer.isWinner ? <CheckCircle2 className="h-3.5 w-3.5" /> : oIdx + 1}
+                            </div>
+                            <div className="flex flex-col">
+                              <p className={cn(
+                                "text-sm font-black uppercase tracking-tight", 
+                                offer.isWinner ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-600 dark:text-zinc-400"
+                              )}>
+                                {offer.supplierName}
+                              </p>
+                              {offer.isWinner && (
+                                <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-[0.1em] mt-0.5 flex items-center gap-1.5 bg-emerald-100/50 dark:bg-emerald-500/10 px-2 py-0.5 rounded-full w-fit">
+                                  Melhor Oferta Identificada
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            {offer.wasNegotiated ? (
+                              <div>
+                                <p className="text-[10px] text-zinc-400 line-through leading-none">{formatCurrency(offer.initialPrice)}</p>
+                                <p className={cn(
+                                  "text-sm font-bold",
+                                  offer.isWinner ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-600"
+                                )}>{formatCurrency(offer.price)}</p>
+                              </div>
+                            ) : (
+                              <p className={cn(
+                                "text-sm font-bold",
+                                offer.isWinner ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500"
+                              )}>{formatCurrency(offer.price)}</p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className={cn(
+                              "text-lg font-black tracking-tighter leading-none", 
+                              offer.isWinner ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-900 dark:text-zinc-100"
+                            )}>
+                              {formatCurrency(offer.total)}
+                            </p>
+                            <p className="text-[8px] font-bold text-zinc-400 uppercase mt-1">
+                              {p.quantidade} {p.unidade}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* ── RODAPÉ PARA O DOCUMENTO/PRINT ── */}
-          <div className={cn("pt-8 pb-4 text-center border-t mt-8", isCapturing ? "border-zinc-300" : "border-zinc-200 dark:border-zinc-800")}>
-            <p className={cn("text-[10px] uppercase tracking-widest font-bold", isCapturing ? "text-zinc-500" : "text-zinc-500")}>
-              Este relatório reflete a performance de negociação da equipe de suprimentos.
-            </p>
-            <p className={cn("text-[9px] mt-1", isCapturing ? "text-zinc-400" : "text-zinc-500")}>
-              Gerado via MGC Cotações
-            </p>
+          <div className="pt-12 pb-6 border-t border-zinc-100 dark:border-zinc-900 text-center space-y-2">
+            <p className="text-xs font-black text-zinc-400 uppercase tracking-[0.3em]">Gestão de Suprimentos Auditada</p>
+            <div className="flex items-center justify-center gap-2 text-[10px] font-bold text-zinc-300 uppercase">
+              <span>MGC Cotações</span>
+              <span className="text-zinc-200">•</span>
+              <span>Inteligência de Mercado</span>
+            </div>
           </div>
-          
+
         </div>
       </div>
     </ResponsiveModal>

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox, MessageCircle } from "lucide-react";
+import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox, MessageCircle, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -22,6 +22,7 @@ interface QuoteConversionTabProps {
   getBestPriceInfoForProduct: (productId: string) => { bestPrice: number; bestSupplierId: string | null };
   supplierItems?: any[];
   safeStr: (val: any) => string;
+  onShowResumo?: () => void;
 }
 
 export function QuoteConversionTab({
@@ -33,7 +34,8 @@ export function QuoteConversionTab({
   getSupplierProductValue,
   getBestPriceInfoForProduct,
   supplierItems = [],
-  safeStr
+  safeStr,
+  onShowResumo
 }: QuoteConversionTabProps) {
   const { data: company } = useCompany();
   const [pedidoSubTab, setPedidoSubTab] = useState("melhores");
@@ -208,12 +210,21 @@ export function QuoteConversionTab({
             <Button
               variant="outline"
               size="sm"
+              onClick={onShowResumo}
+              className="h-8 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
+            >
+              <Sparkles className="h-3.5 w-3.5 mr-1" />
+              Relatório Visual
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleWhatsAppExport}
               disabled={Object.keys(productSelections).length === 0}
               className="h-8 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
             >
               <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              Relatório WhatsApp
+              Relatório Texto
             </Button>
             <Tabs value={pedidoSubTab} onValueChange={(val) => {
               setPedidoSubTab(val);

@@ -117,71 +117,36 @@ export function generateQuoteExportMessage(
   totalSavings: number,
   melhorTotal: number,
   analysisResult?: string | null,
-  potentialSavings?: number
+  potentialSavings?: number,
+  companyName: string = "MERCADÃO NOVO BOI JOÃO DIAS"
 ): string {
-  const company = "MERCADÃO NOVO BOI JOÃO DIAS";
   const SEP = "━━━━━━━━━━━━━━━━━━━";
   
-  // Extrair lista de produtos únicos
-  const allProductsSet = new Set<string>();
-  groupedData.forEach(g => g.items.forEach(i => {
-    const name = i.productName || i.product_name || "Item";
-    if (name) allProductsSet.add(name);
-  }));
-  const productsList = Array.from(allProductsSet).slice(0, 15);
-  
-  // Extrair fornecedores arrematantes
-  const suppliersNames = groupedData
-    .filter(g => g.name !== "Pendente / Sem Vencedor")
-    .map(g => g.name);
-
-  let m = "📜 *RELATÓRIO DE COMPRAS | CotaPro*\n";
-  m += "🏢 *" + company + "*\n";
+  let m = "📜 *RESUMO DE GANHADORES | CotaJá*\n";
+  m += "🏢 *" + companyName + "*\n";
   m += SEP + "\n\n";
 
-  m += "📦 *ITENS EM COTAÇÃO*\n";
-  m += productsList.map(p => "• " + p).join("\n") + "\n";
-  if (allProductsSet.size > 15) {
-    m += "_(... e outros " + (allProductsSet.size - 15) + " itens)_\n";
-  }
+  m += "📊 *MÉTRICAS GERAIS*\n";
+  m += `• Itens: *${stats.totalProdutos}*\n`;
+  m += `• Fornecedores: *${stats.fornecedoresRespondidos}/${stats.totalFornecedores}*\n`;
+  m += `• Valor Total: *${fmtCurrency(melhorTotal)}*\n`;
+  m += `• Economia Real: *${fmtCurrency(totalSavings)}*\n`;
   m += "\n" + SEP + "\n\n";
 
-  m += "👥 *FORNECEDORES ARREMATANTES*\n";
-  m += suppliersNames.map(s => "• " + s).join("\n");
-  m += "\n\n" + SEP + "\n\n";
+  m += "🏆 *DISTRIBUIÇÃO POR FORNECEDOR*\n\n";
 
-  m += "📋 *CONQUISTAS DE NEGOCIAÇÃO*\n";
-  const negotiationWins = groupedData.flatMap(g => 
-    g.items
-      .filter(i => (i.priceSequence?.length || 0) > 1 || (i.allPrices?.length > 1))
-      .map(i => {
-        const initial = i.priceSequence?.[0] || (i.allPrices?.[0]?.valor_inicial) || i.bestPrice;
-        const final = i.bestPrice;
-        const diff = initial - final;
-        if (diff <= 0) return null;
-        return { 
-          name: i.productName || i.product_name, 
-          initial, 
-          final, 
-          economy: diff * i.quantidade,
-          percent: ((diff / initial) * 100).toFixed(0)
-        };
-      })
-  ).filter(Boolean) as any[];
+  groupedData.forEach(g => {
+    if (g.name === "Pendente / Sem Vencedor") return;
 
-  if (negotiationWins.length > 0) {
-    m += negotiationWins.slice(0, 10).map(w => 
-      `✅ *${w.name}*\n   De ${fmtCurrency(w.initial)} por *${fmtCurrency(w.final)}* (-${w.percent}%)\n   Economia: *+ ${fmtCurrency(w.economy)}*`
-    ).join("\n\n") + "\n";
-    if (negotiationWins.length > 10) m += `_(... e outros ${negotiationWins.length - 10} itens negociados)_\n`;
-  } else {
-    m += "_Pedidos fechados no lance inicial._\n";
-  }
-  m += "\n" + SEP + "\n\n";
+    m += `🏢 *${g.name.toUpperCase()}*\n`;
+    g.items.forEach(i => {
+      const unit = (i.unidade || 'un').toUpperCase();
+      m += `• ${i.productName || i.product_name}\n`;
+      m += `  ${i.quantidade} ${unit} x ${fmtCurrency(i.bestPrice)} = *${fmtCurrency(i.totalItem)}*\n`;
+    });
+    m += `💰 *Subtotal: ${fmtCurrency(g.total)}*\n\n`;
+  });
 
-  m += "🚀 *ECONOMIA REAL NEGOCIADA: " + fmtCurrency(totalSavings) + "*\n";
-  m += "_(Redução bruta alcançada nas negociações)_\n\n";
-  
   m += SEP + "\n\n";
 
   if (analysisResult) {
@@ -191,7 +156,73 @@ export function generateQuoteExportMessage(
   }
 
   m += "*GESTÃO DE COMPRAS AUDITADA*\n";
-  m += "Sistema *CotaPro* — Inteligência de Mercado";
+  m += "Sistema *CotaJá* — Inteligência de Mercado";
+
+  return m;
+}
+
+export function generateComparativeQuoteExportMessage(
+  stats: {
+    totalProdutos: number;
+    totalFornecedores: number;
+    fornecedoresRespondidos: number;
+  },
+  productsData: any[],
+  totalSavings: number,
+  melhorTotal: number,
+  analysisResult?: string | null,
+  companyName: string = "MERCADÃO NOVO BOI JOÃO DIAS"
+): string {
+  const SEP = "━━━━━━━━━━━━━━━━━━━━━━";
+  const ITEM_SEP = "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈";
+  
+  let m = "📊 *QUADRO COMPARATIVO GERAL*\n";
+  m += `🏢 *${companyName.toUpperCase()}*\n`;
+  m += SEP + "\n\n";
+
+  productsData.forEach((p, idx) => {
+    const unit = (p.unidade || 'un').toUpperCase();
+    m += `*${idx + 1}. ${(p.productName || '').toUpperCase()}*\n`;
+    m += `📦 Demanda: *${p.quantidade} ${unit}*\n\n`;
+
+    // Ordenar ofertas: ganhador primeiro, depois por preço
+    const sortedOffers = [...p.allOffers].sort((a, b) => {
+      if (a.isWinner) return -1;
+      if (b.isWinner) return 1;
+      return a.price - b.price;
+    });
+
+    sortedOffers.forEach((o: any) => {
+      const isWinner = o.isWinner;
+      const indicator = isWinner ? "🏆" : "•";
+      const supplierName = isWinner ? `*${o.supplierName.toUpperCase()}*` : o.supplierName;
+      const negotiated = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
+      
+      m += `${indicator} ${supplierName}\n`;
+      if (negotiated) {
+        m += `   └ ~${fmtCurrency(o.initialPrice)}~ → *${fmtCurrency(o.price)}* | Total: *${fmtCurrency(o.total)}*\n`;
+      } else {
+        m += `   └ Unit: ${fmtCurrency(o.price)} | Total: *${fmtCurrency(o.total)}*\n`;
+      }
+    });
+    
+    if (idx < productsData.length - 1) {
+      m += "\n" + ITEM_SEP + "\n\n";
+    }
+  });
+
+  m += "\n" + SEP + "\n";
+  m += `💰 *VALOR TOTAL DO PEDIDO: ${fmtCurrency(melhorTotal)}*\n`;
+  m += `📈 *ECONOMIA CAPTURADA: ${fmtCurrency(totalSavings)}*\n`;
+  m += SEP + "\n\n";
+
+  if (analysisResult) {
+    m += "💡 *ANÁLISE ESTRATÉGICA*\n";
+    m += "_" + analysisResult + "_\n\n";
+  }
+
+  m += "✅ *Relatório Auditado via CotaJá*\n";
+  m += "_Inteligência em Gestão de Suprimentos_";
 
   return m;
 }
