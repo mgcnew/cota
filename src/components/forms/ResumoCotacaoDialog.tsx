@@ -6,12 +6,12 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import {
   Package, Building2, DollarSign, Calendar, ClipboardList,
   TrendingDown, Award, X, CheckCircle2, Clock, Sparkles, MessageCircle,
-  Camera, Loader2, ArrowRight, Info
+  Camera, Loader2, ArrowRight, Info, Download
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
-import { generateQuoteExportMessage, generateComparativeQuoteExportMessage, sendWhatsAppMedia } from "@/lib/whatsapp-service";
+import { generateQuoteExportMessage, generateComparativeQuoteExportMessage, sendWhatsAppMedia, generateWhatsAppGreeting, generateQuoteReportHTML } from "@/lib/whatsapp-service";
 import type { Quote } from "@/hooks/useCotacoes";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
@@ -213,59 +213,106 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     });
   }, [produtosComVencedor]);
 
-  const handleWhatsAppExport = () => {
-    const statsExport = {
-      totalProdutos: products.length,
-      totalFornecedores: fornecedores.length,
-      fornecedoresRespondidos: fornecedoresRespondidos,
-    };
-
-    const groups: Record<string, { name: string, items: any[], total: number }> = {};
-    produtosComVencedor.forEach(p => {
-      const supplierName = p.bestSupplier || "Pendente / Sem Vencedor";
-      if (!groups[supplierName]) {
-        groups[supplierName] = { name: supplierName, items: [], total: 0 };
-      }
-      groups[supplierName].items.push(p);
-      groups[supplierName].total += p.totalItem;
-    });
-
-    const groupedDataExport = Object.values(groups).sort((a, b) => {
+  const getReportHTMLOpts = () => ({
+    quoteId: safeStr(quote.id),
+    dateLabel: safeStr(quote.dataInicio),
+    companyName: company?.name || "MERCADÃO NOVO BOI JOÃO DIAS",
+    totalProdutos: products.length,
+    totalFornecedores: fornecedores.length,
+    fornecedoresRespondidos,
+    totalMelhorPreco,
+    totalEconomiaReal,
+    productsData: produtosComVencedor,
+    viewMode,
+    groupedData: Object.values(
+      produtosComVencedor.reduce((acc: Record<string, any>, p: any) => {
+        const name = p.bestSupplier || "Pendente / Sem Vencedor";
+        if (!acc[name]) acc[name] = { name, items: [], total: 0 };
+        acc[name].items.push(p);
+        acc[name].total += p.totalItem;
+        return acc;
+      }, {})
+    ).sort((a: any, b: any) => {
       if (a.name === "Pendente / Sem Vencedor") return 1;
       if (b.name === "Pendente / Sem Vencedor") return -1;
       return a.name.localeCompare(b.name);
-    });
+    })
+  });
 
-    const exportMsg = viewMode === 'winners' 
-      ? generateQuoteExportMessage(
-          statsExport,
-          groupedDataExport,
-          totalEconomiaReal,
-          totalMelhorPreco,
-          (quote as any).analise_ia,
-          totalEconomiaPotencial,
-          company?.name
-        )
-      : generateComparativeQuoteExportMessage(
-          statsExport,
-          produtosComVencedor,
-          totalEconomiaReal,
-          totalMelhorPreco,
-          (quote as any).analise_ia,
-          company?.name
-        );
+  const handleWhatsAppExport = async () => {
+    if (!contentRef.current) return;
+    setIsCapturing(true);
 
-    toast.promise(
-      import("@/lib/whatsapp-service").then(m => m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg, company?.id)),
-      {
-        loading: 'Enviando relatório para WhatsApp...',
-        success: (res: any) => {
-          if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
-          return 'Relatório enviado com sucesso via API!';
-        },
-        error: (err) => `Falha no envio via API: ${err.message}. Tente novamente.`
-      }
-    );
+    try {
+      // 1. Capture the visible report as image
+      await new Promise(resolve => setTimeout(resolve, 400));
+      const canvas = await html2canvas(contentRef.current, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: contentRef.current.scrollWidth,
+        height: contentRef.current.scrollHeight,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.querySelector('[data-capture-container="true"]') as HTMLElement;
+          if (el) {
+            el.classList.remove('dark');
+            el.classList.add('light');
+            el.style.backgroundColor = '#ffffff';
+            el.style.color = '#000000';
+            clonedDoc.documentElement.classList.remove('dark');
+            clonedDoc.body.classList.remove('dark');
+          }
+        }
+      });
+
+      const base64Image = canvas.toDataURL("image/jpeg", 0.9);
+
+      // 2. Short greeting caption
+      const greeting = generateWhatsAppGreeting(
+        safeStr(quote.id),
+        products.length,
+        company?.name
+      );
+
+      // 3. Send via API (image + greeting as caption)
+      toast.promise(
+        import("@/lib/whatsapp-service").then(m =>
+          m.sendWhatsAppMedia(
+            m.DEFAULT_PHONE_NUMBER,
+            base64Image,
+            greeting,
+            company?.id
+          )
+        ),
+        {
+          loading: 'Enviando relatório para WhatsApp...',
+          success: (res: any) => {
+            if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
+            return 'Relatório enviado com sucesso via WhatsApp!';
+          },
+          error: (err) => `Falha no envio: ${err.message}`
+        }
+      );
+    } catch (error: any) {
+      toast.error("Erro ao capturar relatório: " + error.message);
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
+  const handleDownloadHTML = () => {
+    const html = generateQuoteReportHTML(getReportHTMLOpts());
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `relatorio-cotacao-${safeStr(quote.id).slice(0, 8)}.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Relatório HTML baixado com sucesso!");
   };
 
   const handleSendScreenshot = async () => {
@@ -327,20 +374,20 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       footer={
         <div className="flex w-full gap-2 p-4">
           <Button
-            onClick={handleSendScreenshot}
-            disabled={isCapturing}
+            onClick={handleDownloadHTML}
             variant="outline"
-            className="flex-1 h-12 font-bold text-xs uppercase tracking-wider"
+            className="h-12 font-bold text-xs uppercase tracking-wider px-5"
           >
-            {isCapturing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Camera className="h-4 w-4 mr-2" />}
-            Gerar Imagem do Relatório
+            <Download className="h-4 w-4 mr-2" />
+            Baixar Relatório
           </Button>
           <Button
             onClick={handleWhatsAppExport}
+            disabled={isCapturing}
             className="flex-1 h-12 bg-[#25D366] hover:bg-[#128C7E] text-white font-black text-xs uppercase tracking-wider"
           >
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Enviar como Texto
+            {isCapturing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MessageCircle className="h-4 w-4 mr-2" />}
+            {isCapturing ? "Capturando..." : "Enviar via WhatsApp"}
           </Button>
           <Button onClick={() => onOpenChange(false)} variant="ghost" className="h-12 font-bold px-6">
             Fechar

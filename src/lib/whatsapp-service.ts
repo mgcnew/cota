@@ -221,10 +221,198 @@ export function generateComparativeQuoteExportMessage(
     m += "_" + analysisResult + "_\n\n";
   }
 
-  m += "✅ *Relatório Auditado via CotaJá*\n";
+   m += "✅ *Relatório Auditado via CotaJá*\n";
   m += "_Inteligência em Gestão de Suprimentos_";
 
   return m;
+}
+
+/**
+ * Short WhatsApp greeting — no data, just announces the report image that follows.
+ */
+export function generateWhatsAppGreeting(
+  quoteId: string,
+  totalProdutos: number,
+  companyName: string = "MERCADÃO NOVO BOI JOÃO DIAS"
+): string {
+  return (
+    `📊 *RELATÓRIO DE NEGOCIAÇÃO*\n` +
+    `🏢 *${companyName.toUpperCase()}*\n\n` +
+    `Cotação *#${quoteId.slice(0, 8)}* — ${totalProdutos} itens\n` +
+    `Segue o comparativo completo em imagem. 👇\n\n` +
+    `_CotaJá • Inteligência de Compras_`
+  );
+}
+
+/**
+ * Generates a self-contained HTML report for the quotation.
+ * Responsive, dark-themed, audit-ready.
+ */
+export function generateQuoteReportHTML(opts: {
+  quoteId: string;
+  dateLabel: string;
+  companyName: string;
+  totalProdutos: number;
+  totalFornecedores: number;
+  fornecedoresRespondidos: number;
+  totalMelhorPreco: number;
+  totalEconomiaReal: number;
+  productsData: any[];
+  viewMode: "winners" | "comparative";
+  groupedData?: { name: string; items: any[]; total: number }[];
+}): string {
+  const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  // --- Header ---
+  let items = "";
+
+  if (opts.viewMode === "comparative") {
+    opts.productsData.forEach((p, idx) => {
+      const unit = (p.unidade || "un").toUpperCase();
+      const sorted = [...(p.allOffers || [])].sort((a: any, b: any) => {
+        if (a.isWinner) return -1;
+        if (b.isWinner) return 1;
+        return a.price - b.price;
+      });
+
+      let rows = "";
+      sorted.forEach((o: any, oIdx: number) => {
+        const neg = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
+        const winClass = o.isWinner ? "winner" : "";
+        const badge = o.isWinner ? `<span class="badge-winner">🏆 Vencedor</span>` : `<span class="rank">#${oIdx + 1}</span>`;
+        const priceCell = neg
+          ? `<span class="old-price">${fmt(o.initialPrice)}</span> → <strong>${fmt(o.price)}</strong>`
+          : fmt(o.price);
+
+        rows += `
+          <tr class="${winClass}">
+            <td>${badge} ${o.supplierName}</td>
+            <td class="num">${priceCell}</td>
+            <td class="num"><strong>${fmt(o.total)}</strong></td>
+          </tr>`;
+      });
+
+      items += `
+        <div class="product-card">
+          <div class="product-header">
+            <span class="product-idx">${idx + 1}</span>
+            <div>
+              <h3>${(p.productName || "").toUpperCase()}</h3>
+              <span class="demand">${p.quantidade} ${unit}</span>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Fornecedor</th><th class="num">Unitário</th><th class="num">Total</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    });
+  } else {
+    // Winners grouped view
+    (opts.groupedData || []).forEach(g => {
+      if (g.name === "Pendente / Sem Vencedor") return;
+      let rows = "";
+      g.items.forEach((i: any) => {
+        const unit = (i.unidade || "un").toUpperCase();
+        rows += `
+          <tr>
+            <td>${i.productName || i.product_name}</td>
+            <td class="num">${i.quantidade} ${unit}</td>
+            <td class="num">${fmt(i.bestPrice)}</td>
+            <td class="num"><strong>${fmt(i.totalItem)}</strong></td>
+          </tr>`;
+      });
+      items += `
+        <div class="product-card">
+          <div class="product-header supplier-header">
+            <span class="product-idx">🏢</span>
+            <div>
+              <h3>${g.name.toUpperCase()}</h3>
+              <span class="demand">${g.items.length} itens — Subtotal: ${fmt(g.total)}</span>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Unit.</th><th class="num">Total</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+    });
+  }
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Negociação — #${opts.quoteId.slice(0, 8)}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e4e4e7;padding:24px;min-height:100vh}
+  .container{max-width:900px;margin:0 auto}
+  .header{display:flex;align-items:center;gap:20px;padding-bottom:24px;border-bottom:2px solid #27272a;margin-bottom:32px}
+  .logo{width:56px;height:56px;background:#18181b;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:#fff;border:3px solid #3f3f46;flex-shrink:0}
+  .header h1{font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
+  .header p{font-size:12px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+  .header p span.brand{color:#10b981}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
+  .stat-card{background:#18181b;border:1px solid #27272a;border-radius:16px;padding:20px}
+  .stat-card .label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#71717a;margin-bottom:8px}
+  .stat-card .value{font-size:24px;font-weight:900;letter-spacing:-1px}
+  .stat-card.economy .value{color:#10b981}
+  .product-card{background:#18181b;border:1px solid #27272a;border-radius:20px;overflow:hidden;margin-bottom:20px}
+  .product-header{display:flex;align-items:center;gap:16px;padding:20px 24px;border-bottom:1px solid #27272a}
+  .product-idx{width:36px;height:36px;background:#27272a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#a1a1aa;flex-shrink:0}
+  .product-header h3{font-size:15px;font-weight:900;letter-spacing:-0.3px}
+  .demand{font-size:11px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+  table{width:100%;border-collapse:collapse}
+  thead th{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#52525b;padding:12px 24px;text-align:left;background:#111}
+  th.num,td.num{text-align:right}
+  tbody tr{border-top:1px solid #1e1e22;transition:background .15s}
+  tbody tr:hover{background:#1c1c20}
+  tbody td{padding:14px 24px;font-size:13px}
+  tr.winner{background:rgba(16,185,129,0.06)}
+  tr.winner td{color:#34d399;font-weight:700}
+  .badge-winner{display:inline-block;background:rgba(16,185,129,0.15);color:#10b981;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:999px;margin-right:8px}
+  .rank{display:inline-block;background:#27272a;color:#71717a;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;margin-right:8px}
+  .old-price{text-decoration:line-through;color:#71717a;font-size:11px;margin-right:4px}
+  .footer{text-align:center;padding:32px 0 16px;border-top:2px solid #27272a;margin-top:32px;color:#52525b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
+  .footer strong{color:#10b981}
+  @media(max-width:600px){
+    body{padding:12px}
+    .stats{grid-template-columns:1fr 1fr}
+    .stat-card .value{font-size:18px}
+    thead th,tbody td{padding:10px 12px;font-size:11px}
+    .product-header{padding:14px 16px}
+  }
+  @media print{body{background:#fff;color:#000}
+    .product-card,.stat-card{border-color:#ddd}
+    tr.winner{background:#f0fdf4}tr.winner td{color:#047857}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">M</div>
+    <div>
+      <h1>Relatório de Negociação</h1>
+      <p><span class="brand">#${opts.quoteId.slice(0, 8)}</span> &bull; ${opts.dateLabel} &bull; ${opts.companyName}</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card"><div class="label">Itens Cotados</div><div class="value">${opts.totalProdutos}</div></div>
+    <div class="stat-card"><div class="label">Fornecedores</div><div class="value">${opts.fornecedoresRespondidos}/${opts.totalFornecedores}</div></div>
+    <div class="stat-card economy"><div class="label">Economia Capturada</div><div class="value">${fmt(opts.totalEconomiaReal)}</div></div>
+    <div class="stat-card"><div class="label">Total Negociado</div><div class="value">${fmt(opts.totalMelhorPreco)}</div></div>
+  </div>
+
+  ${items}
+
+  <div class="footer">Relatório auditado via <strong>CotaJá</strong> — Inteligência de Compras</div>
+</div>
+</body>
+</html>`;
 }
 
 export function isWhatsAppConfigured(): boolean {
