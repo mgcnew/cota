@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   BarChart3,
   ClipboardList,
+  Flag,
   StickyNote,
   ScanLine,
   ChevronDown,
@@ -96,7 +97,8 @@ const menuCategories: MenuCategory[] = [
     title: "Ferramentas",
     items: [
       { title: "Anotações", url: "/dashboard/anotacoes", icon: StickyNote },
-      { title: "Etiquetas", url: "/dashboard/etiquetas", icon: ScanLine }
+      { title: "Etiquetas", url: "/dashboard/etiquetas", icon: ScanLine },
+      { title: "Faixas", url: "/dashboard/faixas", icon: Flag }
     ]
   },
   {
@@ -375,6 +377,11 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             <div className="px-2 py-1.5 w-full">
               <CompanySelector />
             </div>
+
+            <DropdownMenuItem onClick={() => navigate('/dashboard/faixas')} className="cursor-pointer rounded-xl py-2.5">
+              <Flag className="mr-3 h-4 w-4 text-brand" />
+              <span className="font-medium text-sm">Faixas</span>
+            </DropdownMenuItem>
 
             <DropdownMenuItem onClick={() => navigate('/dashboard/configuracoes')} className="cursor-pointer rounded-xl py-2.5">
               <Settings className="mr-3 h-4 w-4 opacity-70" />
