@@ -100,6 +100,49 @@ export async function sendWhatsAppImage(phone: string, base64Image: string, capt
 }
 
 /**
+ * Envia um documento via W-API
+ */
+export async function sendWhatsAppDocument(phone: string, base64Content: string, fileName: string, caption?: string): Promise<SendMessageResponse> {
+  const cleanPhone = phone.replace(/\D/g, '');
+  const formattedPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
+
+  if (!W_API_TOKEN || W_API_TOKEN === "COLE_AQUI_O_TOKEN_DA_IMAGEM") {
+    throw new Error("W-API Token não configurado no .env");
+  }
+
+  const baseUrl = import.meta.env.PROD ? 'https://api.w-api.app' : '/whatsapp-api';
+  const endpoint = `${baseUrl}/v1/message/send-document?instanceId=${W_API_INSTANCE}`;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${W_API_TOKEN}`
+      },
+      body: JSON.stringify({
+        phone: formattedPhone,
+        document: base64Content,
+        fileName: fileName,
+        caption: caption,
+        delayMessage: 10
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Erro ao enviar documento via W-API");
+    }
+
+    return data;
+  } catch (error: any) {
+    console.error("[W-API] Erro no envio de documento:", error);
+    throw error;
+  }
+}
+
+/**
  * Verifica se a API está configurada no ambiente
  */
 export const isWApiConfigured = !!W_API_TOKEN && W_API_TOKEN !== "COLE_AQUI_O_TOKEN_DA_IMAGEM";

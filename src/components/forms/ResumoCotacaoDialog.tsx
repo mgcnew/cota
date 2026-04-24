@@ -275,18 +275,23 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         company?.name
       );
 
-      // 3. Send via API (image + greeting as caption)
+      // 3. Generate HTML report content
+      const opts = getReportHTMLOpts();
+      const { generateQuoteReportHTML, sendWhatsAppReport, DEFAULT_PHONE_NUMBER } = await import("@/lib/whatsapp-service");
+      const htmlContent = generateQuoteReportHTML(opts);
+
+      // 4. Send via API (image + document + greeting)
       toast.promise(
-        import("@/lib/whatsapp-service").then(m =>
-          m.sendWhatsAppMedia(
-            m.DEFAULT_PHONE_NUMBER,
-            base64Image,
-            greeting,
-            company?.id
-          )
+        sendWhatsAppReport(
+          DEFAULT_PHONE_NUMBER,
+          base64Image,
+          htmlContent,
+          safeStr(quote.id),
+          greeting,
+          company?.id
         ),
         {
-          loading: 'Enviando relatório para WhatsApp...',
+          loading: 'Enviando relatório completo para WhatsApp...',
           success: (res: any) => {
             if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
             return 'Relatório enviado com sucesso via WhatsApp!';

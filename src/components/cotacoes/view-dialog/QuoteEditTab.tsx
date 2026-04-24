@@ -221,6 +221,7 @@ export function QuoteEditTab({
       await onAddQuoteItem({
         quoteId,
         productId: selectedProductToAdd,
+        productName: selectedProduct?.name || "Produto",
         quantidade: productQuantity,
         unidade: productUnit
       });

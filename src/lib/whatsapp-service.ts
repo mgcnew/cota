@@ -1,4 +1,4 @@
-import { sendWhatsAppMessage as sendMsg, sendWhatsAppImage, isWApiConfigured } from "./w-api";
+import { sendWhatsAppMessage as sendMsg, sendWhatsAppImage, sendWhatsAppDocument, isWApiConfigured } from "./w-api";
 import { supabase } from "@/integrations/supabase/client";
 
 const fmtCurrency = (v: number) =>
@@ -70,16 +70,32 @@ export async function sendWhatsAppMedia(
   company_id?: string
 ) {
   try {
-    // Tenta usar configuração do banco primeiro se existir
-    const config = company_id ? await getWhatsAppConfig(company_id) : null;
-    
-    if (config?.api_url && config?.api_key && config?.instance_name) {
-       // Suporte para envio de mídia na Evolution API se necessário futuramente
-       // Por enquanto mantém o fallback
-    }
-
     const data = await sendWhatsAppImage(phone, base64Image, caption);
     return { success: true, messageId: data.data?.messageId || "wapi-sent" };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
+export async function sendWhatsAppReport(
+  phone: string,
+  base64Image: string,
+  htmlContent: string,
+  quoteId: string,
+  caption?: string,
+  company_id?: string
+) {
+  try {
+    // 1. Enviar imagem com a saudação como legenda
+    const imgResult = await sendWhatsAppImage(phone, base64Image, caption);
+    
+    // 2. Enviar o HTML como documento
+    const base64Html = btoa(unescape(encodeURIComponent(htmlContent)));
+    const fileName = `relatorio_cotacao_${quoteId.slice(0, 8)}.html`;
+    
+    await sendWhatsAppDocument(phone, base64Html, fileName, "Arquivo do Relatório Interativo");
+    
+    return { success: true, messageId: imgResult.data?.messageId || "sent" };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
