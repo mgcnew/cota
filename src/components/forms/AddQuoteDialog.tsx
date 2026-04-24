@@ -86,6 +86,9 @@ import {
   FileText,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
+  RotateCcw,
   Zap,
   Search,
   Loader2,
@@ -190,16 +193,27 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const debouncedProductSearch = useDebounce(productSearch, 300);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Supplier[]>([]);
   const [activeTab, setActiveTab] = useState("produtos");
+  const [personalizeViewMode, setPersonalizeViewMode] = useState<"by-supplier" | "by-product">("by-supplier");
+  const [personalizeSearch, setPersonalizeSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
   const prevTabIndexRef = useRef(0);
+  const prevProductIdsRef = useRef<string[]>([]);
 
   const tabs = useMemo(() => [
     { id: "produtos", label: "Produtos", icon: Package },
-    { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Clock },
-    { id: "detalhes", label: "Detalhes", icon: FileText }
+    { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Building2 },
+    { id: "personalizar", label: "Configurar Itens", icon: MousePointerClick },
+    { id: "detalhes", label: "Resumo", icon: FileText }
   ], []);
+
+  const [supplierItemAssignments, setSupplierItemAssignments] = useState<Record<string, string[]>>({});
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const toggleExpanded = (id: string) => {
+    setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
@@ -260,6 +274,40 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     control: form.control,
     name: "produtos",
   });
+
+  // Função para manter os fornecedores sincronizados com os produtos
+  useEffect(() => {
+    const currentProductIds = fields.map(f => f.produtoId);
+    const prevProductIds = prevProductIdsRef.current;
+    
+    // Novas IDs que foram adicionadas agora
+    const newProductIds = currentProductIds.filter(id => !prevProductIds.includes(id));
+    
+    setSupplierItemAssignments(prev => {
+      const next = { ...prev };
+      const supplierIds = Object.keys(next);
+      
+      // Se não houver fornecedores ainda, não fazemos nada (serão tratados ao selecionar o fornecedor)
+      if (supplierIds.length > 0) {
+        supplierIds.forEach(supplierId => {
+          // Se o fornecedor já tiver atribuições, adicionamos apenas os NOVOS produtos
+          // para manter a "liberdade" de ele já ter removido outros produtos
+          if (newProductIds.length > 0) {
+            const currentAssignments = next[supplierId] || [];
+            // Adicionamos os novos ao final, evitando duplicatas
+            const updatedAssignments = [...new Set([...currentAssignments, ...newProductIds])];
+            next[supplierId] = updatedAssignments;
+          }
+          
+          // Sempre filtramos para remover IDs que não existem mais (produtos deletados)
+          next[supplierId] = (next[supplierId] || []).filter(id => currentProductIds.includes(id));
+        });
+      }
+      return next;
+    });
+    
+    prevProductIdsRef.current = currentProductIds;
+  }, [fields.length]);
 
   // Filter suppliers only if search has content (Mover para cima para uso nos handlers)
   const filteredSuppliers = supplierSearch.length >= 1
@@ -608,15 +656,18 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
       const quoteSupplierItemsData: any[] = [];
       data.fornecedoresIds.forEach(supplierId => {
-        data.produtos.forEach(produto => {
-          quoteSupplierItemsData.push({
-            quote_id: quote.id,
-            supplier_id: supplierId,
-            product_id: produto.produtoId,
-            product_name: produto.produtoNome,
-            valor_oferecido: 0
+        const assignedProductIds = supplierItemAssignments[supplierId] || data.produtos.map(p => p.produtoId);
+        data.produtos
+          .filter(produto => assignedProductIds.includes(produto.produtoId))
+          .forEach(produto => {
+            quoteSupplierItemsData.push({
+              quote_id: quote.id,
+              supplier_id: supplierId,
+              product_id: produto.produtoId,
+              product_name: produto.produtoNome,
+              valor_oferecido: 0
+            });
           });
-        });
       });
 
       const { error: supplierItemsError } = await supabase
@@ -669,6 +720,12 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       const newSuppliers = [...selectedSuppliers, supplier];
       setSelectedSuppliers(newSuppliers);
       form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+      
+      // Ao selecionar um fornecedor, ele recebe todos os produtos por padrão
+      setSupplierItemAssignments(prev => ({
+        ...prev,
+        [supplier.id]: fields.map(f => f.produtoId)
+      }));
     }
     setSupplierSearch("");
   };
@@ -677,6 +734,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     const newSuppliers = selectedSuppliers.filter(s => s.id !== supplierId);
     setSelectedSuppliers(newSuppliers);
     form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+
+    // Remove as atribuições de itens do fornecedor
+    setSupplierItemAssignments(prev => {
+      const next = { ...prev };
+      delete next[supplierId];
+      return next;
+    });
 
     if (focusedSupplierId === supplierId) {
       setFocusedSupplierId(null);
@@ -699,15 +763,20 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setSelectedSuppliers(newSuppliers);
       form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
     } else {
-      // Add visible/filtered suppliers to selection (avoid duplicates)
       const newSuppliers = [...selectedSuppliers];
+      const newAssignments = { ...supplierItemAssignments };
+      const currentProductIds = fields.map(f => f.produtoId);
+
       filteredSuppliers.forEach(s => {
         if (!newSuppliers.some(selected => selected.id === s.id)) {
           newSuppliers.push(s);
+          newAssignments[s.id] = currentProductIds;
         }
       });
+      
       setSelectedSuppliers(newSuppliers);
       form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
+      setSupplierItemAssignments(newAssignments);
 
       toast({
         title: "✅ Fornecedores selecionados",
@@ -720,6 +789,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   const handleClearAllSuppliers = () => {
     setSelectedSuppliers([]);
     form.setValue("fornecedoresIds", []);
+    setSupplierItemAssignments({});
   };
 
   const progress = ((currentTabIndex + 1) / tabs.length) * 100;
@@ -734,6 +804,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           ? !!formValues.dataPlanejada
           : !!formValues.dataInicio && !!formValues.dataFim;
         return hasPeriod && selectedSuppliers.length > 0;
+      }
+      case "personalizar": {
+        // Pelo menos um fornecedor deve ter pelo menos um produto
+        return Object.values(supplierItemAssignments).some(ids => ids.length > 0);
       }
       case "detalhes":
         return true;
@@ -788,7 +862,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           )}
           <div>
             <DialogTitle className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
-              {currentTabIndex === 0 ? "Produtos" : currentTabIndex === 1 ? "Período & Fornecedores" : "Revisão"}
+              {currentTabIndex === 0 ? "Produtos" : 
+               currentTabIndex === 1 ? "Período & Fornecedores" : 
+               currentTabIndex === 2 ? "Configurar Itens" : 
+               "Resumo"}
             </DialogTitle>
             <DialogDescription className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
               Passo {currentTabIndex + 1} de {tabs.length}
@@ -1245,7 +1322,253 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               </div>
             )}
 
-            {/* ── STEP 3: Review ── */}
+            {/* ── STEP 3: Personalize ── */}
+            {activeTab === "personalizar" && (
+              <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                {/* Header controls */}
+                <div className="px-4 pb-3 space-y-3 flex-shrink-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex p-1 rounded-xl bg-muted/50 border border-border/50 flex-1">
+                      <button
+                        type="button"
+                        onClick={() => setPersonalizeViewMode("by-supplier")}
+                        className={cn(
+                          "flex-1 py-2 text-xs font-medium rounded-lg transition-all",
+                          personalizeViewMode === "by-supplier" 
+                            ? "bg-background shadow-sm text-brand" 
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        Por Fornecedor
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPersonalizeViewMode("by-product")}
+                        className={cn(
+                          "flex-1 py-2 text-xs font-medium rounded-lg transition-all",
+                          personalizeViewMode === "by-product" 
+                            ? "bg-background shadow-sm text-brand" 
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        Por Produto
+                      </button>
+                    </div>
+                    
+                    <div className="flex gap-1 flex-shrink-0">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const allProductIds = fields.map(f => f.produtoId);
+                          const newAssignments: Record<string, string[]> = {};
+                          selectedSuppliers.forEach(s => {
+                            newAssignments[s.id] = [...allProductIds];
+                          });
+                          setSupplierItemAssignments(newAssignments);
+                        }}
+                        className="h-9 w-9 rounded-xl bg-brand/5 text-brand"
+                        title="Atribuir Tudo"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setSupplierItemAssignments({})}
+                        className="h-9 w-9 rounded-xl bg-red-50 text-red-500 dark:bg-red-950/20"
+                        title="Limpar Tudo"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                    <Input
+                      placeholder={personalizeViewMode === "by-supplier" ? "Filtrar fornecedores..." : "Filtrar produtos..."}
+                      value={personalizeSearch}
+                      onChange={(e) => setPersonalizeSearch(e.target.value)}
+                      className={cn(ds.components.input.root, "pl-10 h-10 text-sm")}
+                    />
+                  </div>
+                </div>
+
+                {/* List of items */}
+                <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-3">
+                  {personalizeViewMode === "by-supplier" ? (
+                    selectedSuppliers
+                      .filter(s => s.name.toLowerCase().includes(personalizeSearch.toLowerCase()))
+                      .map(supplier => {
+                        const assignedIds = supplierItemAssignments[supplier.id] || [];
+                        const isExpanded = expandedItems[supplier.id];
+                        
+                        return (
+                          <div key={supplier.id} className={cn("rounded-2xl border transition-all overflow-hidden", ds.colors.surface.card, ds.colors.border.subtle)}>
+                            <div 
+                              onClick={() => toggleExpanded(supplier.id)}
+                              className="p-4 flex items-center justify-between cursor-pointer active:bg-muted/30"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary, "truncate")}>
+                                  {supplier.name}
+                                </p>
+                                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                  {assignedIds.length} de {fields.length} produtos
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="flex gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleAllItemsForSupplier(supplier.id, true);
+                                    }}
+                                    className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-brand/10 text-brand rounded-md border border-brand/20"
+                                  >
+                                    Tudo
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      toggleAllItemsForSupplier(supplier.id, false);
+                                    }}
+                                    className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-md border border-border"
+                                  >
+                                    Limpar
+                                  </button>
+                                </div>
+                                {isExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400" /> : <ChevronDown className="h-4 w-4 text-zinc-400" />}
+                              </div>
+                            </div>
+
+                            {isExpanded && (
+                              <div className="px-4 pb-4 pt-0 space-y-2 border-t border-border/30 bg-muted/20 animate-in fade-in slide-in-from-top-1 duration-200">
+                                {fields.map((field, idx) => {
+                                  const productId = field.produtoId;
+                                  const productName = form.watch(`produtos.${idx}.produtoNome`);
+                                  const isChecked = assignedIds.includes(productId);
+                                  
+                                  return (
+                                    <div 
+                                      key={productId}
+                                      onClick={() => toggleItemAssignment(supplier.id, productId)}
+                                      className="flex items-center gap-3 py-2 cursor-pointer"
+                                    >
+                                      <div className={cn(
+                                        "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                        isChecked ? "bg-brand border-brand text-zinc-950" : "border-zinc-300 dark:border-zinc-700"
+                                      )}>
+                                        {isChecked && <Check className="h-3 w-3" />}
+                                      </div>
+                                      <span className={cn(ds.typography.size.xs, isChecked ? ds.colors.text.primary : ds.colors.text.secondary)}>
+                                        {productName}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                  ) : (
+                    fields
+                      .filter(f => f.produtoNome.toLowerCase().includes(personalizeSearch.toLowerCase()))
+                      .map((field, idx) => {
+                        const productId = field.produtoId;
+                        const productName = form.watch(`produtos.${idx}.produtoNome`);
+                        const isExpanded = expandedItems[productId];
+                        const suppliersAssigned = selectedSuppliers.filter(s => (supplierItemAssignments[s.id] || []).includes(productId));
+                        
+                        return (
+                          <div key={productId} className={cn("rounded-2xl border transition-all overflow-hidden", ds.colors.surface.card, ds.colors.border.subtle)}>
+                            <div 
+                              onClick={() => toggleExpanded(productId)}
+                              className="p-4 flex items-center justify-between cursor-pointer active:bg-muted/30"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary, "truncate")}>
+                                  {productName}
+                                </p>
+                                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                  {suppliersAssigned.length} de {selectedSuppliers.length} fornecedores
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="flex gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      selectedSuppliers.forEach(s => {
+                                        if (!(supplierItemAssignments[s.id] || []).includes(productId)) {
+                                          toggleItemAssignment(s.id, productId);
+                                        }
+                                      });
+                                    }}
+                                    className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-brand/10 text-brand rounded-md border border-brand/20"
+                                  >
+                                    Todos
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      selectedSuppliers.forEach(s => {
+                                        if ((supplierItemAssignments[s.id] || []).includes(productId)) {
+                                          toggleItemAssignment(s.id, productId);
+                                        }
+                                      });
+                                    }}
+                                    className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-500 rounded-md border border-border"
+                                  >
+                                    Nenhum
+                                  </button>
+                                </div>
+                                {isExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400" /> : <ChevronDown className="h-4 w-4 text-zinc-400" />}
+                              </div>
+                            </div>
+
+                            {isExpanded && (
+                              <div className="px-4 pb-4 pt-0 space-y-2 border-t border-border/30 bg-muted/20 animate-in fade-in slide-in-from-top-1 duration-200">
+                                {selectedSuppliers.map(supplier => {
+                                  const isChecked = (supplierItemAssignments[supplier.id] || []).includes(productId);
+                                  
+                                  return (
+                                    <div 
+                                      key={supplier.id}
+                                      onClick={() => toggleItemAssignment(supplier.id, productId)}
+                                      className="flex items-center gap-3 py-2 cursor-pointer"
+                                    >
+                                      <div className={cn(
+                                        "w-5 h-5 rounded border flex items-center justify-center transition-all",
+                                        isChecked ? "bg-brand border-brand text-zinc-950" : "border-zinc-300 dark:border-zinc-700"
+                                      )}>
+                                        {isChecked && <Check className="h-3 w-3" />}
+                                      </div>
+                                      <span className={cn(ds.typography.size.xs, isChecked ? ds.colors.text.primary : ds.colors.text.secondary)}>
+                                        {supplier.name}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 4: Review ── */}
             {activeTab === "detalhes" && (
               <div className="flex-1 overflow-y-auto px-4 pb-24">
                 <div className="space-y-4">
@@ -2164,6 +2487,26 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                             </p>
                                           )}
                                         </div>
+                                        {isSelected && (
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-bold bg-brand/5 border-brand/20 text-brand">
+                                              {(supplierItemAssignments[supplier.id] || []).length}/{fields.length} itens
+                                            </Badge>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="icon"
+                                              className="h-7 w-7 text-brand hover:bg-brand/10"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                changeTab("personalizar");
+                                                setPersonalizeViewMode("by-supplier");
+                                              }}
+                                            >
+                                              <LayoutList className="h-3.5 w-3.5" />
+                                            </Button>
+                                          </div>
+                                        )}
                                       </button>
                                     );
                                   })}
@@ -2209,8 +2552,361 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                       </div>
                     </TabsContent>
-                        {/* Detalhes Tab - Resumo Final Minimalista */}
-                        <TabsContent value="detalhes" className="flex-1 h-full min-h-0 overflow-hidden m-0 p-0">
+                    <TabsContent value="personalizar" className="flex-1 h-full min-h-0 overflow-hidden m-0 p-0">
+                      <div className={cn("h-full flex flex-col", ds.colors.surface.page)}>
+                        <div className="p-4 sm:p-5 border-b flex-shrink-0 bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand">
+                                <MousePointerClick className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <h3 className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>
+                                  Configurar Envio
+                                </h3>
+                                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                  Escolha quais produtos cada fornecedor receberá.
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border/50">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setPersonalizeViewMode("by-supplier")}
+                                className={cn(
+                                  "h-8 text-xs px-3 rounded-lg transition-all",
+                                  personalizeViewMode === "by-supplier" 
+                                    ? "bg-background shadow-sm text-brand font-bold" 
+                                    : "text-muted-foreground hover:text-primary"
+                                )}
+                              >
+                                <Building2 className="h-3.5 w-3.5 mr-1.5" />
+                                Por Fornecedor
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setPersonalizeViewMode("by-product")}
+                                className={cn(
+                                  "h-8 text-xs px-3 rounded-lg transition-all",
+                                  personalizeViewMode === "by-product" 
+                                    ? "bg-background shadow-sm text-brand font-bold" 
+                                    : "text-muted-foreground hover:text-primary"
+                                )}
+                              >
+                                <Package className="h-3.5 w-3.5 mr-1.5" />
+                                Por Produto
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Search & Bulk Actions */}
+                        <div className="px-4 py-3 border-b bg-muted/20 flex flex-wrap items-center justify-between gap-3">
+                          <div className="relative flex-1 min-w-[200px] max-w-md">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                            <Input
+                              placeholder={personalizeViewMode === "by-supplier" ? "Filtrar fornecedores..." : "Filtrar produtos..."}
+                              value={personalizeSearch}
+                              onChange={(e) => setPersonalizeSearch(e.target.value)}
+                              className="pl-9 h-9 text-xs bg-background/50 border-border/50 focus:border-brand/50 rounded-lg"
+                            />
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const currentProductIds = fields.map(f => f.produtoId);
+                                const newAssignments = { ...supplierItemAssignments };
+                                selectedSuppliers.forEach(s => {
+                                  newAssignments[s.id] = currentProductIds;
+                                });
+                                setSupplierItemAssignments(newAssignments);
+                                toast({ title: "✅ Todos os itens atribuídos a todos os fornecedores" });
+                              }}
+                              className="h-8 text-[10px] uppercase tracking-wider font-bold hover:bg-brand/10 border-brand/30 text-brand"
+                            >
+                              Atribuir Tudo
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newAssignments = { ...supplierItemAssignments };
+                                selectedSuppliers.forEach(s => {
+                                  newAssignments[s.id] = [];
+                                });
+                                setSupplierItemAssignments(newAssignments);
+                                toast({ 
+                                  title: "⚠️ Atribuições limpas",
+                                  description: "Nenhum fornecedor receberá itens agora."
+                                });
+                              }}
+                              className="h-8 text-[10px] uppercase tracking-wider font-bold hover:bg-red-50 border-red-200 text-red-500"
+                            >
+                              Limpar Tudo
+                            </Button>
+                          </div>
+                        </div>
+
+                        <ScrollArea className="flex-1">
+                          <div className="p-4 sm:p-6 pb-24">
+                            {selectedSuppliers.length === 0 ? (
+                              <div className="py-20 text-center space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-muted mx-auto flex items-center justify-center">
+                                  <Building2 className="h-8 w-8 opacity-20 text-brand" />
+                                </div>
+                                <div className="space-y-1">
+                                  <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary)}>
+                                    Nenhum fornecedor selecionado
+                                  </p>
+                                  <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                                    Selecione os fornecedores na aba anterior para configurar os itens.
+                                  </p>
+                                </div>
+                                <Button 
+                                  variant="outline" 
+                                  onClick={() => changeTab("periodo_fornecedores")}
+                                  className="h-9 text-xs"
+                                >
+                                  Voltar para Seleção
+                                </Button>
+                              </div>
+                            ) : personalizeViewMode === "by-supplier" ? (
+                              <div className="grid grid-cols-1 gap-6">
+                                {selectedSuppliers
+                                  .filter(s => s.name.toLowerCase().includes(personalizeSearch.toLowerCase()))
+                                  .map((supplier) => (
+                                  <div key={supplier.id} className={cn(
+                                    ds.colors.surface.card,
+                                    "border border-border/60 shadow-sm overflow-hidden rounded-2xl transition-all hover:border-brand/30"
+                                  )}>
+                                    <div className="py-3 px-4 bg-muted/40 border-b flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+                                          <Building2 className="h-4 w-4 text-brand" />
+                                        </div>
+                                        <div>
+                                          <h4 className="text-sm font-bold text-primary">{supplier.name}</h4>
+                                          <p className="text-[10px] text-muted-foreground">
+                                            {(supplierItemAssignments[supplier.id] || []).length} de {fields.length} itens selecionados
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSupplierItemAssignments(prev => ({
+                                              ...prev,
+                                              [supplier.id]: fields.map(f => f.produtoId)
+                                            }));
+                                          }}
+                                          className="h-7 text-[10px] font-bold text-brand hover:bg-brand/10 px-2"
+                                        >
+                                          Tudo
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            const currentAssignments = supplierItemAssignments[supplier.id] || [];
+                                            const newAssignments = { ...supplierItemAssignments };
+                                            selectedSuppliers.forEach(s => {
+                                              newAssignments[s.id] = [...currentAssignments];
+                                            });
+                                            setSupplierItemAssignments(newAssignments);
+                                            toast({ 
+                                              title: "📋 Configuração copiada",
+                                              description: `A lista de ${supplier.name} foi aplicada a todos os fornecedores.`,
+                                              duration: 2000
+                                            });
+                                          }}
+                                          className="h-7 text-[10px] font-bold text-blue-500 hover:bg-blue-50 px-2"
+                                        >
+                                          Replicar
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSupplierItemAssignments(prev => ({
+                                              ...prev,
+                                              [supplier.id]: []
+                                            }));
+                                          }}
+                                          className="h-7 text-[10px] font-bold text-red-500 hover:bg-red-50 px-2"
+                                        >
+                                          Limpar
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <div className="p-3 bg-background/50">
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {fields.map((field) => {
+                                          const isAssigned = (supplierItemAssignments[supplier.id] || []).includes(field.produtoId);
+                                          return (
+                                            <button
+                                              key={field.id}
+                                              type="button"
+                                              onClick={() => {
+                                                setSupplierItemAssignments(prev => {
+                                                  const current = prev[supplier.id] || [];
+                                                  const next = current.includes(field.produtoId)
+                                                    ? current.filter(id => id !== field.produtoId)
+                                                    : [...current, field.produtoId];
+                                                  return { ...prev, [supplier.id]: next };
+                                                });
+                                              }}
+                                              className={cn(
+                                                "flex flex-col p-2.5 rounded-xl border text-left transition-all relative group",
+                                                isAssigned 
+                                                  ? "border-brand/40 bg-brand/[0.04] ring-1 ring-brand/10" 
+                                                  : "border-border/50 bg-transparent opacity-60 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 hover:border-brand/20"
+                                              )}
+                                            >
+                                              <div className={cn(
+                                                "absolute top-2 right-2 w-4 h-4 rounded-full border flex items-center justify-center transition-all",
+                                                isAssigned ? "bg-brand border-brand text-zinc-950 scale-100" : "bg-transparent border-border scale-90"
+                                              )}>
+                                                {isAssigned && <Check className="h-2.5 w-2.5 stroke-[4]" />}
+                                              </div>
+                                              <p className={cn("text-[11px] font-bold leading-tight pr-4", isAssigned ? "text-brand" : "text-primary")}>
+                                                {field.produtoNome}
+                                              </p>
+                                              <p className="text-[10px] text-muted-foreground mt-1">
+                                                {field.quantidade} {field.unidade}
+                                              </p>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 gap-6">
+                                {fields
+                                  .filter(f => f.produtoNome.toLowerCase().includes(personalizeSearch.toLowerCase()))
+                                  .map((field) => (
+                                  <div key={field.id} className={cn(
+                                    ds.colors.surface.card,
+                                    "border border-border/60 shadow-sm overflow-hidden rounded-2xl transition-all hover:border-brand/30"
+                                  )}>
+                                    <div className="py-3 px-4 bg-muted/40 border-b flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
+                                          <Package className="h-4 w-4 text-brand" />
+                                        </div>
+                                        <div>
+                                          <h4 className="text-sm font-bold text-primary">{field.produtoNome}</h4>
+                                          <p className="text-[10px] text-muted-foreground">
+                                            {selectedSuppliers.filter(s => (supplierItemAssignments[s.id] || []).includes(field.produtoId)).length} de {selectedSuppliers.length} fornecedores
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSupplierItemAssignments(prev => {
+                                              const next = { ...prev };
+                                              selectedSuppliers.forEach(s => {
+                                                const current = next[s.id] || [];
+                                                if (!current.includes(field.produtoId)) {
+                                                  next[s.id] = [...current, field.produtoId];
+                                                }
+                                              });
+                                              return next;
+                                            });
+                                          }}
+                                          className="h-7 text-[10px] font-bold text-brand hover:bg-brand/10 px-2"
+                                        >
+                                          Todos
+                                        </Button>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            setSupplierItemAssignments(prev => {
+                                              const next = { ...prev };
+                                              selectedSuppliers.forEach(s => {
+                                                next[s.id] = (next[s.id] || []).filter(id => id !== field.produtoId);
+                                              });
+                                              return next;
+                                            });
+                                          }}
+                                          className="h-7 text-[10px] font-bold text-red-500 hover:bg-red-50 px-2"
+                                        >
+                                          Nenhum
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    <div className="p-3 bg-background/50">
+                                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                        {selectedSuppliers.map((supplier) => {
+                                          const isAssigned = (supplierItemAssignments[supplier.id] || []).includes(field.produtoId);
+                                          return (
+                                            <button
+                                              key={supplier.id}
+                                              type="button"
+                                              onClick={() => {
+                                                setSupplierItemAssignments(prev => {
+                                                  const current = prev[supplier.id] || [];
+                                                  const next = current.includes(field.produtoId)
+                                                    ? current.filter(id => id !== field.produtoId)
+                                                    : [...current, field.produtoId];
+                                                  return { ...prev, [supplier.id]: next };
+                                                });
+                                              }}
+                                              className={cn(
+                                                "flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all relative group",
+                                                isAssigned 
+                                                  ? "border-brand/40 bg-brand/[0.04] ring-1 ring-brand/10" 
+                                                  : "border-border/50 bg-transparent opacity-60 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 hover:border-brand/20"
+                                              )}
+                                            >
+                                              <div className={cn(
+                                                "w-4 h-4 rounded-full border flex items-center justify-center transition-all flex-shrink-0",
+                                                isAssigned ? "bg-brand border-brand text-zinc-950" : "bg-transparent border-border"
+                                              )}>
+                                                {isAssigned && <Check className="h-2.5 w-2.5 stroke-[4]" />}
+                                              </div>
+                                              <p className={cn("text-[11px] font-bold leading-tight truncate", isAssigned ? "text-brand" : "text-primary")}>
+                                                {supplier.name}
+                                              </p>
+                                            </button>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                        </div>
+                      </ScrollArea>
+                      </div>
+                    </TabsContent>
+
+                    {/* Detalhes Tab - Resumo Final Minimalista */}
+                    <TabsContent value="detalhes" className="flex-1 h-full min-h-0 overflow-hidden m-0 p-0">
                           <ScrollArea className="h-full custom-scrollbar">
                             <div className="p-4 sm:p-8 max-w-4xl mx-auto space-y-8 pb-32">
                               
@@ -2302,16 +2998,23 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       </h3>
                                     </div>
                                     <div className="flex flex-wrap gap-2">
-                                      {selectedSuppliers.map((s) => (
-                                        <span key={s.id} className={cn(
-                                          "px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold border",
-                                          ds.colors.surface.section,
-                                          ds.colors.border.subtle,
-                                          ds.colors.text.secondary
-                                        )}>
-                                          {s.name}
-                                        </span>
-                                      ))}
+                                      {selectedSuppliers.map((s) => {
+                                        const assignedCount = (supplierItemAssignments[s.id] || []).length;
+                                        const totalCount = fields.length;
+                                        const isPartial = assignedCount < totalCount;
+                                        
+                                        return (
+                                          <div key={s.id} className={cn(
+                                            "flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold border transition-all",
+                                            isPartial ? "bg-amber-50 border-amber-200 text-amber-700" : cn(ds.colors.surface.section, ds.colors.border.subtle, ds.colors.text.secondary)
+                                          )}>
+                                            {s.name}
+                                            <span className="opacity-50">
+                                              ({assignedCount}/{totalCount})
+                                            </span>
+                                          </div>
+                                        );
+                                      })}
                                       {selectedSuppliers.length === 0 && (
                                         <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>Nenhum selecionado</p>
                                       )}
