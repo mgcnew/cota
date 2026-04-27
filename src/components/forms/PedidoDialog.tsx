@@ -22,7 +22,7 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Plus, Trash2, Loader2, Building2, Calendar, Package, FileText, 
   Save, ShoppingCart, X, Search, ClipboardList, Download,
-  DollarSign, ChevronLeft, ChevronRight, Check
+  DollarSign, ChevronLeft, ChevronRight, Check, Calculator, ArrowLeftRight, ChevronDown
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -96,6 +96,17 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const newProductInputRef = useRef<HTMLInputElement>(null);
   const newQuantityInputRef = useRef<HTMLInputElement>(null);
   const newPriceInputRef = useRef<HTMLInputElement>(null);
+
+  // Package conversion states
+  const [showConversion, setShowConversion] = useState(false);
+  const [conversionMode, setConversionMode] = useState<'box_to_unit' | 'unit_to_box'>('box_to_unit');
+  const [unPerBox, setUnPerBox] = useState('');
+
+  // Calculator states
+  const [showCalc, setShowCalc] = useState(false);
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcExpr, setCalcExpr] = useState('');
+  const calcRef = useRef({ prevVal: null as number | null, op: null as string | null, waitNew: false });
 
   // Data states
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -326,6 +337,87 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     }
   };
 
+  // ── Calculator ─────────────────────────────────────────────────────
+  const calcComputeFn = (a: number, b: number, op: string) => {
+    const r = op === '+' ? a+b : op === '-' ? a-b : op === '*' ? a*b : b !== 0 ? a/b : 0;
+    return Math.round(r * 1e10) / 1e10;
+  };
+
+  const handleCalcKey = useCallback((key: string) => {
+    const cs = calcRef.current;
+    if (key === 'C') {
+      setCalcDisplay('0'); setCalcExpr('');
+      calcRef.current = { prevVal: null, op: null, waitNew: false }; return;
+    }
+    if (key === '⌫') { setCalcDisplay(d => d.length > 1 ? d.slice(0, -1) : '0'); return; }
+    if ('0123456789.'.includes(key)) {
+      setCalcDisplay(d => {
+        if (cs.waitNew) { cs.waitNew = false; return key === '.' ? '0.' : key; }
+        if (key === '.' && d.includes('.')) return d;
+        return d === '0' && key !== '.' ? key : d + key;
+      }); return;
+    }
+    const opMap: Record<string, string> = { '×': '*', '÷': '/', '+': '+', '-': '-' };
+    if (opMap[key]) {
+      setCalcDisplay(d => {
+        const val = parseFloat(d);
+        if (cs.prevVal !== null && cs.op && !cs.waitNew) {
+          const res = calcComputeFn(cs.prevVal, val, cs.op);
+          const s = Number.isInteger(res) ? String(res) : res.toFixed(8).replace(/\.?0+$/, '') || '0';
+          cs.prevVal = res; setCalcExpr(`${s} ${key}`); cs.op = opMap[key]; cs.waitNew = true;
+          return s;
+        }
+        cs.prevVal = val; setCalcExpr(`${val} ${key}`); cs.op = opMap[key]; cs.waitNew = true;
+        return d;
+      }); return;
+    }
+    if (key === '=') {
+      if (cs.prevVal === null || !cs.op) return;
+      setCalcDisplay(d => {
+        const val = parseFloat(d);
+        const res = calcComputeFn(cs.prevVal!, val, cs.op!);
+        const s = Number.isInteger(res) ? String(res) : res.toFixed(8).replace(/\.?0+$/, '') || '0';
+        cs.prevVal = null; cs.op = null; cs.waitNew = true; setCalcExpr('');
+        return s;
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!showCalc) return;
+    const kmap: Record<string, string> = {
+      '0':'0','1':'1','2':'2','3':'3','4':'4','5':'5','6':'6','7':'7','8':'8','9':'9',
+      '.':'.', ',':'.', '+':'+', '-':'-', '*':'×', '/':'÷', 'Enter':'=', '=':'='
+    };
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const mapped = kmap[e.key];
+      if (mapped) { e.preventDefault(); handleCalcKey(mapped); }
+      else if (e.key === 'Backspace') { e.preventDefault(); handleCalcKey('⌫'); }
+      else if (e.key === 'Delete') { e.preventDefault(); handleCalcKey('C'); }
+      else if (e.key === 'Escape') setShowCalc(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [showCalc, handleCalcKey]);
+
+  // ── Conversion helpers ─────────────────────────────────────────────
+  const conversionResult = (() => {
+    const price = parseFloat(String(newPrice).replace(',', '.')) || 0;
+    const factor = parseFloat(unPerBox.replace(',', '.')) || 0;
+    if (!price || !factor) return null;
+    if (conversionMode === 'box_to_unit') return { label: 'Preço por unidade', value: price / factor };
+    return { label: 'Preço por caixa', value: price * factor };
+  })();
+
+  const handleApplyConversion = () => {
+    if (!conversionResult) return;
+    setNewPrice(conversionResult.value.toFixed(4).replace(/\.?0+$/, ''));
+    if (conversionMode === 'box_to_unit') setNewProductUnit('un');
+    else setNewProductUnit('cx');
+    setShowConversion(false);
+  };
+
   const handleSubmit = async () => {
     if (!user || !fornecedor || !dataEntrega) {
       toast({ title: "Erro", description: "Preencha fornecedor e data de entrega", variant: "destructive" });
@@ -553,27 +645,157 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       </div>
 
                       {newProduct && (
-                        <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border bg-brand/5 border-brand/20">
-                          <div className={ds.components.input.group}>
-                            <Label className={ds.components.input.label}>Qtd ({newProductUnit})</Label>
-                            <Input
-                              type="number"
-                              value={newQuantity}
-                              onChange={(e) => setNewQuantity(e.target.value)}
-                              className={cn(ds.components.input.root, "h-11")}
-                            />
+                        <div className="space-y-4 p-4 rounded-2xl border bg-brand/5 border-brand/20 shadow-sm">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className={ds.components.input.group}>
+                              <Label className={ds.components.input.label}>Qtd ({newProductUnit})</Label>
+                              <Input
+                                type="number"
+                                value={newQuantity}
+                                onChange={(e) => setNewQuantity(e.target.value)}
+                                className={cn(ds.components.input.root, "h-12 text-center text-lg font-bold")}
+                              />
+                            </div>
+                            <div className={ds.components.input.group}>
+                              <div className="flex items-center justify-between">
+                                <Label className={ds.components.input.label}>Preço</Label>
+                                <button 
+                                  type="button" 
+                                  onClick={() => setShowCalc(!showCalc)}
+                                  className="text-brand p-1 hover:bg-brand/10 rounded-lg transition-colors"
+                                >
+                                  <Calculator className="h-4 w-4" />
+                                </button>
+                              </div>
+                              <Input
+                                value={newPrice}
+                                onChange={(e) => setNewPrice(e.target.value)}
+                                className={cn(ds.components.input.root, "h-12 text-center text-lg font-bold")}
+                                placeholder="0,00"
+                              />
+                            </div>
                           </div>
-                          <div className={ds.components.input.group}>
-                            <Label className={ds.components.input.label}>Preço</Label>
-                            <Input
-                              value={newPrice}
-                              onChange={(e) => setNewPrice(e.target.value)}
-                              className={cn(ds.components.input.root, "h-11")}
-                              placeholder="R$ 0,00"
-                            />
+
+                          {/* Mobile Conversion Toggle */}
+                          <div className="flex items-center justify-between px-1">
+                            <button
+                              type="button"
+                              onClick={() => setShowConversion(!showConversion)}
+                              className={cn(
+                                "flex items-center gap-2 text-xs font-bold transition-all px-3 py-2 rounded-xl",
+                                showConversion ? "bg-brand text-zinc-950" : "bg-white/50 dark:bg-black/20 text-zinc-500"
+                              )}
+                            >
+                              <ArrowLeftRight className="h-3.5 w-3.5" />
+                              Conversão
+                              <ChevronDown className={cn("h-3 w-3 transition-transform", showConversion && "rotate-180")} />
+                            </button>
+                            
+                            {newProductUnit !== 'un' && (
+                              <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-brand/30 text-brand">
+                                {newProductUnit}
+                              </Badge>
+                            )}
                           </div>
-                          <Button onClick={handleAddNewItem} className={cn(ds.components.button.primary, "col-span-2 h-11")}>
-                            Adicionar Item
+
+                          {showConversion && (
+                            <div className="p-4 rounded-2xl border border-dashed border-brand/40 bg-white/40 dark:bg-black/20 space-y-4 animate-in fade-in slide-in-from-top-2">
+                              <div className="flex p-1 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                                <button
+                                  type="button"
+                                  onClick={() => setConversionMode('box_to_unit')}
+                                  className={cn(
+                                    "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all",
+                                    conversionMode === 'box_to_unit' ? "bg-white dark:bg-zinc-700 shadow-sm text-brand" : "text-zinc-400"
+                                  )}
+                                >
+                                  Cx → Un
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setConversionMode('unit_to_box')}
+                                  className={cn(
+                                    "flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all",
+                                    conversionMode === 'unit_to_box' ? "bg-white dark:bg-zinc-700 shadow-sm text-brand" : "text-zinc-400"
+                                  )}
+                                >
+                                  Un → Cx
+                                </button>
+                              </div>
+                              
+                              <div className="flex items-center gap-4">
+                                <div className="flex-1">
+                                  <Label className="text-[10px] font-black uppercase text-zinc-400 mb-1 block">Unidades por Caixa</Label>
+                                  <Input
+                                    type="number"
+                                    placeholder="Ex: 12"
+                                    value={unPerBox}
+                                    onChange={e => setUnPerBox(e.target.value)}
+                                    className={cn(ds.components.input.root, "h-11 text-center font-bold")}
+                                  />
+                                </div>
+                                {conversionResult && (
+                                  <div className="flex-1 text-right">
+                                    <p className="text-[10px] font-black uppercase text-zinc-400 mb-1">{conversionResult.label}</p>
+                                    <p className="text-lg font-black text-brand leading-none">R$ {conversionResult.value.toFixed(2)}</p>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <Button
+                                onClick={handleApplyConversion}
+                                disabled={!conversionResult}
+                                className={cn(ds.components.button.primary, "w-full h-11 rounded-xl shadow-lg")}
+                              >
+                                Aplicar Conversão
+                              </Button>
+                            </div>
+                          )}
+
+                          {/* Mobile Calculator */}
+                          {showCalc && (
+                            <div className="p-4 rounded-2xl border border-brand/20 bg-zinc-950 shadow-2xl animate-in fade-in slide-in-from-top-4">
+                              <div className="bg-black/50 px-4 py-3 rounded-xl mb-3 text-right">
+                                <p className="text-[10px] text-zinc-500 font-mono h-4">{calcExpr}</p>
+                                <p className="text-2xl font-black text-brand font-mono">{calcDisplay}</p>
+                              </div>
+                              <div className="grid grid-cols-4 gap-2">
+                                {([
+                                  ['C', '⌫', '÷', '×'],
+                                  ['7', '8', '9', '-'],
+                                  ['4', '5', '6', '+'],
+                                  ['1', '2', '3', '='],
+                                  ['0', '.', 'OK']
+                                ] as string[][]).map((row, ri) => (
+                                  row.map(k => {
+                                    const isSpecial = ['C', '⌫', '÷', '×', '-', '+', '=', 'OK'].includes(k);
+                                    const isOK = k === 'OK';
+                                    return (
+                                      <button
+                                        key={k}
+                                        type="button"
+                                        onClick={() => {
+                                          if (k === 'OK') { setNewPrice(calcDisplay); setShowCalc(false); }
+                                          else handleCalcKey(k);
+                                        }}
+                                        className={cn(
+                                          "h-12 rounded-xl text-sm font-bold active:scale-95 transition-all",
+                                          isOK ? "col-span-2 bg-brand text-zinc-950" : 
+                                          isSpecial ? "bg-zinc-800 text-brand" : 
+                                          "bg-zinc-900 text-white"
+                                        )}
+                                      >
+                                        {k}
+                                      </button>
+                                    )
+                                  })
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <Button onClick={handleAddNewItem} className={cn(ds.components.button.primary, "w-full h-14 rounded-2xl text-lg font-black shadow-xl shadow-brand/20")}>
+                            Adicionar ao Pedido
                           </Button>
                         </div>
                       )}
@@ -859,13 +1081,28 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               {!isReadOnly && (
                 <Card className={cn(ds.components.card.root, "border-brand/20 bg-brand/5 shadow-sm overflow-visible")}>
                   <CardContent className={cn(ds.components.card.body, "space-y-4 pt-4 overflow-visible")}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
-                        <Plus className="h-4 w-4 text-zinc-950" />
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+                          <Plus className="h-4 w-4 text-zinc-950" />
+                        </div>
+                        <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, "text-brand uppercase tracking-wider")}>
+                          Adicionar Novo Item
+                        </span>
                       </div>
-                      <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, "text-brand uppercase tracking-wider")}>
-                        Adicionar Novo Item
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowCalc(v => !v)}
+                        title="Calculadora (teclado numérico ativo)"
+                        className={cn(
+                          "h-8 w-8 rounded-lg flex items-center justify-center transition-all",
+                          showCalc
+                            ? "bg-brand text-zinc-950 shadow-md"
+                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 hover:bg-brand/20 hover:text-brand"
+                        )}
+                      >
+                        <Calculator className="h-4 w-4" />
+                      </button>
                     </div>
                     
                     <div className="relative overflow-visible">
@@ -962,6 +1199,166 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         <span className="lg:hidden">Adicionar Item</span>
                       </Button>
                     </div>
+
+                    {/* ─ Conversão de embalagem ─ */}
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setShowConversion(!showConversion)}
+                        className={cn(
+                          "flex items-center gap-2 text-[10px] font-black uppercase tracking-wider transition-all px-3 py-1.5 rounded-lg border",
+                          showConversion 
+                            ? "bg-brand/10 text-brand border-brand/30 shadow-sm" 
+                            : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-transparent hover:border-brand/20 hover:text-brand"
+                        )}
+                      >
+                        <ArrowLeftRight className="h-3.5 w-3.5" />
+                        Ferramenta de Conversão
+                        <ChevronDown className={cn("h-3 w-3 transition-transform", showConversion && "rotate-180")} />
+                      </button>
+
+                      {newProductUnit !== 'un' && (
+                        <div className="flex items-center gap-2">
+                           <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Unidade Atual:</span>
+                           <Badge variant="outline" className="text-[10px] font-black uppercase border-brand/40 text-brand bg-brand/5">
+                             {newProductUnit}
+                           </Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    {showConversion && (
+                      <div className="p-4 rounded-2xl border border-dashed border-brand/40 bg-brand/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <div className="flex p-1 bg-zinc-200/50 dark:bg-zinc-800/50 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => setConversionMode('box_to_unit')}
+                            className={cn(
+                              "flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all",
+                              conversionMode === 'box_to_unit' 
+                                ? "bg-white dark:bg-zinc-700 text-brand shadow-sm" 
+                                : "text-zinc-500 hover:text-brand/70"
+                            )}
+                          >
+                            Preço da Caixa → Valor Unidade
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setConversionMode('unit_to_box')}
+                            className={cn(
+                              "flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight transition-all",
+                              conversionMode === 'unit_to_box' 
+                                ? "bg-white dark:bg-zinc-700 text-brand shadow-sm" 
+                                : "text-zinc-500 hover:text-brand/70"
+                            )}
+                          >
+                            Preço Unidade → Valor Caixa
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 items-end">
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-black uppercase text-zinc-400 ml-1">Fator (Un/Cx)</Label>
+                            <Input
+                              type="number"
+                              placeholder="Ex: 12"
+                              value={unPerBox}
+                              onChange={e => setUnPerBox(e.target.value)}
+                              className={cn(ds.components.input.root, "h-10 text-center font-bold text-lg")}
+                            />
+                          </div>
+                          
+                          {conversionResult ? (
+                            <div className="bg-white dark:bg-zinc-900 rounded-xl p-2.5 border border-brand/20 shadow-sm flex flex-col items-center justify-center min-h-[60px]">
+                              <p className="text-[10px] font-black uppercase text-zinc-400 mb-0.5">{conversionResult.label}</p>
+                              <p className="text-xl font-black text-brand tracking-tighter">R$ {conversionResult.value.toFixed(2)}</p>
+                            </div>
+                          ) : (
+                            <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 border border-dashed border-zinc-200 dark:border-zinc-700 flex items-center justify-center min-h-[60px]">
+                              <p className="text-[10px] font-bold text-zinc-400 italic">Aguardando fator...</p>
+                            </div>
+                          )}
+                        </div>
+
+                        <Button
+                          onClick={handleApplyConversion}
+                          disabled={!conversionResult}
+                          className={cn(ds.components.button.primary, "w-full h-11 rounded-xl shadow-lg shadow-brand/20 font-black uppercase tracking-widest text-xs")}
+                        >
+                          Aplicar Preço Calculado
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* ─ Calculadora flutuante ─ */}
+                    {showCalc && (
+                      <div className={cn(
+                        "rounded-2xl border shadow-2xl p-5 space-y-3 select-none animate-in fade-in zoom-in-95 duration-200",
+                        ds.colors.surface.card, ds.colors.border.default
+                      )}>
+                        <div className="flex items-center justify-between px-1">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-brand animate-pulse" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Calculadora Ativa</span>
+                          </div>
+                          <button onClick={() => setShowCalc(false)} className="text-zinc-400 hover:text-red-500 transition-colors">
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+
+                        <div className="rounded-2xl bg-zinc-950 px-5 py-4 text-right space-y-1 min-h-[80px] flex flex-col justify-center shadow-inner">
+                          {calcExpr && <p className="text-[10px] text-zinc-500 font-mono tracking-wider">{calcExpr}</p>}
+                          <p className="text-3xl font-black text-brand font-mono tracking-tighter">{calcDisplay}</p>
+                        </div>
+
+                        <div className="grid gap-2.5">
+                          {([
+                            ['C', '⌫', '÷', '×'],
+                            ['7', '8', '9', '-'],
+                            ['4', '5', '6', '+'],
+                            ['1', '2', '3', '='],
+                            ['0', '.', 'Aplicar Preço'],
+                          ] as string[][]).map((row, ri) => (
+                            <div key={ri} className="grid gap-2.5" style={{ gridTemplateColumns: ri === 4 ? '1fr 1fr 2fr' : 'repeat(4, 1fr)' }}>
+                              {row.map(k => {
+                                const isOp = ['+', '-', '×', '÷'].includes(k);
+                                const isEq = k === '=';
+                                const isAct = k === 'C' || k === '⌫';
+                                const isApply = k === 'Aplicar Preço';
+                                return (
+                                  <button
+                                    key={k}
+                                    type="button"
+                                    onClick={() => {
+                                      if (isApply) { setNewPrice(calcDisplay); setShowCalc(false); }
+                                      else handleCalcKey(k);
+                                    }}
+                                    className={cn(
+                                      "rounded-xl py-3 text-sm font-bold transition-all active:scale-90",
+                                      isEq && "bg-brand text-zinc-950 shadow-lg shadow-brand/20",
+                                      isOp && !isEq && "bg-zinc-800 text-brand hover:bg-brand hover:text-zinc-950",
+                                      isAct && "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white",
+                                      isApply && "bg-emerald-500/10 text-emerald-600 font-black tracking-tighter hover:bg-emerald-500 hover:text-white",
+                                      !isOp && !isEq && !isAct && !isApply && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-brand/20 hover:text-brand"
+                                    )}
+                                  >
+                                    {k}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex items-center justify-center gap-3 pt-2">
+                          <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+                            <kbd className="px-1.5 py-0.5 rounded border bg-zinc-50 dark:bg-zinc-800">Esc</kbd> fechar
+                          </span>
+                          <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+                            <kbd className="px-1.5 py-0.5 rounded border bg-zinc-50 dark:bg-zinc-800">Enter</kbd> calcular
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
