@@ -305,6 +305,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           // Normalizar valores para comparação
           const item = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === product.product_id);
           const valor = item?.valor_oferecido || 0;
+          const valorInicial = Number(item?.valor_inicial) || valor;
 
           let valorNormalizado = valor;
           if (item?.unidade_preco === 'cx' && item?.fator_conversao) {
@@ -321,6 +322,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             supplierId: f.id,
             supplierName: f.nome,
             valorOferecido: valor,
+            valorInicial: valorInicial,
             valorNormalizado: valorNormalizado,
             isMelhorPreco: false,
           };
@@ -421,6 +423,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     .badge-diff-low { background: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
     .badge-diff-med { background: #ffedd5; color: #ea580c; border: 1px solid #fdba74; }
     .badge-diff-high { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+    .badge-econ { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .econ-positive { color: #059669; font-weight: 800; }
+    .econ-label { font-size: 11px; color: #059669; font-weight: 700; margin-left: 12px; }
     
     .no-response { padding: 30px; text-align: center; color: #94a3b8; font-weight: 600; font-style: italic; background: #f8fafc; }
     
@@ -501,8 +506,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               <thead>
                 <tr>
                   <th>Fornecedor Participante</th>
+                  <th>Val. Inicial</th>
                   <th>Proposta (Unidade/Quant.)</th>
                   <th>Preço Custo Normalizado</th>
+                  <th>Economia</th>
                   <th>Resultado</th>
                 </tr>
               </thead>
@@ -520,10 +527,17 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           return `
                   <tr class="${f.isMelhorPreco ? 'winner-row' : ''}">
                     <td>${f.supplierName}</td>
+                    <td>${f.valorInicial > 0 && Math.abs(f.valorInicial - f.valorOferecido) > 0.001 ? `R$ ${formatCurrency(f.valorInicial)}` : '-'}</td>
                     <td>
-                      ${f.valorOferecido !== f.valorNormalizado ? `<span class="val-oferecido">R$ ${formatCurrency(f.valorOferecido)} original</span>` : ''}
+                      ${f.valorOferecido !== f.valorNormalizado ? `<span class="val-oferecido">R$ ${formatCurrency(f.valorOferecido)} original</span>` : `R$ ${formatCurrency(f.valorOferecido)}`}
                     </td>
                     <td><strong>R$ ${formatCurrency(f.valorNormalizado)}</strong></td>
+                    <td>
+                      ${f.valorInicial > 0 && f.valorInicial > f.valorOferecido
+                        ? `<span class="econ-positive">R$ ${formatCurrency((f.valorInicial - f.valorOferecido) * (comp.quantidade || 1))}</span>`
+                        : '-'
+                      }
+                    </td>
                     <td>
                       ${f.isMelhorPreco
               ? '<span class="badge badge-winner">🏆 Melhor Opção</span>'

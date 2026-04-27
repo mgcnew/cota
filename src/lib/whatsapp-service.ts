@@ -296,15 +296,25 @@ export function generateQuoteReportHTML(opts: {
         const neg = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
         const winClass = o.isWinner ? "winner" : "";
         const badge = o.isWinner ? `<span class="badge-winner">🏆 Vencedor</span>` : `<span class="rank">#${oIdx + 1}</span>`;
+        const initialCell = o.initialPrice > 0 ? fmt(o.initialPrice) : "-";
         const priceCell = neg
           ? `<span class="old-price">${fmt(o.initialPrice)}</span> → <strong>${fmt(o.price)}</strong>`
           : fmt(o.price);
+        const econPerUnit = o.initialPrice > 0 && o.initialPrice > o.price
+          ? (o.initialPrice - o.price)
+          : 0;
+        const econTotal = econPerUnit * (p.quantidade || 1);
+        const econCell = econTotal > 0
+          ? `<span class="econ-positive">${fmt(econTotal)}</span>`
+          : "-";
 
         rows += `
           <tr class="${winClass}">
             <td>${badge} ${o.supplierName}</td>
+            <td class="num">${initialCell}</td>
             <td class="num">${priceCell}</td>
             <td class="num"><strong>${fmt(o.total)}</strong></td>
+            <td class="num">${econCell}</td>
           </tr>`;
       });
 
@@ -318,7 +328,7 @@ export function generateQuoteReportHTML(opts: {
             </div>
           </div>
           <table>
-            <thead><tr><th>Fornecedor</th><th class="num">Unitário</th><th class="num">Total</th></tr></thead>
+            <thead><tr><th>Fornecedor</th><th class="num">Val. Inicial</th><th class="num">Val. Final</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>`;
@@ -330,25 +340,44 @@ export function generateQuoteReportHTML(opts: {
       let rows = "";
       g.items.forEach((i: any) => {
         const unit = (i.unidade || "un").toUpperCase();
+        // Calcular valor inicial e economia do item
+        const offers = i.allOffers || [];
+        const highestOffer = offers.length > 0 ? Math.max(...offers.map((o: any) => o.price || 0)) : i.bestPrice;
+        const initialPrice = offers.length > 0
+          ? Math.max(...offers.map((o: any) => o.initialPrice || o.price || 0))
+          : i.bestPrice;
+        const valorInicial = Math.max(highestOffer, initialPrice);
+        const econItem = valorInicial > i.bestPrice ? (valorInicial - i.bestPrice) * (i.quantidade || 1) : 0;
         rows += `
           <tr>
             <td>${i.productName || i.product_name}</td>
             <td class="num">${i.quantidade} ${unit}</td>
+            <td class="num">${fmt(valorInicial)}</td>
             <td class="num">${fmt(i.bestPrice)}</td>
             <td class="num"><strong>${fmt(i.totalItem)}</strong></td>
+            <td class="num">${econItem > 0 ? `<span class="econ-positive">${fmt(econItem)}</span>` : "-"}</td>
           </tr>`;
       });
+      const groupEcon = g.items.reduce((sum: number, i: any) => {
+        const offers = i.allOffers || [];
+        const highestOffer = offers.length > 0 ? Math.max(...offers.map((o: any) => o.price || 0)) : i.bestPrice;
+        const initialPrice = offers.length > 0
+          ? Math.max(...offers.map((o: any) => o.initialPrice || o.price || 0))
+          : i.bestPrice;
+        const valorInicial = Math.max(highestOffer, initialPrice);
+        return sum + (valorInicial > i.bestPrice ? (valorInicial - i.bestPrice) * (i.quantidade || 1) : 0);
+      }, 0);
       items += `
         <div class="product-card">
           <div class="product-header supplier-header">
             <span class="product-idx">🏢</span>
             <div>
               <h3>${g.name.toUpperCase()}</h3>
-              <span class="demand">${g.items.length} itens — Subtotal: ${fmt(g.total)}</span>
+              <span class="demand">${g.items.length} itens — Subtotal: ${fmt(g.total)}${groupEcon > 0 ? ` — Economia: ${fmt(groupEcon)}` : ""}</span>
             </div>
           </div>
           <table>
-            <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Unit.</th><th class="num">Total</th></tr></thead>
+            <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Val. Inicial</th><th class="num">Val. Final</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>`;
@@ -391,6 +420,7 @@ export function generateQuoteReportHTML(opts: {
   .badge-winner{display:inline-block;background:rgba(16,185,129,0.15);color:#10b981;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:999px;margin-right:8px}
   .rank{display:inline-block;background:#27272a;color:#71717a;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;margin-right:8px}
   .old-price{text-decoration:line-through;color:#71717a;font-size:11px;margin-right:4px}
+  .econ-positive{color:#10b981;font-weight:800}
   .footer{text-align:center;padding:32px 0 16px;border-top:2px solid #27272a;margin-top:32px;color:#52525b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
   .footer strong{color:#10b981}
   @media(max-width:600px){
