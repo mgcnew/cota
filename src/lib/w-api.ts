@@ -110,6 +110,9 @@ export async function sendWhatsAppDocument(phone: string, base64Content: string,
     throw new Error("W-API Token não configurado no .env");
   }
 
+  // Extrair extensão do nome do arquivo
+  const extension = fileName.includes('.') ? fileName.split('.').pop() : 'html';
+
   const baseUrl = import.meta.env.PROD ? 'https://api.w-api.app' : '/whatsapp-api';
   const endpoint = `${baseUrl}/v1/message/send-document?instanceId=${W_API_INSTANCE}`;
 
@@ -124,6 +127,7 @@ export async function sendWhatsAppDocument(phone: string, base64Content: string,
         phone: formattedPhone,
         document: base64Content,
         fileName: fileName,
+        extension: extension,
         caption: caption,
         delayMessage: 10
       })
