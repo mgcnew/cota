@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
+import { useCompany } from "@/hooks/useCompany";
 import { DeleteQuoteDialogLazy } from "@/components/forms/LazyDialogs";
 import { supabase } from "@/integrations/supabase/client";
 import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
@@ -73,6 +74,7 @@ const TabSkeleton = ({ type }: { type: string }) => {
 import { designSystem } from "@/styles/design-system";
 
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
+  const { data: company } = useCompany();
   const [activeTab, setActiveTab] = useState("resumo");
   const [showResumoDialog, setShowResumoDialog] = useState(false);
   const [isExportingWhatsApp, setIsExportingWhatsApp] = useState(false);
