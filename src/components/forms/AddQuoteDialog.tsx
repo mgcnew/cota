@@ -1799,34 +1799,22 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto custom-scrollbar pb-2">
-          <TabsList className="bg-transparent p-0 flex gap-2 w-max min-w-full justify-start h-auto">
-            {tabs.map((tab, idx) => {
-              const isActive = currentTabIndex === idx;
-              const Icon = tab.icon;
-              return (
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  onClick={() => changeTab(tab.id)}
+        {/* Progress bar — thin, clean */}
+        <div className="flex gap-1.5 px-4 pb-3">
+          {tabs.map((_, idx) => {
+            const isCompleted = currentTabIndex > idx;
+            const isActive = currentTabIndex === idx;
+            return (
+              <div key={idx} className="flex-1 flex flex-col gap-2">
+                <div
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap border",
-                    isActive 
-                      ? "bg-brand/10 border-brand/30 text-brand shadow-sm" 
-                      : "bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50"
+                    "h-1.5 rounded-full transition-all duration-300",
+                    isCompleted ? "bg-brand" : isActive ? "bg-brand/60" : "bg-muted dark:bg-muted/50"
                   )}
-                >
-                  <div className={cn(
-                    "w-6 h-6 rounded-lg flex items-center justify-center transition-colors",
-                    isActive ? "bg-brand text-zinc-950" : "bg-muted text-muted-foreground"
-                  )}>
-                    <Icon className="h-3.5 w-3.5" />
-                  </div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{tab.label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -1851,8 +1839,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 >
                   <Tabs value={activeTab} onValueChange={changeTab} className="w-full h-full">
                     {/* Produtos Tab */}
-                    <TabsContent value="produtos" className="h-full m-0 overflow-visible">
-                      <div className={cn("h-full p-3 sm:p-4 md:p-6", ds.colors.surface.page)}>
+                    <TabsContent value="produtos" className="h-full m-0 overflow-y-auto custom-scrollbar">
+                      <div className={cn("h-full p-3 sm:p-4 md:p-6 pb-24", ds.colors.surface.page)}>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
                           {/* Formulário de Adição - Lado Esquerdo */}
                           <div className={cn(
@@ -2113,7 +2101,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
                                 </div>
                               ) : (
-                                <div className="h-full overflow-y-auto scrollbar-hide pr-2">
+                                <div className="max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar pr-2">
                                   <div className="space-y-3">
                                     {fields.map((field, index) => (
                                       <div key={field.id} className={cn(
@@ -2161,7 +2149,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     </TabsContent>
 
                     {/* Periodo & Fornecedores - Tab Unificada */}
-                    <TabsContent value="periodo_fornecedores" className="flex-1 h-full min-h-0 overflow-hidden m-0 p-0">
+                    <TabsContent value="periodo_fornecedores" className="flex-1 h-full min-h-0 overflow-y-auto custom-scrollbar m-0 p-0">
                       <div className="flex flex-col lg:flex-row h-full">
 
                         {/* Esquerda: Periodo */}
@@ -2453,7 +2441,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               </div>
                           </div>
 
-                          <div className="flex-1 overflow-y-auto p-2 scrollbar-hide pb-20">
+                          <div className="flex-1 max-h-[calc(100vh-320px)] overflow-y-auto p-2 custom-scrollbar pb-20">
                             {supplierSearch.length === 0 && selectedSuppliers.length === 0 ? (
                               <div className="h-full flex flex-col items-center justify-center gap-2 p-6 text-center">
                                 <Search className={cn("h-8 w-8 opacity-20", ds.colors.text.secondary)} />
@@ -2694,121 +2682,159 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </Button>
                               </div>
                             ) : personalizeViewMode === "by-supplier" ? (
-                              <div className="grid grid-cols-1 gap-6">
+                              <div className="grid grid-cols-1 gap-3">
                                 {selectedSuppliers
                                   .filter(s => s.name.toLowerCase().includes(personalizeSearch.toLowerCase()))
-                                  .map((supplier) => (
-                                  <div key={supplier.id} className={cn(
-                                    ds.colors.surface.card,
-                                    "border border-border/60 shadow-sm overflow-hidden rounded-2xl transition-all hover:border-brand/30"
-                                  )}>
-                                    <div className="py-3 px-4 bg-muted/40 border-b flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <div className="w-8 h-8 rounded-lg bg-brand/10 flex items-center justify-center">
-                                          <Building2 className="h-4 w-4 text-brand" />
+                                  .map((supplier) => {
+                                    const isExpanded = expandedItems[`supplier-${supplier.id}`] || false;
+                                    const assignedCount = (supplierItemAssignments[supplier.id] || []).length;
+                                    return (
+                                    <div key={supplier.id} className={cn(
+                                      ds.colors.surface.card,
+                                      "border shadow-sm overflow-hidden rounded-2xl transition-all",
+                                      isExpanded ? "border-brand/30" : "border-border/60 hover:border-brand/20"
+                                    )}>
+                                      {/* Collapsed Card Header — always visible */}
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleExpanded(`supplier-${supplier.id}`)}
+                                        className="w-full py-3 px-4 bg-muted/40 flex items-center justify-between cursor-pointer hover:bg-muted/60 transition-colors"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <div className={cn(
+                                            "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
+                                            isExpanded ? "bg-brand text-zinc-950" : "bg-brand/10 text-brand"
+                                          )}>
+                                            <Building2 className="h-4 w-4" />
+                                          </div>
+                                          <div className="text-left">
+                                            <h4 className="text-sm font-bold text-primary">{supplier.name}</h4>
+                                            <p className="text-[10px] text-muted-foreground">
+                                              {assignedCount} de {fields.length} itens selecionados
+                                            </p>
+                                          </div>
                                         </div>
-                                        <div>
-                                          <h4 className="text-sm font-bold text-primary">{supplier.name}</h4>
-                                          <p className="text-[10px] text-muted-foreground">
-                                            {(supplierItemAssignments[supplier.id] || []).length} de {fields.length} itens selecionados
-                                          </p>
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className={cn(
+                                            "h-5 px-1.5 text-[10px] font-bold",
+                                            assignedCount === fields.length
+                                              ? "bg-brand/5 border-brand/20 text-brand"
+                                              : assignedCount === 0
+                                                ? "bg-red-50 border-red-200 text-red-500 dark:bg-red-950/20 dark:border-red-800 dark:text-red-400"
+                                                : "bg-amber-50 border-amber-200 text-amber-600 dark:bg-amber-950/20 dark:border-amber-800 dark:text-amber-400"
+                                          )}>
+                                            {assignedCount}/{fields.length}
+                                          </Badge>
+                                          <ChevronDown className={cn(
+                                            "h-4 w-4 text-muted-foreground transition-transform duration-200",
+                                            isExpanded && "rotate-180"
+                                          )} />
                                         </div>
-                                      </div>
-                                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            setSupplierItemAssignments(prev => ({
-                                              ...prev,
-                                              [supplier.id]: fields.map(f => f.produtoId)
-                                            }));
-                                          }}
-                                          className="h-7 text-[10px] font-bold text-brand hover:bg-brand/10 px-2"
-                                        >
-                                          Tudo
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            const currentAssignments = supplierItemAssignments[supplier.id] || [];
-                                            const newAssignments = { ...supplierItemAssignments };
-                                            selectedSuppliers.forEach(s => {
-                                              newAssignments[s.id] = [...currentAssignments];
-                                            });
-                                            setSupplierItemAssignments(newAssignments);
-                                            toast({ 
-                                              title: "📋 Configuração copiada",
-                                              description: `A lista de ${supplier.name} foi aplicada a todos os fornecedores.`,
-                                              duration: 2000
-                                            });
-                                          }}
-                                          className="h-7 text-[10px] font-bold text-blue-500 hover:bg-blue-50 px-2"
-                                        >
-                                          Replicar
-                                        </Button>
-                                        <Button
-                                          type="button"
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            setSupplierItemAssignments(prev => ({
-                                              ...prev,
-                                              [supplier.id]: []
-                                            }));
-                                          }}
-                                          className="h-7 text-[10px] font-bold text-red-500 hover:bg-red-50 px-2"
-                                        >
-                                          Limpar
-                                        </Button>
-                                      </div>
-                                    </div>
-                                    <div className="p-3 bg-background/50">
-                                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                                        {fields.map((field) => {
-                                          const isAssigned = (supplierItemAssignments[supplier.id] || []).includes(field.produtoId);
-                                          return (
-                                            <button
-                                              key={field.id}
+                                      </button>
+
+                                      {/* Expanded Content — only rendered when open */}
+                                      {isExpanded && (
+                                        <>
+                                          <div className="px-4 py-2 border-t border-b border-border/40 bg-muted/20 flex flex-wrap items-center gap-1 sm:gap-2">
+                                            <Button
                                               type="button"
-                                              onClick={() => {
-                                                setSupplierItemAssignments(prev => {
-                                                  const current = prev[supplier.id] || [];
-                                                  const next = current.includes(field.produtoId)
-                                                    ? current.filter(id => id !== field.produtoId)
-                                                    : [...current, field.produtoId];
-                                                  return { ...prev, [supplier.id]: next };
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSupplierItemAssignments(prev => ({
+                                                  ...prev,
+                                                  [supplier.id]: fields.map(f => f.produtoId)
+                                                }));
+                                              }}
+                                              className="h-7 text-[10px] font-bold text-brand hover:bg-brand/10 px-2"
+                                            >
+                                              Tudo
+                                            </Button>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                const currentAssignments = supplierItemAssignments[supplier.id] || [];
+                                                const newAssignments = { ...supplierItemAssignments };
+                                                selectedSuppliers.forEach(s => {
+                                                  newAssignments[s.id] = [...currentAssignments];
+                                                });
+                                                setSupplierItemAssignments(newAssignments);
+                                                toast({ 
+                                                  title: "📋 Configuração copiada",
+                                                  description: `A lista de ${supplier.name} foi aplicada a todos os fornecedores.`,
+                                                  duration: 2000
                                                 });
                                               }}
-                                              className={cn(
-                                                "flex flex-col p-2.5 rounded-xl border text-left transition-all relative group",
-                                                isAssigned 
-                                                  ? "border-brand/40 bg-brand/[0.04] ring-1 ring-brand/10" 
-                                                  : "border-border/50 bg-transparent opacity-60 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 hover:border-brand/20"
-                                              )}
+                                              className="h-7 text-[10px] font-bold text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 px-2"
                                             >
-                                              <div className={cn(
-                                                "absolute top-2 right-2 w-4 h-4 rounded-full border flex items-center justify-center transition-all",
-                                                isAssigned ? "bg-brand border-brand text-zinc-950 scale-100" : "bg-transparent border-border scale-90"
-                                              )}>
-                                                {isAssigned && <Check className="h-2.5 w-2.5 stroke-[4]" />}
-                                              </div>
-                                              <p className={cn("text-[11px] font-bold leading-tight pr-4", isAssigned ? "text-brand" : "text-primary")}>
-                                                {field.produtoNome}
-                                              </p>
-                                              <p className="text-[10px] text-muted-foreground mt-1">
-                                                {field.quantidade} {field.unidade}
-                                              </p>
-                                            </button>
-                                          );
-                                        })}
-                                      </div>
+                                              Replicar
+                                            </Button>
+                                            <Button
+                                              type="button"
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSupplierItemAssignments(prev => ({
+                                                  ...prev,
+                                                  [supplier.id]: []
+                                                }));
+                                              }}
+                                              className="h-7 text-[10px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 px-2"
+                                            >
+                                              Limpar
+                                            </Button>
+                                          </div>
+                                          <div className="p-3 bg-background/50">
+                                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                                              {fields.map((field) => {
+                                                const isAssigned = (supplierItemAssignments[supplier.id] || []).includes(field.produtoId);
+                                                return (
+                                                  <button
+                                                    key={field.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                      setSupplierItemAssignments(prev => {
+                                                        const current = prev[supplier.id] || [];
+                                                        const next = current.includes(field.produtoId)
+                                                          ? current.filter(id => id !== field.produtoId)
+                                                          : [...current, field.produtoId];
+                                                        return { ...prev, [supplier.id]: next };
+                                                      });
+                                                    }}
+                                                    className={cn(
+                                                      "flex flex-col p-2.5 rounded-xl border text-left transition-all relative group",
+                                                      isAssigned 
+                                                        ? "border-brand/40 bg-brand/[0.04] ring-1 ring-brand/10" 
+                                                        : "border-border/50 bg-transparent opacity-60 grayscale-[0.5] hover:opacity-100 hover:grayscale-0 hover:border-brand/20"
+                                                    )}
+                                                  >
+                                                    <div className={cn(
+                                                      "absolute top-2 right-2 w-4 h-4 rounded-full border flex items-center justify-center transition-all",
+                                                      isAssigned ? "bg-brand border-brand text-zinc-950 scale-100" : "bg-transparent border-border scale-90"
+                                                    )}>
+                                                      {isAssigned && <Check className="h-2.5 w-2.5 stroke-[4]" />}
+                                                    </div>
+                                                    <p className={cn("text-[11px] font-bold leading-tight pr-4", isAssigned ? "text-brand" : "text-primary")}>
+                                                      {field.produtoNome}
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                                      {field.quantidade} {field.unidade}
+                                                    </p>
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
+                                          </div>
+                                        </>
+                                      )}
                                     </div>
-                                  </div>
-                                ))}
+                                  );
+                                })}
                               </div>
                             ) : (
                               <div className="grid grid-cols-1 gap-6">
