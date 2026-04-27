@@ -689,6 +689,21 @@ export function useCotacoes() {
     }) => {
       console.log('🗑️ Removendo item do fornecedor:', { quoteId, supplierId, productId });
 
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
+
       const { error } = await supabase
         .from("quote_supplier_items")
         .delete()
@@ -1338,44 +1353,7 @@ export function useCotacoes() {
     }
   });
 
-  // Mutation to remove a specific product from a supplier in a quote
-  const removeSupplierProduct = useMutation({
-    mutationFn: async ({ quoteId, supplierId, productId }: { quoteId: string; supplierId: string; productId: string }) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
 
-      // Check quote status first
-      const { data: quote, error: statusError } = await supabase
-        .from("quotes")
-        .select("status")
-        .eq("id", quoteId)
-        .single();
-      
-      if (statusError) throw statusError;
-      if (quote?.status === 'finalizada') {
-        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
-      }
-
-      // Remove from quote_supplier_items
-      const { error } = await supabase
-        .from("quote_supplier_items")
-        .delete()
-        .eq("quote_id", quoteId)
-        .eq("supplier_id", supplierId)
-        .eq("product_id", productId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      markMutationComplete();
-      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
-      toast({ title: "Produto removido do fornecedor!" });
-    },
-    onError: (error) => {
-      console.error("Erro ao remover produto do fornecedor:", error);
-      toast({ title: "Erro ao remover produto do fornecedor", variant: "destructive" });
-    }
-  });
 
   return {
     cotacoes,
