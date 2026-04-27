@@ -988,7 +988,8 @@ export function useCotacoes() {
               unidade_entregue: null,
               valor_unitario_cotado: valorEscolhido,
               maior_valor_cotado: valorInicialVencedor,
-              brand_id: supplierItem?.brand_id || null
+              brand_id: supplierItem?.brand_id || null,
+              quantidade_por_embalagem: supplierItem?.quantidade_por_embalagem || null
             };
           });
 

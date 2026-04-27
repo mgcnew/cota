@@ -15,6 +15,7 @@ export interface PedidoItem {
   unidade_entregue?: string | null;
   valor_unitario_cotado?: number | null;
   maior_valor_cotado?: number | null;
+  quantidade_por_embalagem?: number | null;
   brand_name?: string | null;
 }
 
@@ -111,7 +112,8 @@ export function usePedidos() {
             quantidade_entregue,
             unidade_entregue,
             valor_unitario_cotado,
-            maior_valor_cotado
+            maior_valor_cotado,
+            quantidade_por_embalagem
           )
         `)
         .gte('created_at', dateFilter)
@@ -144,6 +146,7 @@ export function usePedidos() {
           unidade_entregue: item.unidade_entregue || null,
           valor_unitario_cotado: item.valor_unitario_cotado ? Number(item.valor_unitario_cotado) : null,
           maior_valor_cotado: item.maior_valor_cotado ? Number(item.maior_valor_cotado) : null,
+          quantidade_por_embalagem: item.quantidade_por_embalagem ? Number(item.quantidade_por_embalagem) : null,
         })) || [],
       }));
 

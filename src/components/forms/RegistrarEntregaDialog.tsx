@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Truck, Package, DollarSign, TrendingDown, 
-  Loader2, CheckCircle2, AlertCircle, X, Sparkles 
+  Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon 
 } from "lucide-react";
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,17 @@ interface ItemEntrega {
   valorUnitario: number; // Preço acordado originalmente
   valorFaturado: number; // Preço real cobrado na NFe
   maiorValor: number; // Teto para cálculo da economia
-  fatorEmbalagem: number; // Fator de caixa (implícito pelo total_price vs unit_price)
+  fatorEmbalagem: number; // Fator de caixa (itens por caixa)
+  isBoxUnit: boolean; // Se a unidade é do tipo caixa
+  quantidadePorEmbalagemOriginal: number | null; // Valor original vindo da cotação
+}
+
+/**
+ * Detecta se a unidade é do tipo "caixa"
+ */
+function isBoxLikeUnit(unit: string): boolean {
+  const normalized = unit.toLowerCase().trim();
+  return normalized === 'cx' || normalized === 'caixa' || normalized === 'caixas' || normalized.startsWith('cx');
 }
 
 export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
@@ -51,19 +61,27 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           const numUnit = Number(item.valor_unitario_cotado || item.unit_price) || 1;
           const baseUnitCost = numUnit * quantidadePedida;
           const computedFactor = baseUnitCost > 0 ? Math.round(Number(item.total_price || baseUnitCost) / baseUnitCost) : 1;
-          const fatorEmbalagem = computedFactor < 1 ? 1 : computedFactor;
+          const fallbackFator = computedFactor < 1 ? 1 : computedFactor;
+
+          // Prioridade: quantidade_por_embalagem do DB > fator computado > 1
+          const qtdEmbalagem = item.quantidade_por_embalagem || null;
+          const fatorEmbalagem = qtdEmbalagem || fallbackFator;
+          const unitStr = item.unidade_pedida || item.unidade_entregue || 'un';
+          const isBox = isBoxLikeUnit(unitStr);
 
           return {
             itemId: item.id || '',
             productName: item.product_name,
             quantidadePedida: item.quantidade_pedida || item.quantity,
-            unidadePedida: item.unidade_pedida || 'un',
+            unidadePedida: unitStr,
             quantidadeEntregue: item.quantidade_entregue || 0,
             unidadeEntregue: item.unidade_entregue || 'kg',
             valorUnitario: item.valor_unitario_cotado || item.unit_price,
-            valorFaturado: item.unit_price, // Iniciamos com o valor que estava no pedido (que já pode ter sido alterado da cotação)
+            valorFaturado: item.unit_price,
             maiorValor: item.maior_valor_cotado || item.unit_price,
             fatorEmbalagem,
+            isBoxUnit: isBox,
+            quantidadePorEmbalagemOriginal: qtdEmbalagem,
           };
         })
       );
@@ -116,6 +134,15 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     });
   };
 
+  const handleFatorEmbalagemChange = (index: number, value: string) => {
+    const fator = parseFloat(value) || 1;
+    setItensEntrega(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], fatorEmbalagem: fator < 1 ? 1 : fator };
+      return updated;
+    });
+  };
+
   const handleSubmit = async () => {
     if (!pedido) return;
 
@@ -153,6 +180,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const veioDeCotacao = pedido?.quote_id != null;
   // Agora validamos se os campos foram manipulados/conferidos, mesmo que zerados
   const todosPreenchidos = itensEntrega.every(item => item.quantidadeEntregue >= 0);
+  const hasBoxItems = itensEntrega.some(item => item.isBoxUnit);
 
   if (!pedido) return null;
 
@@ -218,10 +246,13 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           {/* Lista Compacta de Itens */}
           <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
             <div className="hidden sm:grid grid-cols-12 gap-4 p-3 bg-muted/50 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider items-center">
-              <div className="col-span-5">Produto Pedido</div>
+              <div className="col-span-4">Produto Pedido</div>
               <div className="col-span-2 text-right">Qtd Pedida</div>
               <div className="col-span-2 text-right">Custo NFe / Unit</div>
-              <div className="col-span-3 text-right pr-2">Qtd Recebida</div>
+              <div className={cn("text-right pr-2", hasBoxItems ? "col-span-2" : "col-span-4")}>Qtd Recebida</div>
+              {hasBoxItems && (
+                <div className="col-span-2 text-right pr-2">Un/Caixa</div>
+              )}
             </div>
             
             <div className="divide-y divide-border">
@@ -231,19 +262,34 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
               
               return (
                 <div key={item.itemId || index} className="grid sm:grid-cols-12 gap-3 sm:gap-4 p-3 sm:items-center hover:bg-muted/30 transition-colors">
-                  <div className="sm:col-span-5 flex items-start sm:items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center shrink-0 mt-1 sm:mt-0">
-                      <Package className="h-4 w-4 text-brand/70" />
+                  <div className="sm:col-span-4 flex items-start sm:items-center gap-3 min-w-0">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 mt-1 sm:mt-0",
+                      item.isBoxUnit 
+                        ? "bg-amber-500/5 border-amber-500/10" 
+                        : "bg-brand/5 border-brand/10"
+                    )}>
+                      {item.isBoxUnit 
+                        ? <BoxIcon className="h-4 w-4 text-amber-600/70" />
+                        : <Package className="h-4 w-4 text-brand/70" />
+                      }
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-sm text-foreground tracking-tight leading-none mb-1.5" title={item.productName}>
+                      <p className="font-bold text-sm text-foreground tracking-tight leading-none mb-1" title={item.productName}>
                         {item.productName}
                       </p>
-                      {veioDeCotacao && item.maiorValor > item.valorUnitario && (
-                        <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                          Econ. R$ {((item.maiorValor - item.valorUnitario) * item.fatorEmbalagem).toFixed(2)}/{item.unidadeEntregue}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {item.isBoxUnit && (
+                          <Badge variant="outline" className="h-[16px] px-1 text-[8px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 font-bold uppercase tracking-wider">
+                            Caixa
+                          </Badge>
+                        )}
+                        {veioDeCotacao && item.maiorValor > item.valorUnitario && (
+                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                            Econ. R$ {((item.maiorValor - item.valorUnitario) * item.fatorEmbalagem).toFixed(2)}/{item.unidadeEntregue}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -284,7 +330,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                     )}
                   </div>
 
-                  <div className="sm:col-span-3 flex flex-col justify-center pt-2 sm:pt-0">
+                  <div className={cn("flex flex-col justify-center pt-2 sm:pt-0", hasBoxItems ? "sm:col-span-2" : "sm:col-span-4")}>
                     <div className="flex items-center justify-between mb-1">
                       <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest">Recebida</p>
                       <button 
@@ -326,6 +372,51 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                        </span>
                     )}
                   </div>
+
+                  {/* Coluna: Qtd por Caixa (aparece quando existem itens em caixa) */}
+                  {hasBoxItems && (
+                    <div className="sm:col-span-2 flex flex-col justify-center pt-2 sm:pt-0">
+                      {item.isBoxUnit ? (
+                        <>
+                          <p className="sm:hidden text-[10px] text-amber-500 uppercase font-bold tracking-widest mb-1">Un/Caixa</p>
+                          <div className="relative w-full">
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="1"
+                              value={item.fatorEmbalagem === 1 && !item.quantidadePorEmbalagemOriginal ? '' : item.fatorEmbalagem}
+                              onChange={(e) => handleFatorEmbalagemChange(index, e.target.value)}
+                              onFocus={(e) => e.target.select()}
+                              placeholder="Qtd..."
+                              className={cn(
+                                "h-10 pr-10 text-right font-black text-sm transition-all",
+                                item.quantidadePorEmbalagemOriginal
+                                  ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
+                                  : item.fatorEmbalagem > 1
+                                    ? "bg-amber-500/5 border-amber-500/30 text-amber-700 dark:text-amber-400"
+                                    : "bg-background"
+                              )}
+                            />
+                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground uppercase pointer-events-none">
+                              un/cx
+                            </span>
+                          </div>
+                          {item.quantidadePorEmbalagemOriginal ? (
+                            <span className="text-[10px] font-medium mt-1 text-emerald-600 dark:text-emerald-500 text-right w-full block">
+                              Cotado: {item.quantidadePorEmbalagemOriginal} un/cx
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-medium mt-1 text-amber-500 text-right w-full block italic">
+                              Não informado na cotação
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        // Célula vazia para manter o grid alinhado
+                        <div className="h-10" />
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}
