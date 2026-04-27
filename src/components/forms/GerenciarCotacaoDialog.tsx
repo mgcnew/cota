@@ -616,8 +616,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               </div>
             </div>
 
-            {/* Tabs - Flexível e Desenhado como pílulas (Pills) */}
-            <div className="flex-1 min-w-0 flex items-center pl-4 border-l border-border/50 ml-2">
+            {/* Tabs - Flexível e Desenhado como pílulas (Pills) com Scroll */}
+            <div className="flex-1 min-w-0 flex items-center pl-4 border-l border-border/50 ml-2 overflow-hidden">
               {isMobile ? (
                 <Select value={activeTab} onValueChange={setActiveTab}>
                   <SelectTrigger className="w-32 h-8 rounded-lg text-[11px] font-bold bg-muted/50 border-transparent hover:bg-muted">
@@ -637,22 +637,24 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   </SelectContent>
                 </Select>
               ) : (
-                <TabsList className="bg-muted/30 p-1 border border-border/50 rounded-xl h-auto flex gap-1">
-                  {[
-                    { id: 'resumo', label: 'Resumo' },
-                    { id: 'valores', label: 'Valores' },
-                    { id: 'converter', label: 'Decisão', hide: isFinalizada },
-                    { id: 'editar', label: 'Configurações', hide: isFinalizada }
-                  ].filter(tab => !tab.hide).map((tab) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className="px-3 py-1.5 h-7 text-[10px] font-black uppercase tracking-widest text-muted-foreground rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-                    >
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+                <div className="w-full overflow-x-auto custom-scrollbar pb-1">
+                  <TabsList className="bg-muted/30 p-1 border border-border/50 rounded-xl h-auto flex gap-1 w-max min-w-full">
+                    {[
+                      { id: 'resumo', label: 'Resumo' },
+                      { id: 'valores', label: 'Valores' },
+                      { id: 'converter', label: 'Decisão', hide: isFinalizada },
+                      { id: 'editar', label: 'Configurações', hide: isFinalizada }
+                    ].filter(tab => !tab.hide).map((tab) => (
+                      <TabsTrigger
+                        key={tab.id}
+                        value={tab.id}
+                        className="px-3 py-1.5 h-7 text-[10px] font-black uppercase tracking-widest text-muted-foreground rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all whitespace-nowrap"
+                      >
+                        {tab.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </div>
               )}
             </div>
           </div>

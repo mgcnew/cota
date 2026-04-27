@@ -1799,21 +1799,34 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {tabs.map((tab, idx) => {
-            const isCompleted = currentTabIndex > idx;
-            const isActive = currentTabIndex === idx;
-            return (
-              <div key={tab.id} className="flex-1 flex flex-col gap-2">
-                <div
+        <div className="w-full overflow-x-auto custom-scrollbar pb-2">
+          <TabsList className="bg-transparent p-0 flex gap-2 w-max min-w-full justify-start h-auto">
+            {tabs.map((tab, idx) => {
+              const isActive = currentTabIndex === idx;
+              const Icon = tab.icon;
+              return (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  onClick={() => changeTab(tab.id)}
                   className={cn(
-                    "h-1.5 rounded-full transition-all duration-300",
-                    isCompleted ? "bg-brand" : isActive ? "bg-brand/60" : "bg-muted dark:bg-muted/50"
+                    "flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap border",
+                    isActive 
+                      ? "bg-brand/10 border-brand/30 text-brand shadow-sm" 
+                      : "bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50"
                   )}
-                />
-              </div>
-            );
-          })}
+                >
+                  <div className={cn(
+                    "w-6 h-6 rounded-lg flex items-center justify-center transition-colors",
+                    isActive ? "bg-brand text-zinc-950" : "bg-muted text-muted-foreground"
+                  )}>
+                    <Icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{tab.label}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
         </div>
       </div>
 

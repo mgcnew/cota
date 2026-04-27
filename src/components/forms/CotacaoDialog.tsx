@@ -305,11 +305,13 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0">
-              <TabsTrigger value="detalhes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent"><FileText className="h-4 w-4 mr-2" />Detalhes</TabsTrigger>
-              <TabsTrigger value="valores" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent"><DollarSign className="h-4 w-4 mr-2" />Valores</TabsTrigger>
-              <TabsTrigger value="converter" className="rounded-none border-b-2 border-transparent data-[state=active]:border-teal-500 data-[state=active]:bg-transparent"><ShoppingCart className="h-4 w-4 mr-2" />Converter</TabsTrigger>
-            </TabsList>
+            <div className="w-full overflow-x-auto custom-scrollbar border-b">
+              <TabsList className="w-max min-w-full justify-start rounded-none bg-transparent p-0 flex h-auto">
+                <TabsTrigger value="detalhes" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap"><FileText className="h-4 w-4 mr-2" />Detalhes</TabsTrigger>
+                <TabsTrigger value="valores" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap"><DollarSign className="h-4 w-4 mr-2" />Valores</TabsTrigger>
+                <TabsTrigger value="converter" className="rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent px-4 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap"><ShoppingCart className="h-4 w-4 mr-2" />Converter</TabsTrigger>
+              </TabsList>
+            </div>
 
             <ScrollArea className="flex-1">
               {/* Tab Detalhes */}

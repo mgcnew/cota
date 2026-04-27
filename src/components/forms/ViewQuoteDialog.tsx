@@ -1513,58 +1513,60 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 <ScrollArea className="flex-1 bg-muted/30 min-h-0 h-full">
                   <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                      <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-border bg-muted/30 backdrop-blur-sm flex-shrink-0">
-                        <TabsList className={`grid w-full ${!readOnly ? "grid-cols-5" : "grid-cols-4"} bg-background/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-border gap-1 h-8 sm:h-9 transition-colors`}>
-                          <TabsTrigger
-                            value="detalhes"
-                            className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-primary/10 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-muted-foreground"
-                          >
-                            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                            <span className="hidden xs:inline">Detalhes</span>
-                            {currentQuote && currentQuote.fornecedoresParticipantes.length > 0 && (
-                              <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-primary/10 text-primary data-[state=active]:bg-primary/20 data-[state=active]:text-white">
-                                {currentQuote.fornecedoresParticipantes.length}
-                              </Badge>
-                            )}
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="comparativo"
-                            className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-purple-600 dark:data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-purple-700 dark:data-[state=active]:hover:bg-purple-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                          >
-                            <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                            <span className="hidden xs:inline">Comparativo</span>
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="exportar"
-                            className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                          >
-                            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                            <span className="hidden xs:inline">Exportar</span>
-                          </TabsTrigger>
-                          {currentQuote && currentQuote.status === "finalizada" && (
+                      <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-border bg-muted/30 backdrop-blur-sm flex-shrink-0 overflow-hidden">
+                        <div className="w-full overflow-x-auto custom-scrollbar pb-1">
+                          <TabsList className={`flex w-max min-w-full bg-background/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-border gap-1 h-auto transition-colors`}>
                             <TabsTrigger
-                              value="economia"
-                              className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-green-600 dark:data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-green-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-green-700 dark:data-[state=active]:hover:bg-green-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
+                              value="detalhes"
+                              className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-primary/10 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-muted-foreground whitespace-nowrap"
                             >
-                              <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                              <span className="hidden xs:inline">Economia</span>
-                            </TabsTrigger>
-                          )}
-                          {!readOnly && (
-                            <TabsTrigger
-                              value="atualizacao"
-                              className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-success dark:data-[state=active]:bg-success data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-success/10 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-success/90 dark:data-[state=active]:hover:bg-success/90 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300"
-                            >
-                              <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
-                              <span className="hidden xs:inline">Valores</span>
-                              {products.length > 0 && (
-                                <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-success/20 dark:bg-success/20 text-success dark:text-success data-[state=active]:bg-success/30 dark:data-[state=active]:bg-success/30 data-[state=active]:text-white dark:data-[state=active]:text-white">
-                                  {products.length}
+                              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span className="hidden xs:inline">Detalhes</span>
+                              {currentQuote && currentQuote.fornecedoresParticipantes.length > 0 && (
+                                <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-primary/10 text-primary data-[state=active]:bg-primary/20 data-[state=active]:text-white">
+                                  {currentQuote.fornecedoresParticipantes.length}
                                 </Badge>
                               )}
                             </TabsTrigger>
-                          )}
-                        </TabsList>
+                            <TabsTrigger
+                              value="comparativo"
+                              className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-purple-600 dark:data-[state=active]:bg-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-purple-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-purple-700 dark:data-[state=active]:hover:bg-purple-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                            >
+                              <BarChart3 className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span className="hidden xs:inline">Comparativo</span>
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="exportar"
+                              className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-orange-600 dark:data-[state=active]:bg-orange-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-orange-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-orange-700 dark:data-[state=active]:hover:bg-orange-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                            >
+                              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                              <span className="hidden xs:inline">Exportar</span>
+                            </TabsTrigger>
+                            {currentQuote && currentQuote.status === "finalizada" && (
+                              <TabsTrigger
+                                value="economia"
+                                className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-green-600 dark:data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-green-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-green-700 dark:data-[state=active]:hover:bg-green-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                              >
+                                <TrendingDown className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                                <span className="hidden xs:inline">Economia</span>
+                              </TabsTrigger>
+                            )}
+                            {!readOnly && (
+                              <TabsTrigger
+                                value="atualizacao"
+                                className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-success dark:data-[state=active]:bg-success data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-success/10 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-success/90 dark:data-[state=active]:hover:bg-success/90 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300 whitespace-nowrap"
+                              >
+                                <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
+                                <span className="hidden xs:inline">Valores</span>
+                                {products.length > 0 && (
+                                  <Badge variant="secondary" className="ml-0.5 h-4 px-1 text-[9px] font-semibold bg-success/20 dark:bg-success/20 text-success dark:text-success data-[state=active]:bg-success/30 dark:data-[state=active]:bg-success/30 data-[state=active]:text-white dark:data-[state=active]:text-white">
+                                    {products.length}
+                                  </Badge>
+                                )}
+                              </TabsTrigger>
+                            )}
+                          </TabsList>
+                        </div>
                       </div>
 
                       <TabsContent value="detalhes" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0 mt-0">
