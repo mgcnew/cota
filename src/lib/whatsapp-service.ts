@@ -89,8 +89,8 @@ export async function sendWhatsAppReport(
     // 1. Enviar imagem com a saudação como legenda
     const imgResult = await sendWhatsAppImage(phone, base64Image, caption);
     
-    // 2. Enviar o HTML como documento
-    const base64Html = btoa(unescape(encodeURIComponent(htmlContent)));
+    // 2. Enviar o HTML como documento com prefixo data URI
+    const base64Html = `data:text/html;base64,${btoa(unescape(encodeURIComponent(htmlContent)))}`;
     const fileName = `relatorio_cotacao_${quoteId.slice(0, 8)}.html`;
     
     await sendWhatsAppDocument(phone, base64Html, fileName, "Arquivo do Relatório Interativo");

@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ResumoCotacaoDialog from "./ResumoCotacaoDialog";
 import html2canvas from "html2canvas";
 import { sendWhatsAppReport, generateWhatsAppGreeting, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
+import { toast as sonnerToast } from "sonner";
 
 // Skeleton para cada aba
 const TabSkeleton = ({ type }: { type: string }) => {
@@ -575,7 +576,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     if (isExportingWhatsApp) return;
     
     setIsExportingWhatsApp(true);
-    const toastId = toast.loading('Preparando relatório para WhatsApp...');
+    const toastId = sonnerToast.loading('Preparando relatório para WhatsApp...');
 
     try {
       const html = generateHtmlComparative();
@@ -618,13 +619,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       );
 
       if (res.success) {
-        toast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
+        sonnerToast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
       } else {
         throw new Error(res.error || "Erro no envio");
       }
     } catch (error: any) {
       console.error("WhatsApp Export Error:", error);
-      toast.error(`Falha no envio: ${error.message}`, { id: toastId });
+      sonnerToast.error(`Falha no envio: ${error.message}`, { id: toastId });
     } finally {
       setIsExportingWhatsApp(false);
     }
