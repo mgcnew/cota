@@ -88,6 +88,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     updateQuoteItemQuantity,
     convertToOrder,
     deleteQuote,
+    removeSupplierProduct,
     isUpdating
   } = useCotacoes();
 
@@ -284,6 +285,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const handleUpdateSupplierProductValue = useCallback(async (params: any) => {
     await updateQuoteItemPrice.mutateAsync(params);
   }, [updateQuoteItemPrice]);
+
+  const handleRemoveSupplierProduct = useCallback(async (params: any) => {
+    await removeSupplierProduct.mutateAsync(params);
+  }, [removeSupplierProduct]);
 
   // Exportação em HTML
   const generateHtmlComparative = useCallback(() => {
@@ -696,6 +701,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   quoteId={quote.id}
                   supplierItems={supplierItems}
                   onUpdateSupplierProductValue={handleUpdateSupplierProductValue}
+                  onRemoveSupplierProduct={handleRemoveSupplierProduct}
                   onRefresh={handleRefresh}
                   isMobile={isMobile}
                   safeStr={safeStr}

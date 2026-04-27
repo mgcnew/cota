@@ -1,7 +1,8 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import { Package } from "lucide-react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2 } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Power } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { 
   Drawer, 
   DrawerClose, 
@@ -31,6 +32,7 @@ interface QuoteValuesTabProps {
   quoteId: string;
   supplierItems: any[];
   onUpdateSupplierProductValue: (params: any) => void;
+  onRemoveSupplierProduct: (params: any) => void;
   onRefresh: () => void;
   isMobile: boolean;
   safeStr: (val: any) => string;
@@ -46,6 +48,7 @@ export function QuoteValuesTab({
   quoteId,
   supplierItems,
   onUpdateSupplierProductValue,
+  onRemoveSupplierProduct,
   onRefresh,
   isMobile,
   safeStr,
@@ -217,10 +220,28 @@ export function QuoteValuesTab({
   }, [selectedSupplier, editedValues, editedQtdPerBox, quoteId, onUpdateSupplierProductValue, onRefresh, toast, getSupplierProductValue, supplierItems]);
 
   const handleCancelEdit = useCallback(() => {
-    setEditingProductId(null);
-    setEditedValues({});
     setEditedQtdPerBox({});
   }, []);
+
+  const handleRemoveItem = useCallback(async (productId: string) => {
+    if (!selectedSupplier || isReadOnly) return;
+    
+    // Confirmação simples
+    if (!window.confirm("Deseja realmente remover este produto deste fornecedor? Ele não verá mais este item no portal.")) {
+      return;
+    }
+
+    try {
+      await onRemoveSupplierProduct({
+        quoteId,
+        supplierId: selectedSupplier,
+        productId
+      });
+      onRefresh();
+    } catch {
+      toast({ title: "Erro ao remover produto", variant: "destructive" });
+    }
+  }, [selectedSupplier, isReadOnly, onRemoveSupplierProduct, quoteId, onRefresh, toast]);
 
 
   const handleInputChange = (productId: string, value: string) => {
@@ -614,7 +635,8 @@ export function QuoteValuesTab({
 
             {!isMobile && (
               <div className="px-6 py-3 border-b border-border/50 bg-muted/30 flex-shrink-0">
-                  <div className="grid grid-cols-[3fr_60px_60px_280px_auto] gap-4 items-center px-4">
+                  <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
+                    <div className="w-10" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
@@ -714,14 +736,58 @@ export function QuoteValuesTab({
                         </div>
                       </div>
                     ) : (
-                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[3fr_60px_60px_280px_auto] gap-4 items-center h-11")}>
+                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center h-11")}>
+                        {!isMobile && (
+                          <div className="flex justify-center">
+                            <TooltipProvider delayDuration={100}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Switch
+                                    checked={currentValue > 0 || supplierItems.some(i => i.supplier_id === selectedSupplier && i.product_id === product.product_id)}
+                                    onCheckedChange={(checked) => {
+                                      if (!checked) {
+                                        onRemoveSupplierProduct({ quoteId, supplierId: selectedSupplier, productId: product.product_id });
+                                      } else {
+                                        onUpdateSupplierProductValue({ quoteId, supplierId: selectedSupplier, productId: product.product_id, newValue: 0 });
+                                      }
+                                      setTimeout(onRefresh, 100);
+                                    }}
+                                    className="data-[state=checked]:bg-brand"
+                                  />
+                                </TooltipTrigger>
+                                <TooltipContent side="right" className="text-[10px] font-black uppercase">
+                                  {currentValue > 0 || supplierItems.some(i => i.supplier_id === selectedSupplier && i.product_id === product.product_id) ? "Item Ativo" : "Item Inativo"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        )}
                         <div className="min-w-0 pr-2">
-                          <p className="font-bold text-zinc-900 dark:text-zinc-100 truncate text-[13px]" title={product.product_name}>{safeStr(product.product_name)}</p>
+                          <p className={cn(
+                            "font-bold truncate text-[13px]",
+                            (currentValue > 0 || supplierItems.some(i => i.supplier_id === selectedSupplier && i.product_id === product.product_id)) ? "text-zinc-900 dark:text-zinc-100" : "text-zinc-400 line-through opacity-50"
+                          )} title={product.product_name}>
+                            {safeStr(product.product_name)}
+                          </p>
                           {isMobile && (
-                            <p className="text-[10px] font-bold text-zinc-500 uppercase mt-0.5">
-                              {product.quantidade} {product.unidade}
-                              {isBest && <span className="ml-2 text-brand font-black">🏆</span>}
-                            </p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <Switch
+                                checked={currentValue > 0 || supplierItems.some(i => i.supplier_id === selectedSupplier && i.product_id === product.product_id)}
+                                onCheckedChange={(checked) => {
+                                  if (!checked) {
+                                    onRemoveSupplierProduct({ quoteId, supplierId: selectedSupplier, productId: product.product_id });
+                                  } else {
+                                    onUpdateSupplierProductValue({ quoteId, supplierId: selectedSupplier, productId: product.product_id, newValue: 0 });
+                                  }
+                                  setTimeout(onRefresh, 100);
+                                }}
+                                className="scale-75 data-[state=checked]:bg-brand"
+                              />
+                              <p className="text-[10px] font-bold text-zinc-500 uppercase">
+                                {product.quantidade} {product.unidade}
+                                {isBest && <span className="ml-2 text-brand font-black">🏆</span>}
+                              </p>
+                            </div>
                           )}
                         </div>
                         {!isMobile && (
@@ -882,12 +948,16 @@ export function QuoteValuesTab({
                           )}
                           <LastPaidPricesTooltip productId={product.product_id} />
                         </div>
-                        <div className="flex-shrink-0">
-                          {!isReadOnly && (
-                            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-brand hover:bg-brand/10" onClick={() => handleStartEdit(product.product_id, currentValue)}>
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          )}
+
+                        <div className="flex items-center justify-end gap-1 pr-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleStartEdit(product.product_id, currentValue)}
+                            className="h-8 w-8 rounded-lg text-zinc-400 hover:text-brand hover:bg-brand/10 transition-all"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -992,12 +1062,29 @@ export function QuoteValuesTab({
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-[13px] font-black text-foreground uppercase tracking-tight truncate leading-tight">
-                            {safeStr(product.product_name)}
-                          </h4>
-                          <p className="text-[10px] font-bold text-zinc-500 uppercase mt-1">
-                            {product.quantidade} {product.unidade}
-                          </p>
+                          <h4 className={cn(
+                             "text-[13px] font-black uppercase tracking-tight truncate leading-tight",
+                             (currentValue > 0 || supplierItems.some(i => i.supplier_id === selectedSupplier && i.product_id === product.product_id)) ? "text-foreground" : "text-zinc-400 line-through opacity-50"
+                           )}>
+                             {safeStr(product.product_name)}
+                           </h4>
+                           <div className="flex items-center gap-2 mt-1">
+                             <Switch
+                                checked={currentValue > 0 || supplierItems.some(i => i.supplier_id === (selectedSupplier || '') && i.product_id === product.product_id)}
+                                onCheckedChange={(checked) => {
+                                  if (!checked) {
+                                    onRemoveSupplierProduct({ quoteId, supplierId: selectedSupplier || '', productId: product.product_id });
+                                  } else {
+                                    onUpdateSupplierProductValue({ quoteId, supplierId: selectedSupplier || '', productId: product.product_id, newValue: 0 });
+                                  }
+                                  setTimeout(onRefresh, 100);
+                                }}
+                                className="scale-75 data-[state=checked]:bg-brand"
+                              />
+                             <p className="text-[10px] font-bold text-zinc-500 uppercase">
+                               {product.quantidade} {product.unidade}
+                             </p>
+                           </div>
                         </div>
                         {isBest && (
                           <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full text-[10px] font-black shadow-lg shadow-brand/20">
@@ -1065,8 +1152,27 @@ export function QuoteValuesTab({
                                   </div>
                                 );
                              })()}
-                             <div className="p-1.5 rounded-lg bg-brand/10 text-brand border border-brand/20">
-                               <Edit2 className="h-3.5 w-3.5" />
+                             
+                             <div className="flex gap-1.5">
+                               <div 
+                                 className="p-1.5 rounded-lg bg-brand/10 text-brand border border-brand/20"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleStartEdit(product.product_id, currentValue);
+                                 }}
+                               >
+                                 <Edit2 className="h-3.5 w-3.5" />
+                               </div>
+                               
+                               <div 
+                                 className="p-1.5 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20"
+                                 onClick={(e) => {
+                                   e.stopPropagation();
+                                   handleRemoveItem(product.product_id);
+                                 }}
+                               >
+                                 <Trash2 className="h-3.5 w-3.5" />
+                               </div>
                              </div>
                           </div>
                         </div>

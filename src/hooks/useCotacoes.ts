@@ -676,6 +676,84 @@ export function useCotacoes() {
     }
   });
 
+  // Mutation to remove a specific product from a supplier in a quote
+  const removeSupplierProduct = useMutation({
+    mutationFn: async ({ 
+      quoteId, 
+      supplierId, 
+      productId 
+    }: { 
+      quoteId: string; 
+      supplierId: string; 
+      productId: string; 
+    }) => {
+      console.log('🗑️ Removendo item do fornecedor:', { quoteId, supplierId, productId });
+
+      const { error } = await supabase
+        .from("quote_supplier_items")
+        .delete()
+        .eq("quote_id", quoteId)
+        .eq("supplier_id", supplierId)
+        .eq("product_id", productId);
+
+      if (error) {
+        console.error('❌ Erro ao remover item:', error);
+        throw error;
+      }
+    },
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ['cotacoes'] });
+      const previousCotacoes = queryClient.getQueryData(['cotacoes']);
+
+      queryClient.setQueryData(['cotacoes'], (old: any[] | undefined) => {
+        if (!old) return old;
+        return old.map((cotacao: any) => {
+          if (cotacao.id !== variables.quoteId) return cotacao;
+
+          const updatedSupplierItems = (cotacao._supplierItems || []).filter((item: any) => 
+            !(item.supplier_id === variables.supplierId && item.product_id === variables.productId)
+          );
+
+          const updatedParticipantes = (cotacao.fornecedoresParticipantes || []).map((f: any) => {
+            if (f.id !== variables.supplierId) return f;
+            const supplierValues = updatedSupplierItems
+              .filter((si: any) => si.supplier_id === variables.supplierId)
+              .map((si: any) => Number(si.valor_oferecido) || 0)
+              .filter((v: number) => v > 0);
+            const totalValue = supplierValues.reduce((sum: number, val: number) => sum + val, 0);
+            return { ...f, valorOferecido: totalValue };
+          });
+
+          return {
+            ...cotacao,
+            _supplierItems: updatedSupplierItems,
+            fornecedoresParticipantes: updatedParticipantes
+          };
+        });
+      });
+
+      return { previousCotacoes };
+    },
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      toast({
+        title: "Item removido",
+        description: "O produto foi removido deste fornecedor.",
+      });
+    },
+    onError: (error: any, _variables, context) => {
+      if (context?.previousCotacoes) {
+        queryClient.setQueryData(['cotacoes'], context.previousCotacoes);
+      }
+      toast({
+        title: "Erro ao remover",
+        description: error.message || "Não foi possível remover o item",
+        variant: "destructive",
+      });
+    }
+  });
+
   // Mutation to update quote
   const updateQuote = useMutation({
     mutationFn: async ({ quoteId, data }: { quoteId: string; data: any }) => {
@@ -1260,6 +1338,45 @@ export function useCotacoes() {
     }
   });
 
+  // Mutation to remove a specific product from a supplier in a quote
+  const removeSupplierProduct = useMutation({
+    mutationFn: async ({ quoteId, supplierId, productId }: { quoteId: string; supplierId: string; productId: string }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Usuário não autenticado");
+
+      // Check quote status first
+      const { data: quote, error: statusError } = await supabase
+        .from("quotes")
+        .select("status")
+        .eq("id", quoteId)
+        .single();
+      
+      if (statusError) throw statusError;
+      if (quote?.status === 'finalizada') {
+        throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+      }
+
+      // Remove from quote_supplier_items
+      const { error } = await supabase
+        .from("quote_supplier_items")
+        .delete()
+        .eq("quote_id", quoteId)
+        .eq("supplier_id", supplierId)
+        .eq("product_id", productId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      markMutationComplete();
+      queryClient.invalidateQueries({ queryKey: ['cotacoes'] });
+      toast({ title: "Produto removido do fornecedor!" });
+    },
+    onError: (error) => {
+      console.error("Erro ao remover produto do fornecedor:", error);
+      toast({ title: "Erro ao remover produto do fornecedor", variant: "destructive" });
+    }
+  });
+
   return {
     cotacoes,
     isLoading,
@@ -1272,6 +1389,7 @@ export function useCotacoes() {
     updateSupplierProductValue,
     updateQuoteItemPrice: updateSupplierProductValue,
     deleteQuote,
+    removeSupplierProduct,
     updateQuote,
     updateQuoteStatus,
     convertToOrder,
@@ -1289,6 +1407,7 @@ export function useCotacoes() {
       removeQuoteItem.isPending || 
       addQuoteSupplier.isPending || 
       removeQuoteSupplier.isPending ||
-      updateQuoteItemQuantity.isPending,
+      updateQuoteItemQuantity.isPending ||
+      removeSupplierProduct.isPending,
   };
 }
