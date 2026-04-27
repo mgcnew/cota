@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2, Sparkles, MessageCircle } from "lucide-react";
+import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Loader2, Trash2, Sparkles, MessageCircle } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -720,23 +720,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   onClick={handleWhatsAppExport}
                   disabled={isExportingWhatsApp}
                   className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Exportar p/ WhatsApp"
+                  title="Enviar Relatório via WhatsApp"
                 >
                   {isExportingWhatsApp ? (
                     <Loader2 className="h-4 w-4 animate-spin text-brand" />
                   ) : (
                     <MessageCircle className="h-4 w-4 text-brand" />
                   )}
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleExportHtml}
-                  className="text-muted-foreground hover:text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Exportar HTML"
-                >
-                  <Download className="h-4 w-4" />
                 </Button>
               </div>
             )}
@@ -837,11 +827,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleExportHtml}
-            className="text-muted-foreground hover:text-brand hover:bg-brand/10 h-10 w-10 rounded-xl transition-all"
-            title="Exportar"
+            onClick={handleWhatsAppExport}
+            disabled={isExportingWhatsApp}
+            className="text-brand hover:bg-brand/10 h-10 w-10 rounded-xl transition-all"
+            title="Enviar Relatório via WhatsApp"
           >
-            <Download className="h-5 w-5" />
+            {isExportingWhatsApp ? (
+              <Loader2 className="h-5 w-5 animate-spin text-brand" />
+            ) : (
+              <MessageCircle className="h-5 w-5" />
+            )}
           </Button>
         </div>
       )}
