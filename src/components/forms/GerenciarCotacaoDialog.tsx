@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2, Sparkles } from "lucide-react";
+import { ClipboardList, X, Package, DollarSign, ShoppingCart, Settings, Download, Loader2, Trash2, Sparkles, MessageCircle } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -32,6 +32,8 @@ interface GerenciarCotacaoDialogProps {
 
 import { Skeleton } from "@/components/ui/skeleton";
 import ResumoCotacaoDialog from "./ResumoCotacaoDialog";
+import html2canvas from "html2canvas";
+import { sendWhatsAppReport, generateWhatsAppGreeting, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
 
 // Skeleton para cada aba
 const TabSkeleton = ({ type }: { type: string }) => {
@@ -73,6 +75,8 @@ import { designSystem } from "@/styles/design-system";
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
   const [activeTab, setActiveTab] = useState("resumo");
   const [showResumoDialog, setShowResumoDialog] = useState(false);
+  const [isExportingWhatsApp, setIsExportingWhatsApp] = useState(false);
+  const captureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (activeTab === 'converter' && !open) setActiveTab('resumo');
@@ -565,29 +569,64 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     return html;
   }, [quote, products, supplierItems]);
 
-  const handleExportHtml = useCallback(() => {
+  const handleWhatsAppExport = useCallback(async () => {
+    if (isExportingWhatsApp) return;
+    
+    setIsExportingWhatsApp(true);
+    const toastId = toast.loading('Preparando relatório para WhatsApp...');
+
     try {
       const html = generateHtmlComparative();
-      if (!html) {
-        toast({ title: "Erro ao gerar exportação", description: "Não há dados suficientes para exportar.", variant: "destructive" });
-        return;
+      if (!html) throw new Error("Não há dados para exportar.");
+
+      // Capturar imagem do que está visível no momento
+      let base64Image = "";
+      if (captureRef.current) {
+        await new Promise(resolve => setTimeout(resolve, 400));
+        const canvas = await html2canvas(captureRef.current, {
+          useCORS: true,
+          scale: 1.5,
+          backgroundColor: '#ffffff',
+          logging: false,
+          onclone: (clonedDoc) => {
+            const el = clonedDoc.querySelector('[data-capture-container="true"]') as HTMLElement;
+            if (el) {
+              el.classList.remove('dark');
+              el.style.backgroundColor = '#ffffff';
+            }
+          }
+        });
+        base64Image = canvas.toDataURL("image/jpeg", 0.8);
       }
 
-      const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `cotacao-${quote.id.substring(0, 8)}-${quote.dataInicio.replace(/\//g, '-')}.html`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
+      const quoteId = safeStr(quote.id);
+      const greeting = generateWhatsAppGreeting(
+        quoteId,
+        products.length,
+        company?.name
+      );
 
-      toast({ title: "Exportação concluída", description: "O arquivo foi baixado com sucesso." });
-    } catch (error) {
-      console.error("Erro ao exportar:", error);
-      toast({ title: "Erro ao exportar", description: "Ocorreu um erro ao gerar o arquivo.", variant: "destructive" });
+      const res = await sendWhatsAppReport(
+        (window as any).DEFAULT_PHONE_NUMBER || DEFAULT_PHONE_NUMBER,
+        base64Image,
+        html,
+        quoteId,
+        greeting,
+        company?.id
+      );
+
+      if (res.success) {
+        toast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
+      } else {
+        throw new Error(res.error || "Erro no envio");
+      }
+    } catch (error: any) {
+      console.error("WhatsApp Export Error:", error);
+      toast.error(`Falha no envio: ${error.message}`, { id: toastId });
+    } finally {
+      setIsExportingWhatsApp(false);
     }
-  }, [generateHtmlComparative, quote, toast]);
+  }, [generateHtmlComparative, quote, products.length, company?.name, company?.id, isExportingWhatsApp, safeStr]);
 
   if (!mounted || !initialQuote || !quote) return null;
 
@@ -595,7 +634,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
 
   const modalContent = (
-    <>
+    <div ref={captureRef} data-capture-container="true" className="h-full flex flex-col bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
         {/* Header - Compacto e Responsivo */}
         <div className="flex items-center justify-between py-3 px-5 border-b bg-card min-h-[64px]">
@@ -671,6 +710,21 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   title="Relatório Profissional"
                 >
                   <Sparkles className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleWhatsAppExport}
+                  disabled={isExportingWhatsApp}
+                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                  title="Exportar p/ WhatsApp"
+                >
+                  {isExportingWhatsApp ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                  ) : (
+                    <MessageCircle className="h-4 w-4 text-brand" />
+                  )}
                 </Button>
 
                 <Button
@@ -789,9 +843,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           </Button>
         </div>
       )}
-
-
-    </>
+    </div>
   );
 
   if (isMobile) {

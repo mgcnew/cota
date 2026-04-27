@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,9 +9,10 @@ import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
 import { analyzeQuoteOptions } from "@/lib/gemini";
-import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
+import { generateQuoteExportMessage, sendWhatsAppReport, generateWhatsAppGreeting, generateQuoteReportHTML } from "@/lib/whatsapp-service";
 import { useCompany } from "@/hooks/useCompany";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -33,6 +34,106 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   const [groupBySupplier, setGroupBySupplier] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<string | null>(null);
+  const [isExportingWhatsApp, setIsExportingWhatsApp] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleWhatsAppExport = async () => {
+    if (!containerRef.current || isExportingWhatsApp) return;
+    
+    setIsExportingWhatsApp(true);
+    const toastId = toast.loading('Preparando relatório profissional...');
+
+    try {
+      // 1. Capturar imagem do resumo
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const canvas = await html2canvas(containerRef.current, {
+        useCORS: true,
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+        onclone: (clonedDoc) => {
+          const el = clonedDoc.querySelector('[data-capture-id="quote-summary"]') as HTMLElement;
+          if (el) {
+            el.classList.remove('dark');
+            el.style.backgroundColor = '#ffffff';
+          }
+        }
+      });
+      
+      const base64Image = canvas.toDataURL("image/jpeg", 0.8);
+
+      // 2. Preparar dados para o HTML interativo
+      const negotiatedSavings = filteredAndSortedData.reduce((acc, item) => {
+        const bestEntry = item.allPrices?.find((p: any) => p.fornecedorId === item.bestSupplierId);
+        const initial = bestEntry?.valor_inicial || item.bestPrice;
+        return acc + Math.max(0, (initial - item.bestPrice) * item.quantidade);
+      }, 0);
+
+      const marketSavings = filteredAndSortedData.reduce((acc, item) => 
+        acc + (item.savings > 0 ? item.savings * item.quantidade : 0), 0
+      );
+
+      // Mapear produtos para o formato esperado pelo generateQuoteReportHTML
+      const productsData = filteredAndSortedData.map(p => ({
+        productName: p.productName,
+        quantidade: p.quantidade,
+        unidade: p.unidade,
+        bestPrice: p.bestPrice,
+        bestSupplierName: p.bestSupplierName,
+        totalItem: p.bestPrice * p.quantidade,
+        allOffers: p.allPrices?.map((o: any) => ({
+          supplierName: o.nome,
+          price: o.value,
+          initialPrice: o.valor_inicial,
+          total: o.value * p.quantidade,
+          isWinner: o.fornecedorId === p.bestSupplierId,
+          wasNegotiated: o.value < o.valor_inicial
+        })) || []
+      }));
+
+      const quoteId = productPricesData[0]?.quoteId || "COTA";
+
+      const htmlContent = generateQuoteReportHTML({
+        quoteId: quoteId,
+        dateLabel: new Date().toLocaleDateString('pt-BR'),
+        companyName: company?.name || "Minha Empresa",
+        totalProdutos: stats.totalProdutos,
+        totalFornecedores: stats.totalFornecedores,
+        fornecedoresRespondidos: stats.fornecedoresRespondidos,
+        totalMelhorPreco: melhorTotal,
+        totalEconomiaReal: negotiatedSavings,
+        productsData: productsData,
+        viewMode: "comparative"
+      });
+
+      const greeting = generateWhatsAppGreeting(
+        quoteId,
+        stats.totalProdutos,
+        company?.name
+      );
+
+      // 3. Enviar via API
+      const res = await sendWhatsAppReport(
+        (window as any).DEFAULT_PHONE_NUMBER || "11966670314",
+        base64Image,
+        htmlContent,
+        quoteId,
+        greeting,
+        company?.id
+      );
+
+      if (res.success) {
+        toast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
+      } else {
+        throw new Error(res.error || "Erro no envio");
+      }
+    } catch (error: any) {
+      console.error("WhatsApp Export Error:", error);
+      toast.error(`Falha no envio: ${error.message}`, { id: toastId });
+    } finally {
+      setIsExportingWhatsApp(false);
+    }
+  };
 
   const handleAnalyzeQuote = async () => {
     setIsAnalyzing(true);
@@ -162,7 +263,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   );
 
   return (
-    <div className="flex flex-col w-full h-auto bg-transparent">
+    <div ref={containerRef} data-capture-id="quote-summary" className="flex flex-col w-full h-auto bg-transparent">
       {/* 1. SEÇÃO DE STATS COMPACTA */}
       <div className="bg-card/50 border-b border-border/40 px-4 py-3 flex items-center justify-between overflow-x-auto custom-scrollbar">
         <div className="flex items-center gap-6 min-w-max">
@@ -202,42 +303,15 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         <div className="flex items-center gap-2">
           <Button 
             variant="outline"
-            onClick={() => {
-                const negotiatedSavings = filteredAndSortedData.reduce((acc, item) => {
-                  const bestEntry = item.allPrices?.find((p: any) => p.fornecedorId === item.bestSupplierId);
-                  const initial = bestEntry?.valor_inicial || item.bestPrice;
-                  return acc + Math.max(0, (initial - item.bestPrice) * item.quantidade);
-                }, 0);
-
-                const marketSavings = filteredAndSortedData.reduce((acc, item) => 
-                  acc + (item.savings > 0 ? item.savings * item.quantidade : 0), 0
-                );
-
-                const exportMsg = generateQuoteExportMessage(
-                  stats,
-                  groupedData || [],
-                  negotiatedSavings,
-                  melhorTotal,
-                  (stats as any).analiseResult || null,
-                  marketSavings
-                );
-                
-                toast.promise(
-                  import("@/lib/whatsapp-service").then(async m => {
-                    const res: any = await m.sendWhatsApp(m.DEFAULT_PHONE_NUMBER, exportMsg, company?.id);
-                    if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
-                    return res;
-                  }),
-                  {
-                    loading: 'Enviando relatório para WhatsApp...',
-                    success: 'Relatório enviado com sucesso via API!',
-                    error: (err) => `Falha no envio via API: ${err.message}`
-                  }
-                );
-              }}
+            onClick={handleWhatsAppExport}
+            disabled={isExportingWhatsApp}
             className="h-8 border-brand/20 text-brand font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm hover:bg-brand/10 transition-all flex-shrink-0"
           >
-            <MessageCircle className="h-3 w-3 mr-1.5" />
+            {isExportingWhatsApp ? (
+              <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+            ) : (
+              <MessageCircle className="h-3 w-3 mr-1.5" />
+            )}
             <span className="hidden sm:inline">Exportar p/</span> WhatsApp
           </Button>
 
