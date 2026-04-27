@@ -1106,11 +1106,11 @@ export function useCotacoes() {
           : `Pedido criado - R$ ${data.totalValue.toFixed(2)}${economiaMsg}`
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Erro ao converter cotação:", error);
       toast({
-        title: "Erro",
-        description: "Não foi possível converter a cotação em pedido.",
+        title: "Erro ao converter",
+        description: error?.message || "Não foi possível converter a cotação em pedido.",
         variant: "destructive"
       });
     }
