@@ -152,10 +152,10 @@ export function usePedidos() {
 
       return formattedPedidos;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes - shorter than cotacoes since orders are created externally
     gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: 'always', // Always refetch on mount to pick up orders created from cotacoes conversion
   });
 
   const deleteMutation = useMutation({

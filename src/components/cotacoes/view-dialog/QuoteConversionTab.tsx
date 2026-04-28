@@ -87,24 +87,20 @@ export function QuoteConversionTab({
   }, [products, getBestPriceInfoForProduct, productSelections]);
 
   const totalSelecao = useMemo(() => {
-    if (pedidoSubTab === "dividido") {
-      let total = 0;
-      Object.entries(productAllocations).forEach(([productId, allocs]) => {
-        Object.entries(allocs).forEach(([supplierId, qty]) => {
-          total += (getSupplierProductValue(supplierId, productId) * qty);
-        });
-      });
-      return total;
+    if (pedidoSubTab === 'dividido') {
+      return Object.entries(productAllocations).reduce((total, [productId, allocs]) => {
+        const totalQuoteQty = parseFloat(products.find(p => p.product_id === productId)?.quantidade?.toString().replace(',', '.') || '1') || 1;
+        return total + Object.entries(allocs).reduce((sum, [supplierId, qty]) => {
+          const unitPrice = getSupplierProductValue(supplierId, productId) / totalQuoteQty;
+          return sum + (unitPrice * qty);
+        }, 0);
+      }, 0);
     }
-
     return products.reduce((total: number, product: any) => {
       const supplierId = productSelections[product.product_id];
-      // Note: Assuming getSupplierProductValue returns UNIT price based on previous discussion,
-      // wait, earlier we saw getSupplierProductValue is used as `total += getSupplierProductValue(supplierId, product.product_id)` in the original code. Let's keep it as is, or adjust if divided.
-      // Wait, earlier getSupplierProductValue was used without multiplying by quantity. Let's keep it as is for 'melhores'/'unico', and for 'dividido' maybe we need unit price?
-      // Actually, if getSupplierProductValue returns unit price, we should multiply by qty. If it returns total price, dividing by total qty gives unit price. Let's see original Code: `total + getSupplierProductValue(...)`.
-      // I'll keep the original behavior for non-divided, and calculate unit price for divided.
-      if (supplierId) return total + getSupplierProductValue(supplierId, product.product_id);
+      if (supplierId) {
+        return total + getSupplierProductValue(supplierId, product.product_id);
+      }
       return total;
     }, 0);
   }, [products, productSelections, productAllocations, pedidoSubTab, getSupplierProductValue]);
@@ -121,19 +117,24 @@ export function QuoteConversionTab({
     
     if (pedidoSubTab === "dividido") {
       Object.entries(productAllocations).forEach(([productId, allocs]) => {
+        const product = products.find((p: any) => p.product_id === productId);
+        if (!product) return;
+
         Object.entries(allocs).forEach(([supplierId, qty]) => {
           if (qty > 0) {
-            const product = products.find((p: any) => p.product_id === productId);
             const fornecedor = fornecedores.find((f: any) => f.id === supplierId);
-            if (product && fornecedor) {
+            if (fornecedor) {
               if (!groups.has(supplierId)) {
                 groups.set(supplierId, { supplierId, supplierName: safeStr(fornecedor.nome), products: [], productQuantities: {} });
               }
               const g = groups.get(supplierId)!;
+              
+              const totalQuoteQty = parseFloat(product.quantidade?.toString().replace(',', '.') || '1') || 1;
+              const unitPrice = getSupplierProductValue(supplierId, productId) / totalQuoteQty;
+
               g.products.push({
                 ...product,
-                // Pro-rata value for export
-                value: (getSupplierProductValue(supplierId, productId) / (product.quantidade || 1)) * qty,
+                value: unitPrice * qty,
                 quantidade: qty
               });
               g.productQuantities[productId] = qty;
@@ -154,13 +155,15 @@ export function QuoteConversionTab({
             ...product,
             value: getSupplierProductValue(supplierId, productId)
           });
-          // For whole selection, productQuantities doesn't need to be set or can be set to product.quantidade
-          g.productQuantities[productId] = product.quantidade;
+          g.productQuantities[productId] = parseFloat(product.quantidade?.toString().replace(',', '.') || '0');
         }
       });
     }
     return Array.from(groups.values());
   }, [productSelections, productAllocations, pedidoSubTab, products, fornecedores, getSupplierProductValue, safeStr]);
+
+  // Total da seleção para exibição no botão/header
+  const totalDisplay = totalSelecao;
 
   const handleConvertToOrder = () => {
     if (!deliveryDate) {
@@ -171,11 +174,27 @@ export function QuoteConversionTab({
       toast.error("Selecione fornecedores para os produtos");
       return;
     }
+
+    // Validação de alocação incompleta em modo dividido
+    if (pedidoSubTab === 'dividido') {
+      const incompleteProducts = products.filter(product => {
+        const allocs = productAllocations[product.product_id] || {};
+        const totalAllocated = Object.values(allocs).reduce((sum, q) => sum + (Number(q) || 0), 0);
+        return Math.abs(totalAllocated - (parseFloat(product.quantidade?.toString().replace(',', '.') || '0'))) > 0.01;
+      });
+
+      if (incompleteProducts.length > 0) {
+        if (!confirm(`Alguns produtos não foram totalmente alocados ou excedem a quantidade total. Deseja continuar mesmo assim?\n\nProdutos: ${incompleteProducts.map(p => safeStr(p.product_name)).join(', ')}`)) {
+          return;
+        }
+      }
+    }
+
     if (onConvertToOrder) {
       const orders = supplierGroups.map(group => ({
         supplierId: group.supplierId,
         productIds: group.products.map((p: any) => p.product_id),
-        productQuantities: pedidoSubTab === 'dividido' ? group.productQuantities : undefined,
+        productQuantities: group.productQuantities,
         deliveryDate,
         observations: observations || undefined
       }));
@@ -196,19 +215,24 @@ export function QuoteConversionTab({
       name: group.supplierName,
       total: group.products.reduce((acc, p) => acc + p.value, 0),
       items: group.products.map(p => {
-        const { bestPrice } = getBestPriceInfoForProduct(p.product_id);
+        const { bestPrice: mktBestPrice } = getBestPriceInfoForProduct(p.product_id);
         const supplierItem = supplierItems.find(si => si.product_id === p.product_id && si.supplier_id === group.supplierId);
         
+        const totalQuoteQty = parseFloat(products.find(prod => prod.product_id === p.product_id)?.quantidade?.toString().replace(',', '.') || '1') || 1;
+        const unitPrice = getSupplierProductValue(group.supplierId, p.product_id) / totalQuoteQty;
+        const unitBestPrice = mktBestPrice / totalQuoteQty;
+        const unitInitialOffer = Number(supplierItem?.valor_inicial) || unitPrice;
+
         return {
           productName: p.product_name,
-          product_name: p.product_name, // Suporte a ambos os nomes
+          product_name: p.product_name,
           quantidade: p.quantidade,
           unidade: p.unidade,
-          bestPrice: p.value,
+          bestPrice: unitPrice, // Preço unitário selecionado
           bestSupplierId: group.supplierId,
-          initialOffer: supplierItem?.price_history?.[0]?.old_price || p.value,
-          allPrices: [], // Estrutura mínima
-          savings: bestPrice > 0 ? (bestPrice - p.value) : 0
+          initialOffer: unitInitialOffer,
+          allPrices: [],
+          savings: unitBestPrice > 0 ? (unitBestPrice - unitPrice) : 0
         };
       })
     }));
@@ -227,7 +251,7 @@ export function QuoteConversionTab({
       statsExport,
       groupedDataExport,
       totalNegotiatedSavings,
-      totalSelecao,
+      totalDisplay,
       (quote as any).analise_ia || null,
       totalMarketPotential
     );
@@ -344,8 +368,9 @@ export function QuoteConversionTab({
                 {products.map((product: any) => {
                   const allocs = productAllocations[product.product_id] || {};
                   const totalAllocated = Object.values(allocs).reduce((sum, q) => sum + (Number(q) || 0), 0);
-                  const isComplete = totalAllocated === product.quantidade;
-                  const isOver = totalAllocated > product.quantidade;
+                  const totalQuoteQty = parseFloat(product.quantidade?.toString().replace(',', '.') || '0');
+                  const isComplete = Math.abs(totalAllocated - totalQuoteQty) < 0.01;
+                  const isOver = totalAllocated > totalQuoteQty + 0.01;
 
                   return (
                     <div key={product.product_id} className="p-3 space-y-3">
@@ -365,13 +390,14 @@ export function QuoteConversionTab({
                       
                       <div className="space-y-2">
                         {fornecedores.filter((f: any) => allowItemsWithoutPrice || getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => {
-                          const val = getSupplierProductValue(f.id, product.product_id);
+                          const totalVal = getSupplierProductValue(f.id, product.product_id);
+                          const unitPrice = totalVal / (totalQuoteQty || 1);
                           const qty = allocs[f.id] || 0;
                           return (
                             <div key={f.id} className="flex items-center justify-between gap-2 bg-muted/30 p-2 rounded-lg border border-border/50">
                               <div className="min-w-0 flex-1">
                                 <p className="text-[10px] font-bold uppercase truncate">{safeStr(f.nome)}</p>
-                                <p className="text-[9px] text-muted-foreground">R$ {val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (Total Oferta)</p>
+                                <p className="text-[9px] text-muted-foreground">R$ {unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / {safeStr(product.unidade)}</p>
                               </div>
                               <div className="w-24">
                                 <Input 
@@ -469,7 +495,7 @@ export function QuoteConversionTab({
         <div className="pt-2">
           <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="w-full h-9 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
             <ShoppingCart className="h-3.5 w-3.5 mr-2" />
-            Converter em Pedidos de Compra
+            Converter em Pedidos (R$ {totalDisplay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
           </Button>
         </div>
       </div>

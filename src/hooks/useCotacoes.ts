@@ -1098,7 +1098,12 @@ export function useCotacoes() {
     onSuccess: (data) => {
       markMutationComplete();
       queryClient.invalidateQueries({ queryKey: ["cotacoes"] });
+      // Force-clear pedidos cache (including localStorage persistence) so the orders tab
+      // always fetches fresh data after a conversion, even if it wasn't mounted
+      queryClient.removeQueries({ queryKey: ["pedidos"] });
       queryClient.invalidateQueries({ queryKey: ["pedidos"] });
+      queryClient.invalidateQueries({ queryKey: ["pedidosStats"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       const count = data.orderIds.length;
       const economiaMsg = data.economiaEstimada > 0 
         ? ` | Economia estimada: R$ ${data.economiaEstimada.toFixed(2)}`
