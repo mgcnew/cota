@@ -183,16 +183,15 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     return economia;
   }, [produtosComVencedor]);
 
-  // Economia calculada: usa a mesma lógica do relatório HTML (maior preço inicial/oferta vs melhor preço)
+  // Economia capturada: valor_inicial do vencedor - valor_final do vencedor × quantidade
   const totalEconomiaCalculada = useMemo(() => {
     return produtosComVencedor.reduce((sum, p) => {
-      const offers = p.allOffers || [];
-      if (offers.length === 0) return sum;
-      const highestOffer = Math.max(...offers.map((o: any) => o.price || 0));
-      const highestInitial = Math.max(...offers.map((o: any) => o.initialPrice || o.price || 0));
-      const valorInicial = Math.max(highestOffer, highestInitial);
-      if (valorInicial > p.bestPrice && p.bestPrice > 0) {
-        return sum + (valorInicial - p.bestPrice) * (p.quantidade || 1);
+      const winnerOffer = (p.allOffers || []).find((o: any) => o.isWinner);
+      if (!winnerOffer) return sum;
+      const inicial = winnerOffer.initialPrice || 0;
+      const final_ = winnerOffer.price || 0;
+      if (inicial > final_ && final_ > 0) {
+        return sum + (inicial - final_) * (p.quantidade || 1);
       }
       return sum;
     }, 0);

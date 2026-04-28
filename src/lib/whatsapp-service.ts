@@ -342,13 +342,9 @@ export function generateQuoteReportHTML(opts: {
       let rows = "";
       g.items.forEach((i: any) => {
         const unit = (i.unidade || "un").toUpperCase();
-        // Calcular valor inicial e economia do item
-        const offers = i.allOffers || [];
-        const highestOffer = offers.length > 0 ? Math.max(...offers.map((o: any) => o.price || 0)) : i.bestPrice;
-        const initialPrice = offers.length > 0
-          ? Math.max(...offers.map((o: any) => o.initialPrice || o.price || 0))
-          : i.bestPrice;
-        const valorInicial = Math.max(highestOffer, initialPrice);
+        // Economia do item = valor_inicial do vencedor - valor_final do vencedor × qtd
+        const winnerOffer = (i.allOffers || []).find((o: any) => o.isWinner);
+        const valorInicial = winnerOffer?.initialPrice || i.bestPrice;
         const econItem = valorInicial > i.bestPrice ? (valorInicial - i.bestPrice) * (i.quantidade || 1) : 0;
         rows += `
           <tr>
@@ -361,12 +357,8 @@ export function generateQuoteReportHTML(opts: {
           </tr>`;
       });
       const groupEcon = g.items.reduce((sum: number, i: any) => {
-        const offers = i.allOffers || [];
-        const highestOffer = offers.length > 0 ? Math.max(...offers.map((o: any) => o.price || 0)) : i.bestPrice;
-        const initialPrice = offers.length > 0
-          ? Math.max(...offers.map((o: any) => o.initialPrice || o.price || 0))
-          : i.bestPrice;
-        const valorInicial = Math.max(highestOffer, initialPrice);
+        const winnerOffer = (i.allOffers || []).find((o: any) => o.isWinner);
+        const valorInicial = winnerOffer?.initialPrice || i.bestPrice;
         return sum + (valorInicial > i.bestPrice ? (valorInicial - i.bestPrice) * (i.quantidade || 1) : 0);
       }, 0);
       items += `
