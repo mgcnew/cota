@@ -386,28 +386,28 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     <div className="h-full flex flex-col bg-background">
       {/* Header */}
       <div className="flex items-center justify-between py-3 px-5 border-b bg-card min-h-[56px]">
-        <div className="flex items-center gap-3 min-w-max">
-          <div className="p-2 rounded-[10px] bg-brand/10 border border-brand/20">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+          <div className="hidden sm:flex p-2 rounded-[10px] bg-brand/10 border border-brand/20 flex-shrink-0">
             <Sparkles className="h-4 w-4 text-brand" />
           </div>
-          <div className="flex flex-col">
-            <h2 className="text-base font-black text-foreground tracking-tight leading-none mb-1">
+          <div className="flex flex-col min-w-0">
+            <h2 className="text-sm md:text-base font-black text-foreground tracking-tight leading-none mb-1 truncate">
               Resumo da Negociação
             </h2>
-            <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">
+            <span className="hidden sm:inline text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">
               #{safeStr(quote.id).substring(0, 8)}
             </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
           {/* View Toggle */}
           {!isCapturing && (
-            <div className="flex p-0.5 bg-muted rounded-lg border border-border/50 mr-2">
+            <div className="flex p-0.5 bg-muted rounded-lg border border-border/50 mr-1 md:mr-2">
               <button
                 onClick={() => setViewMode("winners")}
                 className={cn(
-                  "px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest transition-all",
+                  "px-1 md:px-3 py-1 rounded-md text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all",
                   viewMode === "winners"
                     ? "bg-background text-brand shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
@@ -418,28 +418,28 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
               <button
                 onClick={() => setViewMode("comparative")}
                 className={cn(
-                  "px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest transition-all",
+                  "px-1 md:px-3 py-1 rounded-md text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all",
                   viewMode === "comparative"
                     ? "bg-background text-brand shadow-sm"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                Comparativo
+                Comp.
               </button>
             </div>
           )}
 
-          <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
-            <Button variant="ghost" size="icon" onClick={handleDownloadHTML} className="h-8 w-8 rounded-lg text-brand hover:bg-brand/5" title="Baixar HTML">
-              <Download className="h-4 w-4" />
+          <div className="flex items-center gap-0.5 md:gap-1 border-r border-border pr-1 md:pr-2 mr-1">
+            <Button variant="ghost" size="icon" onClick={handleDownloadHTML} className="h-7 w-7 md:h-8 md:w-8 rounded-lg text-brand hover:bg-brand/5" title="Baixar HTML">
+              <Download className="h-3.5 w-3.5 md:h-4 md:w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleWhatsAppExport} disabled={isCapturing} className="h-8 w-8 rounded-lg text-brand hover:bg-brand/5" title="Enviar WhatsApp">
-              {isCapturing ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+            <Button variant="ghost" size="icon" onClick={handleWhatsAppExport} disabled={isCapturing} className="h-7 w-7 md:h-8 md:w-8 rounded-lg text-brand hover:bg-brand/5" title="Enviar WhatsApp">
+              {isCapturing ? <Loader2 className="h-3.5 w-3.5 md:h-4 md:w-4 animate-spin" /> : <MessageCircle className="h-3.5 w-3.5 md:h-4 md:w-4" />}
             </Button>
           </div>
 
-          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 rounded-lg hover:bg-accent">
-            <X className="h-4 w-4 text-muted-foreground" />
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-7 w-7 md:h-8 md:w-8 rounded-lg hover:bg-accent">
+            <X className="h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
           </Button>
         </div>
       </div>
@@ -457,34 +457,38 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         <div className="space-y-5 max-w-full mx-auto">
           
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-card border border-border rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="p-1 bg-brand/10 rounded-md"><Sparkles className="h-3 w-3 text-brand" /></div>
-                <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Status</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div className="bg-card border border-border rounded-xl p-2.5 md:p-3">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
+                <div className="p-1 bg-brand/10 rounded-md"><Sparkles className="h-2.5 w-2.5 md:h-3 md:w-3 text-brand" /></div>
+                <span className="text-[7px] md:text-[8px] font-black text-muted-foreground uppercase tracking-widest">Status</span>
               </div>
-              <Badge className="bg-brand/10 text-brand border-brand/20 font-black text-[9px] uppercase tracking-widest">{quote.status}</Badge>
+              <Badge className="bg-brand/10 text-brand border-brand/20 font-black text-[8px] md:text-[9px] uppercase tracking-widest px-1.5 py-0">{quote.status}</Badge>
             </div>
-            <div className="bg-card border border-border rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="p-1 bg-muted rounded-md"><Building2 className="h-3 w-3 text-muted-foreground" /></div>
-                <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Respondentes</span>
+            <div className="bg-card border border-border rounded-xl p-2.5 md:p-3">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
+                <div className="p-1 bg-muted rounded-md"><Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-muted-foreground" /></div>
+                <span className="text-[7px] md:text-[8px] font-black text-muted-foreground uppercase tracking-widest">Respondentes</span>
               </div>
-              <p className="text-lg font-black text-foreground leading-none">{fornecedoresRespondidos}<span className="text-xs text-muted-foreground font-bold">/{fornecedores.length}</span></p>
+              <p className="text-base md:text-lg font-black text-foreground leading-none">{fornecedoresRespondidos}<span className="text-[10px] md:text-xs text-muted-foreground font-bold">/{fornecedores.length}</span></p>
             </div>
-            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="p-1 bg-emerald-500 rounded-md text-white"><TrendingDown className="h-3 w-3" /></div>
-                <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Economia</span>
+            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-2.5 md:p-3">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
+                <div className="p-1 bg-emerald-500 rounded-md text-white"><TrendingDown className="h-2.5 w-2.5 md:h-3 md:w-3" /></div>
+                <span className="text-[7px] md:text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Economia</span>
               </div>
-              <p className="text-lg font-black text-emerald-600 tracking-tighter leading-none">{formatCurrency(totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial)}</p>
+              <p className="text-base md:text-lg font-black text-emerald-600 tracking-tighter leading-none truncate" title={formatCurrency(totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial)}>
+                {formatCurrency(totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial)}
+              </p>
             </div>
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-3">
-              <div className="flex items-center gap-2 mb-1.5">
-                <div className="p-1 bg-brand rounded-md text-black"><DollarSign className="h-3 w-3" /></div>
-                <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Total Pedido</span>
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 md:p-3">
+              <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
+                <div className="p-1 bg-brand rounded-md text-black"><DollarSign className="h-2.5 w-2.5 md:h-3 md:w-3" /></div>
+                <span className="text-[7px] md:text-[8px] font-black text-zinc-400 uppercase tracking-widest">Total Pedido</span>
               </div>
-              <p className="text-lg font-black text-white tracking-tighter leading-none">{formatCurrency(totalMelhorPreco)}</p>
+              <p className="text-base md:text-lg font-black text-white tracking-tighter leading-none truncate" title={formatCurrency(totalMelhorPreco)}>
+                {formatCurrency(totalMelhorPreco)}
+              </p>
             </div>
           </div>
 
@@ -608,14 +612,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     </div>
                     
                     <div className="grid grid-cols-1">
-                      <div className="grid grid-cols-[1fr_120px_140px] px-5 py-2 bg-muted/20 border-b border-border/40">
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor</span>
+                      <div className="grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 px-3 md:px-5 py-2 bg-muted/20 border-b border-border/40">
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest truncate">Fornecedor</span>
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Unitário</span>
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Total Ofertado</span>
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Total</span>
                       </div>
                       {p.allOffers.map((offer, oIdx) => (
                         <div key={offer.supplierId} className={cn(
-                          "px-5 py-2.5 grid grid-cols-[1fr_120px_140px] items-center transition-all border-b border-border/20 last:border-0",
+                          "px-3 md:px-5 py-2.5 grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 items-center transition-all border-b border-border/20 last:border-0",
                           offer.isWinner 
                             ? "bg-brand/5 dark:bg-brand/10" 
                             : "bg-background hover:bg-muted/30"
@@ -638,25 +642,25 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
+                          <div className="text-right whitespace-nowrap">
                             {offer.wasNegotiated ? (
-                              <div className="flex flex-col">
+                              <div className="flex flex-col items-end">
                                 <span className="text-[8px] text-muted-foreground line-through leading-none">{formatCurrency(offer.initialPrice)}</span>
                                 <span className={cn(
-                                  "text-[11px] font-bold",
+                                  "text-[10px] md:text-[11px] font-bold",
                                   offer.isWinner ? "text-brand" : "text-foreground"
                                 )}>{formatCurrency(offer.price)}</span>
                               </div>
                             ) : (
                               <span className={cn(
-                                "text-[11px] font-bold",
+                                "text-[10px] md:text-[11px] font-bold",
                                 offer.isWinner ? "text-brand" : "text-foreground"
                               )}>{formatCurrency(offer.price)}</span>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="text-right whitespace-nowrap">
                             <p className={cn(
-                              "text-[13px] font-black tracking-tight leading-none", 
+                              "text-[11px] md:text-[13px] font-black tracking-tight leading-none", 
                               offer.isWinner ? "text-brand" : "text-foreground"
                             )}>
                               {formatCurrency(offer.total)}

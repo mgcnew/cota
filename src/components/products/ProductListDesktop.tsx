@@ -1,16 +1,12 @@
-import { memo } from 'react';
-import { Package, Tags, Award, Barcode, CircleDot, DollarSign, Building2, ClipboardList, Star, History, TrendingUp, TrendingDown, Minus, Eye, EyeOff } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table";
+import { memo, useState, useCallback } from 'react';
+import { Package, Star, ClipboardList, History, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableActionGroup } from "@/components/ui/table-action-group";
 import { LazyImage } from "@/components/responsive/LazyImage";
 import { capitalize } from "@/lib/text-utils";
 import type { Product } from "@/hooks/useProducts";
-import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
 
 interface ProductListDesktopProps {
   products: Product[];
@@ -27,157 +23,260 @@ const getProductStatus = (product: Product) => {
 };
 
 const getTrendIcon = (trend: "up" | "down" | "stable") => {
-  if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400 opacity-80" />;
-  if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-500 opacity-70" />;
-  return <Minus className="h-3.5 w-3.5 text-zinc-300 dark:text-zinc-600" />;
+  if (trend === "up") return <TrendingUp className="h-3 w-3 text-emerald-500" />;
+  if (trend === "down") return <TrendingDown className="h-3 w-3 text-red-400" />;
+  return <Minus className="h-3 w-3 text-zinc-300 dark:text-zinc-600" />;
+};
+
+type SortKey = 'name' | 'category' | 'brand' | 'price' | 'quotes';
+type SortDir = 'asc' | 'desc';
+
+const extractPrice = (priceStr: string): number => {
+  const cleaned = priceStr.replace(/[^\d,.-]/g, '').replace(',', '.');
+  return parseFloat(cleaned) || 0;
 };
 
 export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory }: ProductListDesktopProps) => {
+  const [sortKey, setSortKey] = useState<SortKey | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+
+  const handleSort = useCallback((key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }, [sortKey]);
+
+  const sortedProducts = (() => {
+    if (!sortKey) return products;
+    return [...products].sort((a, b) => {
+      let cmp = 0;
+      switch (sortKey) {
+        case 'name':
+          cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR');
+          break;
+        case 'category':
+          cmp = (a.category || '').localeCompare(b.category || '', 'pt-BR');
+          break;
+        case 'brand':
+          cmp = (a.brand_name || '').localeCompare(b.brand_name || '', 'pt-BR');
+          break;
+        case 'price':
+          cmp = extractPrice(a.lastOrderPrice || '') - extractPrice(b.lastOrderPrice || '');
+          break;
+        case 'quotes':
+          cmp = (a.quotesCount || 0) - (b.quotesCount || 0);
+          break;
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  })();
+
+  const SortHeader = ({ label, sortId, className }: { label: string; sortId: SortKey; className?: string }) => {
+    const isActive = sortKey === sortId;
+    return (
+      <th
+        className={cn(
+          "h-10 px-3 text-left text-[11px] font-semibold uppercase tracking-wider cursor-pointer select-none transition-colors",
+          "text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200",
+          isActive && "text-zinc-800 dark:text-zinc-100",
+          className
+        )}
+        onClick={() => handleSort(sortId)}
+      >
+        <div className="flex items-center gap-1">
+          <span>{label}</span>
+          {isActive ? (
+            sortDir === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />
+          ) : (
+            <ChevronsUpDown className="h-3 w-3 opacity-0 group-hover/th:opacity-40 transition-opacity" />
+          )}
+        </div>
+      </th>
+    );
+  };
+
   return (
-    <div className="hidden md:block overflow-x-auto w-full custom-scrollbar">
-      <Table className={ds.components.table.root}>
-        <TableHeader className={ds.components.table.header}>
-          <TableRow className="hover:bg-transparent border-none">
-            <TableCell colSpan={9} className="px-1 pb-0 pt-0 border-none">
-              <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
-                <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
-                    <Package className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
+    <div className="hidden md:block w-full">
+      <div className="bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
+        <table className="w-full text-sm">
+          {/* Header */}
+          <thead>
+            <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/40">
+              <SortHeader label="Produto" sortId="name" className="pl-4 w-[28%]" />
+              <SortHeader label="Categoria" sortId="category" className="w-[13%]" />
+              <th className="h-10 px-3 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 hidden lg:table-cell w-[12%]">
+                Marca
+              </th>
+              <th className="h-10 px-3 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 hidden xl:table-cell w-[10%]">
+                Código
+              </th>
+              <th className="h-10 px-3 text-center text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 w-[10%]">
+                Status
+              </th>
+              <SortHeader label="Preço" sortId="price" className="w-[10%]" />
+              <th className="h-10 px-3 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 hidden lg:table-cell w-[12%]">
+                Fornecedor
+              </th>
+              <SortHeader label="Cot." sortId="quotes" className="w-[6%] text-center" />
+              <th className="h-10 px-3 text-right text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 pr-4 w-[9%]">
+                Ações
+              </th>
+            </tr>
+          </thead>
+
+          {/* Body */}
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/60">
+            {sortedProducts.map((product, idx) => (
+              <tr
+                key={product.id}
+                className={cn(
+                  "group transition-colors duration-150",
+                  "hover:bg-zinc-50/80 dark:hover:bg-zinc-800/30",
+                  idx % 2 === 1 && "bg-zinc-50/40 dark:bg-zinc-900/20"
+                )}
+              >
+                {/* Produto */}
+                <td className="pl-4 pr-3 py-2.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-zinc-200/60 dark:border-zinc-700/60">
+                      {product.image_url ? (
+                        <LazyImage
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-full h-full object-cover"
+                          showSkeleton={true}
+                          fallback={<Package className="h-4 w-4 text-zinc-400" />}
+                        />
+                      ) : (
+                        <Package className="h-4 w-4 text-zinc-400" />
+                      )}
+                    </div>
+                    <span className="font-semibold text-sm text-zinc-900 dark:text-zinc-50 truncate">
+                      {capitalize(product.name)}
+                    </span>
                   </div>
-                  <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Produto</span>
-                </div>
-                <div className="w-[12%] px-2 flex justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Categoria</span>
-                </div>
-                <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Marca</span>
-                </div>
-                <div className="hidden xl:flex w-[10%] px-2 justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Código</span>
-                </div>
-                <div className="w-[11%] px-2 flex justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Status</span>
-                </div>
-                <div className="w-[10%] px-2 flex justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Preço</span>
-                </div>
-                <div className="hidden lg:flex w-[12%] px-2 justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Fornecedor</span>
-                </div>
-                <div className="w-[8%] px-2 flex justify-center items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Cot.</span>
-                </div>
-                <div className="w-[10%] flex justify-end items-center gap-2 px-2">
-                  <span className={ds.components.table.headerLabel}>Ações</span>
-                </div>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {products.map((product) => {
-            return (
-              <TableRow key={product.id} className="group border-none hover:bg-transparent">
-                <TableCell colSpan={9} className={ds.components.table.cell}>
-                  <div className={cn(
-                    ds.components.table.row,
-                    ds.components.table.rowWrapper
-                  )}>
-                    <div className="w-[25%] flex items-center gap-3 pr-4 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-border/40">
-                        {product.image_url ? (
-                          <LazyImage
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            showSkeleton={true}
-                            fallback={<Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />}
+                </td>
+
+                {/* Categoria */}
+                <td className="px-3 py-2.5">
+                  <span className="inline-flex items-center text-[10px] uppercase font-bold tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 px-2 py-0.5 rounded-md">
+                    {capitalize(product.category)}
+                  </span>
+                </td>
+
+                {/* Marca */}
+                <td className="px-3 py-2.5 hidden lg:table-cell">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm text-zinc-600 dark:text-zinc-300 truncate max-w-[120px]">
+                      {capitalize(product.brand_name || "—")}
+                    </span>
+                    {product.brand_rating ? (
+                      <div className="flex items-center gap-px">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={cn(
+                              "h-2.5 w-2.5",
+                              i < (product.brand_rating || 0)
+                                ? "text-amber-400 fill-amber-400"
+                                : "text-zinc-200 dark:text-zinc-700"
+                            )}
                           />
-                        ) : (
-                          <Package className="h-5 w-5 text-gray-400 dark:text-gray-500" />
-                        )}
+                        ))}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <div className={ds.components.dataDisplay.highlight}>{capitalize(product.name)}</div>
-                      </div>
-                    </div>
-
-                    <div className="w-[12%] px-2 flex justify-center items-center">
-                      <span className={ds.components.dataDisplay.category}>
-                        {capitalize(product.category)}
-                      </span>
-                    </div>
-
-                    <div className="hidden lg:flex w-[12%] px-2 flex-col justify-center items-center gap-1">
-                      <span className={cn("truncate max-w-full", ds.components.dataDisplay.secondary)}>
-                        {capitalize(product.brand_name || "—")}
-                      </span>
-                      {product.brand_rating ? (
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-2.5 w-2.5 ${i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-zinc-300 dark:text-zinc-700"}`}
-                            />
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-
-                    <div className="hidden xl:flex w-[10%] px-2 justify-center items-center">
-                      <span className={ds.components.dataDisplay.code}>
-                        {product.barcode || "—"}
-                      </span>
-                    </div>
-
-                    <div className="w-[11%] px-2 flex justify-center items-center">
-                      <StatusBadge status={getProductStatus(product)} />
-                    </div>
-
-                    <div className="w-[10%] px-2 flex justify-center items-center gap-1.5">
-                      <div className="flex flex-col items-end">
-                        <span className={ds.components.dataDisplay.money}>{product.lastOrderPrice}</span>
-                        <span className={ds.components.dataDisplay.secondary}>unidade</span>
-                      </div>
-                      {getTrendIcon(product.trend)}
-                    </div>
-
-                    <div className="hidden lg:flex w-[12%] px-2 justify-center items-center">
-                      <span className={cn("text-sm truncate max-w-[120px]", ds.colors.text.secondary)} title={capitalize(product.bestSupplier || "")}>
-                        {capitalize(product.bestSupplier || "—")}
-                      </span>
-                    </div>
-
-                    <div className="w-[8%] px-2 flex justify-center items-center gap-1.5">
-                      <div className="flex items-center gap-1 px-2.5 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                        <ClipboardList className="h-3.5 w-3.5 text-blue-500" />
-                        <span className="font-bold text-blue-600 dark:text-blue-400 text-xs">{product.quotesCount || 0}</span>
-                      </div>
-                    </div>
-
-                    <div className="w-[10%] flex justify-end items-center px-2">
-                      <TableActionGroup
-                        showView={false}
-                        onEdit={() => onEdit(product)}
-                        onDelete={() => onDelete(product)}
-                        additionalActions={[
-                          {
-                            icon: <History className="h-4 w-4" />,
-                            label: "Histórico de Preços",
-                            onClick: () => onHistory(product),
-                            variant: "default" as const,
-                          }
-                        ]}
-                        dropdownLabel="Ações"
-                      />
-                    </div>
+                    ) : null}
                   </div>
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+                </td>
+
+                {/* Código */}
+                <td className="px-3 py-2.5 hidden xl:table-cell">
+                  <span className="font-mono text-[11px] text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-200/80 dark:border-zinc-700">
+                    {product.barcode || "—"}
+                  </span>
+                </td>
+
+                {/* Status */}
+                <td className="px-3 py-2.5 text-center">
+                  <StatusBadge status={getProductStatus(product)} />
+                </td>
+
+                {/* Preço */}
+                <td className="px-3 py-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm text-emerald-600 dark:text-emerald-400 tabular-nums tracking-tight">
+                        {product.lastOrderPrice}
+                      </span>
+                      <span className="text-[10px] text-zinc-400 dark:text-zinc-500">
+                        /{product.unit || 'un'}
+                      </span>
+                    </div>
+                    {getTrendIcon(product.trend)}
+                  </div>
+                </td>
+
+                {/* Fornecedor */}
+                <td className="px-3 py-2.5 hidden lg:table-cell">
+                  <span
+                    className="text-sm text-zinc-600 dark:text-zinc-300 truncate block max-w-[120px]"
+                    title={capitalize(product.bestSupplier || "")}
+                  >
+                    {capitalize(product.bestSupplier || "—")}
+                  </span>
+                </td>
+
+                {/* Cotações */}
+                <td className="px-3 py-2.5 text-center">
+                  <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 dark:bg-blue-500/10 rounded-md border border-blue-100 dark:border-blue-500/20">
+                    <ClipboardList className="h-3 w-3 text-blue-500" />
+                    <span className="font-bold text-blue-600 dark:text-blue-400 text-xs tabular-nums">
+                      {product.quotesCount || 0}
+                    </span>
+                  </div>
+                </td>
+
+                {/* Ações */}
+                <td className="px-3 py-2.5 pr-4 text-right">
+                  <div className="flex justify-end opacity-60 group-hover:opacity-100 transition-opacity">
+                    <TableActionGroup
+                      showView={false}
+                      onEdit={() => onEdit(product)}
+                      onDelete={() => onDelete(product)}
+                      additionalActions={[
+                        {
+                          icon: <History className="h-4 w-4" />,
+                          label: "Histórico de Preços",
+                          onClick: () => onHistory(product),
+                          variant: "default" as const,
+                        }
+                      ]}
+                      dropdownLabel="Ações"
+                    />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Footer com info */}
+        <div className="border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 px-4 py-2 flex items-center justify-between">
+          <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
+            {sortedProducts.length} produto{sortedProducts.length !== 1 ? 's' : ''} exibido{sortedProducts.length !== 1 ? 's' : ''}
+          </span>
+          {sortKey && (
+            <button
+              onClick={() => { setSortKey(null); setSortDir('asc'); }}
+              className="text-[11px] text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 font-medium transition-colors"
+            >
+              Limpar ordenação
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 });

@@ -84,7 +84,7 @@ export function ComparativoTab({
                         <p className="font-semibold text-foreground text-[13px]">{f.supplierName}</p>
                         <p className="text-[10px] text-muted-foreground font-medium mt-0.5">{formatCurrency(f.valorTotal)} ({f.quantidadeVenda} {f.unidadeVenda} / {f.quantidadeUnidades} un)</p>
                       </div>
-                      <div className="text-right flex-shrink-0">
+                      <div className="text-right flex-shrink-0 whitespace-nowrap">
                         <p className="font-bold text-[13px] text-foreground">{formatCurrency(f.custoPorUnidade)}/un</p>
                         {!f.isMelhorPreco ? <p className="text-[10px] font-bold text-red-500 mt-0.5">+{f.diferencaPercentual.toFixed(1)}%</p> : <Badge className="bg-brand/10 text-brand border border-brand/20 text-[9px] font-bold mt-0.5">Melhor</Badge>}
                       </div>
@@ -143,7 +143,7 @@ export function ComparativoTab({
                         {formatCurrency(item.valorTotal)} ({item.quantidadeVenda} {item.unidadeVenda} / {item.quantidadeUnidades} un)
                       </p>
                     </div>
-                    <div className="text-right flex-shrink-0">
+                    <div className="text-right flex-shrink-0 whitespace-nowrap">
                       <p className="font-bold text-[13px] text-foreground">{formatCurrency(item.custoPorUnidade)}/un</p>
                       {!item.isMelhorPreco 
                         ? <p className="text-[10px] font-bold text-red-500 mt-0.5">+{item.diferencaPercentual.toFixed(1)}%</p>
