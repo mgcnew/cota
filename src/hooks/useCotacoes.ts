@@ -871,6 +871,7 @@ export function useCotacoes() {
       orders: Array<{
         supplierId: string;
         productIds: string[];
+        productQuantities?: Record<string, number>;
         deliveryDate: string;
         observations?: string;
       }>;
@@ -913,7 +914,7 @@ export function useCotacoes() {
 
       // Loop through each supplier order
       for (const order of orders) {
-        const { supplierId, productIds, deliveryDate, observations } = order;
+        const { supplierId, productIds, productQuantities, deliveryDate, observations } = order;
 
         // Fetch supplier details
         const { data: supplierData, error: supplierError } = await supabase
@@ -947,7 +948,10 @@ export function useCotacoes() {
             const valorEscolhido = supplierItem?.valor_oferecido || 0;
             const valorInicialVencedor = Number(supplierItem?.valor_inicial) || valorEscolhido;
             const unidadePreco = (supplierItem?.unidade_preco || item.unidade || 'un') as PricingUnit;
-            const quantidade = parseFloat(item.quantidade?.toString().replace(',', '.') || '0') || 1;
+            
+            const requestedQuantity = productQuantities?.[item.product_id];
+            const quantidadeOriginal = parseFloat(item.quantidade?.toString().replace(',', '.') || '0') || 1;
+            const quantidade = requestedQuantity !== undefined ? requestedQuantity : quantidadeOriginal;
             
             // Usar o utilitário de normalização para o valor escolhido
             const normalizedEscolhido = normalizePrice({

@@ -20,7 +20,7 @@ interface CotacaoDialogProps {
   onOpenChange: (open: boolean) => void;
   cotacao: Quote | null;
   onUpdateSupplierProductValue?: (quoteId: string, supplierId: string, productId: string, newValue: number) => void;
-  onConvertToOrder?: (quoteId: string, orders: Array<{ supplierId: string; productIds: string[]; deliveryDate: string; observations?: string; }>) => void;
+  onConvertToOrder?: (quoteId: string, orders: Array<{ supplierId: string; productIds: string[]; productQuantities?: Record<string, number>; deliveryDate: string; observations?: string; }>) => void;
   onEdit?: () => void;
   isUpdating?: boolean;
 }

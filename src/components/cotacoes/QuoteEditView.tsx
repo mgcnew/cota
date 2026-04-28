@@ -25,6 +25,7 @@ interface QuoteEditViewProps {
   onConvertToOrder: (quoteId: string, orders: Array<{
     supplierId: string;
     productIds: string[];
+    productQuantities?: Record<string, number>;
     deliveryDate: string;
     observations?: string;
   }>) => void;

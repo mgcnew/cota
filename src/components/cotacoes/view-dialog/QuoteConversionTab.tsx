@@ -40,9 +40,22 @@ export function QuoteConversionTab({
   const { data: company } = useCompany();
   const [pedidoSubTab, setPedidoSubTab] = useState("melhores");
   const [productSelections, setProductSelections] = useState<Record<string, string>>({});
+  const [productAllocations, setProductAllocations] = useState<Record<string, Record<string, number>>>({});
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
   const [allowItemsWithoutPrice, setAllowItemsWithoutPrice] = useState(false);
+
+  const updateAllocation = (productId: string, supplierId: string, qty: number) => {
+    setProductAllocations(prev => {
+      const prodAllocs = { ...(prev[productId] || {}) };
+      if (qty <= 0) {
+        delete prodAllocs[supplierId];
+      } else {
+        prodAllocs[supplierId] = qty;
+      }
+      return { ...prev, [productId]: prodAllocs };
+    });
+  };
 
   useEffect(() => {
     // Inicializa as seleções apenas uma vez quando os produtos carregarem
@@ -74,12 +87,27 @@ export function QuoteConversionTab({
   }, [products, getBestPriceInfoForProduct, productSelections]);
 
   const totalSelecao = useMemo(() => {
+    if (pedidoSubTab === "dividido") {
+      let total = 0;
+      Object.entries(productAllocations).forEach(([productId, allocs]) => {
+        Object.entries(allocs).forEach(([supplierId, qty]) => {
+          total += (getSupplierProductValue(supplierId, productId) * qty);
+        });
+      });
+      return total;
+    }
+
     return products.reduce((total: number, product: any) => {
       const supplierId = productSelections[product.product_id];
+      // Note: Assuming getSupplierProductValue returns UNIT price based on previous discussion,
+      // wait, earlier we saw getSupplierProductValue is used as `total += getSupplierProductValue(supplierId, product.product_id)` in the original code. Let's keep it as is, or adjust if divided.
+      // Wait, earlier getSupplierProductValue was used without multiplying by quantity. Let's keep it as is for 'melhores'/'unico', and for 'dividido' maybe we need unit price?
+      // Actually, if getSupplierProductValue returns unit price, we should multiply by qty. If it returns total price, dividing by total qty gives unit price. Let's see original Code: `total + getSupplierProductValue(...)`.
+      // I'll keep the original behavior for non-divided, and calculate unit price for divided.
       if (supplierId) return total + getSupplierProductValue(supplierId, product.product_id);
       return total;
     }, 0);
-  }, [products, productSelections, getSupplierProductValue]);
+  }, [products, productSelections, productAllocations, pedidoSubTab, getSupplierProductValue]);
 
   const melhorTotal = useMemo(() => {
     return products.reduce((total: number, product: any) => {
@@ -89,22 +117,50 @@ export function QuoteConversionTab({
   }, [products, getBestPriceInfoForProduct]);
 
   const supplierGroups = useMemo(() => {
-    const groups = new Map<string, { supplierId: string; supplierName: string; products: any[] }>();
-    Object.entries(productSelections).forEach(([productId, supplierId]) => {
-      const product = products.find((p: any) => p.product_id === productId);
-      const fornecedor = fornecedores.find((f: any) => f.id === supplierId);
-      if (product && fornecedor) {
-        if (!groups.has(supplierId)) {
-          groups.set(supplierId, { supplierId, supplierName: safeStr(fornecedor.nome), products: [] });
-        }
-        groups.get(supplierId)!.products.push({
-          ...product,
-          value: getSupplierProductValue(supplierId, productId)
+    const groups = new Map<string, { supplierId: string; supplierName: string; products: any[], productQuantities: Record<string, number> }>();
+    
+    if (pedidoSubTab === "dividido") {
+      Object.entries(productAllocations).forEach(([productId, allocs]) => {
+        Object.entries(allocs).forEach(([supplierId, qty]) => {
+          if (qty > 0) {
+            const product = products.find((p: any) => p.product_id === productId);
+            const fornecedor = fornecedores.find((f: any) => f.id === supplierId);
+            if (product && fornecedor) {
+              if (!groups.has(supplierId)) {
+                groups.set(supplierId, { supplierId, supplierName: safeStr(fornecedor.nome), products: [], productQuantities: {} });
+              }
+              const g = groups.get(supplierId)!;
+              g.products.push({
+                ...product,
+                // Pro-rata value for export
+                value: (getSupplierProductValue(supplierId, productId) / (product.quantidade || 1)) * qty,
+                quantidade: qty
+              });
+              g.productQuantities[productId] = qty;
+            }
+          }
         });
-      }
-    });
+      });
+    } else {
+      Object.entries(productSelections).forEach(([productId, supplierId]) => {
+        const product = products.find((p: any) => p.product_id === productId);
+        const fornecedor = fornecedores.find((f: any) => f.id === supplierId);
+        if (product && fornecedor) {
+          if (!groups.has(supplierId)) {
+            groups.set(supplierId, { supplierId, supplierName: safeStr(fornecedor.nome), products: [], productQuantities: {} });
+          }
+          const g = groups.get(supplierId)!;
+          g.products.push({
+            ...product,
+            value: getSupplierProductValue(supplierId, productId)
+          });
+          // For whole selection, productQuantities doesn't need to be set or can be set to product.quantidade
+          g.productQuantities[productId] = product.quantidade;
+        }
+      });
+    }
     return Array.from(groups.values());
-  }, [productSelections, products, fornecedores, getSupplierProductValue, safeStr]);
+  }, [productSelections, productAllocations, pedidoSubTab, products, fornecedores, getSupplierProductValue, safeStr]);
 
   const handleConvertToOrder = () => {
     if (!deliveryDate) {
@@ -119,6 +175,7 @@ export function QuoteConversionTab({
       const orders = supplierGroups.map(group => ({
         supplierId: group.supplierId,
         productIds: group.products.map((p: any) => p.product_id),
+        productQuantities: pedidoSubTab === 'dividido' ? group.productQuantities : undefined,
         deliveryDate,
         observations: observations || undefined
       }));
@@ -247,11 +304,23 @@ export function QuoteConversionTab({
                   products.forEach((p: any) => { single[p.product_id] = best; });
                   setProductSelections(single);
                 }
+              } else if (val === "dividido") {
+                const initialAllocations: Record<string, Record<string, number>> = {};
+                products.forEach((p: any) => {
+                  const selectedSupplier = productSelections[p.product_id];
+                  if (selectedSupplier) {
+                    initialAllocations[p.product_id] = { [selectedSupplier]: p.quantidade || 0 };
+                  } else {
+                    initialAllocations[p.product_id] = {};
+                  }
+                });
+                setProductAllocations(initialAllocations);
               }
             }}>
               <TabsList className="bg-muted p-1 rounded-lg h-8 border border-border">
                 <TabsTrigger value="melhores" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Melhores</TabsTrigger>
                 <TabsTrigger value="unico" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Unificado</TabsTrigger>
+                <TabsTrigger value="dividido" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Dividido</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -270,52 +339,109 @@ export function QuoteConversionTab({
           </div>
           
           <div className="bg-card border border-border rounded-xl shadow-sm">
-            <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 px-3 py-2 bg-muted/40 border-b border-border items-center hidden sm:grid">
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1">Produto</span>
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor Alocado</span>
-               <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-1">Subtotal</span>
-            </div>
-            <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
-              {products.map((product: any) => {
-                const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-                const selectedSupplierId = productSelections[product.product_id];
-                const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
-                const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
+            {pedidoSubTab === 'dividido' ? (
+              <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar p-2">
+                {products.map((product: any) => {
+                  const allocs = productAllocations[product.product_id] || {};
+                  const totalAllocated = Object.values(allocs).reduce((sum, q) => sum + (Number(q) || 0), 0);
+                  const isComplete = totalAllocated === product.quantidade;
+                  const isOver = totalAllocated > product.quantidade;
 
-                return (
-                  <div key={product.product_id} className={cn("grid grid-cols-1 sm:grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 p-2 sm:px-3 items-center transition-colors hover:bg-muted/10", isBest ? "bg-brand/5" : "")}>
-                    <div className="min-w-0 pl-1">
-                      <p className="font-bold text-[10px] sm:text-[11px] text-foreground truncate">{safeStr(product.product_name)}</p>
-                      <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">{safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
-                    </div>
-                    <div>
-                      <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
-                        <SelectTrigger className="w-full h-7 rounded-md font-bold text-[10px] border-border/70 bg-background hover:bg-muted/50 transition-colors">
-                          <SelectValue placeholder="Fornecedor..." />
-                        </SelectTrigger>
-                        <SelectContent className="rounded-xl border-border">
-                          {fornecedores.filter((f: any) => allowItemsWithoutPrice || getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
-                            <SelectItem key={f.id} value={f.id} className="text-[11px] sm:text-xs font-bold uppercase">
-                              {safeStr(f.nome)} {getSupplierProductValue(f.id, product.product_id) > 0 ? '' : '(Sem Oferta)'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pr-1 gap-1">
-                      <p className="text-[8px] font-bold text-muted-foreground uppercase sm:hidden block">Subtotal:</p>
-                      <div className="flex items-center gap-1">
-                        {isBest && <Trophy className="h-2.5 w-2.5 text-brand" />}
-                        <p className={cn("text-[10px] sm:text-[11px] font-black", isBest ? "text-brand" : "text-foreground")}>
-                          R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </p>
+                  return (
+                    <div key={product.product_id} className="p-3 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-bold text-[11px] text-foreground">{safeStr(product.product_name)}</p>
+                          <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">
+                            Total: {safeStr(product.quantidade)} {safeStr(product.unidade)}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant={isComplete ? "default" : isOver ? "destructive" : "outline"} className={cn("text-[9px] uppercase", isComplete ? "bg-emerald-500 hover:bg-emerald-600" : "")}>
+                            {totalAllocated} / {product.quantidade} Alocados
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {fornecedores.filter((f: any) => allowItemsWithoutPrice || getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => {
+                          const val = getSupplierProductValue(f.id, product.product_id);
+                          const qty = allocs[f.id] || 0;
+                          return (
+                            <div key={f.id} className="flex items-center justify-between gap-2 bg-muted/30 p-2 rounded-lg border border-border/50">
+                              <div className="min-w-0 flex-1">
+                                <p className="text-[10px] font-bold uppercase truncate">{safeStr(f.nome)}</p>
+                                <p className="text-[9px] text-muted-foreground">R$ {val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (Total Oferta)</p>
+                              </div>
+                              <div className="w-24">
+                                <Input 
+                                  type="number" 
+                                  min="0"
+                                  step="any"
+                                  value={qty === 0 ? "" : qty} 
+                                  onChange={(e) => updateAllocation(product.product_id, f.id, parseFloat(e.target.value) || 0)}
+                                  placeholder="0"
+                                  className="h-7 text-right text-xs font-bold bg-background"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
               </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 px-3 py-2 bg-muted/40 border-b border-border items-center hidden sm:grid">
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1">Produto</span>
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor Alocado</span>
+                  <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-1">Subtotal</span>
+                </div>
+                <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar">
+                  {products.map((product: any) => {
+                    const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
+                    const selectedSupplierId = productSelections[product.product_id];
+                    const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
+                    const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
+
+                    return (
+                      <div key={product.product_id} className={cn("grid grid-cols-1 sm:grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 p-2 sm:px-3 items-center transition-colors hover:bg-muted/10", isBest ? "bg-brand/5" : "")}>
+                        <div className="min-w-0 pl-1">
+                          <p className="font-bold text-[10px] sm:text-[11px] text-foreground truncate">{safeStr(product.product_name)}</p>
+                          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mt-0.5">{safeStr(product.quantidade)} {safeStr(product.unidade)}</p>
+                        </div>
+                        <div>
+                          <Select value={selectedSupplierId || ""} onValueChange={(value) => setProductSelections(prev => ({ ...prev, [product.product_id]: value }))}>
+                            <SelectTrigger className="w-full h-7 rounded-md font-bold text-[10px] border-border/70 bg-background hover:bg-muted/50 transition-colors">
+                              <SelectValue placeholder="Fornecedor..." />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-border">
+                              {fornecedores.filter((f: any) => allowItemsWithoutPrice || getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => (
+                                <SelectItem key={f.id} value={f.id} className="text-[11px] sm:text-xs font-bold uppercase">
+                                  {safeStr(f.nome)} {getSupplierProductValue(f.id, product.product_id) > 0 ? '' : '(Sem Oferta)'}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center pr-1 gap-1">
+                          <p className="text-[8px] font-bold text-muted-foreground uppercase sm:hidden block">Subtotal:</p>
+                          <div className="flex items-center gap-1">
+                            {isBest && <Trophy className="h-2.5 w-2.5 text-brand" />}
+                            <p className={cn("text-[10px] sm:text-[11px] font-black", isBest ? "text-brand" : "text-foreground")}>
+                              R$ {selectedValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border/50 shadow-sm relative overflow-hidden">
@@ -341,7 +467,7 @@ export function QuoteConversionTab({
         </div>
         
         <div className="pt-2">
-          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || Object.keys(productSelections).length === 0} className="w-full h-9 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
+          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="w-full h-9 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
             <ShoppingCart className="h-3.5 w-3.5 mr-2" />
             Converter em Pedidos de Compra
           </Button>
