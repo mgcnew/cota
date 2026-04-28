@@ -183,6 +183,21 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     return economia;
   }, [produtosComVencedor]);
 
+  // Economia calculada: usa a mesma lógica do relatório HTML (maior preço inicial/oferta vs melhor preço)
+  const totalEconomiaCalculada = useMemo(() => {
+    return produtosComVencedor.reduce((sum, p) => {
+      const offers = p.allOffers || [];
+      if (offers.length === 0) return sum;
+      const highestOffer = Math.max(...offers.map((o: any) => o.price || 0));
+      const highestInitial = Math.max(...offers.map((o: any) => o.initialPrice || o.price || 0));
+      const valorInicial = Math.max(highestOffer, highestInitial);
+      if (valorInicial > p.bestPrice && p.bestPrice > 0) {
+        return sum + (valorInicial - p.bestPrice) * (p.quantidade || 1);
+      }
+      return sum;
+    }, 0);
+  }, [produtosComVencedor]);
+
   const fornecedoresRanking = useMemo(() => {
     return fornecedores
       .map(f => {
@@ -222,7 +237,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     totalFornecedores: fornecedores.length,
     fornecedoresRespondidos,
     totalMelhorPreco,
-    totalEconomiaReal,
+    totalEconomiaReal: totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial,
     productsData: produtosComVencedor,
     viewMode,
     groupedData: Object.values(
@@ -463,7 +478,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 <div className="p-1 bg-emerald-500 rounded-md text-white"><TrendingDown className="h-3 w-3" /></div>
                 <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Economia</span>
               </div>
-              <p className="text-lg font-black text-emerald-600 tracking-tighter leading-none">{formatCurrency(totalEconomiaReal || totalEconomiaPotencial)}</p>
+              <p className="text-lg font-black text-emerald-600 tracking-tighter leading-none">{formatCurrency(totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial)}</p>
             </div>
             <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-3">
               <div className="flex items-center gap-2 mb-1.5">

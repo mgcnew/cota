@@ -327,10 +327,12 @@ export function generateQuoteReportHTML(opts: {
               <span class="demand">${p.quantidade} ${unit}</span>
             </div>
           </div>
+          <div class="table-wrap">
           <table>
             <thead><tr><th>Fornecedor</th><th class="num">Val. Inicial</th><th class="num">Val. Final</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
+          </div>
         </div>`;
     });
   } else {
@@ -376,10 +378,12 @@ export function generateQuoteReportHTML(opts: {
               <span class="demand">${g.items.length} itens — Subtotal: ${fmt(g.total)}${groupEcon > 0 ? ` — Economia: ${fmt(groupEcon)}` : ""}</span>
             </div>
           </div>
+          <div class="table-wrap">
           <table>
             <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Val. Inicial</th><th class="num">Val. Final</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
+          </div>
         </div>`;
     });
   }
@@ -393,42 +397,60 @@ export function generateQuoteReportHTML(opts: {
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e4e4e7;padding:24px;min-height:100vh}
-  .container{max-width:900px;margin:0 auto}
-  .header{display:flex;align-items:center;gap:20px;padding-bottom:24px;border-bottom:2px solid #27272a;margin-bottom:32px}
-  .logo{width:56px;height:56px;background:#18181b;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px;color:#fff;border:3px solid #3f3f46;flex-shrink:0}
-  .header h1{font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
-  .header p{font-size:12px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-top:4px}
+  .container{max-width:900px;margin:0 auto;overflow-x:hidden}
+  .header{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:2px solid #27272a;margin-bottom:24px;flex-wrap:wrap}
+  .logo{width:48px;height:48px;background:#18181b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;border:3px solid #3f3f46;flex-shrink:0}
+  .header h1{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
+  .header p{font-size:11px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-top:3px;word-break:break-all}
   .header p span.brand{color:#10b981}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px}
-  .stat-card{background:#18181b;border:1px solid #27272a;border-radius:16px;padding:20px}
-  .stat-card .label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#71717a;margin-bottom:8px}
-  .stat-card .value{font-size:24px;font-weight:900;letter-spacing:-1px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+  .stat-card{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:16px}
+  .stat-card .label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#71717a;margin-bottom:6px}
+  .stat-card .value{font-size:20px;font-weight:900;letter-spacing:-1px;word-break:break-all}
   .stat-card.economy .value{color:#10b981}
-  .product-card{background:#18181b;border:1px solid #27272a;border-radius:20px;overflow:hidden;margin-bottom:20px}
-  .product-header{display:flex;align-items:center;gap:16px;padding:20px 24px;border-bottom:1px solid #27272a}
-  .product-idx{width:36px;height:36px;background:#27272a;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#a1a1aa;flex-shrink:0}
-  .product-header h3{font-size:15px;font-weight:900;letter-spacing:-0.3px}
-  .demand{font-size:11px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px}
-  table{width:100%;border-collapse:collapse}
-  thead th{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:#52525b;padding:12px 24px;text-align:left;background:#111}
+  .product-card{background:#18181b;border:1px solid #27272a;border-radius:16px;overflow:hidden;margin-bottom:16px}
+  .product-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #27272a;flex-wrap:wrap}
+  .product-idx{width:32px;height:32px;background:#27272a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#a1a1aa;flex-shrink:0}
+  .product-header h3{font-size:14px;font-weight:900;letter-spacing:-0.3px}
+  .demand{font-size:10px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:480px}
+  thead th{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#52525b;padding:10px 16px;text-align:left;background:#111;white-space:nowrap}
   th.num,td.num{text-align:right}
   tbody tr{border-top:1px solid #1e1e22;transition:background .15s}
   tbody tr:hover{background:#1c1c20}
-  tbody td{padding:14px 24px;font-size:13px}
+  tbody td{padding:12px 16px;font-size:12px;white-space:nowrap}
   tr.winner{background:rgba(16,185,129,0.06)}
   tr.winner td{color:#34d399;font-weight:700}
-  .badge-winner{display:inline-block;background:rgba(16,185,129,0.15);color:#10b981;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:999px;margin-right:8px}
-  .rank{display:inline-block;background:#27272a;color:#71717a;font-size:10px;font-weight:800;padding:2px 8px;border-radius:6px;margin-right:8px}
-  .old-price{text-decoration:line-through;color:#71717a;font-size:11px;margin-right:4px}
+  .badge-winner{display:inline-block;background:rgba(16,185,129,0.15);color:#10b981;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:999px;margin-right:6px}
+  .rank{display:inline-block;background:#27272a;color:#71717a;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;margin-right:6px}
+  .old-price{text-decoration:line-through;color:#71717a;font-size:10px;margin-right:4px}
   .econ-positive{color:#10b981;font-weight:800}
-  .footer{text-align:center;padding:32px 0 16px;border-top:2px solid #27272a;margin-top:32px;color:#52525b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
+  .footer{text-align:center;padding:24px 0 12px;border-top:2px solid #27272a;margin-top:24px;color:#52525b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
   .footer strong{color:#10b981}
-  @media(max-width:600px){
+  @media(max-width:768px){
     body{padding:12px}
-    .stats{grid-template-columns:1fr 1fr}
-    .stat-card .value{font-size:18px}
-    thead th,tbody td{padding:10px 12px;font-size:11px}
-    .product-header{padding:14px 16px}
+    .stats{grid-template-columns:1fr 1fr;gap:8px}
+    .stat-card{padding:12px;border-radius:10px}
+    .stat-card .value{font-size:16px}
+    .stat-card .label{font-size:8px;letter-spacing:1px}
+    .header h1{font-size:16px}
+    .header p{font-size:10px;letter-spacing:1px}
+    .logo{width:40px;height:40px;font-size:16px;border-radius:10px}
+    .product-header{padding:12px 14px}
+    .product-header h3{font-size:12px}
+    .product-card{border-radius:12px;margin-bottom:12px}
+    thead th{padding:8px 10px;font-size:8px;letter-spacing:1px}
+    tbody td{padding:8px 10px;font-size:11px}
+    .footer{font-size:9px;padding:16px 0 8px;margin-top:16px}
+  }
+  @media(max-width:480px){
+    .stats{grid-template-columns:1fr 1fr;gap:6px}
+    .stat-card .value{font-size:14px}
+    .header{gap:10px}
+    .header h1{font-size:14px}
+    table{min-width:400px}
+    thead th,tbody td{padding:6px 8px;font-size:10px}
   }
   @media print{body{background:#fff;color:#000}
     .product-card,.stat-card{border-color:#ddd}
