@@ -77,7 +77,7 @@ let globalChannel: ReturnType<typeof supabase.channel> | null = null;
 // Phase 2: Deduplication guard — tracks when the last local mutation completed
 // If realtime fires within this window, we skip the invalidation (mutation already handled it)
 let lastMutationTimestamp = 0;
-const DEDUP_WINDOW_MS = 3000;
+const DEDUP_WINDOW_MS = 1500;
 
 function markMutationComplete() {
   lastMutationTimestamp = Date.now();
@@ -394,6 +394,8 @@ export function useCotacoes() {
         throw error;
       }
     },
+    staleTime: 60 * 1000, // 1 min — dados ficam frescos por pouco tempo
+    refetchOnMount: 'always', // Sempre busca dados frescos ao navegar para a aba
   });
 
   // Mutation to update supplier value for a specific product

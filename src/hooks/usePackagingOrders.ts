@@ -43,8 +43,7 @@ export function usePackagingOrders() {
 
   const { data: orders = [], isLoading, error } = useQuery({
     queryKey: ['packaging-orders'],
-    staleTime: 1000 * 60 * 5, // 5 minutos - evita refetch desnecessário
-    refetchOnWindowFocus: false, // Não refaz query ao focar na janela
+    staleTime: 60 * 1000, // 1 minuto
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');

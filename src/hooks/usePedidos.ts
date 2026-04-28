@@ -42,7 +42,7 @@ let globalChannel: ReturnType<typeof supabase.channel> | null = null;
 // Deduplication guard — tracks when the last local mutation completed
 // If realtime fires within this window, we skip the invalidation (mutation already handled it)
 let lastMutationTimestamp = 0;
-const DEDUP_WINDOW_MS = 3000;
+const DEDUP_WINDOW_MS = 1500;
 
 function markMutationComplete() {
   lastMutationTimestamp = Date.now();
@@ -152,9 +152,8 @@ export function usePedidos() {
 
       return formattedPedidos;
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes - shorter than cotacoes since orders are created externally
+    staleTime: 60 * 1000, // 1 minuto - dados frescos por pouco tempo
     gcTime: 10 * 60 * 1000, // 10 minutes
-    refetchOnWindowFocus: false,
     refetchOnMount: 'always', // Always refetch on mount to pick up orders created from cotacoes conversion
   });
 

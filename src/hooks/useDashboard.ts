@@ -251,8 +251,8 @@ export function useDashboard() {
         orders: ordersRes.data || [],
       };
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000, // Sync with persistQueryClient
+    staleTime: 2 * 60 * 1000, // 2 minutos - dashboard é pesado, pode ter janela maior
+    gcTime: 30 * 60 * 1000, // 30 minutos
   });
 
   // OPTIMIZED: Memoize expensive calculations
