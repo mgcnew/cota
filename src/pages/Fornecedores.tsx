@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, Edit, Trash2, Upload, Eye } from "lucide-react";
+import { Building2, Plus, TrendingUp, DollarSign, FileText, MoreVertical, MoreHorizontal, Edit, Trash2, Upload, Eye } from "lucide-react";
 import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { capitalize } from "@/lib/text-utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -366,210 +366,122 @@ function Fornecedores() {
             </ResponsiveGrid>
           )}
 
-          {/* Unified Actions Bar */}
-          <div className="mb-6">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-              {/* Search Field */}
-              <div className="flex-1 max-w-xl">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Pesquisar fornecedores..."
-                />
-              </div>
+          {/* Unified Container for Search, Table and Mobile Cards */}
+          <div className="w-full bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm mb-8">
+            {/* Header / Actions Bar */}
+            <div className="p-4 md:p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="flex-1 max-w-xl">
+                  <SearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Pesquisar fornecedores..."
+                  />
+                </div>
+                <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                  <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
+                    <SelectTrigger className="w-[150px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="active">Ativos</SelectItem>
+                      <SelectItem value="inactive">Inativos</SelectItem>
+                      <SelectItem value="pending">Pendentes</SelectItem>
+                    </SelectContent>
+                  </Select>
 
-              {/* Actions & Filters Group */}
-              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-                <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                  <SelectTrigger className="w-[150px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="active">Ativos</SelectItem>
-                    <SelectItem value="inactive">Inativos</SelectItem>
-                    <SelectItem value="pending">Pendentes</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => importSuppliersRef.current?.click()}
-                  className={cn(designSystem.components.button.secondary, "h-11 hidden sm:flex px-6")}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  <span>Importar</span>
-                </Button>
-                
-                <Button
-                  size="sm"
-                  onClick={() => addSupplierRef.current?.click()}
-                  className={cn(designSystem.components.button.primary, "h-11 md:flex px-6 w-full sm:w-auto")}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  <span>Novo Fornecedor</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {viewMode === "grid" ? (
-            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {paginatedData.items.map(supplier => (
-                <Card key={supplier.id} className="group transition-smooth hover:shadow-md hover:-translate-y-1">
-                  <CardHeader className="pb-3 sm:pb-4 p-3 sm:p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-2 sm:space-y-3 flex-1">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                          <div className="p-2 rounded-lg bg-primary/10 md:group-hover:bg-primary/20 md:transition-colors">
-                            <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base font-semibold truncate">
-                              {capitalize(supplier.name)}
-                            </CardTitle>
-                            <p className="text-sm text-muted-foreground truncate mt-0.5">
-                              {capitalize(supplier.contact)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <StatusBadge status={supplier.status} />
-                          {renderNumericRating(supplier.rating)}
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <SupplierQuoteHistoryDialog
-                            supplierName={supplier.name}
-                            supplierId={supplier.id}
-                            trigger={
-                              <DropdownMenuItem onSelect={e => e.preventDefault()}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Histórico
-                              </DropdownMenuItem>
-                            }
-                          />
-                          {!isMobile && (
-                            <DropdownMenuItem onClick={() => setEditingSupplier(supplier)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => setDeletingSupplier(supplier)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="space-y-3 p-3 sm:p-4 pt-0">
-                    <div className="space-y-2.5">
-                      <div className="flex items-center justify-between py-2 border-b border-border/50">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <DollarSign className="h-3.5 w-3.5" />
-                          <span className="text-xs">Limite</span>
-                        </div>
-                        <span className="text-sm font-medium">{supplier.limit}</span>
-                      </div>
-                      <div className="flex items-center justify-between py-2 border-b border-border/50">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <TrendingUp className="h-3.5 w-3.5" />
-                          <span className="text-xs">Preço Médio</span>
-                        </div>
-                        <span className="text-sm font-medium">{supplier.avgPrice}</span>
-                      </div>
-                      <div className="flex items-center justify-between py-2 border-b border-border/50">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <FileText className="h-3.5 w-3.5" />
-                          <span className="text-xs">Cotações</span>
-                        </div>
-                        <span className="text-sm font-medium">{supplier.totalQuotes}</span>
-                      </div>
-
-                      <div className="pt-2.5">
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          className="w-full h-9 transition-smooth hover:bg-muted"
-                          onClick={() => handleOpenAddQuote(supplier)}
+                  <div className="flex items-center gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(designSystem.components.button.secondary, "h-11 px-4 flex items-center justify-center hidden sm:flex")}
                         >
-                          <Plus className="h-3.5 w-3.5 mr-1.5" />
-                          Nova Cotação
+                          <MoreHorizontal className="h-5 w-5" />
                         </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="border-0 bg-transparent">
-              <CardContent className="p-0">
-                {/* Mobile Cards View */}
-                <div className="md:hidden">
-                  <div className="space-y-3 p-2 pb-24">
-                    {paginatedData.items.map(supplier => (
-                      <ExpandableSupplierCard
-                        key={supplier.id}
-                        supplier={supplier}
-                        onEdit={setEditingSupplier}
-                        onDelete={setDeletingSupplier}
-                        onWhatsApp={openWhatsApp}
-                        onViewHistory={setHistorySupplier}
-                        onAddQuote={handleOpenAddQuote}
-                        renderRating={renderNumericRating}
-                      />
-                    ))}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[200px]">
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); importSuppliersRef.current?.click(); }} className="min-h-[44px]">
+                          <Upload className="h-4 w-4 mr-2" /> Importar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button
+                      onClick={() => addSupplierRef.current?.click()}
+                      className={cn(designSystem.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span>Novo Fornecedor</span>
+                    </Button>
                   </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Desktop Table View */}
-                <SupplierListDesktop
-                  suppliers={paginatedData.items}
-                  onEdit={setEditingSupplier}
-                  onDelete={setDeletingSupplier}
-                  onHistory={setHistorySupplier}
-                  onWhatsApp={openWhatsApp}
-                  renderRating={renderNumericRating}
-                />
+            <div className="w-full">
+              {paginatedData.items.length === 0 && !suppliersLoading ? (
+                <div className="p-8">
+                  <EmptyState
+                    icon={Building2}
+                    title="Nenhum fornecedor encontrado"
+                    description="Tente ajustar os filtros ou adicione novos fornecedores"
+                    actionLabel="Adicionar Fornecedor"
+                    actionIcon={Plus}
+                    onAction={() => addSupplierRef.current?.click()}
+                    variant="inline"
+                  />
+                </div>
+              ) : (
+                <>
+                  {/* Mobile Cards View */}
+                  <div className="md:hidden">
+                    <div className="space-y-3 p-2 pb-24">
+                      {paginatedData.items.map(supplier => (
+                        <ExpandableSupplierCard
+                          key={supplier.id}
+                          supplier={supplier}
+                          onEdit={setEditingSupplier}
+                          onDelete={setDeletingSupplier}
+                          onWhatsApp={openWhatsApp}
+                          onViewHistory={setHistorySupplier}
+                          onAddQuote={handleOpenAddQuote}
+                          renderRating={renderNumericRating}
+                        />
+                      ))}
+                    </div>
+                  </div>
 
-                {/* Pagination */}
-                <DataPagination
-                  currentPage={paginatedData.pagination.currentPage}
-                  totalPages={paginatedData.pagination.totalPages}
-                  itemsPerPage={paginatedData.pagination.itemsPerPage}
-                  totalItems={paginatedData.pagination.totalItems}
-                  onPageChange={paginatedData.pagination.goToPage}
-                  onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                  startIndex={paginatedData.pagination.startIndex}
-                  endIndex={paginatedData.pagination.endIndex}
-                />
-              </CardContent>
-            </Card>
-          )}
+                  {/* Desktop Table View */}
+                  <div className="hidden md:block">
+                    <SupplierListDesktop
+                      suppliers={paginatedData.items}
+                      onEdit={setEditingSupplier}
+                      onDelete={setDeletingSupplier}
+                      onHistory={setHistorySupplier}
+                      onWhatsApp={openWhatsApp}
+                      renderRating={renderNumericRating}
+                    />
+                  </div>
 
-          {filteredSuppliers.length === 0 && (
-            <EmptyState
-              icon={Building2}
-              title="Nenhum fornecedor encontrado"
-              description="Tente ajustar os filtros ou adicione novos fornecedores"
-              actionLabel="Adicionar Fornecedor"
-              actionIcon={Plus}
-              onAction={!isMobile ? () => addSupplierRef.current?.click() : undefined}
-            />
-          )}
+                  {/* Pagination */}
+                  <div className="p-4 bg-white dark:bg-card">
+                    <DataPagination
+                      currentPage={paginatedData.pagination.currentPage}
+                      totalPages={paginatedData.pagination.totalPages}
+                      itemsPerPage={paginatedData.pagination.itemsPerPage}
+                      totalItems={paginatedData.pagination.totalItems}
+                      onPageChange={paginatedData.pagination.goToPage}
+                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                      startIndex={paginatedData.pagination.startIndex}
+                      endIndex={paginatedData.pagination.endIndex}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
 
           {/* Lazy loaded dialogs with Suspense - Render permanently to avoid jank */}
           <Suspense fallback={null}>
