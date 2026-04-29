@@ -15,23 +15,14 @@ interface MetricCardProps {
   className?: string;
   onClick?: () => void;
   subtitle?: string;
-  bgImage?: string;
 }
 
-const LIGHT_VARIANTS = {
-  default: "bg-brand text-brand-foreground border-brand shadow-brand/20",
-  success: "bg-emerald-500 text-white border-emerald-500 shadow-emerald-200/40",
-  warning: "bg-amber-500 text-white border-amber-500 shadow-amber-200/40",
-  error: "bg-red-500 text-white border-red-500 shadow-red-200/40",
-  info: "bg-blue-500 text-white border-blue-500 shadow-blue-200/40",
-};
-
-const DARK_VARIANTS = {
-  default: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
-  success: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
-  warning: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
-  error: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
-  info: "dark:bg-zinc-900/80 dark:text-zinc-50 dark:border-zinc-800",
+const VARIANTS = {
+  default: "bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white shadow-lg shadow-indigo-500/20 border-transparent",
+  success: "bg-gradient-to-br from-[#10b981] to-[#059669] text-white shadow-lg shadow-emerald-500/20 border-transparent",
+  warning: "bg-gradient-to-br from-[#f59e0b] to-[#ea580c] text-white shadow-lg shadow-amber-500/20 border-transparent",
+  error: "bg-gradient-to-br from-[#ef4444] to-[#dc2626] text-white shadow-lg shadow-red-500/20 border-transparent",
+  info: "bg-gradient-to-br from-[#0ea5e9] to-[#2563eb] text-white shadow-lg shadow-blue-500/20 border-transparent",
 };
 
 export const MetricCard = memo(function MetricCard({
@@ -43,108 +34,65 @@ export const MetricCard = memo(function MetricCard({
   className,
   onClick,
   subtitle,
-  bgImage,
 }: MetricCardProps) {
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-xl p-0 transition-all duration-500 border",
-        LIGHT_VARIANTS[variant],
-        DARK_VARIANTS[variant],
-        "hover:shadow-2xl hover:scale-[1.04]",
-        "hover:border-white/40 dark:hover:border-border/50",
-        onClick && "cursor-pointer active:scale-[0.98]",
+        "group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 border",
+        VARIANTS[variant],
+        "hover:shadow-xl hover:-translate-y-1",
+        onClick && "cursor-pointer active:translate-y-0",
         className
       )}
       onClick={onClick}
     >
-      {/* Background Image Container */}
-      {bgImage && (
-        <div className="absolute inset-0 z-0">
-          <img 
-            src={bgImage} 
-            alt="" 
-            className="w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000 ease-out"
-          />
-        </div>
-      )}
+      {/* Top subtle highlight for 3D premium effect */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/30" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
 
-      {/* Background Silhouette (Hover Effect) */}
-      {!bgImage && (
-        <div className="absolute -right-6 -bottom-6 opacity-0 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.05] transition-all duration-700 transform group-hover:-translate-y-4 group-hover:-translate-x-2 pointer-events-none rotate-6">
-          <Icon size={160} strokeWidth={1} />
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col h-full p-4">
-        
-        {/* Glassmorphic Text Container for contrast */}
-        <div className={cn(
-          "flex flex-col h-full w-[95%] sm:w-[85%] lg:w-[90%]", 
-          bgImage ? "bg-black/25 dark:bg-black/40 backdrop-blur-md rounded-lg p-4 border border-white/10 shadow-lg" : "p-1"
-        )}>
-          
-          <div className="flex items-center gap-3 mb-4">
-            <div className={cn(
-              "p-2 rounded-xl transition-all duration-300",
-              "bg-white/20 dark:bg-accent",
-              "text-white dark:text-foreground"
-            )}>
-              <Icon className="w-5 h-5" />
-            </div>
-            <span className={cn(
-              "text-[10px] font-black uppercase tracking-widest transition-opacity duration-300",
-              "text-white/90 dark:text-muted-foreground"
-            )}>
-              {title}
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-1 mt-auto">
-            <div className="flex items-baseline gap-2">
-              <h3 className={cn(
-                "text-2xl lg:text-3xl font-black tracking-tight",
-                "text-white dark:text-foreground"
-              )}>
-                {value}
-              </h3>
-
-              {trend && (
-                <div className={cn(
-                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold transition-all",
-                  "bg-white/20 text-white dark:bg-accent dark:text-foreground"
-                )}>
-                  {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
-                    trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
-                  {trend.value}
-                </div>
-              )}
-            </div>
-
-            {trend?.label && (
-              <p className={cn(
-                "text-[11px] font-medium transition-colors",
-                "text-white/80 dark:text-muted-foreground"
-              )}>
-                {trend.label}
-              </p>
-            )}
-
-            {subtitle && !trend?.label && (
-              <p className={cn(
-                "text-[11px] font-medium transition-colors",
-                "text-white/80 dark:text-muted-foreground"
-              )}>
-                {subtitle}
-              </p>
-            )}
-          </div>
-        </div>
+      {/* Decorative large icon functioning as the card's unique graphic */}
+      <div className="absolute -right-6 -bottom-6 transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2 group-hover:-rotate-6 pointer-events-none">
+        <Icon 
+          size={150} 
+          className="text-white/20" 
+          strokeWidth={1.5} 
+          style={{ filter: "drop-shadow(0px 10px 15px rgba(0,0,0,0.15))" }}
+        />
       </div>
 
-      {/* Subtle bottom accent line on hover (Dark Mode Only) */}
-      <div className="hidden dark:block absolute bottom-0 left-0 h-[2px] w-full bg-brand scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
+      {/* Content */}
+      <div className="relative z-10">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm shadow-sm">
+            <Icon className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/90">
+            {title}
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-sm">
+              {value}
+            </h3>
+
+            {trend && (
+              <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white backdrop-blur-sm shadow-sm">
+                {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
+                  trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
+                {trend.value}
+              </div>
+            )}
+          </div>
+
+          {(trend?.label || subtitle) && (
+            <p className="text-[11px] sm:text-xs font-medium text-white/80 mt-1 max-w-[75%] leading-tight">
+              {trend?.label || subtitle}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 });

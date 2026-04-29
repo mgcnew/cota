@@ -103,7 +103,6 @@ export const DashboardActionRow = memo(({
         subtitle="Cotações prontas para decisão"
         icon={CheckCircle2}
         variant="default"
-        bgImage="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=600&auto=format&fit=crop"
         onClick={prontasParaDecisao.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=prontas') : undefined}
       />
 
@@ -113,7 +112,6 @@ export const DashboardActionRow = memo(({
         subtitle="Cotações expirando em breve"
         icon={AlertTriangle}
         variant="warning"
-        bgImage="https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=600&auto=format&fit=crop"
         onClick={vencendo.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=vencendo') : undefined}
       />
 
@@ -123,7 +121,6 @@ export const DashboardActionRow = memo(({
         subtitle="Aguardando entrega"
         icon={Truck}
         variant="info"
-        bgImage="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=600&auto=format&fit=crop"
         onClick={pedidosEmTransito > 0 ? () => navigate('/dashboard/compras?tab=pedidos') : undefined}
       />
 
@@ -133,7 +130,6 @@ export const DashboardActionRow = memo(({
         subtitle="Nas cotações fechadas"
         icon={DollarSign}
         variant="success"
-        bgImage="https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?q=80&w=600&auto=format&fit=crop"
       />
     </div>
   );
