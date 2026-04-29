@@ -15,6 +15,7 @@ interface MetricCardProps {
   className?: string;
   onClick?: () => void;
   subtitle?: string;
+  bgImage?: string;
 }
 
 const LIGHT_VARIANTS = {
@@ -42,11 +43,12 @@ export const MetricCard = memo(function MetricCard({
   className,
   onClick,
   subtitle,
+  bgImage,
 }: MetricCardProps) {
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl p-5 transition-all duration-500 border",
+        "group relative overflow-hidden rounded-xl p-0 transition-all duration-500 border",
         LIGHT_VARIANTS[variant],
         DARK_VARIANTS[variant],
         "hover:shadow-2xl hover:scale-[1.04]",
@@ -56,66 +58,88 @@ export const MetricCard = memo(function MetricCard({
       )}
       onClick={onClick}
     >
-      {/* Background Silhouette (Hover Effect) */}
-      <div className="absolute -right-6 -bottom-6 opacity-0 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.05] transition-all duration-700 transform group-hover:-translate-y-4 group-hover:-translate-x-2 pointer-events-none rotate-6">
-        <Icon size={160} strokeWidth={1} />
-      </div>
-
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={cn(
-            "p-2 rounded-xl transition-all duration-300",
-            "bg-white/20 dark:bg-accent",
-            "text-white dark:text-foreground"
-          )}>
-            <Icon className="w-5 h-5" />
-          </div>
-          <span className={cn(
-            "text-[10px] font-black uppercase tracking-widest transition-opacity duration-300",
-            "text-white/90 dark:text-muted-foreground"
-          )}>
-            {title}
-          </span>
+      {/* Background Image Container */}
+      {bgImage && (
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={bgImage} 
+            alt="" 
+            className="w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000 ease-out"
+          />
         </div>
+      )}
 
-        <div className="flex flex-col gap-1">
-          <div className="flex items-baseline gap-2">
-            <h3 className={cn(
-              "text-2xl lg:text-3xl font-black tracking-tight",
+      {/* Background Silhouette (Hover Effect) */}
+      {!bgImage && (
+        <div className="absolute -right-6 -bottom-6 opacity-0 group-hover:opacity-[0.15] dark:group-hover:opacity-[0.05] transition-all duration-700 transform group-hover:-translate-y-4 group-hover:-translate-x-2 pointer-events-none rotate-6">
+          <Icon size={160} strokeWidth={1} />
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="relative z-10 flex flex-col h-full p-4">
+        
+        {/* Glassmorphic Text Container for contrast */}
+        <div className={cn(
+          "flex flex-col h-full w-[95%] sm:w-[85%] lg:w-[90%]", 
+          bgImage ? "bg-black/25 dark:bg-black/40 backdrop-blur-md rounded-lg p-4 border border-white/10 shadow-lg" : "p-1"
+        )}>
+          
+          <div className="flex items-center gap-3 mb-4">
+            <div className={cn(
+              "p-2 rounded-xl transition-all duration-300",
+              "bg-white/20 dark:bg-accent",
               "text-white dark:text-foreground"
             )}>
-              {value}
-            </h3>
-
-            {trend && (
-              <div className={cn(
-                "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold transition-all",
-                "bg-white/20 text-white dark:bg-accent dark:text-foreground"
-              )}>
-                {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
-                  trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
-                {trend.value}
-              </div>
-            )}
+              <Icon className="w-5 h-5" />
+            </div>
+            <span className={cn(
+              "text-[10px] font-black uppercase tracking-widest transition-opacity duration-300",
+              "text-white/90 dark:text-muted-foreground"
+            )}>
+              {title}
+            </span>
           </div>
 
-          {trend?.label && (
-            <p className={cn(
-              "text-[11px] font-medium transition-colors",
-              "text-white/70 dark:text-muted-foreground"
-            )}>
-              {trend.label}
-            </p>
-          )}
+          <div className="flex flex-col gap-1 mt-auto">
+            <div className="flex items-baseline gap-2">
+              <h3 className={cn(
+                "text-2xl lg:text-3xl font-black tracking-tight",
+                "text-white dark:text-foreground"
+              )}>
+                {value}
+              </h3>
 
-          {subtitle && !trend?.label && (
-            <p className={cn(
-              "text-[11px] font-medium transition-colors",
-              "text-white/70 dark:text-muted-foreground"
-            )}>
-              {subtitle}
-            </p>
-          )}
+              {trend && (
+                <div className={cn(
+                  "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[11px] font-bold transition-all",
+                  "bg-white/20 text-white dark:bg-accent dark:text-foreground"
+                )}>
+                  {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
+                    trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
+                  {trend.value}
+                </div>
+              )}
+            </div>
+
+            {trend?.label && (
+              <p className={cn(
+                "text-[11px] font-medium transition-colors",
+                "text-white/80 dark:text-muted-foreground"
+              )}>
+                {trend.label}
+              </p>
+            )}
+
+            {subtitle && !trend?.label && (
+              <p className={cn(
+                "text-[11px] font-medium transition-colors",
+                "text-white/80 dark:text-muted-foreground"
+              )}>
+                {subtitle}
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

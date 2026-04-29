@@ -94,7 +94,7 @@ export const DashboardActionRow = memo(({
     );
   }
 
-  // ── DESKTOP: Grid 4 colunas (layout original) ───────────────────────
+// ── DESKTOP: Grid 4 colunas (layout original) ───────────────────────
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
       <MetricCard
@@ -103,8 +103,8 @@ export const DashboardActionRow = memo(({
         subtitle="Cotações prontas para decisão"
         icon={CheckCircle2}
         variant="default"
+        bgImage="https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?q=80&w=600&auto=format&fit=crop"
         onClick={prontasParaDecisao.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=prontas') : undefined}
-        className={prontasParaDecisao.length === 0 ? "opacity-60 grayscale hover:scale-100 hover:shadow-none cursor-default" : ""}
       />
 
       <MetricCard
@@ -113,8 +113,8 @@ export const DashboardActionRow = memo(({
         subtitle="Cotações expirando em breve"
         icon={AlertTriangle}
         variant="warning"
+        bgImage="https://images.unsplash.com/photo-1501139083538-0139583c060f?q=80&w=600&auto=format&fit=crop"
         onClick={vencendo.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=vencendo') : undefined}
-        className={vencendo.length === 0 ? "opacity-60 grayscale hover:scale-100 hover:shadow-none cursor-default" : ""}
       />
 
       <MetricCard
@@ -123,8 +123,8 @@ export const DashboardActionRow = memo(({
         subtitle="Aguardando entrega"
         icon={Truck}
         variant="info"
+        bgImage="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=600&auto=format&fit=crop"
         onClick={pedidosEmTransito > 0 ? () => navigate('/dashboard/compras?tab=pedidos') : undefined}
-        className={pedidosEmTransito === 0 ? "opacity-60 grayscale hover:scale-100 hover:shadow-none cursor-default" : ""}
       />
 
       <MetricCard
@@ -133,6 +133,7 @@ export const DashboardActionRow = memo(({
         subtitle="Nas cotações fechadas"
         icon={DollarSign}
         variant="success"
+        bgImage="https://images.unsplash.com/photo-1579621970588-a35d0e7ab9b6?q=80&w=600&auto=format&fit=crop"
       />
     </div>
   );
