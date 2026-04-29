@@ -100,23 +100,29 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
         onClick={() => handleSort(sortId)}
       >
         <div className={cn("flex items-center gap-1.5", className?.includes("text-center") && "justify-center", className?.includes("text-right") && "justify-end")}>
-          <span>{label}</span>
-          {isActive ? (
-            sortDir === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />
-          ) : (
-            <ChevronsUpDown className="h-3.5 w-3.5 opacity-0 group-hover/th:opacity-40 transition-opacity" />
-          )}
+          {label}
+          <div className="flex flex-col items-center justify-center w-3 h-3 text-zinc-300 dark:text-zinc-600 transition-colors">
+            {isActive ? (
+              sortDir === 'asc' ? (
+                <ChevronUp className="w-3 h-3 text-brand" />
+              ) : (
+                <ChevronDown className="w-3 h-3 text-brand" />
+              )
+            ) : (
+              <ChevronsUpDown className="w-3 h-3 opacity-0 group-hover/th:opacity-100 transition-opacity" />
+            )}
+          </div>
         </div>
       </th>
     );
   };
 
   return (
-    <div className="w-full overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="w-full overflow-x-auto custom-scrollbar">
+      <table className="w-full text-sm text-left border-collapse">
           {/* Header */}
           <thead>
-            <tr className="border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+            <tr className="border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/30 dark:bg-zinc-900/20">
               <SortHeader label="Fornecedor" sortId="name" className="pl-6 w-[28%]" />
               <SortHeader label="Status" sortId="status" className="w-[12%] text-center" />
               <SortHeader label="Limite" sortId="limit" className="w-[15%]" />
@@ -130,14 +136,11 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
           </thead>
 
           {/* Body */}
-          <tbody className="divide-y divide-zinc-200/60 dark:divide-zinc-800/60">
+          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
             {sortedSuppliers.map((supplier) => (
               <tr
                 key={supplier.id}
-                className={cn(
-                  "group transition-colors duration-150",
-                  "hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40"
-                )}
+                className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
               >
                 {/* Fornecedor */}
                 <td className="pl-6 pr-4 py-4">

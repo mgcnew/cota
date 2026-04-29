@@ -367,10 +367,10 @@ function Fornecedores() {
           )}
 
           {/* Unified Container for Search, Table and Mobile Cards */}
-          <div className="w-full bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm mb-8">
+          <div className="w-full bg-white dark:bg-[#1C1E23] border border-zinc-200/80 dark:border-zinc-800/80 sm:rounded-xl overflow-hidden shadow-sm mb-8">
             {/* Header / Actions Bar */}
-            <div className="p-4 md:p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="p-3 md:p-4 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#16181C]/50">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
                 <div className="flex-1 max-w-xl">
                   <SearchInput
                     value={searchQuery}
