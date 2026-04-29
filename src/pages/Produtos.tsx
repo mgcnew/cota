@@ -377,74 +377,74 @@ function Produtos() {
             </ResponsiveGrid>
           )}
 
-          <div className="mt-2 mb-6">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-              <div className="flex-1 max-w-xl">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Pesquisar por nome, categoria ou marca..."
-                />
-              </div>
-              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-                <div className="w-full sm:w-[240px]">
-                  <CategorySelect
-                    categories={safeCategories}
-                    products={safeProducts}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={setSelectedCategory}
+          <div className="w-full bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm mb-8">
+            <div className="p-4 md:p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                <div className="flex-1 max-w-xl">
+                  <SearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Pesquisar por nome, categoria ou marca..."
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className={cn(designSystem.components.button.secondary, "h-11 px-4 flex items-center justify-center")}
-                      >
-                        <MoreHorizontal className="h-5 w-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-[200px]">
-                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
-                        <Download className="h-4 w-4 mr-2" /> Exportar
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                        <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <Button
-                    onClick={handleAddProduct}
-                    className={cn(designSystem.components.button.primary, "h-11 px-6")}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    <span>Novo Produto</span>
-                  </Button>
+                <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                  <div className="w-full sm:w-[240px]">
+                    <CategorySelect
+                      categories={safeCategories}
+                      products={safeProducts}
+                      selectedCategory={selectedCategory}
+                      onCategoryChange={setSelectedCategory}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(designSystem.components.button.secondary, "h-11 px-4 flex items-center justify-center")}
+                        >
+                          <MoreHorizontal className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[200px]">
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
+                          <Download className="h-4 w-4 mr-2" /> Exportar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
+                          <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button
+                      onClick={handleAddProduct}
+                      className={cn(designSystem.components.button.primary, "h-11 px-6")}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      <span>Novo Produto</span>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="md:hidden mt-4" />
-
-          <div className="w-full">
-            <div>
+            <div className="w-full">
               {paginatedData.items.length === 0 && !productsLoading ? (
-                <EmptyState
-                  icon={Package}
-                  title="Nenhum produto encontrado"
-                  description="Tente ajustar sua busca ou filtros."
-                  actionLabel="Adicionar Produto"
-                  actionIcon={Plus}
-                  onAction={handleAddProduct}
-                  variant="inline"
-                />
+                <div className="p-8">
+                  <EmptyState
+                    icon={Package}
+                    title="Nenhum produto encontrado"
+                    description="Tente ajustar sua busca ou filtros."
+                    actionLabel="Adicionar Produto"
+                    actionIcon={Plus}
+                    onAction={handleAddProduct}
+                    variant="inline"
+                  />
+                </div>
               ) : (
                 <>
                   {/* Mobile Cards View */}
-                  <div className="md:hidden space-y-2">
+                  <div className="md:hidden space-y-2 p-4 bg-zinc-50/50 dark:bg-zinc-900/20">
                     {paginatedData.items.map((product) => (
                       <MobileProductCard
                         key={product.id}
@@ -467,7 +467,7 @@ function Produtos() {
                   </div>
 
                   {/* Pagination */}
-                  <div className={cn("mt-2", designSystem.colors.border.subtle)}>
+                  <div className="p-4 bg-white dark:bg-card">
                     <DataPagination
                       currentPage={paginatedData.pagination.currentPage}
                       totalPages={paginatedData.pagination.totalPages}
