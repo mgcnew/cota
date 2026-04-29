@@ -337,111 +337,121 @@ function EmbalagensTab() {
             </ResponsiveGrid>
           )}
 
-          {/* Filtros */}
-          <div className="mb-6">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-              {/* Search Field */}
-              <div className="flex-1 max-w-xl">
-                <SearchInput
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  placeholder="Buscar em embalagens..."
-                />
-              </div>
+          {/* Unified Container for Filters + Table + Pagination */}
+          <div className={cn(
+            "flex flex-col w-full transition-all duration-300",
+            !isMobile && "bg-white dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm p-6"
+          )}>
+            {/* Filters Section */}
+            <div className={cn("mb-6", isMobile && "px-1")}>
+              <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+                {/* Search Field */}
+                <div className="flex-1 max-w-xl">
+                  <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Buscar em embalagens..."
+                  />
+                </div>
 
-              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="ativa">🟢 Ativas</SelectItem>
-                    <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
-                    <SelectItem value="concluida">🔵 Concluídas</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos os Status</SelectItem>
+                      <SelectItem value="ativa">🟢 Ativas</SelectItem>
+                      <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
+                      <SelectItem value="concluida">🔵 Concluídas</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Alerta de prontas */}
-          {stats.prontasParaDecisao > 0 && (
-            <div className="bg-brand/5 border border-brand/20 rounded-2xl p-4 flex items-center gap-4 animate-in zoom-in-95 duration-500">
-              <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="h-5 w-5 text-brand" />
+            {/* Alerta de prontas */}
+            {stats.prontasParaDecisao > 0 && (
+              <div className={cn("mb-6 animate-in zoom-in-95 duration-500", isMobile && "px-1")}>
+                <div className="bg-brand/5 border border-brand/20 rounded-2xl p-4 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="h-5 w-5 text-brand" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
+                      {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
+                    </p>
+                    <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados já enviaram suas propostas</p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-xl border-brand/30 text-brand hover:bg-brand/10"
+                    onClick={() => setStatusFilter("prontas")}
+                  >
+                    Analisar agora
+                  </Button>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
-                  {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
-                </p>
-                <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados já enviaram suas propostas</p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-xl border-brand/30 text-brand hover:bg-brand/10"
-                onClick={() => setStatusFilter("prontas")}
-              >
-                Analisar agora
-              </Button>
-            </div>
-          )}
+            )}
 
-          {/* Lista de cotações */}
-          {paginatedData.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
-              <Package className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
-              <p className="text-zinc-500 font-medium">Nenhuma cotação de embalagem encontrada</p>
-              <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setAddDialogOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />Criar Primeira Cotação
-              </Button>
-            </div>
-          ) : isMobile ? (
-            <div className="space-y-3">
-              {paginatedData.items.map((quote, index) => {
-                const numero = paginatedData.pagination.startIndex + index + 1;
-                return (
-                  <MobilePackagingQuoteCard
-                    key={quote.id}
-                    quote={quote}
-                    quoteNumber={numero}
+            {/* Content Section */}
+            <div className="flex-1 min-h-0">
+              {paginatedData.items.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+                  <Package className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
+                  <p className="text-zinc-500 font-medium">Nenhuma cotação de embalagem encontrada</p>
+                  <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setAddDialogOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />Criar Primeira Cotação
+                  </Button>
+                </div>
+              ) : isMobile ? (
+                <div className="space-y-3 px-1">
+                  {paginatedData.items.map((quote, index) => {
+                    const numero = paginatedData.pagination.startIndex + index + 1;
+                    return (
+                      <MobilePackagingQuoteCard
+                        key={quote.id}
+                        quote={quote}
+                        quoteNumber={numero}
+                        onManage={handleManageQuote}
+                        onViewSummary={handleViewSummary}
+                        onDelete={handleDeleteQuote}
+                        onConvertToOrder={handleConvertToOrder}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="bg-transparent overflow-hidden">
+                  <PackagingQuotesTable
+                    quotes={paginatedData.items}
+                    startIndex={paginatedData.pagination.startIndex}
                     onManage={handleManageQuote}
                     onViewSummary={handleViewSummary}
                     onDelete={handleDeleteQuote}
                     onConvertToOrder={handleConvertToOrder}
                   />
-                );
-              })}
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="bg-transparent overflow-hidden">
-              <PackagingQuotesTable
-                quotes={paginatedData.items}
-                startIndex={paginatedData.pagination.startIndex}
-                onManage={handleManageQuote}
-                onViewSummary={handleViewSummary}
-                onDelete={handleDeleteQuote}
-                onConvertToOrder={handleConvertToOrder}
-              />
-            </div>
-          )}
 
-          {/* Paginação */}
-          {paginatedData.pagination.totalPages > 1 && (
-            <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800">
-              <DataPagination
-                currentPage={paginatedData.pagination.currentPage}
-                totalPages={paginatedData.pagination.totalPages}
-                onPageChange={paginatedData.pagination.goToPage}
-                totalItems={paginatedData.pagination.totalItems}
-                itemsPerPage={paginatedData.pagination.itemsPerPage}
-                onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                startIndex={paginatedData.pagination.startIndex}
-                endIndex={paginatedData.pagination.endIndex}
-              />
-            </div>
-          )}
+            {/* Paginação */}
+            {paginatedData.pagination.totalPages > 1 && (
+              <div className={cn("mt-2", !isMobile && "pt-6 border-t border-zinc-100 dark:border-zinc-800")}>
+                <DataPagination
+                  currentPage={paginatedData.pagination.currentPage}
+                  totalPages={paginatedData.pagination.totalPages}
+                  onPageChange={paginatedData.pagination.goToPage}
+                  totalItems={paginatedData.pagination.totalItems}
+                  itemsPerPage={paginatedData.pagination.itemsPerPage}
+                  onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+                  startIndex={paginatedData.pagination.startIndex}
+                  endIndex={paginatedData.pagination.endIndex}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 

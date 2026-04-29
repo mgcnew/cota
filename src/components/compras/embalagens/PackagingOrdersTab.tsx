@@ -133,224 +133,237 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         </ResponsiveGrid>
       )}
 
-      <div className="mb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-          {/* Search Field */}
-          <div className="flex-1 max-w-xl">
-            <SearchInput
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder="Buscar pedidos..."
-            />
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os Status</SelectItem>
-                {PACKAGING_ORDER_STATUS.map(s => (
-                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button 
-              onClick={onCreateOrder} 
-              className={cn(ds.components.button.base, ds.components.button.variants.primary, "h-11 px-6 w-full sm:w-auto")}
-            >
-              <Plus className="h-4 w-4 mr-2" />Novo Pedido
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {paginatedData.items.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
-          <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
-          <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
-          <Button className={cn(ds.components.button.base, ds.components.button.variants.secondary, "mt-6")} onClick={onCreateOrder}>
-            <Plus className="h-4 w-4 mr-2" />Criar Primeiro Pedido
-          </Button>
-        </div>
-      ) : isMobile ? (
-        <div className="space-y-3">
-          {paginatedData.items.map((order, index) => {
-            const numero = paginatedData.pagination.startIndex + index + 1;
-            return (
-              <MobilePackagingOrderCard
-                key={order.id}
-                order={order}
-                orderNumber={numero}
-                onViewDetails={handleViewDetails}
-                onUpdateStatus={handleUpdateStatus}
-                onConfirmDelivery={handleConfirmDelivery}
-                onDelete={handleDelete}
+      {/* Unified Container for Filters + Table + Pagination */}
+      <div className={cn(
+        "flex flex-col w-full transition-all duration-300",
+        !isMobile && "bg-white dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm p-6"
+      )}>
+        {/* Filters Section */}
+        <div className={cn("mb-6", isMobile && "px-1")}>
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
+            {/* Search Field */}
+            <div className="flex-1 max-w-xl">
+              <SearchInput
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Buscar pedidos..."
               />
-            );
-          })}
-        </div>
-      ) : (
-        <Table className={ds.components.table.root}>
-          <TableHeader className={ds.components.table.header}>
-            <TableRow className="border-none hover:bg-transparent">
-              <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
-                <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
-                  <div className="w-[14%] flex items-center gap-3">
-                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
-                      <ShoppingCart className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
-                    </div>
-                    <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Pedido</span>
-                  </div>
-                  <div className="w-[18%] pl-2 flex items-center gap-2">
-                    <span className={ds.components.table.headerLabel}>Fornecedor</span>
-                  </div>
-                  <div className="w-[20%] pl-2 flex items-center gap-2">
-                    <span className={ds.components.table.headerLabel}>Itens</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-2">
-                    <span className={ds.components.table.headerLabel}>Entrega</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                    <span className={ds.components.table.headerLabel}>Status</span>
-                  </div>
-                  <div className="w-[12%] pl-2 flex items-center gap-2">
-                    <span className={ds.components.table.headerLabel}>Valor</span>
-                  </div>
-                  <div className="w-[12%] flex justify-end items-center px-2">
-                    <span className={ds.components.table.headerLabel}>Ações</span>
-                  </div>
-                </div>
-              </TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paginatedData.items.map((order, index) => {
-              const numero = paginatedData.pagination.startIndex + index + 1;
-              const isEntregue = order.status === "entregue";
-              
-              return (
-                <TableRow key={order.id} className="group border-none hover:bg-transparent">
-                  <TableCell colSpan={7} className={ds.components.table.cell}>
-                    <div className={cn(
-                      ds.components.table.row,
-                      ds.components.table.rowWrapper,
-                      isEntregue && ds.components.table.rowActive
-                    )}>
-                      {/* Pedido */}
-                      <div className="w-[14%] flex items-center gap-3">
-                        <div className={cn(
-                          "w-9 h-9 rounded-xl flex items-center justify-center border transition-colors",
-                          isEntregue 
-                            ? "bg-brand/10 border-brand/20" 
-                            : "bg-muted/50 border-border/50"
-                        )}>
-                          {isEntregue ? (
-                            <CheckCircle2 className="h-4 w-4 text-brand" />
-                          ) : (
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                        <div>
-                          <span className={cn("font-bold text-sm", ds.colors.text.primary)}>#{numero.toString().padStart(4, '0')}</span>
-                          <p className={cn("text-[11px]", ds.colors.text.muted)}>{order.orderDate}</p>
-                        </div>
-                      </div>
+            </div>
 
-                      {/* Fornecedor */}
-                      <div className="w-[18%] pl-2">
-                        <CapitalizedText className={cn("font-bold text-sm truncate block max-w-[140px]", ds.colors.text.primary)}>
-                          {order.supplierName}
-                        </CapitalizedText>
-                        <p className={cn("text-[11px]", ds.colors.text.muted)}>{order.itens.length} item(ns)</p>
+            <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Status</SelectItem>
+                  {PACKAGING_ORDER_STATUS.map(s => (
+                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={onCreateOrder} 
+                className={cn(ds.components.button.base, ds.components.button.variants.primary, "h-11 px-6 w-full sm:w-auto")}
+              >
+                <Plus className="h-4 w-4 mr-2" />Novo Pedido
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div className="flex-1 min-h-0">
+          {paginatedData.items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+              <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
+              <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
+              <Button className={cn(ds.components.button.base, ds.components.button.variants.secondary, "mt-6")} onClick={onCreateOrder}>
+                <Plus className="h-4 w-4 mr-2" />Criar Primeiro Pedido
+              </Button>
+            </div>
+          ) : isMobile ? (
+            <div className="space-y-3 px-1">
+              {paginatedData.items.map((order, index) => {
+                const numero = paginatedData.pagination.startIndex + index + 1;
+                return (
+                  <MobilePackagingOrderCard
+                    key={order.id}
+                    order={order}
+                    orderNumber={numero}
+                    onViewDetails={handleViewDetails}
+                    onUpdateStatus={handleUpdateStatus}
+                    onConfirmDelivery={handleConfirmDelivery}
+                    onDelete={handleDelete}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <Table className={ds.components.table.root}>
+              <TableHeader className={ds.components.table.header}>
+                <TableRow className="border-none hover:bg-transparent">
+                  <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
+                    <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
+                      <div className="w-[14%] flex items-center gap-3">
+                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
+                          <ShoppingCart className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
+                        </div>
+                        <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Pedido</span>
                       </div>
-                      
-                      {/* Itens */}
-                      <div className="w-[20%] pl-2">
-                        <CapitalizedText className={cn("font-bold text-sm truncate block max-w-[160px]", ds.colors.text.primary)}>
-                          {order.itens.slice(0, 2).map(i => i.packagingName).join(', ')}
-                        </CapitalizedText>
-                        {order.itens.length > 2 && (
-                          <p className={cn("text-[11px]", ds.colors.text.muted)}>+{order.itens.length - 2} mais</p>
-                        )}
+                      <div className="w-[18%] pl-2 flex items-center gap-2">
+                        <span className={ds.components.table.headerLabel}>Fornecedor</span>
                       </div>
-                      
-                      {/* Entrega */}
-                      <div className={cn("w-[12%] pl-2 text-xs", ds.colors.text.secondary)}>
-                        {order.deliveryDate ? (
-                          <div className="flex items-center gap-1.5">
-                            <Truck className="h-3.5 w-3.5 opacity-50" />
-                            <span>{order.deliveryDate}</span>
-                          </div>
-                        ) : (
-                          <span className="opacity-50">-</span>
-                        )}
+                      <div className="w-[20%] pl-2 flex items-center gap-2">
+                        <span className={ds.components.table.headerLabel}>Itens</span>
                       </div>
-                      
-                      {/* Status */}
-                      <div className="w-[12%] pl-2 flex justify-center">
-                        {getStatusBadge(order.status)}
+                      <div className="w-[12%] pl-2 flex items-center gap-2">
+                        <span className={ds.components.table.headerLabel}>Entrega</span>
                       </div>
-                      
-                      {/* Valor */}
-                      <div className="w-[12%] pl-2">
-                        <span className="font-bold text-sm text-brand">
-                          {formatCurrency(order.totalValue)}
-                        </span>
+                      <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
+                        <span className={ds.components.table.headerLabel}>Status</span>
                       </div>
-                      
-                      {/* Ações */}
-                      <div className="w-[12%] pl-2 flex justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className={ds.components.button.size.icon}>
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
-                            <DropdownMenuItem onClick={() => handleViewDetails(order)} className="rounded-lg gap-2">
-                              <Eye className="h-4 w-4" />Ver Detalhes
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className={ds.components.separator.horizontal} />
-                            {order.status === "pendente" && (
-                              <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')} className="rounded-lg gap-2 text-brand">
-                                <CheckCircle2 className="h-4 w-4" />Confirmar
-                              </DropdownMenuItem>
-                            )}
-                            {(order.status === "pendente" || order.status === "confirmado") && (
-                              <DropdownMenuItem onClick={() => handleConfirmDelivery(order)} className="rounded-lg gap-2 text-brand">
-                                <Truck className="h-4 w-4" />Marcar Entregue
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuSeparator className={ds.components.separator.horizontal} />
-                            <DropdownMenuItem onClick={() => handleDelete(order.id)} className="rounded-lg gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                              <Trash2 className="h-4 w-4" />Excluir
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                      <div className="w-[12%] pl-2 flex items-center gap-2">
+                        <span className={ds.components.table.headerLabel}>Valor</span>
+                      </div>
+                      <div className="w-[12%] flex justify-end items-center px-2">
+                        <span className={ds.components.table.headerLabel}>Ações</span>
                       </div>
                     </div>
                   </TableCell>
                 </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      )}
+              </TableHeader>
+              <TableBody>
+                {paginatedData.items.map((order, index) => {
+                  const numero = paginatedData.pagination.startIndex + index + 1;
+                  const isEntregue = order.status === "entregue";
+                  
+                  return (
+                    <TableRow key={order.id} className="group border-none hover:bg-transparent">
+                      <TableCell colSpan={7} className={ds.components.table.cell}>
+                        <div className={cn(
+                          ds.components.table.row,
+                          ds.components.table.rowWrapper,
+                          isEntregue && ds.components.table.rowActive
+                        )}>
+                          {/* Pedido */}
+                          <div className="w-[14%] flex items-center gap-3">
+                            <div className={cn(
+                              "w-9 h-9 rounded-xl flex items-center justify-center border transition-colors",
+                              isEntregue 
+                                ? "bg-brand/10 border-brand/20" 
+                                : "bg-muted/50 border-border/50"
+                            )}>
+                              {isEntregue ? (
+                                <CheckCircle2 className="h-4 w-4 text-brand" />
+                              ) : (
+                                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                            <div>
+                              <span className={ds.components.dataDisplay.code}>#{numero.toString().padStart(4, '0')}</span>
+                              <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>{order.orderDate}</p>
+                            </div>
+                          </div>
 
-      {paginatedData.pagination.totalPages > 1 && (
-        <DataPagination
-          currentPage={paginatedData.pagination.currentPage}
-          totalPages={paginatedData.pagination.totalPages}
-          onPageChange={paginatedData.pagination.goToPage}
-          totalItems={paginatedData.pagination.totalItems}
-          itemsPerPage={paginatedData.pagination.itemsPerPage}
-          onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-          startIndex={paginatedData.pagination.startIndex}
-          endIndex={paginatedData.pagination.endIndex}
-        />
-      )}
+                          {/* Fornecedor */}
+                          <div className="w-[18%] pl-2">
+                            <CapitalizedText className={cn(ds.components.dataDisplay.highlight, "truncate block max-w-[140px]")}>
+                              {order.supplierName}
+                            </CapitalizedText>
+                            <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>{order.itens.length} item(ns)</p>
+                          </div>
+                          
+                          {/* Itens */}
+                          <div className="w-[20%] pl-2">
+                            <CapitalizedText className={cn(ds.components.dataDisplay.highlight, "truncate block max-w-[160px]")}>
+                              {order.itens.slice(0, 2).map(i => i.packagingName).join(', ')}
+                            </CapitalizedText>
+                            {order.itens.length > 2 && (
+                              <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>+{order.itens.length - 2} mais</p>
+                            )}
+                          </div>
+                          
+                          {/* Entrega */}
+                          <div className="w-[12%] pl-2">
+                            {order.deliveryDate ? (
+                              <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
+                                <Truck className="h-3 w-3 opacity-50" />
+                                <span>{order.deliveryDate}</span>
+                              </div>
+                            ) : (
+                              <span className={ds.components.dataDisplay.secondary}>-</span>
+                            )}
+                          </div>
+                          
+                          {/* Status */}
+                          <div className="w-[12%] pl-2 flex justify-center">
+                            {getStatusBadge(order.status)}
+                          </div>
+                          
+                          {/* Valor */}
+                          <div className="w-[12%] pl-2">
+                            <span className={ds.components.dataDisplay.money}>
+                              {formatCurrency(order.totalValue)}
+                            </span>
+                          </div>
+                          
+                          {/* Ações */}
+                          <div className="w-[12%] pl-2 flex justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className={ds.components.button.size.icon}>
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
+                                <DropdownMenuItem onClick={() => handleViewDetails(order)} className="rounded-lg gap-2">
+                                  <Eye className="h-4 w-4 text-blue-500" />Ver Detalhes
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator className={ds.components.separator.horizontal} />
+                                {order.status === "pendente" && (
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')} className="rounded-lg gap-2 text-emerald-500">
+                                    <CheckCircle2 className="h-4 w-4" />Confirmar
+                                  </DropdownMenuItem>
+                                )}
+                                {(order.status === "pendente" || order.status === "confirmado") && (
+                                  <DropdownMenuItem onClick={() => handleConfirmDelivery(order)} className="rounded-lg gap-2 text-brand">
+                                    <Truck className="h-4 w-4" />Marcar Entregue
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator className={ds.components.separator.horizontal} />
+                                <DropdownMenuItem onClick={() => handleDelete(order.id)} className="rounded-lg gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                                  <Trash2 className="h-4 w-4" />Excluir
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </div>
+
+        {/* Pagination Section */}
+        {paginatedData.pagination.totalPages > 1 && (
+          <div className={cn("mt-2", !isMobile && "pt-6 border-t border-zinc-100 dark:border-zinc-800")}>
+            <DataPagination
+              currentPage={paginatedData.pagination.currentPage}
+              totalPages={paginatedData.pagination.totalPages}
+              onPageChange={paginatedData.pagination.goToPage}
+              totalItems={paginatedData.pagination.totalItems}
+              itemsPerPage={paginatedData.pagination.itemsPerPage}
+              onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
+              startIndex={paginatedData.pagination.startIndex}
+              endIndex={paginatedData.pagination.endIndex}
+            />
+          </div>
+        )}
+      </div>
 
       <PackagingOrderDetailsDialog
         open={detailsDialogOpen}

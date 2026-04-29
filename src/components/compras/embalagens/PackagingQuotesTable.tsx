@@ -118,30 +118,30 @@ export function PackagingQuotesTable({
                       )}
                     </div>
                     <div>
-                      <span className={cn("font-bold text-sm", ds.colors.text.primary)}>#{numero.toString().padStart(4, '0')}</span>
-                      <p className={cn("text-[11px]", ds.colors.text.muted)}>{quote.itens.length} item(ns)</p>
+                      <span className={ds.components.dataDisplay.code}>#{numero.toString().padStart(4, '0')}</span>
+                      <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>{quote.itens.length} item(ns)</p>
                     </div>
                   </div>
 
                   {/* Embalagens */}
                   <div className="w-[22%] pl-2">
-                    <CapitalizedText className={cn("font-bold text-sm truncate block max-w-[180px]", ds.colors.text.primary)}>
+                    <CapitalizedText className={cn(ds.components.dataDisplay.highlight, "truncate block max-w-[180px]")}>
                       {quote.itens.slice(0, 2).map(i => i.packagingName).join(', ') || 'Sem itens'}
                     </CapitalizedText>
                     {quote.itens.length > 2 && (
-                      <p className={cn("text-[11px]", ds.colors.text.muted)}>+{quote.itens.length - 2} mais</p>
+                      <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>+{quote.itens.length - 2} mais</p>
                     )}
                   </div>
                   
                   {/* Período */}
-                  <div className={cn("w-[14%] pl-2 text-xs", ds.colors.text.secondary)}>
-                    <div className="flex items-center gap-1">
+                  <div className="w-[14%] pl-2">
+                    <div className={cn("flex items-center gap-1", ds.components.dataDisplay.secondary)}>
                       <Calendar className="h-3 w-3 opacity-50" />
-                      {quote.dataInicio}
+                      <span>{quote.dataInicio}</span>
                     </div>
-                    <div className="flex items-center gap-1 mt-0.5">
+                    <div className={cn("flex items-center gap-1 mt-0.5", ds.components.dataDisplay.secondary)}>
                       <Calendar className="h-3 w-3 opacity-50" />
-                      {quote.dataFim}
+                      <span>{quote.dataFim}</span>
                     </div>
                   </div>
                   
@@ -153,13 +153,13 @@ export function PackagingQuotesTable({
                   {/* Melhor Preço */}
                   <div className="w-[16%] pl-2">
                     <span className={cn(
-                      "font-bold text-sm",
-                      quote.melhorPreco !== '-' ? "text-brand" : ds.colors.text.muted
+                      ds.components.dataDisplay.money,
+                      quote.melhorPreco === '-' && "text-muted-foreground"
                     )}>
                       {quote.melhorPreco}
                     </span>
                     {quote.melhorFornecedor !== '-' && (
-                      <CapitalizedText as="p" className={cn("text-[11px] truncate max-w-[120px]", ds.colors.text.muted)}>
+                      <CapitalizedText as="p" className={cn("mt-0.5 truncate max-w-[120px]", ds.components.dataDisplay.secondary)}>
                         {quote.melhorFornecedor}
                       </CapitalizedText>
                     )}
@@ -190,7 +190,7 @@ export function PackagingQuotesTable({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
                         <DropdownMenuItem onClick={() => onManage(quote)} disabled={quote.status === "concluida"} className="rounded-lg gap-2">
-                          <Eye className="h-4 w-4" />Negociar Cotação
+                          <Eye className="h-4 w-4 text-blue-500" />Negociar Cotação
                         </DropdownMenuItem>
                         {quote.status === "concluida" && onViewSummary && (
                           <DropdownMenuItem onClick={() => onViewSummary(quote)} className="rounded-lg gap-2 text-brand">
@@ -198,7 +198,7 @@ export function PackagingQuotesTable({
                           </DropdownMenuItem>
                         )}
                         {isPronta && quote.status !== "concluida" && (
-                          <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="rounded-lg gap-2 text-brand">
+                          <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="rounded-lg gap-2 text-emerald-500">
                             <ShoppingCart className="h-4 w-4" />Converter em Pedido
                           </DropdownMenuItem>
                         )}
