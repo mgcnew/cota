@@ -1,8 +1,18 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import { Package } from "lucide-react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Power } from "lucide-react";
+import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Power, Send, CheckCircle2, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Drawer, 
   DrawerClose, 
@@ -69,6 +79,12 @@ export function QuoteValuesTab({
   // Agrupamento de cotações
   const [otherOpenQuotes, setOtherOpenQuotes] = useState<any[]>([]);
   const [useGroupedLink, setUseGroupedLink] = useState(false);
+
+  // Tracking de envios WhatsApp
+  const [sentSuppliers, setSentSuppliers] = useState<Record<string, boolean>>({});
+  const [isSendingAll, setIsSendingAll] = useState(false);
+  const [showGroupConfirm, setShowGroupConfirm] = useState(false);
+  const [pendingBulkSend, setPendingBulkSend] = useState(false);
 
   // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
   const formatInputToBRL = (value: string) => {
@@ -362,6 +378,7 @@ export function QuoteValuesTab({
         
         if (result.success) {
           toast({ title: "✅ Cotação enviada com sucesso!", variant: "default" });
+          setSentSuppliers(prev => ({ ...prev, [supplierId]: true }));
         } else {
           throw new Error(result.error || "Erro desconhecido");
         }
@@ -405,10 +422,109 @@ export function QuoteValuesTab({
         ? `https://wa.me/${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
         : `https://wa.me/?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank');
+      setSentSuppliers(prev => ({ ...prev, [supplierId]: true }));
     }
   };
 
+  // Fornecedores com link (accessToken) para bulk send
+  const linkSuppliers = useMemo(() => 
+    fornecedores.filter((f: any) => f.accessToken),
+    [fornecedores]
+  );
+
+  const handleSendAllViaLink = useCallback(async (withGrouping: boolean) => {
+    if (isSendingAll) return;
+    setIsSendingAll(true);
+    setShowGroupConfirm(false);
+
+    // Temporarily enable grouping if requested
+    const prevGrouped = useGroupedLink;
+    if (withGrouping) setUseGroupedLink(true);
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const supplier of linkSuppliers) {
+      if (sentSuppliers[supplier.id]) continue; // Skip already sent
+      
+      try {
+        // Create a synthetic event
+        const fakeEvent = { stopPropagation: () => {} } as React.MouseEvent;
+        await handleWhatsApp(
+          fakeEvent,
+          supplier.id,
+          supplier.nome,
+          supplier.contato || supplier.contact,
+          supplier.phone,
+          supplier.accessToken
+        );
+        successCount++;
+        // Small delay between sends to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 800));
+      } catch (err) {
+        console.error(`[BulkSend] Erro ao enviar para ${supplier.nome}:`, err);
+        failCount++;
+      }
+    }
+
+    if (!withGrouping) setUseGroupedLink(prevGrouped);
+    setIsSendingAll(false);
+
+    if (successCount > 0) {
+      toast({
+        title: `✅ ${successCount} cotação${successCount > 1 ? 'ões' : ''} enviada${successCount > 1 ? 's' : ''}!`,
+        description: failCount > 0 ? `${failCount} falha${failCount > 1 ? 's' : ''} no envio.` : undefined,
+      });
+    } else if (failCount > 0) {
+      toast({ title: "❌ Nenhuma cotação foi enviada.", variant: "destructive" });
+    }
+  }, [isSendingAll, linkSuppliers, sentSuppliers, handleWhatsApp, useGroupedLink, toast]);
+
+  const handleBulkSendClick = useCallback(() => {
+    // Check if there are grouped links available
+    if (otherOpenQuotes.length > 0) {
+      setShowGroupConfirm(true);
+    } else {
+      handleSendAllViaLink(false);
+    }
+  }, [otherOpenQuotes.length, handleSendAllViaLink]);
+
+  const unsentLinkCount = linkSuppliers.filter(f => !sentSuppliers[f.id]).length;
+
   return (
+    <>
+    {/* AlertDialog para confirmação de agrupamento */}
+    <AlertDialog open={showGroupConfirm} onOpenChange={setShowGroupConfirm}>
+      <AlertDialogContent className="rounded-2xl border-border/50 shadow-2xl max-w-md">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-lg font-black tracking-tight flex items-center gap-2">
+            <LinkIcon className="h-5 w-5 text-amber-500" />
+            Agrupar Links?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+            Este fornecedor possui <strong className="text-foreground">{otherOpenQuotes.length} outra{otherOpenQuotes.length > 1 ? 's' : ''} cotação{otherOpenQuotes.length > 1 ? 'ões' : ''}</strong> ativa{otherOpenQuotes.length > 1 ? 's' : ''}.
+            <br /><br />
+            Deseja enviar um <strong className="text-amber-600">link unificado</strong> para que o fornecedor responda todas as cotações em uma única tela?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:gap-2">
+          <AlertDialogCancel 
+            className="rounded-xl text-xs font-black uppercase tracking-widest"
+            onClick={() => handleSendAllViaLink(false)}
+          >
+            Enviar Separados
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-amber-600/20"
+            onClick={() => handleSendAllViaLink(true)}
+          >
+            <LinkIcon className="h-3.5 w-3.5 mr-1.5" />
+            Agrupar e Enviar
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
       {/* Sidebar - Lista de Fornecedores */}
       <div className={cn(
@@ -498,14 +614,19 @@ export function QuoteValuesTab({
                         handleWhatsApp(e, fornecedor.id, fornecedor.nome, fornecedor.contact || fornecedor.contato, fornecedor.phone, fornecedor.accessToken);
                       }}
                       className={cn(
-                        "flex items-center justify-center p-1.5 rounded-lg transition-colors border cursor-pointer",
-                        isSelected
-                          ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
-                          : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
+                        "flex items-center justify-center p-1.5 rounded-lg transition-all duration-300 border cursor-pointer",
+                        sentSuppliers[fornecedor.id]
+                          ? "bg-emerald-500/15 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/25"
+                          : isSelected
+                            ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
+                            : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
                       )}
-                      title="Enviar Cotação via WhatsApp"
+                      title={sentSuppliers[fornecedor.id] ? "✅ Cotação já enviada" : "Enviar Cotação via WhatsApp"}
                     >
-                      <MessageCircle className="h-3 w-3" />
+                      {sentSuppliers[fornecedor.id] 
+                        ? <CheckCircle2 className="h-3 w-3" />
+                        : <MessageCircle className="h-3 w-3" />
+                      }
                     </div>
                   </div>
                   
@@ -550,6 +671,47 @@ export function QuoteValuesTab({
                   <p className="text-lg font-black text-foreground tracking-tight truncate" title={currentSupplier?.nome}>{currentSupplier?.nome}</p>
                 </div>
               </div>
+
+              {/* Botão "Enviar Todos" via Link */}
+              {linkSuppliers.length > 1 && (
+                <div className="hidden lg:flex items-center gap-2 mr-4 animate-in slide-in-from-right-4">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={handleBulkSendClick}
+                          disabled={isSendingAll || unsentLinkCount === 0}
+                          className={cn(
+                            "px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight flex items-center gap-2 transition-all shrink-0 border shadow-sm",
+                            isSendingAll
+                              ? "bg-brand/10 text-brand border-brand/20 cursor-wait"
+                              : unsentLinkCount === 0
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default"
+                                : "bg-brand text-black border-brand hover:bg-brand/90 hover:shadow-md shadow-brand/20"
+                          )}
+                        >
+                          {isSendingAll ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : unsentLinkCount === 0 ? (
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          ) : (
+                            <Send className="h-3.5 w-3.5" />
+                          )}
+                          {isSendingAll 
+                            ? "Enviando..." 
+                            : unsentLinkCount === 0 
+                              ? "Todos Enviados" 
+                              : `Enviar Todos (${unsentLinkCount})`
+                          }
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent className="bg-zinc-900 text-white border-zinc-800 text-xs max-w-xs shadow-xl rounded-xl">
+                        Envia a cotação via WhatsApp para todos os {linkSuppliers.length} fornecedores com link ativo
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
 
               {otherOpenQuotes.length > 0 && (
                 <div className="hidden lg:flex items-center gap-3 mr-6 animate-in slide-in-from-right-4">
@@ -1217,11 +1379,18 @@ export function QuoteValuesTab({
                 </DrawerClose>
                 <Button 
                   variant="default" 
-                  className="flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest bg-brand text-black shadow-lg shadow-brand/20"
+                  className={cn(
+                    "flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg transition-all duration-300",
+                    sentSuppliers[selectedSupplier || '']
+                      ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                      : "bg-brand text-black shadow-brand/20"
+                  )}
                   onClick={(e) => handleWhatsApp(e, selectedSupplier || '', currentSupplier?.nome || '', currentSupplier?.contact || currentSupplier?.contato, currentSupplier?.phone, currentSupplier?.accessToken)}
                 >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  WhatsApp
+                  {sentSuppliers[selectedSupplier || ''] 
+                    ? <><CheckCircle2 className="h-4 w-4 mr-2" /> Enviado</>
+                    : <><MessageCircle className="h-4 w-4 mr-2" /> WhatsApp</>
+                  }
                 </Button>
               </div>
             </DrawerFooter>
@@ -1229,5 +1398,6 @@ export function QuoteValuesTab({
         </Drawer>
       )}
     </div>
+    </>
   );
 }
