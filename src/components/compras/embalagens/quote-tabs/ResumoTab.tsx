@@ -3,11 +3,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, Award, TrendingDown, Copy, Package, Building2 } from "lucide-react";
+import { Star, Award, TrendingDown, Copy, Package, Building2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 import { PackagingEconomyBreakdown } from "./PackagingEconomyBreakdown";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface BestPriceItem {
   packagingId: string;
@@ -171,11 +172,42 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                           <Package className="h-4 w-4 text-muted-foreground" />
                           <p className="font-semibold text-foreground text-[13px]">{item.packagingName}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right flex items-center justify-end gap-2">
                           <p className="font-bold text-[13px] text-foreground flex items-center gap-1">
                             {formatCurrency(item.bestPrice)}
                             <span className="text-[10px] text-muted-foreground font-medium">/un</span>
                           </p>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6 rounded-full text-muted-foreground hover:text-foreground bg-muted/50"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Info className="h-3.5 w-3.5" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto min-w-[200px] p-3 shadow-lg" align="end" onClick={(e) => e.stopPropagation()}>
+                              <div className="space-y-2">
+                                <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/50 pb-1.5 mb-1.5">Outros Fornecedores</h4>
+                                <div className="flex flex-col gap-1.5">
+                                  {item.allPrices.filter(p => p.supplierId !== group.supplierId).length > 0 ? (
+                                    item.allPrices
+                                      .filter(p => p.supplierId !== group.supplierId)
+                                      .map((price) => (
+                                        <div key={price.supplierId} className="flex justify-between items-center gap-4 text-xs">
+                                          <span className="text-muted-foreground truncate max-w-[150px]" title={price.supplierName}>{price.supplierName}</span>
+                                          <span className="font-bold text-foreground">{formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[9px] text-muted-foreground ml-0.5">/un</span></span>
+                                        </div>
+                                      ))
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground italic">Nenhum outro preço registrado.</span>
+                                  )}
+                                </div>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </div>
                     ))}
