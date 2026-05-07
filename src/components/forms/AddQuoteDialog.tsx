@@ -215,6 +215,33 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     setExpandedItems(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const toggleItemAssignment = (supplierId: string, productId: string) => {
+    setSupplierItemAssignments(prev => {
+      const current = prev[supplierId] || [];
+      const isAssigned = current.includes(productId);
+      
+      const next = { ...prev };
+      if (isAssigned) {
+        next[supplierId] = current.filter(id => id !== productId);
+      } else {
+        next[supplierId] = [...current, productId];
+      }
+      return next;
+    });
+  };
+
+  const toggleAllItemsForSupplier = (supplierId: string, shouldAssign: boolean) => {
+    setSupplierItemAssignments(prev => {
+      const next = { ...prev };
+      if (shouldAssign) {
+        next[supplierId] = fields.map(f => f.produtoId);
+      } else {
+        next[supplierId] = [];
+      }
+      return next;
+    });
+  };
+
   const currentTabIndex = tabs.findIndex(tab => tab.id === activeTab);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
 
@@ -887,6 +914,31 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 {fields.length}
               </span>
             </button>
+          )}
+
+          {currentTabIndex === tabs.length - 1 ? (
+            <Button
+              type="submit"
+              form="quote-form-mobile"
+              disabled={isSubmitting}
+              className={cn(ds.components.button.primary, "h-9 text-xs px-3 font-bold shadow-sm")}
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                "Finalizar"
+              )}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={handleNext}
+              disabled={!canProceedToNext()}
+              className={cn(ds.components.button.primary, "h-9 text-xs px-3 shadow-sm")}
+            >
+              Próximo
+              <ChevronRight className="ml-1 h-3.5 w-3.5" />
+            </Button>
           )}
         </div>
       </div>
@@ -1652,36 +1704,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               </div>
             )}
 
-            {/* ── Bottom Action Bar ── */}
-            <div className={cn(
-              "fixed bottom-0 left-0 right-0 p-4 border-t z-40",
-              ds.colors.surface.card, ds.colors.border.default,
-              "safe-area-bottom"
-            )}>
-              {currentTabIndex === tabs.length - 1 ? (
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={cn(ds.components.button.primary, "w-full h-12 text-base")}
-                >
-                  {isSubmitting ? (
-                    <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Salvando...</>
-                  ) : (
-                    <><Check className="mr-2 h-5 w-5" />Finalizar Cotação</>
-                  )}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleNext}
-                  disabled={!canProceedToNext()}
-                  className={cn(ds.components.button.primary, "w-full h-12 text-base")}
-                >
-                  Próximo
-                  <ChevronRight className="ml-2 h-5 w-5" />
-                </Button>
-              )}
-            </div>
+            {/* Navigation buttons moved to header */}
           </form>
         </Form>
       )}
@@ -1777,24 +1800,53 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             </DialogDescription>
           </div>
           <div className="flex items-center gap-2">
-            {isMobile && currentTabIndex === 0 && (
-              <Button 
+            {currentTabIndex > 0 && (
+              <Button
                 type="button"
-                variant="outline" 
-                size="icon" 
-                onClick={() => setShowMobileCart(true)} 
-                className={cn(ds.components.button.secondary, "h-8 w-8 relative border-brand/20 bg-brand/5 text-brand flex-shrink-0")}
+                variant="outline"
+                onClick={handlePrevious}
+                className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
               >
-                <Package className="h-4 w-4" />
-                {fields.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-brand text-zinc-950 text-[10px] w-[18px] h-[18px] rounded-full flex items-center justify-center font-bold">
-                    {fields.length}
-                  </span>
-                )}
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Voltar
               </Button>
             )}
-            <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-8 w-8 rounded-full flex-shrink-0")}>
-              <X className="h-4 w-4" />
+
+            {currentTabIndex === tabs.length - 1 ? (
+              <Button
+                type="submit"
+                form="quote-form"
+                disabled={isSubmitting}
+                className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Finalizar
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={handleNext}
+                disabled={!canProceedToNext()}
+                className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
+              >
+                Próximo
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            )}
+
+            <div className="w-px h-6 bg-border mx-1" />
+
+            <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className={cn(ds.components.button.ghost, "h-9 w-9 rounded-full flex-shrink-0")}>
+              <X className="h-5 w-5 text-zinc-500" />
             </Button>
           </div>
         </div>
@@ -1826,11 +1878,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           </div>
         </div>
       ) : (
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <Form {...form}>
-            <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col h-full">
-              {/* Content Area - Now with more space */}
-              <div className="flex-1">
+            <form id="quote-form" onSubmit={form.handleSubmit((data) => onSubmit(data, false))} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              {/* Content Area - constrained so footer stays visible */}
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <AnimatedTabContent
                   value={activeTab}
                   activeTab={activeTab}
@@ -3071,61 +3123,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 </AnimatedTabContent>
               </div>
 
-              {/* Footer Fixo */}
-              <div className={cn(ds.components.modal.footer, "flex-shrink-0")}>
-                <div className="flex gap-2 justify-end">
-                  {currentTabIndex > 0 ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevious}
-                      className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
-                    >
-                      <ChevronLeft className="mr-2 h-4 w-4" />
-                      Voltar
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setOpen(false)}
-                      className={cn(ds.components.button.secondary, "h-9 text-sm px-4")}
-                    >
-                      Cancelar
-                    </Button>
-                  )}
 
-                  {currentTabIndex === tabs.length - 1 ? (
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        <>
-                          <Check className="mr-2 h-4 w-4" />
-                          Finalizar Cotação
-                        </>
-                      )}
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      onClick={handleNext}
-                      disabled={!canProceedToNext()}
-                      className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
-                    >
-                      Próximo
-                      <ChevronRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
             </form>
           </Form>
         </div>
