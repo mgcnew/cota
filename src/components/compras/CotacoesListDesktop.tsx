@@ -19,14 +19,7 @@ interface CotacoesListDesktopProps {
   isUpdating: boolean;
 }
 
-type SortKey = 'id' | 'produto' | 'status' | 'melhorPreco' | 'fornecedores' | 'itens' | 'prazo';
-type SortDir = 'asc' | 'desc';
-
-const extractPrice = (priceStr: string): number => {
-  if (!priceStr) return 0;
-  const cleaned = priceStr.replace(/[^\d,.-]/g, '').replace(',', '.');
-  return parseFloat(cleaned) || 0;
-};
+import { useTableSort, SortKey } from '@/hooks/useTableSort';
 
 export const CotacoesListDesktop = memo(({
   cotacoes,
@@ -37,57 +30,7 @@ export const CotacoesListDesktop = memo(({
   onDelete,
   isUpdating
 }: CotacoesListDesktopProps) => {
-  const [sortKey, setSortKey] = useState<SortKey | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>('asc');
-
-  const handleSort = useCallback((key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortKey(key);
-      setSortDir('asc');
-    }
-  }, [sortKey]);
-
-  const sortedCotacoes = (() => {
-    if (!sortKey) return cotacoes;
-    return [...cotacoes].sort((a, b) => {
-      let cmp = 0;
-      switch (sortKey) {
-        case 'id':
-          cmp = (a.id || '').localeCompare(b.id || '', 'pt-BR');
-          break;
-        case 'produto':
-          cmp = (a.produtoResumo || a.produto || '').localeCompare(b.produtoResumo || b.produto || '', 'pt-BR');
-          break;
-        case 'status':
-          cmp = (a.status || '').localeCompare(b.status || '', 'pt-BR');
-          break;
-        case 'melhorPreco':
-          cmp = extractPrice(a.melhorPreco || '') - extractPrice(b.melhorPreco || '');
-          break;
-        case 'fornecedores':
-          cmp = (a.fornecedores || 0) - (b.fornecedores || 0);
-          break;
-        case 'itens':
-          cmp = (a.produtosLista?.length || 0) - (b.produtosLista?.length || 0);
-          break;
-        case 'prazo':
-          // Assume format dd/mm/yyyy
-          const parseDate = (dStr: string) => {
-            if (!dStr) return 0;
-            const parts = dStr.split('/');
-            if (parts.length === 3) {
-              return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
-            }
-            return 0;
-          };
-          cmp = parseDate(a.dataFim || '') - parseDate(b.dataFim || '');
-          break;
-      }
-      return sortDir === 'asc' ? cmp : -cmp;
-    });
-  })();
+  const { sortKey, sortDir, handleSort, sortedCotacoes } = useTableSort(cotacoes);
 
   const SortHeader = ({ label, sortId, className }: { label: string; sortId: SortKey; className?: string }) => {
     const isActive = sortKey === sortId;

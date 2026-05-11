@@ -1,17 +1,12 @@
-import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useCallback, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
-import { usePedidos } from "@/hooks/usePedidos";
-import { useProducts } from "@/hooks/useProducts";
-import { useSuppliers } from "@/hooks/useSuppliers";
-import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Filter, TrendingDown, Clock, CheckCircle2, ShoppingCart, FileText, AlertTriangle, Download, Users, Zap, Award, Sparkles } from "lucide-react";
+import { useCotacoesFilters } from "@/hooks/useCotacoesFilters";
+import { useCotacoesDialogs } from "@/hooks/useCotacoesDialogs";
+import { Plus, CheckCircle2, FileText, AlertTriangle, Download, Users, Zap, Sparkles } from "lucide-react";
 import { SearchInput } from "@/components/ui/search-input";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
@@ -19,9 +14,6 @@ import { MetricCard } from "@/components/ui/metric-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { useExportCSV } from "@/hooks/useExportCSV";
-import { CapitalizedText } from "@/components/ui/capitalized-text";
-import { useToast } from "@/hooks/use-toast";
 import { useCotacoesStats } from "@/hooks/useCotacoesStats";
 import { CotacoesListDesktop } from "./CotacoesListDesktop";
 import { MobileQuoteCard } from "./MobileQuoteCard";
@@ -38,71 +30,55 @@ import {
 
 function CotacoesTab() {
   const { isMobile } = useBreakpoint();
+  
+  const { 
+    cotacoes, 
+    isLoading, 
+    isUpdating,
+    refetch, 
+    updateQuoteStatus, 
+    deleteQuote 
+  } = useCotacoes();
+
+  const stats = useCotacoesStats(cotacoes);
+
+  const {
+    searchTerm,
+    setSearchTerm,
+    statusFilter,
+    handleStatusFilterChange,
+    filteredCotacoes
+  } = useCotacoesFilters(cotacoes);
+
+  const {
+    addDialogOpen,
+    setAddDialogOpen,
+    viewDialogOpen,
+    setViewDialogOpen,
+    gerenciarDialogOpen,
+    setGerenciarDialogOpen,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    relatorioDialogOpen,
+    setRelatorioDialogOpen,
+    selectedQuote,
+    initialSupplierId,
+    setInitialSupplierId,
+    handleViewQuote,
+    handleGerenciarQuote,
+    handleDeleteQuote
+  } = useCotacoesDialogs(cotacoes);
+
   const { paginate } = usePagination<Quote>({ initialItemsPerPage: isMobile ? 8 : 10 });
-  const [searchTerm, setSearchTerm] = useState("");
-  const debouncedSearchTerm = useDebounce(searchTerm, 300);
-  const { toast } = useToast();
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [gerenciarDialogOpen, setGerenciarDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [relatorioDialogOpen, setRelatorioDialogOpen] = useState(false);
-  const [selectedQuoteId, setSelectedQuoteId] = useState<string | null>(null);
+  const paginatedData = paginate(filteredCotacoes);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("filter") || "all");
-  const [initialSupplierId, setInitialSupplierId] = useState<string | null>(null);
+  const handleUpdateStatus = useCallback((quoteId: string, status: string) => {
+    updateQuoteStatus.mutate({ quoteId, status });
+  }, [updateQuoteStatus]);
 
-  useEffect(() => {
-    const isNew = searchParams.get("open") === "new";
-    const supplierId = searchParams.get("supplierId");
-    
-    if (isNew) {
-      if (supplierId) {
-        setInitialSupplierId(supplierId);
-      }
-      setTimeout(() => {
-        setAddDialogOpen(true);
-        setSearchParams(prev => {
-          prev.delete("open");
-          prev.delete("supplierId");
-          return prev;
-        }, { replace: true });
-      }, 100);
-    }
-  }, [searchParams, setSearchParams]);
-
-  useEffect(() => {
-    const filter = searchParams.get("filter");
-    if (filter && filter !== statusFilter) {
-      setStatusFilter(filter);
-    }
-  }, [searchParams]);
-
-  const handleStatusFilterChange = (val: string) => {
-    setStatusFilter(val);
-    setSearchParams(prev => {
-      if (val === "all") prev.delete("filter");
-      else prev.set("filter", val);
-      return prev;
-    });
-  };
-
-  const { cotacoes, isLoading, refetch, updateSupplierProductValue, deleteQuote, convertToOrder, addQuoteItem, removeQuoteItem, addQuoteSupplier, removeQuoteSupplier, updateQuoteStatus, isUpdating } = useCotacoes();
-  const { pedidos } = usePedidos();
-
-  const stats = useCotacoesStats(cotacoes, pedidos);
-
-  // Derive selectedQuote from cotacoes to ensure real-time updates
-  const selectedQuote = useMemo(() => {
-    if (!selectedQuoteId) return null;
-    return cotacoes.find(c => c.id === selectedQuoteId) || null;
-  }, [cotacoes, selectedQuoteId]);
-  const { products: allProducts } = useProducts();
-  const { suppliers: allSuppliers } = useSuppliers();
-
-  const availableProducts = useMemo(() => allProducts.map(p => ({ id: p.id, name: p.name, unit: p.unit || 'un' })), [allProducts]);
-  const availableSuppliers = useMemo(() => allSuppliers.map(s => ({ id: s.id, name: s.name })), [allSuppliers]);
+  const handleExportQuotes = useCallback(() => {
+    setRelatorioDialogOpen(true);
+  }, [setRelatorioDialogOpen]);
 
   // Ouvir evento de atalho de teclado para nova cotação
   useEffect(() => {
@@ -113,109 +89,9 @@ function CotacoesTab() {
     };
     window.addEventListener('compras:nova', handleNovaEvent as EventListener);
     return () => window.removeEventListener('compras:nova', handleNovaEvent as EventListener);
-  }, []);
-
-  const handleViewQuote = useCallback((quote: Quote) => {
-    startTransition(() => { setSelectedQuoteId(quote.id); setViewDialogOpen(true); });
-  }, []);
-
-  const handleGerenciarQuote = useCallback((quote: Quote) => {
-    startTransition(() => { setSelectedQuoteId(quote.id); setGerenciarDialogOpen(true); });
-  }, []);
-
-  // Interceptar URL param para abrir modal de gerenciar automaticamente
-  useEffect(() => {
-    const manageQuoteId = searchParams.get("manageQuote");
-    if (manageQuoteId && cotacoes.length > 0) {
-      const quoteToManage = cotacoes.find(c => c.id?.toString() === manageQuoteId.toString());
-      if (quoteToManage) {
-        // Timeout para evitar conflitos de re-render com react-router
-        setTimeout(() => {
-          handleGerenciarQuote(quoteToManage);
-          // Limpar o parâmetro da URL para não reabrir se ele fechar e voltar
-          setSearchParams(prev => {
-            prev.delete("manageQuote");
-            return prev;
-          }, { replace: true });
-        }, 100);
-      }
-    }
-  }, [searchParams, cotacoes, handleGerenciarQuote, setSearchParams]);
-
-  const handleDeleteQuote = useCallback((quote: Quote) => {
-    startTransition(() => { setSelectedQuoteId(quote.id); setDeleteDialogOpen(true); });
-  }, []);
-
-  const handleUpdateStatus = useCallback((quoteId: string, status: string) => {
-    updateQuoteStatus.mutate({ quoteId, status });
-  }, [updateQuoteStatus]);
-
-  // Helper para verificar status especial da cotação
-  const getQuoteSpecialStatus = useCallback((cotacao: Quote) => {
-    const fornecedoresRespondidos = cotacao.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
-    const totalFornecedores = cotacao.fornecedoresParticipantes?.length || 0;
-    const isProntaParaDecisao = cotacao.statusReal === "ativa" && totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
-
-    const [df, mf, yf] = cotacao.dataFim.split('/').map(Number);
-    const dataFim = new Date(yf, mf - 1, df);
-    const hoje = new Date();
-    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
-    const isVencendo = cotacao.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
-
-    return { isProntaParaDecisao, isVencendo, fornecedoresRespondidos, totalFornecedores };
-  }, []);
-
-  const filteredCotacoes = useMemo(() => {
-    const hoje = new Date();
-    const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
-
-    const filtered = cotacoes.filter(c => {
-      const matchesSearch = c.produto.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || c.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
-
-      // Filtros especiais
-      if (statusFilter === "prontas") {
-        const fornecedoresRespondidos = c.fornecedoresParticipantes?.filter(f => f.status === "respondido").length || 0;
-        const totalFornecedores = c.fornecedoresParticipantes?.length || 0;
-        return matchesSearch && c.statusReal === "ativa" && totalFornecedores > 0 && fornecedoresRespondidos === totalFornecedores;
-      }
-
-      if (statusFilter === "vencendo") {
-        const [d, m, y] = c.dataFim.split('/').map(Number);
-        const dataFim = new Date(y, m - 1, d);
-        return matchesSearch && c.statusReal === "ativa" && dataFim <= em48h && dataFim >= hoje;
-      }
-
-      const matchesStatus = statusFilter === "all" || c.statusReal === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-
-    return filtered.sort((a, b) => {
-      const aIsClosed = a.status === 'finalizada' || a.statusReal === 'concluida' || a.statusReal === 'finalizada';
-      const bIsClosed = b.status === 'finalizada' || b.statusReal === 'concluida' || b.statusReal === 'finalizada';
-      
-      // Se um está finalizado e o outro não, o não finalizado (aberto) vem primeiro
-      if (aIsClosed !== bIsClosed) {
-        return aIsClosed ? 1 : -1;
-      }
-      
-      // Se ambos têm o mesmo status, ordena pela data mais recente (priorizando a última cotação)
-      // Usando created_at real se disponível, caso contrário recai na data de início
-      const [da, ma, ya] = a.dataInicio.split('/').map(Number);
-      const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(ya, ma - 1, da).getTime();
-      const [db, mb, yb] = b.dataInicio.split('/').map(Number);
-      const bDate = (b._raw as any)?.created_at ? new Date((b._raw as any).created_at).getTime() : new Date(yb, mb - 1, db).getTime();
-      
-      return bDate - aDate;
-    });
-  }, [cotacoes, debouncedSearchTerm, statusFilter]);
-
-  const handleExportQuotes = useCallback(() => {
-    setRelatorioDialogOpen(true);
-  }, []);
+  }, [setAddDialogOpen]);
 
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
-
-  const paginatedData = paginate(filteredCotacoes);
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">

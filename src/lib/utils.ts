@@ -34,3 +34,28 @@ export function formatLocalDate(date: Date | string | null | undefined): string 
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+/**
+ * Converte uma data no formato "DD/MM/YYYY" para um timestamp (number) para facilitar comparações.
+ * Retorna 0 se a string for inválida ou vazia.
+ */
+export function parseDateBR(dateStr?: string | null): number {
+  if (!dateStr) return 0;
+  const parts = dateStr.split('/');
+  if (parts.length === 3) {
+    const [day, month, year] = parts.map(Number);
+    // Usa meia noite para garantir comparação estável, ajustando mês para base 0 (0 = Jan)
+    return new Date(year, month - 1, day).getTime();
+  }
+  return 0;
+}
+
+/**
+ * Extrai o valor numérico de uma string de preço formatada no padrão BR (ex: "R$ 1.234,56").
+ * Retorna 0 se a string for inválida ou vazia.
+ */
+export function extractPrice(priceStr?: string | null): number {
+  if (!priceStr) return 0;
+  const cleaned = priceStr.replace(/[^\d,.-]/g, '').replace(',', '.');
+  return parseFloat(cleaned) || 0;
+}

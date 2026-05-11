@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Quote } from '@/hooks/useCotacoes';
 import { Pedido } from '@/hooks/usePedidos';
 
-export function useCotacoesStats(cotacoes: Quote[], pedidos: Pedido[]) {
+export function useCotacoesStats(cotacoes: Quote[] = [], pedidos: Pedido[] = []) {
   return useMemo(() => {
     const ativas = cotacoes.filter(c => c.statusReal === "ativa").length;
     const pendentes = cotacoes.filter(c => c.status === "pendente").length;
