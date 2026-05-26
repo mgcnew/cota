@@ -65,7 +65,7 @@ export const MetricCard = memo(function MetricCard({
   return (
     <div
       className={cn(
-        "relative bg-card border border-border rounded-lg p-4",
+        "relative bg-card border border-border dark:border-white/5 rounded-lg p-4",
         "border-l-[3px]",
         v.border,
         "transition-all duration-150",

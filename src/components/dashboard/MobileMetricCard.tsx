@@ -42,7 +42,7 @@ export const MobileMetricCard = memo(function MobileMetricCard({
   return (
     <div
       className={cn(
-        "relative bg-card border border-border rounded-lg",
+        "relative bg-card border border-border dark:border-white/5 rounded-lg",
         "border-l-[3px]", v.border,
         "w-[152px] flex-shrink-0",
         "p-3 flex flex-col justify-between min-h-[100px]",
