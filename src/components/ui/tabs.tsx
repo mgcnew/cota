@@ -40,8 +40,8 @@ const TabsTrigger = React.forwardRef<
       variant === "line"
         ? cn(
             "relative flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap select-none transition-colors duration-150",
-            "bg-transparent hover:bg-transparent",
-            "data-[state=active]:bg-transparent",
+            "bg-transparent !bg-transparent hover:!bg-transparent",
+            "data-[state=active]:!bg-transparent",
             "text-muted-foreground hover:text-foreground",
             "border-b-2 border-transparent -mb-px",
             "data-[state=active]:text-foreground data-[state=active]:border-brand",
