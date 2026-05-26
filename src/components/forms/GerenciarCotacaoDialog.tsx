@@ -378,12 +378,11 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const modalContent = (
     <div ref={captureRef} data-capture-container="true" className="h-full flex flex-col bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
-        {/* Header - Compacto e Responsivo */}
-        <div className="flex items-center justify-between py-3 px-5 border-b bg-card min-h-[64px]">
-
-          <div className="flex items-center gap-4 relative z-10 flex-1 min-w-0">
-            {/* Título - Mais compacto */}
-            <div className="flex items-center gap-3 min-w-max">
+        {/* Header */}
+        <div className="bg-card flex flex-col">
+          {/* Title row */}
+          <div className="flex items-center justify-between px-5 pt-3 pb-2">
+            <div className="flex items-center gap-3">
               <div className="p-2 rounded-[10px] bg-brand/10 border border-brand/20">
                 <ClipboardList className="h-4 w-4 text-brand" />
               </div>
@@ -397,62 +396,60 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               </div>
             </div>
 
-            {/* Tabs - Flexível e Desenhado como pílulas (Pills) com Scroll */}
-            <div className="flex-1 min-w-0 flex items-center pl-4 border-l border-border/50 ml-2 overflow-hidden">
-              <div className="w-full overflow-x-auto [&::-webkit-scrollbar]:hidden pb-0.5" style={{ scrollbarWidth: 'none' }}>
-                <TabsList className="bg-muted/30 p-1 border border-border dark:border-white/5 rounded-xl h-auto flex gap-1 w-max min-w-full">
-                  {[
-                    { id: 'resumo', label: 'Resumo' },
-                    { id: 'valores', label: 'Valores' },
-                    { id: 'converter', label: 'Decisão', hide: isFinalizada },
-                    { id: 'editar', label: 'Configurações', hide: isFinalizada },
-                  ].filter(tab => !tab.hide).map((tab) => (
-                    <TabsTrigger
-                      key={tab.id}
-                      value={tab.id}
-                      className="px-3 py-1.5 h-7 text-[10px] font-black uppercase tracking-widest text-muted-foreground rounded-lg data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all whitespace-nowrap"
-                    >
-                      {tab.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </div>
+            <div className="flex items-center gap-1.5">
+              {!isMobile && (
+                <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleWhatsAppExport}
+                    disabled={isExportingWhatsApp}
+                    className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                    title="Enviar para WhatsApp"
+                  >
+                    {isExportingWhatsApp ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowResumoDialog(true)}
+                    className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                    title="Relatório Profissional"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="h-8 w-8 rounded-lg hover:bg-accent transition-colors"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+                <span className="sr-only">Fechar</span>
+              </Button>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 ml-2">
-            {!isMobile && (
-              <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleWhatsAppExport}
-                  disabled={isExportingWhatsApp}
-                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Enviar para WhatsApp"
+          {/* Tab bar - line variant */}
+          <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden px-5" style={{ scrollbarWidth: 'none' }}>
+            <TabsList variant="line" className="w-max min-w-full">
+              {[
+                { id: 'resumo', label: 'Resumo' },
+                { id: 'valores', label: 'Valores' },
+                { id: 'converter', label: 'Decisão', hide: isFinalizada },
+                { id: 'editar', label: 'Configurações', hide: isFinalizada },
+              ].filter(tab => !tab.hide).map((tab) => (
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  variant="line"
                 >
-                  {isExportingWhatsApp ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowResumoDialog(true)}
-                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Relatório Profissional"
-                >
-                  <Sparkles className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8 rounded-lg hover:bg-accent transition-colors"
-            >
-              <X className="h-4 w-4 text-muted-foreground" />
-              <span className="sr-only">Fechar</span>
-            </Button>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
         </div>
 
