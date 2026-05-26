@@ -85,20 +85,20 @@
 
   .dark {
     /* ============================================
-       DARK MODE — Slate/Vercel style
-       Base hue 220 (warm slate), high contrast
+       DARK MODE — shadcn/new-york style
+       Pure neutrals, zero hue, maximum contrast
        ============================================ */
 
-    /* Background — deep navy-slate */
-    --background: 220 13% 6%;
+    /* Background — near-black, pure neutral */
+    --background: 0 0% 4%;
     --foreground: 0 0% 98%;
 
-    /* Cards — clearly elevated above background */
-    --card: 220 13% 9.5%;
+    /* Cards — elevated above background */
+    --card: 0 0% 8%;
     --card-foreground: 0 0% 98%;
 
     /* Popovers/Dropdowns */
-    --popover: 220 13% 12%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 98%;
 
     /* Cor Primária - Azul Principal */
@@ -106,23 +106,23 @@
     --primary-foreground: 0 0% 100%;
 
     /* Secondary */
-    --secondary: 220 10% 14%;
+    --secondary: 0 0% 13%;
     --secondary-foreground: 0 0% 98%;
 
     /* Muted */
-    --muted: 220 10% 14%;
-    --muted-foreground: 215 16% 67%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 0 0% 65%;
 
-    /* Accent — visibly higher than card for hover states */
-    --accent: 220 10% 17%;
+    /* Accent — clearly above card for visible hover states */
+    --accent: 0 0% 16%;
     --accent-foreground: 0 0% 98%;
 
     /* Borders — clearly visible against card surface */
-    --border: 220 10% 22%;
-    --input: 220 10% 14%;
+    --border: 0 0% 20%;
+    --input: 0 0% 13%;
     --ring: 217 91% 60%;
 
-    /* Destructive — bright enough to be visible in dark mode */
+    /* Destructive */
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
@@ -133,9 +133,9 @@
     --info: 199 89% 48%;
 
     /* Box Shadows (Custom for Dark Mode) */
-    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.5);
-    --shadow-elevated: 0 10px 25px rgba(0, 0, 0, 0.6);
-    --shadow-floating: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.6);
+    --shadow-elevated: 0 10px 25px rgba(0, 0, 0, 0.7);
+    --shadow-floating: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
   }
 }
 
