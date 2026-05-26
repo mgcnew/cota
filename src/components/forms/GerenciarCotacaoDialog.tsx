@@ -704,7 +704,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           <div className="flex items-center gap-1.5 ml-2">
             {!isMobile && (
               <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
-
                 <Button
                   variant="ghost"
                   size="icon"
@@ -713,21 +712,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   title="Relatório Profissional"
                 >
                   <Sparkles className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleWhatsAppExport}
-                  disabled={isExportingWhatsApp}
-                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Enviar Relatório via WhatsApp"
-                >
-                  {isExportingWhatsApp ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-brand" />
-                  ) : (
-                    <MessageCircle className="h-4 w-4 text-brand" />
-                  )}
                 </Button>
               </div>
             )}
@@ -821,26 +805,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         </div>
       </Tabs>
 
-      {/* Footer */}
-      {isMobile && (
-        <div className="flex items-center justify-end gap-2 p-4 border-t border-border dark:border-white/5 bg-card">
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleWhatsAppExport}
-            disabled={isExportingWhatsApp}
-            className="text-brand hover:bg-brand/10 h-10 w-10 rounded-xl transition-all"
-            title="Enviar Relatório via WhatsApp"
-          >
-            {isExportingWhatsApp ? (
-              <Loader2 className="h-5 w-5 animate-spin text-brand" />
-            ) : (
-              <MessageCircle className="h-5 w-5" />
-            )}
-          </Button>
-        </div>
-      )}
     </div>
   );
 
