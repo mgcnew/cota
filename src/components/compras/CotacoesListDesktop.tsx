@@ -120,7 +120,7 @@ export const CotacoesListDesktop = memo(({
                         options={QUOTE_STATUS_OPTIONS}
                         onChange={(newStatus) => onUpdateStatus(cotacao.id, newStatus)}
                         isLoading={isUpdating}
-                        disabled={cotacao.status === 'finalizada'}
+                        disabled={cotacao.status === 'concluida'}
                       />
                     </div>
                   </TableCell>

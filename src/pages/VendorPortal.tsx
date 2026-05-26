@@ -294,7 +294,7 @@ export default function VendorPortal() {
               table: 'quotes'
             }, 
             (payload: any) => {
-              if (payload.new && (payload.new as any).status === 'finalizada') {
+              if (payload.new && (payload.new as any).status === 'concluida') {
                 // If it's closed, we could remove just those items, or just warn. 
                 // For simplicity, we warn if ALL are closed, but here let's just trigger a reload to clean the list
                 location.reload();

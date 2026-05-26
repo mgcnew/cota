@@ -113,7 +113,7 @@ const anyWidthArb = fc.integer({ min: 320, max: 2560 });
 const quoteDataArb = fc.record({
   id: fc.uuid(),
   produto: fc.string({ minLength: 1, maxLength: 100 }),
-  status: fc.constantFrom('ativa', 'pendente', 'concluida', 'planejada', 'expirada'),
+  status: fc.constantFrom('ativa', 'concluida', 'planejada', 'cancelada'),
   fornecedores: fc.integer({ min: 0, max: 50 }),
   melhorPreco: fc.string({ minLength: 1, maxLength: 20 }),
 });

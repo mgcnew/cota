@@ -24,8 +24,8 @@ async function assertQuoteEditable(quoteId: string): Promise<void> {
     .eq("id", quoteId)
     .single();
   if (error) throw error;
-  if (data?.status === "finalizada") {
-    throw new Error("Esta cotação já está finalizada e não pode ser alterada.");
+  if (data?.status === "concluida") {
+    throw new Error("Esta cotação já está concluída e não pode ser alterada.");
   }
 }
 
@@ -469,7 +469,7 @@ export function useCotacoesMutations() {
 
       const { error: updateError } = await supabase
         .from("quotes")
-        .update({ status: "finalizada" })
+        .update({ status: "concluida" })
         .eq("id", quoteId);
       if (updateError) throw updateError;
 

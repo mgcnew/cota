@@ -8,7 +8,7 @@ export interface SupplierQuoteHistoryEntry {
   productId: string;
   price: number;
   quotationId: string;
-  status: "concluida" | "ativa" | "expirada";
+  status: "concluida" | "ativa" | "planejada" | "cancelada";
   isWinner: boolean; // Se foi o fornecedor escolhido nesta cotação
 }
 
@@ -98,7 +98,7 @@ export function useSupplierQuoteHistory(supplierId: string) {
           productId: item.product_id,
           price: Number(item.valor_oferecido),
           quotationId: quote.id,
-          status: quote.status as "concluida" | "ativa" | "expirada",
+          status: quote.status as "concluida" | "ativa" | "planejada" | "cancelada",
           isWinner
         });
       });

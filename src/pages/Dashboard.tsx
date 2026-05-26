@@ -191,7 +191,7 @@ function Dashboard() {
           <div className="space-y-4 max-h-[60vh] overflow-y-auto px-1 custom-scrollbar">
             {recentQuotes.map((quote: any) => (
               <div key={quote.id} className={cn("flex items-start gap-4 p-4 rounded-xl border bg-muted/10", ds.colors.border.subtle, "hover:border-primary/30 transition-colors")}>
-                <div className={cn("w-3 h-3 rounded-full mt-1.5 flex-shrink-0", quote.status === 'ativa' ? "bg-blue-500" : quote.status === 'finalizada' ? "bg-emerald-500" : "bg-zinc-400")} />
+                <div className={cn("w-3 h-3 rounded-full mt-1.5 flex-shrink-0", quote.status === 'ativa' ? "bg-blue-500" : quote.status === 'concluida' ? "bg-emerald-500" : "bg-zinc-400")} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1">
                     <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, "truncate")}>{quote.product}</p>

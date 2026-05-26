@@ -111,7 +111,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   // Debug removido pois já confirmamos que o BD está OK
   const keyboardOffset = useKeyboardOffset();
   
-  const isFinalizada = quote?.status === "finalizada";
+  const isFinalizada = quote?.status === "concluida";
 
   // Memos globais para evitar recálculos
   const products = useMemo(() => {

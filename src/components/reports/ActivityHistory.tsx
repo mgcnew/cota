@@ -190,7 +190,7 @@ export const ActivityHistory = memo(function ActivityHistory({ isActive }: Activ
           allData.push({
             id: q.id,
             tipo: "cotacao",
-            acao: `Cotação ${q.status === "concluida" || q.status === "finalizada" ? "finalizada" : q.status}`,
+            acao: `Cotação ${q.status === "concluida" ? "concluída" : q.status}`,
             detalhes: `Cotação ${q.status}`,
             data: format(new Date(q.data_inicio || q.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }),
             usuario: user?.email || "Usuário",

@@ -257,7 +257,7 @@ export function QuoteComparisonTab({
                     </ScrollArea>
 
                     {/* Rodapé com Ação de Converter */}
-                    {bestSupplier && currentQuote.status !== 'finalizada' && !readOnly && (
+                    {bestSupplier && currentQuote.status !== 'concluida' && !readOnly && (
                         <div className="flex-shrink-0 p-2.5 sm:p-3 border-t border-border dark:border-white/5 bg-white dark:bg-gray-950">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                                 <div className="flex items-center gap-2">

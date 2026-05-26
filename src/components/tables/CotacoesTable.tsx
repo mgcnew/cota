@@ -183,7 +183,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                       {cotacao.status === "concluida" && (
                         <DropdownMenuItem disabled className="text-gray-400">
                           <FileText className="h-4 w-4 mr-2" />
-                          <span>Cotação finalizada</span>
+                          <span>Cotação concluída</span>
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

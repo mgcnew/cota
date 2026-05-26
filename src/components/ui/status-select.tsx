@@ -21,13 +21,10 @@ const normalizeStatus = (s: string) =>
 
 // Status para cotações
 export const QUOTE_STATUS_OPTIONS: StatusOption[] = [
-  { value: "ativa", label: "Ativa", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:bg-emerald-500/20 dark:border-emerald-500/40" },
-  { value: "pendente", label: "Pendente", className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 dark:bg-orange-500/20 dark:border-orange-500/40" },
   { value: "planejada", label: "Planejada", className: "bg-yellow-400/20 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/40" },
+  { value: "ativa", label: "Ativa", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:bg-emerald-500/20 dark:border-emerald-500/40" },
   { value: "concluida", label: "Concluída", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 dark:bg-blue-500/20 dark:border-blue-500/40" },
-  { value: "finalizada", label: "Finalizada", className: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 dark:bg-purple-500/20 dark:border-purple-500/40" },
   { value: "cancelada", label: "Cancelada", className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 dark:bg-red-500/20 dark:border-red-500/40" },
-  { value: "expirada", label: "Expirada", className: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20 dark:bg-rose-500/20 dark:border-rose-500/40" },
 ];
 
 // Status para pedidos

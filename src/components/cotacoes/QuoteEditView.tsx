@@ -140,19 +140,15 @@ export default function QuoteEditView({
     const variants = {
       ativa: "default",
       concluida: "secondary",
-      pendente: "outline",
-      expirada: "destructive",
-      finalizada: "default",
-      planejada: "outline"
+      planejada: "outline",
+      cancelada: "destructive",
     };
 
     const labels = {
       ativa: "Ativa",
       concluida: "Concluída",
-      pendente: "Pendente",
-      expirada: "Expirada",
-      finalizada: "Finalizada",
-      planejada: "Planejada"
+      planejada: "Planejada",
+      cancelada: "Cancelada",
     };
 
     return (
@@ -798,7 +794,7 @@ export default function QuoteEditView({
 
                 <Button
                   onClick={handleConvertToOrder}
-                  disabled={!bestSupplier || quote.status === "finalizada"}
+                  disabled={!bestSupplier || quote.status === "concluida"}
                   size="lg"
                   className="mt-6"
                 >
@@ -806,7 +802,7 @@ export default function QuoteEditView({
                   Converter para Pedido
                 </Button>
 
-                {quote.status === "finalizada" && (
+                {quote.status === "concluida" && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
                     Esta cotação já foi convertida em pedido
                   </p>

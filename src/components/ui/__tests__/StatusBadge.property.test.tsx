@@ -16,7 +16,7 @@ import { StatusBadge } from '../status-badge';
 const validStatuses = [
   'active', 'inactive', 'pending', 'completed', 'expired', 'cancelled',
   'ativo', 'inativo', 'pendente', 'concluido', 'expirado', 'cancelado',
-  'ativa', 'concluida', 'expirada', 'cancelada', 'planejada', 'finalizada',
+  'ativa', 'concluida', 'cancelada', 'planejada',
   'em_andamento', 'baixo_estoque', 'sem_estoque', 'entregue', 'enviado',
   'cotado', 'sem_cotacao', 'confirmado', 'processando',
 ];

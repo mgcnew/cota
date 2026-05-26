@@ -52,12 +52,10 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
   const [supplierOrdersForConversion, setSupplierOrdersForConversion] = useState<SupplierOrder[]>([]);
 
   const statusOptions = [
-    { value: "ativa", label: "Ativa", color: "bg-teal-100 text-teal-700 border-teal-200" },
-    { value: "pendente", label: "Pendente", color: "bg-amber-100 text-amber-700 border-amber-200" },
     { value: "planejada", label: "Planejada", color: "bg-blue-100 text-blue-700 border-blue-200" },
+    { value: "ativa", label: "Ativa", color: "bg-teal-100 text-teal-700 border-teal-200" },
     { value: "concluida", label: "Concluída", color: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-    { value: "finalizada", label: "Finalizada", color: "bg-green-100 text-green-700 border-green-200" },
-    { value: "expirada", label: "Expirada", color: "bg-red-100 text-red-700 border-red-200" }
+    { value: "cancelada", label: "Cancelada", color: "bg-red-100 text-red-700 border-red-200" },
   ];
 
   const products = useMemo(() => {

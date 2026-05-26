@@ -379,17 +379,15 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     const variants = {
       ativa: "default",
       concluida: "secondary",
-      pendente: "outline",
-      expirada: "destructive",
-      finalizada: "default"
+      planejada: "outline",
+      cancelada: "destructive",
     };
 
     const labels = {
       ativa: "Ativa",
       concluida: "Concluída",
-      pendente: "Pendente",
-      expirada: "Expirada",
-      finalizada: "Finalizada"
+      planejada: "Planejada",
+      cancelada: "Cancelada",
     };
 
     return (
@@ -1167,11 +1165,10 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                     </SelectTrigger>
                                                   </FormControl>
                                                   <SelectContent>
-                                                    <SelectItem value="ativa">Ativa</SelectItem>
                                                     <SelectItem value="planejada">Planejada</SelectItem>
-                                                    <SelectItem value="pendente">Pendente</SelectItem>
+                                                    <SelectItem value="ativa">Ativa</SelectItem>
                                                     <SelectItem value="concluida">Concluída</SelectItem>
-                                                    <SelectItem value="expirada">Expirada</SelectItem>
+                                                    <SelectItem value="cancelada">Cancelada</SelectItem>
                                                   </SelectContent>
                                                 </Select>
                                                 <FormMessage className="text-[10px]" />
@@ -1542,7 +1539,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                               <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 flex-shrink-0" />
                               <span className="hidden xs:inline">Exportar</span>
                             </TabsTrigger>
-                            {currentQuote && currentQuote.status === "finalizada" && (
+                            {currentQuote && currentQuote.status === "concluida" && (
                               <TabsTrigger
                                 value="economia"
                                 className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-green-600 dark:data-[state=active]:bg-green-600 data-[state=active]:text-white data-[state=active]:shadow-md hover:bg-green-50 dark:hover:bg-gray-700/50 data-[state=active]:hover:bg-green-700 dark:data-[state=active]:hover:bg-green-700 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-gray-700 dark:text-gray-300 whitespace-nowrap"
@@ -1627,7 +1624,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                         />
                       </TabsContent>
 
-                      {currentQuote && currentQuote.status === "finalizada" && (
+                      {currentQuote && currentQuote.status === "concluida" && (
                         <TabsContent value="economia" className="flex-1 overflow-hidden p-0 animate-in fade-in-0 slide-in-from-right-2 duration-300 min-h-0 mt-0">
                           <ScrollArea className="h-full w-full">
                             <div className="p-4 sm:p-6">
