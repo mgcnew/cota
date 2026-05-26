@@ -139,7 +139,7 @@ function Compras() {
         </div>
       )}
 
-      <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500", isMobile ? "pb-24" : "")}>
+      <div className={cn(ds.layout.container.page, "", isMobile ? "pb-24" : "")}>
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           {/* Page Header + Inline Tabs */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-6 md:mb-10 pb-4 md:pb-8 md:border-b border-zinc-200/70 dark:border-zinc-800">

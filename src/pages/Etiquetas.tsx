@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+﻿import { useState, useRef, useEffect, useMemo } from "react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { designSystem } from "@/styles/design-system";
 import { Card, CardContent } from "@/components/ui/card";
@@ -352,7 +352,7 @@ export default function Etiquetas() {
 
   return (
     <PageWrapper>
-      <div className={cn(designSystem.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
+      <div className={cn(designSystem.layout.container.page, "")}>
         {/* Page Header - Standardized with Dashboard Style */}
         <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

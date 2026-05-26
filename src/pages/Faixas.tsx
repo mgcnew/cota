@@ -342,7 +342,7 @@ export default function Faixas() {
   if (!project) {
     return (
       <PageWrapper>
-        <div className={cn(ds.layout.container.page, "animate-in fade-in duration-500")}>
+        <div className={cn(ds.layout.container.page)}>
           <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-2 md:gap-3">
@@ -428,7 +428,7 @@ export default function Faixas() {
   // ═══════════════════════════════════
   return (
     <PageWrapper>
-      <div ref={editorWrapperRef} className={cn(ds.layout.container.page, "animate-in fade-in duration-300 !space-y-2 !pb-2 h-full flex flex-col")}>
+      <div ref={editorWrapperRef} className={cn(ds.layout.container.page, "!space-y-2 !pb-2 h-full flex flex-col")}>
         {/* Toolbar */}
         <div className="toolbar-container flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-card/80 backdrop-blur-sm rounded-xl border p-2 px-3 flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0 flex-wrap">

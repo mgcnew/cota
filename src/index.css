@@ -1730,7 +1730,8 @@
     .animate-slide-in-bottom,
     .animate-slide-out-bottom,
     .animate-slide-in-right,
-    .animate-slide-out-right {
+    .animate-slide-out-right,
+    .animate-page-enter {
       animation: none !important;
       opacity: 1 !important;
       transform: none !important;

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Relatorios Page - Página principal de Relatórios
  * 
  * Página refatorada que orquestra os componentes modulares de relatórios.
@@ -41,7 +41,7 @@ const HistoryTab = lazy(() =>
  */
 function TabSkeleton() {
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Skeleton className="h-10 w-48 rounded-xl" />
         <Skeleton className="h-10 w-48 rounded-xl" />
@@ -184,7 +184,7 @@ export default function Relatorios() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
+      <div className={cn(ds.layout.container.page, "")}>
         {/* Page Header - Standardized with Dashboard Style */}
         <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">

@@ -147,7 +147,7 @@ export default function ContagemEstoque() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")}>
+      <div className={cn(ds.layout.container.page, "")}>
         {/* Page Header - Standardized with Dashboard Style */}
         <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
           <div className="flex items-center gap-2 md:gap-3">

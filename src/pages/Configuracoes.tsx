@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, Suspense, lazy } from "react";
+﻿import { useState, useRef, useCallback, Suspense, lazy } from "react";
 import { useTheme } from "next-themes";
 import { useSettings } from "@/hooks/useSettings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -553,7 +553,7 @@ export default function Configuracoes() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "animate-in fade-in zoom-in-95 duration-500")} ref={contentRef}>
+      <div className={cn(ds.layout.container.page, "")} ref={contentRef}>
         {/* Page Header - Standardized with Dashboard Style */}
         <div className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-10">
           <div className="flex items-center justify-between gap-4">
