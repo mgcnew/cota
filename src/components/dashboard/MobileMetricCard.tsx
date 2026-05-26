@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 
 interface MobileMetricCardProps {
   title: string;
@@ -19,58 +18,13 @@ interface MobileMetricCardProps {
   };
 }
 
-const VARIANT_STYLES = {
-  default: {
-    bg: "bg-brand",
-    iconBg: "bg-white/20",
-    iconColor: "text-white",
-    text: "text-white",
-    textMuted: "text-white/70",
-    pulse: "bg-white/40",
-    shadow: "shadow-brand/30",
-  },
-  success: {
-    bg: "bg-emerald-500",
-    iconBg: "bg-white/20",
-    iconColor: "text-white",
-    text: "text-white",
-    textMuted: "text-white/70",
-    pulse: "bg-white/40",
-    shadow: "shadow-emerald-400/30",
-  },
-  warning: {
-    bg: "bg-amber-500",
-    iconBg: "bg-white/20",
-    iconColor: "text-white",
-    text: "text-white",
-    textMuted: "text-white/70",
-    pulse: "bg-white/40",
-    shadow: "shadow-amber-400/30",
-  },
-  error: {
-    bg: "bg-red-500",
-    iconBg: "bg-white/20",
-    iconColor: "text-white",
-    text: "text-white",
-    textMuted: "text-white/70",
-    pulse: "bg-white/40",
-    shadow: "shadow-red-400/30",
-  },
-  info: {
-    bg: "bg-blue-500",
-    iconBg: "bg-white/20",
-    iconColor: "text-white",
-    text: "text-white",
-    textMuted: "text-white/70",
-    pulse: "bg-white/40",
-    shadow: "shadow-blue-400/30",
-  },
+const VARIANTS: Record<string, { border: string; icon: string; iconBg: string }> = {
+  default: { border: "border-l-indigo-500", icon: "text-indigo-500", iconBg: "bg-indigo-500/10" },
+  success:  { border: "border-l-emerald-500", icon: "text-emerald-500", iconBg: "bg-emerald-500/10" },
+  warning:  { border: "border-l-amber-500",   icon: "text-amber-500",   iconBg: "bg-amber-500/10"   },
+  error:    { border: "border-l-red-500",     icon: "text-red-500",     iconBg: "bg-red-500/10"     },
+  info:     { border: "border-l-blue-500",    icon: "text-blue-500",    iconBg: "bg-blue-500/10"    },
 };
-
-const DARK_OVERRIDE = "dark:bg-zinc-900/90 dark:shadow-none dark:border dark:border-zinc-800";
-const DARK_ICON = "dark:bg-accent dark:text-foreground";
-const DARK_TEXT = "dark:text-zinc-50";
-const DARK_TEXT_MUTED = "dark:text-zinc-400";
 
 export const MobileMetricCard = memo(function MobileMetricCard({
   title,
@@ -83,115 +37,48 @@ export const MobileMetricCard = memo(function MobileMetricCard({
   isEmpty = false,
   trend,
 }: MobileMetricCardProps) {
-  const v = VARIANT_STYLES[variant];
+  const v = VARIANTS[variant];
 
   return (
     <div
       className={cn(
-        // Base dimensions – fixed width so ribbon shows multiple cards
-        "relative overflow-hidden rounded-xl",
-        "w-[148px] flex-shrink-0",
-        "p-3 flex flex-col justify-between",
-        // Min height for touch targets
-        "min-h-[120px]",
-        // Color
-        v.bg,
-        DARK_OVERRIDE,
-        // Shadow
-        "shadow-lg",
-        v.shadow,
-        // Touch interactions
-        "transition-all duration-200",
-        onClick && "cursor-pointer active:scale-95 active:brightness-95",
-        // Dimmed if empty / inactive
-        isEmpty && "opacity-50 grayscale cursor-default"
+        "relative bg-card border border-border rounded-lg",
+        "border-l-[3px]", v.border,
+        "w-[152px] flex-shrink-0",
+        "p-3 flex flex-col justify-between min-h-[100px]",
+        "transition-all duration-150",
+        onClick && !isEmpty && "cursor-pointer active:scale-[0.98]",
+        isEmpty && "opacity-50 cursor-default"
       )}
       onClick={isEmpty ? undefined : onClick}
       role={onClick && !isEmpty ? "button" : undefined}
       aria-label={`${title}: ${value}`}
     >
-      {/* Top row: Icon + optional pulse indicator */}
-      <div className="relative z-10 flex items-start justify-between mb-2">
-        <div
-          className={cn(
-            "p-2 rounded-lg",
-            v.iconBg,
-            v.iconColor,
-            DARK_ICON
-          )}
-        >
-          <Icon className="w-4 h-4" />
+      <div className="flex items-start justify-between mb-2">
+        <div className={cn("p-1.5 rounded-md", v.iconBg)}>
+          <Icon className={cn("w-3.5 h-3.5", v.icon)} />
         </div>
-
-        {/* Pulse dot – shows urgency without harsh colors */}
         {pulse && !isEmpty && (
-          <span className="relative flex h-2.5 w-2.5 mt-1">
-            <span
-              className={cn(
-                "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-                v.pulse,
-                "dark:bg-brand"
-              )}
-            />
-            <span
-              className={cn(
-                "relative inline-flex rounded-full h-2.5 w-2.5",
-                v.pulse,
-                "dark:bg-brand"
-              )}
-            />
+          <span className="relative flex h-2 w-2 mt-0.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-50" />
+            <span className={cn("relative inline-flex rounded-full h-2 w-2", v.icon, "bg-current")} />
           </span>
         )}
       </div>
 
-      {/* Value + label */}
-      <div className="relative z-10">
-        <p
-          className={cn(
-            "text-[9px] font-black uppercase tracking-[0.12em] mb-1",
-            "opacity-80",
-            v.text,
-            DARK_TEXT_MUTED
-          )}
-        >
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-none mb-1.5">
           {title}
         </p>
-        <h3
-          className={cn(
-            "text-2xl font-bold tracking-tight leading-none mb-1",
-            v.text,
-            DARK_TEXT
-          )}
-        >
+        <p className="text-xl font-bold leading-none text-foreground">
           {value}
-        </h3>
-        {trend ? (
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span className={cn(
-              "text-[10px] font-bold px-1.5 py-0.5 rounded flex items-center",
-              "bg-white/20 text-white"
-            )}>
-              {trend.value}
-            </span>
-            <span className={cn("text-[10px] leading-tight", v.textMuted, DARK_TEXT_MUTED)}>
-              {trend.label}
-            </span>
-          </div>
-        ) : subtitle ? (
-          <p
-            className={cn(
-              "text-[11px] font-medium leading-tight",
-              v.textMuted,
-              DARK_TEXT_MUTED
-            )}
-          >
-            {subtitle}
+        </p>
+        {(subtitle || trend?.label) && (
+          <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
+            {subtitle || trend?.label}
           </p>
-        ) : null}
+        )}
       </div>
-
-      {/* Bottom accent line – Dark mode brand indicator on hover */}
-      <div className="hidden dark:block absolute bottom-0 left-0 h-[2px] w-full bg-brand scale-x-0 active:scale-x-100 transition-transform origin-left duration-300" />
     </div>
   );
 });
