@@ -461,7 +461,6 @@ function Fornecedores() {
                       onDelete={setDeletingSupplier}
                       onHistory={setHistorySupplier}
                       onWhatsApp={openWhatsApp}
-                      renderRating={renderNumericRating}
                     />
                   </div>
 
