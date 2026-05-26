@@ -1,5 +1,5 @@
 import { memo, useState, useCallback } from 'react';
-import { Package, ClipboardList, History, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Package, History, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableActionGroup } from "@/components/ui/table-action-group";
@@ -181,10 +181,17 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
 
                 {/* Cotações */}
                 <TableCell className="text-center">
-                  <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md text-muted-foreground">
-                    <ClipboardList className="h-3.5 w-3.5" />
-                    <span className="text-xs tabular-nums">{product.quotesCount || 0}</span>
-                  </div>
+                  {(product.quotesCount || 0) === 0 ? (
+                    <span className="text-[12px] text-muted-foreground/40 tabular-nums">—</span>
+                  ) : (product.quotesCount || 0) >= 3 ? (
+                    <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] tabular-nums font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50">
+                      {product.quotesCount}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] tabular-nums font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50">
+                      {product.quotesCount}
+                    </span>
+                  )}
                 </TableCell>
 
                 {/* Ações */}
