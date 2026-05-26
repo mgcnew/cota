@@ -18,10 +18,9 @@ export const SmoothPageTransition = memo(function SmoothPageTransition({ childre
   const location = useLocation();
 
   return (
-    <div 
-      key={location.pathname} 
-      className="animate-fade-in w-full"
-      style={{ animationDuration: '400ms', animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
+    <div
+      key={location.pathname}
+      className="animate-page-enter w-full"
     >
       <Suspense fallback={<PageLoader />}>
         {children}
