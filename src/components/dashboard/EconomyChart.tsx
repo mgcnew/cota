@@ -75,8 +75,8 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
   }, [data, isMobile, period]);
 
   return (
-    <Card className="bg-card border border-subtle shadow-sm rounded-xl md:hover:shadow-md md:transition-shadow md:duration-150">
-      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-muted">
+    <Card className="bg-card shadow-sm rounded-xl md:hover:shadow-md md:transition-shadow md:duration-150">
+      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-border dark:border-white/5">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">
@@ -86,7 +86,7 @@ export const EconomyChart = memo(function EconomyChart({ data, period, onPeriodC
               <span className="font-semibold text-foreground truncate">Economia Gerada</span>
             </CardTitle>
             <Select value={period} onValueChange={onPeriodChange}>
-              <SelectTrigger className="w-[100px] sm:w-[140px] h-8 sm:h-9 text-xs border-gray-200 dark:border-gray-700/60 hover:border-green-400">
+              <SelectTrigger className="w-[100px] sm:w-[140px] h-8 sm:h-9 text-xs border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

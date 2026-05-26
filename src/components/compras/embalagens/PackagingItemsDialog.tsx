@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -37,7 +37,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
   });
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Foco automático no campo nome quando abrir o formulário
+  // Foco automÃ¡tico no campo nome quando abrir o formulÃ¡rio
   useEffect(() => {
     if (step === "form" && open) {
       setTimeout(() => {
@@ -78,7 +78,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
       });
       
       if (createMore) {
-        // Limpa apenas o formulário, mantém na tela de criação
+        // Limpa apenas o formulÃ¡rio, mantÃ©m na tela de criaÃ§Ã£o
         setFormData({
           name: "",
           category: "",
@@ -202,7 +202,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800/50">
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-border dark:border-white/5/50">
                         <Badge 
                           variant="secondary" 
                           className="bg-brand/10 text-brand text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
@@ -238,14 +238,14 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                 ref={nameInputRef}
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Ex: Sacola Plástica 30x40"
+                placeholder="Ex: Sacola PlÃ¡stica 30x40"
                 autoFocus
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Unidade de Referência *</Label>
+                <Label>Unidade de ReferÃªncia *</Label>
                 <Select 
                   value={formData.reference_unit} 
                   onValueChange={(v) => setFormData(prev => ({ ...prev, reference_unit: v }))}
@@ -277,11 +277,11 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>Descrição (opcional)</Label>
+              <Label>DescriÃ§Ã£o (opcional)</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Descrição detalhada..."
+                placeholder="DescriÃ§Ã£o detalhada..."
                 rows={2}
               />
             </div>
@@ -318,7 +318,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
               )}
               
               <p className="text-xs text-center text-muted-foreground">
-                Atalhos: <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> para salvar • <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> para cancelar
+                Atalhos: <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Ctrl+Enter</kbd> para salvar â€¢ <kbd className="px-1.5 py-0.5 rounded bg-muted font-mono text-[10px]">Esc</kbd> para cancelar
               </p>
             </div>
           </div>
@@ -347,3 +347,4 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
     </Dialog>
   );
 }
+

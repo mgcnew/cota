@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+﻿import { ReactNode } from "react";
 import { Eye, Edit, Trash2, CheckCircle, MoreVertical, Download, History, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -55,7 +55,7 @@ export function TableActionGroup({
   onFinalize,
   additionalActions = [],
   dropdownItems = [],
-  dropdownLabel = "Ações",
+  dropdownLabel = "AÃ§Ãµes",
   className,
   showView = true,
   showEdit = true,
@@ -66,7 +66,7 @@ export function TableActionGroup({
   deleteLabel = "Excluir",
   finalizeLabel = "Finalizar",
 }: TableActionGroupProps) {
-  // Construir lista de ações do dropdown
+  // Construir lista de aÃ§Ãµes do dropdown
   const allActions: DropdownItem[] = [];
 
   if (showView && onView) {
@@ -96,7 +96,7 @@ export function TableActionGroup({
     });
   }
 
-  // Adicionar ações adicionais
+  // Adicionar aÃ§Ãµes adicionais
   additionalActions.forEach((action) => {
     if (!action.hidden) {
       allActions.push(action);
@@ -110,7 +110,7 @@ export function TableActionGroup({
     }
   });
 
-  // Adicionar delete por último (destrutivo)
+  // Adicionar delete por Ãºltimo (destrutivo)
   if (showDelete && onDelete) {
     allActions.push({
       icon: <Trash2 className="h-4 w-4" />,
@@ -136,7 +136,7 @@ export function TableActionGroup({
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="bg-popover border border-border z-50 w-48 shadow-lg rounded-xl"
+          className="bg-popover border border-border dark:border-white/5 z-50 w-48 shadow-lg rounded-xl"
         >
           <DropdownMenuLabel className="text-muted-foreground font-medium text-xs px-3 py-2">
             {dropdownLabel}
@@ -175,3 +175,4 @@ export const ActionIcons = {
 
 // Export variant styles for external use
 export { actionVariantStyles };
+

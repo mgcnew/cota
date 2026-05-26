@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const debouncedSearch = useDebounce(searchTerm, 300);
 
-  // Buscar produtos (com paginação para carregar todos)
+  // Buscar produtos (com paginaÃ§Ã£o para carregar todos)
   const { data: products = [] } = useQuery({
     queryKey: ["analysis-products"],
     queryFn: async () => {
@@ -78,7 +78,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
     },
   });
 
-  // Buscar fornecedores (com paginação para carregar todos)
+  // Buscar fornecedores (com paginaÃ§Ã£o para carregar todos)
   const { data: suppliers = [] } = useQuery({
     queryKey: ["analysis-suppliers"],
     queryFn: async () => {
@@ -137,7 +137,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
     return [...productResults, ...supplierResults];
   }, [debouncedSearch, products, suppliers]);
 
-  // Handler de teclado para navegação
+  // Handler de teclado para navegaÃ§Ã£o
   const handleSearchKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (searchResults.length === 0) return;
 
@@ -176,10 +176,10 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
             </div>
             <div className="flex-1">
               <h3 className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
-                Central de Inteligência
+                Central de InteligÃªncia
               </h3>
               <p className={cn(designSystem.typography.size.sm, designSystem.colors.text.secondary, "opacity-70")}>
-                Consulte históricos e tendências de produtos ou fornecedores
+                Consulte histÃ³ricos e tendÃªncias de produtos ou fornecedores
               </p>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
         <div className="mt-6 relative group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-brand transition-colors" />
           <Input
-            placeholder="O que você deseja analisar hoje? (Produto, fornecedor ou vendedor)"
+            placeholder="O que vocÃª deseja analisar hoje? (Produto, fornecedor ou vendedor)"
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setHighlightedIndex(-1); }}
             onKeyDown={handleSearchKeyDown}
@@ -206,8 +206,8 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
               designSystem.colors.surface.card,
               designSystem.colors.border.subtle
             )}>
-              <div className="px-5 py-3 bg-muted/30 border-b border-border">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">Sugestões encontradas</span>
+              <div className="px-5 py-3 bg-muted/30 border-b border-border dark:border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">SugestÃµes encontradas</span>
               </div>
               <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                 {searchResults.map((item, index) => (
@@ -248,7 +248,7 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
                             <span className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Fornecedor</span>
                             {item.contact && (
                               <span className="text-brand font-medium">
-                                • 👤 {item.contact}
+                                â€¢ ðŸ‘¤ {item.contact}
                               </span>
                             )}
                           </>
@@ -262,14 +262,14 @@ export default function AnaliseTab({ }: AnaliseTabProps) {
                   </button>
                 ))}
               </div>
-              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border flex justify-between uppercase tracking-widest">
+              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border dark:border-white/5 flex justify-between uppercase tracking-widest">
                 <div>DICA: Use as setas para navegar</div>
                 <div className="flex gap-4">
                   <span className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">↑↓</kbd> Mudar
+                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border dark:border-white/5 shadow-sm">â†‘â†“</kbd> Mudar
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">Enter</kbd> Abrir
+                    <kbd className="px-1.5 py-0.5 bg-background rounded border border-border dark:border-white/5 shadow-sm">Enter</kbd> Abrir
                   </span>
                 </div>
               </div>
@@ -308,10 +308,10 @@ function EmptyState() {
         <Target className="h-12 w-12 text-brand" />
       </div>
       <h3 className={cn(designSystem.typography.size.xl, designSystem.typography.weight.bold, designSystem.colors.text.primary, "mb-3")}>
-        Pronto para o próximo insight?
+        Pronto para o prÃ³ximo insight?
       </h3>
       <p className={cn(designSystem.typography.size.sm, designSystem.colors.text.secondary, "max-w-sm mx-auto opacity-70 mb-8")}>
-        Analise o desempenho de qualquer item ou parceiro comercial em tempo real para tomar decisões baseadas em dados.
+        Analise o desempenho de qualquer item ou parceiro comercial em tempo real para tomar decisÃµes baseadas em dados.
       </p>
       <div className="flex gap-4">
         <div className="px-4 py-2 rounded-full bg-muted text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -424,7 +424,7 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
             <h2 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, "tracking-tight")}>
               {productName}
             </h2>
-            <p className="text-zinc-400 text-sm font-medium">Visão analítica do produto</p>
+            <p className="text-zinc-400 text-sm font-medium">VisÃ£o analÃ­tica do produto</p>
           </div>
         </div>
         <Button 
@@ -432,14 +432,14 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
           className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" 
           onClick={onClear}
         >
-          Fechar Análise
+          Fechar AnÃ¡lise
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <MetricCard title="Preço Médio" value={`R$ ${metrics.avgPrice.toFixed(2)}`} icon={DollarSign} variant="default" />
-        <MetricCard title="Melhor Preço" value={`R$ ${metrics.minPrice.toFixed(2)}`} icon={Award} variant="success" />
-        <MetricCard title="Cotações" value={metrics.totalQuotes.toString()} icon={FileText} variant="info" />
+        <MetricCard title="PreÃ§o MÃ©dio" value={`R$ ${metrics.avgPrice.toFixed(2)}`} icon={DollarSign} variant="default" />
+        <MetricCard title="Melhor PreÃ§o" value={`R$ ${metrics.minPrice.toFixed(2)}`} icon={Award} variant="success" />
+        <MetricCard title="CotaÃ§Ãµes" value={metrics.totalQuotes.toString()} icon={FileText} variant="info" />
         <MetricCard title="Pedidos" value={metrics.totalOrders.toString()} icon={ShoppingCart} variant="warning" />
       </div>
 
@@ -447,7 +447,7 @@ function ProductAnalysis({ productId, productName, onClear }: { productId: strin
         <Tabs defaultValue="overview" className="w-full">
           <div className="px-4 pt-4">
             <TabsList className={designSystem.components.tabs.clean.list}>
-              <TabsTrigger value="overview" className={designSystem.components.tabs.clean.trigger}>Histórico de Preços</TabsTrigger>
+              <TabsTrigger value="overview" className={designSystem.components.tabs.clean.trigger}>HistÃ³rico de PreÃ§os</TabsTrigger>
               <TabsTrigger value="details" className={designSystem.components.tabs.clean.trigger}>Comparativo de Fornecedores</TabsTrigger>
             </TabsList>
           </div>
@@ -515,7 +515,7 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
             <h2 className={cn(designSystem.typography.size["2xl"], designSystem.typography.weight.bold, "tracking-tight")}>
               {supplierName}
             </h2>
-            <p className="text-zinc-400 text-sm font-medium">Histórico do parceiro comercial</p>
+            <p className="text-zinc-400 text-sm font-medium">HistÃ³rico do parceiro comercial</p>
           </div>
         </div>
         <Button 
@@ -523,14 +523,14 @@ function SupplierAnalysis({ supplierId, supplierName, onClear }: { supplierId: s
           className="relative z-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold" 
           onClick={onClear}
         >
-          Fechar Análise
+          Fechar AnÃ¡lise
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <MetricCard title="Total de Pedidos" value={metrics.count.toString()} icon={Package} variant="default" />
         <MetricCard title="Volume Total" value={`R$ ${metrics.totalSpent.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={DollarSign} variant="success" />
-        <MetricCard title="Ticket Médio" value={`R$ ${metrics.avgOrder.toFixed(2)}`} icon={TrendingUp} variant="info" />
+        <MetricCard title="Ticket MÃ©dio" value={`R$ ${metrics.avgOrder.toFixed(2)}`} icon={TrendingUp} variant="info" />
       </div>
 
       <div className={cn(designSystem.components.card.root, "p-6")}>
@@ -582,7 +582,7 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
                   <span className={designSystem.components.table.headerLabel}>Data</span>
                 </div>
                 <div className="w-[20%] text-right flex justify-end items-center px-2">
-                  <span className={designSystem.components.table.headerLabel}>Preço</span>
+                  <span className={designSystem.components.table.headerLabel}>PreÃ§o</span>
                 </div>
               </div>
             </TableCell>
@@ -592,7 +592,7 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
           {combined.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic">
-                Nenhum histórico encontrado.
+                Nenhum histÃ³rico encontrado.
               </TableCell>
             </TableRow>
           ) : (
@@ -608,7 +608,7 @@ function PriceHistoryList({ quotes, orders }: { quotes: any[]; orders: any[] }) 
                         {item.type === 'order' ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                       </div>
                       <span className={cn("text-[10px] font-black uppercase tracking-widest", designSystem.colors.text.secondary, "opacity-50")}>
-                        {item.type === 'order' ? 'Pedido' : 'Cotação'}
+                        {item.type === 'order' ? 'Pedido' : 'CotaÃ§Ã£o'}
                       </span>
                     </div>
                     <div className="w-[45%] pl-2">
@@ -686,7 +686,7 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
                       </p>
                     </div>
                     <div className="w-[15%] flex justify-center items-center pl-2">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border dark:border-white/5/50">
                         <Package className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{order.order_items?.length}</span>
                       </div>
@@ -733,10 +733,10 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
                   <span className={designSystem.components.table.headerLabel}>Fornecedor</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Interações</span>
+                  <span className={designSystem.components.table.headerLabel}>InteraÃ§Ãµes</span>
                 </div>
                 <div className="w-[25%] text-right flex justify-end items-center px-2">
-                  <span className={designSystem.components.table.headerLabel}>Preço Médio</span>
+                  <span className={designSystem.components.table.headerLabel}>PreÃ§o MÃ©dio</span>
                 </div>
               </div>
             </TableCell>
@@ -746,7 +746,7 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
           {stats.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic">
-                Nenhuma informação encontrada.
+                Nenhuma informaÃ§Ã£o encontrada.
               </TableCell>
             </TableRow>
           ) : (
@@ -765,7 +765,7 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
                     <div className="w-[45%] pl-2">
                       <span className={cn("font-bold text-sm block", designSystem.colors.text.primary)}>{s.name}</span>
                       {idx === 0 && (
-                        <p className="text-[9px] font-black text-brand uppercase tracking-widest mt-0.5">Melhor Preço Médio</p>
+                        <p className="text-[9px] font-black text-brand uppercase tracking-widest mt-0.5">Melhor PreÃ§o MÃ©dio</p>
                       )}
                     </div>
                     <div className="w-[20%] pl-2">
@@ -788,3 +788,4 @@ function SupplierStats({ orders, quotes }: { orders: any[]; quotes: any[] }) {
     </div>
   );
 }
+

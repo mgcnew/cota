@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+﻿import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
 
@@ -21,7 +21,7 @@ export function PageHeader({
 }: PageHeaderProps) {
     return (
         <div className={cn("flex flex-col gap-5 md:gap-6 pb-5 md:pb-6", className)}>
-            {/* Header principal com título e ações */}
+            {/* Header principal com tÃ­tulo e aÃ§Ãµes */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3 md:gap-4">
                     {Icon && (
@@ -48,9 +48,9 @@ export function PageHeader({
                 )}
             </div>
 
-            {/* Área de filtros e busca com card elevado */}
+            {/* Ãrea de filtros e busca com card elevado */}
             {children && (
-                <div className="bg-card rounded-xl border border-border shadow-sm p-4 md:p-5">
+                <div className="bg-card rounded-xl border border-border dark:border-white/5 shadow-sm p-4 md:p-5">
                     <div className="flex flex-col md:flex-row gap-3 md:gap-4 items-start md:items-center justify-between">
                         {children}
                     </div>
@@ -59,3 +59,4 @@ export function PageHeader({
         </div>
     );
 }
+

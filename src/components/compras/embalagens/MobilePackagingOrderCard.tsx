@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+﻿import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -92,7 +92,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
                 <CapitalizedText>{order.supplierName}</CapitalizedText>
               </h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
-                #{orderNumber.toString().padStart(4, '0')} • {order.orderDate}
+                #{orderNumber.toString().padStart(4, '0')} â€¢ {order.orderDate}
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
             </Badge>
           ))}
           {order.itens.length > 3 && (
-            <Badge variant="outline" className="text-[10px] rounded-full border-zinc-200 dark:border-zinc-800 px-2 py-0.5">
+            <Badge variant="outline" className="text-[10px] rounded-full border-border dark:border-white/5 px-2 py-0.5">
               +{order.itens.length - 3} itens
             </Badge>
           )}
@@ -152,7 +152,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+        <div className="flex items-center gap-2 pt-4 border-t border-border dark:border-white/5/50">
           <div className="flex-1 flex gap-2">
             <Button
               onClick={handleViewDetails}

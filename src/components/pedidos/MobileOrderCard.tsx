@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+﻿import { memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { capitalize } from "@/lib/text-utils";
@@ -153,7 +153,7 @@ export const MobileOrderCard = memo(function MobileOrderCard({
           <Button
             size="icon"
             variant="outline"
-            className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 disabled:opacity-50"
+            className="h-10 w-10 rounded-xl border-border dark:border-white/5 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 disabled:opacity-50"
             onClick={() => onDelete(pedido)}
             disabled={pedido.status === 'entregue'}
             aria-label="Excluir pedido"
@@ -177,3 +177,4 @@ export const MobileOrderCard = memo(function MobileOrderCard({
 });
 
 export default MobileOrderCard;
+

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+﻿import { Link } from "react-router-dom";
 import { useState, lazy, Suspense, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Menu, X } from "lucide-react";
@@ -40,8 +40,8 @@ export default function Landing() {
   return (
     <div className={cn("min-h-screen flex flex-col", ds.colors.surface.page)}>
 
-      {/* ── HEADER ── */}
-      <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-200/60 dark:border-zinc-800/60">
+      {/* â”€â”€ HEADER â”€â”€ */}
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-border dark:border-white/5">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -75,7 +75,7 @@ export default function Landing() {
 
         {/* Mobile nav */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-6 py-4 animate-in slide-in-from-top-2 duration-200">
+          <div className="md:hidden border-t border-border dark:border-white/5 bg-white dark:bg-zinc-950 px-6 py-4 animate-in slide-in-from-top-2 duration-200">
             <Link to="/auth?mode=login" className="block">
               <Button className={cn(ds.components.button.variants.primary, "w-full h-10 text-sm gap-2")}>
                 Acessar Sistema
@@ -86,7 +86,7 @@ export default function Landing() {
         )}
       </header>
 
-      {/* ── HERO ── */}
+      {/* â”€â”€ HERO â”€â”€ */}
       <section className="relative overflow-hidden">
         {/* Subtle background grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px),linear-gradient(to_bottom,#80808008_1px,transparent_1px)] bg-[size:56px_56px]" />
@@ -96,7 +96,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-6 py-20 sm:py-28 md:py-36 relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-6">
             {/* Badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-3 py-1 text-[11px] font-bold text-zinc-500 uppercase tracking-wider shadow-sm">
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-border dark:border-white/5 bg-white dark:bg-zinc-900 px-3 py-1 text-[11px] font-bold text-zinc-500 uppercase tracking-wider shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-brand" />
               Sistema Interno
             </div>
@@ -107,7 +107,7 @@ export default function Landing() {
               ds.typography.weight.extrabold,
               ds.colors.text.primary
             )}>
-              Gestão de Cotações{" "}
+              GestÃ£o de CotaÃ§Ãµes{" "}
               <span className="text-brand">Inteligente</span>
             </h1>
 
@@ -139,7 +139,7 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── SECTIONS ── */}
+      {/* â”€â”€ SECTIONS â”€â”€ */}
       <Suspense fallback={<SectionSkeleton />}>
         <FeaturesSection />
       </Suspense>
@@ -150,3 +150,4 @@ export default function Landing() {
     </div>
   );
 }
+

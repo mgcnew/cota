@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+﻿import { memo, useCallback } from "react";
 import { LayoutGrid, Table } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ViewMode } from "@/types/pagination";
@@ -20,7 +20,7 @@ export const ViewToggle = memo(function ViewToggle({
   const handleTableClick = useCallback(() => onViewChange("table"), [onViewChange]);
 
   return (
-    <div className={cn("flex items-center gap-0.5 rounded-lg bg-muted/50 border border-border p-0.5", className)}>
+    <div className={cn("flex items-center gap-0.5 rounded-lg bg-muted/50 border border-border dark:border-white/5 p-0.5", className)}>
       <Button
         variant={view === "grid" ? "default" : "ghost"}
         size="sm"

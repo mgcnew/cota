@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,9 +31,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
 
-// Definição dos schemas (Zod) poderia ser movida para um arquivo separado, 
-// mas para simplificar vamos manter a validação manual/inline por enquanto 
-// para seguir o padrão do AddPedidoDialog, ou adaptar conforme necessário.
+// DefiniÃ§Ã£o dos schemas (Zod) poderia ser movida para um arquivo separado, 
+// mas para simplificar vamos manter a validaÃ§Ã£o manual/inline por enquanto 
+// para seguir o padrÃ£o do AddPedidoDialog, ou adaptar conforme necessÃ¡rio.
 
 interface ListItem {
   nome: string;
@@ -54,7 +54,7 @@ interface AddListDialogProps {
 }
 
 const STEPS = [
-  { id: "info", title: "Informações", icon: ListTodo },
+  { id: "info", title: "InformaÃ§Ãµes", icon: ListTodo },
   { id: "itens", title: "Itens", icon: Package },
 ];
 
@@ -91,7 +91,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
 
-  // Reset e Inicialização
+  // Reset e InicializaÃ§Ã£o
   useEffect(() => {
     if (open) {
       if (activeStep === "info") {
@@ -141,11 +141,11 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
     const qtd = parseFloat(newItemQuantity);
 
     if (!nome || nome.trim().length < 2) {
-      toast({ title: "Nome inválido", description: "O item precisa de pelo menos 2 caracteres.", variant: "destructive" });
+      toast({ title: "Nome invÃ¡lido", description: "O item precisa de pelo menos 2 caracteres.", variant: "destructive" });
       return;
     }
     if (!qtd || qtd <= 0) {
-      toast({ title: "Quantidade inválida", description: "A quantidade deve ser maior que zero.", variant: "destructive" });
+      toast({ title: "Quantidade invÃ¡lida", description: "A quantidade deve ser maior que zero.", variant: "destructive" });
       return;
     }
 
@@ -169,7 +169,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   const selectProductFromList = (product: any) => {
     setSelectedProduct(product);
     setNewItemName(product.name);
-    setProductSearch(""); // Limpa a busca visualmente, mas mantém o item selecionado
+    setProductSearch(""); // Limpa a busca visualmente, mas mantÃ©m o item selecionado
     setHighlightedProductIndex(-1);
     setTimeout(() => {
       quantityInputRef.current?.focus();
@@ -265,7 +265,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
         selectProductFromList(p);
       }}
       className={cn(
-        "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-gray-100 dark:border-gray-800 last:border-none",
+        "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-2 transition-all border-b border-border dark:border-white/5 last:border-none",
         highlightedProductIndex === index 
           ? "bg-gray-100 dark:bg-gray-800" 
           : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
@@ -301,10 +301,10 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   const content = (
     <>
       {/* Header */}
-      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 relative overflow-hidden">
+      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border dark:border-white/5 bg-white dark:bg-gray-900 relative overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-900 dark:text-white border border-border dark:border-white/5 flex-shrink-0">
               <ClipboardList className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
@@ -320,7 +320,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
           <div className="flex items-center gap-2 sm:gap-3">
             {currentStepIndex > 0 && (
               <Button type="button" variant="outline" size="sm" onClick={handlePrevious}
-                className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
+                className="border-border dark:border-white/5 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 h-9 px-3 text-xs font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400 shadow-sm">
                 <ChevronLeft className="h-3 w-3 sm:mr-1.5" />
                 <span className="hidden sm:inline">Voltar</span>
               </Button>
@@ -329,7 +329,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
             {currentStepIndex < STEPS.length - 1 ? (
               <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
                 className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                <span className="hidden sm:inline">Próximo</span>
+                <span className="hidden sm:inline">PrÃ³ximo</span>
                 <ChevronRight className="h-3 w-3 ml-1.5" />
               </Button>
             ) : (
@@ -352,8 +352,8 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-900">
+        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-white dark:bg-gray-950 rounded-lg border border-border dark:border-white/5 shadow-sm">
           {STEPS.map((step, index) => {
             const Icon = step.icon;
             const status = index < currentStepIndex ? "completed" : index === currentStepIndex ? "current" : "pending";
@@ -379,14 +379,14 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
       {/* Content */}
       <div className="flex-1 relative bg-gray-50 dark:bg-black">
         
-        {/* Step: Informações */}
+        {/* Step: InformaÃ§Ãµes */}
         {activeStep === "info" && (
           <div className="h-full p-4 sm:p-6 flex flex-col justify-start">
-             <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
-              <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+             <Card className="border-border dark:border-white/5 bg-white dark:bg-gray-900 shadow-sm">
+              <CardHeader className="pb-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-900">
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
                   <ListTodo className="h-4 w-4 text-gray-500" />
-                  <span>Informações Básicas</span>
+                  <span>InformaÃ§Ãµes BÃ¡sicas</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
@@ -394,7 +394,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                   <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Nome da Lista</Label>
                   <Input 
                     ref={nameInputRef}
-                    placeholder="Ex: Rancho do Mês, Churrasco..." 
+                    placeholder="Ex: Rancho do MÃªs, Churrasco..." 
                     value={listName}
                     onChange={(e) => setListName(e.target.value)}
                     onKeyDown={(e) => {
@@ -404,9 +404,9 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                       }
                     }}
                     onFocus={handleInputFocus}
-                    className="h-11 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-sm font-medium rounded-lg focus:ring-gray-400/20" 
+                    className="h-11 bg-white dark:bg-gray-950 border-border dark:border-white/5 text-sm font-medium rounded-lg focus:ring-gray-400/20" 
                   />
-                  <p className="text-[10px] text-gray-400 pl-1">Mínimo de 3 caracteres</p>
+                  <p className="text-[10px] text-gray-400 pl-1">MÃ­nimo de 3 caracteres</p>
                 </div>
               </CardContent>
             </Card>
@@ -419,8 +419,8 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start">
               
               {/* Adicionar Item */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-visible z-10">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
+              <Card className="border-border dark:border-white/5 bg-white dark:bg-gray-900 shadow-sm h-fit rounded-xl overflow-visible z-10">
+                <CardHeader className="pb-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-900 rounded-t-xl">
                   <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
                     <Plus className="h-4 w-4 text-gray-500" />
                     <span>Adicionar Item</span>
@@ -443,11 +443,11 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                         }}
                         onKeyDown={(e) => handleProductKeyDown(e, 'search')}
                         onFocus={handleInputFocus}
-                        className="pl-9 h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg focus:ring-gray-400/20" 
+                        className="pl-9 h-9 bg-white dark:bg-gray-950 border-border dark:border-white/5 text-xs font-medium rounded-lg focus:ring-gray-400/20" 
                       />
                       {/* Dropdown de resultados */}
                       {filteredProducts.length > 0 && !selectedProduct && (
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-xl z-50 overflow-hidden">
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-950 border border-border dark:border-white/5 rounded-lg shadow-xl z-50 overflow-hidden">
                           <div className="max-h-[200px] w-full overflow-y-auto custom-scrollbar">
                             <div className="p-1">
                               {filteredProducts.map((p, i) => renderProductItem(p, i))}
@@ -469,13 +469,13 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                         onChange={(e) => setNewItemQuantity(e.target.value)}
                         onKeyDown={(e) => handleProductKeyDown(e, 'quantity')}
                         onFocus={handleInputFocus}
-                        className="h-9 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-800 text-xs font-medium rounded-lg"
+                        className="h-9 bg-white dark:bg-gray-950 border-border dark:border-white/5 text-xs font-medium rounded-lg"
                       />
                     </div>
                     {/* Unidade poderia ser um Select, mas vamos simplificar como fixo 'un' ou expandir futuramente */}
                     <div className="space-y-1">
                       <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Unidade</Label>
-                      <div className="h-9 flex items-center px-3 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-800 rounded-lg text-xs font-medium text-gray-500">
+                      <div className="h-9 flex items-center px-3 bg-gray-50 dark:bg-gray-800 border border-border dark:border-white/5 rounded-lg text-xs font-medium text-gray-500">
                         {newItemUnit}
                       </div>
                     </div>
@@ -484,20 +484,20 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                   <Button onClick={handleAddItem} 
                     className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs h-9 rounded-lg shadow-sm">
                     <Plus className="h-3.5 w-3.5 mr-2" />
-                    Adicionar à Lista
+                    Adicionar Ã  Lista
                   </Button>
                 </CardContent>
               </Card>
 
               {/* Lista de Itens */}
-              <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm h-full max-h-[400px] lg:max-h-none rounded-xl overflow-hidden flex flex-col">
-                <CardHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+              <Card className="border-border dark:border-white/5 bg-white dark:bg-gray-900 shadow-sm h-full max-h-[400px] lg:max-h-none rounded-xl overflow-hidden flex flex-col">
+                <CardHeader className="pb-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-900 flex-shrink-0">
                   <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
                     <span className="flex items-center gap-2 text-gray-900 dark:text-white">
                       <Package className="h-4 w-4 text-gray-500" />
                       Itens da Lista
                     </span>
-                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 font-bold">
+                    <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-border dark:border-white/5 font-bold">
                       {itens.length}
                     </Badge>
                   </CardTitle>
@@ -508,7 +508,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                       {itens.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-gray-400">
                           <ClipboardList className="h-8 w-8 opacity-20 mb-2" />
-                          <p className="text-xs font-medium">Sua lista está vazia</p>
+                          <p className="text-xs font-medium">Sua lista estÃ¡ vazia</p>
                         </div>
                       ) : (
                         itens.map((item, index) => (
@@ -545,7 +545,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent 
-          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-950 transition-all duration-200"
+          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-border dark:border-white/5 bg-white dark:bg-gray-950 transition-all duration-200"
           style={{ 
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
@@ -561,10 +561,11 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[85vh] sm:h-[80vh] max-h-[700px] p-0 gap-0 overflow-hidden border border-gray-200 dark:border-gray-800 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950"
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[85vh] sm:h-[80vh] max-h-[700px] p-0 gap-0 overflow-hidden border border-border dark:border-white/5 shadow-md rounded-2xl flex flex-col bg-white dark:bg-gray-950"
       >
         {content}
       </DialogContent>
     </Dialog>
   );
 }
+

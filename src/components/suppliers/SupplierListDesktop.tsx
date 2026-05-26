@@ -2,6 +2,8 @@ import { memo, useState, useCallback } from 'react';
 import { Building2, MessageCircle, History, ChevronUp, ChevronDown, ChevronsUpDown, FileText } from 'lucide-react';
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableActionGroup } from "@/components/ui/table-action-group";
+
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { capitalize } from "@/lib/text-utils";
 import { cn } from "@/lib/utils";
 
@@ -64,24 +66,12 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
     return [...suppliers].sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
-        case 'name':
-          cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR');
-          break;
-        case 'status':
-          cmp = (a.status || '').localeCompare(b.status || '', 'pt-BR');
-          break;
-        case 'limit':
-          cmp = extractPrice(a.limit || '') - extractPrice(b.limit || '');
-          break;
-        case 'avgPrice':
-          cmp = extractPrice(a.avgPrice || '') - extractPrice(b.avgPrice || '');
-          break;
-        case 'quotes':
-          cmp = (a.totalQuotes || 0) - (b.totalQuotes || 0);
-          break;
-        case 'rating':
-          cmp = (a.rating || 0) - (b.rating || 0);
-          break;
+        case 'name':     cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR'); break;
+        case 'status':   cmp = (a.status || '').localeCompare(b.status || '', 'pt-BR'); break;
+        case 'limit':    cmp = extractPrice(a.limit || '') - extractPrice(b.limit || ''); break;
+        case 'avgPrice': cmp = extractPrice(a.avgPrice || '') - extractPrice(b.avgPrice || ''); break;
+        case 'quotes':   cmp = (a.totalQuotes || 0) - (b.totalQuotes || 0); break;
+        case 'rating':   cmp = (a.rating || 0) - (b.rating || 0); break;
       }
       return sortDir === 'asc' ? cmp : -cmp;
     });
@@ -90,111 +80,93 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
   const SortHeader = ({ label, sortId, className }: { label: string; sortId: SortKey; className?: string }) => {
     const isActive = sortKey === sortId;
     return (
-      <th
-        className={cn(
-          "h-11 px-4 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 cursor-pointer select-none transition-colors group/th",
-          "hover:text-zinc-800 dark:hover:text-zinc-200",
-          isActive && "text-zinc-900 dark:text-zinc-100 font-semibold",
-          className
-        )}
+      <TableHead
+        className={cn("cursor-pointer select-none group/th", isActive && "text-foreground font-semibold", className)}
         onClick={() => handleSort(sortId)}
       >
         <div className={cn("flex items-center gap-1.5", className?.includes("text-center") && "justify-center", className?.includes("text-right") && "justify-end")}>
           {label}
-          <div className="flex flex-col items-center justify-center w-3 h-3 text-zinc-300 dark:text-zinc-600 transition-colors">
+          <div className="w-3 h-3 text-muted-foreground/30 transition-colors">
             {isActive ? (
-              sortDir === 'asc' ? (
-                <ChevronUp className="w-3 h-3 text-brand" />
-              ) : (
-                <ChevronDown className="w-3 h-3 text-brand" />
-              )
+              sortDir === 'asc' ? <ChevronUp className="w-3 h-3 text-brand" /> : <ChevronDown className="w-3 h-3 text-brand" />
             ) : (
               <ChevronsUpDown className="w-3 h-3 opacity-0 group-hover/th:opacity-100 transition-opacity" />
             )}
           </div>
         </div>
-      </th>
+      </TableHead>
     );
   };
 
   return (
-    <div className="w-full overflow-x-auto custom-scrollbar">
-      <table className="w-full text-sm text-left border-collapse">
-          {/* Header */}
-          <thead>
-            <tr className="border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/30 dark:bg-zinc-900/20">
+    <>
+      <Table>
+          <TableHeader>
+            <TableRow>
               <SortHeader label="Fornecedor" sortId="name" className="pl-6 w-[28%]" />
               <SortHeader label="Status" sortId="status" className="w-[12%] text-center" />
               <SortHeader label="Limite" sortId="limit" className="w-[15%]" />
               <SortHeader label="Preço Médio" sortId="avgPrice" className="hidden lg:table-cell w-[15%]" />
               <SortHeader label="Cotações" sortId="quotes" className="hidden lg:table-cell w-[10%] text-center" />
               <SortHeader label="Avaliação" sortId="rating" className="hidden xl:table-cell w-[10%] text-center" />
-              <th className="h-11 px-4 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 pr-6 w-[10%]">
-                Ações
-              </th>
-            </tr>
-          </thead>
+              <TableHead className="text-right pr-6 w-[10%]">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
 
-          {/* Body */}
-          <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
+          <TableBody>
             {sortedSuppliers.map((supplier) => (
-              <tr
-                key={supplier.id}
-                className="group hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-              >
+              <TableRow key={supplier.id} className="group">
                 {/* Fornecedor */}
-                <td className="pl-6 pr-4 py-4">
+                <TableCell className="pl-6 pr-4">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 overflow-hidden border border-zinc-200/80 dark:border-zinc-700 shadow-sm">
+                    <div className="w-10 h-10 rounded-lg bg-card flex items-center justify-center flex-shrink-0 border border-border dark:border-white/5 shadow-sm">
                       <Building2 className="h-4 w-4 text-brand" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 truncate">
+                      <span className="font-medium text-sm text-foreground truncate">
                         {capitalize(supplier.name)}
                       </span>
-                      <span className="text-[11px] text-zinc-500 dark:text-zinc-500 font-medium truncate">
+                      <span className="text-[11px] text-muted-foreground font-medium truncate">
                         {supplier.contact || "Sem contato"}
                       </span>
                     </div>
                   </div>
-                </td>
+                </TableCell>
 
                 {/* Status */}
-                <td className="px-4 py-4 text-center">
+                <TableCell className="text-center">
                   <StatusBadge status={supplier.status} />
-                </td>
+                </TableCell>
 
                 {/* Limite */}
-                <td className="px-4 py-4">
-                  <span className="font-medium text-sm text-zinc-900 dark:text-zinc-100 tabular-nums">
+                <TableCell>
+                  <span className="font-medium text-sm text-foreground tabular-nums">
                     {formatLimitBRL(supplier.limit)}
                   </span>
-                </td>
+                </TableCell>
 
                 {/* Preço Médio */}
-                <td className="px-4 py-4 hidden lg:table-cell">
+                <TableCell className="hidden lg:table-cell">
                   <span className="font-medium text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
                     {supplier.avgPrice}
                   </span>
-                </td>
+                </TableCell>
 
                 {/* Cotações */}
-                <td className="px-4 py-4 text-center hidden lg:table-cell">
-                  <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-zinc-100 dark:bg-zinc-800/80 rounded-md text-zinc-700 dark:text-zinc-300">
-                    <FileText className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
-                    <span className="font-medium text-xs tabular-nums">
-                      {supplier.totalQuotes}
-                    </span>
+                <TableCell className="text-center hidden lg:table-cell">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md text-muted-foreground">
+                    <FileText className="h-3.5 w-3.5" />
+                    <span className="font-medium text-xs tabular-nums">{supplier.totalQuotes}</span>
                   </div>
-                </td>
+                </TableCell>
 
                 {/* Avaliação */}
-                <td className="px-4 py-4 text-center hidden xl:table-cell">
+                <TableCell className="text-center hidden xl:table-cell">
                   {renderRating(supplier.rating)}
-                </td>
+                </TableCell>
 
                 {/* Ações */}
-                <td className="px-4 py-4 pr-6 text-right">
+                <TableCell className="pr-6 text-right">
                   <div className="flex justify-end opacity-60 group-hover:opacity-100 transition-opacity">
                     <TableActionGroup
                       showView={false}
@@ -217,26 +189,26 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                       dropdownLabel="Ações"
                     />
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+      </Table>
 
-        {/* Footer com info */}
-        <div className="border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 px-6 py-3 flex items-center justify-between">
-          <span className="text-[12px] text-zinc-500 dark:text-zinc-400 font-medium">
-            {sortedSuppliers.length} fornecedor{sortedSuppliers.length !== 1 ? 'es' : ''} exibido{sortedSuppliers.length !== 1 ? 's' : ''}
-          </span>
-          {sortKey && (
-            <button
-              onClick={() => { setSortKey(null); setSortDir('asc'); }}
-              className="text-[12px] text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200 font-medium transition-colors"
-            >
-              Limpar ordenação
-            </button>
-          )}
-        </div>
-    </div>
+      {/* Footer */}
+      <div className="border-t border-border dark:border-white/5 bg-muted/20 px-6 py-3 flex items-center justify-between">
+        <span className="text-[12px] text-muted-foreground font-medium">
+          {sortedSuppliers.length} fornecedor{sortedSuppliers.length !== 1 ? 'es' : ''} exibido{sortedSuppliers.length !== 1 ? 's' : ''}
+        </span>
+        {sortKey && (
+          <button
+            onClick={() => { setSortKey(null); setSortDir('asc'); }}
+            className="text-[12px] text-muted-foreground hover:text-foreground font-medium transition-colors"
+          >
+            Limpar ordenação
+          </button>
+        )}
+      </div>
+    </>
   );
 });

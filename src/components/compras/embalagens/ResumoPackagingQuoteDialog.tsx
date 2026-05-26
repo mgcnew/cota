@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ResponsiveModal } from "@/components/responsive/ResponsiveModal";
@@ -114,7 +114,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
       open={open}
       onOpenChange={onOpenChange}
       hideClose
-      title="Resumo da Cotação"
+      title="Resumo da CotaÃ§Ã£o"
       description={`#${safeStr(quote.id).slice(0, 8)}`}
       desktopMaxWidth="md"
       className={cn(
@@ -147,7 +147,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
         <div className="space-y-3 pb-2">
 
-          {/* ── HEADER: Status + Período ── */}
+          {/* â”€â”€ HEADER: Status + PerÃ­odo â”€â”€ */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-brand/10 border border-brand/20">
@@ -155,20 +155,20 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
               </div>
               <div>
                 <p className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
-                  Cotação de Embalagem
+                  CotaÃ§Ã£o de Embalagem
                 </p>
                 <StatusBadge status={quote.status} />
               </div>
             </div>
             <div className="text-right">
-              <p className={cn("text-[10px] uppercase tracking-wider", ds.typography.weight.bold, ds.colors.text.muted)}>Período</p>
+              <p className={cn("text-[10px] uppercase tracking-wider", ds.typography.weight.bold, ds.colors.text.muted)}>PerÃ­odo</p>
               <p className={cn("text-xs", ds.typography.weight.bold, ds.colors.text.primary)}>
-                {safeStr(quote.dataInicio)} – {safeStr(quote.dataFim)}
+                {safeStr(quote.dataInicio)} â€“ {safeStr(quote.dataFim)}
               </p>
             </div>
           </div>
 
-          {/* ── KPI ROW ── */}
+          {/* â”€â”€ KPI ROW â”€â”€ */}
           <div className="grid grid-cols-3 gap-2">
             {/* Embalagens */}
             <div className={cn(ds.components.card.root, "p-2.5 text-center")}>
@@ -205,20 +205,20 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
             </div>
           </div>
 
-          {/* ── MELHOR FORNECEDOR + ECONOMIA ── */}
+          {/* â”€â”€ MELHOR FORNECEDOR + ECONOMIA â”€â”€ */}
           {melhorFornecedor && (
             <div className={cn(
               ds.components.card.root,
               "overflow-hidden"
             )}>
               {/* Melhor Fornecedor */}
-              <div className="px-3 py-2.5 flex items-center gap-3 border-b border-zinc-100 dark:border-zinc-800/50">
+              <div className="px-3 py-2.5 flex items-center gap-3 border-b border-border dark:border-white/5/50">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-brand/10 border border-brand/20">
                   <Award className="h-4 w-4 text-brand" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={cn("text-[9px] uppercase tracking-widest text-brand", ds.typography.weight.bold)}>
-                    🏆 Melhor Fornecedor
+                    ðŸ† Melhor Fornecedor
                   </p>
                   <p className={cn("text-sm truncate", ds.typography.weight.bold, ds.colors.text.primary)}>
                     {safeStr(melhorFornecedor.supplierName)}
@@ -240,7 +240,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
                       Economia Potencial
                     </p>
                     <p className={cn("text-xs leading-relaxed", ds.colors.text.secondary)}>
-                      Diferença entre a pior e melhor oferta por item
+                      DiferenÃ§a entre a pior e melhor oferta por item
                     </p>
                   </div>
                   <p className={cn("text-sm text-brand flex-shrink-0", ds.typography.weight.bold)}>
@@ -251,9 +251,9 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
             </div>
           )}
 
-          {/* ── EMBALAGENS: Lista compacta ── */}
+          {/* â”€â”€ EMBALAGENS: Lista compacta â”€â”€ */}
           <div className={cn(ds.components.card.root, "overflow-hidden")}>
-            <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Package className="h-3.5 w-3.5 text-brand" />
                 <span className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
@@ -265,15 +265,15 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
               </Badge>
             </div>
 
-            {/* Cabeçalho da tabela compacta */}
-            <div className="grid grid-cols-[1fr_60px_90px_90px] gap-1 px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/50 border-b border-zinc-100 dark:border-zinc-800/30">
+            {/* CabeÃ§alho da tabela compacta */}
+            <div className="grid grid-cols-[1fr_60px_90px_90px] gap-1 px-3 py-1.5 bg-zinc-50 dark:bg-zinc-900/50 border-b border-border dark:border-white/5/30">
               <span className={cn("text-[9px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>Embalagem</span>
               <span className={cn("text-[9px] uppercase tracking-widest text-center", ds.typography.weight.bold, ds.colors.text.muted)}>Qtd</span>
               <span className={cn("text-[9px] uppercase tracking-widest text-right", ds.typography.weight.bold, ds.colors.text.muted)}>Melhor</span>
               <span className={cn("text-[9px] uppercase tracking-widest text-right", ds.typography.weight.bold, ds.colors.text.muted)}>Fornec.</span>
             </div>
 
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/30 max-h-[200px] overflow-y-auto custom-scrollbar">
+            <div className="divide-y divide-border dark:divide-white/5 max-h-[200px] overflow-y-auto custom-scrollbar">
               {products.map((p: any) => {
                 const best = getBestPrice(p.packagingId);
                 return (
@@ -299,9 +299,9 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
             </div>
           </div>
 
-          {/* ── RANKING FORNECEDORES ── */}
+          {/* â”€â”€ RANKING FORNECEDORES â”€â”€ */}
           <div className={cn(ds.components.card.root, "overflow-hidden")}>
-            <div className="px-3 py-2 border-b border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Building2 className="h-3.5 w-3.5 text-brand" />
                 <span className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
@@ -313,7 +313,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
               </Badge>
             </div>
 
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800/30 max-h-[200px] overflow-y-auto custom-scrollbar">
+            <div className="divide-y divide-border dark:divide-white/5 max-h-[200px] overflow-y-auto custom-scrollbar">
               {fornecedoresRanking.length > 0 ? fornecedoresRanking.map((f, idx) => {
                 const isBest = idx === 0;
                 return (
@@ -324,15 +324,15 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
                       isBest ? "bg-brand/5 dark:bg-brand/10" : "hover:bg-zinc-50/50 dark:hover:bg-zinc-800/20"
                     )}
                   >
-                    {/* Posição */}
+                    {/* PosiÃ§Ã£o */}
                     <div className={cn(
                       "w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 text-[10px]",
                       ds.typography.weight.bold,
                       isBest
                         ? "bg-brand/20 text-brand border border-brand/30"
-                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-zinc-200 dark:border-zinc-700"
+                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border border-border dark:border-white/5"
                     )}>
-                      {idx + 1}º
+                      {idx + 1}Âº
                     </div>
 
                     {/* Nome + Status */}
@@ -352,7 +352,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
                           <Clock className="h-2.5 w-2.5 text-amber-500" />
                         )}
                         <span className={cn("text-[9px] uppercase tracking-wider", ds.colors.text.muted)}>
-                          {f.status === 'respondido' ? 'Respondido' : 'Pendente'} · {f.itensRespondidos} itens
+                          {f.status === 'respondido' ? 'Respondido' : 'Pendente'} Â· {f.itensRespondidos} itens
                         </span>
                       </div>
                     </div>
@@ -373,7 +373,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
                 </div>
               )}
 
-              {/* Fornecedores que não responderam */}
+              {/* Fornecedores que nÃ£o responderam */}
               {fornecedores
                 .filter(f => calcularTotalFornecedor(f.supplierId) === 0)
                 .map(f => (
@@ -381,7 +381,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
                     key={f.supplierId}
                     className="px-3 py-2 flex items-center gap-2.5 opacity-40"
                   >
-                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700">
+                    <div className="w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0 bg-zinc-100 dark:bg-zinc-800 border border-border dark:border-white/5">
                       <Clock className="h-3 w-3 text-zinc-400" />
                     </div>
                     <p className={cn("text-xs flex-1 truncate", ds.colors.text.muted)}>
@@ -394,11 +394,11 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
             </div>
           </div>
 
-          {/* ── OBSERVAÇÕES ── */}
+          {/* â”€â”€ OBSERVAÃ‡Ã•ES â”€â”€ */}
           {quote.observacoes && (
             <div className={cn(ds.components.card.root, "p-3")}>
               <p className={cn("text-[9px] uppercase tracking-widest mb-1", ds.typography.weight.bold, ds.colors.text.muted)}>
-                Observações
+                ObservaÃ§Ãµes
               </p>
               <p className={cn("text-xs leading-relaxed", ds.colors.text.secondary)}>
                 {safeStr(quote.observacoes)}
@@ -411,3 +411,4 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
     </ResponsiveModal>
   );
 }
+

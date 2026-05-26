@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+﻿import { useState, useEffect, useMemo, useRef } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -54,7 +54,7 @@ const priorityConfig: Record<Priority, { label: string; icon: any; color: string
     bg: "bg-gray-100 dark:bg-gray-800",
   },
   medium: {
-    label: "Média",
+    label: "MÃ©dia",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -181,7 +181,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
 
       toast({
         title: "Sucesso",
-        description: `${selectedItems.length} itens adicionados à lista.`,
+        description: `${selectedItems.length} itens adicionados Ã  lista.`,
       });
 
       onOpenChange(false);
@@ -234,14 +234,14 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
     <div className="flex-1 overflow-hidden flex flex-col relative">
       {step === "select" ? (
         <>
-          <div className="p-4 bg-white/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800 backdrop-blur-sm z-10">
+          <div className="p-4 bg-white/50 dark:bg-gray-900/50 border-b border-border dark:border-white/5 backdrop-blur-sm z-10">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 placeholder="Digite para buscar produtos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-10 pl-9 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg focus:ring-blue-500/20"
+                className="h-10 pl-9 bg-white dark:bg-gray-800 border-border dark:border-white/5 rounded-lg focus:ring-blue-500/20"
                 autoFocus
               />
               {isSearching && (
@@ -290,7 +290,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
                           <span>{product.unit || "UN"}</span>
                           {product.category && (
                             <>
-                              <span>•</span>
+                              <span>â€¢</span>
                               <span>{product.category}</span>
                             </>
                           )}
@@ -359,7 +359,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
                     
                     {/* Quantity Control */}
                     <div className="flex items-center gap-3">
-                      <div className="flex items-center flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-1">
+                      <div className="flex items-center flex-1 bg-gray-50 dark:bg-gray-900 rounded-lg border border-border dark:border-white/5 p-1">
                         <Button
                           size="icon"
                           variant="ghost"
@@ -395,7 +395,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
             </div>
 
             {/* Global Settings */}
-            <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div className="space-y-4 pt-4 border-t border-border dark:border-white/5">
               <div className="space-y-3">
                 <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Prioridade (Geral)</Label>
                 <div className="grid grid-cols-4 gap-2">
@@ -411,7 +411,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
                           "flex flex-col items-center justify-center gap-2 p-2 rounded-lg border transition-all",
                           isSelected
                             ? cn(config.bg, "border-current ring-1 ring-current/20", config.color)
-                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-gray-300"
+                            : "bg-white dark:bg-gray-800 border-border dark:border-white/5 text-gray-500 hover:border-gray-300"
                         )}
                       >
                         <Icon className="w-4 h-4" />
@@ -423,12 +423,12 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Observações (Opcional)</Label>
+                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">ObservaÃ§Ãµes (Opcional)</Label>
                 <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Observações para todos os itens..."
-                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-sm min-h-[80px]"
+                  placeholder="ObservaÃ§Ãµes para todos os itens..."
+                  className="bg-white dark:bg-gray-800 border-border dark:border-white/5 text-sm min-h-[80px]"
                 />
               </div>
             </div>
@@ -444,7 +444,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
         <Button
           variant="outline"
           onClick={handleBack}
-          className="flex-1 h-11 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+          className="flex-1 h-11 border-border dark:border-white/5 text-gray-700 dark:text-gray-300"
         >
           Voltar
         </Button>
@@ -454,7 +454,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
            <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="flex-1 h-11 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300"
+            className="flex-1 h-11 border-border dark:border-white/5 text-gray-700 dark:text-gray-300"
           >
             Cancelar
           </Button>
@@ -477,7 +477,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
           ) : (
             <Check className="w-5 h-5 mr-2" />
           )}
-          Adicionar à Lista
+          Adicionar Ã  Lista
         </Button>
       )}
     </div>
@@ -509,3 +509,4 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
     </Dialog>
   );
 }
+

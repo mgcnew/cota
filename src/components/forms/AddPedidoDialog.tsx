@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -243,7 +243,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     const preco = newProductPrice ? parseFloat(newProductPrice.replace(',', '.')) : 0;
     
     if (!quantidade || quantidade <= 0) {
-      toast({ title: "Erro", description: "Quantidade inválida", variant: "destructive" });
+      toast({ title: "Erro", description: "Quantidade invÃ¡lida", variant: "destructive" });
       return;
     }
     
@@ -361,7 +361,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       const total = itens.reduce((acc, item) => acc + item.quantidade * item.valorUnitario, 0);
       const selectedSupplier = suppliers.find(s => s.id === fornecedor);
       const { data: companyData } = await supabase.from("company_users").select("company_id").eq("user_id", user.id).single();
-      if (!companyData) throw new Error("Empresa não encontrada");
+      if (!companyData) throw new Error("Empresa nÃ£o encontrada");
 
       const { data: order, error: orderError } = await supabase.from('orders').insert({
         company_id: companyData.company_id,
@@ -384,11 +384,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         unit: item.unidade,
         unit_price: item.valorUnitario,
         total_price: item.quantidade * item.valorUnitario,
-        // Campos para consistência com economia real
+        // Campos para consistÃªncia com economia real
         quantidade_pedida: item.quantidade,
         unidade_pedida: item.unidade,
         valor_unitario_cotado: item.valorUnitario,
-        maior_valor_cotado: item.valorUnitario // No pedido manual, o maior é o único
+        maior_valor_cotado: item.valorUnitario // No pedido manual, o maior Ã© o Ãºnico
       }));
       
       await supabase.from('order_items').insert(orderItems);
@@ -429,8 +429,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     let r = 0;
     if (op === '+') r = a + b;
     else if (op === '-') r = a - b;
-    else if (op === '×') r = a * b;
-    else if (op === '÷') r = b !== 0 ? a / b : 0;
+    else if (op === 'Ã—') r = a * b;
+    else if (op === 'Ã·') r = b !== 0 ? a / b : 0;
     return Math.round(r * 1e10) / 1e10;
   };
 
@@ -457,7 +457,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         handleCalcInput(e.key);
         e.preventDefault();
       } else if (['+', '-', '*', '/'].includes(e.key)) {
-        const opMap: Record<string, string> = { '+': '+', '-': '-', '*': '×', '/': '÷' };
+        const opMap: Record<string, string> = { '+': '+', '-': '-', '*': 'Ã—', '/': 'Ã·' };
         handleCalcOp(opMap[e.key]);
         e.preventDefault();
       } else if (e.key === 'Enter') {
@@ -487,7 +487,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     if (!factor || factor <= 0 || !price || price <= 0) return null;
 
     if (conversionMode === 'box_to_unit') {
-      return { value: price / factor, label: 'Valor Unitário' };
+      return { value: price / factor, label: 'Valor UnitÃ¡rio' };
     } else {
       return { value: price * factor, label: 'Valor da Caixa' };
     }
@@ -555,7 +555,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     }, 300);
   };
 
-  // Helpers de Renderização
+  // Helpers de RenderizaÃ§Ã£o
   const renderProductItem = (p: any, index: number) => (
     <button
       key={p.id}
@@ -787,7 +787,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         )}>
                           <Package className={cn("h-8 w-8 mx-auto mb-2 opacity-20", ds.colors.text.secondary)} />
                           <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.secondary, "mb-4")}>
-                            Este produto não consta no sistema
+                            Este produto nÃ£o consta no sistema
                           </p>
                           <Button
                             type="button"
@@ -803,7 +803,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         </div>
                       )}
 
-                      {/* Formulário inline de cadastro rápido de produto */}
+                      {/* FormulÃ¡rio inline de cadastro rÃ¡pido de produto */}
                       {showQuickCreateProduct && (
                         <div className={cn(
                           "mt-4 p-4 rounded-xl border border-dashed animate-in fade-in slide-in-from-top-2",
@@ -871,7 +871,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
                     <div className={cn(ds.components.input.group, "col-span-6 sm:col-span-3")}>
                       <div className="flex items-center justify-between mb-1.5">
-                        <Label className={ds.components.input.label}>Preço Unit.</Label>
+                        <Label className={ds.components.input.label}>PreÃ§o Unit.</Label>
                         <div className="flex items-center gap-1.5">
                            <button
                             type="button"
@@ -891,7 +891,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                               "p-1 rounded-md transition-colors",
                               showConversion ? "bg-brand/20 text-brand" : "text-zinc-400 hover:text-brand"
                             )}
-                            title="Conversão cx/un"
+                            title="ConversÃ£o cx/un"
                           >
                             <ArrowLeftRight className="h-3.5 w-3.5" />
                           </button>
@@ -917,7 +917,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       </div>
                     </div>
 
-                    {/* ─ Ferramentas Auxiliares ─ */}
+                    {/* â”€ Ferramentas Auxiliares â”€ */}
                     <div className="col-span-6">
                       {showConversion && (
                         <div className="p-4 rounded-2xl border border-dashed border-brand/40 bg-brand/5 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 mb-4">
@@ -932,7 +932,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                   : "text-zinc-500 hover:text-brand/70"
                               )}
                             >
-                              Preço Caixa → Unitário
+                              PreÃ§o Caixa â†’ UnitÃ¡rio
                             </button>
                             <button
                               type="button"
@@ -944,7 +944,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                   : "text-zinc-500 hover:text-brand/70"
                               )}
                             >
-                              Preço Unitário → Caixa
+                              PreÃ§o UnitÃ¡rio â†’ Caixa
                             </button>
                           </div>
 
@@ -966,7 +966,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 <p className="text-lg font-black text-brand tracking-tighter">R$ {conversionResult.value.toFixed(2)}</p>
                               </div>
                             ) : (
-                              <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 border border-dashed border-zinc-200 dark:border-zinc-700 flex items-center justify-center min-h-[60px]">
+                              <div className="bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-2.5 border border-dashed border-border dark:border-white/5 flex items-center justify-center min-h-[60px]">
                                 <p className="text-[10px] font-bold text-zinc-400 italic">Informe fator</p>
                               </div>
                             )}
@@ -977,13 +977,13 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                             disabled={!conversionResult}
                             className={cn(ds.components.button.primary, "w-full h-10 rounded-xl shadow-lg shadow-brand/20 font-black uppercase tracking-widest text-[10px]")}
                           >
-                            Aplicar Conversão
+                            Aplicar ConversÃ£o
                           </Button>
                         </div>
                       )}
 
                       {showCalc && (
-                        <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 animate-in fade-in zoom-in-95 duration-200 mb-4">
+                        <div className="p-4 rounded-2xl border border-border dark:border-white/5 bg-zinc-100 dark:bg-zinc-800 animate-in fade-in zoom-in-95 duration-200 mb-4">
                           <div className="bg-zinc-950 rounded-xl p-4 mb-4 text-right">
                             <p className="text-[10px] font-black text-brand/50 uppercase tracking-widest mb-1 h-3">
                               {calcRef.prevVal !== null ? `${calcRef.prevVal} ${calcRef.op}` : ''}
@@ -994,18 +994,18 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           </div>
                           
                           <div className="grid grid-cols-4 gap-2">
-                            {['7','8','9','÷','4','5','6','×','1','2','3','-','0','C','=','+'].map(key => (
+                            {['7','8','9','Ã·','4','5','6','Ã—','1','2','3','-','0','C','=','+'].map(key => (
                               <button
                                 key={key}
                                 onClick={() => {
                                   if (key === 'C') handleCalcClear();
                                   else if (key === '=') handleCalcEq();
-                                  else if (['÷','×','-','+'].includes(key)) handleCalcOp(key);
+                                  else if (['Ã·','Ã—','-','+'].includes(key)) handleCalcOp(key);
                                   else handleCalcInput(key);
                                 }}
                                 className={cn(
                                   "h-10 rounded-lg font-black transition-all active:scale-95",
-                                  ['÷','×','-','+','='].includes(key) 
+                                  ['Ã·','Ã—','-','+','='].includes(key) 
                                     ? "bg-brand text-brand-foreground shadow-sm" 
                                     : "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white"
                                 )}
@@ -1096,9 +1096,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 ds.colors.text.secondary
                               )}>
                                 <span>{item.quantidade} {item.unidade}</span>
-                                <span>×</span>
+                                <span>Ã—</span>
                                 <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
-                                  {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                                  {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preÃ§o'}
                                 </span>
                               </div>
                             </div>
@@ -1232,7 +1232,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         </div>
                       )}
 
-                      {/* Mensagem quando não há resultados - Com opção de cadastro rápido */}
+                      {/* Mensagem quando nÃ£o hÃ¡ resultados - Com opÃ§Ã£o de cadastro rÃ¡pido */}
                       {supplierSearch && filteredSuppliers.length === 0 && !showQuickCreateSupplier && (
                         <div className={cn(
                           "absolute top-full left-0 right-0 mt-2 z-[100] p-8 rounded-xl border text-center animate-in fade-in zoom-in-95",
@@ -1246,7 +1246,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                             ds.typography.weight.medium,
                             ds.colors.text.secondary,
                             "mb-4"
-                          )}>Fornecedor não encontrado</p>
+                          )}>Fornecedor nÃ£o encontrado</p>
                           <Button
                             type="button"
                             onClick={() => setShowQuickCreateSupplier(true)}
@@ -1258,7 +1258,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         </div>
                       )}
 
-                      {/* Formulário inline de cadastro rápido de fornecedor */}
+                      {/* FormulÃ¡rio inline de cadastro rÃ¡pido de fornecedor */}
                       {showQuickCreateSupplier && (
                         <div className={cn(
                           "mt-4 p-4 rounded-xl border border-dashed animate-in fade-in slide-in-from-top-2",
@@ -1373,9 +1373,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </div>
 
                   <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Observações</Label>
+                    <Label className={ds.components.input.label}>ObservaÃ§Ãµes</Label>
                     <Textarea 
-                      placeholder="Instruções de entrega, pagamento..." 
+                      placeholder="InstruÃ§Ãµes de entrega, pagamento..." 
                       value={observacoes}
                       onChange={(e) => setObservacoes(e.target.value)}
                       onFocus={handleInputFocus}
@@ -1483,7 +1483,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                             ds.typography.size.xs,
                             ds.colors.text.secondary,
                             "mt-1"
-                          )}>{item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}</p>
+                          )}>{item.quantidade} {item.unidade} Ã— R$ {item.valorUnitario.toFixed(2)}</p>
                         </div>
                         <p className={cn(
                           ds.typography.size.sm,
@@ -1518,7 +1518,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 </CardContent>
               </Card>
 
-              {/* Resumo Observações */}
+              {/* Resumo ObservaÃ§Ãµes */}
               {observacoes && (
                 <Card className={ds.components.card.root}>
                   <CardContent className={cn(ds.components.card.body, "space-y-3")}>
@@ -1534,7 +1534,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                         ds.typography.weight.bold,
                         ds.colors.text.secondary,
                         "uppercase tracking-wider"
-                      )}>Observações</span>
+                      )}>ObservaÃ§Ãµes</span>
                     </div>
                     <p className={cn(
                       ds.typography.size.sm,
@@ -1577,7 +1577,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             disabled={!canProceed()}
             className={cn(ds.components.button.primary, "gap-2 ml-auto")}
           >
-            Próximo
+            PrÃ³ximo
             <ChevronRight className="h-4 w-4" />
           </Button>
         ) : (
@@ -1604,7 +1604,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     </>
   );
 
-  // ── Mobile helpers ─────────────────────────────────────────────────────────
+  // â”€â”€ Mobile helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const addDays = (n: number) => {
     const d = new Date();
     d.setDate(d.getDate() + n);
@@ -1629,7 +1629,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           )}
           <div className="flex-1 min-w-0">
             <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, "text-brand uppercase tracking-wider")}>
-              Novo Pedido · Passo {currentStepIndex + 1} de {STEPS.length}
+              Novo Pedido Â· Passo {currentStepIndex + 1} de {STEPS.length}
             </p>
             <h2 className={cn(ds.components.modal.title, "mt-0.5")}>
               {STEPS[currentStepIndex].title}
@@ -1662,7 +1662,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto custom-scrollbar">
 
-        {/* ── Step 1: Produtos ───────────────────────────── */}
+        {/* â”€â”€ Step 1: Produtos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeStep === "produtos" && (
           <div className="p-4 space-y-4 pb-32">
 
@@ -1692,7 +1692,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               )}
             </button>
 
-            {/* Quick Add Form — appears after selecting a product */}
+            {/* Quick Add Form â€” appears after selecting a product */}
             {selectedProduct && (
               <div className={cn(
                 "p-4 rounded-xl border space-y-3 animate-in slide-in-from-top-2",
@@ -1740,7 +1740,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </div>
                   <div className={cn(ds.components.input.group, "col-span-2")}>
                     <div className="flex items-center justify-between mb-1">
-                      <Label className={ds.components.input.label}>Preço</Label>
+                      <Label className={ds.components.input.label}>PreÃ§o</Label>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -1784,7 +1784,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           conversionMode === 'box_to_unit' ? "bg-white dark:bg-zinc-700 text-brand shadow-sm" : "text-zinc-500"
                         )}
                       >
-                        Caixa → Unidade
+                        Caixa â†’ Unidade
                       </button>
                       <button
                         type="button"
@@ -1794,7 +1794,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           conversionMode === 'unit_to_box' ? "bg-white dark:bg-zinc-700 text-brand shadow-sm" : "text-zinc-500"
                         )}
                       >
-                        Unidade → Caixa
+                        Unidade â†’ Caixa
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-4 items-end">
@@ -1819,13 +1819,13 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       onClick={handleApplyConversion}
                       className={cn(ds.components.button.primary, "w-full h-12 rounded-xl font-black uppercase tracking-widest text-xs")}
                     >
-                      Aplicar Conversão
+                      Aplicar ConversÃ£o
                     </Button>
                   </div>
                 )}
 
                 {showCalc && (
-                  <div className="p-4 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 animate-in slide-in-from-top-2">
+                  <div className="p-4 rounded-2xl border border-border dark:border-white/5 bg-zinc-100 dark:bg-zinc-800 animate-in slide-in-from-top-2">
                     <div className="bg-zinc-950 rounded-xl p-4 mb-4 text-right">
                       <p className="text-[10px] font-black text-brand/50 uppercase tracking-widest mb-1 h-3">
                         {calcRef.prevVal !== null ? `${calcRef.prevVal} ${calcRef.op}` : ''}
@@ -1835,18 +1835,18 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       </p>
                     </div>
                     <div className="grid grid-cols-4 gap-2">
-                      {['7','8','9','÷','4','5','6','×','1','2','3','-','0','C','=','+'].map(key => (
+                      {['7','8','9','Ã·','4','5','6','Ã—','1','2','3','-','0','C','=','+'].map(key => (
                         <button
                           key={key}
                           onClick={() => {
                             if (key === 'C') handleCalcClear();
                             else if (key === '=') handleCalcEq();
-                            else if (['÷','×','-','+'].includes(key)) handleCalcOp(key);
+                            else if (['Ã·','Ã—','-','+'].includes(key)) handleCalcOp(key);
                             else handleCalcInput(key);
                           }}
                           className={cn(
                             "h-12 rounded-xl font-black transition-all active:scale-90",
-                            ['÷','×','-','+','='].includes(key) 
+                            ['Ã·','Ã—','-','+','='].includes(key) 
                               ? "bg-brand text-brand-foreground shadow-md" 
                               : "bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white"
                           )}
@@ -1895,7 +1895,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     <div className="flex-1 min-w-0">
                       <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>{item.produto}</p>
                       <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                        {item.quantidade} {item.unidade}{item.valorUnitario > 0 ? ` · R$ ${item.valorUnitario.toFixed(2)}` : ""}
+                        {item.quantidade} {item.unidade}{item.valorUnitario > 0 ? ` Â· R$ ${item.valorUnitario.toFixed(2)}` : ""}
                       </p>
                     </div>
                     {item.valorUnitario > 0 && (
@@ -1921,13 +1921,13 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <div className={cn("flex flex-col items-center justify-center py-16 rounded-xl border border-dashed", ds.colors.border.default)}>
                 <ShoppingCart className={cn("h-12 w-12 mb-3 opacity-20", ds.colors.text.secondary)} />
                 <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.secondary)}>Nenhum item adicionado</p>
-                <p className={cn(ds.typography.size.xs, ds.colors.text.muted, "mt-1")}>Busque um produto acima para começar</p>
+                <p className={cn(ds.typography.size.xs, ds.colors.text.muted, "mt-1")}>Busque um produto acima para comeÃ§ar</p>
               </div>
             )}
           </div>
         )}
 
-        {/* ── Step 2: Fornecedor & Entrega ───────────────── */}
+        {/* â”€â”€ Step 2: Fornecedor & Entrega â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeStep === "fornecedor" && (
           <div className="p-4 space-y-5 pb-32">
 
@@ -1974,7 +1974,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               <div className="grid grid-cols-4 gap-2">
                 {[
                   { label: "Hoje", days: 0 },
-                  { label: "Amanhã", days: 1 },
+                  { label: "AmanhÃ£", days: 1 },
                   { label: "+3 dias", days: 3 },
                   { label: "+7 dias", days: 7 },
                 ].map(({ label, days }) => {
@@ -1999,16 +1999,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               </div>
               {dataEntrega && (
                 <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-2 text-center")}>
-                  📅 {format(dataEntrega, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  ðŸ“… {format(dataEntrega, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                 </p>
               )}
             </div>
 
             {/* Observations */}
             <div className={ds.components.input.group}>
-              <Label className={ds.components.input.label}>Observações</Label>
+              <Label className={ds.components.input.label}>ObservaÃ§Ãµes</Label>
               <Textarea
-                placeholder="Instruções de entrega, pagamento..."
+                placeholder="InstruÃ§Ãµes de entrega, pagamento..."
                 value={observacoes}
                 onChange={(e) => setObservacoes(e.target.value)}
                 onFocus={handleInputFocus}
@@ -2018,7 +2018,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           </div>
         )}
 
-        {/* ── Step 3: Confirmar ──────────────────────────── */}
+        {/* â”€â”€ Step 3: Confirmar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {activeStep === "confirmar" && (
           <div className="p-4 space-y-4 pb-32">
             <div className="grid grid-cols-2 gap-3">
@@ -2027,7 +2027,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <Building2 className="h-3 w-3" /> Fornecedor
                 </p>
                 <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
-                  {suppliers.find(s => s.id === fornecedor)?.name || "—"}
+                  {suppliers.find(s => s.id === fornecedor)?.name || "â€”"}
                 </p>
               </div>
               <div className={cn("p-3 rounded-xl border", ds.colors.surface.section, ds.colors.border.default)}>
@@ -2035,7 +2035,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <CalendarIcon className="h-3 w-3" /> Entrega
                 </p>
                 <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary)}>
-                  {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "—"}
+                  {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "â€”"}
                 </p>
               </div>
             </div>
@@ -2054,7 +2054,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                     <div className="flex-1 min-w-0">
                       <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>{item.produto}</p>
                       <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
-                        {item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}
+                        {item.quantidade} {item.unidade} Ã— R$ {item.valorUnitario.toFixed(2)}
                       </p>
                     </div>
                     <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "ml-3")}>
@@ -2074,7 +2074,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             {observacoes && (
               <div className={cn("p-3 rounded-xl border", ds.colors.surface.section, ds.colors.border.default)}>
                 <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider mb-1.5 flex items-center gap-1.5")}>
-                  <FileText className="h-3 w-3" /> Observações
+                  <FileText className="h-3 w-3" /> ObservaÃ§Ãµes
                 </p>
                 <p className={cn(ds.typography.size.sm, ds.colors.text.primary)}>{observacoes}</p>
               </div>
@@ -2105,7 +2105,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             disabled={!canProceed()}
             className={cn(ds.components.button.primary, "flex-1 h-12 text-base")}
           >
-            Próximo <ChevronRight className="h-4 w-4 ml-2" />
+            PrÃ³ximo <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         ) : (
           <Button
@@ -2123,7 +2123,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         )}
       </div>
 
-      {/* ── Mobile Supplier Search Drawer ───────────────── */}
+      {/* â”€â”€ Mobile Supplier Search Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <Drawer open={showMobileSupplierSearch && isMobile} onOpenChange={setShowMobileSupplierSearch}>
         <DrawerContent className={cn("h-[92vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
           <DrawerHeader className="border-b pb-3 px-4 flex-shrink-0">
@@ -2177,8 +2177,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-4", ds.colors.surface.section)}>
                   <Building2 className={cn("h-8 w-8 opacity-30", ds.colors.text.secondary)} />
                 </div>
-                <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>Fornecedor não encontrado</p>
-                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-1 mb-6")}>Deseja cadastrá-lo agora?</p>
+                <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>Fornecedor nÃ£o encontrado</p>
+                <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-1 mb-6")}>Deseja cadastrÃ¡-lo agora?</p>
                 <Button
                   onClick={() => { setShowMobileSupplierSearch(false); setShowQuickCreateSupplier(true); }}
                   className={cn(ds.components.button.primary, "h-11 px-6 rounded-xl")}
@@ -2215,7 +2215,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         onKeyDown={!isMobile ? handleKeyDown : undefined}
         hideClose={isMobile}
       >
-        {/* Adiciona títulos acessíveis */}
+        {/* Adiciona tÃ­tulos acessÃ­veis */}
         <div className="sr-only">
           <DialogTitle>Novo Pedido Geral</DialogTitle>
           <DialogDescription>Crie um novo pedido de compra</DialogDescription>
@@ -2223,10 +2223,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
         {isMobile ? mobileContent : modalInnerContent}
         
-        {/* Mobile Shopping Cart Drawer - Renderizado como filho do DialogContent para manter contexto de interação */}
+        {/* Mobile Shopping Cart Drawer - Renderizado como filho do DialogContent para manter contexto de interaÃ§Ã£o */}
         <Drawer open={showMobileCart && isMobile} onOpenChange={setShowMobileCart}>
           <DrawerContent className={cn("max-h-[85vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default)}>
-            <DrawerHeader className="text-left border-b border-border/40 pb-4">
+            <DrawerHeader className="text-left border-b border-border dark:border-white/5/40 pb-4">
               <div className="flex items-center justify-between">
                 <DrawerTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, "flex items-center gap-2")}>
                   <Package className="h-5 w-5 text-brand" />
@@ -2246,7 +2246,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <div className="flex flex-col items-center justify-center py-10 text-center">
                   <Package className="h-12 w-12 text-muted-foreground/30 mb-3" />
                   <p className="text-sm font-medium text-foreground">Nenhum produto adicionado</p>
-                  <p className="text-xs text-muted-foreground mt-1">Busque e adicione produtos no formulário.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Busque e adicione produtos no formulÃ¡rio.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -2267,9 +2267,9 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                               <span className="bg-secondary/50 px-1.5 py-0.5 rounded flex items-center gap-1">
                                 {item.quantidade} <span className="opacity-70">{item.unidade}</span>
                               </span>
-                              <span>×</span>
+                              <span>Ã—</span>
                               <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
-                                {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
+                                {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preÃ§o'}
                               </span>
                             </div>
                           </div>
@@ -2279,14 +2279,14 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           size="icon" 
                           onClick={() => {
                             setItens(itens.filter((_, i) => i !== index));
-                            if (itens.length === 1) setShowMobileCart(false); // Fecha se remover o último
+                            if (itens.length === 1) setShowMobileCart(false); // Fecha se remover o Ãºltimo
                           }}
                           className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                      <div className="flex justify-end items-center pt-2 border-t border-border/40 mt-1">
+                      <div className="flex justify-end items-center pt-2 border-t border-border dark:border-white/5/40 mt-1">
                          <p className="text-[14px] font-bold text-foreground">
                            R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
                          </p>
@@ -2297,7 +2297,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
               )}
             </div>
             
-            <div className="p-4 border-t border-border bg-background/50 flex-shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
+            <div className="p-4 border-t border-border dark:border-white/5 bg-background/50 flex-shrink-0 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]">
                <div className="flex justify-between items-center mb-4">
                  <span className="text-sm font-bold text-muted-foreground uppercase tracking-wider">Total do Pedido</span>
                  <span className="text-xl font-bold text-brand">
@@ -2316,7 +2316,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         {/* Mobile Product Search Drawer */}
         <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
           <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
-            <DrawerHeader className="border-b border-border/40 pb-4 px-4 overflow-visible flex-shrink-0">
+            <DrawerHeader className="border-b border-border dark:border-white/5/40 pb-4 px-4 overflow-visible flex-shrink-0">
               <div className="flex items-center gap-3">
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -2375,7 +2375,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <div className="w-20 h-20 rounded-3xl bg-brand/5 flex items-center justify-center mb-6 shadow-inner">
                      <Package className="h-10 w-10 text-brand/30" />
                   </div>
-                  <p className="text-base font-bold text-foreground">Produto não encontrado</p>
+                  <p className="text-base font-bold text-foreground">Produto nÃ£o encontrado</p>
                   <p className="text-xs text-muted-foreground mt-2 mb-8 max-w-[200px] mx-auto">Gostaria de cadastrar "{productSearch}" no sistema agora?</p>
                   <Button
                     onClick={() => {
@@ -2403,3 +2403,4 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     </Dialog>
   );
 }
+

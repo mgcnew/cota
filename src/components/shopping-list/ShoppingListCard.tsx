@@ -1,4 +1,4 @@
-import { memo, useState } from "react";
+﻿import { memo, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,11 +38,11 @@ const priorityConfig = {
     label: "Baixa",
     icon: Clock,
     color: "text-gray-600 dark:text-gray-400",
-    badge: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+    badge: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-border dark:border-white/5",
     accent: "border-l-gray-400",
   },
   medium: {
-    label: "Média",
+    label: "MÃ©dia",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
     badge: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200 dark:border-blue-800",
@@ -111,7 +111,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
       open={isExpanded}
       onOpenChange={setIsExpanded}
       className={cn(
-        "group relative rounded-xl border-l-4 bg-card border border-border overflow-hidden transition-all duration-200 hover:shadow-md",
+        "group relative rounded-xl border-l-4 bg-card border border-border dark:border-white/5 overflow-hidden transition-all duration-200 hover:shadow-md",
         config.accent,
         isSelected && "ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-900"
       )}
@@ -187,7 +187,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
                 </div>
               </div>
               <div className="bg-muted/50 rounded-lg p-2.5">
-                <p className="text-xs text-muted-foreground mb-0.5">Preço Est.</p>
+                <p className="text-xs text-muted-foreground mb-0.5">PreÃ§o Est.</p>
                 <p
                   className={cn(
                     "font-semibold",
@@ -207,7 +207,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
       {/* Expand/Collapse Button */}
       <CollapsibleTrigger asChild>
         <button
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-muted/30 border-t border-border text-xs text-muted-foreground active:bg-muted/50 touch-target min-h-[44px]"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-muted/30 border-t border-border dark:border-white/5 text-xs text-muted-foreground active:bg-muted/50 touch-target min-h-[44px]"
         >
           {isExpanded ? (
             <>
@@ -225,7 +225,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
 
       {/* Expandable Actions */}
       <CollapsibleContent className="data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up overflow-hidden">
-        <div className="p-4 pt-0 space-y-3 border-t border-border bg-muted/20">
+        <div className="p-4 pt-0 space-y-3 border-t border-border dark:border-white/5 bg-muted/20">
           
           {/* Notes */}
           {item.notes && (
@@ -270,3 +270,4 @@ export const ShoppingListCard = memo(function ShoppingListCard({
     </Collapsible>
   );
 });
+

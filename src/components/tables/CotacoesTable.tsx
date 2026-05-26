@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -28,25 +28,25 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                   <div className="w-8 h-8 rounded-lg bg-white/70 dark:bg-gray-900/40 border border-teal-200/50 dark:border-teal-800/50 flex items-center justify-center text-teal-600 dark:text-cyan-300">
                     <FileText className="h-4 w-4" />
                   </div>
-                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Cotação</span>
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">CotaÃ§Ã£o</span>
                 </div>
                 <div className="hidden md:flex w-[20%] pl-2">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Produto</span>
                 </div>
                 <div className="hidden lg:flex w-[18%] pl-2">
-                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Período</span>
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">PerÃ­odo</span>
                 </div>
                 <div className="hidden sm:flex w-[12%] pl-2 justify-center">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Status</span>
                 </div>
                 <div className="flex w-[16%] pl-2 justify-center">
-                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Melhor Preço</span>
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Melhor PreÃ§o</span>
                 </div>
                 <div className="hidden sm:flex w-[12%] pl-2 justify-center">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Fornecedores</span>
                 </div>
                 <div className="w-[10%] pl-4 flex justify-end">
-                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Ações</span>
+                  <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">AÃ§Ãµes</span>
                 </div>
               </div>
             </TableCell>
@@ -57,7 +57,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
             <TableRow 
               key={cotacao.id}
               className={cn(
-                "sm:hover:bg-accent/50 border-b border-border",
+                "sm:hover:bg-accent/50 border-b border-border dark:border-white/5",
                 index % 2 === 0 ? "bg-card" : "bg-muted/30"
               )}
             >
@@ -148,7 +148,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                         className="h-8 w-8 p-0 hover:bg-accent transition-colors duration-200"
                       >
                         <MoreVertical className="h-4 w-4 transition-colors duration-200" />
-                        <span className="sr-only">Abrir menu de ações</span>
+                        <span className="sr-only">Abrir menu de aÃ§Ãµes</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
@@ -183,7 +183,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                       {cotacao.status === "concluida" && (
                         <DropdownMenuItem disabled className="text-gray-400">
                           <FileText className="h-4 w-4 mr-2" />
-                          <span>Cotação finalizada</span>
+                          <span>CotaÃ§Ã£o finalizada</span>
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -58,7 +58,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Inicializar quantidades com as quantidades necessárias da cotação
+  // Inicializar quantidades com as quantidades necessÃ¡rias da cotaÃ§Ã£o
   useMemo(() => {
     if (quote && Object.keys(quantities).length === 0) {
       const initialQuantities: Record<string, number> = {};
@@ -104,7 +104,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
               ? supplierItem.valorTotal / supplierItem.quantidadeUnidadesEstimada
               : supplierItem.valorTotal);
         
-        // Melhor preço (menor)
+        // Melhor preÃ§o (menor)
         if (costPerUnit > 0 && costPerUnit < bestCostPerUnit) {
           bestCostPerUnit = costPerUnit;
           bestSupplierId = fornecedor.supplierId;
@@ -112,7 +112,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           bestItem = supplierItem;
         }
         
-        // Pior preço (maior) - para cálculo de economia
+        // Pior preÃ§o (maior) - para cÃ¡lculo de economia
         if (costPerUnit > worstCostPerUnit) {
           worstCostPerUnit = costPerUnit;
           worstSupplierId = fornecedor.supplierId;
@@ -146,14 +146,14 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
   const bestSupplierByItem = supplierDataByItem.best;
   const worstSupplierByItem = supplierDataByItem.worst;
 
-  // Agrupar itens por fornecedor (modo automático)
+  // Agrupar itens por fornecedor (modo automÃ¡tico)
   const ordersBySupplier = useMemo(() => {
     if (!quote) return {};
     
     const orders: Record<string, { supplierName: string; items: any[] }> = {};
     
     if (conversionMode === "auto") {
-      // Modo automático: usar melhor preço
+      // Modo automÃ¡tico: usar melhor preÃ§o
       Object.entries(bestSupplierByItem).forEach(([packagingId, data]) => {
         if (!orders[data.supplierId]) {
           orders[data.supplierId] = { supplierName: data.supplierName, items: [] };
@@ -165,7 +165,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
         });
       });
     } else {
-      // Modo personalizado: usar seleções do usuário
+      // Modo personalizado: usar seleÃ§Ãµes do usuÃ¡rio
       Object.entries(customSelections).forEach(([packagingId, supplierId]) => {
         const fornecedor = respondedSuppliers.find(f => f.supplierId === supplierId);
         if (!fornecedor) return;
@@ -198,7 +198,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     }, 0);
   }, [ordersBySupplier, quantities, quote]);
 
-  // Calcular economia estimada: (Maior preço - Preço escolhido) × Quantidade
+  // Calcular economia estimada: (Maior preÃ§o - PreÃ§o escolhido) Ã— Quantidade
   const economiaBySupplier = useMemo(() => {
     const economia: Record<string, number> = {};
     
@@ -214,7 +214,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           const precoEscolhido = item.valorTotal || 0;
           const maiorPreco = worst.item.valorTotal;
           
-          // Economia = (Maior preço - Preço escolhido) × Quantidade
+          // Economia = (Maior preÃ§o - PreÃ§o escolhido) Ã— Quantidade
           if (maiorPreco > precoEscolhido) {
             supplierEconomia += (maiorPreco - precoEscolhido) * qty;
           }
@@ -232,7 +232,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     return Object.values(economiaBySupplier).reduce((sum, val) => sum + val, 0);
   }, [economiaBySupplier]);
 
-  // Inicializar seleções personalizadas com melhor preço
+  // Inicializar seleÃ§Ãµes personalizadas com melhor preÃ§o
   const initCustomSelections = () => {
     const selections: Record<string, string> = {};
     Object.entries(bestSupplierByItem).forEach(([packagingId, data]) => {
@@ -315,12 +315,12 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
             <div className={cn("w-9 h-9 flex justify-center items-center rounded-xl", ds.colors.surface.card, "border", ds.colors.border.subtle)}>
               <ShoppingCart className={cn("h-4 w-4", ds.colors.text.secondary)} />
             </div>
-            Converter Cotação em Pedido(s)
+            Converter CotaÃ§Ã£o em Pedido(s)
           </DialogTitle>
           <DialogDescription>
             {suppliersCount > 1 
-              ? `Serão criados ${suppliersCount} pedidos para fornecedores diferentes`
-              : "Selecione o modo de conversão e confirme os itens"
+              ? `SerÃ£o criados ${suppliersCount} pedidos para fornecedores diferentes`
+              : "Selecione o modo de conversÃ£o e confirme os itens"
             }
           </DialogDescription>
         </DialogHeader>
@@ -329,9 +329,9 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
           <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; }`}</style>
           <div className="space-y-4 pb-4 hide-scrollbar">
             
-            {/* Modo de Conversão */}
+            {/* Modo de ConversÃ£o */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium">Modo de Conversão</Label>
+              <Label className="text-sm font-medium">Modo de ConversÃ£o</Label>
               <RadioGroup 
                 value={conversionMode} 
                 onValueChange={(v) => {
@@ -346,7 +346,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                     "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
                     conversionMode === "auto"
                       ? "bg-slate-100 dark:bg-zinc-800/50 border-slate-300 dark:border-zinc-700 ring-1 ring-slate-300 dark:ring-zinc-700"
-                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
+                      : "bg-white dark:bg-zinc-900 border-border dark:border-white/5 hover:border-slate-300 dark:hover:border-zinc-700"
                   )}
                 >
                   <RadioGroupItem value="auto" id="auto" className="sr-only" />
@@ -357,8 +357,8 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                     <Zap className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">Melhor Preço</p>
-                    <p className="text-xs text-muted-foreground">Automático por item</p>
+                    <p className="font-medium text-sm">Melhor PreÃ§o</p>
+                    <p className="text-xs text-muted-foreground">AutomÃ¡tico por item</p>
                   </div>
                 </Label>
                 
@@ -368,7 +368,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                     "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all",
                     conversionMode === "custom"
                       ? "bg-slate-100 dark:bg-zinc-800/50 border-slate-300 dark:border-zinc-700 ring-1 ring-slate-300 dark:ring-zinc-700"
-                      : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700"
+                      : "bg-white dark:bg-zinc-900 border-border dark:border-white/5 hover:border-slate-300 dark:hover:border-zinc-700"
                   )}
                 >
                   <RadioGroupItem value="custom" id="custom" className="sr-only" />
@@ -395,7 +395,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
               </div>
             ) : (
               <>
-                {/* Modo Personalizado - Seleção por Item */}
+                {/* Modo Personalizado - SeleÃ§Ã£o por Item */}
                 {conversionMode === "custom" && (
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Selecionar Fornecedor por Item</Label>
@@ -545,9 +545,9 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-medium">Observações (opcional)</Label>
+                        <Label className="text-xs font-medium">ObservaÃ§Ãµes (opcional)</Label>
                         <Input
-                          placeholder="Observações sobre o pedido..."
+                          placeholder="ObservaÃ§Ãµes sobre o pedido..."
                           value={observations}
                           onChange={(e) => setObservations(e.target.value)}
                           className="h-8"
@@ -578,7 +578,7 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
                         <Award className="h-4 w-4 text-green-600 dark:text-green-500" />
                         <span className="font-medium text-sm text-green-700 dark:text-green-500">Economia Estimada</span>
                         <span className="text-xs text-muted-foreground">
-                          (vs maior preço cotado)
+                          (vs maior preÃ§o cotado)
                         </span>
                       </div>
                       <span className="text-lg font-bold text-green-600 dark:text-green-500">
@@ -624,3 +624,4 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
     </Dialog>
   );
 }
+

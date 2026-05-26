@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+﻿import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Zap, Target, BarChart3 } from "lucide-react";
 
@@ -30,13 +30,13 @@ const categoriaConfig = {
   },
   recomendacao: {
     icon: Target,
-    label: 'Recomendação',
+    label: 'RecomendaÃ§Ã£o',
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
   },
   tendencia: {
     icon: BarChart3,
-    label: 'Tendência',
+    label: 'TendÃªncia',
     color: 'text-purple-600 dark:text-purple-400',
     bgColor: 'bg-purple-50 dark:bg-purple-950/30',
   },
@@ -44,7 +44,7 @@ const categoriaConfig = {
 
 const prioridadeConfig = {
   alta: { label: 'Alta', variant: 'destructive' as const },
-  media: { label: 'Média', variant: 'default' as const },
+  media: { label: 'MÃ©dia', variant: 'default' as const },
   baixa: { label: 'Baixa', variant: 'secondary' as const },
 };
 
@@ -82,9 +82,9 @@ export function InsightCard({ insight }: InsightCardProps) {
           </p>
           
           {insight.acaoSugerida && (
-            <div className="pt-2 border-t border-border">
+            <div className="pt-2 border-t border-border dark:border-white/5">
               <p className="text-sm font-medium text-foreground">
-                💡 Ação Sugerida:
+                ðŸ’¡ AÃ§Ã£o Sugerida:
               </p>
               <p className="text-sm text-muted-foreground mt-1">
                 {insight.acaoSugerida}
@@ -96,3 +96,4 @@ export function InsightCard({ insight }: InsightCardProps) {
     </Card>
   );
 }
+

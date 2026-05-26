@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -56,7 +56,7 @@ export function SelectSupplierPerProductDialog({
     } else {
       newIncluded.add(productId);
       
-      // Se estamos incluindo e não tem fornecedor selecionado, tenta o melhor ou o primeiro
+      // Se estamos incluindo e nÃ£o tem fornecedor selecionado, tenta o melhor ou o primeiro
       const selection = selections.get(productId);
       if (!selection || !selection.supplierId) {
         const product = products.find(p => p.productId === productId);
@@ -130,7 +130,7 @@ export function SelectSupplierPerProductDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-5xl h-[90vh] sm:h-[85vh] p-0 flex flex-col bg-white dark:bg-gray-900 border-0 dark:border dark:border-gray-700 rounded-lg sm:rounded-xl [&>button]:hidden">
-        <DialogHeader className="px-3 sm:px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex-shrink-0">
+        <DialogHeader className="px-3 sm:px-4 py-2.5 border-b border-border dark:border-white/5 bg-white dark:bg-gray-900 flex-shrink-0">
           <div className="flex items-center justify-between gap-3">
             <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
               <div className="p-1.5 rounded-lg bg-blue-600 dark:bg-blue-500 text-white flex-shrink-0">
@@ -156,7 +156,7 @@ export function SelectSupplierPerProductDialog({
             <Alert className="border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertDescription className="text-amber-800 dark:text-amber-200 text-xs">
-                <strong>Atenção:</strong> Economia perdida: <span className="font-bold">R$ {(total - bestTotal).toFixed(2)}</span>
+                <strong>AtenÃ§Ã£o:</strong> Economia perdida: <span className="font-bold">R$ {(total - bestTotal).toFixed(2)}</span>
               </AlertDescription>
             </Alert>
           )}
@@ -170,7 +170,7 @@ export function SelectSupplierPerProductDialog({
                     <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[140px]">Produto</TableHead>
                     <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[70px]">Qtd</TableHead>
                     <TableHead className="px-2 py-1.5 text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[260px]">Fornecedor</TableHead>
-                    <TableHead className="px-2 py-1.5 text-right text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[100px]">Preço</TableHead>
+                    <TableHead className="px-2 py-1.5 text-right text-[10px] font-semibold text-slate-700 dark:text-gray-300 min-w-[100px]">PreÃ§o</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-slate-100 dark:divide-gray-700">
@@ -198,7 +198,7 @@ export function SelectSupplierPerProductDialog({
                             </p>
                             {!product.isActuallyIncluded && isIncluded && (
                               <span className="text-[9px] text-amber-600 dark:text-amber-400 font-medium uppercase leading-tight">
-                                Sem preço cotado
+                                Sem preÃ§o cotado
                               </span>
                             )}
                           </div>
@@ -215,8 +215,8 @@ export function SelectSupplierPerProductDialog({
                               options={product.supplierOptions.map(s => ({
                                 value: s.supplierId,
                                 label: s.price > 0 
-                                  ? `${s.supplierName} - R$ ${s.price.toFixed(2)}${s.isBest ? ' ⭐' : ''}`
-                                  : `${s.supplierName} - (Sem preço registrado)`
+                                  ? `${s.supplierName} - R$ ${s.price.toFixed(2)}${s.isBest ? ' â­' : ''}`
+                                  : `${s.supplierName} - (Sem preÃ§o registrado)`
                               }))}
                               value={selection?.supplierId || ''}
                               onValueChange={(value) => handleSelectionChange(product.productId, value)}
@@ -255,7 +255,7 @@ export function SelectSupplierPerProductDialog({
             <Alert className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
               <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               <AlertDescription className="text-blue-900 dark:text-blue-200 text-xs">
-                <strong>Múltiplos fornecedores:</strong> {supplierGroups.size} selecionados
+                <strong>MÃºltiplos fornecedores:</strong> {supplierGroups.size} selecionados
                 {Array.from(supplierGroups.entries()).map(([supplierId, productNames]) => {
                   const supplier = products.find(p => 
                     p.supplierOptions.some(s => s.supplierId === supplierId)
@@ -263,7 +263,7 @@ export function SelectSupplierPerProductDialog({
                   
                   return (
                     <div key={supplierId} className="mt-0.5 text-[10px]">
-                      • <strong>{supplier?.supplierName}:</strong> {productNames.length} produto(s)
+                      â€¢ <strong>{supplier?.supplierName}:</strong> {productNames.length} produto(s)
                     </div>
                   );
                 })}
@@ -272,7 +272,7 @@ export function SelectSupplierPerProductDialog({
           )}
         </div>
 
-        <div className="flex-shrink-0 p-3 border-t border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/50">
+        <div className="flex-shrink-0 p-3 border-t border-border dark:border-white/5 bg-slate-50 dark:bg-gray-800/50">
           <div className="flex items-center justify-between mb-2 gap-3">
             <span className="text-xs font-semibold text-slate-700 dark:text-gray-300 whitespace-nowrap">Total do Pedido:</span>
             <span className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap">R$ {total.toFixed(2)}</span>
@@ -307,3 +307,4 @@ export function SelectSupplierPerProductDialog({
     </Dialog>
   );
 }
+

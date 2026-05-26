@@ -1,4 +1,4 @@
-import { useCallback, memo, useEffect } from "react";
+﻿import { useCallback, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
@@ -80,7 +80,7 @@ function CotacoesTab() {
     setRelatorioDialogOpen(true);
   }, [setRelatorioDialogOpen]);
 
-  // Ouvir evento de atalho de teclado para nova cotação
+  // Ouvir evento de atalho de teclado para nova cotaÃ§Ã£o
   useEffect(() => {
     const handleNovaEvent = (e: CustomEvent) => {
       if (e.detail?.tab === 'cotacoes') {
@@ -99,9 +99,9 @@ function CotacoesTab() {
       {isMobile ? (
         <div className="mb-4 -mx-1">
           <MobileMetricRibbon>
-            <MobileMetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
+            <MobileMetricCard title="CotaÃ§Ãµes Ativas" value={stats.ativas} icon={FileText} variant="info" />
             <MobileMetricCard 
-              title="Adesão Fornecedores" 
+              title="AdesÃ£o Fornecedores" 
               value={stats.adesaoFormatada} 
               icon={Users} 
               variant="success" 
@@ -109,7 +109,7 @@ function CotacoesTab() {
               onClick={() => handleStatusFilterChange("prontas")}
             />
             <MobileMetricCard
-              title="Ações Urgentes"
+              title="AÃ§Ãµes Urgentes"
               value={stats.vencendo}
               icon={Zap}
               variant="warning"
@@ -127,10 +127,10 @@ function CotacoesTab() {
         </div>
       ) : (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-          <MetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
+          <MetricCard title="CotaÃ§Ãµes Ativas" value={stats.ativas} icon={FileText} variant="info" />
           
           <MetricCard
-            title="Adesão de Fornecedores"
+            title="AdesÃ£o de Fornecedores"
             value={stats.adesaoFormatada}
             icon={Users}
             variant="success"
@@ -143,7 +143,7 @@ function CotacoesTab() {
           />
 
           <MetricCard
-            title="Ações Urgentes"
+            title="AÃ§Ãµes Urgentes"
             value={stats.vencendo}
             icon={Zap}
             variant="warning"
@@ -179,9 +179,9 @@ function CotacoesTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
-                  {stats.prontasParaDecisao} cotação(ões) pronta(s)
+                  {stats.prontasParaDecisao} cotaÃ§Ã£o(Ãµes) pronta(s)
                 </p>
-                <p className={cn("text-xs", ds.colors.text.secondary)}>Todos os fornecedores já responderam</p>
+                <p className={cn("text-xs", ds.colors.text.secondary)}>Todos os fornecedores jÃ¡ responderam</p>
               </div>
               <Button
                 size="sm"
@@ -201,7 +201,7 @@ function CotacoesTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
-                  {stats.vencendo} cotação(ões) para vencer
+                  {stats.vencendo} cotaÃ§Ã£o(Ãµes) para vencer
                 </p>
                 <p className={cn("text-xs", ds.colors.text.secondary)}>Prazo termina em menos de 48h</p>
               </div>
@@ -219,32 +219,32 @@ function CotacoesTab() {
       )}
 
       {/* Unified Container for Search, Table and Mobile Cards */}
-      <div className="w-full bg-white dark:bg-[#1C1E23] border border-zinc-200/80 dark:border-zinc-800/80 sm:rounded-xl overflow-hidden shadow-sm mb-8">
+      <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm mb-8">
         {/* Header / Actions Bar */}
-        <div className="p-3 md:p-4 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#16181C]/50">
+        <div className="p-3 md:p-4 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
             {/* Search Field */}
             <div className="flex-1 max-w-xl">
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Buscar cotação..."
+                placeholder="Buscar cotaÃ§Ã£o..."
               />
             </div>
 
             <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
               <div className="hidden md:block">
                 <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                  <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
+                  <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="ativa">🟢 Ativas</SelectItem>
-                    <SelectItem value="pendente">🟡 Pendentes</SelectItem>
-                    <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
-                    <SelectItem value="vencendo">⚠️ Vencendo em 48h</SelectItem>
-                    <SelectItem value="concluida">🔵 Concluídas</SelectItem>
+                    <SelectItem value="ativa">ðŸŸ¢ Ativas</SelectItem>
+                    <SelectItem value="pendente">ðŸŸ¡ Pendentes</SelectItem>
+                    <SelectItem value="prontas">âœ… Prontas p/ DecisÃ£o</SelectItem>
+                    <SelectItem value="vencendo">âš ï¸ Vencendo em 48h</SelectItem>
+                    <SelectItem value="concluida">ðŸ”µ ConcluÃ­das</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -252,8 +252,8 @@ function CotacoesTab() {
                 variant="outline"
                 size="icon"
                 onClick={handleExportQuotes}
-                className={cn("h-11 w-11 rounded-lg border-zinc-200 dark:border-zinc-800", ds.components.button.secondary)}
-                title="Relatório de Economia e Resultados"
+                className={cn("h-11 w-11 rounded-lg border-border dark:border-white/5", ds.components.button.secondary)}
+                title="RelatÃ³rio de Economia e Resultados"
               >
                 <Download className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
               </Button>
@@ -262,14 +262,14 @@ function CotacoesTab() {
                 className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
               >
                 <Plus className="h-4 w-4 mr-1.5" />
-                Nova Cotação
+                Nova CotaÃ§Ã£o
               </Button>
             </div>
           </div>
         </div>
 
         {/* Mobile Filter Chips */}
-        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#16181C]/50 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style dangerouslySetInnerHTML={{__html: `
             .md\\:hidden::-webkit-scrollbar { display: none; }
           `}} />
@@ -279,7 +279,7 @@ function CotacoesTab() {
             { value: 'pendente', label: 'Pendentes' },
             { value: 'prontas', label: 'Prontas' },
             { value: 'vencendo', label: 'Vencendo' },
-            { value: 'concluida', label: 'Concluídas' },
+            { value: 'concluida', label: 'ConcluÃ­das' },
           ].map(status => (
             <button
               key={status.value}
@@ -302,10 +302,10 @@ function CotacoesTab() {
               <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
                 <FileText className="h-8 w-8 text-zinc-400" />
               </div>
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Nenhuma cotação encontrada</h3>
-              <p className="text-zinc-500 max-w-sm mx-auto mb-6">Tente ajustar os filtros ou crie uma nova cotação.</p>
+              <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Nenhuma cotaÃ§Ã£o encontrada</h3>
+              <p className="text-zinc-500 max-w-sm mx-auto mb-6">Tente ajustar os filtros ou crie uma nova cotaÃ§Ã£o.</p>
               <Button onClick={() => setAddDialogOpen(true)} className={cn(ds.components.button.primary)}>
-                <Plus className="h-4 w-4 mr-2" /> Nova Cotação
+                <Plus className="h-4 w-4 mr-2" /> Nova CotaÃ§Ã£o
               </Button>
             </div>
           ) : (
@@ -345,7 +345,7 @@ function CotacoesTab() {
               </div>
 
               {/* Pagination */}
-              <div className="p-4 bg-white dark:bg-[#1C1E23] border-t border-zinc-200/80 dark:border-zinc-800/80">
+              <div className="p-4 bg-white dark:bg-[#1C1E23] border-t border-border dark:border-white/5">
                 <DataPagination
                   currentPage={paginatedData.pagination.currentPage}
                   totalPages={paginatedData.pagination.totalPages}
@@ -385,3 +385,4 @@ function CotacoesTab() {
 }
 
 export default memo(CotacoesTab);
+

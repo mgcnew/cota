@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+﻿import { Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProductPriceHistory } from "@/hooks/useProductPriceHistory";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ export function LastPaidPricesTooltip({ productId }: LastPaidPricesTooltipProps)
             "text-muted-foreground hover:text-foreground transition-colors"
           )}
           onClick={(e) => e.stopPropagation()}
-          aria-label="Últimos valores pagos"
+          aria-label="Ãšltimos valores pagos"
         >
           <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center ring-1 ring-zinc-200 dark:ring-zinc-800">
             <Info className="h-3 w-3" />
@@ -40,7 +40,7 @@ export function LastPaidPricesTooltip({ productId }: LastPaidPricesTooltipProps)
         side="right"
         align="start"
         className={cn(
-          "w-64 p-3 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 shadow-xl rounded-xl z-[100]",
+          "w-64 p-3 bg-white dark:bg-gray-950 border border-border dark:border-white/5 shadow-xl rounded-xl z-[100]",
           designSystem.components.card.flat
         )}
         onClick={(e) => e.stopPropagation()}
@@ -48,12 +48,12 @@ export function LastPaidPricesTooltip({ productId }: LastPaidPricesTooltipProps)
       >
         <div className="space-y-2">
           <p className="font-black text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
-            Últimos valores pagos
+            Ãšltimos valores pagos
           </p>
           {isLoading ? (
             <p className="text-xs text-muted-foreground">Carregando...</p>
           ) : entries.length === 0 ? (
-            <p className="text-xs text-muted-foreground">Sem histórico de pedidos</p>
+            <p className="text-xs text-muted-foreground">Sem histÃ³rico de pedidos</p>
           ) : (
             <div className="space-y-2">
               {entries.map((e: any) => (
@@ -76,3 +76,4 @@ export function LastPaidPricesTooltip({ productId }: LastPaidPricesTooltipProps)
     </Popover>
   );
 }
+

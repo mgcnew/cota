@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+﻿import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -79,17 +79,17 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [internalOpen, setInternalOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  // Usar controle externo se fornecido, senão usar interno
+  // Usar controle externo se fornecido, senÃ£o usar interno
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
 
-  // Usar quote prop diretamente (removida lógica de lazy loading mobile)
+  // Usar quote prop diretamente (removida lÃ³gica de lazy loading mobile)
   const currentQuote: Quote | null = quote || null;
 
-  // Estado de loading (removida lógica mobile)
+  // Estado de loading (removida lÃ³gica mobile)
   const isLoadingQuote = false;
 
-  // Se não há quote e modal não está aberto, apenas renderizar trigger
+  // Se nÃ£o hÃ¡ quote e modal nÃ£o estÃ¡ aberto, apenas renderizar trigger
   if (!open && !currentQuote) {
     if (trigger) {
       return <>{trigger}</>;
@@ -101,7 +101,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [isEditMode, setIsEditMode] = useState(false);
   const [activeSection, setActiveSection] = useState<EditSection>("detalhes");
 
-  // Mantém compatibilidade com tabs antigas temporariamente
+  // MantÃ©m compatibilidade com tabs antigas temporariamente
   const [activeTab, setActiveTab] = useState(defaultTab || "detalhes");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
@@ -123,7 +123,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const [supplierOrdersForConversion, setSupplierOrdersForConversion] = useState<SupplierOrder[]>([]);
   const editInputRef = useRef<HTMLInputElement>(null);
 
-  // Estados para formulário de edição
+  // Estados para formulÃ¡rio de ediÃ§Ã£o
   const [editProducts, setEditProducts] = useState<any[]>([]);
   const [editSuppliers, setEditSuppliers] = useState<any[]>([]);
   const [editLoading, setEditLoading] = useState(false);
@@ -172,7 +172,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     setHasUnsavedChanges(true);
   };
 
-  // Auto-foco e seleção quando entra em modo de edição
+  // Auto-foco e seleÃ§Ã£o quando entra em modo de ediÃ§Ã£o
   useEffect(() => {
     if (editingProductId && editInputRef.current) {
       editInputRef.current.focus();
@@ -183,10 +183,10 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   // Limpar valores editados quando trocar de fornecedor
   useEffect(() => {
     if (hasUnsavedChanges && editingProductId) {
-      // Mostrar aviso ao usuário
+      // Mostrar aviso ao usuÃ¡rio
       toast({
-        title: "Valor não salvo",
-        description: "Os valores editados não foram salvos. Salve antes de trocar de fornecedor.",
+        title: "Valor nÃ£o salvo",
+        description: "Os valores editados nÃ£o foram salvos. Salve antes de trocar de fornecedor.",
         variant: "destructive",
       });
       return;
@@ -262,7 +262,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     };
   };
 
-  // Get products from the quote (com verificação de null)
+  // Get products from the quote (com verificaÃ§Ã£o de null)
   const products = currentQuote?._raw?.quote_items || [];
 
   // Get supplier items for selected supplier
@@ -340,7 +340,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     if (selectedSupplier === supplierId && editedValues[productId] !== undefined) {
       return editedValues[productId];
     }
-    // Senão, usar valor da base de dados
+    // SenÃ£o, usar valor da base de dados
     return getSupplierProductValue(supplierId, productId);
   };
 
@@ -386,7 +386,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
     const labels = {
       ativa: "Ativa",
-      concluida: "Concluída",
+      concluida: "ConcluÃ­da",
       pendente: "Pendente",
       expirada: "Expirada",
       finalizada: "Finalizada"
@@ -406,14 +406,14 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     if (open && currentQuote) {
       setIsEditMode(false);
       setActiveSection("detalhes");
-      // Carregar dados para edição se necessário
+      // Carregar dados para ediÃ§Ã£o se necessÃ¡rio
       if (onEdit && editProducts.length === 0 && !editLoading) {
         loadEditData();
       }
     }
   }, [open, currentQuote]);
 
-  // Carregar dados para edição quando entrar em modo de edição
+  // Carregar dados para ediÃ§Ã£o quando entrar em modo de ediÃ§Ã£o
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (open && isEditMode && onEdit) {
@@ -493,7 +493,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       console.error("Erro ao carregar dados:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível carregar os dados da cotação",
+        description: "NÃ£o foi possÃ­vel carregar os dados da cotaÃ§Ã£o",
         variant: "destructive",
       });
     } finally {
@@ -523,11 +523,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       (supplier.contact && supplier.contact.toLowerCase().includes(editSupplierSearch.toLowerCase())))
   );
 
-  // Menu items para modo de edição (similar ao PedidoDialog)
+  // Menu items para modo de ediÃ§Ã£o (similar ao PedidoDialog)
   const menuItems = [
-    { id: "detalhes" as EditSection, label: "Detalhes da Cotação", icon: FileText },
+    { id: "detalhes" as EditSection, label: "Detalhes da CotaÃ§Ã£o", icon: FileText },
     { id: "fornecedores" as EditSection, label: "Fornecedores", icon: Building2 },
-    { id: "observacoes" as EditSection, label: "Observações", icon: FileText },
+    { id: "observacoes" as EditSection, label: "ObservaÃ§Ãµes", icon: FileText },
   ];
 
   const handleEditSubmit = async (data: QuoteFormData) => {
@@ -537,17 +537,17 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     try {
       await onEdit(currentQuote.id, data);
       toast({
-        title: "✅ Cotação atualizada",
-        description: "As alterações foram salvas com sucesso.",
+        title: "âœ… CotaÃ§Ã£o atualizada",
+        description: "As alteraÃ§Ãµes foram salvas com sucesso.",
       });
-      // Voltar para modo de visualização após salvar
+      // Voltar para modo de visualizaÃ§Ã£o apÃ³s salvar
       setIsEditMode(false);
       setActiveSection("detalhes");
     } catch (error) {
       console.error("Erro ao salvar:", error);
       toast({
-        title: "❌ Erro ao salvar",
-        description: "Não foi possível salvar as alterações.",
+        title: "âŒ Erro ao salvar",
+        description: "NÃ£o foi possÃ­vel salvar as alteraÃ§Ãµes.",
         variant: "destructive",
       });
     } finally {
@@ -603,7 +603,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
           };
         });
 
-      // Calcular o melhor preço entre as opções com preço > 0
+      // Calcular o melhor preÃ§o entre as opÃ§Ãµes com preÃ§o > 0
       const validOptions = supplierOptions.filter(s => s.price > 0);
       if (validOptions.length > 0) {
         const minPrice = Math.min(...validOptions.map(s => s.price));
@@ -637,8 +637,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       return;
     }
 
-    // Sempre mostrar o diálogo de seleção se houver mais de um produto,
-    // para permitir que o usuário escolha quais incluir (com ou sem preço)
+    // Sempre mostrar o diÃ¡logo de seleÃ§Ã£o se houver mais de um produto,
+    // para permitir que o usuÃ¡rio escolha quais incluir (com ou sem preÃ§o)
     const shouldShowSelectionDialog = productSelections.length > 1 || 
       productSelections.some(selection => 
         selection.supplierOptions.filter(option => option.isBest).length > 1
@@ -647,16 +647,16 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     if (shouldShowSelectionDialog) {
       const initialSelections = new Map<string, { supplierId: string; supplierName: string }>();
       productSelections.forEach(selection => {
-        // Se tiver o "isActuallyIncluded" (tem preço), pré-seleciona o melhor.
-        // Se não tiver, deixa vazio ou o melhor se existir algum zero.
+        // Se tiver o "isActuallyIncluded" (tem preÃ§o), prÃ©-seleciona o melhor.
+        // Se nÃ£o tiver, deixa vazio ou o melhor se existir algum zero.
         if (selection.selectedSupplierId) {
           initialSelections.set(selection.productId, {
             supplierId: selection.selectedSupplierId,
             supplierName: selection.selectedSupplierName
           });
         } else if (selection.supplierOptions.length > 0) {
-          // Se não tem melhor preço, não pré-seleciona ninguém no map de ativos se for sem preço
-          // O diálogo cuidará de marcar como incluído ou não
+          // Se nÃ£o tem melhor preÃ§o, nÃ£o prÃ©-seleciona ninguÃ©m no map de ativos se for sem preÃ§o
+          // O diÃ¡logo cuidarÃ¡ de marcar como incluÃ­do ou nÃ£o
         }
       });
 
@@ -700,7 +700,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
         setConvertDialogOpen(true);
       }
     } else {
-      // Múltiplos fornecedores - preparar dados para múltiplos pedidos
+      // MÃºltiplos fornecedores - preparar dados para mÃºltiplos pedidos
       if (!currentQuote || !currentQuote._raw) {
         return;
       }
@@ -751,7 +751,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       // Fluxo simples: 1 fornecedor com todos os produtos
       if (!currentQuote) return;
       
-      // Usar a seleção detalhada se existir, senão usar todos (fallback)
+      // Usar a seleÃ§Ã£o detalhada se existir, senÃ£o usar todos (fallback)
       let productIds: string[] = [];
       if (selectedSuppliers && selectedSuppliers.size > 0) {
         selectedSuppliers.forEach((selection, productId) => {
@@ -797,12 +797,12 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   const getConversionProducts = () => {
     if (!selectedSupplierForConversion) return [];
     
-    // Filtra os produtos que foram designados para este fornecedor no diálogo de seleção
+    // Filtra os produtos que foram designados para este fornecedor no diÃ¡logo de seleÃ§Ã£o
     const designatedProductIds = Array.from(selectedSuppliers.entries())
       .filter(([_, sel]) => sel.supplierId === selectedSupplierForConversion.id)
       .map(([productId]) => productId);
 
-    // Se não há designações detalhadas, usa todos os produtos
+    // Se nÃ£o hÃ¡ designaÃ§Ãµes detalhadas, usa todos os produtos
     const finalProductIds = designatedProductIds.length > 0 
       ? designatedProductIds 
       : products.map((p: any) => p.product_id);
@@ -820,24 +820,24 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
       });
   };
 
-  // Conteúdo interno do modal (compartilhado entre Dialog e Drawer)
+  // ConteÃºdo interno do modal (compartilhado entre Dialog e Drawer)
   const modalInnerContent = (
     <>
       {isLoadingQuote ? (
         <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
           <Loader2 className="h-10 w-10 animate-spin text-teal-600 dark:text-teal-400" />
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Carregando detalhes da cotação...</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Carregando detalhes da cotaÃ§Ã£o...</p>
           <p className="text-xs text-gray-500 dark:text-gray-400">Aguarde um momento</p>
         </div>
       ) : !currentQuote ? (
         <div className="flex flex-col items-center justify-center h-full min-h-[400px] space-y-4">
           <AlertCircle className="h-10 w-10 text-red-600 dark:text-red-400" />
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Erro ao carregar cotação</p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">Não foi possível carregar os detalhes</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Erro ao carregar cotaÃ§Ã£o</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">NÃ£o foi possÃ­vel carregar os detalhes</p>
         </div>
       ) : (
         <>
-          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-2.5 sm:py-3'} border-b border-border bg-background`}>
+          <div className={`flex-shrink-0 ${isMobile ? 'px-4 py-3' : 'px-4 sm:px-5 py-2.5 sm:py-3'} border-b border-border dark:border-white/5 bg-background`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className={`${isMobile ? 'w-9 h-9 rounded-xl shadow-lg' : 'w-8 h-8 rounded-lg'} bg-primary flex items-center justify-center text-primary-foreground flex-shrink-0`}>
@@ -845,7 +845,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 </div>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <div className={`${isMobile ? 'text-base font-bold' : 'text-sm sm:text-base font-semibold'} text-foreground truncate`}>
-                    {isEditMode ? `Editar Cotação #${currentQuote?.id?.substring(0, 8) || '...'}` : `Cotação #${currentQuote?.id?.substring(0, 8) || '...'}`}
+                    {isEditMode ? `Editar CotaÃ§Ã£o #${currentQuote?.id?.substring(0, 8) || '...'}` : `CotaÃ§Ã£o #${currentQuote?.id?.substring(0, 8) || '...'}`}
                   </div>
                   <div className="hidden sm:block scale-90 origin-left">
                     {currentQuote && getStatusBadge(currentQuote.status)}
@@ -882,8 +882,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                         <TooltipContent>
                           <p>
                             {currentQuote.whatsapp_sent_at 
-                              ? `Enviado em ${format(new Date(currentQuote.whatsapp_sent_at), "dd/MM 'às' HH:mm", { locale: ptBR })}`
-                              : "Enviar cotação via WhatsApp"}
+                              ? `Enviado em ${format(new Date(currentQuote.whatsapp_sent_at), "dd/MM 'Ã s' HH:mm", { locale: ptBR })}`
+                              : "Enviar cotaÃ§Ã£o via WhatsApp"}
                           </p>
                         </TooltipContent>
                       </Tooltip>
@@ -925,11 +925,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : isEditMode ? (
-              // Modo de Edição (similar ao PedidoDialog)
+              // Modo de EdiÃ§Ã£o (similar ao PedidoDialog)
                 <div className={`flex ${isMobile ? 'flex-col' : 'flex-row'} flex-1 overflow-hidden`}>
                   {/* Menu Lateral Esquerdo - Desktop | Tabs - Mobile */}
                   {isMobile ? (
-                    <div className="flex-shrink-0 border-b border-border bg-muted/50">
+                    <div className="flex-shrink-0 border-b border-border dark:border-white/5 bg-muted/50">
                       <div className="flex overflow-x-auto">
                         {menuItems.map((item) => {
                           const Icon = item.icon;
@@ -978,7 +978,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                     </div>
                   )}
 
-                  {/* Conteúdo Principal de Edição */}
+                  {/* ConteÃºdo Principal de EdiÃ§Ã£o */}
                   <ScrollArea className="flex-1 bg-background min-h-0 h-full">
                     <div className={`${isMobile ? 'p-4' : 'p-4 sm:p-6'} pb-8`}>
                       {editLoading ? (
@@ -995,20 +995,20 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                         <>
                           {activeSection === "detalhes" && (
                             <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
-                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border`}>
-                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border`}>
-                                  Detalhes da Cotação
+                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border dark:border-white/5`}>
+                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border dark:border-white/5`}>
+                                  Detalhes da CotaÃ§Ã£o
                                 </h3>
                                 <Form {...editForm}>
                                   <form onSubmit={editForm.handleSubmit(handleEditSubmit)} className="space-y-4">
-                                    {/* Seção 1: Campos Essenciais - Grid Compacto */}
+                                    {/* SeÃ§Ã£o 1: Campos Essenciais - Grid Compacto */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                                      {/* Período */}
-                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-border bg-muted/50">
+                                      {/* PerÃ­odo */}
+                                      <Card className="border border-border dark:border-white/5 bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border dark:border-white/5 bg-muted/50">
                                           <div className="flex items-center gap-2">
                                             <Calendar className="h-4 w-4 text-primary" />
-                                            <h4 className="text-xs font-semibold text-foreground">Período*</h4>
+                                            <h4 className="text-xs font-semibold text-foreground">PerÃ­odo*</h4>
                                           </div>
                                         </div>
                                         <div className="p-2.5 space-y-2.5">
@@ -1018,7 +1018,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                               name="dataInicio"
                                               render={({ field }) => (
                                                 <FormItem className="flex flex-col">
-                                                  <FormLabel className="text-[10px] text-muted-foreground mb-1">Início*</FormLabel>
+                                                  <FormLabel className="text-[10px] text-muted-foreground mb-1">InÃ­cio*</FormLabel>
                                                   <Popover>
                                                     <PopoverTrigger asChild>
                                                       <FormControl>
@@ -1033,7 +1033,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                           {field.value ? (
                                                             format(field.value, "dd/MM/yyyy", { locale: ptBR })
                                                           ) : (
-                                                            <span className="text-[10px]">Data início</span>
+                                                            <span className="text-[10px]">Data inÃ­cio</span>
                                                           )}
                                                           <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-50" />
                                                         </Button>
@@ -1119,7 +1119,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                         {field.value ? (
                                                           format(field.value, "dd/MM/yyyy", { locale: ptBR })
                                                         ) : (
-                                                          <span className="text-[10px]">Não agendada</span>
+                                                          <span className="text-[10px]">NÃ£o agendada</span>
                                                         )}
                                                         <CalendarIcon className="ml-auto h-3.5 w-3.5 opacity-50" />
                                                       </Button>
@@ -1147,8 +1147,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </Card>
 
                                       {/* Status */}
-                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-border bg-muted/50">
+                                      <Card className="border border-border dark:border-white/5 bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border dark:border-white/5 bg-muted/50">
                                           <div className="flex items-center gap-2">
                                             <FileText className="h-4 w-4 text-primary" />
                                             <h4 className="text-xs font-semibold text-foreground">Status*</h4>
@@ -1170,7 +1170,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                     <SelectItem value="ativa">Ativa</SelectItem>
                                                     <SelectItem value="planejada">Planejada</SelectItem>
                                                     <SelectItem value="pendente">Pendente</SelectItem>
-                                                    <SelectItem value="concluida">Concluída</SelectItem>
+                                                    <SelectItem value="concluida">ConcluÃ­da</SelectItem>
                                                     <SelectItem value="expirada">Expirada</SelectItem>
                                                   </SelectContent>
                                                 </Select>
@@ -1182,9 +1182,9 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </Card>
                                     </div>
 
-                                    {/* Seção 2: Produtos - Layout Compacto em Tabela */}
-                                    <Card className="border border-border bg-card rounded-lg shadow-sm">
-                                      <div className="p-2.5 border-b border-border bg-muted/50 flex items-center justify-between">
+                                    {/* SeÃ§Ã£o 2: Produtos - Layout Compacto em Tabela */}
+                                    <Card className="border border-border dark:border-white/5 bg-card rounded-lg shadow-sm">
+                                      <div className="p-2.5 border-b border-border dark:border-white/5 bg-muted/50 flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                           <Package className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                                           <h4 className="text-xs font-semibold text-foreground">Produtos*</h4>
@@ -1205,7 +1205,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </div>
                                       <div className="p-2.5 space-y-2">
                                         {editFields.map((field, index) => (
-                                          <div key={field.id} className="border border-border rounded-md p-2.5 bg-muted/30">
+                                          <div key={field.id} className="border border-border dark:border-white/5 rounded-md p-2.5 bg-muted/30">
                                             <div className="grid grid-cols-12 gap-2 items-start">
                                               <div className="col-span-12 sm:col-span-6 lg:col-span-5">
                                                 <FormField
@@ -1338,11 +1338,11 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </div>
                                     </Card>
 
-                                    {/* Seção 3: Opcionais - Grid Horizontal */}
+                                    {/* SeÃ§Ã£o 3: Opcionais - Grid Horizontal */}
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                       {/* Fornecedores */}
-                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-border bg-muted/50">
+                                      <Card className="border border-border dark:border-white/5 bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border dark:border-white/5 bg-muted/50">
                                           <div className="flex items-center gap-2">
                                             <Users className="h-4 w-4 text-primary" />
                                             <h4 className="text-xs font-semibold text-foreground">Fornecedores (Opcional)</h4>
@@ -1402,7 +1402,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                                       onClick={() => handleEditSupplierRemove(supplier.id)}
                                                       className="ml-0.5 hover:text-red-600 dark:hover:text-red-400 font-bold transition-colors"
                                                     >
-                                                      ×
+                                                      Ã—
                                                     </button>
                                                   </div>
                                                 ))}
@@ -1412,12 +1412,12 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                         </div>
                                       </Card>
 
-                                      {/* Observações */}
-                                      <Card className="border border-border bg-card rounded-lg shadow-sm">
-                                        <div className="p-2.5 border-b border-border bg-muted/50">
+                                      {/* ObservaÃ§Ãµes */}
+                                      <Card className="border border-border dark:border-white/5 bg-card rounded-lg shadow-sm">
+                                        <div className="p-2.5 border-b border-border dark:border-white/5 bg-muted/50">
                                           <div className="flex items-center gap-2">
                                             <FileText className="h-4 w-4 text-muted-foreground" />
-                                            <h4 className="text-xs font-semibold text-foreground">Observações</h4>
+                                            <h4 className="text-xs font-semibold text-foreground">ObservaÃ§Ãµes</h4>
                                           </div>
                                         </div>
                                         <div className="p-2.5">
@@ -1428,7 +1428,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                               <FormItem>
                                                 <FormControl>
                                                   <Textarea
-                                                    placeholder="Adicione observações (opcional)..."
+                                                    placeholder="Adicione observaÃ§Ãµes (opcional)..."
                                                     className="resize-none text-xs bg-background border-input min-h-[80px]"
                                                     rows={3}
                                                     {...field}
@@ -1442,8 +1442,8 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                                       </Card>
                                     </div>
 
-                                    {/* Botões de ação */}
-                                    <div className="flex justify-end gap-2 pt-4 border-t border-border">
+                                    {/* BotÃµes de aÃ§Ã£o */}
+                                    <div className="flex justify-end gap-2 pt-4 border-t border-border dark:border-white/5">
                                       <Button
                                         type="button"
                                         variant="outline"
@@ -1484,22 +1484,22 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
 
                           {activeSection === "fornecedores" && (
                             <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
-                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border`}>
-                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border`}>
+                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border dark:border-white/5`}>
+                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border dark:border-white/5`}>
                                   Fornecedores
                                 </h3>
-                                <p className="text-sm text-muted-foreground">Seção de fornecedores em construção</p>
+                                <p className="text-sm text-muted-foreground">SeÃ§Ã£o de fornecedores em construÃ§Ã£o</p>
                               </div>
                             </div>
                           )}
 
                           {activeSection === "observacoes" && (
                             <div className={`max-w-2xl ${isMobile ? 'mx-0 space-y-4' : 'mx-auto space-y-6'}`}>
-                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border`}>
-                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border`}>
-                                  Observações
+                              <div className={`bg-card rounded-xl ${isMobile ? 'p-4' : 'p-6'} shadow-md border border-border dark:border-white/5`}>
+                                <h3 className={`${isMobile ? 'text-lg mb-4' : 'text-xl mb-6'} font-bold text-foreground pb-3 border-b border-border dark:border-white/5`}>
+                                  ObservaÃ§Ãµes
                                 </h3>
-                                <p className="text-sm text-muted-foreground">Seção de observações em construção</p>
+                                <p className="text-sm text-muted-foreground">SeÃ§Ã£o de observaÃ§Ãµes em construÃ§Ã£o</p>
                               </div>
                             </div>
                           )}
@@ -1509,13 +1509,13 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
                   </ScrollArea>
                 </div>
               ) : (
-                // Modo de Visualização
+                // Modo de VisualizaÃ§Ã£o
                 <ScrollArea className="flex-1 bg-muted/30 min-h-0 h-full">
                   <div className={`${isMobile ? 'p-4 space-y-4' : 'p-4 sm:p-6 space-y-6'} pb-8`}>
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                      <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-border bg-muted/30 backdrop-blur-sm flex-shrink-0 overflow-hidden">
+                      <div className="px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 border-b border-border dark:border-white/5 bg-muted/30 backdrop-blur-sm flex-shrink-0 overflow-hidden">
                         <div className="w-full overflow-x-auto custom-scrollbar pb-1">
-                          <TabsList className={`flex w-max min-w-full bg-background/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-border gap-1 h-auto transition-colors`}>
+                          <TabsList className={`flex w-max min-w-full bg-background/80 backdrop-blur-sm rounded-lg sm:rounded-xl p-1 shadow-md border border-border dark:border-white/5 gap-1 h-auto transition-colors`}>
                             <TabsTrigger
                               value="detalhes"
                               className="group relative rounded-md sm:rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md hover:bg-primary/10 px-2 sm:px-3 py-1.5 sm:py-2 flex items-center justify-center gap-1.5 sm:gap-2 text-muted-foreground whitespace-nowrap"
@@ -1737,3 +1737,4 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
     </Dialog>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { 
   Check, 
   Tags, 
@@ -50,7 +50,7 @@ export function CategorySelectForm({
   useEffect(() => {
     if (open) {
       setSearchValue(value ? value.toUpperCase() : "");
-      // Pequeno delay para focar o input após a animação do popover
+      // Pequeno delay para focar o input apÃ³s a animaÃ§Ã£o do popover
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open, value]);
@@ -95,7 +95,7 @@ export function CategorySelectForm({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              "w-full h-11 justify-between bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all font-medium text-left shadow-sm",
+              "w-full h-11 justify-between bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-border dark:border-white/5 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all font-medium text-left shadow-sm",
               !value && "text-muted-foreground"
             )}
           >
@@ -120,12 +120,12 @@ export function CategorySelectForm({
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl border-gray-200 dark:border-gray-800 shadow-2xl bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-[100] overflow-visible" 
+          className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl border-border dark:border-white/5 shadow-2xl bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl z-[100] overflow-visible" 
           align="start"
           sideOffset={6}
         >
           <Command className="bg-transparent" shouldFilter={false}>
-            <div className="flex items-center border-b border-gray-100 dark:border-gray-800 px-3 h-11">
+            <div className="flex items-center border-b border-border dark:border-white/5 px-3 h-11">
               <Search className="h-4 w-4 text-orange-600 mr-2 shrink-0" />
               <Input
                 ref={inputRef}
@@ -171,8 +171,8 @@ export function CategorySelectForm({
 
                   {searchValue.trim().length > 0 && !uniqueCategories.some(c => c.toUpperCase() === searchValue.toUpperCase()) && (
                     <>
-                      <CommandSeparator className="my-1 border-gray-100 dark:border-gray-800" />
-                      <CommandGroup heading="Ação">
+                      <CommandSeparator className="my-1 border-border dark:border-white/5" />
+                      <CommandGroup heading="AÃ§Ã£o">
                         <CommandItem
                           onSelect={handleCreate}
                           className="flex items-center gap-2 py-3 px-3 cursor-pointer rounded-lg mx-1 my-0.5 text-orange-600 font-bold hover:bg-orange-50 dark:hover:bg-orange-950/20"
@@ -186,7 +186,7 @@ export function CategorySelectForm({
 
                   {searchValue.trim().length > 0 && filteredCategories.length === 0 && !uniqueCategories.some(c => c.toUpperCase() === searchValue.toUpperCase()) && (
                     <CommandEmpty className="p-8 text-center">
-                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Categoria não encontrada</p>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Categoria nÃ£o encontrada</p>
                     </CommandEmpty>
                   )}
                 </>
@@ -198,3 +198,4 @@ export function CategorySelectForm({
     </div>
   );
 }
+

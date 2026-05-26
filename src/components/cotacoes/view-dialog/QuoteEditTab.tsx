@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+﻿import { useState, useMemo, useRef, useEffect } from "react";
 import { Plus, Trash2, Package, Building2, Search, Star, Trophy, X, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -80,7 +80,7 @@ export function QuoteEditTab({
 
         if (error) throw error;
         
-        // Mantemos a lista original para feedback visual, similar ao modal de nova cotação
+        // Mantemos a lista original para feedback visual, similar ao modal de nova cotaÃ§Ã£o
         setDynamicProducts(data || []);
       } catch (error) {
         console.error("Erro na busca de produtos:", error);
@@ -125,7 +125,7 @@ export function QuoteEditTab({
       .slice(0, 30);
   }, [suppliersNotInQuote, supplierSearch, safeStr]);
 
-  // Combinar produtos locais e dinâmicos (evitando duplicatas)
+  // Combinar produtos locais e dinÃ¢micos (evitando duplicatas)
   const allProducts = useMemo(() => {
     const combined = [...dynamicProducts];
     filteredProductsLocal.forEach(p => {
@@ -134,7 +134,7 @@ export function QuoteEditTab({
       }
     });
 
-    // Filtro final rigoroso para evitar que produtos já na cotação apareçam (inclusive do Supabase)
+    // Filtro final rigoroso para evitar que produtos jÃ¡ na cotaÃ§Ã£o apareÃ§am (inclusive do Supabase)
     return combined.filter(p => !products.some(pi => pi.product_id === p.id));
   }, [dynamicProducts, filteredProductsLocal, products]);
 
@@ -254,7 +254,7 @@ export function QuoteEditTab({
         "p-4 space-y-4 transition-all duration-300",
         ((productSearch.length > 0 && !selectedProduct) || (supplierSearch.length > 0 && !selectedSupplier)) ? "pb-80" : "pb-10"
       )}>
-        {/* Gestão de Produtos */}
+        {/* GestÃ£o de Produtos */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
@@ -265,7 +265,7 @@ export function QuoteEditTab({
             </div>
           </div>
 
-          <div className="p-3 bg-muted/30 border border-border rounded-xl shadow-sm space-y-3">
+          <div className="p-3 bg-muted/30 border border-border dark:border-white/5 rounded-xl shadow-sm space-y-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -290,7 +290,7 @@ export function QuoteEditTab({
                 )}
 
               {productSearch.length > 0 && !selectedProduct && (
-                <div ref={productListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
+                <div ref={productListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border dark:border-white/5 shadow-2xl rounded-xl max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
                   {allProducts.length > 0 ? (
                     allProducts.map((p: any, index: number) => (
                         <button
@@ -338,9 +338,9 @@ export function QuoteEditTab({
           <div className="space-y-2">
             {products.length > 0 ? (
               products.map((p: any) => (
-                <div key={p.product_id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border rounded-xl group hover:border-brand/30 transition-all">
+                <div key={p.product_id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-all">
                   <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-background flex items-center justify-center text-muted-foreground border border-border shadow-sm group-hover:text-brand transition-colors">
+                    <div className="w-7 h-7 rounded-lg bg-background flex items-center justify-center text-muted-foreground border border-border dark:border-white/5 shadow-sm group-hover:text-brand transition-colors">
                       <Package className="h-3.5 w-3.5" />
                     </div>
                     <div className="flex flex-col">
@@ -394,8 +394,8 @@ export function QuoteEditTab({
           </div>
         </div>
 
-        {/* Gestão de Fornecedores */}
-        <div className="space-y-3 pt-5 border-t border-border">
+        {/* GestÃ£o de Fornecedores */}
+        <div className="space-y-3 pt-5 border-t border-border dark:border-white/5">
           <div className="flex items-center gap-2 px-1">
             <div className="p-1 rounded-lg bg-brand/10">
               <Building2 className="h-3.5 w-3.5 text-brand" />
@@ -403,7 +403,7 @@ export function QuoteEditTab({
             <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</span>
           </div>
 
-          <div className="p-2.5 bg-muted/30 border border-border rounded-xl shadow-sm flex gap-2 relative">
+          <div className="p-2.5 bg-muted/30 border border-border dark:border-white/5 rounded-xl shadow-sm flex gap-2 relative">
             <div className="flex-1 relative group">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
@@ -427,7 +427,7 @@ export function QuoteEditTab({
               )}
 
               {supplierSearch.length > 0 && !selectedSupplier && (
-                <div ref={supplierListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border shadow-2xl rounded-xl max-h-[250px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
+                <div ref={supplierListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border dark:border-white/5 shadow-2xl rounded-xl max-h-[250px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
                   {filteredSuppliers.length > 0 ? (
                     filteredSuppliers.map((supplier: any, index: number) => (
                       <button
@@ -458,7 +458,7 @@ export function QuoteEditTab({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {fornecedores.map((f: any) => (
-              <div key={f.id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border rounded-xl group hover:border-brand/30 transition-all">
+              <div key={f.id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-all">
                 <div className="flex items-center gap-2 min-w-0">
                   <Building2 className="h-3.5 w-3.5 text-muted-foreground group-hover:text-brand" />
                   <span className="text-[10px] font-black text-foreground uppercase truncate">{safeStr(f.nome)}</span>
@@ -474,3 +474,4 @@ export function QuoteEditTab({
     </div>
   );
 }
+

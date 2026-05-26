@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { 
   Check, 
   Tag, 
@@ -96,7 +96,7 @@ export function BrandSelect({ value, onChange, className }: BrandSelectProps) {
                 if (searchValue.length > 0) setOpen(true);
               }}
               placeholder="Digite a marca..."
-              className="pl-10 pr-10 h-11 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all focus:ring-orange-400/20"
+              className="pl-10 pr-10 h-11 bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-border dark:border-white/5 hover:border-orange-300 dark:hover:border-orange-800 rounded-xl transition-all focus:ring-orange-400/20"
             />
             {searchValue && (
               <button
@@ -110,7 +110,7 @@ export function BrandSelect({ value, onChange, className }: BrandSelectProps) {
           </div>
         </PopoverAnchor>
         <PopoverContent 
-          className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl border-gray-200 dark:border-gray-800 shadow-2xl overflow-hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl" 
+          className="w-[var(--radix-popover-trigger-width)] p-0 rounded-xl border-border dark:border-white/5 shadow-2xl overflow-hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl" 
           align="start"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
@@ -178,7 +178,7 @@ export function BrandSelect({ value, onChange, className }: BrandSelectProps) {
                       {!brands.some(b => b.name.toLowerCase() === searchValue.toLowerCase()) && (
                         <>
                           <CommandSeparator />
-                          <CommandGroup heading="Ação">
+                          <CommandGroup heading="AÃ§Ã£o">
                             <CommandItem
                               onSelect={handleCreate}
                               className="flex items-center gap-2 py-3 cursor-pointer rounded-lg mx-1 my-0.5 text-orange-600 font-medium"
@@ -200,3 +200,4 @@ export function BrandSelect({ value, onChange, className }: BrandSelectProps) {
     </div>
   );
 }
+

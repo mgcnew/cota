@@ -1,4 +1,4 @@
-import { memo } from "react";
+﻿import { memo } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClipboardList, Eye, CheckCircle, Trash2, Clock, Activity, XCircle } from "lucide-react";
@@ -59,7 +59,7 @@ interface StockCountListDesktopProps {
 
 export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelete }: StockCountListDesktopProps) => {
   return (
-    <div className="hidden lg:block rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+    <div className="hidden lg:block rounded-xl border border-border dark:border-white/5 bg-card overflow-hidden shadow-sm">
       <Table>
         <TableHeader>
           <TableRow className="bg-muted/40 hover:bg-muted/40">
@@ -68,8 +68,8 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Setor / Tipo</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Respondente</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Status</TableHead>
-            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Observações</TableHead>
-            <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Ações</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">ObservaÃ§Ãµes</TableHead>
+            <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">AÃ§Ãµes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -77,7 +77,7 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
             <TableRow key={count.id} className="group hover:bg-muted/30 transition-colors">
               <TableCell className="py-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                  <div className="w-9 h-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-border dark:border-white/5">
                     <ClipboardList className="w-4 h-4 text-zinc-500" />
                   </div>
                   <span className="font-medium text-foreground">
@@ -114,11 +114,11 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground text-sm">
-                {count.counter_name || "—"}
+                {count.counter_name || "â€”"}
               </TableCell>
               <TableCell>{getStatusBadge(count.status)}</TableCell>
               <TableCell className="max-w-[200px] truncate text-muted-foreground text-sm">
-                {count.notes || "—"}
+                {count.notes || "â€”"}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -160,4 +160,5 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
     </div>
   );
 });
+
 

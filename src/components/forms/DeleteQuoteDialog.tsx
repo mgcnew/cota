@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,22 +56,22 @@ export default function DeleteQuoteDialog({
           {trigger}
         </AlertDialogTrigger>
       )}
-      <AlertDialogContent className="rounded-3xl border-gray-200 dark:border-gray-800 shadow-2xl">
+      <AlertDialogContent className="rounded-3xl border-border dark:border-white/5 shadow-2xl">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl">
               <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
-            <AlertDialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Confirmar ExclusÃ£o</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-            Tem certeza que deseja excluir a cotação <strong className="text-gray-900 dark:text-white">#{quote?.id.substring(0, 8)}</strong>?
+            Tem certeza que deseja excluir a cotaÃ§Ã£o <strong className="text-gray-900 dark:text-white">#{quote?.id.substring(0, 8)}</strong>?
             <br />
-            Esta ação removerá permanentemente todos os preços e fornecedores vinculados.
+            Esta aÃ§Ã£o removerÃ¡ permanentemente todos os preÃ§os e fornecedores vinculados.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 mt-4">
-          <AlertDialogCancel disabled={isDeleting} className="rounded-xl border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <AlertDialogCancel disabled={isDeleting} className="rounded-xl border-border dark:border-white/5 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction 
@@ -88,7 +88,7 @@ export default function DeleteQuoteDialog({
                   Excluindo...
                 </>
               ) : (
-                "Confirmar Exclusão"
+                "Confirmar ExclusÃ£o"
               )}
             </Button>
           </AlertDialogAction>
@@ -97,3 +97,4 @@ export default function DeleteQuoteDialog({
     </AlertDialog>
   );
 }
+

@@ -24,7 +24,7 @@ export const EconomyHeroCard = memo(function EconomyHeroCard({
   const isPositiveGrowth = crescimentoEconomia >= 0;
 
   return (
-    <Card className="relative overflow-hidden border border-emerald-200/70 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-gray-900 shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150">
+    <Card className="relative overflow-hidden bg-emerald-50/50 dark:bg-card shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150">
       <div className="p-4 sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -78,7 +78,7 @@ export const EconomyHeroCard = memo(function EconomyHeroCard({
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-emerald-200/50 dark:border-emerald-500/10">
+        <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border dark:border-white/5">
           <div>
             <p className="text-xs font-semibold text-gray-600 dark:text-gray-500 mb-0.5">Potencial</p>
             <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{formatCurrency(economiaPotencial)}</p>

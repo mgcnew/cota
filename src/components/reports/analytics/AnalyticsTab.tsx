@@ -1,8 +1,8 @@
-/**
+﻿/**
  * AnalyticsTab - Componente principal da aba Analytics
  * 
  * Orquestra MetricsGrid/Carousel, PerformanceCharts e InsightsPanel.
- * Implementa lazy loading para charts e otimizações de performance.
+ * Implementa lazy loading para charts e otimizaÃ§Ãµes de performance.
  * 
  * @module components/reports/analytics/AnalyticsTab
  * Requirements: 2.4, 2.5, 6.5
@@ -37,7 +37,7 @@ function ChartsSkeleton() {
       <Skeleton className="h-6 w-48" />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {[0, 1, 2, 3].map((index) => (
-          <Card key={index} className="border border-gray-200 dark:border-gray-700">
+          <Card key={index} className="border border-border dark:border-white/5">
             <CardContent className="p-4">
               <Skeleton className="h-4 w-32 mb-4" />
               <Skeleton className="h-[250px] w-full" />
@@ -72,12 +72,12 @@ function InsightsSkeleton() {
 }
 
 /**
- * AnalyticsTab - Aba de Analytics com métricas, gráficos e insights
+ * AnalyticsTab - Aba de Analytics com mÃ©tricas, grÃ¡ficos e insights
  * 
- * Componente memoizado com otimizações de performance usando useMemo e useCallback.
+ * Componente memoizado com otimizaÃ§Ãµes de performance usando useMemo e useCallback.
  * 
- * @param startDate - Data inicial do período
- * @param endDate - Data final do período
+ * @param startDate - Data inicial do perÃ­odo
+ * @param endDate - Data final do perÃ­odo
  * @param selectedFornecedores - Fornecedores selecionados para filtro
  * @param selectedProdutos - Produtos selecionados para filtro
  */
@@ -142,7 +142,7 @@ export const AnalyticsTab = memo(function AnalyticsTab({
 
   /**
    * Memoized handler para gerar insights
-   * Usa useCallback para evitar recriação da função em cada render
+   * Usa useCallback para evitar recriaÃ§Ã£o da funÃ§Ã£o em cada render
    */
   const handleGenerateInsights = useCallback(() => {
     generateInsights(analyticsDataForInsights);
@@ -150,8 +150,8 @@ export const AnalyticsTab = memo(function AnalyticsTab({
 
   return (
     <div className="space-y-6">
-      {/* Seção de Métricas */}
-      <section aria-label="Métricas de performance">
+      {/* SeÃ§Ã£o de MÃ©tricas */}
+      <section aria-label="MÃ©tricas de performance">
         {isMobile ? (
           <MetricsCarousel 
             metrics={metricas} 
@@ -165,8 +165,8 @@ export const AnalyticsTab = memo(function AnalyticsTab({
         )}
       </section>
 
-      {/* Seção de Gráficos - Lazy loaded */}
-      <section aria-label="Gráficos de performance">
+      {/* SeÃ§Ã£o de GrÃ¡ficos - Lazy loaded */}
+      <section aria-label="GrÃ¡ficos de performance">
         <Suspense fallback={<ChartsSkeleton />}>
           <PerformanceCharts
             performanceFornecedores={performanceFornecedores}
@@ -175,7 +175,7 @@ export const AnalyticsTab = memo(function AnalyticsTab({
         </Suspense>
       </section>
 
-      {/* Seção de Insights - Lazy loaded */}
+      {/* SeÃ§Ã£o de Insights - Lazy loaded */}
       <section aria-label="Insights com IA">
         <Suspense fallback={<InsightsSkeleton />}>
           <InsightsPanel
@@ -191,3 +191,4 @@ export const AnalyticsTab = memo(function AnalyticsTab({
 });
 
 export default AnalyticsTab;
+

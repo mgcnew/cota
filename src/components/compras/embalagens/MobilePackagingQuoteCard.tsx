@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+﻿import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
@@ -90,7 +90,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
             </div>
             <div className="min-w-0">
               <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-2">
-                Cotação #{quoteNumber.toString().padStart(4, '0')}
+                CotaÃ§Ã£o #{quoteNumber.toString().padStart(4, '0')}
                 {isPronta && (
                   <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">
                     Pronta
@@ -106,7 +106,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
           
           <div className="text-right flex-shrink-0">
             <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
-              Melhor Preço
+              Melhor PreÃ§o
             </span>
             <span className={cn(
               "text-sm font-black transition-colors",
@@ -130,7 +130,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
             </Badge>
           ))}
           {quote.itens.length > 3 && (
-            <Badge variant="outline" className="text-[10px] rounded-full border-zinc-200 dark:border-zinc-800 px-2 py-0.5 text-zinc-500">
+            <Badge variant="outline" className="text-[10px] rounded-full border-border dark:border-white/5 px-2 py-0.5 text-zinc-500">
               +{quote.itens.length - 3} itens
             </Badge>
           )}
@@ -153,7 +153,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
               "flex items-center gap-1.5 px-2.5 py-1 rounded-full border",
               respondidos === total && total > 0 
                 ? "bg-brand/5 border-brand/20 text-brand" 
-                : "bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-800 text-zinc-500"
+                : "bg-zinc-50 dark:bg-zinc-800/50 border-border dark:border-white/5 text-zinc-500"
             )}>
               <Building2 className="h-3.5 w-3.5 opacity-70" />
               <span className="text-[11px] font-bold">
@@ -164,7 +164,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+        <div className="flex items-center gap-2 pt-4 border-t border-border dark:border-white/5/50">
           <div className="flex-1 flex gap-2">
             <Button
               onClick={handleManage}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTrigger, DrawerTitle } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,7 @@ export function CreateStockCountDialog({
       {Header}
       
       <div className={cn(ds.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4")}>
-        {/* Seção: Tipo de Contagem */}
+        {/* SeÃ§Ã£o: Tipo de Contagem */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
             <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
@@ -173,7 +173,7 @@ export function CreateStockCountDialog({
                     Contagem Livre
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Sem vínculo com pedido
+                    Sem vÃ­nculo com pedido
                   </p>
                 </div>
                 {countType === "from_scratch" && (
@@ -193,18 +193,18 @@ export function CreateStockCountDialog({
             </h3>
             
             {loadingOrders ? (
-              <div className="flex items-center justify-center py-6 bg-muted/20 rounded-lg border border-border border-dashed">
+              <div className="flex items-center justify-center py-6 bg-muted/20 rounded-lg border border-border dark:border-white/5 border-dashed">
                 <Loader2 className="h-5 w-5 animate-spin text-brand mr-2" />
                 <span className="text-sm text-muted-foreground">Carregando...</span>
               </div>
             ) : availableOrders.length === 0 ? (
-              <div className="flex flex-col items-center py-6 bg-muted/20 rounded-lg border border-border border-dashed text-center">
+              <div className="flex flex-col items-center py-6 bg-muted/20 rounded-lg border border-border dark:border-white/5 border-dashed text-center">
                 <FileBox className="w-8 h-8 text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">Nenhum pedido disponível</p>
+                <p className="text-sm text-muted-foreground">Nenhum pedido disponÃ­vel</p>
                 <p className="text-xs text-muted-foreground/70">Use contagem livre</p>
               </div>
             ) : (
-              <div className="rounded-lg border border-border max-h-[180px] overflow-auto bg-card custom-scrollbar">
+              <div className="rounded-lg border border-border dark:border-white/5 max-h-[180px] overflow-auto bg-card custom-scrollbar">
                 <div className="p-1.5 space-y-1">
                   {availableOrders.map((order) => (
                     <button
@@ -245,7 +245,7 @@ export function CreateStockCountDialog({
           </div>
         )}
 
-        {/* Informações da Contagem */}
+        {/* InformaÃ§Ãµes da Contagem */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
             <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
@@ -281,20 +281,20 @@ export function CreateStockCountDialog({
                 <Input
                   value={counterName}
                   onChange={(e) => setCounterName(e.target.value)}
-                  placeholder="Nome de quem está contando"
+                  placeholder="Nome de quem estÃ¡ contando"
                   className={cn(ds.components.input.root, "pl-9")}
                 />
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-card">
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border dark:border-white/5 bg-card">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-brand/10 flex items-center justify-center">
                   <Scale className="w-4 h-4 text-brand" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium">Balanço Mensal</h4>
-                  <p className="text-xs text-muted-foreground">Esta contagem é para fechamento?</p>
+                  <h4 className="text-sm font-medium">BalanÃ§o Mensal</h4>
+                  <p className="text-xs text-muted-foreground">Esta contagem Ã© para fechamento?</p>
                 </div>
               </div>
               <Switch
@@ -309,10 +309,10 @@ export function CreateStockCountDialog({
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
             <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
-            Observações
+            ObservaÃ§Ãµes
           </h3>
           <Textarea
-            placeholder="Adicione observações opcionais sobre esta contagem..."
+            placeholder="Adicione observaÃ§Ãµes opcionais sobre esta contagem..."
             value={countNotes}
             onChange={(e) => setCountNotes(e.target.value)}
             rows={2}
@@ -354,7 +354,7 @@ export function CreateStockCountDialog({
       <Drawer open={open} onOpenChange={onOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border dark:border-white/5"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
@@ -377,4 +377,5 @@ export function CreateStockCountDialog({
     </Dialog>
   );
 }
+
 

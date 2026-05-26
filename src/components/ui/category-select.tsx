@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { Filter, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { capitalize } from "@/lib/text-utils";
@@ -60,7 +60,7 @@ export function CategorySelect({
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="w-full sm:w-[280px] h-11 bg-card border border-border focus:ring-2 focus:ring-brand/20 rounded-lg shadow-sm text-foreground transition-all">
+        <SelectTrigger className="w-full sm:w-[280px] h-11 bg-card border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 rounded-lg shadow-sm text-foreground transition-all">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-brand" />
             <SelectValue placeholder="Categorias" />
@@ -75,7 +75,7 @@ export function CategorySelect({
         </SelectContent>
       </Select>
 
-      {/* Botão para limpar filtro quando uma categoria específica está selecionada */}
+      {/* BotÃ£o para limpar filtro quando uma categoria especÃ­fica estÃ¡ selecionada */}
       {selectedCategory !== "all" && (
         <Button
           variant="ghost"

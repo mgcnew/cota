@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
+﻿import { useState, useMemo, useCallback, startTransition, memo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
@@ -113,12 +113,12 @@ function EmbalagensTab() {
     });
   }, []);
 
-  // IDs de cotações que já foram convertidas em pedidos
+  // IDs de cotaÃ§Ãµes que jÃ¡ foram convertidas em pedidos
   const convertedQuoteIds = useMemo(() => {
     return new Set(orders.filter(o => o.quoteId).map(o => o.quoteId));
   }, [orders]);
 
-  // Filtrar cotações (INCLUINDO as concluídas para histórico)
+  // Filtrar cotaÃ§Ãµes (INCLUINDO as concluÃ­das para histÃ³rico)
   const filteredQuotes = useMemo(() => {
     return quotes.filter(q => {
       const itemNames = q.itens.map(i => i.packagingName.toLowerCase()).join(' ');
@@ -139,7 +139,7 @@ function EmbalagensTab() {
 
   const paginatedData = paginate(filteredQuotes);
 
-  // Estatísticas (excluindo cotações já convertidas)
+  // EstatÃ­sticas (excluindo cotaÃ§Ãµes jÃ¡ convertidas)
   const stats = useMemo(() => {
     const quotesNaoConvertidas = quotes.filter(q => !convertedQuoteIds.has(q.id));
     const ativas = quotesNaoConvertidas.filter(q => q.status === "ativa").length;
@@ -179,7 +179,7 @@ function EmbalagensTab() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
             <div className="text-center md:text-left">
               <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Portal de Embalagens</h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gerencie fluxos e acompanhe o balanço de compras deste setor.</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gerencie fluxos e acompanhe o balanÃ§o de compras deste setor.</p>
             </div>
             
             <div className="flex w-full md:w-auto items-center gap-2">
@@ -189,29 +189,29 @@ function EmbalagensTab() {
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
               >
                 <Package className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Gestão de Itens</span>
+                <span className="hidden sm:inline">GestÃ£o de Itens</span>
               </Button>
               <Button
                 onClick={() => setAddDialogOpen(true)}
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
               >
                 <Plus className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Nova Cotação</span>
+                <span className="hidden sm:inline">Nova CotaÃ§Ã£o</span>
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { id: "cotacoes", icon: ClipboardList, label: "Cotações", desc: "Gerencie orçamentos e compare preços", badge: stats.prontasParaDecisao },
-              { id: "pedidos", icon: ShoppingCart, label: "Pedidos", desc: "Acompanhe reposições geradas" },
-              { id: "analise", icon: BarChart3, label: "Análise", desc: "Métricas gerenciais gerais" },
-              { id: "economia", icon: Calculator, label: "Poupança", desc: "Monitoramento de saving" }
+              { id: "cotacoes", icon: ClipboardList, label: "CotaÃ§Ãµes", desc: "Gerencie orÃ§amentos e compare preÃ§os", badge: stats.prontasParaDecisao },
+              { id: "pedidos", icon: ShoppingCart, label: "Pedidos", desc: "Acompanhe reposiÃ§Ãµes geradas" },
+              { id: "analise", icon: BarChart3, label: "AnÃ¡lise", desc: "MÃ©tricas gerenciais gerais" },
+              { id: "economia", icon: Calculator, label: "PoupanÃ§a", desc: "Monitoramento de saving" }
             ].map(card => (
               <button 
                 key={card.id}
                 onClick={() => setActiveSubTab(card.id)}
-                className="group relative flex flex-col items-start p-6 bg-white dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800/80 rounded-2xl text-left transition-all hover:bg-zinc-50/80 dark:hover:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
+                className="group relative flex flex-col items-start p-6 bg-white dark:bg-zinc-950/60 border border-border dark:border-white/5/80 rounded-2xl text-left transition-all hover:bg-zinc-50/80 dark:hover:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
               >
                 <div className="p-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl mb-5 text-zinc-600 dark:text-zinc-400 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
                   <card.icon className="h-5 w-5" />
@@ -232,14 +232,14 @@ function EmbalagensTab() {
 
       {/* Internal Navigation Header (When deeply navigated) */}
       {activeSubTab !== "hub" && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-zinc-800/80 pb-4 mb-4 animate-in slide-in-from-top-4 duration-300">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-border dark:border-white/5/80 pb-4 mb-4 animate-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between w-full sm:w-auto">
             <div className="flex items-center gap-3">
               <Button variant="ghost" size="icon" onClick={() => setActiveSubTab("hub")} className="rounded-full shadow-none bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 h-9 w-9">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
               </Button>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 capitalize">
-                {activeSubTab === "cotacoes" ? "Cotações de Embalagem" : activeSubTab} 
+                {activeSubTab === "cotacoes" ? "CotaÃ§Ãµes de Embalagem" : activeSubTab} 
               </h2>
             </div>
           </div>
@@ -251,7 +251,7 @@ function EmbalagensTab() {
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm")}
               >
                 <Package className="h-4 w-4 mr-2" />
-                Gestão de Itens
+                GestÃ£o de Itens
               </Button>
             )}
             {activeSubTab === "cotacoes" && (
@@ -260,7 +260,7 @@ function EmbalagensTab() {
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm transition-colors")}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Nova Cotação
+                Nova CotaÃ§Ã£o
               </Button>
             )}
           </div>
@@ -278,27 +278,27 @@ function EmbalagensTab() {
         </Button>
       )}
 
-      {/* Cotações Content */}
+      {/* CotaÃ§Ãµes Content */}
       {activeSubTab === "cotacoes" && (
         <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-          {/* Métricas */}
+          {/* MÃ©tricas */}
           {isMobile ? (
             <MobileMetricRibbon>
               <MobileMetricCard
-                title="Cotações Ativas"
+                title="CotaÃ§Ãµes Ativas"
                 value={stats.ativas.toString()}
                 icon={PackageOpen}
                 variant="info"
               />
               <MobileMetricCard
-                title="Prontas p/ Decisão"
+                title="Prontas p/ DecisÃ£o"
                 value={stats.prontasParaDecisao.toString()}
                 icon={CheckCircle2}
                 variant="success"
                 onClick={() => setStatusFilter("prontas")}
               />
               <MobileMetricCard
-                title="Concluídas"
+                title="ConcluÃ­das"
                 value={stats.concluidas.toString()}
                 icon={CircleCheck}
                 variant="warning"
@@ -313,16 +313,16 @@ function EmbalagensTab() {
             </MobileMetricRibbon>
           ) : (
             <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-              <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
+              <MetricCard title="CotaÃ§Ãµes Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
               <MetricCard
-                title="Prontas p/ Decisão"
+                title="Prontas p/ DecisÃ£o"
                 value={stats.prontasParaDecisao.toString()}
                 icon={CheckCircle2}
                 variant="success"
                 onClick={() => setStatusFilter("prontas")}
               />
               <MetricCard
-                title="Concluídas"
+                title="ConcluÃ­das"
                 value={stats.concluidas.toString()}
                 icon={CircleCheck}
                 variant="warning"
@@ -340,7 +340,7 @@ function EmbalagensTab() {
           {/* Unified Container for Filters + Table + Pagination */}
           <div className={cn(
             "flex flex-col w-full transition-all duration-300",
-            !isMobile && "bg-white dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm p-6"
+            !isMobile && "bg-white dark:bg-zinc-950/40 border border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm p-6"
           )}>
             {/* Filters Section */}
             <div className={cn("mb-6", isMobile && "px-1")}>
@@ -356,14 +356,14 @@ function EmbalagensTab() {
 
                 <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                    <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Todos os Status</SelectItem>
-                      <SelectItem value="ativa">🟢 Ativas</SelectItem>
-                      <SelectItem value="prontas">✅ Prontas p/ Decisão</SelectItem>
-                      <SelectItem value="concluida">🔵 Concluídas</SelectItem>
+                      <SelectItem value="ativa">ðŸŸ¢ Ativas</SelectItem>
+                      <SelectItem value="prontas">âœ… Prontas p/ DecisÃ£o</SelectItem>
+                      <SelectItem value="concluida">ðŸ”µ ConcluÃ­das</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -379,9 +379,9 @@ function EmbalagensTab() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
-                      {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
+                      {stats.prontasParaDecisao} cotaÃ§Ã£o(Ãµes) pronta(s) para decisÃ£o
                     </p>
-                    <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados já enviaram suas propostas</p>
+                    <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados jÃ¡ enviaram suas propostas</p>
                   </div>
                   <Button
                     size="sm"
@@ -398,11 +398,11 @@ function EmbalagensTab() {
             {/* Content Section */}
             <div className="flex-1 min-h-0">
               {paginatedData.items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+                <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-border dark:border-white/5">
                   <Package className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
-                  <p className="text-zinc-500 font-medium">Nenhuma cotação de embalagem encontrada</p>
+                  <p className="text-zinc-500 font-medium">Nenhuma cotaÃ§Ã£o de embalagem encontrada</p>
                   <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setAddDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />Criar Primeira Cotação
+                    <Plus className="h-4 w-4 mr-2" />Criar Primeira CotaÃ§Ã£o
                   </Button>
                 </div>
               ) : isMobile ? (
@@ -436,9 +436,9 @@ function EmbalagensTab() {
               )}
             </div>
 
-            {/* Paginação */}
+            {/* PaginaÃ§Ã£o */}
             {paginatedData.pagination.totalPages > 1 && (
-              <div className={cn("mt-2", !isMobile && "pt-6 border-t border-zinc-100 dark:border-zinc-800")}>
+              <div className={cn("mt-2", !isMobile && "pt-6 border-t border-border dark:border-white/5")}>
                 <DataPagination
                   currentPage={paginatedData.pagination.currentPage}
                   totalPages={paginatedData.pagination.totalPages}
@@ -519,3 +519,4 @@ function EmbalagensTab() {
 }
 
 export default memo(EmbalagensTab);
+

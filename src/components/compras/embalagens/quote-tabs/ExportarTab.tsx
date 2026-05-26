@@ -1,4 +1,4 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
+﻿import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -38,26 +38,26 @@ export function ExportarTab({
           <div className="w-14 h-14 mx-auto mb-3 rounded-xl bg-muted flex items-center justify-center">
             <FileDown className="h-7 w-7 text-muted-foreground" />
           </div>
-          <h3 className="text-base font-bold text-foreground mb-1.5 tracking-tight">Exportar Relatório</h3>
+          <h3 className="text-base font-bold text-foreground mb-1.5 tracking-tight">Exportar RelatÃ³rio</h3>
           <p className="text-[11px] text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            Gere um PDF ou HTML com o comparativo completo para documentação e aprovação.
+            Gere um PDF ou HTML com o comparativo completo para documentaÃ§Ã£o e aprovaÃ§Ã£o.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-            <div className="px-3 py-2 border-b border-border/50 bg-muted/20">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 bg-muted/20">
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="h-3 w-3" />Conteúdo
+                <FileText className="h-3 w-3" />ConteÃºdo
               </h4>
             </div>
             <div className="p-3 space-y-2">
               {[
-                `Período: ${quote.dataInicio} a ${quote.dataFim}`,
+                `PerÃ­odo: ${quote.dataInicio} a ${quote.dataFim}`,
                 `${quote.itens.length} embalagens comparadas`,
                 `${quote.fornecedores.length} fornecedores participantes`,
-                "Tabela de preços detalhada",
-                "Destaque dos melhores preços",
+                "Tabela de preÃ§os detalhada",
+                "Destaque dos melhores preÃ§os",
                 "Ranking de fornecedores"
               ].map((text, i) => (
                 <div key={i} className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">
@@ -69,7 +69,7 @@ export function ExportarTab({
           </Card>
 
           <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-            <div className="px-3 py-2 border-b border-border/50 bg-muted/20">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 bg-muted/20">
               <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <Trophy className="h-3 w-3 text-muted-foreground" />Vencedores
               </h4>
@@ -122,8 +122,8 @@ export function ExportarTab({
         </div>
 
         {showHtmlPreview && (
-          <div className="mt-4 border border-border rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-muted/30 px-3 py-1.5 border-b border-border/50">
+          <div className="mt-4 border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-muted/30 px-3 py-1.5 border-b border-border dark:border-white/5/50">
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Preview</p>
             </div>
             <iframe srcDoc={generateHtmlComparative()} className="w-full h-[400px] sm:h-[500px] border-0" title="HTML Preview" />
@@ -133,3 +133,4 @@ export function ExportarTab({
     </ScrollArea>
   );
 }
+

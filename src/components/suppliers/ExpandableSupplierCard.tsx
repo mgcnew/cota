@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { memo, useCallback } from "react";
 import { 
   Building2, 
@@ -167,7 +167,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+        <div className="flex items-center gap-2 pt-4 border-t border-border dark:border-white/5/50">
           <div className="flex-1 flex gap-2">
             <Button
               onClick={handleWhatsApp}
@@ -193,7 +193,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
               )}
             >
               <Plus className="h-4 w-4 mr-1.5" />
-              Cotação
+              CotaÃ§Ã£o
             </Button>
           </div>
           
@@ -203,7 +203,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
               variant="outline"
               size="icon"
               className={cn(
-                "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
+                "h-11 w-11 rounded-xl border-border dark:border-white/5",
                 "text-zinc-600 dark:text-zinc-400 hover:text-brand hover:border-brand",
                 "bg-zinc-50/50 dark:bg-zinc-800/30"
               )}
@@ -216,7 +216,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
               variant="outline"
               size="icon"
               className={cn(
-                "h-11 w-11 rounded-xl border-zinc-200 dark:border-zinc-800",
+                "h-11 w-11 rounded-xl border-border dark:border-white/5",
                 "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20",
                 "bg-zinc-50/50 dark:bg-zinc-800/30"
               )}
@@ -231,3 +231,4 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
 });
 
 export default ExpandableSupplierCard;
+

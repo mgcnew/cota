@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import { Trophy, History } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
 
@@ -47,46 +48,59 @@ export const DashboardIntelligenceBoard = memo(({
     <div className="flex flex-col gap-4 lg:h-full">
 
       {/* Top Parceiros */}
-      <Card className="bg-card border border-border rounded-lg shadow-sm flex flex-col">
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+      <Card className="p-0">
+        <div className="px-4 py-3 border-b border-border dark:border-white/5 flex items-center justify-between">
           <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
             Top Parceiros
           </span>
         </div>
-
-        <div className="p-3 space-y-0">
+        <CardContent className="p-0">
           {topSuppliers.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">
+            <p className="text-xs text-muted-foreground text-center py-6">
               Dados insuficientes no período.
             </p>
           ) : (
-            topSuppliers.slice(0, 3).map((supplier, idx) => (
-              <div key={idx} className="flex items-center gap-2.5 px-1 py-2.5 hover:bg-accent/50 rounded-md transition-colors">
-                <span className={cn(
-                  "w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold text-white shrink-0",
-                  RANK_COLORS[idx] ?? "bg-zinc-300"
-                )}>
-                  {idx + 1}
-                </span>
-                <p className="text-[13px] font-medium text-foreground truncate flex-1">
-                  <CapitalizedText>{supplier.name}</CapitalizedText>
-                </p>
-                <div className="text-right shrink-0">
-                  <p className="text-xs font-semibold text-foreground">{supplier.quotes} vitórias</p>
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
-                    {(supplier.economiaPercentual || 0).toFixed(1)}% eco.
-                  </p>
-                </div>
-              </div>
-            ))
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-8">#</TableHead>
+                  <TableHead>Parceiro</TableHead>
+                  <TableHead className="text-right">Vitórias</TableHead>
+                  <TableHead className="text-right">Eco.</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {topSuppliers.slice(0, 3).map((supplier, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <span className={cn(
+                        "w-5 h-5 rounded-full inline-flex items-center justify-center text-[9px] font-bold text-white",
+                        RANK_COLORS[idx] ?? "bg-muted-foreground"
+                      )}>
+                        {idx + 1}
+                      </span>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <CapitalizedText>{supplier.name}</CapitalizedText>
+                    </TableCell>
+                    <TableCell className="text-right text-xs font-semibold text-foreground">
+                      {supplier.quotes}
+                    </TableCell>
+                    <TableCell className="text-right text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      {(supplier.economiaPercentual || 0).toFixed(1)}%
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </div>
+        </CardContent>
       </Card>
 
-      {/* Radar de Operações */}
-      <Card className="bg-card border border-border rounded-lg shadow-sm flex flex-col lg:flex-1">
-        <div className="px-4 py-3 border-b border-border flex items-center justify-between">
+      {/* Atividade Recente */}
+      <Card className="p-0 flex flex-col lg:flex-1">
+        <div className="px-4 py-3 border-b border-border dark:border-white/5 flex items-center justify-between">
           <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <History className="w-3.5 h-3.5 text-muted-foreground" />
             Atividade Recente
@@ -100,41 +114,49 @@ export const DashboardIntelligenceBoard = memo(({
             Ver todas
           </Button>
         </div>
-
-        <div className="p-3 space-y-0">
+        <CardContent className="p-0">
           {recentQuotes.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">
+            <p className="text-xs text-muted-foreground text-center py-6">
               Sem histórico recente.
             </p>
           ) : (
-            recentQuotes.slice(0, 6).map((quote, idx) => {
-              const s = STATUS_CONFIG[quote.status?.toLowerCase()] ?? { dot: "bg-zinc-400", label: "Atualizado" };
-              const hasPrice = quote.bestPrice && quote.bestPrice !== 'Sem ofertas';
-
-              return (
-                <div key={idx} className="flex items-center gap-2.5 px-1 py-2 hover:bg-accent/50 rounded-md transition-colors">
-                  <span className={cn("w-1.5 h-1.5 rounded-full shrink-0 mt-px", s.dot)} />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-foreground truncate leading-none">
-                      <CapitalizedText>{quote.product}</CapitalizedText>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {s.label}{quote.supplier ? ` · ${quote.supplier}` : ''}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    {hasPrice && (
-                      <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                        {quote.bestPrice}
-                      </p>
-                    )}
-                    <p className="text-[11px] text-muted-foreground">{quote.date}</p>
-                  </div>
-                </div>
-              );
-            })
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Melhor Preço</TableHead>
+                  <TableHead className="text-right">Data</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentQuotes.slice(0, 6).map((quote, idx) => {
+                  const s = STATUS_CONFIG[quote.status?.toLowerCase()] ?? { dot: "bg-muted-foreground", label: "Atualizado" };
+                  const hasPrice = quote.bestPrice && quote.bestPrice !== 'Sem ofertas';
+                  return (
+                    <TableRow key={idx}>
+                      <TableCell className="font-medium text-[13px]">
+                        <CapitalizedText>{quote.product}</CapitalizedText>
+                      </TableCell>
+                      <TableCell>
+                        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", s.dot)} />
+                          {s.label}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        {hasPrice ? quote.bestPrice : '—'}
+                      </TableCell>
+                      <TableCell className="text-right text-[11px] text-muted-foreground">
+                        {quote.date}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
           )}
-        </div>
+        </CardContent>
       </Card>
 
     </div>

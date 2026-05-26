@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+﻿import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -74,7 +74,7 @@ export function QuoteComparisonTab({
 
                 {/* Resumo Comparativo Superior */}
                 {bestSupplier && (
-                    <Card className="mb-2.5 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/50 rounded-lg shadow-sm dark:shadow-none">
+                    <Card className="mb-2.5 border border-border dark:border-white/5 bg-white dark:bg-gray-950/50 rounded-lg shadow-sm dark:shadow-none">
                         <div className="p-2.5 sm:p-3">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                                 <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export function QuoteComparisonTab({
                                     </div>
                                     <div>
                                         <h3 className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase mb-0.5">
-                                            Melhor Opção
+                                            Melhor OpÃ§Ã£o
                                         </h3>
                                         <p className="font-bold text-sm text-gray-900 dark:text-white">
                                             {bestSupplier.nome}
@@ -105,11 +105,11 @@ export function QuoteComparisonTab({
                 )}
 
                 {/* Tabela Comparativa - Foco Total */}
-                <Card className="flex-1 overflow-hidden border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#1C1F26] rounded-lg shadow-sm dark:shadow-none flex flex-col">
+                <Card className="flex-1 overflow-hidden border border-border dark:border-white/5 bg-white dark:bg-[#1C1F26] rounded-lg shadow-sm dark:shadow-none flex flex-col">
                     <ScrollArea className="flex-1">
                         <table className="w-full border-collapse min-w-max">
                             <thead className="sticky top-0 z-10 bg-gray-50/80 dark:bg-gray-900/95 backdrop-blur-sm">
-                                <tr className="border-b border-gray-200 dark:border-gray-800">
+                                <tr className="border-b border-border dark:border-white/5">
                                     <th className="px-3 py-2 text-left bg-gray-50/80 dark:bg-gray-800/95 backdrop-blur-sm sticky left-0 z-20 shadow-sm">
                                         <div className="flex items-center gap-1.5">
                                             <Package className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
@@ -166,10 +166,10 @@ export function QuoteComparisonTab({
 
                                     return (
                                         <tr key={product.product_id} className={cn(
-                                            "border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors",
+                                            "border-b border-border dark:border-white/5 hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-colors",
                                             index % 2 === 0 ? "bg-white dark:bg-gray-900" : "bg-gray-50/30 dark:bg-gray-800/30"
                                         )}>
-                                            <td className="px-3 py-2 bg-gray-50/30 dark:bg-gray-800/80 sticky left-0 z-10 shadow-sm border-r border-gray-100 dark:border-gray-800">
+                                            <td className="px-3 py-2 bg-gray-50/30 dark:bg-gray-800/80 sticky left-0 z-10 shadow-sm border-r border-border dark:border-white/5">
                                                 <p className="font-bold text-xs text-gray-900 dark:text-white truncate max-w-[200px]" title={product.product_name}>
                                                     {product.product_name}
                                                 </p>
@@ -185,7 +185,7 @@ export function QuoteComparisonTab({
                                                 const showOriginalUnit = shouldShowOriginalUnit(fornecedor.id, product.product_id);
                                                 const metadata = getPricingMetadata(fornecedor.id, product.product_id);
 
-                                                // Calcular economia usando preços normalizados
+                                                // Calcular economia usando preÃ§os normalizados
                                                 const allNormalizedPrices = currentQuote.fornecedoresParticipantes
                                                     .map(f => getNormalizedPrice(f.id, product.product_id))
                                                     .filter(v => v > 0);
@@ -213,7 +213,7 @@ export function QuoteComparisonTab({
                                                                                     : "text-xs min-w-[85px]",
                                                                                 isBestPrice
                                                                                     ? "bg-emerald-600 dark:bg-emerald-600 text-white ring-1 ring-emerald-200 dark:ring-emerald-800"
-                                                                                    : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700"
+                                                                                    : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-border dark:border-white/5"
                                                             )}>
                                                                                 {isBestPrice && <TrendingDown className="h-2.5 w-2.5 flex-shrink-0" />}
                                                                                 <span className="whitespace-nowrap">R$ {normalizedUnitPrice.toFixed(2)}</span>
@@ -221,9 +221,9 @@ export function QuoteComparisonTab({
                                                                         </TooltipTrigger>
                                                                         <TooltipContent>
                                                                             <div className="text-xs space-y-1">
-                                                                                <p><strong>Preço normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/un</p>
+                                                                                <p><strong>PreÃ§o normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/un</p>
                                                                                 {showOriginalUnit && (
-                                                                                    <p><strong>Preço original:</strong> R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}</p>
+                                                                                    <p><strong>PreÃ§o original:</strong> R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}</p>
                                                                                 )}
                                                                                 <p><strong>Total:</strong> R$ {(normalizedUnitPrice * product.quantidade).toFixed(2)}</p>
                                                                             </div>
@@ -256,9 +256,9 @@ export function QuoteComparisonTab({
                         </table>
                     </ScrollArea>
 
-                    {/* Rodapé com Ação de Converter */}
+                    {/* RodapÃ© com AÃ§Ã£o de Converter */}
                     {bestSupplier && currentQuote.status !== 'finalizada' && !readOnly && (
-                        <div className="flex-shrink-0 p-2.5 sm:p-3 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+                        <div className="flex-shrink-0 p-2.5 sm:p-3 border-t border-border dark:border-white/5 bg-white dark:bg-gray-950">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
                                 <div className="flex items-center gap-2">
                                     <div className="p-2 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-950 shadow-sm">
@@ -269,7 +269,7 @@ export function QuoteComparisonTab({
                                             Melhor: <span className="text-emerald-600 dark:text-emerald-400">{bestSupplier.nome}</span>
                                         </p>
                                         <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                                            R$ {bestSupplier.totalValue.toFixed(2)} • Eco: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</span>
+                                            R$ {bestSupplier.totalValue.toFixed(2)} â€¢ Eco: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{currentQuote?.economia || 'N/A'}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -287,7 +287,7 @@ export function QuoteComparisonTab({
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>Converter cotação em pedido</p>
+                                            <p>Converter cotaÃ§Ã£o em pedido</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
@@ -299,3 +299,4 @@ export function QuoteComparisonTab({
         </ScrollArea>
     );
 }
+

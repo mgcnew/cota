@@ -57,7 +57,7 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
       {/* Cotações Prontas para Decisão */}
       {prontasParaDecisao.length > 0 && (
-        <Card className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800 transition-smooth hover:shadow-md">
+        <Card className="p-4 bg-emerald-50/50 dark:bg-emerald-950/20 transition-smooth hover:shadow-md">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-emerald-500 shadow-sm">
               <CheckCircle2 className="h-5 w-5 text-white" />
@@ -95,7 +95,7 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
 
       {/* Cotações Vencendo */}
       {vencendo.length > 0 && (
-        <Card className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 transition-smooth hover:shadow-md">
+        <Card className="p-4 bg-amber-50/50 dark:bg-amber-950/20 transition-smooth hover:shadow-md">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-lg bg-amber-500 shadow-sm">
               <AlertTriangle className="h-5 w-5 text-white" />
@@ -129,7 +129,7 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
 
       {/* Alertas de Fornecedores Agendados */}
       {visibleSuppliers.map(supplier => (
-        <Card key={supplier.id} className="p-4 bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 transition-smooth hover:shadow-md relative group">
+        <Card key={supplier.id} className="p-4 bg-blue-50/50 dark:bg-blue-950/20 transition-smooth hover:shadow-md relative group">
           <Button
             variant="ghost"
             size="icon"

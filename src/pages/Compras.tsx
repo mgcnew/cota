@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
+﻿import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket, Package } from "lucide-react";
@@ -16,11 +16,11 @@ const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"
 const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
 const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
 const TABS = [
-  { value: "cotacoes", icon: FileText, label: "Cotações" },
+  { value: "cotacoes", icon: FileText, label: "CotaÃ§Ãµes" },
   { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
   { value: "lista", icon: ShoppingBasket, label: "Lista" },
   { value: "embalagens", icon: Package, label: "Embalagens" },
-  { value: "analise", icon: BarChart3, label: "Análise" },
+  { value: "analise", icon: BarChart3, label: "AnÃ¡lise" },
   { value: "calculadora", icon: Keyboard, label: "Calculadora" }
 ];
 
@@ -55,7 +55,7 @@ function Compras() {
     {
       key: '1',
       action: () => activeTab !== 'calculadora' && handleTabChange('cotacoes'),
-      description: 'Ir para Cotações'
+      description: 'Ir para CotaÃ§Ãµes'
     },
     {
       key: '2',
@@ -75,7 +75,7 @@ function Compras() {
     {
       key: '5',
       action: () => activeTab !== 'calculadora' && handleTabChange('analise'),
-      description: 'Ir para Análise'
+      description: 'Ir para AnÃ¡lise'
     },
     {
       key: '6',
@@ -89,7 +89,7 @@ function Compras() {
         const event = new CustomEvent('compras:nova', { detail: { tab: activeTab } });
         window.dispatchEvent(event);
       },
-      description: 'Nova cotação/pedido'
+      description: 'Nova cotaÃ§Ã£o/pedido'
     },
     {
       key: 'f',
@@ -109,7 +109,7 @@ function Compras() {
       {/* Mobile Bottom Navigation Bar */}
       {isMobile && (
         <div className={cn(
-          "md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#16181C]/95 backdrop-blur-xl border-t border-zinc-200 dark:border-zinc-800/50 pb-safe shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.15)]",
+          "md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#16181C]/95 backdrop-blur-xl border-t border-border dark:border-white/5/50 pb-safe shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.15)]",
         )}>
           <div className="flex items-center justify-between px-2 py-2">
             {TABS.map((tab) => {
@@ -143,7 +143,7 @@ function Compras() {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           {/* Page Header + Inline Tabs */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-6 md:mb-10 pb-4 md:pb-8 md:border-b border-zinc-200/70 dark:border-zinc-800">
-            {/* Título */}
+            {/* TÃ­tulo */}
             <div className="flex items-center gap-2 md:gap-3 shrink-0">
               <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
                 <ShoppingBag className="h-6 w-6 text-brand" />
@@ -153,7 +153,7 @@ function Compras() {
                   Compras
                 </h1>
                 <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                  Gerencie cotações e pedidos de compra
+                  Gerencie cotaÃ§Ãµes e pedidos de compra
                 </p>
               </div>
             </div>
@@ -197,5 +197,6 @@ function Compras() {
 }
 
 export default memo(Compras);
+
 
 

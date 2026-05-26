@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
@@ -36,7 +36,7 @@ export function ProductPriceHistoryDialog({
   
   const isMobile = useIsMobile();
   
-  // Buscar dados reais do histórico de preços
+  // Buscar dados reais do histÃ³rico de preÃ§os
   const { data, isLoading, error } = useProductPriceHistory(productId);
   const { quoteHistory = [], orderHistory = [] } = (data as any) || {};
 
@@ -44,7 +44,7 @@ export function ProductPriceHistoryDialog({
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  // Calcular variação de preço
+  // Calcular variaÃ§Ã£o de preÃ§o
   const calculatePriceVariation = (currentPrice: number, previousPrice: number | null) => {
     if (!previousPrice) return { type: "stable" as const, percentage: 0 };
     
@@ -193,15 +193,15 @@ export function ProductPriceHistoryDialog({
         <DrawerTrigger asChild>
           {trigger}
         </DrawerTrigger>
-        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
-          <DrawerHeader className="pb-3 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+        <DrawerContent className="h-[90vh] rounded-t-2xl pb-8 flex flex-col bg-white dark:bg-gray-950 border-t border-border dark:border-white/5">
+          <DrawerHeader className="pb-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-900">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shadow-sm border border-border dark:border-white/5">
                 <Package className="h-5 w-5 text-gray-900 dark:text-white" />
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <DrawerTitle className="text-lg font-bold text-gray-900 dark:text-white">
-                  Histórico de Preços
+                  HistÃ³rico de PreÃ§os
                 </DrawerTitle>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate font-medium">
                   {productName}
@@ -214,23 +214,23 @@ export function ProductPriceHistoryDialog({
           {isLoading ? (
             <div className="text-center py-12">
               <Loader2 className="h-8 w-8 text-blue-500 mx-auto mb-3 animate-spin" />
-              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Carregando histórico...</p>
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Carregando histÃ³rico...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-red-300 dark:text-red-500 mx-auto mb-3" />
-              <p className="text-red-500 dark:text-red-400 text-sm font-medium">Erro ao carregar histórico</p>
+              <p className="text-red-500 dark:text-red-400 text-sm font-medium">Erro ao carregar histÃ³rico</p>
               <p className="text-xs text-red-400 dark:text-red-500 mt-1">Tente novamente mais tarde</p>
             </div>
           ) : sortedHistory.length === 0 ? (
             <div className="text-center py-12">
               <Package className="h-12 w-12 text-gray-300 dark:text-gray-500 mx-auto mb-3" />
-              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium">Nenhum histórico encontrado</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Este produto ainda não possui cotações finalizadas</p>
+              <p className="text-gray-500 dark:text-gray-300 text-sm font-medium">Nenhum histÃ³rico encontrado</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Este produto ainda nÃ£o possui cotaÃ§Ãµes finalizadas</p>
             </div>
           ) : (
             <>
-              {/* Resumo estatístico mobile - no topo */}
+              {/* Resumo estatÃ­stico mobile - no topo */}
               <div className="mb-4 p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/30">
                 <div className="grid grid-cols-3 gap-3">
                   <div className="text-center">
@@ -246,7 +246,7 @@ export function ProductPriceHistoryDialog({
                     </div>
                   </div>
                   <div className="text-center">
-                    <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 font-bold">Médio</div>
+                    <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1 font-bold">MÃ©dio</div>
                     <div className="font-bold text-blue-600 dark:text-blue-400 text-sm">
                       R$ {(sortedHistory.reduce((sum, h) => sum + h.price, 0) / sortedHistory.length).toFixed(2)}
                     </div>
@@ -254,18 +254,18 @@ export function ProductPriceHistoryDialog({
                 </div>
               </div>
 
-              {/* Lista de histórico mobile - layout vertical otimizado */}
+              {/* Lista de histÃ³rico mobile - layout vertical otimizado */}
               {sortedHistory.map((entry, index) => {
                 const previousEntry = sortedHistory[index + 1];
                 const variation = calculatePriceVariation(entry.price, previousEntry?.price || null);
                 
                 return (
-                  <Card key={entry.id} className="border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+                  <Card key={entry.id} className="border border-border dark:border-white/5 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
                     <CardContent className="p-4">
                       {/* Header do card mobile */}
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-700">
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 border border-border dark:border-white/5">
                             <Building2 className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -288,10 +288,10 @@ export function ProductPriceHistoryDialog({
                         )}
                       </div>
 
-                      {/* Preço e variação mobile - destaque */}
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+                      {/* PreÃ§o e variaÃ§Ã£o mobile - destaque */}
+                      <div className="flex items-center justify-between pt-3 border-t border-border dark:border-white/5">
                         <div className="flex items-center gap-2">
-                          <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Preço</div>
+                          <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">PreÃ§o</div>
                           <div className="flex items-baseline gap-1">
                             <span className="text-lg font-black text-gray-900 dark:text-white">
                               R$ {entry.price.toFixed(2)}
@@ -299,7 +299,7 @@ export function ProductPriceHistoryDialog({
                           </div>
                         </div>
                         
-                        {/* Variação mobile - mais visível */}
+                        {/* VariaÃ§Ã£o mobile - mais visÃ­vel */}
                         {index < sortedHistory.length - 1 && (
                           <div className={cn(
                             "flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-bold",
@@ -327,7 +327,7 @@ export function ProductPriceHistoryDialog({
     );
   }
 
-  // Desktop: Usar Dialog (mantém layout original)
+  // Desktop: Usar Dialog (mantÃ©m layout original)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -339,7 +339,7 @@ export function ProductPriceHistoryDialog({
             </div>
             <div className="min-w-0">
               <DialogTitle className="text-base font-bold text-gray-900 dark:text-gray-100">
-                Histórico de Preços
+                HistÃ³rico de PreÃ§os
               </DialogTitle>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate font-medium">
                 {productName}
@@ -359,7 +359,7 @@ export function ProductPriceHistoryDialog({
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <div className="px-4 border-b border-gray-100 dark:border-gray-800">
+          <div className="px-4 border-b border-border dark:border-white/5">
             <TabsList className="flex bg-transparent !bg-transparent p-0 gap-6 h-10 w-full justify-start rounded-none border-b-0 shadow-none !shadow-none">
               <TabsTrigger 
                 value="pedidos" 
@@ -385,7 +385,7 @@ export function ProductPriceHistoryDialog({
                   transition-all cursor-pointer flex items-center gap-2"
               >
                 <ClipboardList className="h-3 w-3" />
-                Histórico de Cotações
+                HistÃ³rico de CotaÃ§Ãµes
               </TabsTrigger>
             </TabsList>
           </div>
@@ -394,12 +394,12 @@ export function ProductPriceHistoryDialog({
             {isLoading ? (
               <div className="h-full flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 text-blue-500 mb-4 animate-spin" />
-                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Carregando histórico...</p>
+                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Carregando histÃ³rico...</p>
               </div>
             ) : error ? (
               <div className="h-full flex flex-col items-center justify-center py-12">
                 <Package className="h-12 w-12 text-red-300 dark:text-red-500 mb-4" />
-                <p className="text-red-500 dark:text-red-400 text-sm font-medium">Erro ao carregar histórico</p>
+                <p className="text-red-500 dark:text-red-400 text-sm font-medium">Erro ao carregar histÃ³rico</p>
               </div>
             ) : (
               <>
@@ -409,7 +409,7 @@ export function ProductPriceHistoryDialog({
                       <ShoppingCart className="h-12 w-12 text-gray-200 dark:text-gray-700 mb-4" />
                       <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Nenhum pedido confirmado</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-[250px]">
-                        Os preços reais de compra aparecerão aqui após a confirmação de pedidos.
+                        Os preÃ§os reais de compra aparecerÃ£o aqui apÃ³s a confirmaÃ§Ã£o de pedidos.
                       </p>
                     </div>
                   ) : (
@@ -421,9 +421,9 @@ export function ProductPriceHistoryDialog({
                   {quoteHistory.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center py-12 text-center">
                       <ClipboardList className="h-12 w-12 text-gray-200 dark:text-gray-700 mb-4" />
-                      <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Nenhuma cotação encontrada</p>
+                      <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">Nenhuma cotaÃ§Ã£o encontrada</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                        Este produto ainda não possui histórico de cotações.
+                        Este produto ainda nÃ£o possui histÃ³rico de cotaÃ§Ãµes.
                       </p>
                     </div>
                   ) : (
@@ -435,9 +435,9 @@ export function ProductPriceHistoryDialog({
           </div>
         </Tabs>
 
-        {/* Resumo estatístico baseado na aba ativa */}
+        {/* Resumo estatÃ­stico baseado na aba ativa */}
         {!isLoading && !error && (
-          <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/40">
+          <div className="p-4 border-t border-border dark:border-white/5 bg-gray-50/50 dark:bg-gray-900/40">
             {(() => {
               const currentHistory = activeTab === 'pedidos' ? orderHistory : quoteHistory;
               if (currentHistory.length === 0) return null;
@@ -462,7 +462,7 @@ export function ProductPriceHistoryDialog({
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">Médio</div>
+                    <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-bold">MÃ©dio</div>
                     <div className="font-bold text-blue-600 dark:text-blue-400 text-sm">R$ {avgPrice.toFixed(2)}</div>
                   </div>
                 </div>

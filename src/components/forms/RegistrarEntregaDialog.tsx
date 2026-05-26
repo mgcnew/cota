@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,16 +32,16 @@ interface ItemEntrega {
   unidadePedida: string;
   quantidadeEntregue: number;
   unidadeEntregue: string;
-  valorUnitario: number; // Preço acordado originalmente
-  valorFaturado: number; // Preço real cobrado na NFe
-  maiorValor: number; // Teto para cálculo da economia
+  valorUnitario: number; // PreÃ§o acordado originalmente
+  valorFaturado: number; // PreÃ§o real cobrado na NFe
+  maiorValor: number; // Teto para cÃ¡lculo da economia
   fatorEmbalagem: number; // Fator de caixa (itens por caixa)
-  isBoxUnit: boolean; // Se a unidade é do tipo caixa
-  quantidadePorEmbalagemOriginal: number | null; // Valor original vindo da cotação
+  isBoxUnit: boolean; // Se a unidade Ã© do tipo caixa
+  quantidadePorEmbalagemOriginal: number | null; // Valor original vindo da cotaÃ§Ã£o
 }
 
 /**
- * Detecta se a unidade é do tipo "caixa"
+ * Detecta se a unidade Ã© do tipo "caixa"
  */
 function isBoxLikeUnit(unit: string): boolean {
   const normalized = unit.toLowerCase().trim();
@@ -98,7 +98,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     }, 0);
   }, [itensEntrega]);
 
-  // Calcular economia real considerando quebra/excesso e preço NFe
+  // Calcular economia real considerando quebra/excesso e preÃ§o NFe
   const economiaRealPreview = useMemo(() => {
     return itensEntrega.reduce((sum, item) => {
       if (item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado) {
@@ -186,9 +186,9 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border shadow-2xl rounded-xl bg-card">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border dark:border-white/5 shadow-2xl rounded-xl bg-card">
         {/* Header Compacto */}
-        <DialogHeader className="px-5 py-4 border-b border-border bg-muted/30">
+        <DialogHeader className="px-5 py-4 border-b border-border dark:border-white/5 bg-muted/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
@@ -199,12 +199,12 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                   Registrar Recebimento
                   {veioDeCotacao && (
                     <Badge variant="outline" className="h-[18px] px-1.5 text-[9px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-bold uppercase tracking-wider">
-                      Via Cotação
+                      Via CotaÃ§Ã£o
                     </Badge>
                   )}
                 </DialogTitle>
                 <p className="text-xs text-muted-foreground font-medium mt-0.5">
-                  {pedido.supplier_name} <span className="mx-1 opacity-50">•</span> Pedido #{pedido.id.substring(0, 8)}
+                  {pedido.supplier_name} <span className="mx-1 opacity-50">â€¢</span> Pedido #{pedido.id.substring(0, 8)}
                 </p>
               </div>
             </div>
@@ -215,13 +215,13 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
         </DialogHeader>
 
         <div className="flex-1 flex flex-col p-5 overflow-y-auto custom-scrollbar">
-          {/* Aviso se não veio de cotação */}
+          {/* Aviso se nÃ£o veio de cotaÃ§Ã£o */}
           {!veioDeCotacao && (
             <div className="flex items-start gap-2 p-3 mb-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
               <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5" />
               <div className="text-xs text-amber-700 dark:text-amber-400">
-                <span className="font-semibold block">Pedido direto s/ cotação</span>
-                <span className="opacity-80">A economia real não será calculada para este registro.</span>
+                <span className="font-semibold block">Pedido direto s/ cotaÃ§Ã£o</span>
+                <span className="opacity-80">A economia real nÃ£o serÃ¡ calculada para este registro.</span>
               </div>
             </div>
           )}
@@ -237,15 +237,15 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                   Alerta Cota Aki AI
                 </p>
                 <p className="font-medium text-foreground/80 leading-relaxed pr-4">
-                  Observamos alterações de preço cobrado ou quebras de volume neste faturamento. Você terá uma <strong className="text-amber-500 font-bold">fuga de economia de R$ {(economiaEsperada - economiaRealPreview).toFixed(2).replace('.', ',')}</strong> na consolidação em relação à expectativa base.
+                  Observamos alteraÃ§Ãµes de preÃ§o cobrado ou quebras de volume neste faturamento. VocÃª terÃ¡ uma <strong className="text-amber-500 font-bold">fuga de economia de R$ {(economiaEsperada - economiaRealPreview).toFixed(2).replace('.', ',')}</strong> na consolidaÃ§Ã£o em relaÃ§Ã£o Ã  expectativa base.
                 </p>
               </div>
             </div>
           )}
 
           {/* Lista Compacta de Itens */}
-          <div className="border border-border rounded-lg overflow-hidden bg-card shadow-sm">
-            <div className="hidden sm:grid grid-cols-12 gap-4 p-3 bg-muted/50 border-b border-border text-[10px] font-bold text-muted-foreground uppercase tracking-wider items-center">
+          <div className="border border-border dark:border-white/5 rounded-lg overflow-hidden bg-card shadow-sm">
+            <div className="hidden sm:grid grid-cols-12 gap-4 p-3 bg-muted/50 border-b border-border dark:border-white/5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider items-center">
               <div className="col-span-4">Produto Pedido</div>
               <div className="col-span-2 text-right">Qtd Pedida</div>
               <div className="col-span-2 text-right">Custo NFe / Unit</div>
@@ -407,12 +407,12 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                             </span>
                           ) : (
                             <span className="text-[10px] font-medium mt-1 text-amber-500 text-right w-full block italic">
-                              Não informado na cotação
+                              NÃ£o informado na cotaÃ§Ã£o
                             </span>
                           )}
                         </>
                       ) : (
-                        // Célula vazia para manter o grid alinhado
+                        // CÃ©lula vazia para manter o grid alinhado
                         <div className="h-10" />
                       )}
                     </div>
@@ -424,8 +424,8 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           </div>
         </div>
 
-        {/* Resumo Final e Ações Footer */}
-        <div className="px-5 py-4 bg-muted/30 border-t border-border flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        {/* Resumo Final e AÃ§Ãµes Footer */}
+        <div className="px-5 py-4 bg-muted/30 border-t border-border dark:border-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 flex-1">
             <div>
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5">Total Recebido</span>
@@ -478,3 +478,4 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     </Dialog>
   );
 }
+

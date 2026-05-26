@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
 
   const bestPricesBySupplier = useMemo(() => {
     const grouped = bestPricesData.reduce((acc, curr) => {
-      // Agrupar apenas itens que têm preço
+      // Agrupar apenas itens que tÃªm preÃ§o
       if (curr.bestPrice > 0 && curr.bestSupplierId) {
         if (!acc[curr.bestSupplierId]) {
           acc[curr.bestSupplierId] = {
@@ -58,7 +58,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
             <span>Resumo de Vencedores</span>
           </h3>
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
-            <div className="flex bg-muted/20 border border-border/50 rounded-lg p-0.5 shrink-0">
+            <div className="flex bg-muted/20 border border-border dark:border-white/5/50 rounded-lg p-0.5 shrink-0">
               <Button 
                 variant={view === "item" ? "secondary" : "ghost"} 
                 size="sm" 
@@ -132,7 +132,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                             </Badge>
                           )}
                         </>
-                      ) : <Badge variant="outline" className="text-muted-foreground bg-muted text-[9px] font-bold border-border">Sem preço</Badge>}
+                      ) : <Badge variant="outline" className="text-muted-foreground bg-muted text-[9px] font-bold border-border">Sem preÃ§o</Badge>}
                     </div>
                   </div>
                 </div>
@@ -143,12 +143,12 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
           <div className="space-y-3">
             {bestPricesBySupplier.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-xs">
-                Nenhum vencedor atribuído ainda
+                Nenhum vencedor atribuÃ­do ainda
               </div>
             ) : (
               bestPricesBySupplier.map((group) => (
                 <Card key={group.supplierId} className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-                  <div className="bg-muted/20 px-4 py-3 border-b border-border/50 flex items-center justify-between">
+                  <div className="bg-muted/20 px-4 py-3 border-b border-border dark:border-white/5/50 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand flex-shrink-0">
                         <Building2 className="h-4 w-4" />
@@ -190,7 +190,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                             </PopoverTrigger>
                             <PopoverContent className="w-auto min-w-[200px] p-3 shadow-lg" align="end" onClick={(e) => e.stopPropagation()}>
                               <div className="space-y-2">
-                                <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/50 pb-1.5 mb-1.5">Outros Fornecedores</h4>
+                                <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border dark:border-white/5/50 pb-1.5 mb-1.5">Outros Fornecedores</h4>
                                 <div className="flex flex-col gap-1.5">
                                   {item.allPrices.filter(p => p.supplierId !== group.supplierId).length > 0 ? (
                                     item.allPrices
@@ -202,7 +202,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                                         </div>
                                       ))
                                   ) : (
-                                    <span className="text-xs text-muted-foreground italic">Nenhum outro preço registrado.</span>
+                                    <span className="text-xs text-muted-foreground italic">Nenhum outro preÃ§o registrado.</span>
                                   )}
                                 </div>
                               </div>
@@ -221,3 +221,4 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
     </ScrollArea>
   );
 }
+

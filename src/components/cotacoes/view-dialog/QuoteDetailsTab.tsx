@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/card";
+﻿import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Package, Users, Clock, TrendingDown, Star, Sparkles } from "lucide-react";
@@ -22,7 +22,7 @@ export function QuoteDetailsTab({
 }: QuoteDetailsTabProps) {
     if (!currentQuote) return null;
 
-    // Calcula os totais de todos os fornecedores que responderam para traçar a estatística da IA
+    // Calcula os totais de todos os fornecedores que responderam para traÃ§ar a estatÃ­stica da IA
     const supplierTotals = currentQuote.fornecedoresParticipantes
         .filter(f => f.status === 'respondido')
         .map(fornecedor => {
@@ -42,9 +42,9 @@ export function QuoteDetailsTab({
                 {/* Layout otimizado e compacto */}
                 <div className="max-w-5xl mx-auto space-y-3">
 
-                    {/* Seção 1: Resumo Executivo - Grid Compacto */}
+                    {/* SeÃ§Ã£o 1: Resumo Executivo - Grid Compacto */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5">
-                        <Card className="p-2 sm:p-2.5 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/50 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg shadow-sm dark:shadow-none">
+                        <Card className="p-2 sm:p-2.5 border border-border dark:border-white/5 bg-white dark:bg-gray-950/50 hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20 transition-all duration-200 rounded-lg shadow-sm dark:shadow-none">
                             <div className="flex items-center gap-1.5">
                                 <div className="p-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-950 flex-shrink-0">
                                     <Package className="h-3.5 w-3.5" />
@@ -56,7 +56,7 @@ export function QuoteDetailsTab({
                             </div>
                         </Card>
 
-                        <Card className="p-2 sm:p-2.5 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/50 hover:border-gray-300 dark:hover:border-gray-700 transition-all rounded-lg shadow-sm dark:shadow-none">
+                        <Card className="p-2 sm:p-2.5 border border-border dark:border-white/5 bg-white dark:bg-gray-950/50 hover:border-gray-300 dark:hover:border-gray-700 transition-all rounded-lg shadow-sm dark:shadow-none">
                             <div className="flex items-center gap-1.5">
                                 <div className="p-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-950 flex-shrink-0">
                                     <Users className="h-3.5 w-3.5" />
@@ -68,7 +68,7 @@ export function QuoteDetailsTab({
                             </div>
                         </Card>
 
-                        <Card className="p-2 sm:p-2.5 border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950/50 hover:border-gray-300 dark:hover:border-gray-700 transition-all rounded-lg shadow-sm dark:shadow-none">
+                        <Card className="p-2 sm:p-2.5 border border-border dark:border-white/5 bg-white dark:bg-gray-950/50 hover:border-gray-300 dark:hover:border-gray-700 transition-all rounded-lg shadow-sm dark:shadow-none">
                             <div className="flex items-center gap-1.5">
                                 <div className="p-1.5 rounded-lg bg-gray-900 dark:bg-white text-white dark:text-gray-950 flex-shrink-0">
                                     <Clock className="h-3.5 w-3.5" />
@@ -98,7 +98,7 @@ export function QuoteDetailsTab({
                         </Card>
                     </div>
 
-                    {/* Seção 2: Melhor Oferta Destaque */}
+                    {/* SeÃ§Ã£o 2: Melhor Oferta Destaque */}
                     {bestSupplier && (
                         <div className="space-y-2">
                             <Card className="p-3 sm:p-4 border border-emerald-100 dark:border-emerald-900/50 bg-emerald-50/30 dark:bg-emerald-950/10 rounded-lg shadow-sm dark:shadow-none">
@@ -120,12 +120,12 @@ export function QuoteDetailsTab({
                                 </div>
                             </Card>
 
-                            {/* Análise Inteligente de Cenário (Cota Aki AI) */}
+                            {/* AnÃ¡lise Inteligente de CenÃ¡rio (Cota Aki AI) */}
                             {supplierTotals.length > 1 && (() => {
                                 const cheapest = supplierTotals[0];
                                 const mostExpensive = supplierTotals[supplierTotals.length - 1];
                                 
-                                // Média dos outros fornecedores
+                                // MÃ©dia dos outros fornecedores
                                 const otherSuppliers = supplierTotals.slice(1);
                                 const otherAverage = otherSuppliers.reduce((acc, curr) => acc + curr.total, 0) / otherSuppliers.length;
 
@@ -141,10 +141,10 @@ export function QuoteDetailsTab({
                                         </div>
                                         <div className="text-sm">
                                             <p className="font-bold flex items-center gap-1.5 text-foreground tracking-tight text-[15px] mb-1">
-                                                Análise Inteligente 
+                                                AnÃ¡lise Inteligente 
                                             </p>
                                             <p className="font-medium text-muted-foreground leading-relaxed">
-                                                Se os preços forem mantidos, fechando esta cotação agora com <strong className="text-foreground">{cheapest.nome}</strong>, você economizará <strong className="text-emerald-600 dark:text-emerald-400 font-bold">R$ {savingsAgainstHighest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> comparado com o cenário mais caro oferecido{supplierTotals.length > 2 ? `, garantindo impressionantes R$ ${savingsAgainstAverage.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a menos em relação à média de preço das outras ofertas` : ''}.
+                                                Se os preÃ§os forem mantidos, fechando esta cotaÃ§Ã£o agora com <strong className="text-foreground">{cheapest.nome}</strong>, vocÃª economizarÃ¡ <strong className="text-emerald-600 dark:text-emerald-400 font-bold">R$ {savingsAgainstHighest.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> comparado com o cenÃ¡rio mais caro oferecido{supplierTotals.length > 2 ? `, garantindo impressionantes R$ ${savingsAgainstAverage.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} a menos em relaÃ§Ã£o Ã  mÃ©dia de preÃ§o das outras ofertas` : ''}.
                                             </p>
                                         </div>
                                     </div>
@@ -153,7 +153,7 @@ export function QuoteDetailsTab({
                         </div>
                     )}
 
-                    {/* Seção 3: Fornecedores Participantes - Tabela Compacta */}
+                    {/* SeÃ§Ã£o 3: Fornecedores Participantes - Tabela Compacta */}
                     <div>
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-xs font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
@@ -212,7 +212,7 @@ export function QuoteDetailsTab({
                                                                 "text-[10px] h-4 px-1.5",
                                                                 fornecedor.status === 'respondido'
                                                                     ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800"
-                                                                    : "border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
+                                                                    : "border-border dark:border-white/5 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
                                                             )}
                                                         >
                                                             {fornecedor.status === 'respondido' ? 'OK' : 'Pend.'}
@@ -243,3 +243,4 @@ export function QuoteDetailsTab({
         </ScrollArea>
     );
 }
+

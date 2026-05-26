@@ -1,10 +1,10 @@
 import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Truck, Package } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
 
 interface QuoteItem {
@@ -37,11 +37,11 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
   const [tab, setTab] = useState('quotes');
 
   return (
-    <Card className="bg-card border border-border rounded-lg shadow-sm h-full flex flex-col">
+    <Card className="p-0 h-full flex flex-col">
       <Tabs value={tab} onValueChange={setTab} className="h-full flex flex-col">
 
         {/* Header com tabs */}
-        <div className="px-4 pt-3 pb-0 border-b border-border shrink-0">
+        <div className="px-4 pt-3 pb-0 border-b border-border dark:border-white/5 shrink-0">
           <TabsList className="h-8 bg-transparent p-0 gap-4 w-full justify-start rounded-none border-none shadow-none">
             <TabsTrigger
               value="quotes"
@@ -73,9 +73,9 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
         </div>
 
         {/* Conteúdo */}
-        <div className="flex-1 overflow-y-auto p-3 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
 
-          <TabsContent value="quotes" className="m-0 space-y-1.5">
+          <TabsContent value="quotes" className="m-0">
             {activeQuotes.length === 0 ? (
               <EmptyState
                 icon={ClipboardList}
@@ -83,43 +83,47 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
                 action={{ label: "Criar cotação", onClick: () => navigate('/dashboard/compras?tab=cotacoes') }}
               />
             ) : (
-              activeQuotes.map(quote => (
-                <div
-                  key={quote.id}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-accent/50 transition-colors group"
-                >
-                  <div className="p-1.5 bg-brand/10 text-brand rounded-md shrink-0">
-                    <ClipboardList className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-foreground truncate leading-none">
-                      <CapitalizedText>{quote.produtoResumo || quote.produto}</CapitalizedText>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      Vence {quote.dataFim} · {quote.fornecedores} resp.
-                    </p>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-2.5">
-                    {quote.melhorPreco && (
-                      <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hidden sm:block">
-                        {quote.melhorPreco}
-                      </span>
-                    )}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2.5 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => navigate(`/dashboard/compras?tab=cotacoes&manageQuote=${quote.id}`)}
-                    >
-                      Ver
-                    </Button>
-                  </div>
-                </div>
-              ))
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Produto</TableHead>
+                      <TableHead>Vence</TableHead>
+                      <TableHead className="text-right">Resp.</TableHead>
+                      <TableHead className="text-right">Melhor Preço</TableHead>
+                      <TableHead className="w-14" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {activeQuotes.map(quote => (
+                      <TableRow key={quote.id} className="group">
+                        <TableCell className="font-medium text-[13px]">
+                          <CapitalizedText>{quote.produtoResumo || quote.produto}</CapitalizedText>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{quote.dataFim}</TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground">{quote.fornecedores}</TableCell>
+                        <TableCell className="text-right text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                          {quote.melhorPreco || '—'}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => navigate(`/dashboard/compras?tab=cotacoes&manageQuote=${quote.id}`)}
+                          >
+                            Ver
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
             )}
           </TabsContent>
 
-          <TabsContent value="orders" className="m-0 space-y-1.5">
+          <TabsContent value="orders" className="m-0">
             {pendingOrders.length === 0 ? (
               <EmptyState
                 icon={Package}
@@ -127,37 +131,47 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
                 action={{ label: "Ver histórico", onClick: () => navigate('/dashboard/compras?tab=pedidos') }}
               />
             ) : (
-              pendingOrders.map(order => (
-                <div
-                  key={order.id}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-accent/50 transition-colors group"
-                >
-                  <div className="p-1.5 bg-blue-500/10 text-blue-500 rounded-md shrink-0">
-                    <Truck className="h-3.5 w-3.5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-foreground truncate leading-none">
-                      <CapitalizedText>{order.supplier_name}</CapitalizedText>
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {new Date(order.order_date).toLocaleDateString('pt-BR')} · {order.items?.length || 0} itens
-                    </p>
-                  </div>
-                  <div className="shrink-0 flex items-center gap-2.5">
-                    <span className="text-xs font-semibold text-foreground hidden sm:block">
-                      R$ {order.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2.5 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => navigate(`/dashboard/compras?tab=pedidos&receiveOrder=${order.id}`)}
-                    >
-                      Ver
-                    </Button>
-                  </div>
-                </div>
-              ))
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Fornecedor</TableHead>
+                      <TableHead>Data</TableHead>
+                      <TableHead className="text-right">Itens</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                      <TableHead className="w-14" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pendingOrders.map(order => (
+                      <TableRow key={order.id} className="group">
+                        <TableCell className="font-medium text-[13px]">
+                          <CapitalizedText>{order.supplier_name}</CapitalizedText>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(order.order_date).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell className="text-right text-xs text-muted-foreground">
+                          {order.items?.length || 0}
+                        </TableCell>
+                        <TableCell className="text-right text-xs font-semibold text-foreground">
+                          R$ {order.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 px-2.5 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => navigate(`/dashboard/compras?tab=pedidos&receiveOrder=${order.id}`)}
+                          >
+                            Ver
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
             )}
           </TabsContent>
 

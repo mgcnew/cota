@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+﻿import { Info } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -39,7 +39,7 @@ export function CurrentPricesTooltip({ prices }: CurrentPricesTooltipProps) {
         side="top" 
         align="end"
         className={cn(
-          "p-3 border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl rounded-xl min-w-[200px] z-[100]",
+          "p-3 border-border dark:border-white/5 bg-white dark:bg-zinc-950 shadow-xl rounded-xl min-w-[200px] z-[100]",
           designSystem.components.card.flat
         )}
         onClick={(e) => e.stopPropagation()}
@@ -47,7 +47,7 @@ export function CurrentPricesTooltip({ prices }: CurrentPricesTooltipProps) {
       >
         <div className="space-y-2">
           <p className="font-black text-[10px] uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-            Cotações Atuais
+            CotaÃ§Ãµes Atuais
           </p>
           <div className="space-y-1.5">
             {prices.map((price, idx) => (
@@ -69,3 +69,4 @@ export function CurrentPricesTooltip({ prices }: CurrentPricesTooltipProps) {
     </Popover>
   );
 }
+

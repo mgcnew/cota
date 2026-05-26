@@ -1,4 +1,4 @@
-import { memo, useCallback } from "react";
+﻿import { memo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { LazyImage } from "@/components/responsive/LazyImage";
@@ -119,13 +119,13 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
               {product.lastOrderPrice}
             </div>
             <div className={cn("text-[9px] uppercase tracking-wider font-medium opacity-60", ds.colors.text.muted)}>
-              últ. preço
+              Ãºlt. preÃ§o
             </div>
           </div>
         </div>
 
         {/* Info Row: Status, Performance, Trend */}
-        <div className="flex items-center justify-between mb-4 bg-zinc-50/80 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-zinc-100 dark:border-zinc-800/50">
+        <div className="flex items-center justify-between mb-4 bg-zinc-50/80 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-border dark:border-white/5/50">
           <StatusBadge 
             status={status} 
             customLabel={getStatusLabel(status)}
@@ -161,7 +161,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
           <Button
             size="icon"
             variant="outline"
-            className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 active:scale-[0.96] transition-transform"
+            className="h-10 w-10 rounded-xl border-border dark:border-white/5 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 active:scale-[0.96] transition-transform"
             onClick={handleDelete}
             aria-label="Excluir produto"
           >
@@ -172,12 +172,12 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
             <Button
               size="icon"
               variant="outline"
-              className="h-10 w-10 rounded-xl border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-brand hover:border-brand/30 hover:bg-brand/5 touch-target shrink-0 active:scale-[0.96] transition-transform"
+              className="h-10 w-10 rounded-xl border-border dark:border-white/5 text-zinc-500 hover:text-brand hover:border-brand/30 hover:bg-brand/5 touch-target shrink-0 active:scale-[0.96] transition-transform"
               onClick={(e) => {
                 e.stopPropagation();
                 handleView();
               }}
-              aria-label="Ver histórico"
+              aria-label="Ver histÃ³rico"
             >
               <History className="w-4 h-4" />
             </Button>
@@ -206,3 +206,4 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
 MobileProductCard.displayName = "MobileProductCard";
 
 export default MobileProductCard;
+

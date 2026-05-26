@@ -1,4 +1,4 @@
-import {
+﻿import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -32,8 +32,8 @@ export default function DeleteSupplierDialog({
     if (supplier) {
       onDelete(supplier.id);
       toast({
-        title: "Fornecedor excluído",
-        description: `${supplier.name} foi excluído com sucesso.`,
+        title: "Fornecedor excluÃ­do",
+        description: `${supplier.name} foi excluÃ­do com sucesso.`,
         variant: "destructive",
       });
       onOpenChange(false);
@@ -44,14 +44,14 @@ export default function DeleteSupplierDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30">
         <AlertDialogHeader>
-          <AlertDialogTitle className="dark:text-white">Confirmar exclusão</AlertDialogTitle>
+          <AlertDialogTitle className="dark:text-white">Confirmar exclusÃ£o</AlertDialogTitle>
           <AlertDialogDescription className="dark:text-gray-400">
             Tem certeza que deseja excluir o fornecedor{" "}
-            <strong className="dark:text-gray-200">{supplier?.name}</strong>? Esta ação não pode ser desfeita.
+            <strong className="dark:text-gray-200">{supplier?.name}</strong>? Esta aÃ§Ã£o nÃ£o pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-0">
-          <AlertDialogCancel className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm dark:text-gray-300 border-gray-200 dark:border-gray-700">Cancelar</AlertDialogCancel>
+          <AlertDialogCancel className="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm dark:text-gray-300 border-border dark:border-white/5">Cancelar</AlertDialogCancel>
           <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 text-white border-0 shadow-lg shadow-red-500/20 transition-all duration-200 active:scale-95">
             Excluir Fornecedor
           </AlertDialogAction>
@@ -60,3 +60,4 @@ export default function DeleteSupplierDialog({
     </AlertDialog>
   );
 }
+

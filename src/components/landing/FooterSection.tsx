@@ -1,11 +1,11 @@
-import { memo } from "react";
+﻿import { memo } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 
 const FooterSection = memo(function FooterSection() {
   return (
-    <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+    <footer className="border-t border-border dark:border-white/5 bg-white dark:bg-zinc-950">
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           {/* Left: Brand */}
@@ -18,7 +18,7 @@ const FooterSection = memo(function FooterSection() {
               />
             </div>
             <p className={cn("text-xs max-w-xs leading-relaxed", ds.typography.weight.medium, ds.colors.text.muted)}>
-              Plataforma interna de gestão de cotações e compras.
+              Plataforma interna de gestÃ£o de cotaÃ§Ãµes e compras.
             </p>
           </div>
 
@@ -30,7 +30,7 @@ const FooterSection = memo(function FooterSection() {
             >
               Entrar no Sistema
             </Link>
-            <span className={cn("text-xs", ds.colors.text.muted)}>·</span>
+            <span className={cn("text-xs", ds.colors.text.muted)}>Â·</span>
             <span className={cn("text-xs", ds.typography.weight.bold, "text-brand")}>
               v2.0.0
             </span>
@@ -38,9 +38,9 @@ const FooterSection = memo(function FooterSection() {
         </div>
 
         {/* Bottom line */}
-        <div className="mt-8 pt-6 border-t border-zinc-100 dark:border-zinc-800/60">
+        <div className="mt-8 pt-6 border-t border-border dark:border-white/5/60">
           <p className={cn("text-[11px]", ds.colors.text.muted)}>
-            © {new Date().getFullYear()} CotaJá · Sistema de Uso Restrito
+            Â© {new Date().getFullYear()} CotaJÃ¡ Â· Sistema de Uso Restrito
           </p>
         </div>
       </div>
@@ -49,3 +49,4 @@ const FooterSection = memo(function FooterSection() {
 });
 
 export default FooterSection;
+

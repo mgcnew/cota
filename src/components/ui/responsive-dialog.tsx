@@ -1,7 +1,7 @@
-/**
+﻿/**
  * ResponsiveDialog - Wrapper que converte Dialog para Drawer no mobile
  * 
- * Este componente substitui o Dialog padrão e automaticamente:
+ * Este componente substitui o Dialog padrÃ£o e automaticamente:
  * - Renderiza como Drawer (bottom sheet) no mobile
  * - Renderiza como Dialog (modal centralizado) no desktop
  * 
@@ -95,7 +95,7 @@ const ResponsiveDialogFooter = ({ className, ...props }: React.HTMLAttributes<HT
   const isMobile = useIsMobile();
   
   if (isMobile) {
-    return <DrawerFooter className={cn("pt-2 flex-shrink-0 border-t border-border", className)} {...props} />;
+    return <DrawerFooter className={cn("pt-2 flex-shrink-0 border-t border-border dark:border-white/5", className)} {...props} />;
   }
   
   return <DialogFooter className={className} {...props} />;
@@ -142,3 +142,4 @@ export {
   ResponsiveDialogTitle,
   ResponsiveDialogDescription,
 };
+

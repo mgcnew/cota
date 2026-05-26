@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Calculator, Package, TrendingDown, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,8 +22,8 @@ interface PriceConverterProps {
 }
 
 /**
- * Calculadora de conversão de preços
- * Converte preço por caixa para preço por kg/unidade
+ * Calculadora de conversÃ£o de preÃ§os
+ * Converte preÃ§o por caixa para preÃ§o por kg/unidade
  */
 export function PriceConverter({
   currentValue = 0,
@@ -40,29 +40,29 @@ export function PriceConverter({
   );
   const [result, setResult] = useState<number | null>(null);
 
-  // Atualizar unidade de conversão quando a unidade do produto mudar
+  // Atualizar unidade de conversÃ£o quando a unidade do produto mudar
   useEffect(() => {
     if (productUnit === "kg" || productUnit === "un" || productUnit === "metade") {
       setConversionUnit(productUnit);
     } else {
-      // Se for caixa, usar kg como padrão
+      // Se for caixa, usar kg como padrÃ£o
       setConversionUnit("kg");
     }
   }, [productUnit]);
 
-  // Normalizar número (aceita vírgula ou ponto como separador decimal)
+  // Normalizar nÃºmero (aceita vÃ­rgula ou ponto como separador decimal)
   const normalizeNumber = (value: string): number => {
     if (!value || !value.trim()) return 0;
     let normalized = value.trim();
     
-    // Se tiver vírgula, assume formato brasileiro (vírgula como separador decimal)
+    // Se tiver vÃ­rgula, assume formato brasileiro (vÃ­rgula como separador decimal)
     if (normalized.includes(",")) {
-      // Remove pontos (separadores de milhar) e substitui vírgula por ponto
+      // Remove pontos (separadores de milhar) e substitui vÃ­rgula por ponto
       normalized = normalized.replace(/\./g, "").replace(",", ".");
     }
-    // Se tiver ponto mas não vírgula, pode ser formato internacional
-    // Mas também pode ser formato brasileiro com ponto como separador de milhar
-    // Por segurança, vamos tratar como formato internacional se tiver apenas um ponto
+    // Se tiver ponto mas nÃ£o vÃ­rgula, pode ser formato internacional
+    // Mas tambÃ©m pode ser formato brasileiro com ponto como separador de milhar
+    // Por seguranÃ§a, vamos tratar como formato internacional se tiver apenas um ponto
     
     const num = parseFloat(normalized);
     return isNaN(num) ? 0 : num;
@@ -91,7 +91,7 @@ export function PriceConverter({
       };
       onConvert(metadata);
       setOpen(false);
-      // Limpar campos após aplicar
+      // Limpar campos apÃ³s aplicar
       setPricePerBox("");
       setQuantityPerBox("");
       setResult(null);
@@ -110,7 +110,7 @@ export function PriceConverter({
       variant="outline"
       size="sm"
       className="h-8 w-8 p-0 border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-600 transition-all"
-      title="Calcular preço por caixa"
+      title="Calcular preÃ§o por caixa"
     >
       <Calculator className="h-4 w-4" />
     </Button>
@@ -137,20 +137,20 @@ export function PriceConverter({
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-xs text-gray-900 dark:text-white truncate">
-                  Calculadora de Preços
+                  Calculadora de PreÃ§os
                 </h3>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                  Caixa → {conversionUnit === "kg" ? "kg" : conversionUnit === "metade" ? "metade" : "unidade"}
+                  Caixa â†’ {conversionUnit === "kg" ? "kg" : conversionUnit === "metade" ? "metade" : "unidade"}
                 </p>
               </div>
             </div>
 
-            {/* Informação do produto */}
-            <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+            {/* InformaÃ§Ã£o do produto */}
+            <div className="p-2 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-border dark:border-white/5">
               <div className="flex items-center gap-1.5 mb-1">
                 <Package className="h-3 w-3 text-gray-500 flex-shrink-0" />
                 <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300 truncate">
-                  Necessário: {productQuantity} {productUnit}
+                  NecessÃ¡rio: {productQuantity} {productUnit}
                 </span>
               </div>
               {currentValue > 0 && (
@@ -164,7 +164,7 @@ export function PriceConverter({
             <div className="space-y-2.5">
               <div className="space-y-1">
                 <Label htmlFor="price-per-box" className="text-[11px] font-medium text-gray-700 dark:text-gray-300">
-                  Preço por Caixa (R$)
+                  PreÃ§o por Caixa (R$)
                 </Label>
                 <Input
                   id="price-per-box"
@@ -173,9 +173,9 @@ export function PriceConverter({
                   value={pricePerBox}
                   onChange={(e) => {
                     let value = e.target.value;
-                    // Permitir apenas números, vírgula e ponto
+                    // Permitir apenas nÃºmeros, vÃ­rgula e ponto
                     value = value.replace(/[^\d,.]/g, "");
-                    // Garantir apenas uma vírgula ou ponto
+                    // Garantir apenas uma vÃ­rgula ou ponto
                     const parts = value.split(/[,.]/);
                     if (parts.length > 2) {
                       value = parts[0] + (parts[1] || "") + (parts.slice(2).join(""));
@@ -198,9 +198,9 @@ export function PriceConverter({
                   value={quantityPerBox}
                   onChange={(e) => {
                     let value = e.target.value;
-                    // Permitir apenas números, vírgula e ponto
+                    // Permitir apenas nÃºmeros, vÃ­rgula e ponto
                     value = value.replace(/[^\d,.]/g, "");
-                    // Garantir apenas uma vírgula ou ponto
+                    // Garantir apenas uma vÃ­rgula ou ponto
                     const parts = value.split(/[,.]/);
                     if (parts.length > 2) {
                       value = parts[0] + (parts[1] || "") + (parts.slice(2).join(""));
@@ -238,12 +238,12 @@ export function PriceConverter({
             {/* Dica */}
             <div className="pt-1.5 border-t">
               <p className="text-[10px] text-gray-500 dark:text-gray-400 text-center leading-tight">
-                💡 <strong>Dica:</strong> Ex: R$ 120,50 por caixa com 12,5 kg = R$ 9,64/kg
+                ðŸ’¡ <strong>Dica:</strong> Ex: R$ 120,50 por caixa com 12,5 kg = R$ 9,64/kg
               </p>
             </div>
           </div>
           
-          {/* Ações - Fixas na parte inferior */}
+          {/* AÃ§Ãµes - Fixas na parte inferior */}
           <div className="flex gap-2 p-3 pt-2 border-t bg-white dark:bg-[#1C1F26] flex-shrink-0">
             <Button
               type="button"
@@ -272,3 +272,4 @@ export function PriceConverter({
     </Popover>
   );
 }
+

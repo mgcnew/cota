@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox, MessageCircle, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,8 +58,8 @@ export function QuoteConversionTab({
   };
 
   useEffect(() => {
-    // Inicializa as seleções apenas uma vez quando os produtos carregarem
-    // e se ainda não houver seleções feitas pelo usuário
+    // Inicializa as seleÃ§Ãµes apenas uma vez quando os produtos carregarem
+    // e se ainda nÃ£o houver seleÃ§Ãµes feitas pelo usuÃ¡rio
     if (Object.keys(productSelections).length === 0 && products.length > 0) {
       const initialSelections: Record<string, string> = {};
       let hasSelections = false;
@@ -75,13 +75,13 @@ export function QuoteConversionTab({
       if (hasSelections) {
         setProductSelections(initialSelections);
       } else {
-        // Se nenhum produto tem melhor fornecedor (ex: sem preços), 
+        // Se nenhum produto tem melhor fornecedor (ex: sem preÃ§os), 
         // marcamos como inicializado com um objeto vazio mas evitamos o loop
-        // definindo um valor que impeça a re-execução desta lógica se necessário,
+        // definindo um valor que impeÃ§a a re-execuÃ§Ã£o desta lÃ³gica se necessÃ¡rio,
         // mas aqui o products.length > 0 e Object.keys(productSelections).length === 0
         // continuaria sendo verdade. 
-        // Vamos usar uma marcação interna ou apenas aceitar que se não há fornecedores,
-        // não fazemos o set.
+        // Vamos usar uma marcaÃ§Ã£o interna ou apenas aceitar que se nÃ£o hÃ¡ fornecedores,
+        // nÃ£o fazemos o set.
       }
     }
   }, [products, getBestPriceInfoForProduct, productSelections]);
@@ -162,7 +162,7 @@ export function QuoteConversionTab({
     return Array.from(groups.values());
   }, [productSelections, productAllocations, pedidoSubTab, products, fornecedores, getSupplierProductValue, safeStr]);
 
-  // Total da seleção para exibição no botão/header
+  // Total da seleÃ§Ã£o para exibiÃ§Ã£o no botÃ£o/header
   const totalDisplay = totalSelecao;
 
   const handleConvertToOrder = () => {
@@ -175,7 +175,7 @@ export function QuoteConversionTab({
       return;
     }
 
-    // Validação de alocação incompleta em modo dividido
+    // ValidaÃ§Ã£o de alocaÃ§Ã£o incompleta em modo dividido
     if (pedidoSubTab === 'dividido') {
       const incompleteProducts = products.filter(product => {
         const allocs = productAllocations[product.product_id] || {};
@@ -184,7 +184,7 @@ export function QuoteConversionTab({
       });
 
       if (incompleteProducts.length > 0) {
-        if (!confirm(`Alguns produtos não foram totalmente alocados ou excedem a quantidade total. Deseja continuar mesmo assim?\n\nProdutos: ${incompleteProducts.map(p => safeStr(p.product_name)).join(', ')}`)) {
+        if (!confirm(`Alguns produtos nÃ£o foram totalmente alocados ou excedem a quantidade total. Deseja continuar mesmo assim?\n\nProdutos: ${incompleteProducts.map(p => safeStr(p.product_name)).join(', ')}`)) {
           return;
         }
       }
@@ -204,7 +204,7 @@ export function QuoteConversionTab({
   };
 
   const handleWhatsAppExport = () => {
-    // Calcular estatísticas para o export baseado nas SELEÇÕES ATUAIS
+    // Calcular estatÃ­sticas para o export baseado nas SELEÃ‡Ã•ES ATUAIS
     const statsExport = {
       totalProdutos: products.length,
       totalFornecedores: fornecedores.length,
@@ -228,7 +228,7 @@ export function QuoteConversionTab({
           product_name: p.product_name,
           quantidade: p.quantidade,
           unidade: p.unidade,
-          bestPrice: unitPrice, // Preço unitário selecionado
+          bestPrice: unitPrice, // PreÃ§o unitÃ¡rio selecionado
           bestSupplierId: group.supplierId,
           initialOffer: unitInitialOffer,
           allPrices: [],
@@ -237,12 +237,12 @@ export function QuoteConversionTab({
       })
     }));
 
-    // Economia Real: Diferença entre a primeira oferta do fornecedor e o preço final selecionado
+    // Economia Real: DiferenÃ§a entre a primeira oferta do fornecedor e o preÃ§o final selecionado
     const totalNegotiatedSavings = groupedDataExport.reduce((acc, g) => 
       acc + g.items.reduce((sum, i: any) => sum + (Math.max(0, (i.initialOffer - i.bestPrice)) * i.quantidade), 0), 0
     );
 
-    // Economia de Mercado: Diferença entre o melhor preço global e o selecionado
+    // Economia de Mercado: DiferenÃ§a entre o melhor preÃ§o global e o selecionado
     const totalMarketPotential = groupedDataExport.reduce((acc, g) => 
       acc + g.items.reduce((sum, i: any) => sum + (i.savings > 0 ? i.savings * i.quantidade : 0), 0), 0
     );
@@ -263,8 +263,8 @@ export function QuoteConversionTab({
         return res;
       }),
       {
-        loading: 'Enviando relatório para WhatsApp...',
-        success: 'Relatório enviado com sucesso via API!',
+        loading: 'Enviando relatÃ³rio para WhatsApp...',
+        success: 'RelatÃ³rio enviado com sucesso via API!',
         error: (err) => `Falha no envio via API: ${err.message}`
       }
     );
@@ -282,9 +282,9 @@ export function QuoteConversionTab({
   return (
     <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 pb-16">
-        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border/50">
+        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border dark:border-white/5/50">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">EstratÃ©gia</span>
             <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
           </div>
           <div className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export function QuoteConversionTab({
               className="h-8 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
             >
               <Sparkles className="h-3.5 w-3.5 mr-1" />
-              Relatório Visual
+              RelatÃ³rio Visual
             </Button>
             <Button
               variant="outline"
@@ -305,7 +305,7 @@ export function QuoteConversionTab({
               className="h-8 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
             >
               <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              Relatório Texto
+              RelatÃ³rio Texto
             </Button>
             <Tabs value={pedidoSubTab} onValueChange={(val) => {
               setPedidoSubTab(val);
@@ -341,7 +341,7 @@ export function QuoteConversionTab({
                 setProductAllocations(initialAllocations);
               }
             }}>
-              <TabsList className="bg-muted p-1 rounded-lg h-8 border border-border">
+              <TabsList className="bg-muted p-1 rounded-lg h-8 border border-border dark:border-white/5">
                 <TabsTrigger value="melhores" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Melhores</TabsTrigger>
                 <TabsTrigger value="unico" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Unificado</TabsTrigger>
                 <TabsTrigger value="dividido" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Dividido</TabsTrigger>
@@ -362,7 +362,7 @@ export function QuoteConversionTab({
             </div>
           </div>
           
-          <div className="bg-card border border-border rounded-xl shadow-sm">
+          <div className="bg-card border border-border dark:border-white/5 rounded-xl shadow-sm">
             {pedidoSubTab === 'dividido' ? (
               <div className="divide-y divide-border/50 max-h-[350px] overflow-y-auto custom-scrollbar p-2">
                 {products.map((product: any) => {
@@ -394,7 +394,7 @@ export function QuoteConversionTab({
                           const unitPrice = totalVal / (totalQuoteQty || 1);
                           const qty = allocs[f.id] || 0;
                           return (
-                            <div key={f.id} className="flex items-center justify-between gap-2 bg-muted/30 p-2 rounded-lg border border-border/50">
+                            <div key={f.id} className="flex items-center justify-between gap-2 bg-muted/30 p-2 rounded-lg border border-border dark:border-white/5/50">
                               <div className="min-w-0 flex-1">
                                 <p className="text-[10px] font-bold uppercase truncate">{safeStr(f.nome)}</p>
                                 <p className="text-[9px] text-muted-foreground">R$ {unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / {safeStr(product.unidade)}</p>
@@ -420,7 +420,7 @@ export function QuoteConversionTab({
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 px-3 py-2 bg-muted/40 border-b border-border items-center hidden sm:grid">
+                <div className="grid grid-cols-[1fr_minmax(140px,200px)_100px] gap-2 px-3 py-2 bg-muted/40 border-b border-border dark:border-white/5 items-center hidden sm:grid">
                   <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1">Produto</span>
                   <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Fornecedor Alocado</span>
                   <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest text-right pr-1">Subtotal</span>
@@ -470,7 +470,7 @@ export function QuoteConversionTab({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border/50 shadow-sm relative overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border dark:border-white/5/50 shadow-sm relative overflow-hidden">
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Entrega *</label>
             <Input
@@ -482,11 +482,11 @@ export function QuoteConversionTab({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Observações do Pedido</label>
+            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">ObservaÃ§Ãµes do Pedido</label>
             <Input
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              placeholder="Ex: Entregar após as 14h..."
+              placeholder="Ex: Entregar apÃ³s as 14h..."
               className="h-9 rounded-lg font-bold text-xs bg-background"
             />
           </div>
@@ -502,3 +502,4 @@ export function QuoteConversionTab({
     </div>
   );
 }
+

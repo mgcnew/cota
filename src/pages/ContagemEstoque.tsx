@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+﻿import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import {
@@ -159,7 +159,7 @@ export default function ContagemEstoque() {
                 Contagem de Estoque
               </h1>
               <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                Gerencie conferências de entrada e contagens avulsas
+                Gerencie conferÃªncias de entrada e contagens avulsas
               </p>
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function ContagemEstoque() {
             title="Pendentes"
             value={stats.pendentes}
             icon={Clock}
-            trend={{ value: "Aguardando", label: "início", type: "neutral" }}
+            trend={{ value: "Aguardando", label: "inÃ­cio", type: "neutral" }}
             variant="warning"
             className="hover:scale-[1.02] transition-transform w-full"
           />
@@ -202,7 +202,7 @@ export default function ContagemEstoque() {
             title="Finalizadas"
             value={stats.finalizadas}
             icon={CheckCircle}
-            trend={{ value: "Concluídas", label: "com sucesso", type: "positive" }}
+            trend={{ value: "ConcluÃ­das", label: "com sucesso", type: "positive" }}
             variant="success"
             className="hover:scale-[1.02] transition-transform w-full"
           />
@@ -212,7 +212,7 @@ export default function ContagemEstoque() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-1">
           <div className="flex-1">
             <SearchInput
-              placeholder="Buscar por fornecedor, data ou observação..."
+              placeholder="Buscar por fornecedor, data ou observaÃ§Ã£o..."
               value={searchTerm}
               onChange={setSearchTerm}
             />
@@ -235,7 +235,7 @@ export default function ContagemEstoque() {
             className="w-full sm:w-auto h-11 border-brand/20 hover:bg-brand/5 dark:border-brand/30 dark:hover:bg-brand/10 text-brand"
           >
             <FileText className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Relatório</span>
+            <span className="hidden sm:inline">RelatÃ³rio</span>
           </Button>
           <Button
             onClick={() => setCreateDialogOpen(true)}
@@ -263,7 +263,7 @@ export default function ContagemEstoque() {
                   Nenhuma contagem encontrada
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Não encontramos registros com os filtros atuais. Tente alterar a busca ou crie uma nova contagem.
+                  NÃ£o encontramos registros com os filtros atuais. Tente alterar a busca ou crie uma nova contagem.
                 </p>
               </div>
               <Button
@@ -287,7 +287,7 @@ export default function ContagemEstoque() {
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 border border-zinc-200 dark:border-zinc-700">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0 border border-border dark:border-white/5">
                         <ClipboardList className="w-5 h-5 text-zinc-500" />
                       </div>
                       <div className="min-w-0">
@@ -304,7 +304,7 @@ export default function ContagemEstoque() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 mb-3">
-                    <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                    <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-border dark:border-white/5">
                       <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Setor / Tipo</span>
                       <div className="flex flex-col gap-1">
                         <span className="text-xs font-medium truncate">{(count as any).sector?.name || "Geral"}</span>
@@ -321,14 +321,14 @@ export default function ContagemEstoque() {
                       </div>
                     </div>
                     {(count as any).counter_name && (
-                      <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800">
+                      <div className="bg-zinc-50 dark:bg-zinc-900/50 p-2 rounded-lg border border-border dark:border-white/5">
                         <span className="text-[10px] text-zinc-500 uppercase font-bold block mb-0.5">Respondente</span>
                         <span className="text-xs font-medium truncate block">{(count as any).counter_name}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                  <div className="flex items-center justify-end gap-2 pt-3 border-t border-border dark:border-white/5">
                     <Button
                       size="sm"
                       variant="outline"
@@ -400,4 +400,5 @@ export default function ContagemEstoque() {
     </PageWrapper>
   );
 }
+
 

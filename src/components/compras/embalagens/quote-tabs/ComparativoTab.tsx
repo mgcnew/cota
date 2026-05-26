@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +34,9 @@ export function ComparativoTab({
       <div className="p-4 space-y-3 pb-10">
         <div className="flex items-center justify-between">
           <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <TrendingDown className="h-3 w-3" />Análise Comparativa
+            <TrendingDown className="h-3 w-3" />AnÃ¡lise Comparativa
           </h3>
-          <div className="flex bg-muted/20 border border-border/50 rounded-md p-0.5">
+          <div className="flex bg-muted/20 border border-border dark:border-white/5/50 rounded-md p-0.5">
             <Button 
               variant={comparativoView === "item" ? "secondary" : "ghost"} 
               size="sm" 
@@ -68,7 +68,7 @@ export function ComparativoTab({
         ) : comparativoView === "item" ? (
           comparison.map((comp) => (
             <Card key={comp.packagingId} className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-              <div className="bg-muted/20 px-4 py-3 border-b border-border/50">
+              <div className="bg-muted/20 px-4 py-3 border-b border-border dark:border-white/5/50">
                 <h4 className="font-semibold text-[13px] text-foreground flex items-center gap-2"><Package className="h-3.5 w-3.5 text-muted-foreground" />{comp.packagingName}</h4>
               </div>
               {comp.fornecedores.length === 0 ? (
@@ -97,7 +97,7 @@ export function ComparativoTab({
         ) : (
           comparisonBySupplier.map((group) => (
             <Card key={group.supplierId} className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-              <div className="bg-muted/20 px-4 py-3 border-b border-border/50 flex items-center justify-between">
+              <div className="bg-muted/20 px-4 py-3 border-b border-border dark:border-white/5/50 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand flex-shrink-0">
                     <Building2 className="h-4 w-4" />
@@ -105,7 +105,7 @@ export function ComparativoTab({
                   <div>
                     <h4 className="font-semibold text-[13px] text-foreground">{group.supplierName}</h4>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
-                      {group.itens.length} itens • {group.vitorias} vitórias
+                      {group.itens.length} itens â€¢ {group.vitorias} vitÃ³rias
                     </p>
                   </div>
                 </div>
@@ -134,7 +134,7 @@ export function ComparativoTab({
                     onClick={() => onEditItem(group.supplierId, item.packagingId)}
                   >
                     <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0", 
-                      item.isMelhorPreco ? "bg-brand/10 text-brand border border-brand/20 shadow-none" : "bg-muted text-muted-foreground border border-border/50")}>
+                      item.isMelhorPreco ? "bg-brand/10 text-brand border border-brand/20 shadow-none" : "bg-muted text-muted-foreground border border-border dark:border-white/5/50")}>
                       {item.isMelhorPreco ? <Award className="h-3.5 w-3.5" /> : <Package className="h-3.5 w-3.5" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -160,3 +160,4 @@ export function ComparativoTab({
     </ScrollArea>
   );
 }
+

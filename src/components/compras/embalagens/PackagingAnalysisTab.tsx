@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -96,7 +96,7 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
       setSummary(res.replace(/\*\*/g, ''));
     } catch (e) {
       console.error(e);
-      setSummary("Não foi possível gerar os insights agora.");
+      setSummary("NÃ£o foi possÃ­vel gerar os insights agora.");
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +122,7 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
       <div className="flex flex-col gap-5 relative z-10">
         <div className="flex items-center gap-2 text-brand font-semibold text-sm">
           <Sparkles className={cn("h-4 w-4", isLoading && "animate-pulse")} />
-          {isLoading ? "A Inteligência Artificial está analisando os dados..." : "Insights Executivos da IA"}
+          {isLoading ? "A InteligÃªncia Artificial estÃ¡ analisando os dados..." : "Insights Executivos da IA"}
         </div>
         
         {isLoading ? (
@@ -135,7 +135,7 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
           <div className="space-y-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
             {summary?.split('\n').filter(Boolean).map((line, i) => (
               <p key={i} className="flex gap-2 items-start">
-                <span className="text-brand mt-1">•</span>
+                <span className="text-brand mt-1">â€¢</span>
                 <span>{line.replace(/^-\s*/, '')}</span>
               </p>
             ))}
@@ -167,7 +167,7 @@ function PriceHistoryList({ history }: { history: any[] }) {
                   <span className={ds.components.table.headerLabel}>Data</span>
                 </div>
                 <div className="w-[20%] text-right flex justify-end items-center px-2">
-                  <span className={ds.components.table.headerLabel}>Preço</span>
+                  <span className={ds.components.table.headerLabel}>PreÃ§o</span>
                 </div>
               </div>
             </TableCell>
@@ -179,7 +179,7 @@ function PriceHistoryList({ history }: { history: any[] }) {
               <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic gap-3 border-none">
                 <div className="flex flex-col items-center justify-center">
                   <div className="p-3 rounded-full bg-muted/30"><AlertCircle className="h-6 w-6 opacity-30" /></div>
-                  <span className="text-sm font-medium mt-2">Sem histórico disponível</span>
+                  <span className="text-sm font-medium mt-2">Sem histÃ³rico disponÃ­vel</span>
                 </div>
               </TableCell>
             </TableRow>
@@ -196,7 +196,7 @@ function PriceHistoryList({ history }: { history: any[] }) {
                         {item.type === "order" ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
                       </div>
                       <span className={cn("text-[10px] font-black uppercase tracking-widest", ds.colors.text.secondary, "opacity-50")}>
-                        {item.type === 'order' ? 'Pedido' : 'Cotação'}
+                        {item.type === 'order' ? 'Pedido' : 'CotaÃ§Ã£o'}
                       </span>
                     </div>
                     <div className="w-[45%] pl-2">
@@ -294,7 +294,7 @@ function SupplierComparison({ orders, quotes }: { orders: any[]; quotes: any[] }
                   <span className={ds.components.table.headerLabel}>Registros</span>
                 </div>
                 <div className="w-[25%] text-right flex justify-end items-center px-2">
-                  <span className={ds.components.table.headerLabel}>Preço Médio</span>
+                  <span className={ds.components.table.headerLabel}>PreÃ§o MÃ©dio</span>
                 </div>
               </div>
             </TableCell>
@@ -321,8 +321,8 @@ function SupplierComparison({ orders, quotes }: { orders: any[]; quotes: any[] }
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-2">
                           <span className={cn("font-bold text-sm", ds.colors.text.primary)}>{supplier.name}</span>
-                          {index === 0 && <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[9px] font-black uppercase tracking-widest px-1.5 h-4">Melhor preço</Badge>}
-                          {isFastest && <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black uppercase tracking-widest px-1.5 h-4">Mais Rápido</Badge>}
+                          {index === 0 && <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[9px] font-black uppercase tracking-widest px-1.5 h-4">Melhor preÃ§o</Badge>}
+                          {isFastest && <Badge className="bg-amber-500/10 text-amber-600 border-none text-[9px] font-black uppercase tracking-widest px-1.5 h-4">Mais RÃ¡pido</Badge>}
                         </div>
                         <span className={cn("text-[10px] font-black uppercase tracking-widest opacity-50", ds.colors.text.secondary)}>
                           {supplier.avgLeadTime > 0 ? `Entrega em ~${supplier.avgLeadTime.toFixed(0)} dias` : "Prazo sob consulta"}
@@ -403,7 +403,7 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
                       </p>
                     </div>
                     <div className="w-[15%] flex justify-center items-center pl-2">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border/50">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border dark:border-white/5/50">
                         <Package className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{order.packaging_order_items?.length || 0}</span>
                       </div>
@@ -472,7 +472,7 @@ function TopPackagingList({ packaging }: { packaging: Array<{ name: string; quan
                   </div>
                   <div className="w-[20%] pl-2">
                     <p className={cn("font-medium text-[10px] uppercase tracking-widest opacity-70", ds.colors.text.secondary)}>
-                      {item.count} vez(es) • {item.quantity} un
+                      {item.count} vez(es) â€¢ {item.quantity} un
                     </p>
                   </div>
                   <div className="w-[25%] text-right px-2">
@@ -510,13 +510,13 @@ function EmptyState() {
         Pronto para analisar?
       </h3>
       <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "max-w-sm mx-auto opacity-70 mb-8")}>
-        Selecione uma embalagem ou fornecedor para visualizar métricas detalhadas e histórico de preços.
+        Selecione uma embalagem ou fornecedor para visualizar mÃ©tricas detalhadas e histÃ³rico de preÃ§os.
       </p>
     </div>
   );
 }
 
-// --- TELAS DE ANÁLISE ---
+// --- TELAS DE ANÃLISE ---
 
 function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingId: string; packagingName: string; onClear: () => void }) {
   const [activeTab, setActiveTab] = useState("overview");
@@ -566,7 +566,7 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
     const minPrice = allPrices.length > 0 ? Math.min(...allPrices) : 0;
     const maxPrice = allPrices.length > 0 ? Math.max(...allPrices) : 0;
     
-    // Cálculo de Lead Time (Diferença entre pedido e entrega se disponível)
+    // CÃ¡lculo de Lead Time (DiferenÃ§a entre pedido e entrega se disponÃ­vel)
     const leadTimes = orders
       .filter((o: any) => o.packaging_orders?.order_date && o.created_at)
       .map((o: any) => {
@@ -594,8 +594,8 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
     orders.forEach((o: any) => { const name = o.packaging_orders?.supplier_name; if (name && o.valor_unitario > 0) { if (!supplierPrices[name]) supplierPrices[name] = []; supplierPrices[name].push(o.valor_unitario); } });
     let bestSupplier = { name: "-", avgPrice: 0 };
     Object.entries(supplierPrices).forEach(([name, prices]) => { const avg = prices.reduce((a, b) => a + b, 0) / prices.length; if (!bestSupplier.avgPrice || avg < bestSupplier.avgPrice) { bestSupplier = { name, avgPrice: avg }; } });
-    // Cálculo de Economia Perdida (Custo de Oportunidade)
-    // Para cada pedido, comparamos o valor unitário pago com o menor preço disponível na época
+    // CÃ¡lculo de Economia Perdida (Custo de Oportunidade)
+    // Para cada pedido, comparamos o valor unitÃ¡rio pago com o menor preÃ§o disponÃ­vel na Ã©poca
     let lostSavings = 0;
     orders.forEach((order: any) => {
       if (order.valor_unitario > minPrice && minPrice > 0) {
@@ -649,21 +649,21 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
             <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
               {packagingName}
             </h2>
-            <p className="text-zinc-500 text-sm font-medium">Análise detalhada de embalagem</p>
+            <p className="text-zinc-500 text-sm font-medium">AnÃ¡lise detalhada de embalagem</p>
           </div>
         </div>
         <div className="flex items-center gap-3 relative z-10 self-end md:self-auto">
           <Select value={timeFilter} onValueChange={setTimeFilter}>
-            <SelectTrigger className="w-40 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 h-10 rounded-xl">
+            <SelectTrigger className="w-40 bg-zinc-50 dark:bg-zinc-900 border-border dark:border-white/5 h-10 rounded-xl">
               <Calendar className="h-4 w-4 mr-2 text-zinc-500" />
-              <SelectValue placeholder="Período" />
+              <SelectValue placeholder="PerÃ­odo" />
             </SelectTrigger>
             <SelectContent className={ds.colors.surface.card}>
-              <SelectItem value="7">Últimos 7 dias</SelectItem>
-              <SelectItem value="30">Últimos 30 dias</SelectItem>
-              <SelectItem value="90">Últimos 90 dias</SelectItem>
-              <SelectItem value="180">Últimos 6 meses</SelectItem>
-              <SelectItem value="all">Todo o período</SelectItem>
+              <SelectItem value="7">Ãšltimos 7 dias</SelectItem>
+              <SelectItem value="30">Ãšltimos 30 dias</SelectItem>
+              <SelectItem value="90">Ãšltimos 90 dias</SelectItem>
+              <SelectItem value="180">Ãšltimos 6 meses</SelectItem>
+              <SelectItem value="all">Todo o perÃ­odo</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={onClear} className={cn(ds.components.button.base, ds.components.button.variants.secondary, "font-bold h-10")}>
@@ -673,17 +673,17 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <MetricCard icon={<FileText className="h-4 w-4" />} label="Cotações" value={metrics.totalQuotes.toString()} color="blue" />
+        <MetricCard icon={<FileText className="h-4 w-4" />} label="CotaÃ§Ãµes" value={metrics.totalQuotes.toString()} color="blue" />
         <MetricCard icon={<ShoppingCart className="h-4 w-4" />} label="Pedidos" value={metrics.totalOrders.toString()} color="green" />
-        <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Preço Médio" value={formatCurrency(metrics.avgPrice)} color="violet" />
-        <MetricCard icon={<Clock className="h-4 w-4" />} label="Lead Time" value={metrics.avgLeadTime > 0 ? `${metrics.avgLeadTime.toFixed(0)}d` : "-"} subtitle="Média entrega" color="amber" />
-        <MetricCard icon={metrics.trend === "up" ? <TrendingUp className="h-4 w-4" /> : metrics.trend === "down" ? <TrendingDown className="h-4 w-4" /> : <Minus className="h-4 w-4" />} label="Tendência" value={metrics.trend === "stable" ? "Estável" : `${metrics.trendPercent > 0 ? "+" : ""}${metrics.trendPercent.toFixed(1)}%`} color={metrics.trend === "up" ? "red" : metrics.trend === "down" ? "green" : "gray"} />
-        <MetricCard icon={<PiggyBank className="h-4 w-4" />} label="Perda Econ." value={formatCurrency(metrics.lostSavings)} color="red" tooltip="Quanto você deixou de economizar em relação ao melhor preço" />
+        <MetricCard icon={<DollarSign className="h-4 w-4" />} label="PreÃ§o MÃ©dio" value={formatCurrency(metrics.avgPrice)} color="violet" />
+        <MetricCard icon={<Clock className="h-4 w-4" />} label="Lead Time" value={metrics.avgLeadTime > 0 ? `${metrics.avgLeadTime.toFixed(0)}d` : "-"} subtitle="MÃ©dia entrega" color="amber" />
+        <MetricCard icon={metrics.trend === "up" ? <TrendingUp className="h-4 w-4" /> : metrics.trend === "down" ? <TrendingDown className="h-4 w-4" /> : <Minus className="h-4 w-4" />} label="TendÃªncia" value={metrics.trend === "stable" ? "EstÃ¡vel" : `${metrics.trendPercent > 0 ? "+" : ""}${metrics.trendPercent.toFixed(1)}%`} color={metrics.trend === "up" ? "red" : metrics.trend === "down" ? "green" : "gray"} />
+        <MetricCard icon={<PiggyBank className="h-4 w-4" />} label="Perda Econ." value={formatCurrency(metrics.lostSavings)} color="red" tooltip="Quanto vocÃª deixou de economizar em relaÃ§Ã£o ao melhor preÃ§o" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <InsightCard icon={<Target className="h-5 w-5" />} title="Melhor Fornecedor" value={metrics.bestSupplier.name} subtitle={metrics.bestSupplier.avgPrice > 0 ? `Média: ${formatCurrency(metrics.bestSupplier.avgPrice)}` : "Sem dados"} color="emerald" />
-        <InsightCard icon={<DollarSign className="h-5 w-5" />} title="Faixa de Preço" value={metrics.minPrice > 0 ? `${formatCurrency(metrics.minPrice)} - ${formatCurrency(metrics.maxPrice)}` : "-"} subtitle={`Variação: ${metrics.maxPrice > 0 && metrics.minPrice > 0 ? ((metrics.maxPrice - metrics.minPrice) / metrics.minPrice * 100).toFixed(0) : 0}%`} color="amber" />
+        <InsightCard icon={<Target className="h-5 w-5" />} title="Melhor Fornecedor" value={metrics.bestSupplier.name} subtitle={metrics.bestSupplier.avgPrice > 0 ? `MÃ©dia: ${formatCurrency(metrics.bestSupplier.avgPrice)}` : "Sem dados"} color="emerald" />
+        <InsightCard icon={<DollarSign className="h-5 w-5" />} title="Faixa de PreÃ§o" value={metrics.minPrice > 0 ? `${formatCurrency(metrics.minPrice)} - ${formatCurrency(metrics.maxPrice)}` : "-"} subtitle={`VariaÃ§Ã£o: ${metrics.maxPrice > 0 && metrics.minPrice > 0 ? ((metrics.maxPrice - metrics.minPrice) / metrics.minPrice * 100).toFixed(0) : 0}%`} color="amber" />
         <InsightCard icon={<Building2 className="h-5 w-5" />} title="Fornecedores" value={metrics.uniqueSuppliers.toString()} subtitle="Fornecedores diferentes" color="blue" />
       </div>
 
@@ -695,7 +695,7 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-4 pt-4">
             <TabsList className={ds.components.tabs.clean.list}>
-              <TabsTrigger value="overview" className={ds.components.tabs.clean.trigger}>Histórico de Preços</TabsTrigger>
+              <TabsTrigger value="overview" className={ds.components.tabs.clean.trigger}>HistÃ³rico de PreÃ§os</TabsTrigger>
               <TabsTrigger value="suppliers" className={ds.components.tabs.clean.trigger}>Por Fornecedor</TabsTrigger>
             </TabsList>
           </div>
@@ -767,23 +767,23 @@ function SupplierPackagingAnalysis({ supplierId, supplierName, onClear }: { supp
             <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
               {supplierName}
             </h2>
-            <p className="text-zinc-500 text-sm font-medium">Histórico do parceiro comercial (Embalagens)</p>
+            <p className="text-zinc-500 text-sm font-medium">HistÃ³rico do parceiro comercial (Embalagens)</p>
           </div>
         </div>
         <Button onClick={onClear} className={cn(ds.components.button.base, ds.components.button.variants.secondary, "relative z-10 font-bold")}>
-          Fechar Análise
+          Fechar AnÃ¡lise
         </Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard icon={<FileText className="h-4 w-4" />} label="Cotações" value={`${metrics.wonQuotes}/${metrics.totalQuotes}`} subtitle={`${metrics.winRate.toFixed(0)}% vitórias`} color="blue" />
+        <MetricCard icon={<FileText className="h-4 w-4" />} label="CotaÃ§Ãµes" value={`${metrics.wonQuotes}/${metrics.totalQuotes}`} subtitle={`${metrics.winRate.toFixed(0)}% vitÃ³rias`} color="blue" />
         <MetricCard icon={<ShoppingCart className="h-4 w-4" />} label="Pedidos" value={metrics.totalOrders.toString()} subtitle={`${metrics.deliveredOrders} entregues`} color="green" />
         <MetricCard icon={<DollarSign className="h-4 w-4" />} label="Total Comprado" value={formatCurrency(metrics.totalValue)} color="violet" />
-        <MetricCard icon={<Target className="h-4 w-4" />} label="Ticket Médio" value={formatCurrency(metrics.avgOrderValue)} color="amber" />
+        <MetricCard icon={<Target className="h-4 w-4" />} label="Ticket MÃ©dio" value={formatCurrency(metrics.avgOrderValue)} color="amber" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <InsightCard icon={<Award className="h-5 w-5" />} title="Taxa de Vitória" value={`${metrics.winRate.toFixed(0)}%`} subtitle={`${metrics.wonQuotes} de ${metrics.totalQuotes} cotações`} color={metrics.winRate >= 50 ? "emerald" : metrics.winRate >= 25 ? "amber" : "red"} />
+        <InsightCard icon={<Award className="h-5 w-5" />} title="Taxa de VitÃ³ria" value={`${metrics.winRate.toFixed(0)}%`} subtitle={`${metrics.wonQuotes} de ${metrics.totalQuotes} cotaÃ§Ãµes`} color={metrics.winRate >= 50 ? "emerald" : metrics.winRate >= 25 ? "amber" : "red"} />
         <InsightCard icon={<CheckCircle className="h-5 w-5" />} title="Taxa de Entrega" value={`${metrics.deliveryRate.toFixed(0)}%`} subtitle={`${metrics.deliveredOrders} de ${metrics.totalOrders} pedidos`} color={metrics.deliveryRate >= 80 ? "emerald" : metrics.deliveryRate >= 50 ? "amber" : "red"} />
         <InsightCard icon={<Package className="h-5 w-5" />} title="Embalagens" value={metrics.uniquePackaging.toString()} subtitle="Embalagens diferentes" color="blue" />
       </div>
@@ -869,7 +869,7 @@ export default function PackagingAnalysisTab() {
               <BarChart3 className="h-6 w-6 text-brand" />
             </div>
             <div className="flex-1">
-              <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>Análise de Embalagens</h3>
+              <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>AnÃ¡lise de Embalagens</h3>
               <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "opacity-70")}>Busque por embalagem ou fornecedor para insights detalhados</p>
             </div>
           </div>
@@ -886,8 +886,8 @@ export default function PackagingAnalysisTab() {
           />
           {searchResults.length > 0 && (
             <div className={cn("absolute z-50 w-full mt-3 border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200", ds.colors.surface.card, ds.colors.border.subtle)}>
-              <div className="px-5 py-3 bg-muted/30 border-b border-border">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">Sugestões encontradas</span>
+              <div className="px-5 py-3 bg-muted/30 border-b border-border dark:border-white/5">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">SugestÃµes encontradas</span>
               </div>
               <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
                 {searchResults.map((item, index) => (
@@ -906,9 +906,9 @@ export default function PackagingAnalysisTab() {
                   </button>
                 ))}
               </div>
-              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border flex justify-between uppercase tracking-widest">
+              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border dark:border-white/5 flex justify-between uppercase tracking-widest">
                 <div>DICA: Use as setas para navegar</div>
-                <div className="flex gap-4"><span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">↑↓</kbd> Mudar</span><span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-background rounded border border-border shadow-sm">Enter</kbd> Abrir</span></div>
+                <div className="flex gap-4"><span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-background rounded border border-border dark:border-white/5 shadow-sm">â†‘â†“</kbd> Mudar</span><span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-background rounded border border-border dark:border-white/5 shadow-sm">Enter</kbd> Abrir</span></div>
               </div>
             </div>
           )}
@@ -922,3 +922,4 @@ export default function PackagingAnalysisTab() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -148,7 +148,7 @@ export function ResponsiveModal({
           </div>
           
           {footer && (
-            <DrawerFooter className="pt-2 flex-shrink-0 border-t border-border">
+            <DrawerFooter className="pt-2 flex-shrink-0 border-t border-border dark:border-white/5">
               {footer}
             </DrawerFooter>
           )}
@@ -189,3 +189,4 @@ export function ResponsiveModal({
 }
 
 export default ResponsiveModal;
+

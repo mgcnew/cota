@@ -1,4 +1,4 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ export function PedidosSkeleton({
         {Array.from({ length: 4 }).map((_, i) => (
           <div 
             key={`metric-${i}`} 
-            className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4"
+            className="bg-white dark:bg-gray-800/50 rounded-xl border border-border dark:border-white/5/30 p-4"
           >
             <div className="flex items-center justify-between mb-3">
               <Skeleton className="h-4 w-20" />
@@ -72,7 +72,7 @@ export function PedidosSkeleton({
         {Array.from({ length: itemCount }).map((_, i) => (
           <div 
             key={`mobile-card-${i}`} 
-            className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/30 p-4"
+            className="bg-white dark:bg-gray-800/50 rounded-xl border border-border dark:border-white/5/30 p-4"
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex items-center gap-3 flex-1">
@@ -180,7 +180,7 @@ export function PedidosSkeleton({
       </div>
 
       {/* Pagination Skeleton */}
-      <div className="border-t border-gray-200 dark:border-gray-700 px-3 sm:px-4 py-3">
+      <div className="border-t border-border dark:border-white/5 px-3 sm:px-4 py-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <Skeleton className="h-4 w-24" />
           <div className="flex items-center gap-2">
@@ -196,3 +196,4 @@ export function PedidosSkeleton({
 }
 
 export default PedidosSkeleton;
+

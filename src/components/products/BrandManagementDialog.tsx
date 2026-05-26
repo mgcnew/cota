@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -124,7 +124,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
 
       if (error) throw error;
 
-      toast({ title: "Marca excluída com sucesso" });
+      toast({ title: "Marca excluÃ­da com sucesso" });
       fetchBrands();
     } catch (error) {
       console.error('Error deleting brand:', error);
@@ -172,7 +172,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
 
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Controls */}
-        <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 grid gap-4 bg-zinc-50/50 dark:bg-zinc-900/50">
+        <div className="p-4 border-b border-border dark:border-white/5 grid gap-4 bg-zinc-50/50 dark:bg-zinc-900/50">
           <div className="flex gap-2">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
@@ -186,7 +186,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-zinc-800 p-3 rounded-xl border border-zinc-200 dark:border-zinc-700 shadow-sm">
+          <div className="flex flex-col sm:flex-row gap-3 bg-white dark:bg-zinc-800 p-3 rounded-xl border border-border dark:border-white/5 shadow-sm">
             <div className="flex-1 space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">
                 {isEditing ? "Editar Marca" : "Nova Marca"}
@@ -200,8 +200,8 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
               />
             </div>
             <div className="sm:w-32 space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Avaliação</Label>
-              <div className="flex items-center gap-1.5 h-10 px-3 border rounded-lg bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">AvaliaÃ§Ã£o</Label>
+              <div className="flex items-center gap-1.5 h-10 px-3 border rounded-lg bg-zinc-50 dark:bg-zinc-900 border-border dark:border-white/5">
                 {[1, 2, 3, 4, 5].map((rating) => (
                   <button
                     key={rating}
@@ -254,7 +254,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
                 <Loader2 className="h-8 w-8 animate-spin mr-3" /> Carregando...
               </div>
             ) : filteredBrands.length === 0 ? (
-              <div className="text-center py-12 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-2xl">
+              <div className="text-center py-12 border-2 border-dashed border-border dark:border-white/5 rounded-2xl">
                 <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Award className="h-8 w-8 text-zinc-300" />
                 </div>
@@ -270,7 +270,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
                       "flex items-center justify-between p-4 rounded-xl border transition-all group hover:shadow-md",
                       editingBrand?.id === brand.id
                         ? "bg-brand/5 border-brand/30"
-                        : "bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700"
+                        : "bg-white dark:bg-zinc-900 border-border dark:border-white/5 hover:border-zinc-200 dark:hover:border-zinc-700"
                     )}
                   >
                     <div className="min-w-0 flex-1">
@@ -324,11 +324,11 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
+                        <AlertDialogContent className="bg-white dark:bg-zinc-900 border-border dark:border-white/5">
                           <AlertDialogHeader>
                             <AlertDialogTitle className="text-zinc-900 dark:text-white">Excluir marca?</AlertDialogTitle>
                             <AlertDialogDescription className="text-zinc-500">
-                              Esta ação não pode ser desfeita. Isso excluirá permanentemente a marca
+                              Esta aÃ§Ã£o nÃ£o pode ser desfeita. Isso excluirÃ¡ permanentemente a marca
                               <strong className="text-zinc-900 dark:text-white"> {brand.name}</strong>.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
@@ -358,7 +358,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-border dark:border-white/5 transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
@@ -381,3 +381,4 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
     </Dialog>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+﻿import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -70,10 +70,10 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     const template = [
       {
         nome: "Holambra",
-        contato: "João Silva",
+        contato: "JoÃ£o Silva",
         telefone: "(11) 99999-9999",
         email: "contato@holambra.com.br",
-        endereco: "Av. Principal, 123 - São Paulo/SP",
+        endereco: "Av. Principal, 123 - SÃ£o Paulo/SP",
         limite: "R$ 25.000",
         status: "active",
         avaliacao: 4.8
@@ -83,7 +83,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         contato: "Maria Santos",
         telefone: "(11) 88888-8888",
         email: "vendas@seara.com.br",
-        endereco: "Rua Comercial, 456 - São Paulo/SP",
+        endereco: "Rua Comercial, 456 - SÃ£o Paulo/SP",
         limite: "R$ 50.000",
         status: "active",
         avaliacao: 4.6
@@ -116,7 +116,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         !selectedFile.name.endsWith('.xlsx') && 
         !selectedFile.name.endsWith('.xls')) {
       toast({
-        title: "Formato inválido",
+        title: "Formato invÃ¡lido",
         description: "Por favor, selecione um arquivo CSV ou Excel (.xlsx, .xls)",
         variant: "destructive"
       });
@@ -139,16 +139,16 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      // Mapear colunas (flexível para diferentes formatos)
+      // Mapear colunas (flexÃ­vel para diferentes formatos)
       const mapped = jsonData.map((row: any, index: number) => {
         const name = row.nome || row.name || row.fornecedor || row.Nome || row.Name || row.Fornecedor || '';
         const contact = row.contato || row.contact || row.responsavel || row.Contato || row.Contact || row.Responsavel || '';
         
         if (!name) {
-          errors.push(`Linha ${index + 2}: Nome é obrigatório`);
+          errors.push(`Linha ${index + 2}: Nome Ã© obrigatÃ³rio`);
         }
         if (!contact) {
-          errors.push(`Linha ${index + 2}: Contato/Responsável é obrigatório`);
+          errors.push(`Linha ${index + 2}: Contato/ResponsÃ¡vel Ã© obrigatÃ³rio`);
         }
 
         // Processar status
@@ -184,7 +184,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       if (mapped.length === 0) {
         toast({
           title: "Arquivo vazio",
-          description: "O arquivo não contém dados válidos",
+          description: "O arquivo nÃ£o contÃ©m dados vÃ¡lidos",
           variant: "destructive"
         });
       } else {
@@ -197,7 +197,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       console.error('Erro ao processar arquivo:', error);
       toast({
         title: "Erro ao processar arquivo",
-        description: "Verifique se o arquivo está no formato correto",
+        description: "Verifique se o arquivo estÃ¡ no formato correto",
         variant: "destructive"
       });
     } finally {
@@ -217,10 +217,10 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     setIsProcessing(true);
 
     try {
-      // 1. Verificar autenticação
+      // 1. Verificar autenticaÃ§Ã£o
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("Usuário não autenticado");
+        throw new Error("UsuÃ¡rio nÃ£o autenticado");
       }
 
       // 2. Get company_id
@@ -231,10 +231,10 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         .single();
 
       if (!companyData) {
-        throw new Error("Empresa não encontrada");
+        throw new Error("Empresa nÃ£o encontrada");
       }
 
-      // 3. Preparar dados para inserção
+      // 3. Preparar dados para inserÃ§Ã£o
       const suppliersToInsert = parsedData.map(s => ({
         company_id: companyData.company_id,
         name: s.name,
@@ -242,7 +242,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         phone: s.phone || null,
         email: s.email || null,
         address: s.address || null,
-        cnpj: null, // CNPJ não está no template, mas pode ser adicionado
+        cnpj: null, // CNPJ nÃ£o estÃ¡ no template, mas pode ser adicionado
         limit: s.limit || null,
       }));
 
@@ -258,7 +258,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
 
       toast({
-        title: "Importação concluída",
+        title: "ImportaÃ§Ã£o concluÃ­da",
         description: `${data?.length || parsedData.length} fornecedores importados com sucesso`,
       });
 
@@ -270,8 +270,8 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     } catch (error: any) {
       console.error('Erro ao importar fornecedores:', error);
       toast({
-        title: "Erro na importação",
-        description: error.message || "Não foi possível importar os fornecedores",
+        title: "Erro na importaÃ§Ã£o",
+        description: error.message || "NÃ£o foi possÃ­vel importar os fornecedores",
         variant: "destructive"
       });
     } finally {
@@ -325,7 +325,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
             <div>
               <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Fornecedores</DialogTitle>
               <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
-                Importe múltiplos fornecedores usando arquivos CSV ou Excel
+                Importe mÃºltiplos fornecedores usando arquivos CSV ou Excel
               </DialogDescription>
             </div>
           </div>
@@ -333,7 +333,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
 
         <div className="p-5 space-y-4 overflow-y-auto max-h-[calc(85vh-180px)] bg-transparent">
           {/* Download Template */}
-          <Card className="border-dashed bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-gray-200 dark:border-gray-700">
+          <Card className="border-dashed bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-border dark:border-white/5">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -343,11 +343,11 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">Precisa de um template?</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Baixe um arquivo de exemplo para facilitar a importação
+                      Baixe um arquivo de exemplo para facilitar a importaÃ§Ã£o
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={downloadTemplate} className="h-8 text-xs border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <Button variant="outline" size="sm" onClick={downloadTemplate} className="h-8 text-xs border-border dark:border-white/5 bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-700">
                   <Download className="h-3.5 w-3.5 mr-2" />
                   Baixar Template
                 </Button>
@@ -356,16 +356,16 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Card>
 
           {/* File Upload */}
-          <Card className="bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-gray-200 dark:border-gray-700">
+          <Card className="bg-white/30 dark:bg-gray-900/30 backdrop-blur-sm border-border dark:border-white/5">
             <CardContent className="p-6">
               {!file ? (
-                <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
+                <div className="border-2 border-dashed border-border dark:border-white/5 rounded-xl p-8 text-center hover:border-orange-400 dark:hover:border-orange-500 transition-colors">
                   <div className="w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-950/20 flex items-center justify-center mx-auto mb-4">
                     <Upload className="h-8 w-8 text-orange-500 dark:text-orange-400" />
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Selecione um arquivo</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    Formatos aceitos: CSV, XLSX, XLS (máx. 10MB)
+                    Formatos aceitos: CSV, XLSX, XLS (mÃ¡x. 10MB)
                   </p>
                   <input
                     ref={fileInputRef}
@@ -383,7 +383,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 rounded-xl border border-border dark:border-white/5">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                         <FileSpreadsheet className="h-5 w-5 text-primary" />
@@ -420,7 +420,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                           <div className="flex items-start gap-2">
                             <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
                             <div className="space-y-1">
-                              <p className="font-medium text-xs text-red-600 dark:text-red-400">Avisos de validação:</p>
+                              <p className="font-medium text-xs text-red-600 dark:text-red-400">Avisos de validaÃ§Ã£o:</p>
                               {validationErrors.slice(0, 3).map((error, i) => (
                                 <p key={i} className="text-[11px] text-red-500/80">{error}</p>
                               ))}
@@ -434,7 +434,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                         </div>
                       )}
 
-                      <ScrollArea className="h-[250px] border border-gray-200 dark:border-gray-700 rounded-xl bg-white/20 dark:bg-gray-900/20 backdrop-blur-sm">
+                      <ScrollArea className="h-[250px] border border-border dark:border-white/5 rounded-xl bg-white/20 dark:bg-gray-900/20 backdrop-blur-sm">
                         <div className="p-3 space-y-2">
                           {parsedData.slice(0, 50).map((supplier, index) => (
                             <div key={index} className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/40 rounded-lg border border-gray-200/50 dark:border-gray-700/50 transition-colors hover:bg-white dark:hover:bg-gray-800">
@@ -473,17 +473,17 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
           </Card>
 
           {/* Instructions */}
-          <Card className="bg-gray-50/50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-700 backdrop-blur-sm">
+          <Card className="bg-gray-50/50 dark:bg-gray-900/50 border-border dark:border-white/5 backdrop-blur-sm">
             <CardContent className="p-4">
               <h4 className="font-bold text-gray-900 dark:text-white mb-2 text-xs uppercase tracking-wider">Formato do arquivo:</h4>
               <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-1 h-1 rounded-full bg-orange-400"></span>
-                  <strong>nome</strong>: Fornecedor (obrigatório)
+                  <strong>nome</strong>: Fornecedor (obrigatÃ³rio)
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-1 h-1 rounded-full bg-orange-400"></span>
-                  <strong>contato</strong>: Responsável (obrigatório)
+                  <strong>contato</strong>: ResponsÃ¡vel (obrigatÃ³rio)
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-1 h-1 rounded-full bg-gray-400"></span>
@@ -507,7 +507,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         </div>
 
         <DialogFooter className="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/40 bg-gray-50/30 dark:bg-gray-800/30 backdrop-blur-sm">
-          <Button variant="outline" onClick={() => setOpen(false)} className="h-10 text-sm border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+          <Button variant="outline" onClick={() => setOpen(false)} className="h-10 text-sm border-border dark:border-white/5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
             Cancelar
           </Button>
           <Button 
@@ -532,3 +532,4 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     </Dialog>
   );
 }
+

@@ -15,19 +15,19 @@ interface ExecutiveSummaryProps {
 // Modo claro: cores vibrantes com bordas suaves | Modo escuro: fundo neutro escuro
 const STAT_STYLES = {
   blue: {
-    bg: 'bg-blue-100 dark:bg-gray-800/60',
+    bg: 'bg-blue-100 dark:bg-muted/60',
     icon: 'text-blue-600 dark:text-blue-400',
-    border: 'border border-blue-200/70 dark:border-blue-500/20',
+    border: 'border border-border dark:border-white/5',
   },
   emerald: {
-    bg: 'bg-emerald-100 dark:bg-gray-800/60',
+    bg: 'bg-emerald-100 dark:bg-muted/60',
     icon: 'text-emerald-600 dark:text-emerald-400',
-    border: 'border border-emerald-200/70 dark:border-emerald-500/20',
+    border: 'border border-border dark:border-white/5',
   },
   amber: {
-    bg: 'bg-amber-100 dark:bg-gray-800/60',
+    bg: 'bg-amber-100 dark:bg-muted/60',
     icon: 'text-amber-600 dark:text-amber-400',
-    border: 'border border-amber-200/70 dark:border-amber-500/20',
+    border: 'border border-border dark:border-white/5',
   },
 } as const;
 
@@ -64,7 +64,7 @@ export const ExecutiveSummary = memo(function ExecutiveSummary({
   ];
 
   return (
-    <Card className="bg-blue-50/50 dark:bg-gray-900 border border-blue-200/70 dark:border-blue-500/20 shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150 relative overflow-hidden">
+    <Card className="bg-blue-50/50 dark:bg-card shadow-md md:hover:shadow-lg md:transition-shadow md:duration-150 relative overflow-hidden">
       <div className="p-4 sm:p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 gap-2">

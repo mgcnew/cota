@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from "react";
+﻿import { useState, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableRow, TableHeader } from "@/components/ui/table";
@@ -136,7 +136,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
       {/* Unified Container for Filters + Table + Pagination */}
       <div className={cn(
         "flex flex-col w-full transition-all duration-300",
-        !isMobile && "bg-white dark:bg-zinc-950/40 border border-zinc-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm p-6"
+        !isMobile && "bg-white dark:bg-zinc-950/40 border border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm p-6"
       )}>
         {/* Filters Section */}
         <div className={cn("mb-6", isMobile && "px-1")}>
@@ -152,7 +152,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
 
             <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -175,7 +175,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         {/* Content Section */}
         <div className="flex-1 min-h-0">
           {paginatedData.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-zinc-800">
+            <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-border dark:border-white/5">
               <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
               <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
               <Button className={cn(ds.components.button.base, ds.components.button.variants.secondary, "mt-6")} onClick={onCreateOrder}>
@@ -227,7 +227,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                         <span className={ds.components.table.headerLabel}>Valor</span>
                       </div>
                       <div className="w-[12%] flex justify-end items-center px-2">
-                        <span className={ds.components.table.headerLabel}>Ações</span>
+                        <span className={ds.components.table.headerLabel}>AÃ§Ãµes</span>
                       </div>
                     </div>
                   </TableCell>
@@ -308,7 +308,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                             </span>
                           </div>
                           
-                          {/* Ações */}
+                          {/* AÃ§Ãµes */}
                           <div className="w-[12%] pl-2 flex justify-end">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -350,7 +350,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
 
         {/* Pagination Section */}
         {paginatedData.pagination.totalPages > 1 && (
-          <div className={cn("mt-2", !isMobile && "pt-6 border-t border-zinc-100 dark:border-zinc-800")}>
+          <div className={cn("mt-2", !isMobile && "pt-6 border-t border-border dark:border-white/5")}>
             <DataPagination
               currentPage={paginatedData.pagination.currentPage}
               totalPages={paginatedData.pagination.totalPages}
@@ -381,3 +381,4 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
 }
 
 export default memo(PackagingOrdersTab);
+

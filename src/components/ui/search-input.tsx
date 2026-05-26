@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react";
+﻿import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { designSystem } from "@/styles/design-system";
 import { memo, useCallback } from "react";
@@ -11,8 +11,8 @@ interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
 }
 
 /**
- * Busca Estática Premium - Design Minimalista com Sombra Sutil
- * Substitui o modelo de expansão por um estado fixo e profissional.
+ * Busca EstÃ¡tica Premium - Design Minimalista com Sombra Sutil
+ * Substitui o modelo de expansÃ£o por um estado fixo e profissional.
  */
 export const SearchInput = memo(function SearchInput({
   value,
@@ -35,7 +35,7 @@ export const SearchInput = memo(function SearchInput({
         className={cn(
           "relative flex items-center h-11 w-full rounded-lg transition-all duration-200 overflow-hidden",
           "bg-card",
-          "border border-border",
+          "border border-border dark:border-white/5",
           "shadow-sm group-focus-within:shadow-md",
           "group-focus-within:border-border/80",
           "group-focus-within:ring-2 group-focus-within:ring-ring/20"
@@ -77,3 +77,4 @@ export const SearchInput = memo(function SearchInput({
     </div>
   );
 });
+

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -51,10 +51,10 @@ const priorityConfig = {
     icon: Clock,
     color: "text-gray-600 dark:text-gray-400",
     bg: "bg-gray-100 dark:bg-gray-800",
-    badge: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700",
+    badge: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-border dark:border-white/5",
   },
   medium: {
-    label: "Média",
+    label: "MÃ©dia",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -110,7 +110,7 @@ export function ShoppingListTable({
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border bg-card p-12">
+      <div className="rounded-xl border border-border dark:border-white/5 bg-card p-12">
         <div className="flex flex-col items-center justify-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           <p className="text-sm text-muted-foreground">Carregando lista...</p>
@@ -121,7 +121,7 @@ export function ShoppingListTable({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-card p-12">
+      <div className="rounded-xl border border-border dark:border-white/5 bg-card p-12">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
           <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
             <ShoppingBasket className="w-8 h-8 text-blue-500 dark:text-blue-400" />
@@ -131,7 +131,7 @@ export function ShoppingListTable({
               Lista vazia
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Adicione produtos para começar sua lista de compras
+              Adicione produtos para comeÃ§ar sua lista de compras
             </p>
           </div>
         </div>
@@ -166,13 +166,13 @@ export function ShoppingListTable({
                   <span className={designSystem.components.table.headerLabel}>Prioridade</span>
                 </div>
                 <div className="w-[13%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Preço Est.</span>
+                  <span className={designSystem.components.table.headerLabel}>PreÃ§o Est.</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>Observações</span>
+                  <span className={designSystem.components.table.headerLabel}>ObservaÃ§Ãµes</span>
                 </div>
                 <div className="w-[10%] px-2 flex justify-end items-center">
-                  <span className={designSystem.components.table.headerLabel}>Ações</span>
+                  <span className={designSystem.components.table.headerLabel}>AÃ§Ãµes</span>
                 </div>
               </div>
             </TableCell>
@@ -199,7 +199,7 @@ export function ShoppingListTable({
                       />
                     </div>
                     <div className="w-[25%] flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 border border-border">
+                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 border border-border dark:border-white/5">
                         <Package className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -245,7 +245,7 @@ export function ShoppingListTable({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="low">Baixa</SelectItem>
-                            <SelectItem value="medium">Média</SelectItem>
+                            <SelectItem value="medium">MÃ©dia</SelectItem>
                             <SelectItem value="high">Alta</SelectItem>
                             <SelectItem value="urgent">Urgente</SelectItem>
                           </SelectContent>
@@ -344,3 +344,4 @@ export function ShoppingListTable({
     </div>
   );
 }
+

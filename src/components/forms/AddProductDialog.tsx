@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -52,25 +52,25 @@ import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 const productSchema = z.object({
   name: z.string()
     .trim()
-    .min(1, "Nome é obrigatório")
-    .max(100, "Nome deve ter no máximo 100 caracteres"),
+    .min(1, "Nome Ã© obrigatÃ³rio")
+    .max(100, "Nome deve ter no mÃ¡ximo 100 caracteres"),
   category: z.string()
-    .min(1, "Categoria é obrigatória"),
+    .min(1, "Categoria Ã© obrigatÃ³ria"),
   brand_id: z.string().optional(),
   unit: z.string()
-    .min(1, "Unidade é obrigatória"),
+    .min(1, "Unidade Ã© obrigatÃ³ria"),
   barcode: z.string()
     .trim()
-    .max(13, "Código de barras deve ter no máximo 13 caracteres")
+    .max(13, "CÃ³digo de barras deve ter no mÃ¡ximo 13 caracteres")
     .optional()
     .or(z.literal("")),
   newCategory: z.string()
     .trim()
-    .max(50, "Categoria deve ter no máximo 50 caracteres")
+    .max(50, "Categoria deve ter no mÃ¡ximo 50 caracteres")
     .optional(),
   weight: z.string()
     .trim()
-    .max(50, "Peso deve ter no máximo 50 caracteres")
+    .max(50, "Peso deve ter no mÃ¡ximo 50 caracteres")
     .optional()
     .or(z.literal("")),
 });
@@ -117,12 +117,12 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     },
   });
 
-  // Salvar posição de scroll quando abrir o modal
+  // Salvar posiÃ§Ã£o de scroll quando abrir o modal
   useEffect(() => {
     if (open) {
       scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
     } else {
-      // Restaurar posição de scroll quando fechar o modal
+      // Restaurar posiÃ§Ã£o de scroll quando fechar o modal
       // Usar setTimeout para garantir que o DOM foi atualizado
       setTimeout(() => {
         window.scrollTo({
@@ -151,8 +151,8 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         setCategories(uniqueCategories);
       } catch (error) {
         console.error('Erro ao carregar categorias:', error);
-        // Fallback para categorias padrão em caso de erro
-        setCategories(["Frango", "Embutidos", "Frios", "Bovino", "Suíno"]);
+        // Fallback para categorias padrÃ£o em caso de erro
+        setCategories(["Frango", "Embutidos", "Frios", "Bovino", "SuÃ­no"]);
       } finally {
         setLoadingCategories(false);
       }
@@ -169,7 +169,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
     if (!productName) {
       toast({
-        title: "Nome obrigatório",
+        title: "Nome obrigatÃ³rio",
         description: "Digite o nome do produto antes de gerar a imagem",
         variant: "destructive",
       });
@@ -188,7 +188,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       if (data.success) {
         setProductImage(data.imageUrl);
         toast({
-          title: "✨ Imagem gerada!",
+          title: "âœ¨ Imagem gerada!",
           description: "Imagem do produto criada com IA",
         });
       }
@@ -196,7 +196,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       console.error("Erro ao gerar imagem:", error);
       toast({
         title: "Erro ao gerar imagem",
-        description: "Tente novamente ou faça upload manual",
+        description: "Tente novamente ou faÃ§a upload manual",
         variant: "destructive",
       });
     } finally {
@@ -209,13 +209,13 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      toast({ title: "Arquivo inválido", description: "Selecione uma imagem válida", variant: "destructive" });
+      toast({ title: "Arquivo invÃ¡lido", description: "Selecione uma imagem vÃ¡lida", variant: "destructive" });
       return;
     }
 
     // Allow larger files since we'll compress them (max 10MB input)
     if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "Arquivo muito grande", description: "Tamanho máximo: 10MB", variant: "destructive" });
+      toast({ title: "Arquivo muito grande", description: "Tamanho mÃ¡ximo: 10MB", variant: "destructive" });
       return;
     }
 
@@ -228,7 +228,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         .eq("user_id", user!.id)
         .single();
 
-      if (!companyData) throw new Error("Empresa não encontrada");
+      if (!companyData) throw new Error("Empresa nÃ£o encontrada");
 
       // Compress image if needed (> 500KB)
       let processedFile: File = file;
@@ -239,7 +239,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
         toast({
           title: "Imagem comprimida",
-          description: `${info.originalSizeKB}KB → ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`,
+          description: `${info.originalSizeKB}KB â†’ ${info.compressedSizeKB}KB (${info.savedPercent}% menor)`,
         });
       }
 
@@ -259,7 +259,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
 
       setProductImage(data.publicUrl);
 
-      toast({ title: "✅ Upload concluído", description: "Imagem do produto enviada com sucesso" });
+      toast({ title: "âœ… Upload concluÃ­do", description: "Imagem do produto enviada com sucesso" });
     } catch (error) {
       console.error("Erro no upload:", error);
       toast({ title: "Erro no upload", description: "Tente novamente", variant: "destructive" });
@@ -273,7 +273,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
 
     if (data.category === "nova" && !data.newCategory?.trim()) {
-      form.setError("newCategory", { message: "Nome da nova categoria é obrigatório" });
+      form.setError("newCategory", { message: "Nome da nova categoria Ã© obrigatÃ³rio" });
       return;
     }
 
@@ -281,12 +281,12 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       const { data: userData, error: userError } = await supabase.auth.getUser();
 
       if (userError || !userData.user) {
-        toast({ title: "Erro", description: "Você precisa estar autenticado para adicionar produtos.", variant: "destructive" });
+        toast({ title: "Erro", description: "VocÃª precisa estar autenticado para adicionar produtos.", variant: "destructive" });
         return;
       }
 
       if (!user?.id) {
-        throw new Error("Usuário não autenticado");
+        throw new Error("UsuÃ¡rio nÃ£o autenticado");
       }
 
       // Get company_id
@@ -302,11 +302,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       }
 
       if (!companyData || !companyData.company_id) {
-        console.error("Company data não encontrada:", { user_id: user.id, companyData });
-        throw new Error("Empresa não encontrada. Verifique se você está associado a uma empresa.");
+        console.error("Company data nÃ£o encontrada:", { user_id: user.id, companyData });
+        throw new Error("Empresa nÃ£o encontrada. Verifique se vocÃª estÃ¡ associado a uma empresa.");
       }
 
-      // Verificar limite antes de inserir (validação adicional no frontend)
+      // Verificar limite antes de inserir (validaÃ§Ã£o adicional no frontend)
       const ownerEmails = ['mgc.info.new@gmail.com'];
 
       let userIsOwner = false;
@@ -342,7 +342,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       if (!userIsOwner && !subscriptionLimits.canAddProduct) {
         toast({
           title: "Limite atingido",
-          description: `Você atingiu o limite de ${subscriptionLimits.maxProducts} produtos. Faça upgrade do plano para adicionar mais produtos.`,
+          description: `VocÃª atingiu o limite de ${subscriptionLimits.maxProducts} produtos. FaÃ§a upgrade do plano para adicionar mais produtos.`,
           variant: "destructive",
         });
         return;
@@ -359,9 +359,9 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
         image_url: productImage && productImage.trim() ? productImage.trim() : null,
       };
 
-      if (!productData.name || productData.name.length === 0) throw new Error("Nome do produto é obrigatório");
-      if (!productData.category || productData.category.length === 0) throw new Error("Categoria do produto é obrigatória");
-      if (!productData.unit || productData.unit.length === 0) throw new Error("Unidade de medida é obrigatória");
+      if (!productData.name || productData.name.length === 0) throw new Error("Nome do produto Ã© obrigatÃ³rio");
+      if (!productData.category || productData.category.length === 0) throw new Error("Categoria do produto Ã© obrigatÃ³ria");
+      if (!productData.unit || productData.unit.length === 0) throw new Error("Unidade de medida Ã© obrigatÃ³ria");
       if (!productData.company_id) throw new Error("Erro ao identificar a empresa");
 
       const { data: insertedProduct, error: insertError } = await supabase
@@ -414,7 +414,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);
 
-      let errorMessage = "Não foi possível adicionar o produto. Tente novamente.";
+      let errorMessage = "NÃ£o foi possÃ­vel adicionar o produto. Tente novamente.";
 
       if (error?.details) errorMessage = error.details;
       else if (error?.message) errorMessage = error.message;
@@ -424,11 +424,11 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       else if (error?.error) errorMessage = error.error;
 
       if (errorMessage.includes('duplicate') || errorMessage.includes('unique')) {
-        errorMessage = "Já existe um produto com este nome e categoria.";
+        errorMessage = "JÃ¡ existe um produto com este nome e categoria.";
       } else if (errorMessage.includes('permission') || errorMessage.includes('policy') || errorMessage.includes('RLS')) {
-        errorMessage = "Você não tem permissão para adicionar produtos. Verifique sua conta.";
+        errorMessage = "VocÃª nÃ£o tem permissÃ£o para adicionar produtos. Verifique sua conta.";
       } else if (errorMessage.includes('company_id') || errorMessage.includes('company')) {
-        errorMessage = "Erro ao identificar a empresa. Faça login novamente.";
+        errorMessage = "Erro ao identificar a empresa. FaÃ§a login novamente.";
       }
 
       toast({
@@ -473,7 +473,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
           Novo Produto
         </DialogTitleComponent>
       </div>
-      {/* Botão de fechar removido - usando o nativo do DialogContent */}
+      {/* BotÃ£o de fechar removido - usando o nativo do DialogContent */}
     </div>
   );
 
@@ -489,10 +489,10 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               current={subscriptionLimits.currentProducts}
               max={subscriptionLimits.maxProducts}
             />
-            {/* Seção: Informações Básicas */}
+            {/* SeÃ§Ã£o: InformaÃ§Ãµes BÃ¡sicas */}
             <div className={designSystem.components.card.flat + " p-4"}>
               <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider mb-4 flex items-center gap-2", designSystem.colors.text.muted)}>
-                Informações
+                InformaÃ§Ãµes
               </h3>
 
               <div className="space-y-4">
@@ -583,7 +583,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
                     name="barcode"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
+                        <FormLabel className={designSystem.typography.size.sm}>CÃ³d. Barras</FormLabel>
                         <FormControl>
                           <Input {...field} placeholder="EAN-13, EAN-8..." className={designSystem.components.input.root} maxLength={13} />
                         </FormControl>
@@ -607,7 +607,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
               </div>
 
               {productImage ? (
-                <div className="relative w-full h-32 bg-muted/50 rounded-lg overflow-hidden border border-border flex items-center justify-center">
+                <div className="relative w-full h-32 bg-muted/50 rounded-lg overflow-hidden border border-border dark:border-white/5 flex items-center justify-center">
                   <img src={productImage} alt="Preview" className="h-full object-contain" />
                 </div>
               ) : (
@@ -651,7 +651,7 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
       <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border dark:border-white/5 transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
@@ -677,3 +677,4 @@ export function AddProductDialog({ onProductAdded, onCategoryAdded, trigger, ope
     </Dialog>
   );
 }
+

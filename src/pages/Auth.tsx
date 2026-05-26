@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, startTransition } from "react";
+﻿import { useState, useEffect, useRef, startTransition } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 
 const loginSchema = z.object({
-  email: z.string().trim().email({ message: "E-mail inválido" }),
-  password: z.string().min(8, { message: "A senha deve ter no mínimo 8 caracteres" }),
+  email: z.string().trim().email({ message: "E-mail invÃ¡lido" }),
+  password: z.string().min(8, { message: "A senha deve ter no mÃ­nimo 8 caracteres" }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -78,7 +78,7 @@ export default function Auth() {
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast({
-            title: "Credenciais inválidas",
+            title: "Credenciais invÃ¡lidas",
             description: "E-mail ou senha incorretos. Tente novamente.",
             variant: "destructive",
           });
@@ -122,7 +122,7 @@ export default function Auth() {
       </div>
 
       {/* Top bar with logo */}
-      <header className="relative z-10 border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl">
+      <header className="relative z-10 border-b border-border dark:border-white/5 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center">
           <Link to="/" className="flex items-center">
             <img
@@ -156,7 +156,7 @@ export default function Auth() {
           </div>
 
           {/* Form card */}
-          <div className="rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/50 p-6 shadow-sm">
+          <div className="rounded-2xl border border-border dark:border-white/5 bg-white dark:bg-zinc-900/50 p-6 shadow-sm">
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-5">
                 <FormField
@@ -179,7 +179,7 @@ export default function Auth() {
                           className={cn(
                             "h-11 rounded-lg transition-all",
                             "bg-zinc-50 dark:bg-zinc-800/50",
-                            "border-zinc-200 dark:border-zinc-700",
+                            "border-border dark:border-white/5",
                             "focus:ring-2 focus:ring-brand/20 focus:border-brand",
                             "placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                           )}
@@ -208,11 +208,11 @@ export default function Auth() {
                         <div className="relative">
                           <Input
                             type={showPassword ? "text" : "password"}
-                            placeholder="••••••••"
+                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                             className={cn(
                               "h-11 rounded-lg pr-10 transition-all",
                               "bg-zinc-50 dark:bg-zinc-800/50",
-                              "border-zinc-200 dark:border-zinc-700",
+                              "border-border dark:border-white/5",
                               "focus:ring-2 focus:ring-brand/20 focus:border-brand",
                               "placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
                             )}
@@ -309,3 +309,4 @@ export default function Auth() {
     </div>
   );
 }
+

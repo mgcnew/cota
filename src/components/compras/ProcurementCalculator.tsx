@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+﻿import { useState, useEffect, useRef, useCallback } from "react";
 import { Calculator, RotateCcw, Copy, Check, History, Percent, Keyboard as KeyboardIcon, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export default function ProcurementCalculator() {
         .replace(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)%/g, '($1 * ($2/100))')
         .replace(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)%/g, '($1 / ($2/100))')
         .replace(/x/g, '*')
-        .replace(/÷/g, '/');
+        .replace(/Ã·/g, '/');
 
       // Use Function instead of eval for a bit more control, though still careful with inputs
       // In a production app, a math library like mathjs would be better
@@ -69,12 +69,12 @@ export default function ProcurementCalculator() {
         setFormula("");
       } else {
         toast({
-          title: "Erro no cálculo",
-          description: "Verifique a expressão informada.",
+          title: "Erro no cÃ¡lculo",
+          description: "Verifique a expressÃ£o informada.",
           variant: "destructive"
         });
       }
-    } else if (["+", "-", "x", "÷"].includes(value)) {
+    } else if (["+", "-", "x", "Ã·"].includes(value)) {
       if (display === "Erro") return;
       setFormula(display + " " + value + " ");
       setDisplay("0");
@@ -108,7 +108,7 @@ export default function ProcurementCalculator() {
         handleAction("x");
       } else if (e.key === "/") {
         e.preventDefault();
-        handleAction("÷");
+        handleAction("Ã·");
       } else if (e.key === "Enter" || e.key === "=") {
         e.preventDefault();
         handleAction("=");
@@ -132,7 +132,7 @@ export default function ProcurementCalculator() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast({
-      description: "Valor copiado para a área de transferência",
+      description: "Valor copiado para a Ã¡rea de transferÃªncia",
     });
   };
 
@@ -160,7 +160,7 @@ export default function ProcurementCalculator() {
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Calculadora Principal */}
       <Card className={cn("lg:col-span-2 overflow-hidden border-none shadow-xl bg-white dark:bg-[#1A1C20]")}>
-        <CardHeader className="pb-4 bg-muted/50 dark:bg-zinc-900/50 border-b border-zinc-200 dark:border-zinc-800">
+        <CardHeader className="pb-4 bg-muted/50 dark:bg-zinc-900/50 border-b border-border dark:border-white/5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-brand/10 rounded-lg">
@@ -168,7 +168,7 @@ export default function ProcurementCalculator() {
               </div>
               <div>
                 <CardTitle className="text-lg">Calculadora de Compras</CardTitle>
-                <CardDescription>Otimizada para cálculos de margem e impostos</CardDescription>
+                <CardDescription>Otimizada para cÃ¡lculos de margem e impostos</CardDescription>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -189,11 +189,11 @@ export default function ProcurementCalculator() {
           {/* Display */}
           <div className="relative group">
             <div className="absolute top-2 left-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
-              {formula || "Expressão"}
+              {formula || "ExpressÃ£o"}
             </div>
             <div 
               className={cn(
-                "w-full h-24 flex items-end justify-end p-4 text-4xl font-mono tracking-tighter bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-zinc-200 dark:border-zinc-800 transition-all group-hover:border-brand/30",
+                "w-full h-24 flex items-end justify-end p-4 text-4xl font-mono tracking-tighter bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-border dark:border-white/5 transition-all group-hover:border-brand/30",
                 display === "Erro" ? "text-red-500" : "text-foreground"
               )}
             >
@@ -207,15 +207,15 @@ export default function ProcurementCalculator() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Teclado Numérico e Operadores */}
+            {/* Teclado NumÃ©rico e Operadores */}
             <div className="grid grid-cols-4 gap-2">
-              {[ "7", "8", "9", "÷", "4", "5", "6", "x", "1", "2", "3", "-", "0", ".", "%", "+" ].map((btn) => (
+              {[ "7", "8", "9", "Ã·", "4", "5", "6", "x", "1", "2", "3", "-", "0", ".", "%", "+" ].map((btn) => (
                 <Button
                   key={btn}
-                  variant={["÷", "x", "-", "+"].includes(btn) ? "secondary" : "outline"}
+                  variant={["Ã·", "x", "-", "+"].includes(btn) ? "secondary" : "outline"}
                   className={cn(
                     "h-14 text-lg font-bold rounded-xl transition-all active:scale-95",
-                    ["÷", "x", "-", "+"].includes(btn) ? "bg-brand/5 hover:bg-brand/10 text-brand border-brand/20" : "hover:border-brand/30"
+                    ["Ã·", "x", "-", "+"].includes(btn) ? "bg-brand/5 hover:bg-brand/10 text-brand border-brand/20" : "hover:border-brand/30"
                   )}
                   onClick={() => handleAction(btn)}
                 >
@@ -234,7 +234,7 @@ export default function ProcurementCalculator() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                  <Percent className="h-3 w-3" /> Acréscimos (+%)
+                  <Percent className="h-3 w-3" /> AcrÃ©scimos (+%)
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {[5, 10, 15, 20, 30, 50].map(p => (
@@ -270,10 +270,10 @@ export default function ProcurementCalculator() {
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="space-y-2 pt-2 border-t border-border dark:border-white/5">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                    Cálculo de Margem (Divisão por 1-%)
+                    CÃ¡lculo de Margem (DivisÃ£o por 1-%)
                   </p>
                   <TooltipProvider>
                     <Tooltip>
@@ -281,7 +281,7 @@ export default function ProcurementCalculator() {
                         <div className="p-1 cursor-help"><KeyboardIcon className="h-3 w-3 text-muted-foreground" /></div>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-[200px] text-[10px]">
-                        Calcula o preço de venda para atingir a margem desejada. Fórmula: Custo / (1 - Margem/100)
+                        Calcula o preÃ§o de venda para atingir a margem desejada. FÃ³rmula: Custo / (1 - Margem/100)
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -305,23 +305,23 @@ export default function ProcurementCalculator() {
         </CardContent>
       </Card>
 
-      {/* Histórico */}
+      {/* HistÃ³rico */}
       <Card className="border-none shadow-xl bg-white dark:bg-[#1A1C20] flex flex-col">
-        <CardHeader className="pb-4 border-b border-zinc-200 dark:border-zinc-800">
+        <CardHeader className="pb-4 border-b border-border dark:border-white/5">
           <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-brand" />
-            <CardTitle className="text-lg">Histórico de Cálculos</CardTitle>
+            <CardTitle className="text-lg">HistÃ³rico de CÃ¡lculos</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="flex-1 p-0 overflow-y-auto max-h-[600px]">
           {history.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-6 text-center text-muted-foreground">
               <RotateCcw className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">Nenhum cálculo recente</p>
-              <p className="text-[10px] uppercase font-bold tracking-tighter mt-1 opacity-50">Os resultados aparecerão aqui</p>
+              <p className="text-sm">Nenhum cÃ¡lculo recente</p>
+              <p className="text-[10px] uppercase font-bold tracking-tighter mt-1 opacity-50">Os resultados aparecerÃ£o aqui</p>
             </div>
           ) : (
-            <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            <div className="divide-y divide-border dark:divide-white/5">
               {history.map((item, idx) => (
                 <div 
                   key={idx} 
@@ -342,14 +342,14 @@ export default function ProcurementCalculator() {
           )}
         </CardContent>
         {history.length > 0 && (
-          <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="p-4 border-t border-border dark:border-white/5">
             <Button 
               variant="ghost" 
               size="sm" 
               className="w-full text-[10px] font-black uppercase tracking-widest h-8"
               onClick={() => setHistory([])}
             >
-              Apagar Histórico
+              Apagar HistÃ³rico
             </Button>
           </div>
         )}
@@ -357,3 +357,4 @@ export default function ProcurementCalculator() {
     </div>
   );
 }
+

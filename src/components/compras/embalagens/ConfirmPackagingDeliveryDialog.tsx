@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+﻿import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -30,12 +30,12 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // States para armazenar as edições do usuário para cada item
-  // A chave é o id do order entry item.
+  // States para armazenar as ediÃ§Ãµes do usuÃ¡rio para cada item
+  // A chave Ã© o id do order entry item.
   const [itemQuantities, setItemQuantities] = useState<Record<string, string>>({});
   const [itemTotals, setItemTotals] = useState<Record<string, string>>({});
 
-  // Helpers de formatação para moeda BRL
+  // Helpers de formataÃ§Ã£o para moeda BRL
   const formatInputToBRL = (value: string) => {
     const digitOnly = value.replace(/\D/g, "");
     if (!digitOnly) return "";
@@ -73,7 +73,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
     setItemTotals(prev => ({ ...prev, [itemId]: formatInputToBRL(value) }));
   };
 
-  // Cálculos reativos em tempo real
+  // CÃ¡lculos reativos em tempo real
   const summary = useMemo(() => {
     if (!order) return { totalGeral: 0, newEconomy: 0 };
     
@@ -84,9 +84,9 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
       totalGeral += valorTotalItem;
     });
 
-    const originalTotal = order.totalValue || 1; // previne divisões por 0
-    // Proporção de economia = economia original / total original 
-    // Nova Economia = Nova Total * Proporção
+    const originalTotal = order.totalValue || 1; // previne divisÃµes por 0
+    // ProporÃ§Ã£o de economia = economia original / total original 
+    // Nova Economia = Nova Total * ProporÃ§Ã£o
     const proportion = order.economiaEstimada / originalTotal;
     const newEconomy = totalGeral * proportion;
 
@@ -109,7 +109,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
         const qtd = parseFloat(itemQuantities[item.id]) || item.quantidade;
         const vTotalVal = itemTotals[item.id] ? parseBRLToNumber(itemTotals[item.id]) : item.valorTotal;
         const vTotal = vTotalVal || item.valorTotal;
-        // O valor unitário é sempre o total/quantidade
+        // O valor unitÃ¡rio Ã© sempre o total/quantidade
         const vUnit = qtd > 0 ? vTotal / qtd : 0;
         
         return {
@@ -131,7 +131,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
       resetForm();
     } catch (e) {
       console.error(e);
-      // O erro é lidado pela mutation, mas se cairmos aqui garantimos liberar a interface
+      // O erro Ã© lidado pela mutation, mas se cairmos aqui garantimos liberar a interface
     } finally {
       setIsSubmitting(false);
     }
@@ -142,7 +142,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) resetForm(); onOpenChange(isOpen); }}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-border/40">
+        <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-border dark:border-white/5/40">
           <DialogTitle className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
               <Truck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -270,3 +270,4 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
     </Dialog>
   );
 }
+

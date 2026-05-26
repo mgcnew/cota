@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from "react";
+﻿import { useState, useMemo, useRef } from "react";
 import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +41,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     if (!containerRef.current || isExportingWhatsApp) return;
     
     setIsExportingWhatsApp(true);
-    const toastId = toast.loading('Preparando relatório profissional...');
+    const toastId = toast.loading('Preparando relatÃ³rio profissional...');
 
     try {
       // 1. Capturar imagem do resumo
@@ -123,7 +123,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       );
 
       if (res.success) {
-        toast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
+        toast.success('RelatÃ³rio enviado com sucesso via WhatsApp!', { id: toastId });
       } else {
         throw new Error(res.error || "Erro no envio");
       }
@@ -142,7 +142,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       setAnalysisResult(result);
     } catch (error) {
       console.error(error);
-      setAnalysisResult("Ocorreu um erro ao gerar a análise.");
+      setAnalysisResult("Ocorreu um erro ao gerar a anÃ¡lise.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -256,7 +256,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
             </span>
           </div>
         ) : (
-          <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
+          <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">â€”</span>
         )}
       </div>
     </div>
@@ -264,8 +264,8 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
   return (
     <div ref={containerRef} data-capture-id="quote-summary" className="flex flex-col w-full h-auto bg-transparent">
-      {/* 1. SEÇÃO DE STATS COMPACTA */}
-      <div className="bg-card/50 border-b border-border/40 px-4 py-3 flex items-center justify-between overflow-x-auto custom-scrollbar">
+      {/* 1. SEÃ‡ÃƒO DE STATS COMPACTA */}
+      <div className="bg-card/50 border-b border-border dark:border-white/5/40 px-4 py-3 flex items-center justify-between overflow-x-auto custom-scrollbar">
         <div className="flex items-center gap-6 min-w-max">
           <div className="flex items-center gap-2">
             <Package className="h-4 w-4 text-zinc-400" />
@@ -327,13 +327,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         </div>
       </div>
 
-      {/* RESULTADO DA IA (condicional) - RESUMO DA DECISÃO */}
+      {/* RESULTADO DA IA (condicional) - RESUMO DA DECISÃƒO */}
       {analysisResult && (
         <div className="bg-brand/5 border-b border-brand/20 p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-brand" />
-              <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Resumo da Decisão (IA)</h3>
+              <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Resumo da DecisÃ£o (IA)</h3>
             </div>
             <Button
               variant="outline"
@@ -352,7 +352,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
               className="h-7 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95"
             >
               <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              Exportar Decisão
+              Exportar DecisÃ£o
             </Button>
           </div>
           <div className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed font-medium">
@@ -362,7 +362,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       )}
 
       {/* 2. TOOLBAR & FILTROS */}
-      <div className="bg-background/80 backdrop-blur-md px-4 py-3 border-b border-border/40 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">
+      <div className="bg-background/80 backdrop-blur-md px-4 py-3 border-b border-border dark:border-white/5/40 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">
         <div className="relative w-full sm:flex-1 group">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-brand transition-colors z-20 pointer-events-none" />
           <Input
@@ -396,11 +396,11 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
               </div>
             </SelectTrigger>
             <SelectContent className="rounded-xl border-border/50">
-              <SelectItem value="default" className="text-xs">Ordenação Padrão</SelectItem>
-              <SelectItem value="price-asc" className="text-xs">Menor Preço</SelectItem>
-              <SelectItem value="price-desc" className="text-xs">Maior Preço</SelectItem>
+              <SelectItem value="default" className="text-xs">OrdenaÃ§Ã£o PadrÃ£o</SelectItem>
+              <SelectItem value="price-asc" className="text-xs">Menor PreÃ§o</SelectItem>
+              <SelectItem value="price-desc" className="text-xs">Maior PreÃ§o</SelectItem>
               <SelectItem value="savings" className="text-xs">Melhor Economia</SelectItem>
-              <SelectItem value="name" className="text-xs">Alfabética (A-Z)</SelectItem>
+              <SelectItem value="name" className="text-xs">AlfabÃ©tica (A-Z)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -408,7 +408,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
       {/* 3. TABELA (Corpo sem scroll interno) */}
       <div className="flex flex-col bg-transparent">
-        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-6 py-2 bg-muted/30 border-b border-border/40">
+        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-6 py-2 bg-muted/30 border-b border-border dark:border-white/5/40">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Item Adquirido</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Unid.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Quant.</span>
@@ -420,7 +420,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           {filteredAndSortedData.length > 0 ? (
             groupBySupplier && groupedData ? (
               groupedData.map(group => (
-                <div key={group.name} className="mt-4 first:mt-0 mb-4 bg-card rounded-2xl p-3 border border-border/40 shadow-sm">
+                <div key={group.name} className="mt-4 first:mt-0 mb-4 bg-card rounded-2xl p-3 border border-border dark:border-white/5/40 shadow-sm">
                   <div className="flex items-center justify-between mb-3 px-1">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
@@ -447,7 +447,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
               filteredAndSortedData.map(renderItem)
             )
           ) : (
-            <div className="py-20 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
+            <div className="py-20 text-center border border-dashed border-border dark:border-white/5 rounded-2xl">
               <div className="inline-flex p-4 rounded-full bg-zinc-100 dark:bg-zinc-900 mb-4 opacity-50">
                 <Inbox className="h-8 w-8 text-zinc-400" />
               </div>
@@ -460,3 +460,4 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     </div>
   );
 }
+

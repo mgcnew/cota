@@ -2116,7 +2116,6 @@
   .dark [class*="Card"],
   .dark .bg-card {
     background-color: hsl(var(--card));
-    border-color: hsl(var(--border));
   }
   
   .dark .card-elevated:hover {
@@ -2176,11 +2175,9 @@
     background-color: transparent;
   }
   
-  /* Wrapper de tabela com borda */
-  .dark .bg-white.dark\:bg-gray-800\/50,
-  .dark [class*="rounded-xl"][class*="border"] {
+  /* Wrapper de tabela com borda (legado) */
+  .dark .bg-white.dark\:bg-gray-800\/50 {
     background-color: hsl(var(--card));
-    border-color: hsl(var(--border));
   }
   
   /* Header da tabela - MESMO tom das linhas para efeito flutuante */
@@ -2228,8 +2225,11 @@
     background-color: hsl(var(--card));
   }
   
-  /* Bordas das linhas de tabela */
-  .dark .border-border {
+  /* Bordas de inputs/botões no dark mode — não sobrescreve cards */
+  .dark input.border-border,
+  .dark select.border-border,
+  .dark textarea.border-border,
+  .dark button.border-border {
     border-color: hsl(var(--border));
   }
   
@@ -2277,9 +2277,8 @@
   }
   
   /* Botão outline/secondary */
-  .dark .border-gray-200,
-  .dark .border-border {
-    border-color: hsl(var(--border)) !important;
+  .dark .border-gray-200 {
+    border-color: hsl(var(--border));
   }
   
   .dark button[class*="outline"],

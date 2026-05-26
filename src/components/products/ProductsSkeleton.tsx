@@ -1,4 +1,4 @@
-import { memo } from "react";
+﻿import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -60,7 +60,7 @@ function ProductsSkeleton() {
         <Card>
           <CardContent className="p-0">
             {/* Table Header */}
-            <div className="border-b border-border p-4">
+            <div className="border-b border-border dark:border-white/5 p-4">
               <div className="flex items-center gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <Skeleton key={i} className="h-4 w-20" />
@@ -69,7 +69,7 @@ function ProductsSkeleton() {
             </div>
             {/* Table Rows */}
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <div key={i} className="border-b border-border p-4">
+              <div key={i} className="border-b border-border dark:border-white/5 p-4">
                 <div className="flex items-center gap-4">
                   <Skeleton className="h-8 w-8 rounded-lg" />
                   <Skeleton className="h-4 w-32" />
@@ -99,3 +99,4 @@ function ProductsSkeleton() {
 }
 
 export default memo(ProductsSkeleton);
+

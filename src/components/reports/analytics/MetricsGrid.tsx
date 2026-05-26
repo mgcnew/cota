@@ -1,8 +1,8 @@
-/**
- * MetricsGrid - Componente para exibir métricas em grid responsivo (desktop)
+﻿/**
+ * MetricsGrid - Componente para exibir mÃ©tricas em grid responsivo (desktop)
  * 
- * Renderiza 4 métricas em um grid responsivo usando o MetricCard existente.
- * Usa React.memo para evitar re-renders desnecessários.
+ * Renderiza 4 mÃ©tricas em um grid responsivo usando o MetricCard existente.
+ * Usa React.memo para evitar re-renders desnecessÃ¡rios.
  * 
  * @module components/reports/analytics/MetricsGrid
  * Requirements: 2.1, 2.3, 6.5
@@ -16,7 +16,7 @@ import { TrendingUp, Clock, Users, DollarSign } from "lucide-react";
 import type { MetricsGridProps, Metric } from "@/types/reports";
 
 /**
- * Mapeia o tipo de métrica para a variante do MetricCard
+ * Mapeia o tipo de mÃ©trica para a variante do MetricCard
  */
 const getVariantFromTipo = (tipo: Metric['tipo']): 'success' | 'error' | 'default' => {
   switch (tipo) {
@@ -30,12 +30,12 @@ const getVariantFromTipo = (tipo: Metric['tipo']): 'success' | 'error' | 'defaul
 };
 
 /**
- * Ícones padrão para cada posição de métrica
+ * Ãcones padrÃ£o para cada posiÃ§Ã£o de mÃ©trica
  */
 const DEFAULT_ICONS = [TrendingUp, Clock, Users, DollarSign];
 
 /**
- * Variantes padrão para cada posição de métrica
+ * Variantes padrÃ£o para cada posiÃ§Ã£o de mÃ©trica
  */
 const DEFAULT_VARIANTS: Array<'success' | 'info' | 'warning' | 'default'> = [
   'success',
@@ -49,7 +49,7 @@ const DEFAULT_VARIANTS: Array<'success' | 'info' | 'warning' | 'default'> = [
  */
 function MetricSkeleton() {
   return (
-    <Card className="relative overflow-hidden border border-zinc-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-900 shadow-none">
+    <Card className="relative overflow-hidden border border-border dark:border-white/5 rounded-2xl bg-white dark:bg-zinc-900 shadow-none">
       <CardContent className="p-5">
         <div className="flex items-center gap-3 mb-4">
           <Skeleton className="h-9 w-9 rounded-xl bg-zinc-100 dark:bg-zinc-800" />
@@ -65,15 +65,15 @@ function MetricSkeleton() {
 }
 
 /**
- * MetricsGrid - Exibe métricas em grid responsivo para desktop
+ * MetricsGrid - Exibe mÃ©tricas em grid responsivo para desktop
  * 
- * Componente memoizado para evitar re-renders desnecessários.
+ * Componente memoizado para evitar re-renders desnecessÃ¡rios.
  * 
- * @param metrics - Array de métricas a serem exibidas (máximo 4)
+ * @param metrics - Array de mÃ©tricas a serem exibidas (mÃ¡ximo 4)
  * @param isLoading - Estado de carregamento
  */
 export const MetricsGrid = memo(function MetricsGrid({ metrics, isLoading }: MetricsGridProps) {
-  // Garante que sempre temos exatamente 4 métricas para o grid
+  // Garante que sempre temos exatamente 4 mÃ©tricas para o grid
   const displayMetrics = metrics.slice(0, 4);
 
   if (isLoading) {
@@ -116,3 +116,4 @@ export const MetricsGrid = memo(function MetricsGrid({ metrics, isLoading }: Met
 });
 
 export default MetricsGrid;
+

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, memo, useEffect } from "react";
+﻿import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
@@ -130,8 +130,8 @@ function PedidosTab() {
         return aIsClosed ? 1 : -1;
       }
       
-      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
-      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
+      // Se tÃªm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
+      // Se tÃªm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
       const [da, ma, ya] = a.dataPedido.split('/').map(Number);
       const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(ya, ma - 1, da).getTime();
       const [db, mb, yb] = b.dataPedido.split('/').map(Number);
@@ -167,10 +167,10 @@ function PedidosTab() {
     if (receiveOrderId && pedidos.length > 0) {
       const orderToReceive = pedidos.find(p => p.id?.toString() === receiveOrderId.toString());
       if (orderToReceive) {
-        // Usa setTimeout para garantir que a renderização inicial não atropele o estado do dialog
+        // Usa setTimeout para garantir que a renderizaÃ§Ã£o inicial nÃ£o atropele o estado do dialog
         setTimeout(() => {
           handleRegistrarEntrega(orderToReceive);
-          // Limpar o parâmetro da URL
+          // Limpar o parÃ¢metro da URL
           setSearchParams(prev => {
             prev.delete("receiveOrder");
             return prev;
@@ -210,7 +210,7 @@ function PedidosTab() {
               variant="success"
               trend={{
                 value: stats.variacaoFaturadoFormatada,
-                label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
+                label: stats.variacaoType === 'negative' ? 'furo de preÃ§o' : 'ganho extra',
                 type: stats.variacaoType
               }}
             />
@@ -228,7 +228,7 @@ function PedidosTab() {
             variant="success"
             trend={{
               value: stats.variacaoFaturadoFormatada,
-              label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
+              label: stats.variacaoType === 'negative' ? 'furo de preÃ§o' : 'ganho extra',
               type: stats.variacaoType
             }}
           />
@@ -236,9 +236,9 @@ function PedidosTab() {
       )}
 
       {/* Unified Container for Search, Table and Mobile Cards */}
-      <div className="w-full bg-white dark:bg-[#1C1E23] border border-zinc-200/80 dark:border-zinc-800/80 sm:rounded-xl overflow-hidden shadow-sm mb-8">
+      <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm mb-8">
         {/* Header / Actions Bar */}
-        <div className="p-3 md:p-4 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#16181C]/50">
+        <div className="p-3 md:p-4 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
           <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
             {/* Search Field */}
             <div className="flex-1 max-w-xl">
@@ -252,16 +252,16 @@ function PedidosTab() {
             <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
               <div className="hidden md:block">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
+                  <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="pendente">🟡 Pendentes</SelectItem>
-                    <SelectItem value="enviado">🛫 Enviados</SelectItem>
-                    <SelectItem value="confirmado">🟢 Confirmados</SelectItem>
-                    <SelectItem value="entregue">🔵 Entregues</SelectItem>
-                    <SelectItem value="cancelado">🔴 Cancelados</SelectItem>
+                    <SelectItem value="pendente">ðŸŸ¡ Pendentes</SelectItem>
+                    <SelectItem value="enviado">ðŸ›« Enviados</SelectItem>
+                    <SelectItem value="confirmado">ðŸŸ¢ Confirmados</SelectItem>
+                    <SelectItem value="entregue">ðŸ”µ Entregues</SelectItem>
+                    <SelectItem value="cancelado">ðŸ”´ Cancelados</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -277,7 +277,7 @@ function PedidosTab() {
         </div>
 
         {/* Mobile Filter Chips */}
-        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#16181C]/50 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           <style dangerouslySetInnerHTML={{__html: `
             .md\\:hidden::-webkit-scrollbar { display: none; }
           `}} />
@@ -345,7 +345,7 @@ function PedidosTab() {
               />
 
               {/* Pagination */}
-              <div className="border-t border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/30 dark:bg-[#16181C]/30 p-4">
+              <div className="border-t border-border dark:border-white/5 bg-zinc-50/30 dark:bg-muted/20 p-4">
                 <DataPagination
                   currentPage={paginatedData.pagination.currentPage}
                   totalPages={paginatedData.pagination.totalPages}
@@ -398,3 +398,4 @@ function PedidosTab() {
 }
 
 export default memo(PedidosTab);
+

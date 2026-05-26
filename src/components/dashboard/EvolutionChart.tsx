@@ -87,8 +87,8 @@ export const EvolutionChart = memo(function EvolutionChart({ data, period, onPer
   }, [data, isMobile, period]);
 
   return (
-    <Card className="col-span-1 lg:col-span-2 bg-card border border-subtle shadow-sm rounded-xl">
-      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-muted">
+    <Card className="col-span-1 lg:col-span-2 bg-card shadow-sm rounded-xl">
+      <CardHeader className="p-3 sm:p-4 pb-2 sm:pb-4 border-b border-border dark:border-white/5">
         <div className="flex flex-col gap-2 sm:gap-3">
           <div className="flex items-center justify-between gap-2">
             <CardTitle className="flex items-center gap-2 sm:gap-3 text-sm sm:text-base">

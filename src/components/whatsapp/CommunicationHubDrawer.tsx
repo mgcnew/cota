@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Sheet, 
@@ -90,7 +90,7 @@ export function CommunicationHubDrawer({
             Central de WhatsApp
           </SheetTitle>
           <SheetDescription>
-            Histórico recente de interações e respostas dos fornecedores.
+            HistÃ³rico recente de interaÃ§Ãµes e respostas dos fornecedores.
           </SheetDescription>
         </SheetHeader>
 
@@ -102,7 +102,7 @@ export function CommunicationHubDrawer({
               </div>
             ) : notifications.length === 0 ? (
               <div className="text-center py-10 text-muted-foreground">
-                Nenhuma interação registrada ainda.
+                Nenhuma interaÃ§Ã£o registrada ainda.
               </div>
             ) : (
               notifications.map((notif) => (
@@ -141,10 +141,10 @@ export function CommunicationHubDrawer({
                     {notif.supplier?.name || "Fornecedor Desconhecido"}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    Respondeu à sua solicitação de cotação via WhatsApp.
+                    Respondeu Ã  sua solicitaÃ§Ã£o de cotaÃ§Ã£o via WhatsApp.
                   </p>
 
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border dark:border-white/5/50">
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -154,7 +154,7 @@ export function CommunicationHubDrawer({
                         onSelectNotification?.(notif.quote_id);
                       }}
                     >
-                      Ver Cotação
+                      Ver CotaÃ§Ã£o
                       <ArrowRight className="h-3 w-3" />
                     </Button>
 
@@ -181,3 +181,4 @@ export function CommunicationHubDrawer({
     </Sheet>
   );
 }
+

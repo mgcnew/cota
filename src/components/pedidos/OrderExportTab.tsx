@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+﻿import { useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Download, Eye, FileText, Building2, Package, Calendar } from "lucide-react";
@@ -31,7 +31,7 @@ export function OrderExportTab({
   const selectedSupplier = suppliers.find(s => s.id === fornecedor);
   const calculateTotal = () => itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
   
-  // Formatar valor em reais (padrão brasileiro)
+  // Formatar valor em reais (padrÃ£o brasileiro)
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
@@ -95,7 +95,7 @@ export function OrderExportTab({
 <body>
   <div class="container">
     <div class="header">
-      <h1>📦 PEDIDO DE COMPRA</h1>
+      <h1>ðŸ“¦ PEDIDO DE COMPRA</h1>
       <p>Pedido #${pedido.id.substring(0, 8)}</p>
     </div>
 
@@ -114,12 +114,12 @@ export function OrderExportTab({
       </div>
       <div class="info-card">
         <strong>Gerado em</strong>
-        <span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span>
+        <span>${new Date().toLocaleDateString('pt-BR')} Ã s ${new Date().toLocaleTimeString('pt-BR')}</span>
       </div>
     </div>
 
     <div class="items-section">
-      <h2>📋 Itens do Pedido</h2>
+      <h2>ðŸ“‹ Itens do Pedido</h2>
       <table class="items-table">
         <thead>
           <tr>
@@ -151,14 +151,14 @@ export function OrderExportTab({
 
     ${observacoes ? `
     <div class="observations">
-      <h3>📝 Observações</h3>
+      <h3>ðŸ“ ObservaÃ§Ãµes</h3>
       <p>${observacoes}</p>
     </div>
     ` : ''}
 
     <div class="footer">
-      <p>Sistema CotaJá - Pedido de Compra</p>
-      <p>Este documento foi gerado automaticamente e contém informações confidenciais.</p>
+      <p>Sistema CotaJÃ¡ - Pedido de Compra</p>
+      <p>Este documento foi gerado automaticamente e contÃ©m informaÃ§Ãµes confidenciais.</p>
     </div>
   </div>
 </body>
@@ -186,8 +186,8 @@ export function OrderExportTab({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header com ações */}
-      <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      {/* Header com aÃ§Ãµes */}
+      <div className="flex-shrink-0 px-4 py-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-orange-500" />
@@ -209,8 +209,8 @@ export function OrderExportTab({
         </div>
       </div>
 
-      {/* Estatísticas rápidas */}
-      <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      {/* EstatÃ­sticas rÃ¡pidas */}
+      <div className="flex-shrink-0 px-4 py-3 border-b border-border dark:border-white/5 bg-white dark:bg-gray-900">
         <div className="grid grid-cols-3 gap-4">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-orange-500" />
@@ -237,11 +237,11 @@ export function OrderExportTab({
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-border dark:border-white/5 overflow-hidden">
+              <div className="px-3 py-2 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-2">
                 <Eye className="h-4 w-4 text-gray-500" />
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  Pré-visualização
+                  PrÃ©-visualizaÃ§Ã£o
                 </span>
               </div>
               <iframe
@@ -256,3 +256,4 @@ export function OrderExportTab({
     </div>
   );
 }
+

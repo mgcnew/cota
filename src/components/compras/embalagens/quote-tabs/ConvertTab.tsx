@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -287,7 +287,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           setSubmittingStep(`Enviando WhatsApp: ${supplierName}...`);
           
           try {
-            // Gerar mensagem com link de confirmação
+            // Gerar mensagem com link de confirmaÃ§Ã£o
             const { message, phone } = await generatePackagingOrderMessage(orderId);
             
             if (!phone) {
@@ -325,8 +325,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
         }
       }
 
-      // STEP 3: Atualizar status da cotação
-      setSubmittingStep("Finalizando cotação...");
+      // STEP 3: Atualizar status da cotaÃ§Ã£o
+      setSubmittingStep("Finalizando cotaÃ§Ã£o...");
       await updateQuoteStatus.mutateAsync({ quoteId: quote.id, status: 'concluida' });
       
       setConversionResult(result);
@@ -336,20 +336,20 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
       if (sendMode === "convert_and_send") {
         if (result.whatsappFailed === 0) {
           toast({
-            title: "✅ Pedido(s) criado(s) e enviados!",
+            title: "âœ… Pedido(s) criado(s) e enviados!",
             description: `${result.totalOrders} pedido(s) criado(s) e ${result.whatsappSent} enviado(s) via WhatsApp.`,
           });
         } else {
           toast({
-            title: "⚠️ Pedido(s) criado(s) com alertas",
+            title: "âš ï¸ Pedido(s) criado(s) com alertas",
             description: `${result.whatsappSent} enviado(s) via WhatsApp, ${result.whatsappFailed} falharam.`,
             variant: "default",
           });
         }
       } else {
         toast({
-          title: "✅ Pedido(s) criado(s) com sucesso!",
-          description: `${result.totalOrders} pedido(s) de embalagens criado(s). Disponíveis na aba de Pedidos.`,
+          title: "âœ… Pedido(s) criado(s) com sucesso!",
+          description: `${result.totalOrders} pedido(s) de embalagens criado(s). DisponÃ­veis na aba de Pedidos.`,
         });
       }
       
@@ -393,14 +393,14 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm mb-6">
             {wasSent 
-              ? `${conversionResult.totalOrders} pedido(s) criado(s) e ${conversionResult.whatsappSent} enviado(s) via WhatsApp com link de confirmação.`
-              : `A cotação foi convertida em ${conversionResult.totalOrders} pedido(s) de embalagens. Disponíveis na aba Pedidos.`
+              ? `${conversionResult.totalOrders} pedido(s) criado(s) e ${conversionResult.whatsappSent} enviado(s) via WhatsApp com link de confirmaÃ§Ã£o.`
+              : `A cotaÃ§Ã£o foi convertida em ${conversionResult.totalOrders} pedido(s) de embalagens. DisponÃ­veis na aba Pedidos.`
             }
           </p>
 
           {/* Resumo visual */}
           <div className="w-full max-w-sm space-y-3">
-            <div className="flex items-center gap-3 bg-muted/50 border border-border/50 rounded-xl p-4">
+            <div className="flex items-center gap-3 bg-muted/50 border border-border dark:border-white/5/50 rounded-xl p-4">
               <div className="flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4 text-brand" />
                 <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Total</span>
@@ -430,7 +430,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
                 </div>
                 <div className="space-y-1">
                   {conversionResult.failedSuppliers.map((name, i) => (
-                    <p key={i} className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">• {name}</p>
+                    <p key={i} className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">â€¢ {name}</p>
                   ))}
                 </div>
                 <p className="text-[10px] text-muted-foreground mt-2">
@@ -454,7 +454,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           </div>
           <h3 className="text-lg font-bold text-foreground mb-2">Nenhum Fornecedor Respondeu</h3>
           <p className="text-sm text-muted-foreground max-w-sm">
-            Para converter esta cotação em pedido, pelo menos um fornecedor precisa ter enviado seus preços.
+            Para converter esta cotaÃ§Ã£o em pedido, pelo menos um fornecedor precisa ter enviado seus preÃ§os.
           </p>
         </div>
       </ScrollArea>
@@ -465,8 +465,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
     <ScrollArea className="h-full">
       <div className="p-4 sm:p-5 space-y-5">
         
-        {/* Header da Conversão */}
-        <div className="flex items-center gap-3 pb-3 border-b border-border/50">
+        {/* Header da ConversÃ£o */}
+        <div className="flex items-center gap-3 pb-3 border-b border-border dark:border-white/5/50">
           <div className="w-9 h-9 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center">
             <ShoppingCart className="h-4 w-4 text-brand" />
           </div>
@@ -475,15 +475,15 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
               {suppliersCount > 1 
                 ? `${suppliersCount} pedidos para fornecedores diferentes`
-                : "Selecione o modo de conversão e confirme"
+                : "Selecione o modo de conversÃ£o e confirme"
               }
             </p>
           </div>
         </div>
 
-        {/* Modo de Conversão */}
+        {/* Modo de ConversÃ£o */}
         <div className="space-y-3">
-          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Modo de Conversão</Label>
+          <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Modo de ConversÃ£o</Label>
           <RadioGroup 
             value={conversionMode} 
             onValueChange={(v) => {
@@ -509,8 +509,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
                 <Zap className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-bold text-sm text-foreground">Melhor Preço</p>
-                <p className="text-[10px] text-muted-foreground font-medium">Automático por item</p>
+                <p className="font-bold text-sm text-foreground">Melhor PreÃ§o</p>
+                <p className="text-[10px] text-muted-foreground font-medium">AutomÃ¡tico por item</p>
               </div>
             </Label>
             
@@ -538,7 +538,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           </RadioGroup>
         </div>
 
-        {/* Modo Personalizado - Seleção por Item */}
+        {/* Modo Personalizado - SeleÃ§Ã£o por Item */}
         {conversionMode === "custom" && (
           <div className="space-y-2">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Selecionar Fornecedor por Item</Label>
@@ -650,8 +650,8 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           </div>
         )}
 
-        {/* Data de Entrega e Observações */}
-        <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border/50">
+        {/* Data de Entrega e ObservaÃ§Ãµes */}
+        <div className="space-y-3 p-4 bg-muted/30 rounded-xl border border-border dark:border-white/5/50">
           <div className="space-y-2">
             <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
               <Calendar className="h-3.5 w-3.5" />
@@ -666,9 +666,9 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Observações (opcional)</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">ObservaÃ§Ãµes (opcional)</Label>
             <Input
-              placeholder="Observações sobre o pedido..."
+              placeholder="ObservaÃ§Ãµes sobre o pedido..."
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
               className="h-10 text-sm bg-background border-border"
@@ -697,7 +697,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
                 <TrendingDown className="h-4 w-4 text-emerald-600" />
                 <span className="font-bold text-sm text-emerald-700 dark:text-emerald-400">Economia Estimada</span>
                 <span className="text-[10px] text-muted-foreground font-medium">
-                  (vs maior preço cotado)
+                  (vs maior preÃ§o cotado)
                 </span>
               </div>
               <span className="text-lg font-black text-emerald-600 dark:text-emerald-400">
@@ -707,10 +707,10 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           )}
         </div>
 
-        {/* Opção de Envio: Converter ou Converter + WhatsApp */}
+        {/* OpÃ§Ã£o de Envio: Converter ou Converter + WhatsApp */}
         {Object.keys(ordersBySupplier).length > 0 && (
           <div className="space-y-3">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Ação após conversão</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">AÃ§Ã£o apÃ³s conversÃ£o</Label>
             <RadioGroup 
               value={sendMode} 
               onValueChange={(v) => setSendMode(v as SendMode)}
@@ -735,7 +735,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-foreground">Converter e Enviar via WhatsApp</p>
                   <p className="text-[10px] text-muted-foreground font-medium leading-relaxed">
-                    Cria os pedidos e envia automaticamente para cada fornecedor com link de confirmação
+                    Cria os pedidos e envia automaticamente para cada fornecedor com link de confirmaÃ§Ã£o
                   </p>
                 </div>
                 {sendMode === "convert_and_send" && (
@@ -772,7 +772,7 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
           </div>
         )}
 
-        {/* Botão de Conversão */}
+        {/* BotÃ£o de ConversÃ£o */}
         <Button
           onClick={handleSubmit}
           disabled={!deliveryDate || Object.keys(ordersBySupplier).length === 0 || isSubmitting}
@@ -803,10 +803,11 @@ export function ConvertTab({ quote, onConversionComplete }: Props) {
 
         {!deliveryDate && Object.keys(ordersBySupplier).length > 0 && (
           <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold text-center uppercase tracking-wider">
-            ⚠️ Preencha a data de entrega para habilitar a conversão
+            âš ï¸ Preencha a data de entrega para habilitar a conversÃ£o
           </p>
         )}
       </div>
     </ScrollArea>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -40,12 +40,12 @@ import { designSystem } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 
 const supplierSchema = z.object({
-  name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
+  name: z.string().trim().min(1, "Nome Ã© obrigatÃ³rio").max(100, "Nome muito longo"),
   cnpj: z.string().trim().max(18, "CNPJ muito longo").optional().or(z.literal("")),
-  contact: z.string().trim().min(1, "Contato é obrigatório").max(100, "Contato muito longo"),
+  contact: z.string().trim().min(1, "Contato Ã© obrigatÃ³rio").max(100, "Contato muito longo"),
   phone: z.string().trim().max(20, "Telefone muito longo").optional().or(z.literal("")),
-  email: z.string().trim().email("Email inválido").max(255, "Email muito longo").optional().or(z.literal("")),
-  address: z.string().trim().max(200, "Endereço muito longo").optional().or(z.literal("")),
+  email: z.string().trim().email("Email invÃ¡lido").max(255, "Email muito longo").optional().or(z.literal("")),
+  address: z.string().trim().max(200, "EndereÃ§o muito longo").optional().or(z.literal("")),
   delivery_schedule: z.array(z.number()).optional(),
 });
 
@@ -84,12 +84,12 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
     },
   });
 
-  // Salvar posição de scroll quando abrir o modal
+  // Salvar posiÃ§Ã£o de scroll quando abrir o modal
   useEffect(() => {
     if (open) {
       scrollPositionRef.current = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
     } else {
-      // Restaurar posição de scroll quando fechar o modal
+      // Restaurar posiÃ§Ã£o de scroll quando fechar o modal
       setTimeout(() => {
         window.scrollTo({
           top: scrollPositionRef.current,
@@ -106,14 +106,14 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
       if (userError || !userData.user) {
         toast({
           title: "Erro",
-          description: "Você precisa estar autenticado.",
+          description: "VocÃª precisa estar autenticado.",
           variant: "destructive",
         });
         return;
       }
 
       if (!user?.id) {
-        throw new Error("Usuário não autenticado");
+        throw new Error("UsuÃ¡rio nÃ£o autenticado");
       }
 
       // Get company_id
@@ -124,15 +124,15 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
         .single();
 
       if (!companyData) {
-        throw new Error("Empresa não encontrada");
+        throw new Error("Empresa nÃ£o encontrada");
       }
 
-      // Verificar limite antes de inserir (validação adicional no frontend)
-      // Owners não têm limites
+      // Verificar limite antes de inserir (validaÃ§Ã£o adicional no frontend)
+      // Owners nÃ£o tÃªm limites
       if (!isOwner && !subscriptionLimits.canAddSupplier) {
         toast({
           title: "Limite atingido",
-          description: `Você atingiu o limite de ${subscriptionLimits.maxSuppliers} fornecedores. Faça upgrade do plano para adicionar mais fornecedores.`,
+          description: `VocÃª atingiu o limite de ${subscriptionLimits.maxSuppliers} fornecedores. FaÃ§a upgrade do plano para adicionar mais fornecedores.`,
           variant: "destructive",
         });
         return;
@@ -191,7 +191,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
     }
   };
 
-  // Função para gerenciar abertura/fechamento e manter scroll
+  // FunÃ§Ã£o para gerenciar abertura/fechamento e manter scroll
   const handleOpenChange = (newOpen: boolean) => {
     handleSetOpen(newOpen);
     if (!newOpen) {
@@ -226,11 +226,11 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           Novo Fornecedor
         </DialogTitleComponent>
       </div>
-      {/* Botão de fechar removido - usando o nativo do DialogContent */}
+      {/* BotÃ£o de fechar removido - usando o nativo do DialogContent */}
     </div>
   );
 
-  // Conteúdo do formulário (reutilizado em mobile e desktop)
+  // ConteÃºdo do formulÃ¡rio (reutilizado em mobile e desktop)
   const content = (
     <>
       {Header}
@@ -244,11 +244,11 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
               max={subscriptionLimits.maxSuppliers}
             />
 
-            {/* Seção: Informações da Empresa */}
+            {/* SeÃ§Ã£o: InformaÃ§Ãµes da Empresa */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
               <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
                 <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
-                Informações da Empresa
+                InformaÃ§Ãµes da Empresa
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -296,10 +296,10 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>Endereço Completo</FormLabel>
+                    <FormLabel className={designSystem.typography.size.sm}>EndereÃ§o Completo</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Rua das Flores, 123, Centro, São Paulo - SP"
+                        placeholder="Rua das Flores, 123, Centro, SÃ£o Paulo - SP"
                         className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
@@ -311,11 +311,11 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
               />
             </div>
 
-            {/* Seção: Informações de Contato */}
+            {/* SeÃ§Ã£o: InformaÃ§Ãµes de Contato */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
               <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
                 <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
-                Informações de Contato
+                InformaÃ§Ãµes de Contato
               </h3>
 
               <FormField
@@ -326,7 +326,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                     <FormLabel className={designSystem.typography.size.sm}>Nome do Contato Principal *</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: João Silva Santos"
+                        placeholder="Ex: JoÃ£o Silva Santos"
                         className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
@@ -379,7 +379,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
               </div>
             </div>
 
-            {/* Seção: Status & Limites (Cronograma) */}
+            {/* SeÃ§Ã£o: Status & Limites (Cronograma) */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
               <h3 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
                 <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
@@ -400,7 +400,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
                           { id: 3, label: 'Qua' },
                           { id: 4, label: 'Qui' },
                           { id: 5, label: 'Sex' },
-                          { id: 6, label: 'Sáb' },
+                          { id: 6, label: 'SÃ¡b' },
                           { id: 0, label: 'Dom' },
                         ].map((day) => {
                           const isSelected = field.value?.includes(day.id);
@@ -437,13 +437,13 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
             {!isMobile && (
               <div className="bg-primary/5 border border-primary/10 rounded-lg p-3">
                 <div className="flex items-start gap-2">
-                  <div className="text-lg">💡</div>
+                  <div className="text-lg">ðŸ’¡</div>
                   <div className="flex-1">
-                    <h4 className={cn("font-semibold text-xs mb-1.5", designSystem.colors.text.primary)}>Dicas Rápidas</h4>
+                    <h4 className={cn("font-semibold text-xs mb-1.5", designSystem.colors.text.primary)}>Dicas RÃ¡pidas</h4>
                     <ul className={cn("text-xs space-y-0.5", designSystem.colors.text.secondary)}>
-                      <li>• Campos com * são obrigatórios</li>
-                      <li>• Email usado para cotações</li>
-                      <li>• Mantenha dados atualizados</li>
+                      <li>â€¢ Campos com * sÃ£o obrigatÃ³rios</li>
+                      <li>â€¢ Email usado para cotaÃ§Ãµes</li>
+                      <li>â€¢ Mantenha dados atualizados</li>
                     </ul>
                   </div>
                 </div>
@@ -451,7 +451,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
             )}
           </div>
 
-          {/* Footer com botões */}
+          {/* Footer com botÃµes */}
           <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
             <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
               <Button
@@ -500,7 +500,7 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
           </DrawerTrigger>
         )}
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border transition-all duration-200"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-background border-t border-border dark:border-white/5 transition-all duration-200"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
@@ -527,3 +527,4 @@ export default function AddSupplierDialog({ onAdd, trigger, open: externalOpen, 
     </Dialog>
   );
 }
+

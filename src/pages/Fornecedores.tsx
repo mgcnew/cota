@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, memo } from "react";
+﻿import { useState, useEffect, useMemo, useRef, useCallback, lazy, Suspense, memo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -179,14 +179,14 @@ function Fornecedores() {
 
     if (!supplier.phone) {
       toast({
-        title: "Telefone não encontrado",
-        description: "Este fornecedor não possui telefone cadastrado.",
+        title: "Telefone nÃ£o encontrado",
+        description: "Este fornecedor nÃ£o possui telefone cadastrado.",
         variant: "destructive"
       });
       return;
     }
 
-    // Busca se existe alguma cotação ativa para este fornecedor para mandar o link
+    // Busca se existe alguma cotaÃ§Ã£o ativa para este fornecedor para mandar o link
     const activeQuote = (supplier as any).activeQuotes?.[0];
     const accessToken = activeQuote?.token || activeQuote?.accessToken || activeQuote?.access_token;
     
@@ -202,12 +202,12 @@ function Fornecedores() {
       } else {
         msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
       }
-      msg += `🛡️ *Link Seguro:* Acesso exclusivo para o Mercadão Novo Boi João Dias.\n\n`;
+      msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo para o MercadÃ£o Novo Boi JoÃ£o Dias.\n\n`;
     }
     
     msg += `Equipe de Compras`;
 
-    // Tenta enviar via API de serviço padronizada
+    // Tenta enviar via API de serviÃ§o padronizada
     try {
       const { sendWhatsApp } = await import("@/lib/whatsapp-service");
       toast({ title: "Iniciando conversa via WhatsApp..." });
@@ -304,7 +304,7 @@ function Fornecedores() {
                 title="Fornecedores"
                 value={stats.total}
                 icon={Building2}
-                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
+                trend={{ value: "+15", label: "novos este mÃªs", type: "positive" }}
                 variant="info"
               />
               <MobileMetricCard
@@ -318,11 +318,11 @@ function Fornecedores() {
                 title="Limite Total"
                 value={stats.totalLimit}
                 icon={DollarSign}
-                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
+                trend={{ value: stats.limiteMedioPorAtivo, label: "mÃ©dia por ativo", type: "neutral" }}
                 variant="default"
               />
               <MobileMetricCard
-                title="Cotações"
+                title="CotaÃ§Ãµes"
                 value={stats.activeQuotes}
                 icon={FileText}
                 trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
@@ -335,7 +335,7 @@ function Fornecedores() {
                 title="Fornecedores"
                 value={stats.total}
                 icon={Building2}
-                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
+                trend={{ value: "+15", label: "novos este mÃªs", type: "positive" }}
                 variant="info"
                 className="hover:scale-[1.02] transition-transform"
               />
@@ -351,12 +351,12 @@ function Fornecedores() {
                 title="Limite Total"
                 value={stats.totalLimit}
                 icon={DollarSign}
-                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
+                trend={{ value: stats.limiteMedioPorAtivo, label: "mÃ©dia por ativo", type: "neutral" }}
                 variant="default"
                 className="hover:scale-[1.02] transition-transform"
               />
               <MetricCard
-                title="Cotações"
+                title="CotaÃ§Ãµes"
                 value={stats.activeQuotes}
                 icon={FileText}
                 trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
@@ -367,9 +367,9 @@ function Fornecedores() {
           )}
 
           {/* Unified Container for Search, Table and Mobile Cards */}
-          <div className="w-full bg-white dark:bg-[#1C1E23] border border-zinc-200/80 dark:border-zinc-800/80 sm:rounded-xl overflow-hidden shadow-sm mb-8">
+          <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm mb-8">
             {/* Header / Actions Bar */}
-            <div className="p-3 md:p-4 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-[#16181C]/50">
+            <div className="p-3 md:p-4 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
               <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
                 <div className="flex-1 max-w-xl">
                   <SearchInput
@@ -380,7 +380,7 @@ function Fornecedores() {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
                   <Select value={statusFilter} onValueChange={value => setStatusFilter(value as any)}>
-                    <SelectTrigger className="w-[150px] h-11 bg-white dark:bg-background border border-zinc-200 dark:border-zinc-800 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
+                    <SelectTrigger className="w-[150px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -540,3 +540,4 @@ function Fornecedores() {
 
 // Memoize component to prevent unnecessary re-renders
 export default memo(Fornecedores);
+

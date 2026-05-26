@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+﻿import { Skeleton } from "@/components/ui/skeleton";
 
 export function TabSkeleton() {
   return (
@@ -9,9 +9,9 @@ export function TabSkeleton() {
         <Skeleton className="h-6 w-20 rounded-md" />
       </div>
       {/* Card skeleton */}
-      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+      <div className="rounded-xl border border-border dark:border-white/5 overflow-hidden">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+          <div key={i} className="px-4 py-3 border-b border-border dark:border-white/5 last:border-0">
             <div className="flex items-center justify-between gap-4">
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-40" />
@@ -36,7 +36,7 @@ export function ValoresTabSkeleton() {
   return (
     <div className="h-full flex flex-col md:flex-row">
       {/* Sidebar skeleton */}
-      <div className="w-full md:w-48 flex-shrink-0 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50/20 dark:bg-zinc-900/20 p-2 space-y-1">
+      <div className="w-full md:w-48 flex-shrink-0 border-b md:border-b-0 md:border-r border-border dark:border-white/5 bg-zinc-50/20 dark:bg-zinc-900/20 p-2 space-y-1">
         <Skeleton className="h-3 w-20 mb-2 mx-1" />
         {[1, 2, 3].map((i) => (
           <Skeleton key={i} className="h-9 w-full rounded-md" />
@@ -45,7 +45,7 @@ export function ValoresTabSkeleton() {
       {/* Content skeleton */}
       <div className="flex-1 p-3 space-y-3">
         {[1, 2].map((i) => (
-          <div key={i} className="rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 space-y-3">
+          <div key={i} className="rounded-xl border border-border dark:border-white/5 p-4 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-8 w-8 rounded-lg" />
@@ -67,3 +67,4 @@ export function ValoresTabSkeleton() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -139,7 +139,7 @@ export function PackagingEconomyBreakdown({
         {sortedEconomies.map((item) => (
           <Card
             key={item.productId}
-            className="border border-border/50 bg-card shadow-sm"
+            className="border border-border dark:border-white/5/50 bg-card shadow-sm"
           >
             <div className="p-4 space-y-3">
               {/* Product Header */}
@@ -197,9 +197,9 @@ export function PackagingEconomyBreakdown({
                   </div>
                 </div>
               ) : (
-                <div className="bg-muted/20 rounded-lg p-3 border border-border/50">
+                <div className="bg-muted/20 rounded-lg p-3 border border-border dark:border-white/5/50">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                    Única Oferta
+                    Ãšnica Oferta
                   </p>
                   <p className="text-sm font-bold text-foreground">
                     {formatCurrency(item.bestPrice.valorUnitario)}/un
@@ -219,3 +219,4 @@ export function PackagingEconomyBreakdown({
     </div>
   );
 }
+

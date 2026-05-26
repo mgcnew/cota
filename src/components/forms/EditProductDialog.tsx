@@ -1,4 +1,4 @@
-// EditProductDialog - Formulário de edição de produtos com upload de imagem e código de barras
+﻿// EditProductDialog - FormulÃ¡rio de ediÃ§Ã£o de produtos com upload de imagem e cÃ³digo de barras
 import { useState, useEffect, memo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,21 +48,21 @@ import { Label } from "@/components/ui/label";
 const productSchema = z.object({
   name: z.string()
     .trim()
-    .min(1, "Nome é obrigatório")
-    .max(100, "Nome deve ter no máximo 100 caracteres"),
+    .min(1, "Nome Ã© obrigatÃ³rio")
+    .max(100, "Nome deve ter no mÃ¡ximo 100 caracteres"),
   category: z.string()
-    .min(1, "Categoria é obrigatória"),
+    .min(1, "Categoria Ã© obrigatÃ³ria"),
   brand_id: z.string().optional(),
   unit: z.string()
-    .min(1, "Unidade é obrigatória"),
+    .min(1, "Unidade Ã© obrigatÃ³ria"),
   barcode: z.string()
     .trim()
-    .max(13, "Código de barras deve ter no máximo 13 caracteres")
+    .max(13, "CÃ³digo de barras deve ter no mÃ¡ximo 13 caracteres")
     .optional()
     .or(z.literal("")),
   newCategory: z.string()
     .trim()
-    .max(50, "Categoria deve ter no máximo 50 caracteres")
+    .max(50, "Categoria deve ter no mÃ¡ximo 50 caracteres")
     .optional(),
 });
 
@@ -158,12 +158,12 @@ function EditProductDialogInternal({
     if (!file || !currentProduct) return;
 
     if (!file.type.startsWith('image/')) {
-      toast({ title: "Arquivo inválido", description: "Selecione uma imagem válida.", variant: "destructive" });
+      toast({ title: "Arquivo invÃ¡lido", description: "Selecione uma imagem vÃ¡lida.", variant: "destructive" });
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "Arquivo muito grande", description: "Máximo 10MB.", variant: "destructive" });
+      toast({ title: "Arquivo muito grande", description: "MÃ¡ximo 10MB.", variant: "destructive" });
       return;
     }
 
@@ -211,7 +211,7 @@ function EditProductDialogInternal({
     const finalCategory = data.category === "nova" ? data.newCategory! : data.category;
 
     if (data.category === "nova" && !data.newCategory?.trim()) {
-      form.setError("newCategory", { message: "Nome da nova categoria é obrigatório" });
+      form.setError("newCategory", { message: "Nome da nova categoria Ã© obrigatÃ³rio" });
       return;
     }
 
@@ -389,7 +389,7 @@ function EditProductDialogInternal({
                   name="barcode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Cód. Barras</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>CÃ³d. Barras</FormLabel>
                       <FormControl>
                         <Input {...field} placeholder="EAN-13..." className={designSystem.components.input.root} maxLength={13} onFocus={handleInputFocus} />
                       </FormControl>
@@ -419,7 +419,7 @@ function EditProductDialogInternal({
           form="edit-product-form"
           className={designSystem.components.button.primary}
         >
-          Salvar Alterações
+          Salvar AlteraÃ§Ãµes
         </Button>
       </div>
     </>
@@ -429,7 +429,7 @@ function EditProductDialogInternal({
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-zinc-200 dark:border-zinc-800 transition-[height,max-height] duration-200 ease-in-out"
+          className="rounded-t-2xl pb-8 overflow-hidden flex flex-col p-0 bg-white dark:bg-zinc-950 border-t border-border dark:border-white/5 transition-[height,max-height] duration-200 ease-in-out"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',

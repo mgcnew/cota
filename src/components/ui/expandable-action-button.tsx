@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+﻿import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -34,7 +34,7 @@ const buttonVariants = {
   },
   default: {
     bg: "bg-gray-50 dark:bg-gray-800/50",
-    border: "border-gray-200 dark:border-gray-700",
+    border: "border-border dark:border-white/5",
     text: "text-gray-600 dark:text-gray-400",
     hover: "hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-gray-300 dark:hover:border-gray-600",
   },
@@ -88,3 +88,4 @@ export function ExpandableActionButton({
     </TooltipProvider>
   );
 }
+

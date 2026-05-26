@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, startTransition, memo, lazy, Suspense } from "react";
+﻿import { useState, useEffect, useMemo, useCallback, startTransition, memo, lazy, Suspense } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthDialog } from "@/components/auth/AuthDialog";
 import { useProducts } from "@/hooks/useProducts";
@@ -89,7 +89,7 @@ function Produtos() {
     }
   }, [loading, user]);
 
-  // Busca direta no Supabase como fallback (quando a busca local pode não ter todos os produtos)
+  // Busca direta no Supabase como fallback (quando a busca local pode nÃ£o ter todos os produtos)
   const [dbSearchResults, setDbSearchResults] = useState<Product[]>([]);
   const [isDbSearching, setIsDbSearching] = useState(false);
 
@@ -188,7 +188,7 @@ function Produtos() {
       const extraFromDb = dbSearchResults.filter(dbP => !existingIds.has(dbP.id));
       
       if (extraFromDb.length > 0) {
-        // Enriquecer dados do DB com dados completos do cache se possível
+        // Enriquecer dados do DB com dados completos do cache se possÃ­vel
         const allProductsMap = new Map(safeProducts.map(p => [p.id, p]));
         const enriched = extraFromDb.map(dbP => allProductsMap.get(dbP.id) || dbP);
         results = [...results, ...enriched];
@@ -218,7 +218,7 @@ function Produtos() {
     if (safeFilteredProducts.length === 0) {
       toast({
         title: "Nenhum produto para exportar",
-        description: "Não há produtos filtrados para exportar.",
+        description: "NÃ£o hÃ¡ produtos filtrados para exportar.",
         variant: "destructive",
       });
       return;
@@ -241,17 +241,17 @@ function Produtos() {
       columns: {
         name: 'Nome',
         category: 'Categoria',
-        barcode: 'Código de Barras',
+        barcode: 'CÃ³digo de Barras',
         unit: 'Unidade',
         status: 'Status',
-        price: 'Preço',
+        price: 'PreÃ§o',
         bestSupplier: 'Melhor Fornecedor',
-        quotesCount: 'Cotações'
+        quotesCount: 'CotaÃ§Ãµes'
       }
     });
 
     toast({
-      title: "Exportação realizada",
+      title: "ExportaÃ§Ã£o realizada",
       description: `${exportData.length} produtos exportados com sucesso.`,
     });
   }, [safeFilteredProducts, toast, exportToCSV]);
@@ -310,13 +310,13 @@ function Produtos() {
                   Produtos
                 </h1>
                 <p className={cn(designSystem.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                  Gerencie seu catálogo de itens e categorias
+                  Gerencie seu catÃ¡logo de itens e categorias
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Métricas essenciais */}
+          {/* MÃ©tricas essenciais */}
           {isMobile ? (
             <MobileMetricRibbon className="mb-4 mt-2">
               <MobileMetricCard
@@ -332,13 +332,13 @@ function Produtos() {
                 variant="info"
               />
               <MobileMetricCard
-                title="Cotações"
+                title="CotaÃ§Ãµes"
                 value={stats.activeQuotes}
                 icon={ClipboardList}
                 variant="success"
               />
               <MobileMetricCard
-                title="Valor Médio"
+                title="Valor MÃ©dio"
                 value={stats.averageValue}
                 icon={DollarSign}
                 variant="default"
@@ -361,14 +361,14 @@ function Produtos() {
                 className="hover:scale-[1.02] transition-transform"
               />
               <MetricCard
-                title="Cotações"
+                title="CotaÃ§Ãµes"
                 value={stats.activeQuotes}
                 icon={ClipboardList}
                 variant="success"
                 className="hover:scale-[1.02] transition-transform"
               />
               <MetricCard
-                title="Valor Médio"
+                title="Valor MÃ©dio"
                 value={stats.averageValue}
                 icon={DollarSign}
                 variant="default"
@@ -377,8 +377,8 @@ function Produtos() {
             </ResponsiveGrid>
           )}
 
-          <div className="w-full bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm mb-8">
-            <div className="p-4 md:p-5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50">
+          <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm mb-8">
+            <div className="p-4 md:p-5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/50">
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 <div className="flex-1 max-w-xl">
                   <SearchInput
@@ -564,3 +564,4 @@ function Produtos() {
 }
 
 export default memo(Produtos);
+

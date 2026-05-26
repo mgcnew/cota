@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -71,8 +71,8 @@ export default function QuoteEditView({
   useEffect(() => {
     if (hasUnsavedChanges && editingProductId) {
       toast({
-        title: "Valor não salvo",
-        description: "Os valores editados não foram salvos. Salve antes de trocar de fornecedor.",
+        title: "Valor nÃ£o salvo",
+        description: "Os valores editados nÃ£o foram salvos. Salve antes de trocar de fornecedor.",
         variant: "destructive",
       });
       return;
@@ -148,7 +148,7 @@ export default function QuoteEditView({
 
     const labels = {
       ativa: "Ativa",
-      concluida: "Concluída",
+      concluida: "ConcluÃ­da",
       pendente: "Pendente",
       expirada: "Expirada",
       finalizada: "Finalizada",
@@ -405,7 +405,7 @@ export default function QuoteEditView({
       duration={200}
       className="bg-card rounded-lg border shadow-sm"
     >
-      {/* Header com botão voltar */}
+      {/* Header com botÃ£o voltar */}
       <div className="border-b bg-muted/50 px-6 py-4 flex items-center gap-4">
         <Button onClick={onBack} variant="ghost" size="sm">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -417,7 +417,7 @@ export default function QuoteEditView({
           </div>
           <div>
             <h2 className="text-lg font-semibold">
-              Cotação #{quote.id.substring(0, 8)}
+              CotaÃ§Ã£o #{quote.id.substring(0, 8)}
             </h2>
             <p className="text-sm text-muted-foreground">
               {quote.produtoResumo}
@@ -427,7 +427,7 @@ export default function QuoteEditView({
         {getStatusBadge(quote.status)}
       </div>
 
-      {/* Conteúdo principal */}
+      {/* ConteÃºdo principal */}
       <div className="p-6 space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
@@ -469,7 +469,7 @@ export default function QuoteEditView({
                     <DollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Melhor Preço</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Melhor PreÃ§o</p>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       R$ {stats.melhorValor.toFixed(2)}
                     </p>
@@ -506,16 +506,16 @@ export default function QuoteEditView({
               </Card>
             </div>
 
-            {/* Informações Gerais */}
+            {/* InformaÃ§Ãµes Gerais */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                Informações da Cotação
+                InformaÃ§Ãµes da CotaÃ§Ã£o
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
                   <Calendar className="h-5 w-5 text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Período</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">PerÃ­odo</p>
                     <p className="font-medium text-gray-900 dark:text-white">
                       {quote.dataInicio} - {quote.dataFim}
                     </p>
@@ -547,13 +547,13 @@ export default function QuoteEditView({
             {/* Lista de Produtos */}
             <Card className="p-6">
               <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                Produtos da Cotação
+                Produtos da CotaÃ§Ã£o
               </h3>
               <div className="space-y-3">
                 {products.map((product: any, index: number) => (
                   <div
                     key={product.product_id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+                    className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-border dark:border-white/5"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -573,7 +573,7 @@ export default function QuoteEditView({
                     <Badge variant="outline">
                       {(() => {
                         const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-                        return bestPrice > 0 ? `R$ ${bestPrice.toFixed(2)}` : "Sem preço";
+                        return bestPrice > 0 ? `R$ ${bestPrice.toFixed(2)}` : "Sem preÃ§o";
                       })()}
                     </Badge>
                   </div>
@@ -590,7 +590,7 @@ export default function QuoteEditView({
                 {quote.fornecedoresParticipantes.map((fornecedor) => (
                   <div
                     key={fornecedor.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+                    className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-border dark:border-white/5"
                   >
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">
@@ -644,7 +644,7 @@ export default function QuoteEditView({
                   <div className="grid grid-cols-12 gap-4 px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg font-medium text-sm text-gray-700 dark:text-gray-300">
                     <div className="col-span-5">Produto</div>
                     <div className="col-span-2 text-center">Quantidade</div>
-                    <div className="col-span-2 text-center">Melhor Preço</div>
+                    <div className="col-span-2 text-center">Melhor PreÃ§o</div>
                     <div className="col-span-3 text-center">Valor Oferecido</div>
                   </div>
 
@@ -661,7 +661,7 @@ export default function QuoteEditView({
                           "grid grid-cols-12 gap-4 p-4 rounded-lg border transition-all",
                           isBestSupplier
                             ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700"
-                            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                            : "bg-white dark:bg-gray-800 border-border dark:border-white/5"
                         )}
                       >
                         <div className="col-span-5 flex items-center">
@@ -690,7 +690,7 @@ export default function QuoteEditView({
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent>
-                                {isBestSupplier ? "Você tem o melhor preço!" : "Menor preço entre fornecedores"}
+                                {isBestSupplier ? "VocÃª tem o melhor preÃ§o!" : "Menor preÃ§o entre fornecedores"}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -778,7 +778,7 @@ export default function QuoteEditView({
                     Converter em Pedido
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Transforme esta cotação em um ou mais pedidos de compra
+                    Transforme esta cotaÃ§Ã£o em um ou mais pedidos de compra
                   </p>
                 </div>
 
@@ -808,7 +808,7 @@ export default function QuoteEditView({
 
                 {quote.status === "finalizada" && (
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-                    Esta cotação já foi convertida em pedido
+                    Esta cotaÃ§Ã£o jÃ¡ foi convertida em pedido
                   </p>
                 )}
               </div>
@@ -857,3 +857,4 @@ export default function QuoteEditView({
     </CSSSlideIn>
   );
 }
+

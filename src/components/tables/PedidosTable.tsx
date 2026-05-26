@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+﻿import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ShoppingCart, Building2, Package, Calendar, DollarSign, Eye, Edit, Trash2, Truck } from "lucide-react";
@@ -61,7 +61,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                 Valor
               </div>
             </TableHead>
-            <TableHead className="text-right table-header py-4 px-6">Ações</TableHead>
+            <TableHead className="text-right table-header py-4 px-6">AÃ§Ãµes</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,7 +69,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
             <TableRow 
               key={pedido.id}
               className={cn(
-                "sm:hover:bg-accent/50 border-b border-border",
+                "sm:hover:bg-accent/50 border-b border-border dark:border-white/5",
                 index % 2 === 0 ? "bg-card" : "bg-muted/30"
               )}
             >

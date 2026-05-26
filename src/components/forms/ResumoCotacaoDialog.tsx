@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+﻿import { useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     const currentPrice = item.valor_oferecido;
     const initialPrice = item.valor_inicial;
     
-    // Inicia a sequência com o valor inicial (primeiro de todos)
+    // Inicia a sequÃªncia com o valor inicial (primeiro de todos)
     const sequencePrices: number[] = [];
     if (initialPrice > 0) {
       sequencePrices.push(initialPrice);
@@ -67,7 +67,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     
     const seq = [...history].sort((a: any, b: any) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
     seq.forEach((h: any) => {
-      // Evita duplicar o valor inicial se ele já estiver na sequência
+      // Evita duplicar o valor inicial se ele jÃ¡ estiver na sequÃªncia
       if (sequencePrices.length === 0 || sequencePrices[sequencePrices.length - 1] !== h.old_price) {
         sequencePrices.push(h.old_price);
       }
@@ -183,7 +183,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     return economia;
   }, [produtosComVencedor]);
 
-  // Economia capturada: valor_inicial do vencedor - valor_final do vencedor × quantidade
+  // Economia capturada: valor_inicial do vencedor - valor_final do vencedor Ã— quantidade
   const totalEconomiaCalculada = useMemo(() => {
     return produtosComVencedor.reduce((sum, p) => {
       const winnerOffer = (p.allOffers || []).find((o: any) => o.isWinner);
@@ -231,7 +231,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
   const getReportHTMLOpts = () => ({
     quoteId: safeStr(quote.id),
     dateLabel: safeStr(quote.dataInicio),
-    companyName: company?.name || "MERCADÃO NOVO BOI JOÃO DIAS",
+    companyName: company?.name || "MERCADÃƒO NOVO BOI JOÃƒO DIAS",
     totalProdutos: products.length,
     totalFornecedores: fornecedores.length,
     fornecedoresRespondidos,
@@ -306,16 +306,16 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           company?.id
         ),
         {
-          loading: 'Enviando relatório completo para WhatsApp...',
+          loading: 'Enviando relatÃ³rio completo para WhatsApp...',
           success: (res: any) => {
             if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
-            return 'Relatório enviado com sucesso via WhatsApp!';
+            return 'RelatÃ³rio enviado com sucesso via WhatsApp!';
           },
           error: (err) => `Falha no envio: ${err.message}`
         }
       );
     } catch (error: any) {
-      toast.error("Erro ao capturar relatório: " + error.message);
+      toast.error("Erro ao capturar relatÃ³rio: " + error.message);
     } finally {
       setIsCapturing(false);
     }
@@ -332,7 +332,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("Relatório HTML baixado com sucesso!");
+    toast.success("RelatÃ³rio HTML baixado com sucesso!");
   };
 
   const handleSendScreenshot = async () => {
@@ -363,17 +363,17 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       });
 
       const base64Image = canvas.toDataURL("image/jpeg", 0.9);
-      const targetPhone = prompt("Número do WhatsApp (com DDD):", "");
+      const targetPhone = prompt("NÃºmero do WhatsApp (com DDD):", "");
       if (!targetPhone) { setIsCapturing(false); return; }
 
       const cleanPhone = targetPhone.replace(/\D/g, '');
       const result = await sendWhatsAppMedia(
         cleanPhone,
         base64Image,
-        `📊 *Relatório de Negociação - Cotação #${safeStr(quote.id).slice(0, 8)}*\n\n_Documento oficial de compras._`
+        `ðŸ“Š *RelatÃ³rio de NegociaÃ§Ã£o - CotaÃ§Ã£o #${safeStr(quote.id).slice(0, 8)}*\n\n_Documento oficial de compras._`
       );
 
-      if (result.success) toast.success("Relatório enviado!");
+      if (result.success) toast.success("RelatÃ³rio enviado!");
       else throw new Error(result.error);
     } catch (error: any) {
       toast.error("Erro ao enviar: " + error.message);
@@ -392,7 +392,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           </div>
           <div className="flex flex-col min-w-0">
             <h2 className="text-sm md:text-base font-black text-foreground tracking-tight leading-none mb-1 truncate">
-              Resumo da Negociação
+              Resumo da NegociaÃ§Ã£o
             </h2>
             <span className="hidden sm:inline text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">
               #{safeStr(quote.id).substring(0, 8)}
@@ -403,7 +403,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
           {/* View Toggle */}
           {!isCapturing && (
-            <div className="flex p-0.5 bg-muted rounded-lg border border-border/50 mr-1 md:mr-2">
+            <div className="flex p-0.5 bg-muted rounded-lg border border-border dark:border-white/5/50 mr-1 md:mr-2">
               <button
                 onClick={() => setViewMode("winners")}
                 className={cn(
@@ -458,14 +458,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           
           {/* Stats Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-            <div className="bg-card border border-border rounded-xl p-2.5 md:p-3">
+            <div className="bg-card border border-border dark:border-white/5 rounded-xl p-2.5 md:p-3">
               <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
                 <div className="p-1 bg-brand/10 rounded-md"><Sparkles className="h-2.5 w-2.5 md:h-3 md:w-3 text-brand" /></div>
                 <span className="text-[7px] md:text-[8px] font-black text-muted-foreground uppercase tracking-widest">Status</span>
               </div>
               <Badge className="bg-brand/10 text-brand border-brand/20 font-black text-[8px] md:text-[9px] uppercase tracking-widest px-1.5 py-0">{quote.status}</Badge>
             </div>
-            <div className="bg-card border border-border rounded-xl p-2.5 md:p-3">
+            <div className="bg-card border border-border dark:border-white/5 rounded-xl p-2.5 md:p-3">
               <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
                 <div className="p-1 bg-muted rounded-md"><Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-muted-foreground" /></div>
                 <span className="text-[7px] md:text-[8px] font-black text-muted-foreground uppercase tracking-widest">Respondentes</span>
@@ -492,7 +492,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             </div>
           </div>
 
-          <div className="bg-muted/30 border border-border rounded-2xl p-5">
+          <div className="bg-muted/30 border border-border dark:border-white/5 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="text-[10px] font-black text-foreground uppercase tracking-tight flex items-center gap-2">
@@ -548,8 +548,8 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             {viewMode === "winners" ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {groupedProdutosPorVencedor.map(([supplierName, items]) => (
-                  <div key={supplierName} className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-                    <div className="bg-muted/40 px-4 py-3 flex items-center justify-between border-b border-border">
+                  <div key={supplierName} className="bg-card rounded-2xl border border-border dark:border-white/5 shadow-sm overflow-hidden">
+                    <div className="bg-muted/40 px-4 py-3 flex items-center justify-between border-b border-border dark:border-white/5">
                       <div className="flex items-center gap-3">
                         <div className="w-7 h-7 bg-brand/10 border border-brand/20 rounded-lg flex items-center justify-center text-brand">
                           <Building2 className="h-3.5 w-3.5" />
@@ -571,7 +571,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                             <div>
                               <p className="text-xs font-bold text-foreground uppercase truncate max-w-[200px] sm:max-w-md">{p.productName}</p>
                               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight">
-                                {p.quantidade} {p.unidade} • {formatCurrency(p.bestPrice)} / {p.unidade}
+                                {p.quantidade} {p.unidade} â€¢ {formatCurrency(p.bestPrice)} / {p.unidade}
                               </p>
                             </div>
                           </div>
@@ -587,8 +587,8 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
             ) : (
               <div className="space-y-4">
                 {produtosComVencedor.map((p, idx) => (
-                  <div key={p.productId} className="bg-card rounded-xl border border-border shadow-sm overflow-hidden transition-all hover:border-brand/40 group">
-                    <div className="bg-muted/50 px-5 py-3 flex items-center justify-between border-b border-border/60">
+                  <div key={p.productId} className="bg-card rounded-xl border border-border dark:border-white/5 shadow-sm overflow-hidden transition-all hover:border-brand/40 group">
+                    <div className="bg-muted/50 px-5 py-3 flex items-center justify-between border-b border-border dark:border-white/5/60">
                       <div className="flex items-center gap-4">
                         <div className="w-8 h-8 bg-zinc-950 dark:bg-zinc-900 rounded-lg flex items-center justify-center text-brand font-black text-xs border border-zinc-800 shadow-inner">
                           {idx + 1}
@@ -612,14 +612,14 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     </div>
                     
                     <div className="grid grid-cols-1">
-                      <div className="grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 px-3 md:px-5 py-2 bg-muted/20 border-b border-border/40">
+                      <div className="grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 px-3 md:px-5 py-2 bg-muted/20 border-b border-border dark:border-white/5/40">
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest truncate">Fornecedor</span>
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Unitário</span>
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">UnitÃ¡rio</span>
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Total</span>
                       </div>
                       {p.allOffers.map((offer, oIdx) => (
                         <div key={offer.supplierId} className={cn(
-                          "px-3 md:px-5 py-2.5 grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 items-center transition-all border-b border-border/20 last:border-0",
+                          "px-3 md:px-5 py-2.5 grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 items-center transition-all border-b border-border dark:border-white/5/20 last:border-0",
                           offer.isWinner 
                             ? "bg-brand/5 dark:bg-brand/10" 
                             : "bg-background hover:bg-muted/30"
@@ -684,11 +684,11 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent
-          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background border-t border-border"
+          className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background border-t border-border dark:border-white/5"
           style={{ height: '95vh', maxHeight: '95vh' }}
         >
-          <DrawerTitle className="sr-only">Resumo da Negociação</DrawerTitle>
-          <DrawerDescription className="sr-only">Relatório de negociação da cotação</DrawerDescription>
+          <DrawerTitle className="sr-only">Resumo da NegociaÃ§Ã£o</DrawerTitle>
+          <DrawerDescription className="sr-only">RelatÃ³rio de negociaÃ§Ã£o da cotaÃ§Ã£o</DrawerDescription>
           {modalContent}
         </DrawerContent>
       </Drawer>
@@ -697,11 +697,12 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1100px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border/50 bg-card rounded-2xl shadow-2xl">
-        <DialogTitle className="sr-only">Resumo da Negociação</DialogTitle>
-        <DialogDescription className="sr-only">Relatório de negociação da cotação</DialogDescription>
+      <DialogContent className="max-w-[1100px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
+        <DialogTitle className="sr-only">Resumo da NegociaÃ§Ã£o</DialogTitle>
+        <DialogDescription className="sr-only">RelatÃ³rio de negociaÃ§Ã£o da cotaÃ§Ã£o</DialogDescription>
         {modalContent}
       </DialogContent>
     </Dialog>
   );
 }
+

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+﻿import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchInput } from "@/components/ui/search-input";
 import {
@@ -72,7 +72,7 @@ export default function Anotacoes() {
             </div>
             <div>
               <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                Anotações
+                AnotaÃ§Ãµes
               </h1>
               <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
                 Gerencie suas tarefas e lembretes de forma simples
@@ -99,7 +99,7 @@ export default function Anotacoes() {
                   className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto font-bold dark:text-white")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Criar Anotação
+                  Criar AnotaÃ§Ã£o
                 </Button>
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function Anotacoes() {
                 {pinnedNotes.length > 0 && (
                   <div className="flex items-center gap-2">
                     <StickyNote className="h-4 w-4 text-muted-foreground" />
-                    <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Outras Anotações</h2>
+                    <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Outras AnotaÃ§Ãµes</h2>
                   </div>
                 )}
                 <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }}>
@@ -215,7 +215,7 @@ export default function Anotacoes() {
                   <p className="text-sm text-muted-foreground">
                     {searchQuery 
                       ? "Tente buscar por outro termo ou limpe o filtro." 
-                      : "Crie uma nova anotação para começar a organizar suas tarefas."}
+                      : "Crie uma nova anotaÃ§Ã£o para comeÃ§ar a organizar suas tarefas."}
                   </p>
                 </div>
                 {!searchQuery && (
@@ -225,7 +225,7 @@ export default function Anotacoes() {
                     className="mt-4"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Nova Anotação
+                    Nova AnotaÃ§Ã£o
                   </Button>
                 )}
               </div>
@@ -235,13 +235,13 @@ export default function Anotacoes() {
 
         {/* Resolved Section */}
         {finalResolvedNotes && finalResolvedNotes.length > 0 && (
-          <div className="pt-12 mt-12 border-t border-border">
+          <div className="pt-12 mt-12 border-t border-border dark:border-white/5">
             <div className="flex items-center gap-3 mb-6">
               <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h2 className={cn(ds.typography.size.lg, "font-semibold text-foreground")}>
-                Concluídas ({finalResolvedNotes.length})
+                ConcluÃ­das ({finalResolvedNotes.length})
               </h2>
             </div>
             
@@ -271,4 +271,5 @@ export default function Anotacoes() {
     </PageWrapper>
   );
 }
+
 

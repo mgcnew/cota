@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect, useCallback } from "react";
+﻿import { useState, useRef, useMemo, useEffect, useCallback } from "react";
 import { Package } from "lucide-react";
 console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
 import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Power, Send, CheckCircle2, Loader2 } from "lucide-react";
@@ -76,7 +76,7 @@ export function QuoteValuesTab({
   const [showMobileValues, setShowMobileValues] = useState(false);
   const [editedQtdPerBox, setEditedQtdPerBox] = useState<Record<string, string>>({});
   
-  // Agrupamento de cotações
+  // Agrupamento de cotaÃ§Ãµes
   const [otherOpenQuotes, setOtherOpenQuotes] = useState<any[]>([]);
   const [useGroupedLink, setUseGroupedLink] = useState(false);
 
@@ -86,7 +86,7 @@ export function QuoteValuesTab({
   const [showGroupConfirm, setShowGroupConfirm] = useState(false);
   const [pendingBulkSend, setPendingBulkSend] = useState(false);
 
-  // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
+  // Helper para formatar string de digitaÃ§Ã£o para Real (ex: "1250" -> "12,50")
   const formatInputToBRL = (value: string) => {
     const digitOnly = value.replace(/\D/g, "");
     if (!digitOnly) return "";
@@ -97,14 +97,14 @@ export function QuoteValuesTab({
     });
   };
 
-  // Helper para converter string formatada em número (ex: "1.250,50" -> 1250.5)
+  // Helper para converter string formatada em nÃºmero (ex: "1.250,50" -> 1250.5)
   const parseBRLToNumber = (value: string) => {
     return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
   };
 
   useEffect(() => {
-    // Seleciona o primeiro fornecedor apenas se não houver um selecionado
-    // e se a lista de fornecedores estiver disponível
+    // Seleciona o primeiro fornecedor apenas se nÃ£o houver um selecionado
+    // e se a lista de fornecedores estiver disponÃ­vel
     if (fornecedores.length > 0 && !selectedSupplier) {
       const firstId = fornecedores[0]?.id;
       if (firstId) {
@@ -120,7 +120,7 @@ export function QuoteValuesTab({
     }
   }, [editingProductId]);
 
-  // Busca se esse fornecedor está em outras cotações "ativas"
+  // Busca se esse fornecedor estÃ¡ em outras cotaÃ§Ãµes "ativas"
   useEffect(() => {
     setOtherOpenQuotes([]);
     setUseGroupedLink(false);
@@ -128,7 +128,7 @@ export function QuoteValuesTab({
     const fetchOtherQuotes = async () => {
       if (!selectedSupplier || !quoteId) return;
 
-      console.log("🔍 [QuoteValues] Scanning other quotes for supplier:", selectedSupplier);
+      console.log("ðŸ” [QuoteValues] Scanning other quotes for supplier:", selectedSupplier);
 
       try {
         const { data, error } = await supabase
@@ -147,11 +147,11 @@ export function QuoteValuesTab({
           .in('quotes.status', ['ativa', 'ativo', 'aberto', 'pendente']);
 
         if (error) {
-          console.error("❌ [QuoteValues] Error fetching other quotes:", error);
+          console.error("âŒ [QuoteValues] Error fetching other quotes:", error);
           return;
         }
 
-        console.log("📊 [QuoteValues] Other quotes found for supplier:", data);
+        console.log("ðŸ“Š [QuoteValues] Other quotes found for supplier:", data);
 
         const formatted = (data || []).map((q: any) => {
           const quoteInfo = Array.isArray(q.quotes) ? q.quotes[0] : q.quotes;
@@ -162,10 +162,10 @@ export function QuoteValuesTab({
           };
         }).filter(q => q.token);
         
-        console.log("✅ [QuoteValues] Formatted other quotes with tokens:", formatted);
+        console.log("âœ… [QuoteValues] Formatted other quotes with tokens:", formatted);
         setOtherOpenQuotes(formatted);
       } catch (err) {
-        console.error("❌ [QuoteValues] Unexpected error scanning quotes:", err);
+        console.error("âŒ [QuoteValues] Unexpected error scanning quotes:", err);
       }
     };
 
@@ -201,7 +201,7 @@ export function QuoteValuesTab({
       const newValue = parseBRLToNumber(editedValues[productId]);
       const qtdPerBox = editedQtdPerBox[productId] ? parseInt(editedQtdPerBox[productId], 10) : undefined;
 
-      // Atualização otimista: avança para o próximo campo IMEDIATAMENTE
+      // AtualizaÃ§Ã£o otimista: avanÃ§a para o prÃ³ximo campo IMEDIATAMENTE
       if (nextProductId) {
         const nextVal = getSupplierProductValue(selectedSupplier, nextProductId);
         setEditingProductId(nextProductId);
@@ -242,8 +242,8 @@ export function QuoteValuesTab({
   const handleRemoveItem = useCallback(async (productId: string) => {
     if (!selectedSupplier || isReadOnly) return;
     
-    // Confirmação simples
-    if (!window.confirm("Deseja realmente remover este produto deste fornecedor? Ele não verá mais este item no portal.")) {
+    // ConfirmaÃ§Ã£o simples
+    if (!window.confirm("Deseja realmente remover este produto deste fornecedor? Ele nÃ£o verÃ¡ mais este item no portal.")) {
       return;
     }
 
@@ -293,7 +293,7 @@ export function QuoteValuesTab({
 
   const filteredProducts = useMemo(() => {
     if (!productSearch) return products;
-    // Pega tanto o nome do produto quanto algo relacionado se necessário
+    // Pega tanto o nome do produto quanto algo relacionado se necessÃ¡rio
     return products.filter((p: any) => p.product_name.toLowerCase().includes(productSearch.toLowerCase()));
   }, [products, productSearch]);
 
@@ -304,7 +304,7 @@ export function QuoteValuesTab({
   
   const getShortLink = async (originalTokens: string) => {
     try {
-      // 1. Verifica se já existe um link para esses tokens
+      // 1. Verifica se jÃ¡ existe um link para esses tokens
       const { data: existing } = await supabase
         .from('short_links')
         .select('id')
@@ -313,7 +313,7 @@ export function QuoteValuesTab({
         
       if (existing) return existing.id;
       
-      // 2. Se não existir, cria um novo código curto de 6 dígitos
+      // 2. Se nÃ£o existir, cria um novo cÃ³digo curto de 6 dÃ­gitos
       const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
       
       const { error } = await supabase
@@ -335,13 +335,13 @@ export function QuoteValuesTab({
   const handleWhatsApp = async (e: React.MouseEvent, supplierId: string, supplierName: string, contactPerson?: string, phone?: string, accessToken?: string) => {
     e.stopPropagation();
     
-    // Busca o fornecedor correto pelo ID passado (não depende do state selectedSupplier)
+    // Busca o fornecedor correto pelo ID passado (nÃ£o depende do state selectedSupplier)
     const targetSupplier = fornecedores.find((f: any) => f.id === supplierId);
     const configured = isWhatsAppConfigured();
     
     if (configured && phone) {
       try {
-        toast({ title: "Enviando cotação para o WhatsApp...", description: `Para: ${contactPerson || supplierName}` });
+        toast({ title: "Enviando cotaÃ§Ã£o para o WhatsApp...", description: `Para: ${contactPerson || supplierName}` });
         // Prioritize the salesperson's name for the message greeting
         const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
         let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
@@ -364,9 +364,9 @@ export function QuoteValuesTab({
           }
           
           if (useGroupedLink && otherOpenQuotes.length > 0) {
-            msg += `🛡️ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
+            msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link Ãºnico reunindo tudo o que precisamos cotar agora.`;
           } else {
-            msg += `🛡️ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
+            msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
           }
         }
         
@@ -377,7 +377,7 @@ export function QuoteValuesTab({
         console.log('[WhatsApp DEBUG] Resultado:', JSON.stringify(result));
         
         if (result.success) {
-          toast({ title: "✅ Cotação enviada com sucesso!", variant: "default" });
+          toast({ title: "âœ… CotaÃ§Ã£o enviada com sucesso!", variant: "default" });
           setSentSuppliers(prev => ({ ...prev, [supplierId]: true }));
         } else {
           throw new Error(result.error || "Erro desconhecido");
@@ -386,12 +386,12 @@ export function QuoteValuesTab({
         console.error("[WhatsApp DEBUG] Erro no envio via API:", error);
         toast({ 
           title: "Erro ao enviar via API", 
-          description: error?.message || "Erro de validação ou conexão",
+          description: error?.message || "Erro de validaÃ§Ã£o ou conexÃ£o",
           variant: "destructive" 
         });
       }
     } else {
-      console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
+      console.log('[WhatsApp DEBUG] âŒ Caiu no modo MANUAL (wa.me link)');
       const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
       let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
 
@@ -410,9 +410,9 @@ export function QuoteValuesTab({
         }
         
         if (useGroupedLink && otherOpenQuotes.length > 0) {
-          msg += `🛡️ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
+          msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link Ãºnico reunindo tudo o que precisamos cotar agora.`;
         } else {
-          msg += `🛡️ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
+          msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
         }
       }
 
@@ -472,11 +472,11 @@ export function QuoteValuesTab({
 
     if (successCount > 0) {
       toast({
-        title: `✅ ${successCount} cotação${successCount > 1 ? 'ões' : ''} enviada${successCount > 1 ? 's' : ''}!`,
+        title: `âœ… ${successCount} cotaÃ§Ã£o${successCount > 1 ? 'Ãµes' : ''} enviada${successCount > 1 ? 's' : ''}!`,
         description: failCount > 0 ? `${failCount} falha${failCount > 1 ? 's' : ''} no envio.` : undefined,
       });
     } else if (failCount > 0) {
-      toast({ title: "❌ Nenhuma cotação foi enviada.", variant: "destructive" });
+      toast({ title: "âŒ Nenhuma cotaÃ§Ã£o foi enviada.", variant: "destructive" });
     }
   }, [isSendingAll, linkSuppliers, sentSuppliers, handleWhatsApp, useGroupedLink, toast]);
 
@@ -493,7 +493,7 @@ export function QuoteValuesTab({
 
   return (
     <>
-    {/* AlertDialog para confirmação de agrupamento */}
+    {/* AlertDialog para confirmaÃ§Ã£o de agrupamento */}
     <AlertDialog open={showGroupConfirm} onOpenChange={setShowGroupConfirm}>
       <AlertDialogContent className="rounded-2xl border-border/50 shadow-2xl max-w-md">
         <AlertDialogHeader>
@@ -502,9 +502,9 @@ export function QuoteValuesTab({
             Agrupar Links?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
-            Este fornecedor possui <strong className="text-foreground">{otherOpenQuotes.length} outra{otherOpenQuotes.length > 1 ? 's' : ''} cotação{otherOpenQuotes.length > 1 ? 'ões' : ''}</strong> ativa{otherOpenQuotes.length > 1 ? 's' : ''}.
+            Este fornecedor possui <strong className="text-foreground">{otherOpenQuotes.length} outra{otherOpenQuotes.length > 1 ? 's' : ''} cotaÃ§Ã£o{otherOpenQuotes.length > 1 ? 'Ãµes' : ''}</strong> ativa{otherOpenQuotes.length > 1 ? 's' : ''}.
             <br /><br />
-            Deseja enviar um <strong className="text-amber-600">link unificado</strong> para que o fornecedor responda todas as cotações em uma única tela?
+            Deseja enviar um <strong className="text-amber-600">link unificado</strong> para que o fornecedor responda todas as cotaÃ§Ãµes em uma Ãºnica tela?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-2">
@@ -530,7 +530,7 @@ export function QuoteValuesTab({
       <div className={cn(
         "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10 h-full",
       )}>
-        <div className="p-3 border-b border-border/50 bg-card/50">
+        <div className="p-3 border-b border-border dark:border-white/5/50 bg-card/50">
           <div className="flex items-center gap-2 mb-3">
             <Building2 className="h-4 w-4 text-zinc-400" />
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
@@ -603,7 +603,7 @@ export function QuoteValuesTab({
                         "text-[8px] font-black uppercase tracking-tighter",
                         fornecedor.status === 'respondido' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
                       )}>
-                        {fornecedor.status === 'respondido' ? "📲 VIA PORTAL" : "Pendente"}
+                        {fornecedor.status === 'respondido' ? "ðŸ“² VIA PORTAL" : "Pendente"}
                       </span>
                     </div>
                     <div
@@ -621,7 +621,7 @@ export function QuoteValuesTab({
                             ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
                             : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
                       )}
-                      title={sentSuppliers[fornecedor.id] ? "✅ Cotação já enviada" : "Enviar Cotação via WhatsApp"}
+                      title={sentSuppliers[fornecedor.id] ? "âœ… CotaÃ§Ã£o jÃ¡ enviada" : "Enviar CotaÃ§Ã£o via WhatsApp"}
                     >
                       {sentSuppliers[fornecedor.id] 
                         ? <CheckCircle2 className="h-3 w-3" />
@@ -655,13 +655,13 @@ export function QuoteValuesTab({
           )}
         </div>
       </div>
-      {/* Área Principal - Valores (Desktop) */}
+      {/* Ãrea Principal - Valores (Desktop) */}
       {!isMobile && (
         <div className="flex-1 flex flex-col bg-background overflow-hidden">
 
         {selectedSupplier ? (
           <>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border/50 bg-card/50 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border dark:border-white/5/50 bg-card/50 flex-shrink-0">
               <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
                 <div className="p-2 rounded-xl bg-brand/10 flex-shrink-0">
                   <Building2 className="h-5 w-5 text-brand" />
@@ -672,7 +672,7 @@ export function QuoteValuesTab({
                 </div>
               </div>
 
-              {/* Botão "Enviar Todos" via Link */}
+              {/* BotÃ£o "Enviar Todos" via Link */}
               {linkSuppliers.length > 1 && (
                 <div className="hidden lg:flex items-center gap-2 mr-4 animate-in slide-in-from-right-4">
                   <TooltipProvider>
@@ -706,7 +706,7 @@ export function QuoteValuesTab({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="bg-zinc-900 text-white border-zinc-800 text-xs max-w-xs shadow-xl rounded-xl">
-                        Envia a cotação via WhatsApp para todos os {linkSuppliers.length} fornecedores com link ativo
+                        Envia a cotaÃ§Ã£o via WhatsApp para todos os {linkSuppliers.length} fornecedores com link ativo
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -716,7 +716,7 @@ export function QuoteValuesTab({
               {otherOpenQuotes.length > 0 && (
                 <div className="hidden lg:flex items-center gap-3 mr-6 animate-in slide-in-from-right-4">
                   <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800 text-[10px] font-black uppercase tracking-tighter">
-                    {otherOpenQuotes.length} vínculo{otherOpenQuotes.length > 1 ? 's' : ''} encontrado{otherOpenQuotes.length > 1 ? 's' : ''}
+                    {otherOpenQuotes.length} vÃ­nculo{otherOpenQuotes.length > 1 ? 's' : ''} encontrado{otherOpenQuotes.length > 1 ? 's' : ''}
                   </Badge>
                   <TooltipProvider>
                     <Tooltip>
@@ -735,7 +735,7 @@ export function QuoteValuesTab({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="bg-amber-900 text-white border-amber-800 text-xs max-w-xs shadow-xl rounded-xl">
-                        As outras cotações serão resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
+                        As outras cotaÃ§Ãµes serÃ£o resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -778,7 +778,7 @@ export function QuoteValuesTab({
                 <div className="flex items-center gap-2">
                   <LinkIcon className="h-3.5 w-3.5 text-amber-600" />
                   <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-tight">
-                    {otherOpenQuotes.length} cotação{otherOpenQuotes.length > 1 ? 's' : ''} extra{otherOpenQuotes.length > 1 ? 's' : ''}
+                    {otherOpenQuotes.length} cotaÃ§Ã£o{otherOpenQuotes.length > 1 ? 's' : ''} extra{otherOpenQuotes.length > 1 ? 's' : ''}
                   </span>
                 </div>
                 <button 
@@ -796,13 +796,13 @@ export function QuoteValuesTab({
             )}
 
             {!isMobile && (
-              <div className="px-6 py-3 border-b border-border/50 bg-muted/30 flex-shrink-0">
+              <div className="px-6 py-3 border-b border-border dark:border-white/5/50 bg-muted/30 flex-shrink-0">
                   <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
                     <div className="w-10" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">Negociação e Valor</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">NegociaÃ§Ã£o e Valor</span>
                     <div className="w-10" />
                   </div>
               </div>
@@ -947,7 +947,7 @@ export function QuoteValuesTab({
                               />
                               <p className="text-[10px] font-bold text-zinc-500 uppercase">
                                 {product.quantidade} {product.unidade}
-                                {isBest && <span className="ml-2 text-brand font-black">🏆</span>}
+                                {isBest && <span className="ml-2 text-brand font-black">ðŸ†</span>}
                               </p>
                             </div>
                           )}
@@ -965,7 +965,7 @@ export function QuoteValuesTab({
                         <div className="flex items-center justify-end gap-2 pr-2">
                           {currentValue > 0 ? (
                             <div className="flex items-center gap-3">
-                              {/* Melhor Preço Indicator */}
+                              {/* Melhor PreÃ§o Indicator */}
                               <div className="w-5 flex justify-center">
                                 {isBest && (
                                   <TooltipProvider delayDuration={100}>
@@ -975,13 +975,13 @@ export function QuoteValuesTab({
                                           <Trophy className="h-3 w-3" />
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent className="bg-brand text-black font-black text-[10px] uppercase border-none shadow-xl"> Melhor Preço Garantido </TooltipContent>
+                                      <TooltipContent className="bg-brand text-black font-black text-[10px] uppercase border-none shadow-xl"> Melhor PreÃ§o Garantido </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 )}
                               </div>
 
-                              {/* Preço Principal */}
+                              {/* PreÃ§o Principal */}
                               <p className={cn(
                                 "text-[14px] font-black tracking-tight w-[75px] text-right",
                                 isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100"
@@ -989,7 +989,7 @@ export function QuoteValuesTab({
                                 {formatCurrency(currentValue)}
                               </p>
 
-                              {/* Ícone de Origem */}
+                              {/* Ãcone de Origem */}
                               <div className="w-6 flex justify-center">
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
@@ -1017,7 +1017,7 @@ export function QuoteValuesTab({
                                 })()}
                               </div>
 
-                              {/* Histórico */}
+                              {/* HistÃ³rico */}
                               <div className="w-6 flex justify-center">
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
@@ -1036,7 +1036,7 @@ export function QuoteValuesTab({
                                           <div className="bg-zinc-900 text-white p-3 border-b border-white/10 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                               <History className="h-4 w-4 text-brand" />
-                                              <span className="text-[11px] font-black uppercase tracking-widest leading-none">Negociação</span>
+                                              <span className="text-[11px] font-black uppercase tracking-widest leading-none">NegociaÃ§Ã£o</span>
                                             </div>
                                             <Badge className="bg-white/10 text-white/70 border-none text-[10px] font-black h-5 px-1.5">
                                               {historyArray.length} etapas
@@ -1103,8 +1103,8 @@ export function QuoteValuesTab({
                             </div>
                           ) : (
                             <div className="text-right w-[150px]">
-                              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-                                Não Cotado
+                              <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-border dark:border-white/5 bg-zinc-50 dark:bg-zinc-900">
+                                NÃ£o Cotado
                               </Badge>
                             </div>
                           )}
@@ -1132,7 +1132,7 @@ export function QuoteValuesTab({
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
             <Building2 className="h-12 w-12 text-zinc-400 mb-6" />
             <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase">Selecione um fornecedor</h3>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase max-w-[200px] mt-2 leading-relaxed">Clique em um fornecedor na lista ao lado para iniciar a negociação.</p>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase max-w-[200px] mt-2 leading-relaxed">Clique em um fornecedor na lista ao lado para iniciar a negociaÃ§Ã£o.</p>
           </div>
         )}
       </div>
@@ -1142,7 +1142,7 @@ export function QuoteValuesTab({
       {isMobile && (
         <Drawer open={showMobileValues && !!selectedSupplier} onOpenChange={setShowMobileValues}>
           <DrawerContent className="max-h-[95vh] flex flex-col bg-background">
-            <DrawerHeader className="border-b border-border/10 pb-4">
+            <DrawerHeader className="border-b border-border dark:border-white/5/10 pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 pr-2 overflow-hidden">
                   <div className="p-2 rounded-xl bg-brand/10 shrink-0">
@@ -1153,7 +1153,7 @@ export function QuoteValuesTab({
                       {currentSupplier?.nome}
                     </DrawerTitle>
                     <DrawerDescription className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-2">
-                       Negociação Direta
+                       NegociaÃ§Ã£o Direta
                        {currentSupplier?.phone && (
                           <span className="flex items-center gap-1 text-emerald-500">
                             <div className="h-1 w-1 rounded-full bg-emerald-500" />
@@ -1173,7 +1173,7 @@ export function QuoteValuesTab({
             </DrawerHeader>
 
             {/* Mobile Search inside Drawer */}
-            <div className="px-4 py-3 border-b border-border/10 shrink-0">
+            <div className="px-4 py-3 border-b border-border dark:border-white/5/10 shrink-0">
               <div className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 focus-within:text-brand transition-colors" />
                 <Input
@@ -1191,7 +1191,7 @@ export function QuoteValuesTab({
                     <div className="flex items-center gap-2">
                       <LinkIcon className="h-4 w-4 text-amber-600" />
                       <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-tight">
-                        {otherOpenQuotes.length} outras cotações vinculadas
+                        {otherOpenQuotes.length} outras cotaÃ§Ãµes vinculadas
                       </span>
                     </div>
                     <button 
@@ -1250,7 +1250,7 @@ export function QuoteValuesTab({
                         </div>
                         {isBest && (
                           <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full text-[10px] font-black shadow-lg shadow-brand/20">
-                            🏆
+                            ðŸ†
                           </div>
                         )}
                       </div>
@@ -1287,11 +1287,11 @@ export function QuoteValuesTab({
                         </div>
                       ) : (
                         <div 
-                          className="flex items-center justify-between bg-background/50 border border-border/30 rounded-xl p-3 cursor-pointer hover:border-brand/30 transition-colors"
+                          className="flex items-center justify-between bg-background/50 border border-border dark:border-white/5/30 rounded-xl p-3 cursor-pointer hover:border-brand/30 transition-colors"
                           onClick={() => handleStartEdit(product.product_id, currentValue)}
                         >
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Valor Unitário</span>
+                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Valor UnitÃ¡rio</span>
                             <span className={cn(
                               "text-lg font-black tracking-tight",
                               currentValue > 0 ? (isBest ? "text-brand" : "text-foreground") : "text-zinc-300"
@@ -1370,7 +1370,7 @@ export function QuoteValuesTab({
                 </div>
             </div>
 
-            <DrawerFooter className="border-t border-border/10 p-4 bg-card/30">
+            <DrawerFooter className="border-t border-border dark:border-white/5/10 p-4 bg-card/30">
               <div className="flex gap-3">
                 <DrawerClose asChild>
                   <Button variant="outline" className="flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest bg-background border-border shadow-sm">
@@ -1401,3 +1401,4 @@ export function QuoteValuesTab({
     </>
   );
 }
+
