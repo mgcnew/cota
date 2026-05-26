@@ -84,26 +84,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    options?: { metadata?: Record<string, unknown> },
+  ) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
+    // `data` is forwarded as raw_user_meta_data, which our DB trigger
+    // `handle_new_user` reads to decide whether to auto-create a company
+    // (skipped when the user is being invited).
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
-      }
+        emailRedirectTo: redirectUrl,
+        data: options?.metadata,
+      },
     });
-    
-    if (error) {
-      return { error };
-    }
-    
+
+    if (error) return { error };
+
     toast({
       title: "Conta criada com sucesso!",
       description: "Você já pode fazer login.",
     });
-    
     return { error: null };
   };
 

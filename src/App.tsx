@@ -7,7 +7,6 @@ import { ThemeProvider } from "next-themes";
 import { useEffect, lazy, Suspense, ReactNode } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { CompanyAutoSetup } from "./components/auth/CompanyAutoSetup";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
@@ -76,7 +75,6 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <CompanyAutoSetup />
               <Routes>
                 {/* Rotas públicas - lazy loaded with ErrorBoundary (Requirements 10.5, 12.1, 12.2) */}
                 <Route path="/" element={<PageWrapper><Landing /></PageWrapper>} />

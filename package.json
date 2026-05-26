@@ -16,11 +16,10 @@
     "check-mobile-imports": "node scripts/check-mobile-imports.js",
     "analyze-mobile": "npm run analyze-bundle && npm run check-mobile-imports",
     "test:mobile": "node scripts/test-mobile-performance.js",
-    "lighthouse:pedidos": "lighthouse http://localhost:8082/dashboard/pedidos --only-categories=performance --form-factor=mobile --output=html --output-path=./lighthouse-reports/pedidos.html",
+    "lighthouse:pedidos": "lighthouse http://localhost:8087/dashboard/pedidos --only-categories=performance --form-factor=mobile --output=html --output-path=./lighthouse-reports/pedidos.html",
     "lighthouse:all": "npm run test:mobile"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@iconify/react": "^6.0.2",
     "@radix-ui/react-accordion": "^1.2.11",
@@ -51,6 +50,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@supabase/supabase-js": "^2.58.0",
+    "@swc/core-win32-x64-msvc": "^1.15.40",
     "@tanstack/query-sync-storage-persister": "^5.99.0",
     "@tanstack/react-query": "^5.83.0",
     "@tanstack/react-query-persist-client": "^5.99.0",

@@ -5,7 +5,11 @@ export interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: any | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    options?: { metadata?: Record<string, unknown> },
+  ) => Promise<{ error: any | null }>;
   signIn: (email: string, password: string) => Promise<{ error: any | null }>;
   signOut: () => Promise<void>;
   forceReAuth: (reason: 'inactivity' | 'update' | 'security') => void;

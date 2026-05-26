@@ -61,6 +61,11 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom"],
   },
+  // Strip console.* and debugger statements from production bundle.
+  // Why: 116+ console.logs leaking IDs/tokens and hurting mobile perf.
+  esbuild: {
+    drop: mode === "production" ? ["console", "debugger"] : [],
+  },
   build: {
     rollupOptions: {
       output: {

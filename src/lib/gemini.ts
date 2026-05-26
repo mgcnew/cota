@@ -1,13 +1,19 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { supabase } from "@/integrations/supabase/client";
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+// Gemini is reached through the `gemini-proxy` edge function so the API key
+// stays server-side. We assume the proxy is deployed; if it isn't, calls fail
+// at runtime with a clear error.
+export const isGeminiConfigured = true;
 
-let genAI: GoogleGenerativeAI | null = null;
-if (GEMINI_API_KEY) {
-  genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+async function callGemini(prompt: string, model = "gemini-2.5-flash"): Promise<string> {
+  const { data, error } = await supabase.functions.invoke<{ text: string; error?: string }>(
+    "gemini-proxy",
+    { body: { prompt, model } },
+  );
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return data?.text ?? "";
 }
-
-export const isGeminiConfigured = !!genAI;
 
 // ==================== TIPOS ====================
 
@@ -287,14 +293,8 @@ export async function askGemini(
   userQuery: string,
   contextData: QueryContext
 ): Promise<string> {
-  if (!genAI) {
-    return "⚠️ Assistente não configurado. Verifique VITE_GEMINI_API_KEY no .env.";
-  }
-
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const contextStr = prepareContext(userQuery, contextData);
-
     const prompt = `${ASSISTANT_SYSTEM_PROMPT}
 
 ===== DADOS COMPLETOS DO SISTEMA =====
@@ -303,8 +303,8 @@ ${contextStr}
 
 Pergunta do Usuário: ${userQuery}`;
 
-    const result = await model.generateContent(prompt);
-    return result.response.text() || "Desculpe, não consegui processar sua pergunta.";
+    const text = await callGemini(prompt);
+    return text || "Desculpe, não consegui processar sua pergunta.";
   } catch (error: any) {
     console.error("[Gemini] Erro:", error);
     return `⚠️ Erro: ${error?.message || "Falha desconhecida"}`;
@@ -315,11 +315,7 @@ Pergunta do Usuário: ${userQuery}`;
 export async function generateExecutiveSummary(
   dashboardData: any
 ): Promise<string> {
-  if (!genAI) return "⚠️ Gemini API Key não configurada.";
-
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const prompt = `Você é um Analista de Dados de nível C-Level (Executivo).
 Abaixo estão os dados agregados de dashboard do setor de embalagens/cotações da empresa.
 
@@ -328,13 +324,13 @@ ${JSON.stringify(dashboardData)}
 \`\`\`
 
 Sua tarefa: Fornecer um "Resumo Executivo Rápido".
-Pule saudações genéricas. Crie 3 tópicos (bullet points) com os maiores "Insights". 
+Pule saudações genéricas. Crie 3 tópicos (bullet points) com os maiores "Insights".
 Aponte algo que passou despercebido. Não liste apenas números secos, interprete-os.
 NÃO use markdown de títulos (###). Use apenas texto plano, bullet points e emojis.
 Responda em português brasileiro.`;
 
-    const result = await model.generateContent(prompt);
-    return result.response.text() || "Nenhum resumo gerado.";
+    const text = await callGemini(prompt);
+    return text || "Nenhum resumo gerado.";
   } catch (error: any) {
     console.error("[Gemini] Erro resumo:", error);
     return `⚠️ Erro: ${error?.message || "Falha desconhecida"}`;
@@ -345,11 +341,7 @@ Responda em português brasileiro.`;
 export async function analyzeQuoteOptions(
   quoteData: any
 ): Promise<string> {
-  if (!genAI) return "⚠️ Gemini API Key não configurada.";
-
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
     const prompt = `Você é um Comprador Profissional analisando uma Cotação.
 Sua missão é olhar para a matriz de preços e sugerir a melhor decisão de compra.
 
@@ -367,8 +359,8 @@ REGRAS:
 6. Use R$ para os valores. Formate os números com ponto e vírgula separando milhares/decimais.
 7. Use emojis de forma moderada 💡, 💰, ⚠️.`;
 
-    const result = await model.generateContent(prompt);
-    return result.response.text() || "Não consegui gerar a análise, tente novamente.";
+    const text = await callGemini(prompt);
+    return text || "Não consegui gerar a análise, tente novamente.";
   } catch (error: any) {
     console.error("[Gemini] Erro análise cotação:", error);
     return `⚠️ Erro: ${error?.message || "Falha desconhecida"}`;

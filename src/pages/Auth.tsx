@@ -43,7 +43,10 @@ export default function Auth() {
 
   useEffect(() => {
     if (user) {
-      const redirectTo = searchParams.get("redirect") || "/dashboard";
+      // Sanitize redirect: only allow internal absolute paths (no protocol, no //)
+      const raw = searchParams.get("redirect");
+      const isSafe = !!raw && raw.startsWith("/") && !raw.startsWith("//");
+      const redirectTo = isSafe ? raw : "/dashboard";
       startTransition(() => {
         navigate(redirectTo, { replace: true });
       });

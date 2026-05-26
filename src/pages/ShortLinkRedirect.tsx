@@ -16,12 +16,10 @@ export default function ShortLinkRedirect() {
       }
 
       try {
-        console.log(`[ShortLink] Resolvendo código: ${id}`);
-        const { data, error } = await supabase
-          .from("short_links")
-          .select("original_tokens")
-          .eq("id", id)
-          .single();
+        // Goes through the RPC `resolve_short_link` (SECURITY DEFINER) so anon
+        // users cannot SELECT/scan the whole `short_links` table — only resolve
+        // a specific id.
+        const { data, error } = await supabase.rpc("resolve_short_link", { p_id: id });
 
         if (error || !data) {
           console.error("[ShortLink] Link não encontrado ou erro:", error);
@@ -29,7 +27,7 @@ export default function ShortLinkRedirect() {
           return;
         }
 
-        const tokens = data.original_tokens || "";
+        const tokens = (data as string) || "";
         
         if (tokens.startsWith("pkg_order_")) {
           const orderId = tokens.replace("pkg_order_", "");

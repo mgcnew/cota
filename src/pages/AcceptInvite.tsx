@@ -13,8 +13,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const signupSchema = z.object({
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "A senha deve ter no mínimo 6 caracteres"),
+  email: z.string().trim().email("Email inválido"),
+  password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "As senhas não coincidem",
@@ -102,8 +102,12 @@ export default function AcceptInvite() {
     try {
       // If user is not logged in, create account
       if (!user) {
-        const { error: signUpError } = await signUp(data.email, data.password);
-        
+        // `invited: true` tells the DB trigger to skip auto-creating a company
+        // — the user will be added to the inviting company below.
+        const { error: signUpError } = await signUp(data.email, data.password, {
+          metadata: { invited: true, invitation_company_id: invitation.company_id },
+        });
+
         if (signUpError) {
           toast.error("Erro ao criar conta", {
             description: signUpError.message,

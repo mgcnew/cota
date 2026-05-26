@@ -1,152 +1,43 @@
 /**
- * Utilitário para integração com a W-API de WhatsApp
+ * Cliente W-API — agora roteia tudo pela edge function `whatsapp-proxy`,
+ * para que o token nunca seja embutido no bundle do front.
  */
-
-const W_API_INSTANCE = import.meta.env.VITE_W_API_INSTANCE;
-const W_API_TOKEN = import.meta.env.VITE_W_API_TOKEN;
+import { supabase } from "@/integrations/supabase/client";
 
 interface SendMessageResponse {
-  message: string;
+  message?: string;
   status: number;
   data?: any;
   success?: boolean;
 }
 
-/**
- * Envia uma mensagem via W-API
- */
+async function invokeProxy(payload: Record<string, unknown>): Promise<SendMessageResponse> {
+  const { data, error } = await supabase.functions.invoke<{
+    status: number;
+    data: any;
+    error?: string;
+  }>("whatsapp-proxy", { body: payload });
+
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return {
+    status: data?.status ?? 200,
+    data: data?.data,
+    success: (data?.status ?? 0) >= 200 && (data?.status ?? 0) < 300,
+  };
+}
+
 export async function sendWhatsAppMessage(phone: string, message: string): Promise<SendMessageResponse> {
-  // 1. Limpar o número (apenas dígitos)
-  const cleanPhone = phone.replace(/\D/g, '');
-  
-  // 2. Garantir código do país (Brasil default)
-  const formattedPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
-
-  if (!W_API_TOKEN || W_API_TOKEN === "COLE_AQUI_O_TOKEN_DA_IMAGEM") {
-    throw new Error("W-API Token não configurado no .env");
-  }
-
-  // Usar o proxy em desenvolvimento para evitar erro de CORS e <!DOCTYPE (HTML)
-  const baseUrl = import.meta.env.PROD ? 'https://api.w-api.app' : '/whatsapp-api';
-  const endpoint = `${baseUrl}/v1/message/send-text${W_API_INSTANCE ? `?instanceId=${W_API_INSTANCE}` : ''}`;
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${W_API_TOKEN}`
-      },
-      body: JSON.stringify({
-        phone: formattedPhone,
-        message: message
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Erro ao enviar mensagem via W-API");
-    }
-
-    return data;
-  } catch (error: any) {
-    console.error("[W-API] Erro no envio:", error);
-    throw error;
-  }
+  return invokeProxy({ kind: "text", phone, message });
 }
 
-/**
- * Envia uma imagem via W-API
- */
 export async function sendWhatsAppImage(phone: string, base64Image: string, caption?: string): Promise<SendMessageResponse> {
-  const cleanPhone = phone.replace(/\D/g, '');
-  const formattedPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
-
-  if (!W_API_TOKEN || W_API_TOKEN === "COLE_AQUI_O_TOKEN_DA_IMAGEM") {
-    throw new Error("W-API Token não configurado no .env");
-  }
-
-  // A W-API geralmente suporta o endpoint send-image ou o send genérico com o tipo correto
-  const baseUrl = import.meta.env.PROD ? 'https://api.w-api.app' : '/whatsapp-api';
-  const endpoint = `${baseUrl}/v1/message/send-image?instanceId=${W_API_INSTANCE}`;
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${W_API_TOKEN}`
-      },
-      body: JSON.stringify({
-        phone: formattedPhone,
-        image: base64Image,
-        caption: caption,
-        delayMessage: 10
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Erro ao enviar imagem via W-API");
-    }
-
-    return data;
-  } catch (error: any) {
-    console.error("[W-API] Erro no envio de imagem:", error);
-    throw error;
-  }
+  return invokeProxy({ kind: "image", phone, image: base64Image, caption });
 }
 
-/**
- * Envia um documento via W-API
- */
 export async function sendWhatsAppDocument(phone: string, base64Content: string, fileName: string, caption?: string): Promise<SendMessageResponse> {
-  const cleanPhone = phone.replace(/\D/g, '');
-  const formattedPhone = cleanPhone.length <= 11 ? `55${cleanPhone}` : cleanPhone;
-
-  if (!W_API_TOKEN || W_API_TOKEN === "COLE_AQUI_O_TOKEN_DA_IMAGEM") {
-    throw new Error("W-API Token não configurado no .env");
-  }
-
-  // Extrair extensão do nome do arquivo
-  const extension = fileName.includes('.') ? fileName.split('.').pop() : 'html';
-
-  const baseUrl = import.meta.env.PROD ? 'https://api.w-api.app' : '/whatsapp-api';
-  const endpoint = `${baseUrl}/v1/message/send-document?instanceId=${W_API_INSTANCE}`;
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${W_API_TOKEN}`
-      },
-      body: JSON.stringify({
-        phone: formattedPhone,
-        document: base64Content,
-        fileName: fileName,
-        extension: extension,
-        caption: caption,
-        delayMessage: 10
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Erro ao enviar documento via W-API");
-    }
-
-    return data;
-  } catch (error: any) {
-    console.error("[W-API] Erro no envio de documento:", error);
-    throw error;
-  }
+  return invokeProxy({ kind: "document", phone, document: base64Content, fileName, caption });
 }
 
-/**
- * Verifica se a API está configurada no ambiente
- */
-export const isWApiConfigured = !!W_API_TOKEN && W_API_TOKEN !== "COLE_AQUI_O_TOKEN_DA_IMAGEM";
+// Optimistic: assume the proxy is deployed. Real status comes from the call.
+export const isWApiConfigured = true;
