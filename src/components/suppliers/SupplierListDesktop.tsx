@@ -123,10 +123,10 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                       <Building2 className="h-4 w-4 text-brand" />
                     </div>
                     <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-sm text-foreground truncate">
+                      <span className="font-medium text-[13px] text-foreground truncate">
                         {capitalize(supplier.name)}
                       </span>
-                      <span className="text-[11px] text-muted-foreground font-medium truncate">
+                      <span className="text-[11px] text-muted-foreground/70 truncate">
                         {supplier.contact || "Sem contato"}
                       </span>
                     </div>
@@ -140,14 +140,14 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
 
                 {/* Limite */}
                 <TableCell>
-                  <span className="font-medium text-sm text-foreground tabular-nums">
+                  <span className="text-[13px] text-foreground tabular-nums">
                     {formatLimitBRL(supplier.limit)}
                   </span>
                 </TableCell>
 
                 {/* Preço Médio */}
                 <TableCell className="hidden lg:table-cell">
-                  <span className="font-medium text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
+                  <span className="text-[13px] text-emerald-700 dark:text-emerald-400 tabular-nums">
                     {supplier.avgPrice}
                   </span>
                 </TableCell>
@@ -156,7 +156,7 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
                 <TableCell className="text-center hidden lg:table-cell">
                   <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md text-muted-foreground">
                     <FileText className="h-3.5 w-3.5" />
-                    <span className="font-medium text-xs tabular-nums">{supplier.totalQuotes}</span>
+                    <span className="text-xs tabular-nums">{supplier.totalQuotes}</span>
                   </div>
                 </TableCell>
 

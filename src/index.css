@@ -2201,8 +2201,8 @@
   .dark .table-modern th,
   .dark thead {
     background-color: transparent;
-    color: hsl(220 15% 75%);
-    font-weight: 500;
+    color: hsl(220 15% 65%);
+    font-weight: 400;
     border-bottom-color: hsl(var(--border));
   }
   

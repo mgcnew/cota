@@ -121,7 +121,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                         <Package className="h-4 w-4 text-muted-foreground" />
                       )}
                     </div>
-                    <span className="font-medium text-sm text-foreground truncate">
+                    <span className="font-medium text-[13px] text-foreground truncate">
                       {capitalize(product.name)}
                     </span>
                   </div>
@@ -172,7 +172,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <div className="flex flex-col">
-                      <span className="font-medium text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
+                      <span className="text-[13px] text-emerald-700 dark:text-emerald-400 tabular-nums">
                         {product.lastOrderPrice}
                       </span>
                       <span className="text-[11px] text-muted-foreground/70">
