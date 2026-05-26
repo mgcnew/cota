@@ -180,7 +180,7 @@ function Compras() {
 
           <div className="mt-2 md:mt-4 overflow-hidden">
             <Suspense fallback={<TabLoader />}>
-              <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-2 md:slide-in-from-right-4 duration-300 ease-out fill-mode-forwards">
+              <div key={activeTab} className="animate-page-enter">
                 {activeTab === "cotacoes" && <CotacoesTab />}
                 {activeTab === "pedidos" && <PedidosTab />}
                 {activeTab === "analise" && <AnaliseTab />}
