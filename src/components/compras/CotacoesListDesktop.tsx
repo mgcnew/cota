@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { ClipboardList, Building2, Info, Calendar, MoreVertical, Eye, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Info, Calendar, MoreVertical, Eye, Trash2, ChevronUp, ChevronDown, ChevronsUpDown, ClipboardList } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { StatusSelect, QUOTE_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
@@ -21,6 +21,22 @@ interface CotacoesListDesktopProps {
   onDelete: (quote: Quote) => void;
   isUpdating: boolean;
 }
+
+type PrazoUrgency = 'expired' | 'urgent' | 'normal' | null;
+
+const getPrazoUrgency = (dataFim: string): PrazoUrgency => {
+  if (!dataFim || dataFim === '-') return null;
+  const parts = dataFim.split(/[\/\-]/).map(Number);
+  if (parts.length < 3 || parts.some(isNaN)) return null;
+  const [df, mf, yf] = parts;
+  const prazo = new Date(yf, mf - 1, df);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+  if (prazo < hoje) return 'expired';
+  if (prazo <= em48h) return 'urgent';
+  return 'normal';
+};
 
 export const CotacoesListDesktop = memo(({
   cotacoes,
@@ -78,13 +94,12 @@ export const CotacoesListDesktop = memo(({
                 <TableRow key={cotacao.id} className="group">
                   {/* Cotação # */}
                   <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center border border-border dark:border-white/5 flex-shrink-0 group-hover:bg-accent transition-colors">
-                        <ClipboardList className="h-4 w-4 text-brand" />
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-lg bg-brand/10 dark:bg-brand/10 flex items-center justify-center flex-shrink-0 border border-brand/20">
+                        <span className="font-bold text-[11px] text-brand tabular-nums leading-none">
+                          {cotacaoNumero.toString().padStart(4, '0')}
+                        </span>
                       </div>
-                      <span className="font-mono text-sm font-medium text-foreground">
-                        #{cotacaoNumero.toString().padStart(4, '0')}
-                      </span>
                     </div>
                   </TableCell>
 
@@ -124,10 +139,17 @@ export const CotacoesListDesktop = memo(({
 
                   {/* Contagem de Fornecedores */}
                   <TableCell>
-                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted border border-border dark:border-white/5 w-fit">
-                      <Building2 className="h-3 w-3 text-muted-foreground" />
-                      <span className="text-xs font-medium text-foreground">{cotacao.fornecedores}</span>
-                    </div>
+                    {(cotacao.fornecedores || 0) === 0 ? (
+                      <span className="text-[12px] text-muted-foreground/40">—</span>
+                    ) : (cotacao.fornecedores || 0) >= 3 ? (
+                      <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] tabular-nums font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50">
+                        {cotacao.fornecedores}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center justify-center min-w-[28px] px-2 py-0.5 rounded-full text-[12px] tabular-nums font-medium bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50">
+                        {cotacao.fornecedores}
+                      </span>
+                    )}
                   </TableCell>
 
                   {/* Itens */}
@@ -156,10 +178,34 @@ export const CotacoesListDesktop = memo(({
 
                   {/* Prazo */}
                   <TableCell>
-                    <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground whitespace-nowrap">
-                      <Calendar className="h-3.5 w-3.5 opacity-60" />
-                      {cotacao.dataFim || '-'}
-                    </div>
+                    {(() => {
+                      const urgency = getPrazoUrgency(cotacao.dataFim);
+                      if (!cotacao.dataFim || cotacao.dataFim === '-') {
+                        return <span className="text-[12px] text-muted-foreground/40">—</span>;
+                      }
+                      if (urgency === 'expired') {
+                        return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50">
+                            <Calendar className="h-3 w-3" />
+                            {cotacao.dataFim}
+                          </span>
+                        );
+                      }
+                      if (urgency === 'urgent') {
+                        return (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50">
+                            <Calendar className="h-3 w-3" />
+                            {cotacao.dataFim}
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground whitespace-nowrap">
+                          <Calendar className="h-3 w-3 opacity-50" />
+                          {cotacao.dataFim}
+                        </span>
+                      );
+                    })()}
                   </TableCell>
 
                   {/* Ações */}
