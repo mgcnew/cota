@@ -191,11 +191,11 @@ function CotacoesTab() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="ativa">ðŸŸ¢ Ativas</SelectItem>
-                    <SelectItem value="pendente">ðŸŸ¡ Pendentes</SelectItem>
-                    <SelectItem value="prontas">âœ… Prontas p/ Decisão</SelectItem>
-                    <SelectItem value="vencendo">âš ï¸ Vencendo em 48h</SelectItem>
-                    <SelectItem value="concluida">ðŸ”µ Concluídas</SelectItem>
+                    <SelectItem value="ativa">Ativas</SelectItem>
+                    <SelectItem value="pendente">Pendentes</SelectItem>
+                    <SelectItem value="prontas">Prontas p/ Decisão</SelectItem>
+                    <SelectItem value="vencendo">Vencendo em 48h</SelectItem>
+                    <SelectItem value="concluida">Concluídas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
