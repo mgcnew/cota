@@ -5,7 +5,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { useCotacoesFilters } from "@/hooks/useCotacoesFilters";
 import { useCotacoesDialogs } from "@/hooks/useCotacoesDialogs";
-import { Plus, CheckCircle2, FileText, AlertTriangle, Download, Users, Zap, Sparkles } from "lucide-react";
+import { Plus, FileText, Download, Users, Zap, Sparkles } from "lucide-react";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { designSystem as ds } from "@/styles/design-system";
@@ -167,55 +167,6 @@ function CotacoesTab() {
             }}
           />
         </ResponsiveGrid>
-      )}
-
-      {/* Alerts */}
-      {(stats.prontasParaDecisao > 0 || stats.vencendo > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {stats.prontasParaDecisao > 0 && (
-            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
-                  {stats.prontasParaDecisao} cotação(ões) pronta(s)
-                </p>
-                <p className={cn("text-xs", ds.colors.text.secondary)}>Todos os fornecedores já responderam</p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-lg h-8 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10"
-                onClick={() => handleStatusFilterChange("prontas")}
-              >
-                Ver agora
-              </Button>
-            </div>
-          )}
-
-          {stats.vencendo > 0 && (
-            <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="h-5 w-5 text-amber-500" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
-                  {stats.vencendo} cotação(ões) para vencer
-                </p>
-                <p className={cn("text-xs", ds.colors.text.secondary)}>Prazo termina em menos de 48h</p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                className="rounded-lg h-8 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
-                onClick={() => handleStatusFilterChange("vencendo")}
-              >
-                Revisar
-              </Button>
-            </div>
-          )}
-        </div>
       )}
 
       {/* Unified Container for Search, Table and Mobile Cards */}
