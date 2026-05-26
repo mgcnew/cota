@@ -379,7 +379,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     <div ref={captureRef} data-capture-container="true" className="h-full flex flex-col bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
         {/* Header */}
-        <div className="bg-card flex flex-col">
+        <div className="flex flex-col">
           {/* Title row */}
           <div className="flex items-center justify-between px-5 pt-3 pb-2">
             <div className="flex items-center gap-3">
