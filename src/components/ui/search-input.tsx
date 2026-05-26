@@ -1,7 +1,6 @@
-﻿import { Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { designSystem } from "@/styles/design-system";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef } from "react";
 
 interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value: string;
@@ -10,10 +9,6 @@ interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   containerClassName?: string;
 }
 
-/**
- * Busca Estática Premium - Design Minimalista com Sombra Sutil
- * Substitui o modelo de expansão por um estado fixo e profissional.
- */
 export const SearchInput = memo(function SearchInput({
   value,
   onChange,
@@ -23,54 +18,53 @@ export const SearchInput = memo(function SearchInput({
   className,
   ...props
 }: SearchInputProps) {
-  
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const handleClear = useCallback(() => {
     onChange("");
     onClear?.();
+    inputRef.current?.focus();
   }, [onChange, onClear]);
 
   return (
     <div className={cn("relative group w-full", containerClassName)}>
-      <div
+      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 group-focus-within:text-brand transition-colors duration-200 pointer-events-none z-10" />
+
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
         className={cn(
-          "relative flex items-center h-11 w-full transition-all duration-200",
-          "border-b border-border dark:border-white/10",
-          "group-focus-within:border-brand"
+          "w-full h-10 pl-10 pr-9 rounded-xl",
+          "bg-white dark:bg-card",
+          "border border-border/60 dark:border-white/8",
+          "text-sm text-foreground placeholder:text-muted-foreground/40",
+          "shadow-sm",
+          "transition-all duration-200",
+          "outline-none",
+          "focus:border-brand/50 focus:ring-2 focus:ring-brand/15 focus:shadow-[0_0_0_3px_hsl(var(--brand)/0.08)]",
+          "hover:border-border dark:hover:border-white/15",
+          className
         )}
-      >
-        <div className="flex-shrink-0 flex items-center justify-center w-8 h-11 text-muted-foreground/50 transition-colors duration-200 group-focus-within:text-brand">
-          <Search className="h-4 w-4" />
-        </div>
+        {...props}
+      />
 
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+      {value && (
+        <button
+          onClick={handleClear}
+          type="button"
           className={cn(
-            "w-full h-full pl-1 pr-3 bg-transparent border-none ring-0 focus:ring-0 focus:outline-none",
-            "text-[14px] text-foreground",
-            "placeholder:text-muted-foreground/40",
-            className
+            "absolute right-2.5 top-1/2 -translate-y-1/2",
+            "w-5 h-5 rounded-md flex items-center justify-center",
+            "text-muted-foreground/40 hover:text-foreground hover:bg-muted/60",
+            "transition-all duration-150 active:scale-90"
           )}
-          {...props}
-        />
-
-        {value && (
-          <button
-            onClick={handleClear}
-            className={cn(
-              "p-1 mr-1 rounded transition-all duration-200",
-              "text-muted-foreground/50 hover:text-foreground",
-              "active:scale-95"
-            )}
-            type="button"
-          >
-            <X className="h-3.5 w-3.5" />
-          </button>
-        )}
-      </div>
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
     </div>
   );
 });
-

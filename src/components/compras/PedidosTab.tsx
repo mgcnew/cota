@@ -131,7 +131,6 @@ function PedidosTab() {
       }
       
       // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
-      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
       const [da, ma, ya] = a.dataPedido.split('/').map(Number);
       const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(ya, ma - 1, da).getTime();
       const [db, mb, yb] = b.dataPedido.split('/').map(Number);
@@ -257,11 +256,11 @@ function PedidosTab() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="pendente">ðŸŸ¡ Pendentes</SelectItem>
-                    <SelectItem value="enviado">ðŸ›« Enviados</SelectItem>
-                    <SelectItem value="confirmado">ðŸŸ¢ Confirmados</SelectItem>
-                    <SelectItem value="entregue">ðŸ”µ Entregues</SelectItem>
-                    <SelectItem value="cancelado">ðŸ”´ Cancelados</SelectItem>
+                    <SelectItem value="pendente">Pendentes</SelectItem>
+                    <SelectItem value="enviado">Enviados</SelectItem>
+                    <SelectItem value="confirmado">Confirmados</SelectItem>
+                    <SelectItem value="entregue">Entregues</SelectItem>
+                    <SelectItem value="cancelado">Cancelados</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -277,10 +276,7 @@ function PedidosTab() {
         </div>
 
         {/* Mobile Filter Chips */}
-        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            .md\\:hidden::-webkit-scrollbar { display: none; }
-          `}} />
+        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30 scroll-smooth [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
           {[
             { value: 'all', label: 'Todos' },
             { value: 'pendente', label: 'Pendentes' },
@@ -334,15 +330,16 @@ function PedidosTab() {
               </div>
 
               {/* Desktop Table View */}
-              <PedidosListDesktop
-                pedidos={paginatedData.items}
-                startIndex={paginatedData.pagination.startIndex}
-                onUpdateStatus={handleUpdateStatus}
-                onManage={handleManagePedido}
-                onRegisterDelivery={handleRegistrarEntrega}
-                onDelete={handleDeletePedidoClick}
-                isUpdating={isUpdating}
-              />
+              <div className="hidden md:block">
+                <PedidosListDesktop
+                  pedidos={paginatedData.items}
+                  onUpdateStatus={handleUpdateStatus}
+                  onManage={handleManagePedido}
+                  onRegisterDelivery={handleRegistrarEntrega}
+                  onDelete={handleDeletePedidoClick}
+                  isUpdating={isUpdating}
+                />
+              </div>
 
               {/* Pagination */}
               <div className="border-t border-border dark:border-white/5 bg-zinc-50/30 dark:bg-muted/20 p-4">

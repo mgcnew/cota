@@ -1,4 +1,5 @@
-﻿import { useState, useEffect, lazy, Suspense, memo, useMemo } from "react";
+﻿import { useState, useEffect, lazy, Suspense, memo, useMemo, Component } from "react";
+import type { ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, ShoppingBasket, Package } from "lucide-react";
@@ -7,6 +8,31 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+
+class ChunkErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(error: Error) {
+    const isChunkError =
+      error.message.includes('Failed to fetch dynamically imported module') ||
+      error.message.includes('Loading chunk') ||
+      error.message.includes('Importing a module script failed');
+    if (isChunkError && !sessionStorage.getItem('chunk-reload')) {
+      sessionStorage.setItem('chunk-reload', '1');
+      window.location.reload();
+    }
+    return { hasError: true };
+  }
+
+  componentDidUpdate() {
+    if (this.state.hasError) sessionStorage.removeItem('chunk-reload');
+  }
+
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
 
 // Lazy load tab contents for better performance
 const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
@@ -179,16 +205,18 @@ function Compras() {
           </div>
 
           <div className="mt-2 md:mt-4 overflow-hidden">
-            <Suspense fallback={<TabLoader />}>
-              <div key={activeTab} className="animate-page-enter">
-                {activeTab === "cotacoes" && <CotacoesTab />}
-                {activeTab === "pedidos" && <PedidosTab />}
-                {activeTab === "analise" && <AnaliseTab />}
-                {activeTab === "lista" && <ListaComprasTab />}
-                {activeTab === "embalagens" && <EmbalagensTab />}
-                {activeTab === "calculadora" && <ProcurementCalculator />}
-              </div>
-            </Suspense>
+            <ChunkErrorBoundary>
+              <Suspense fallback={<TabLoader />}>
+                <div key={activeTab} className="animate-page-enter">
+                  {activeTab === "cotacoes" && <CotacoesTab />}
+                  {activeTab === "pedidos" && <PedidosTab />}
+                  {activeTab === "analise" && <AnaliseTab />}
+                  {activeTab === "lista" && <ListaComprasTab />}
+                  {activeTab === "embalagens" && <EmbalagensTab />}
+                  {activeTab === "calculadora" && <ProcurementCalculator />}
+                </div>
+              </Suspense>
+            </ChunkErrorBoundary>
           </div>
         </Tabs>
       </div>

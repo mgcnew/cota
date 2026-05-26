@@ -1,5 +1,5 @@
 import { memo, useState, useCallback } from 'react';
-import { ShoppingCart, Truck, Info, MoreVertical, ClipboardCheck, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { PackageOpen, Truck, Info, MoreVertical, ClipboardCheck, Trash2, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { capitalize } from "@/lib/text-utils";
@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 interface PedidosListDesktopProps {
   pedidos: OrderData[];
-  startIndex: number;
   onUpdateStatus: (pedidoId: string, status: string) => void;
   onManage: (pedido: OrderData) => void;
   onRegisterDelivery: (pedido: OrderData) => void;
@@ -30,9 +29,28 @@ const extractPrice = (priceStr: string): number => {
   return parseFloat(cleaned) || 0;
 };
 
+const initials = (name: string): string => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+};
+
+const getDeliveryUrgency = (dateStr: string, status: string): 'expired' | 'urgent' | 'normal' | null => {
+  if (!dateStr || status === 'entregue' || status === 'cancelado') return null;
+  const parts = dateStr.split('/');
+  if (parts.length !== 3) return null;
+  const delivery = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.floor((delivery.getTime() - today.getTime()) / 86400000);
+  if (diffDays < 0) return 'expired';
+  if (diffDays <= 2) return 'urgent';
+  return 'normal';
+};
+
 export const PedidosListDesktop = memo(({
   pedidos,
-  startIndex,
   onUpdateStatus,
   onManage,
   onRegisterDelivery,
@@ -100,45 +118,30 @@ export const PedidosListDesktop = memo(({
     <Table>
           <TableHeader>
             <TableRow>
-              <SortHeader label="Pedido" sortId="id" className="w-[15%]" />
-              <SortHeader label="Fornecedor" sortId="fornecedor" className="w-[20%]" />
-              <SortHeader label="Status" sortId="status" className="w-[15%]" />
-              <SortHeader label="Valor Total" sortId="valorTotal" className="w-[15%]" />
-              <SortHeader label="Itens" sortId="itens" className="w-[10%]" />
-              <SortHeader label="Previsão Entrega" sortId="dataEntrega" className="w-[15%]" />
+              <SortHeader label="Fornecedor" sortId="fornecedor" className="w-[25%]" />
+              <SortHeader label="Status" sortId="status" className="w-[18%]" />
+              <SortHeader label="Valor Total" sortId="valorTotal" className="w-[18%]" />
+              <SortHeader label="Itens" sortId="itens" className="w-[12%]" />
+              <SortHeader label="Previsão Entrega" sortId="dataEntrega" className="w-[17%]" />
               <TableHead className="text-right w-[10%]">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {sortedPedidos.map((pedido) => {
-              const originalIndex = pedidos.findIndex(p => p.id === pedido.id);
-              const pedidoNumero = startIndex + originalIndex + 1;
+              const deliveryUrgency = getDeliveryUrgency(pedido.dataEntrega || '', pedido.status);
 
               return (
                 <TableRow key={pedido.id} className="group">
-                  {/* Pedido # */}
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center border border-border dark:border-white/5 flex-shrink-0 group-hover:bg-accent transition-colors">
-                        <ShoppingCart className="h-4 w-4 text-brand" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-mono text-sm font-medium text-foreground">
-                          #{pedido.id.substring(0, 8)}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground">{pedido.dataPedido}</span>
-                      </div>
-                    </div>
-                  </TableCell>
-
                   {/* Fornecedor */}
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-foreground truncate max-w-[200px]" title={pedido.fornecedor}>
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center flex-shrink-0">
+                        <span className="text-[9px] font-black text-brand">{initials(pedido.fornecedor)}</span>
+                      </div>
+                      <span className="font-medium text-foreground truncate max-w-[160px]" title={pedido.fornecedor}>
                         {capitalize(pedido.fornecedor)}
                       </span>
-                      <span className="text-[11px] text-muted-foreground">#{pedido.id.substring(0, 4)}</span>
                     </div>
                   </TableCell>
 
@@ -157,12 +160,9 @@ export const PedidosListDesktop = memo(({
 
                   {/* Valor Total */}
                   <TableCell>
-                    <div className="flex flex-col">
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400 tracking-tight">
-                        {pedido.total}
-                      </span>
-                      <span className="text-[11px] text-muted-foreground">Data: {pedido.dataPedido}</span>
-                    </div>
+                    <span className="font-medium text-emerald-600 dark:text-emerald-400 tracking-tight">
+                      {pedido.total}
+                    </span>
                   </TableCell>
 
                   {/* Itens */}
@@ -196,8 +196,13 @@ export const PedidosListDesktop = memo(({
 
                   {/* Entrega */}
                   <TableCell>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Truck className="h-4 w-4 opacity-60" />
+                    <div className={cn(
+                      "flex items-center gap-2 text-sm",
+                      deliveryUrgency === 'expired' ? "text-red-500 dark:text-red-400" :
+                      deliveryUrgency === 'urgent' ? "text-amber-500 dark:text-amber-400" :
+                      "text-muted-foreground"
+                    )}>
+                      <Truck className="h-4 w-4 opacity-70" />
                       <span>{pedido.dataEntrega || '-'}</span>
                     </div>
                   </TableCell>
@@ -212,7 +217,7 @@ export const PedidosListDesktop = memo(({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48 overflow-hidden rounded-xl">
                         <DropdownMenuItem onClick={() => onManage(pedido)} className="gap-2 cursor-pointer">
-                          <ShoppingCart className="h-4 w-4 text-blue-500" />
+                          <PackageOpen className="h-4 w-4 text-blue-500" />
                           Gerenciar Itens
                         </DropdownMenuItem>
                         {pedido.status !== "entregue" && pedido.status !== "cancelado" && (
