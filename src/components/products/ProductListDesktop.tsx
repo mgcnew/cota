@@ -129,7 +129,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
 
                 {/* Categoria */}
                 <TableCell>
-                  <span className="inline-flex items-center text-xs font-medium text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
+                  <span className="inline-flex items-center text-xs text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
                     {capitalize(product.category)}
                   </span>
                 </TableCell>
@@ -175,7 +175,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                       <span className="font-medium text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
                         {product.lastOrderPrice}
                       </span>
-                      <span className="text-[11px] text-muted-foreground font-medium">
+                      <span className="text-[11px] text-muted-foreground/70">
                         por {product.unit || 'un'}
                       </span>
                     </div>
@@ -197,7 +197,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
                 <TableCell className="text-center">
                   <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-muted rounded-md text-muted-foreground">
                     <ClipboardList className="h-3.5 w-3.5" />
-                    <span className="font-medium text-xs tabular-nums">{product.quotesCount || 0}</span>
+                    <span className="text-xs tabular-nums">{product.quotesCount || 0}</span>
                   </div>
                 </TableCell>
 
@@ -227,7 +227,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
 
       {/* Footer */}
       <div className="border-t border-border dark:border-white/5 bg-muted/20 px-6 py-3 flex items-center justify-between">
-        <span className="text-[12px] text-muted-foreground font-medium">
+        <span className="text-[12px] text-muted-foreground">
           {sortedProducts.length} produto{sortedProducts.length !== 1 ? 's' : ''} exibido{sortedProducts.length !== 1 ? 's' : ''}
         </span>
         {sortKey && (
