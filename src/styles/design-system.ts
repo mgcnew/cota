@@ -101,9 +101,9 @@ export const designSystem = {
         // Containers Comuns
         container: {
             glass: "bg-card/80 backdrop-blur-xl border border-white/5 shadow-sm", // Token Mestre para Sidebar/Header
-            page: "container mx-auto px-4 pt-1 pb-8 md:px-6 md:pt-6 md:pb-8 max-w-7xl space-y-6", // Reduzido pt no mobile de 3 para 1
+            page: "container mx-auto px-4 pt-4 pb-6 md:px-6 md:pt-4 md:pb-8 max-w-7xl space-y-4",
             section: "space-y-4",
-            grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         },
         // Sidebar (Painel Lateral)
         sidebar: {
@@ -151,10 +151,10 @@ export const designSystem = {
             root: "bg-white dark:bg-card/80 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)] hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-200",
             flat: "bg-zinc-50 dark:bg-card border border-zinc-200 dark:border-zinc-800 rounded-xl",
             interactive: "cursor-pointer active:scale-[0.99] transition-transform",
-            header: "px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between",
-            title: "text-base font-semibold text-zinc-900 dark:text-zinc-50", // Mantém título um pouco menor
-            body: "p-6",
-            footer: "px-6 py-4 bg-zinc-50/50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-sm text-zinc-500"
+            header: "px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between",
+            title: "text-sm font-semibold text-zinc-900 dark:text-zinc-50",
+            body: "p-4",
+            footer: "px-4 py-3 bg-zinc-50/50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl text-xs text-zinc-500"
         },
 
         // Cartões de Estatísticas (Metrics)
@@ -210,10 +210,10 @@ export const designSystem = {
             overlay: "fixed inset-0 z-50 bg-background/60 backdrop-blur-[2px] animate-in fade-in duration-200",
             content: "relative z-50 w-full max-w-2xl bg-white dark:bg-card border border-zinc-200 dark:border-zinc-800 shadow-2xl rounded-xl p-0 animate-fade-in flex flex-col max-h-[90vh]",
             // Padrão para Modais de Alta Densidade (Scroll Global)
-            header: "flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
-            title: "text-base font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
-            body: "p-6 overflow-y-auto flex-1 custom-scrollbar",
-            footer: "flex-shrink-0 flex items-center justify-end gap-2 p-4 bg-zinc-50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
+            header: "flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 bg-transparent rounded-t-xl",
+            title: "text-sm font-semibold leading-none tracking-tight text-zinc-900 dark:text-zinc-50",
+            body: "p-4 overflow-y-auto flex-1 custom-scrollbar",
+            footer: "flex-shrink-0 flex items-center justify-end gap-2 px-4 py-3 bg-zinc-50 dark:bg-card/50 border-t border-zinc-100 dark:border-zinc-800 rounded-b-xl",
 
             // Layout de Scroll Unificado (Uso Recomendado)
             layout: {
@@ -226,7 +226,7 @@ export const designSystem = {
             splitView: {
                 container: "flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden",
                 main: "flex-1 flex flex-col bg-white dark:bg-background overflow-hidden",
-                content: "flex-1 overflow-y-auto custom-scrollbar p-6"
+                content: "flex-1 overflow-y-auto custom-scrollbar p-4"
             }
         },
 
@@ -235,11 +235,11 @@ export const designSystem = {
             root: "w-full text-sm text-left border-separate border-spacing-y-2", // Espaçamento vertical entre linhas
             container: "bg-background w-full", // Fundo do sistema para as linhas flutuarem
             header: "bg-transparent",
-            headerCell: "h-12 px-6 text-left align-middle font-bold text-zinc-500 dark:text-zinc-400 text-[10px] uppercase tracking-wider",
-            headerWrapper: "flex items-center rounded-xl shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-4 border bg-white dark:bg-card/50 mb-3",
+            headerCell: "h-10 px-4 text-left align-middle font-semibold text-zinc-500 dark:text-zinc-400 text-[11px] uppercase tracking-wider",
+            headerWrapper: "flex items-center rounded-lg shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-3 border bg-white dark:bg-card/50 mb-2",
             row: "bg-card border border-zinc-200/80 dark:border-border/40 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] hover:scale-[1.002] mb-1.5",
-            rowWrapper: "flex items-center px-4 py-3 transition-all duration-300",
-            rowCompact: "group py-1.5 px-5 rounded-xl border transition-all duration-300 relative overflow-hidden",
+            rowWrapper: "flex items-center px-4 py-2.5 transition-all duration-300",
+            rowCompact: "group py-1.5 px-4 rounded-lg border transition-all duration-300 relative overflow-hidden",
             rowActive: "bg-brand/5 border-brand/20 ring-1 ring-brand/10", // Removido shadow neon
             cell: "p-0 align-middle", // Padrão 0 para que o container interno da linha controle o padding
             
