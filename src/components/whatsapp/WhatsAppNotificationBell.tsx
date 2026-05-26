@@ -8,7 +8,7 @@ import { useNotificationHub } from "@/hooks/useNotificationHub";
 
 export function WhatsAppNotificationBell() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { totalCount, whatsappUnread, urgentCotacoes, reload } = useNotificationHub();
+  const { totalCount, recentResponses, urgentCotacoes, reload } = useNotificationHub();
 
   const tooltipText = totalCount === 0
     ? "Notificações"
@@ -54,7 +54,7 @@ export function WhatsAppNotificationBell() {
           setIsDrawerOpen(open);
           if (!open) reload();
         }}
-        whatsappUnread={whatsappUnread}
+        recentResponses={recentResponses}
         urgentCotacoes={urgentCotacoes}
       />
     </div>

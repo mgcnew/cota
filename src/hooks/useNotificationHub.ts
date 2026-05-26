@@ -9,20 +9,18 @@ export interface UrgentCotacao {
   urgencyType: 'pronta' | 'vencendo';
 }
 
+export interface SupplierResponse {
+  id: string;
+  supplierName: string;
+  produto: string;
+  quoteId: string;
+  updatedAt: string;
+}
+
 export function useNotificationHub() {
   const { data: company } = useCompany();
-  const [whatsappUnread, setWhatsappUnread] = useState(0);
   const [urgentCotacoes, setUrgentCotacoes] = useState<UrgentCotacao[]>([]);
-
-  const loadWhatsappCount = async () => {
-    if (!company) return;
-    const { count } = await supabase
-      .from('whatsapp_responses')
-      .select('*', { count: 'exact', head: true })
-      .eq('company_id', company.id)
-      .eq('is_processed', false);
-    setWhatsappUnread(count || 0);
-  };
+  const [recentResponses, setRecentResponses] = useState<SupplierResponse[]>([]);
 
   const loadUrgentCotacoes = async () => {
     if (!company) return;
@@ -57,13 +55,11 @@ export function useNotificationHub() {
         ? `${String(dataFimDate.getDate()).padStart(2, '0')}/${String(dataFimDate.getMonth() + 1).padStart(2, '0')}/${dataFimDate.getFullYear()}`
         : '';
 
-      // Pronta: todos os fornecedores responderam
       if (suppliers.length > 0 && suppliers.every((s: any) => s.status === 'respondido')) {
         urgent.push({ id: q.id, produto: q.produto || 'Cotação', dataFim: dataFimFormatted, urgencyType: 'pronta' });
         return;
       }
 
-      // Vencendo: prazo em menos de 48h
       if (dataFimDate && dataFimDate <= in48h && dataFimDate >= today) {
         urgent.push({ id: q.id, produto: q.produto || 'Cotação', dataFim: dataFimFormatted, urgencyType: 'vencendo' });
       }
@@ -72,16 +68,49 @@ export function useNotificationHub() {
     setUrgentCotacoes(urgent);
   };
 
+  const loadRecentResponses = async () => {
+    if (!company) return;
+
+    const since = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+
+    const { data } = await supabase
+      .from('quote_suppliers')
+      .select('id, supplier_name, updated_at, quote_id, quotes!inner(id, produto, company_id)')
+      .eq('quotes.company_id', company.id)
+      .eq('status', 'respondido')
+      .gte('updated_at', since)
+      .order('updated_at', { ascending: false })
+      .limit(20);
+
+    if (!data) return;
+
+    setRecentResponses(
+      data.map((r: any) => ({
+        id: r.id,
+        supplierName: r.supplier_name,
+        produto: r.quotes?.produto || 'Cotação',
+        quoteId: r.quote_id,
+        updatedAt: r.updated_at,
+      }))
+    );
+  };
+
   useEffect(() => {
     if (!company) return;
-    loadWhatsappCount();
+
     loadUrgentCotacoes();
+    loadRecentResponses();
 
     const channel = supabase
       .channel('notification-hub')
       .on('postgres_changes' as any,
-        { event: '*', table: 'whatsapp_responses', filter: `company_id=eq.${company.id}` },
-        () => loadWhatsappCount()
+        { event: 'UPDATE', schema: 'public', table: 'quote_suppliers' },
+        (payload: any) => {
+          if (payload.new?.status === 'respondido') {
+            loadRecentResponses();
+            loadUrgentCotacoes();
+          }
+        }
       )
       .subscribe();
 
@@ -89,11 +118,11 @@ export function useNotificationHub() {
   }, [company]);
 
   return {
-    whatsappUnread,
     urgentCotacoes,
+    recentResponses,
     prontasCount: urgentCotacoes.filter(c => c.urgencyType === 'pronta').length,
     vencendoCount: urgentCotacoes.filter(c => c.urgencyType === 'vencendo').length,
-    totalCount: whatsappUnread + urgentCotacoes.length,
-    reload: () => { loadWhatsappCount(); loadUrgentCotacoes(); },
+    totalCount: urgentCotacoes.length + recentResponses.length,
+    reload: () => { loadUrgentCotacoes(); loadRecentResponses(); },
   };
 }
