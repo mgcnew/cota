@@ -89,10 +89,7 @@ const menuCategories: MenuCategory[] = [
       { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart }
     ]
   },
-  {
-    title: "Estoque",
-    items: [{ title: "Contagem de Estoque", url: "/dashboard/contagem-estoque", icon: ClipboardList }]
-  },
+  // { title: "Estoque", items: [{ title: "Contagem de Estoque", url: "/dashboard/contagem-estoque", icon: ClipboardList }] },
   {
     title: "Ferramentas",
     items: [

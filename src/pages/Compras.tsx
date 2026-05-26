@@ -18,7 +18,7 @@ const ProcurementCalculator = lazy(() => import("@/components/compras/Procuremen
 const TABS = [
   { value: "cotacoes", icon: FileText, label: "Cotações" },
   { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
-  { value: "lista", icon: ShoppingBasket, label: "Lista" },
+  // { value: "lista", icon: ShoppingBasket, label: "Lista" },
   { value: "embalagens", icon: Package, label: "Embalagens" },
   { value: "analise", icon: BarChart3, label: "Análise" },
   { value: "calculadora", icon: Keyboard, label: "Calculadora" }
