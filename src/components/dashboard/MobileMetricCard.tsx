@@ -89,11 +89,11 @@ export const MobileMetricCard = memo(function MobileMetricCard({
     <div
       className={cn(
         // Base dimensions – fixed width so ribbon shows multiple cards
-        "relative overflow-hidden rounded-2xl",
-        "w-[168px] flex-shrink-0",
-        "p-4 flex flex-col justify-between",
+        "relative overflow-hidden rounded-xl",
+        "w-[148px] flex-shrink-0",
+        "p-3 flex flex-col justify-between",
         // Min height for touch targets
-        "min-h-[148px]",
+        "min-h-[120px]",
         // Color
         v.bg,
         DARK_OVERRIDE,
@@ -110,22 +110,17 @@ export const MobileMetricCard = memo(function MobileMetricCard({
       role={onClick && !isEmpty ? "button" : undefined}
       aria-label={`${title}: ${value}`}
     >
-      {/* Large background silhouette – always visible at low opacity for richness */}
-      <div className="absolute -right-5 -bottom-5 pointer-events-none opacity-10 dark:opacity-[0.04]">
-        <Icon size={120} strokeWidth={1} />
-      </div>
-
       {/* Top row: Icon + optional pulse indicator */}
-      <div className="relative z-10 flex items-start justify-between mb-3">
+      <div className="relative z-10 flex items-start justify-between mb-2">
         <div
           className={cn(
-            "p-2.5 rounded-xl",
+            "p-2 rounded-lg",
             v.iconBg,
             v.iconColor,
             DARK_ICON
           )}
         >
-          <Icon className="w-5 h-5" />
+          <Icon className="w-4 h-4" />
         </div>
 
         {/* Pulse dot – shows urgency without harsh colors */}
@@ -163,7 +158,7 @@ export const MobileMetricCard = memo(function MobileMetricCard({
         </p>
         <h3
           className={cn(
-            "text-3xl font-black tracking-tight leading-none mb-1",
+            "text-2xl font-bold tracking-tight leading-none mb-1",
             v.text,
             DARK_TEXT
           )}

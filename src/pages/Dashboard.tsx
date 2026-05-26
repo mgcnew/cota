@@ -1,6 +1,6 @@
 import { useState, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -116,36 +116,33 @@ function Dashboard() {
     <PageWrapper>
       <div className={cn(ds.layout.container.page, "px-3 md:px-6 animate-in fade-in zoom-in-95 duration-500")}>
         
-        {/* Header - Command Center Style */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-6 md:mb-10 pb-4 md:pb-8 md:border-b border-zinc-200/70 dark:border-zinc-800">
-          <div className="flex items-center gap-2 md:gap-3 shrink-0">
-            <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-              <TrendingUp className="h-6 w-6 text-brand" />
-            </div>
-            <div>
-              <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                Resumo de Hoje
-              </h1>
-              <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                Bem-vindo ao seu centro de operações.
-              </p>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 mb-4 md:mb-6 pb-3 md:pb-5 md:border-b border-zinc-200/70 dark:border-zinc-800">
+          <div>
+            <h1 className={cn(ds.typography.size.lg, "font-bold text-foreground")}>
+              Resumo de Hoje
+            </h1>
+            <p className={cn(ds.colors.text.muted, "text-xs mt-0.5")}>
+              Centro de operações
+            </p>
           </div>
-          
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <Button 
+
+          <div className="flex items-center gap-2">
+            <Button
               onClick={() => navigate('/dashboard/compras?tab=cotacoes&open=new')}
-              className={cn(ds.components.button.primary, "flex-1 md:flex-none font-bold text-white dark:text-zinc-950")}
+              className={cn(ds.components.button.primary, "font-semibold text-white dark:text-zinc-950")}
+              size="sm"
             >
-              <Plus className="w-4 h-4 mr-1.5" />
+              <Plus className="w-3.5 h-3.5 mr-1" />
               Nova Cotação
             </Button>
-            <Button 
+            <Button
               onClick={() => navigate('/dashboard/compras?tab=pedidos&open=new')}
               variant="outline"
-              className="flex-1 md:flex-none border-border"
+              size="sm"
+              className="border-border hidden sm:flex"
             >
-              <ShoppingCart className="w-4 h-4 mr-1.5" />
+              <ShoppingCart className="w-3.5 h-3.5 mr-1" />
               Novo Pedido
             </Button>
           </div>
@@ -165,7 +162,7 @@ function Dashboard() {
         />
 
         {/* Linha 2: Pátio de Operações e Inteligência */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full min-h-[500px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-[400px]">
           {/* Lado Esquerdo 65%: O Pátio */}
           <div className="lg:col-span-2 flex flex-col h-full">
             <DashboardOperationsBoard 

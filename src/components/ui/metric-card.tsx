@@ -38,56 +38,45 @@ export const MetricCard = memo(function MetricCard({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-2xl p-5 transition-all duration-300 border",
+        "group relative overflow-hidden rounded-xl p-4 transition-all duration-200 border",
         VARIANTS[variant],
-        "hover:shadow-xl hover:-translate-y-1",
+        "hover:shadow-lg hover:-translate-y-0.5",
         onClick && "cursor-pointer active:translate-y-0",
         className
       )}
       onClick={onClick}
     >
-      {/* Top subtle highlight for 3D premium effect */}
-      <div className="absolute inset-x-0 top-0 h-px bg-white/30" />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-
-      {/* Decorative large icon functioning as the card's unique graphic */}
-      <div className="absolute -right-6 -bottom-6 transition-transform duration-500 group-hover:scale-110 group-hover:-translate-y-2 group-hover:-rotate-6 pointer-events-none">
-        <Icon 
-          size={150} 
-          className="text-white/20" 
-          strokeWidth={1.5} 
-          style={{ filter: "drop-shadow(0px 10px 15px rgba(0,0,0,0.15))" }}
-        />
-      </div>
+      {/* Top subtle highlight */}
+      <div className="absolute inset-x-0 top-0 h-px bg-white/25" />
 
       {/* Content */}
       <div className="relative z-10">
-        <div className="flex items-center gap-2 mb-5">
-          <div className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm shadow-sm">
-            <Icon className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-1.5 rounded-md bg-white/20 backdrop-blur-sm">
+            <Icon className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white/90">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-white/90 leading-none">
             {title}
           </span>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-0.5">
           <div className="flex items-baseline gap-2">
-            <h3 className="text-3xl lg:text-4xl font-black tracking-tight text-white drop-shadow-sm">
+            <h3 className="text-2xl font-bold tracking-tight text-white">
               {value}
             </h3>
 
             {trend && (
-              <div className="flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white backdrop-blur-sm shadow-sm">
-                {trend.type === "positive" ? <TrendingUp size={12} strokeWidth={3} /> :
-                  trend.type === "negative" ? <TrendingDown size={12} strokeWidth={3} /> : null}
+              <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white">
+                {trend.type === "positive" ? <TrendingUp size={10} strokeWidth={3} /> :
+                  trend.type === "negative" ? <TrendingDown size={10} strokeWidth={3} /> : null}
                 {trend.value}
               </div>
             )}
           </div>
 
           {(trend?.label || subtitle) && (
-            <p className="text-[11px] sm:text-xs font-medium text-white/80 mt-1 max-w-[75%] leading-tight">
+            <p className="text-[11px] font-medium text-white/75 leading-tight">
               {trend?.label || subtitle}
             </p>
           )}

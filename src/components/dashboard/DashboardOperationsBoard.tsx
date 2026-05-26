@@ -77,40 +77,39 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
               </div>
             ) : (
               activeQuotes.map(quote => (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border/60 hover:border-brand/30 transition-colors shadow-sm">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="p-3 bg-brand/10 text-brand rounded-lg shrink-0">
-                        <ClipboardList className="h-5 w-5" />
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-card border border-border/60 hover:border-brand/30 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="p-1.5 bg-brand/10 text-brand rounded-md shrink-0">
+                        <ClipboardList className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
+                        <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
                           <CapitalizedText>{quote.produtoResumo || quote.produto}</CapitalizedText>
                         </p>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                          <span className={cn(ds.typography.size.xs, ds.colors.text.secondary, "flex items-center gap-1.5")}>
-                            Termina: {quote.dataFim}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>
+                            {quote.dataFim}
                           </span>
-                          <span className={cn(ds.typography.size.xs, ds.colors.text.secondary, "flex items-center gap-1")}>
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                          <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>·</span>
+                          <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>
                             {quote.fornecedores} resp.
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-6 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-border/50">
-                      <div className="text-left sm:text-right">
-                        <p className={cn(ds.typography.size.xs, ds.colors.text.muted)}>Melhor preço</p>
-                        <p className={cn(ds.typography.size.base, ds.typography.weight.bold, "text-emerald-500")}>
-                          {quote.melhorPreco || 'R$ 0,00'}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right hidden sm:block">
+                        <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, "text-emerald-500")}>
+                          {quote.melhorPreco || '—'}
                         </p>
                       </div>
-                      <Button 
-                        size="default" 
-                        variant="outline" 
-                        className="shrink-0 h-11 px-5"
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2.5 text-xs"
                         onClick={() => navigate(`/dashboard/compras?tab=cotacoes&manageQuote=${quote.id}`)}
                       >
-                        Acompanhar
+                        Ver
                       </Button>
                     </div>
                   </div>
@@ -135,39 +134,39 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
               </div>
             ) : (
               pendingOrders.map(order => (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border/60 hover:border-blue-500/30 transition-colors shadow-sm">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="p-3 bg-blue-500/10 text-blue-500 rounded-lg shrink-0">
-                        <Truck className="h-5 w-5" />
+                  <div className="flex items-center justify-between gap-3 p-3 rounded-lg bg-card border border-border/60 hover:border-blue-500/30 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="p-1.5 bg-blue-500/10 text-blue-500 rounded-md shrink-0">
+                        <Truck className="h-3.5 w-3.5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
+                        <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
                           <CapitalizedText>{order.supplier_name}</CapitalizedText>
                         </p>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                          <span className={cn(ds.typography.size.xs, ds.colors.text.secondary, "flex items-center gap-1.5")}>
-                            Pedido em: {new Date(order.order_date).toLocaleDateString('pt-BR')}
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>
+                            {new Date(order.order_date).toLocaleDateString('pt-BR')}
                           </span>
-                          <span className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                          <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>·</span>
+                          <span className={cn(ds.typography.size.xs, ds.colors.text.muted)}>
                             {order.items?.length || 0} itens
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between sm:justify-end gap-6 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-border/50">
-                      <div className="text-left sm:text-right">
-                        <p className={cn(ds.typography.size.xs, ds.colors.text.muted)}>Valor total</p>
-                        <p className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right hidden sm:block">
+                        <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.primary)}>
                           R$ {order.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
                       </div>
-                      <Button 
-                        size="default" 
-                        variant="outline" 
-                        className="shrink-0 h-11 px-5"
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2.5 text-xs"
                         onClick={() => navigate(`/dashboard/compras?tab=pedidos&receiveOrder=${order.id}`)}
                       >
-                        Acompanhar
+                        Ver
                       </Button>
                     </div>
                   </div>
