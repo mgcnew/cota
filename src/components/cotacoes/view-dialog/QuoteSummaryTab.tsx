@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, Sparkles, Loader2, MessageCircle } from "lucide-react";
+import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -8,11 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
-import { analyzeQuoteOptions } from "@/lib/gemini";
-import { generateQuoteExportMessage, sendWhatsAppReport, generateWhatsAppGreeting, generateQuoteReportHTML } from "@/lib/whatsapp-service";
-import { useCompany } from "@/hooks/useCompany";
-import { toast } from "sonner";
-import html2canvas from "html2canvas";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -32,121 +27,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [groupBySupplier, setGroupBySupplier] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<string | null>(null);
-  const [isExportingWhatsApp, setIsExportingWhatsApp] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleWhatsAppExport = async () => {
-    if (!containerRef.current || isExportingWhatsApp) return;
-    
-    setIsExportingWhatsApp(true);
-    const toastId = toast.loading('Preparando relatório profissional...');
-
-    try {
-      // 1. Capturar imagem do resumo
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const canvas = await html2canvas(containerRef.current, {
-        useCORS: true,
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.querySelector('[data-capture-id="quote-summary"]') as HTMLElement;
-          if (el) {
-            el.classList.remove('dark');
-            el.style.backgroundColor = '#ffffff';
-          }
-        }
-      });
-      
-      const base64Image = canvas.toDataURL("image/jpeg", 0.8);
-
-      // 2. Preparar dados para o HTML interativo
-      const negotiatedSavings = filteredAndSortedData.reduce((acc, item) => {
-        const bestEntry = item.allPrices?.find((p: any) => p.fornecedorId === item.bestSupplierId);
-        const initial = bestEntry?.valor_inicial || item.bestPrice;
-        return acc + Math.max(0, (initial - item.bestPrice) * item.quantidade);
-      }, 0);
-
-      const marketSavings = filteredAndSortedData.reduce((acc, item) => 
-        acc + (item.savings > 0 ? item.savings * item.quantidade : 0), 0
-      );
-
-      // Mapear produtos para o formato esperado pelo generateQuoteReportHTML
-      const productsData = filteredAndSortedData.map(p => ({
-        productName: p.productName,
-        quantidade: p.quantidade,
-        unidade: p.unidade,
-        bestPrice: p.bestPrice,
-        bestSupplierName: p.bestSupplierName,
-        totalItem: p.bestPrice * p.quantidade,
-        allOffers: p.allPrices?.map((o: any) => ({
-          supplierName: o.nome,
-          price: o.value,
-          initialPrice: o.valor_inicial,
-          total: o.value * p.quantidade,
-          isWinner: o.fornecedorId === p.bestSupplierId,
-          wasNegotiated: o.value < o.valor_inicial
-        })) || []
-      }));
-
-      const quoteId = productPricesData[0]?.quoteId || "COTA";
-
-      const htmlContent = generateQuoteReportHTML({
-        quoteId: quoteId,
-        dateLabel: new Date().toLocaleDateString('pt-BR'),
-        companyName: company?.name || "Minha Empresa",
-        totalProdutos: stats.totalProdutos,
-        totalFornecedores: stats.totalFornecedores,
-        fornecedoresRespondidos: stats.fornecedoresRespondidos,
-        totalMelhorPreco: melhorTotal,
-        totalEconomiaReal: negotiatedSavings,
-        productsData: productsData,
-        viewMode: "comparative"
-      });
-
-      const greeting = generateWhatsAppGreeting(
-        quoteId,
-        stats.totalProdutos,
-        company?.name
-      );
-
-      // 3. Enviar via API
-      const res = await sendWhatsAppReport(
-        (window as any).DEFAULT_PHONE_NUMBER || "11966670314",
-        base64Image,
-        htmlContent,
-        quoteId,
-        greeting,
-        company?.id
-      );
-
-      if (res.success) {
-        toast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
-      } else {
-        throw new Error(res.error || "Erro no envio");
-      }
-    } catch (error: any) {
-      console.error("WhatsApp Export Error:", error);
-      toast.error(`Falha no envio: ${error.message}`, { id: toastId });
-    } finally {
-      setIsExportingWhatsApp(false);
-    }
-  };
-
-  const handleAnalyzeQuote = async () => {
-    setIsAnalyzing(true);
-    try {
-      const result = await analyzeQuoteOptions(productPricesData);
-      setAnalysisResult(result);
-    } catch (error) {
-      console.error(error);
-      setAnalysisResult("Ocorreu um erro ao gerar a análise.");
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
   const topSuppliersCount = useMemo(() => {
     const wins = new Set();
@@ -300,66 +181,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline"
-            onClick={handleWhatsAppExport}
-            disabled={isExportingWhatsApp}
-            className="h-8 border-brand/20 text-brand font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm hover:bg-brand/10 transition-all flex-shrink-0"
-          >
-            {isExportingWhatsApp ? (
-              <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
-            ) : (
-              <MessageCircle className="h-3 w-3 mr-1.5" />
-            )}
-            <span className="hidden sm:inline">Exportar p/</span> WhatsApp
-          </Button>
-
-          <Button 
-            onClick={handleAnalyzeQuote} 
-            disabled={isAnalyzing}
-            className="h-8 bg-brand hover:bg-brand/90 text-black font-black text-[10px] uppercase tracking-wider rounded-lg shadow-sm shadow-brand/20 border-none transition-all hover:scale-[1.02] flex-shrink-0"
-          >
-            {isAnalyzing ? <Loader2 className="h-3 w-3 mr-1.5 animate-spin" /> : <Sparkles className="h-3 w-3 mr-1.5" />}
-            <span className="hidden sm:inline">Otimizar Compra</span>
-            <span className="sm:hidden">Otimizar</span>
-          </Button>
-        </div>
       </div>
-
-      {/* RESULTADO DA IA (condicional) - RESUMO DA DECISÃƒO */}
-      {analysisResult && (
-        <div className="bg-brand/5 border-b border-brand/20 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-brand" />
-              <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Resumo da Decisão (IA)</h3>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const exportMsg = generateQuoteExportMessage(
-                  stats,
-                  groupedData || [],
-                  filteredAndSortedData.reduce((acc, item) => acc + (item.savings > 0 ? item.savings : 0), 0),
-                  melhorTotal,
-                  analysisResult
-                );
-                const url = `https://wa.me/?text=${encodeURIComponent(exportMsg)}`;
-                window.open(url, '_blank');
-              }}
-              className="h-7 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95"
-            >
-              <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              Exportar Decisão
-            </Button>
-          </div>
-          <div className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed font-medium">
-            {analysisResult}
-          </div>
-        </div>
-      )}
 
       {/* 2. TOOLBAR & FILTROS */}
       <div className="bg-background/80 backdrop-blur-md px-4 py-3 border-b border-border dark:border-white/5/40 flex flex-col sm:flex-row items-center gap-2 sticky top-0 z-20">

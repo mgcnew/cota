@@ -707,6 +707,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={handleWhatsAppExport}
+                  disabled={isExportingWhatsApp}
+                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                  title="Enviar para WhatsApp"
+                >
+                  {isExportingWhatsApp ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => setShowResumoDialog(true)}
                   className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
                   title="Relatório Profissional"
