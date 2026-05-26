@@ -9,7 +9,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border border-border dark:border-white/8 bg-card text-card-foreground shadow-sm relative overflow-hidden",
+      "rounded-lg border border-border dark:border-white/5 bg-card text-card-foreground shadow-sm relative overflow-hidden",
       accent && `before:absolute before:top-0 before:right-0 before:w-24 before:h-24 before:${accentColor} before:-rotate-45 before:translate-x-12 before:-translate-y-12`,
       className
     )}

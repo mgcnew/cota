@@ -142,13 +142,13 @@ export const designSystem = {
         },
 
         card: {
-            root: "bg-card border border-border dark:border-white/8 rounded-xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)] transition-all duration-200",
-            flat: "bg-card border border-border dark:border-white/8 rounded-xl",
+            root: "bg-card border border-border dark:border-white/5 rounded-xl shadow-[0_2px_12px_-4px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.12)] transition-all duration-200",
+            flat: "bg-card border border-border dark:border-white/5 rounded-xl",
             interactive: "cursor-pointer active:scale-[0.99] transition-transform",
-            header: "px-4 py-3 border-b border-border dark:border-white/6 flex items-center justify-between",
+            header: "px-4 py-3 border-b border-border dark:border-white/5 flex items-center justify-between",
             title: "text-sm font-semibold text-foreground",
             body: "p-4",
-            footer: "px-4 py-3 bg-muted/30 dark:bg-card/50 border-t border-border dark:border-white/6 rounded-b-xl text-xs text-muted-foreground"
+            footer: "px-4 py-3 bg-muted/30 dark:bg-card/50 border-t border-border dark:border-white/5 rounded-b-xl text-xs text-muted-foreground"
         },
 
         metricCard: {
@@ -195,11 +195,11 @@ export const designSystem = {
 
         modal: {
             overlay: "fixed inset-0 z-50 bg-background/60 backdrop-blur-[2px] animate-in fade-in duration-200",
-            content: "relative z-50 w-full max-w-2xl bg-card border border-border dark:border-white/8 shadow-2xl rounded-xl p-0 animate-fade-in flex flex-col max-h-[90vh]",
-            header: "flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-border dark:border-white/6 bg-transparent rounded-t-xl",
+            content: "relative z-50 w-full max-w-2xl bg-card border border-border dark:border-white/5 shadow-2xl rounded-xl p-0 animate-fade-in flex flex-col max-h-[90vh]",
+            header: "flex-shrink-0 flex items-center justify-between px-4 py-3 border-b border-border dark:border-white/5 bg-transparent rounded-t-xl",
             title: "text-sm font-semibold leading-none tracking-tight text-foreground",
             body: "p-4 overflow-y-auto flex-1 custom-scrollbar",
-            footer: "flex-shrink-0 flex items-center justify-end gap-2 px-4 py-3 bg-muted/30 dark:bg-card/50 border-t border-border dark:border-white/6 rounded-b-xl",
+            footer: "flex-shrink-0 flex items-center justify-end gap-2 px-4 py-3 bg-muted/30 dark:bg-card/50 border-t border-border dark:border-white/5 rounded-b-xl",
 
             layout: {
                 viewport: "h-[90vh] flex flex-col overflow-hidden border-none shadow-2xl",
@@ -219,8 +219,8 @@ export const designSystem = {
             container: "bg-background w-full",
             header: "bg-transparent",
             headerCell: "h-10 px-4 text-left align-middle font-semibold text-muted-foreground text-[11px] uppercase tracking-wider",
-            headerWrapper: "flex items-center rounded-lg shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-3 border border-border dark:border-white/6 bg-card mb-2",
-            row: "bg-card border border-border dark:border-white/6 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] hover:scale-[1.002] mb-1.5",
+            headerWrapper: "flex items-center rounded-lg shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-3 border border-border dark:border-white/5 bg-card mb-2",
+            row: "bg-card border border-border dark:border-white/5 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_12px_-4px_rgba(0,0,0,0.08)] hover:scale-[1.002] mb-1.5",
             rowWrapper: "flex items-center px-4 py-2.5 transition-all duration-300",
             rowCompact: "group py-1.5 px-4 rounded-lg border transition-all duration-300 relative overflow-hidden",
             rowActive: "bg-brand/5 border-brand/20 ring-1 ring-brand/10",
@@ -248,7 +248,7 @@ export const designSystem = {
             },
             caption: "mt-4 text-sm text-muted-foreground",
 
-            headerContainer: "flex items-center shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-4 border border-border dark:border-white/6 bg-card rounded-xl mb-2",
+            headerContainer: "flex items-center shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] px-4 py-4 border border-border dark:border-white/5 bg-card rounded-xl mb-2",
             headerLabel: "uppercase tracking-wide text-[10px] font-bold text-muted-foreground",
             headerIcon: "w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0 text-muted-foreground"
         },
@@ -298,8 +298,8 @@ export const designSystem = {
         },
 
         separator: {
-            horizontal: "h-[1px] w-full bg-border dark:bg-white/6 my-4",
-            vertical: "h-full w-[1px] bg-border dark:bg-white/6 mx-4"
+            horizontal: "h-[1px] w-full bg-border dark:bg-white/5 my-4",
+            vertical: "h-full w-[1px] bg-border dark:bg-white/5 mx-4"
         },
 
         pagination: {
