@@ -27,8 +27,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   inativo: { label: "Inativo", className: ds.components.badge.outline },
   
   // Pendentes
-  pending: { label: "Pendente", className: ds.components.badge.secondary },
-  pendente: { label: "Pendente", className: ds.components.badge.secondary },
+  pending: { label: "Pendente", className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50" },
+  pendente: { label: "Pendente", className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50" },
   planejada: { label: "Planejada", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
   
   // Concluídos
@@ -58,8 +58,8 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   confirmado: { label: "Confirmado", className: ds.components.badge.success },
   
   // Produtos
-  cotado: { label: "Cotado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
-  sem_cotacao: { label: "Sem Cotação", className: ds.components.badge.outline },
+  cotado: { label: "Cotado", className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50" },
+  sem_cotacao: { label: "Sem Cotação", className: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900/50" },
   
   // Pedidos
   processando: { label: "Processando", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },

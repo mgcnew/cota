@@ -1,5 +1,5 @@
 import { memo, useState, useCallback } from 'react';
-import { Package, Star, ClipboardList, History, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Package, ClipboardList, History, TrendingUp, TrendingDown, Minus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableActionGroup } from "@/components/ui/table-action-group";
@@ -30,7 +30,25 @@ const getTrendIcon = (trend: "up" | "down" | "stable") => {
   return <Minus className="h-3 w-3 text-muted-foreground/30" />;
 };
 
-type SortKey = 'name' | 'category' | 'brand' | 'price' | 'quotes';
+type SortKey = 'name' | 'category' | 'price' | 'quotes';
+
+const CATEGORY_COLORS = [
+  "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/30 dark:text-violet-400 dark:border-violet-900/50",
+  "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/30 dark:text-sky-400 dark:border-sky-900/50",
+  "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50",
+  "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900/50",
+  "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50",
+  "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50",
+  "bg-teal-50 text-teal-700 border-teal-200 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50",
+  "bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-950/30 dark:text-pink-400 dark:border-pink-900/50",
+  "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-400 dark:border-indigo-900/50",
+  "bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-950/30 dark:text-cyan-400 dark:border-cyan-900/50",
+];
+
+const getCategoryColor = (category: string): string => {
+  const hash = (category || "").toLowerCase().split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return CATEGORY_COLORS[hash % CATEGORY_COLORS.length];
+};
 type SortDir = 'asc' | 'desc';
 
 const extractPrice = (priceStr: string): number => {
@@ -58,7 +76,6 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
       switch (sortKey) {
         case 'name':     cmp = (a.name || '').localeCompare(b.name || '', 'pt-BR'); break;
         case 'category': cmp = (a.category || '').localeCompare(b.category || '', 'pt-BR'); break;
-        case 'brand':    cmp = (a.brand_name || '').localeCompare(b.brand_name || '', 'pt-BR'); break;
         case 'price':    cmp = extractPrice(a.lastOrderPrice || '') - extractPrice(b.lastOrderPrice || ''); break;
         case 'quotes':   cmp = (a.quotesCount || 0) - (b.quotesCount || 0); break;
       }
@@ -91,10 +108,8 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
           <TableHeader>
             <TableRow>
               <SortHeader label="Produto" sortId="name" className="pl-6 w-[28%]" />
-              <SortHeader label="Categoria" sortId="category" className="w-[13%]" />
-              <TableHead className="hidden lg:table-cell w-[12%]">Marca</TableHead>
-              <TableHead className="hidden xl:table-cell w-[10%]">Código</TableHead>
-              <TableHead className="text-center w-[10%]">Status</TableHead>
+              <SortHeader label="Categoria" sortId="category" className="w-[15%]" />
+              <TableHead className="text-center w-[12%]">Status</TableHead>
               <SortHeader label="Preço" sortId="price" className="w-[10%]" />
               <TableHead className="hidden lg:table-cell w-[12%]">Fornecedor</TableHead>
               <SortHeader label="Cotações" sortId="quotes" className="w-[8%] text-center" />
@@ -129,37 +144,8 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
 
                 {/* Categoria */}
                 <TableCell>
-                  <span className="inline-flex items-center text-xs text-muted-foreground bg-muted px-2.5 py-0.5 rounded-full">
+                  <span className={cn("inline-flex items-center text-xs px-2.5 py-0.5 rounded-full border", getCategoryColor(product.category || ""))}>
                     {capitalize(product.category)}
-                  </span>
-                </TableCell>
-
-                {/* Marca */}
-                <TableCell className="hidden lg:table-cell">
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-sm text-muted-foreground truncate max-w-[120px]">
-                      {capitalize(product.brand_name || "—")}
-                    </span>
-                    {product.brand_rating ? (
-                      <div className="flex items-center gap-px">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={cn(
-                              "h-2.5 w-2.5",
-                              i < (product.brand_rating || 0) ? "text-amber-400 fill-amber-400" : "text-muted-foreground/20"
-                            )}
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </TableCell>
-
-                {/* Código */}
-                <TableCell className="hidden xl:table-cell">
-                  <span className="font-mono text-[13px] text-muted-foreground bg-muted/50 px-2 py-1 rounded border border-border dark:border-white/5">
-                    {product.barcode || "—"}
                   </span>
                 </TableCell>
 
