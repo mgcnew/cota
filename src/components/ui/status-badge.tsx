@@ -65,7 +65,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   processando: { label: "Processando", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
 };
 
-const defaultConfig = { label: "Desconhecido", className: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400" };
+const defaultConfig = { label: "Desconhecido", className: "bg-muted text-muted-foreground" };
 
 // Memoizado para evitar re-renders desnecessários
 export const StatusBadge = memo(function StatusBadge({ status, className, customLabel }: StatusBadgeProps) {

@@ -27,12 +27,12 @@ export const EmptyState = memo(function EmptyState({
 }: EmptyStateProps) {
   const content = (
     <div className={cn("text-center", variant === "card" ? "p-8 sm:p-12" : "py-8", className)}>
-      <Icon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-      <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
+      <Icon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground/60" />
+      <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">
         {title}
       </h3>
       {description && (
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <p className="text-xs sm:text-sm text-muted-foreground mb-4">
           {description}
         </p>
       )}
@@ -50,7 +50,7 @@ export const EmptyState = memo(function EmptyState({
   }
 
   return (
-    <Card className="border-dashed border-2 border-gray-300 dark:border-gray-600">
+    <Card className="border-dashed border-2 border-border">
       <CardContent className="p-0">
         {content}
       </CardContent>

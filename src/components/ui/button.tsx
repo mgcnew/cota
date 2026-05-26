@@ -14,7 +14,7 @@ const buttonVariants = cva(
         default: ds.components.button.variants.primary,
         destructive: ds.components.button.variants.danger,
         outline: ds.components.button.variants.secondary,
-        secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-50 shadow-sm", // Fallback para estilo 'muted' consistente com sistema
+        secondary: "bg-muted text-foreground hover:bg-muted/80 shadow-sm",
         ghost: ds.components.button.variants.ghost,
         link: "text-brand underline-offset-4 hover:underline",
       },

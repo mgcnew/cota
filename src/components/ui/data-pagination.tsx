@@ -96,7 +96,7 @@ export const DataPagination = memo(function DataPagination({
         <div className={tokens.results}>
           {safeTotalItems > 0 ? (
             <>
-              Mostrando <span className="text-foreground dark:text-zinc-200">{safeStartIndex + 1}</span> a <span className="text-foreground dark:text-zinc-200">{safeEndIndex}</span> de <span className="text-foreground dark:text-zinc-200">{safeTotalItems}</span> resultados
+              Mostrando <span className="text-foreground">{safeStartIndex + 1}</span> a <span className="text-foreground">{safeEndIndex}</span> de <span className="text-foreground">{safeTotalItems}</span> resultados
             </>
           ) : (
             "Nenhum resultado encontrado"
@@ -104,12 +104,12 @@ export const DataPagination = memo(function DataPagination({
         </div>
 
         <div className="hidden md:flex items-center gap-2">
-          <span className="text-[12px] font-medium text-zinc-400">Itens:</span>
+          <span className="text-[12px] font-medium text-muted-foreground">Itens:</span>
           <Select
             value={safeItemsPerPage.toString()}
             onValueChange={handleItemsPerPageChange}
           >
-            <SelectTrigger className="h-8 w-[65px] bg-transparent border-zinc-200 dark:border-zinc-800 text-xs">
+            <SelectTrigger className="h-8 w-[65px] bg-transparent border-border text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

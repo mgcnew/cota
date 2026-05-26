@@ -41,7 +41,7 @@ interface TableActionGroupProps {
 
 // Consistent color styles for action items
 const actionVariantStyles = {
-  default: "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/70 hover:text-gray-800 dark:hover:text-gray-100",
+  default: "text-muted-foreground hover:bg-accent hover:text-foreground",
   view: "text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300",
   edit: "text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-700 dark:hover:text-amber-300",
   success: "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-300",
@@ -129,19 +129,19 @@ export function TableActionGroup({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/70 rounded-lg transition-colors"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
           >
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
-          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 z-50 w-48 shadow-lg rounded-xl"
+          className="bg-popover border border-border z-50 w-48 shadow-lg rounded-xl"
         >
-          <DropdownMenuLabel className="text-gray-500 dark:text-gray-400 font-medium text-xs px-3 py-2">
+          <DropdownMenuLabel className="text-muted-foreground font-medium text-xs px-3 py-2">
             {dropdownLabel}
           </DropdownMenuLabel>
-          <DropdownMenuSeparator className="bg-gray-100 dark:bg-gray-700" />
+          <DropdownMenuSeparator className="bg-border" />
           {allActions.map((item, index) => (
             <DropdownMenuItem
               key={index}

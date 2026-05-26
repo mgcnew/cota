@@ -34,14 +34,14 @@ export const SearchInput = memo(function SearchInput({
       <div 
         className={cn(
           "relative flex items-center h-11 w-full rounded-lg transition-all duration-200 overflow-hidden",
-          "bg-white dark:bg-background",
-          "border border-zinc-200 dark:border-zinc-800",
+          "bg-card",
+          "border border-border",
           "shadow-sm group-focus-within:shadow-md",
-          "group-focus-within:border-zinc-300 dark:group-focus-within:border-zinc-700",
-          "group-focus-within:ring-2 group-focus-within:ring-zinc-100 dark:group-focus-within:ring-zinc-900/50"
+          "group-focus-within:border-border/80",
+          "group-focus-within:ring-2 group-focus-within:ring-ring/20"
         )}
       >
-        <div className="flex-shrink-0 flex items-center justify-center w-11 h-11 text-zinc-400 dark:text-zinc-500 transition-colors group-focus-within:text-brand">
+        <div className="flex-shrink-0 flex items-center justify-center w-11 h-11 text-muted-foreground transition-colors group-focus-within:text-brand">
           <Search className="h-4.5 w-4.5" />
         </div>
         
@@ -52,8 +52,8 @@ export const SearchInput = memo(function SearchInput({
           placeholder={placeholder}
           className={cn(
             "w-full h-full pl-1 pr-3 bg-transparent border-none ring-0 focus:ring-0 focus:outline-none",
-            "text-[14px] font-medium text-zinc-900 dark:text-zinc-100",
-            "placeholder:text-zinc-400/80 dark:placeholder:text-zinc-500/80",
+            "text-[14px] font-medium text-foreground",
+            "placeholder:text-muted-foreground/60",
             className
           )}
           {...props}
@@ -64,8 +64,8 @@ export const SearchInput = memo(function SearchInput({
             onClick={handleClear}
             className={cn(
               "p-1.5 mr-2 rounded-lg transition-all duration-200",
-              "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200",
-              "hover:bg-zinc-100 dark:hover:bg-zinc-800",
+              "text-muted-foreground hover:text-foreground",
+              "hover:bg-accent",
               "active:scale-95"
             )}
             type="button"
