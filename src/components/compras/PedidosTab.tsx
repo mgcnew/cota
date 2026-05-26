@@ -195,7 +195,7 @@ function PedidosTab() {
   if (isLoading) return <div className="flex items-center justify-center py-24"><Loader2 className={cn("h-8 w-8 animate-spin", ds.colors.text.primary)} /></div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+    <div className="space-y-6">
       {/* Metrics */}
       {isMobile ? (
         <div className="mb-4 -mx-1">

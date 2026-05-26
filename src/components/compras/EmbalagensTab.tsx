@@ -175,7 +175,7 @@ function EmbalagensTab() {
     <div className="space-y-6">
       {/* Hub Central Navigation */}
       {activeSubTab === "hub" && (
-        <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+        <div className="space-y-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
             <div className="text-center md:text-left">
               <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Portal de Embalagens</h2>

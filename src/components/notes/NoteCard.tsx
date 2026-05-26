@@ -1,5 +1,4 @@
 ﻿import { memo } from "react";
-import { CSSSlideIn } from "@/components/ui/css-animation";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, MessageSquare, Clock, Edit, Trash2, CheckCircle2, Pin, PinOff } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -55,8 +54,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
   const importance = importanceConfig[note.importance];
 
   return (
-    <CSSSlideIn direction="up" duration={400} delay={index * 30}>
-      <div className={cn(
+    <div className={cn(
         ds.components.card.root,
         "group relative flex flex-col h-full transition-all duration-300 overflow-hidden",
         "border-border dark:border-white/5 hover:border-brand/40 shadow-none hover:shadow-xl",
@@ -158,8 +156,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
             </Button>
           </div>
         </div>
-      </div>
-    </CSSSlideIn>
+    </div>
   );
 });
 

@@ -94,7 +94,7 @@ function CotacoesTab() {
   if (isLoading) return <div className="flex items-center justify-center py-12"><p className="text-muted-foreground">Carregando...</p></div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
+    <div className="space-y-6">
       {/* Metrics */}
       {isMobile ? (
         <div className="mb-4 -mx-1">
