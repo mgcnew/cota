@@ -185,7 +185,7 @@ export const CotacoesListDesktop = memo(({
                       }
                       if (urgency === 'expired') {
                         return (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-red-50 text-red-700 border border-red-200 dark:bg-red-950/30 dark:text-red-400 dark:border-red-900/50">
+                          <span className="inline-flex items-center gap-1 text-[12px] font-medium whitespace-nowrap text-red-500 dark:text-red-400">
                             <Calendar className="h-3 w-3" />
                             {cotacao.dataFim}
                           </span>
@@ -193,7 +193,7 @@ export const CotacoesListDesktop = memo(({
                       }
                       if (urgency === 'urgent') {
                         return (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50">
+                          <span className="inline-flex items-center gap-1 text-[12px] font-medium whitespace-nowrap text-amber-500 dark:text-amber-400">
                             <Calendar className="h-3 w-3" />
                             {cotacao.dataFim}
                           </span>
