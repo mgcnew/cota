@@ -23,7 +23,7 @@ interface QuoteSummaryTabProps {
 }
 
 export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr }: QuoteSummaryTabProps) {
-  const { data: company } = useCompany();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [groupBySupplier, setGroupBySupplier] = useState(false);
