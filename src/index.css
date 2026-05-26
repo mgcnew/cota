@@ -1550,7 +1550,7 @@
 @keyframes pageEnter {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
