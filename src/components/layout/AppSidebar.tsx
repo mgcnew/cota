@@ -183,9 +183,9 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           expanded ? "px-2 gap-3" : "justify-center"
         )}
       >
-        <div 
+        <div
           onClick={() => setProfileDialogOpen(true)}
-          className="relative shrink-0 cursor-pointer overflow-hidden rounded-xl ring-2 ring-border/10 shadow-lg w-14 h-14 hover:opacity-80 transition-opacity bg-white flex items-center justify-center p-0.5"
+          className="relative shrink-0 cursor-pointer overflow-hidden rounded-lg ring-1 ring-border/20 w-9 h-9 hover:opacity-80 transition-opacity bg-white flex items-center justify-center p-0.5"
           title="Abrir Perfil"
         >
           <img 
@@ -307,7 +307,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
       </div>
 
       {/* FOOTER ACTIONS */}
-      <div className="mt-auto flex flex-col items-center w-full pb-6 pt-4 gap-4 px-2 relative z-10">
+      <div className="mt-auto flex flex-col items-center w-full pb-3 pt-3 gap-3 px-2 relative z-10">
         
         {/* Assistente de IA - Destacado e Flutuante */}
         <TooltipProvider delayDuration={0}>
@@ -458,7 +458,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
         >
           <div className="w-full h-full flex flex-col">
             {/* Mobile Header - Compact & Premium */}
-            <div className="px-6 py-6 flex items-center justify-between border-b border-white/5 bg-background/50 backdrop-blur-sm">
+            <div className="px-4 py-4 flex items-center justify-between border-b border-white/5 bg-background/50 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div 
                   onClick={() => {
@@ -511,7 +511,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             </nav>
 
             {/* Mobile Footer - Action Bar Icons */}
-            <div className="mt-auto p-4 bg-muted/30 backdrop-blur-xl rounded-t-[32px] border-t border-white/5">
+            <div className="mt-auto p-3 bg-muted/30 backdrop-blur-xl rounded-t-2xl border-t border-white/5">
               <div className="flex items-center justify-around w-full">
                 {/* User Profile Avatar */}
                 <button
@@ -537,13 +537,13 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                 {/* Theme Toggle */}
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-4 rounded-2xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
+                  className="p-3 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
                   title="Alternar Tema"
                 >
                   {theme === 'dark' ? (
-                    <Sun className="w-6 h-6 text-brand transition-transform group-hover:rotate-45" />
+                    <Sun className="w-5 h-5 text-brand transition-transform group-hover:rotate-45" />
                   ) : (
-                    <Moon className="w-6 h-6 text-brand transition-transform group-hover:-rotate-12" />
+                    <Moon className="w-5 h-5 text-brand transition-transform group-hover:-rotate-12" />
                   )}
                 </button>
 
@@ -553,10 +553,10 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     navigate('/dashboard/configuracoes');
                     setMobileMenuOpen(false);
                   }}
-                  className="p-4 rounded-2xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
+                  className="p-3 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
                   title="Configurações"
                 >
-                  <Settings className="w-6 h-6 opacity-80 group-hover:opacity-100 group-hover:rotate-45 transition-all" />
+                  <Settings className="w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:rotate-45 transition-all" />
                 </button>
 
                 {/* Logout Icon */}
@@ -565,10 +565,10 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="p-4 rounded-2xl text-red-500/80 hover:bg-red-500/10 active:scale-95 transition-all group"
+                  className="p-3 rounded-xl text-red-500/80 hover:bg-red-500/10 active:scale-95 transition-all group"
                   title="Sair"
                 >
-                  <LogOut className="w-6 h-6 opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                  <LogOut className="w-5 h-5 opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </button>
               </div>
             </div>
