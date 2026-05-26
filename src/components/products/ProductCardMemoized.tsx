@@ -20,7 +20,7 @@ interface ProductCardProps {
 
 /**
  * Card de produto otimizado com React.memo
- * - Memoizado para evitar re-renders desnecessÃ¡rios
+ * - Memoizado para evitar re-renders desnecessários
  * - Lazy loading de imagens
  * - Callbacks otimizados
  */
@@ -135,13 +135,13 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
               <div className="flex items-center justify-between p-2.5 rounded-lg bg-gray-50/80 dark:bg-gray-800/30 border border-gray-200/60 dark:border-gray-700/30">
                 <div className="flex items-center gap-2">
                   <Scale className="h-3.5 w-3.5 text-gray-500" />
-                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">CÃ³digo</span>
+                  <span className="text-xs font-medium text-gray-600 dark:text-gray-400">Código</span>
                 </div>
                 <span className="text-xs font-semibold text-gray-900 dark:text-white font-mono">{product.barcode}</span>
               </div>
             )}
 
-            {/* BotÃµes de aÃ§Ã£o rÃ¡pida mobile */}
+            {/* Botões de ação rápida mobile */}
             <div className="flex gap-2 pt-2 border-t border-border dark:border-white/5">
               <ProductPriceHistoryDialog 
                 productName={product.name} 
@@ -153,7 +153,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
                     className="flex-1 h-9 text-xs"
                   >
                     <History className="h-3.5 w-3.5 mr-1.5" />
-                    HistÃ³rico
+                    Histórico
                   </Button>
                 } 
               />
@@ -189,7 +189,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
                 <div className="text-right">
                   <div className="flex items-center gap-1 mb-1">
                     {getTrendIcon(product.trend || "stable")}
-                    <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">TendÃªncia</span>
+                    <span className="text-xs sm:text-sm font-medium text-green-600 hidden sm:inline">Tendência</span>
                   </div>
                   <div className="text-[10px] sm:text-xs text-green-600 bg-green-100 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                     Atualizado
@@ -211,7 +211,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
                 <div className="p-2 sm:p-3 rounded-lg bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200/60 dark:border-blue-700/30 text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
                     <FileText className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
-                    <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">CotaÃ§Ãµes</span>
+                    <span className="text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400">Cotações</span>
                   </div>
                   <span className="text-base sm:text-lg font-bold text-blue-800 dark:text-blue-300">{product.quotesCount || 0}</span>
                 </div>
@@ -237,7 +237,7 @@ export const ProductCardMemoized = memo<ProductCardProps>(({
               className={`w-full bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200 text-orange-700 ${!isMobile ? 'hover:from-orange-100 hover:to-amber-100 hover:border-orange-300 hover:text-orange-800 transition-all duration-200' : ''}`}
             >
               <History className="h-4 w-4 mr-2" />
-              Ver HistÃ³rico de PreÃ§os
+              Ver Histórico de Preços
             </Button>
           } 
         />

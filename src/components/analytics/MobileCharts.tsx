@@ -153,7 +153,7 @@ export const MobileCharts = memo(function MobileCharts({
       <Card className="border border-border dark:border-white/5/30">
         <CardContent className="p-6 text-center">
           <BarChart3 className="h-10 w-10 mx-auto mb-2 text-gray-400" />
-          <p className="text-sm text-gray-500">Nenhum dado disponÃ­vel</p>
+          <p className="text-sm text-gray-500">Nenhum dado disponível</p>
         </CardContent>
       </Card>
     );
@@ -164,7 +164,7 @@ export const MobileCharts = memo(function MobileCharts({
       <div className="flex items-center gap-2">
         <Activity className="h-4 w-4 text-purple-600" />
         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-          AnÃ¡lise de Performance
+          Análise de Performance
         </h3>
       </div>
 
@@ -208,7 +208,7 @@ export const MobileCharts = memo(function MobileCharts({
             <CardHeader className="pb-1 px-3 pt-3">
               <CardTitle className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                 <PieChartIcon className="h-3.5 w-3.5 text-purple-500" />
-                DistribuiÃ§Ã£o
+                Distribuição
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2 pb-2">
@@ -241,7 +241,7 @@ export const MobileCharts = memo(function MobileCharts({
             <CardHeader className="pb-1 px-3 pt-3">
               <CardTitle className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
                 <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-                TendÃªncia Mensal
+                Tendência Mensal
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2 pb-2">
@@ -261,7 +261,7 @@ export const MobileCharts = memo(function MobileCharts({
                     stroke="#10b981"
                     strokeWidth={2}
                     dot={{ fill: '#10b981', r: 3 }}
-                    name="CotaÃ§Ãµes"
+                    name="Cotações"
                   />
                   <Line
                     type="monotone"

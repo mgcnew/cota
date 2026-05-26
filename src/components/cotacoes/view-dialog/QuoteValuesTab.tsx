@@ -76,7 +76,7 @@ export function QuoteValuesTab({
   const [showMobileValues, setShowMobileValues] = useState(false);
   const [editedQtdPerBox, setEditedQtdPerBox] = useState<Record<string, string>>({});
   
-  // Agrupamento de cotaÃ§Ãµes
+  // Agrupamento de cotações
   const [otherOpenQuotes, setOtherOpenQuotes] = useState<any[]>([]);
   const [useGroupedLink, setUseGroupedLink] = useState(false);
 
@@ -86,7 +86,7 @@ export function QuoteValuesTab({
   const [showGroupConfirm, setShowGroupConfirm] = useState(false);
   const [pendingBulkSend, setPendingBulkSend] = useState(false);
 
-  // Helper para formatar string de digitaÃ§Ã£o para Real (ex: "1250" -> "12,50")
+  // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
   const formatInputToBRL = (value: string) => {
     const digitOnly = value.replace(/\D/g, "");
     if (!digitOnly) return "";
@@ -97,14 +97,14 @@ export function QuoteValuesTab({
     });
   };
 
-  // Helper para converter string formatada em nÃºmero (ex: "1.250,50" -> 1250.5)
+  // Helper para converter string formatada em número (ex: "1.250,50" -> 1250.5)
   const parseBRLToNumber = (value: string) => {
     return parseFloat(value.replace(/\./g, "").replace(",", ".")) || 0;
   };
 
   useEffect(() => {
-    // Seleciona o primeiro fornecedor apenas se nÃ£o houver um selecionado
-    // e se a lista de fornecedores estiver disponÃ­vel
+    // Seleciona o primeiro fornecedor apenas se não houver um selecionado
+    // e se a lista de fornecedores estiver disponível
     if (fornecedores.length > 0 && !selectedSupplier) {
       const firstId = fornecedores[0]?.id;
       if (firstId) {
@@ -120,7 +120,7 @@ export function QuoteValuesTab({
     }
   }, [editingProductId]);
 
-  // Busca se esse fornecedor estÃ¡ em outras cotaÃ§Ãµes "ativas"
+  // Busca se esse fornecedor está em outras cotações "ativas"
   useEffect(() => {
     setOtherOpenQuotes([]);
     setUseGroupedLink(false);
@@ -201,7 +201,7 @@ export function QuoteValuesTab({
       const newValue = parseBRLToNumber(editedValues[productId]);
       const qtdPerBox = editedQtdPerBox[productId] ? parseInt(editedQtdPerBox[productId], 10) : undefined;
 
-      // AtualizaÃ§Ã£o otimista: avanÃ§a para o prÃ³ximo campo IMEDIATAMENTE
+      // Atualização otimista: avança para o próximo campo IMEDIATAMENTE
       if (nextProductId) {
         const nextVal = getSupplierProductValue(selectedSupplier, nextProductId);
         setEditingProductId(nextProductId);
@@ -242,8 +242,8 @@ export function QuoteValuesTab({
   const handleRemoveItem = useCallback(async (productId: string) => {
     if (!selectedSupplier || isReadOnly) return;
     
-    // ConfirmaÃ§Ã£o simples
-    if (!window.confirm("Deseja realmente remover este produto deste fornecedor? Ele nÃ£o verÃ¡ mais este item no portal.")) {
+    // Confirmação simples
+    if (!window.confirm("Deseja realmente remover este produto deste fornecedor? Ele não verá mais este item no portal.")) {
       return;
     }
 
@@ -293,7 +293,7 @@ export function QuoteValuesTab({
 
   const filteredProducts = useMemo(() => {
     if (!productSearch) return products;
-    // Pega tanto o nome do produto quanto algo relacionado se necessÃ¡rio
+    // Pega tanto o nome do produto quanto algo relacionado se necessário
     return products.filter((p: any) => p.product_name.toLowerCase().includes(productSearch.toLowerCase()));
   }, [products, productSearch]);
 
@@ -304,7 +304,7 @@ export function QuoteValuesTab({
   
   const getShortLink = async (originalTokens: string) => {
     try {
-      // 1. Verifica se jÃ¡ existe um link para esses tokens
+      // 1. Verifica se já existe um link para esses tokens
       const { data: existing } = await supabase
         .from('short_links')
         .select('id')
@@ -313,7 +313,7 @@ export function QuoteValuesTab({
         
       if (existing) return existing.id;
       
-      // 2. Se nÃ£o existir, cria um novo cÃ³digo curto de 6 dÃ­gitos
+      // 2. Se não existir, cria um novo código curto de 6 dígitos
       const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
       
       const { error } = await supabase
@@ -335,13 +335,13 @@ export function QuoteValuesTab({
   const handleWhatsApp = async (e: React.MouseEvent, supplierId: string, supplierName: string, contactPerson?: string, phone?: string, accessToken?: string) => {
     e.stopPropagation();
     
-    // Busca o fornecedor correto pelo ID passado (nÃ£o depende do state selectedSupplier)
+    // Busca o fornecedor correto pelo ID passado (não depende do state selectedSupplier)
     const targetSupplier = fornecedores.find((f: any) => f.id === supplierId);
     const configured = isWhatsAppConfigured();
     
     if (configured && phone) {
       try {
-        toast({ title: "Enviando cotaÃ§Ã£o para o WhatsApp...", description: `Para: ${contactPerson || supplierName}` });
+        toast({ title: "Enviando cotação para o WhatsApp...", description: `Para: ${contactPerson || supplierName}` });
         // Prioritize the salesperson's name for the message greeting
         const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
         let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
@@ -364,7 +364,7 @@ export function QuoteValuesTab({
           }
           
           if (useGroupedLink && otherOpenQuotes.length > 0) {
-            msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link Ãºnico reunindo tudo o que precisamos cotar agora.`;
+            msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
           } else {
             msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
           }
@@ -377,7 +377,7 @@ export function QuoteValuesTab({
         console.log('[WhatsApp DEBUG] Resultado:', JSON.stringify(result));
         
         if (result.success) {
-          toast({ title: "âœ… CotaÃ§Ã£o enviada com sucesso!", variant: "default" });
+          toast({ title: "âœ… Cotação enviada com sucesso!", variant: "default" });
           setSentSuppliers(prev => ({ ...prev, [supplierId]: true }));
         } else {
           throw new Error(result.error || "Erro desconhecido");
@@ -386,7 +386,7 @@ export function QuoteValuesTab({
         console.error("[WhatsApp DEBUG] Erro no envio via API:", error);
         toast({ 
           title: "Erro ao enviar via API", 
-          description: error?.message || "Erro de validaÃ§Ã£o ou conexÃ£o",
+          description: error?.message || "Erro de validação ou conexão",
           variant: "destructive" 
         });
       }
@@ -410,7 +410,7 @@ export function QuoteValuesTab({
         }
         
         if (useGroupedLink && otherOpenQuotes.length > 0) {
-          msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link Ãºnico reunindo tudo o que precisamos cotar agora.`;
+          msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
         } else {
           msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
         }
@@ -472,11 +472,11 @@ export function QuoteValuesTab({
 
     if (successCount > 0) {
       toast({
-        title: `âœ… ${successCount} cotaÃ§Ã£o${successCount > 1 ? 'Ãµes' : ''} enviada${successCount > 1 ? 's' : ''}!`,
+        title: `âœ… ${successCount} cotação${successCount > 1 ? 'ões' : ''} enviada${successCount > 1 ? 's' : ''}!`,
         description: failCount > 0 ? `${failCount} falha${failCount > 1 ? 's' : ''} no envio.` : undefined,
       });
     } else if (failCount > 0) {
-      toast({ title: "âŒ Nenhuma cotaÃ§Ã£o foi enviada.", variant: "destructive" });
+      toast({ title: "âŒ Nenhuma cotação foi enviada.", variant: "destructive" });
     }
   }, [isSendingAll, linkSuppliers, sentSuppliers, handleWhatsApp, useGroupedLink, toast]);
 
@@ -493,7 +493,7 @@ export function QuoteValuesTab({
 
   return (
     <>
-    {/* AlertDialog para confirmaÃ§Ã£o de agrupamento */}
+    {/* AlertDialog para confirmação de agrupamento */}
     <AlertDialog open={showGroupConfirm} onOpenChange={setShowGroupConfirm}>
       <AlertDialogContent className="rounded-2xl border-border/50 shadow-2xl max-w-md">
         <AlertDialogHeader>
@@ -502,9 +502,9 @@ export function QuoteValuesTab({
             Agrupar Links?
           </AlertDialogTitle>
           <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
-            Este fornecedor possui <strong className="text-foreground">{otherOpenQuotes.length} outra{otherOpenQuotes.length > 1 ? 's' : ''} cotaÃ§Ã£o{otherOpenQuotes.length > 1 ? 'Ãµes' : ''}</strong> ativa{otherOpenQuotes.length > 1 ? 's' : ''}.
+            Este fornecedor possui <strong className="text-foreground">{otherOpenQuotes.length} outra{otherOpenQuotes.length > 1 ? 's' : ''} cotação{otherOpenQuotes.length > 1 ? 'ões' : ''}</strong> ativa{otherOpenQuotes.length > 1 ? 's' : ''}.
             <br /><br />
-            Deseja enviar um <strong className="text-amber-600">link unificado</strong> para que o fornecedor responda todas as cotaÃ§Ãµes em uma Ãºnica tela?
+            Deseja enviar um <strong className="text-amber-600">link unificado</strong> para que o fornecedor responda todas as cotações em uma única tela?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-2">
@@ -621,7 +621,7 @@ export function QuoteValuesTab({
                             ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
                             : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
                       )}
-                      title={sentSuppliers[fornecedor.id] ? "âœ… CotaÃ§Ã£o jÃ¡ enviada" : "Enviar CotaÃ§Ã£o via WhatsApp"}
+                      title={sentSuppliers[fornecedor.id] ? "âœ… Cotação já enviada" : "Enviar Cotação via WhatsApp"}
                     >
                       {sentSuppliers[fornecedor.id] 
                         ? <CheckCircle2 className="h-3 w-3" />
@@ -672,7 +672,7 @@ export function QuoteValuesTab({
                 </div>
               </div>
 
-              {/* BotÃ£o "Enviar Todos" via Link */}
+              {/* Botão "Enviar Todos" via Link */}
               {linkSuppliers.length > 1 && (
                 <div className="hidden lg:flex items-center gap-2 mr-4 animate-in slide-in-from-right-4">
                   <TooltipProvider>
@@ -706,7 +706,7 @@ export function QuoteValuesTab({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="bg-zinc-900 text-white border-zinc-800 text-xs max-w-xs shadow-xl rounded-xl">
-                        Envia a cotaÃ§Ã£o via WhatsApp para todos os {linkSuppliers.length} fornecedores com link ativo
+                        Envia a cotação via WhatsApp para todos os {linkSuppliers.length} fornecedores com link ativo
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -716,7 +716,7 @@ export function QuoteValuesTab({
               {otherOpenQuotes.length > 0 && (
                 <div className="hidden lg:flex items-center gap-3 mr-6 animate-in slide-in-from-right-4">
                   <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800 text-[10px] font-black uppercase tracking-tighter">
-                    {otherOpenQuotes.length} vÃ­nculo{otherOpenQuotes.length > 1 ? 's' : ''} encontrado{otherOpenQuotes.length > 1 ? 's' : ''}
+                    {otherOpenQuotes.length} vínculo{otherOpenQuotes.length > 1 ? 's' : ''} encontrado{otherOpenQuotes.length > 1 ? 's' : ''}
                   </Badge>
                   <TooltipProvider>
                     <Tooltip>
@@ -735,7 +735,7 @@ export function QuoteValuesTab({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent className="bg-amber-900 text-white border-amber-800 text-xs max-w-xs shadow-xl rounded-xl">
-                        As outras cotaÃ§Ãµes serÃ£o resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
+                        As outras cotações serão resolvidas no mesmo link (mesma tela) ao enviar via WhatsApp!
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -778,7 +778,7 @@ export function QuoteValuesTab({
                 <div className="flex items-center gap-2">
                   <LinkIcon className="h-3.5 w-3.5 text-amber-600" />
                   <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-tight">
-                    {otherOpenQuotes.length} cotaÃ§Ã£o{otherOpenQuotes.length > 1 ? 's' : ''} extra{otherOpenQuotes.length > 1 ? 's' : ''}
+                    {otherOpenQuotes.length} cotação{otherOpenQuotes.length > 1 ? 's' : ''} extra{otherOpenQuotes.length > 1 ? 's' : ''}
                   </span>
                 </div>
                 <button 
@@ -802,7 +802,7 @@ export function QuoteValuesTab({
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">NegociaÃ§Ã£o e Valor</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">Negociação e Valor</span>
                     <div className="w-10" />
                   </div>
               </div>
@@ -965,7 +965,7 @@ export function QuoteValuesTab({
                         <div className="flex items-center justify-end gap-2 pr-2">
                           {currentValue > 0 ? (
                             <div className="flex items-center gap-3">
-                              {/* Melhor PreÃ§o Indicator */}
+                              {/* Melhor Preço Indicator */}
                               <div className="w-5 flex justify-center">
                                 {isBest && (
                                   <TooltipProvider delayDuration={100}>
@@ -975,13 +975,13 @@ export function QuoteValuesTab({
                                           <Trophy className="h-3 w-3" />
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent className="bg-brand text-black font-black text-[10px] uppercase border-none shadow-xl"> Melhor PreÃ§o Garantido </TooltipContent>
+                                      <TooltipContent className="bg-brand text-black font-black text-[10px] uppercase border-none shadow-xl"> Melhor Preço Garantido </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 )}
                               </div>
 
-                              {/* PreÃ§o Principal */}
+                              {/* Preço Principal */}
                               <p className={cn(
                                 "text-[14px] font-black tracking-tight w-[75px] text-right",
                                 isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100"
@@ -989,7 +989,7 @@ export function QuoteValuesTab({
                                 {formatCurrency(currentValue)}
                               </p>
 
-                              {/* Ãcone de Origem */}
+                              {/* Ícone de Origem */}
                               <div className="w-6 flex justify-center">
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
@@ -1017,7 +1017,7 @@ export function QuoteValuesTab({
                                 })()}
                               </div>
 
-                              {/* HistÃ³rico */}
+                              {/* Histórico */}
                               <div className="w-6 flex justify-center">
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
@@ -1036,7 +1036,7 @@ export function QuoteValuesTab({
                                           <div className="bg-zinc-900 text-white p-3 border-b border-white/10 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                               <History className="h-4 w-4 text-brand" />
-                                              <span className="text-[11px] font-black uppercase tracking-widest leading-none">NegociaÃ§Ã£o</span>
+                                              <span className="text-[11px] font-black uppercase tracking-widest leading-none">Negociação</span>
                                             </div>
                                             <Badge className="bg-white/10 text-white/70 border-none text-[10px] font-black h-5 px-1.5">
                                               {historyArray.length} etapas
@@ -1104,7 +1104,7 @@ export function QuoteValuesTab({
                           ) : (
                             <div className="text-right w-[150px]">
                               <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-border dark:border-white/5 bg-zinc-50 dark:bg-zinc-900">
-                                NÃ£o Cotado
+                                Não Cotado
                               </Badge>
                             </div>
                           )}
@@ -1132,7 +1132,7 @@ export function QuoteValuesTab({
           <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
             <Building2 className="h-12 w-12 text-zinc-400 mb-6" />
             <h3 className="text-lg font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase">Selecione um fornecedor</h3>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase max-w-[200px] mt-2 leading-relaxed">Clique em um fornecedor na lista ao lado para iniciar a negociaÃ§Ã£o.</p>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase max-w-[200px] mt-2 leading-relaxed">Clique em um fornecedor na lista ao lado para iniciar a negociação.</p>
           </div>
         )}
       </div>
@@ -1153,7 +1153,7 @@ export function QuoteValuesTab({
                       {currentSupplier?.nome}
                     </DrawerTitle>
                     <DrawerDescription className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-2">
-                       NegociaÃ§Ã£o Direta
+                       Negociação Direta
                        {currentSupplier?.phone && (
                           <span className="flex items-center gap-1 text-emerald-500">
                             <div className="h-1 w-1 rounded-full bg-emerald-500" />
@@ -1191,7 +1191,7 @@ export function QuoteValuesTab({
                     <div className="flex items-center gap-2">
                       <LinkIcon className="h-4 w-4 text-amber-600" />
                       <span className="text-[10px] font-black text-amber-900 dark:text-amber-300 uppercase tracking-tight">
-                        {otherOpenQuotes.length} outras cotaÃ§Ãµes vinculadas
+                        {otherOpenQuotes.length} outras cotações vinculadas
                       </span>
                     </div>
                     <button 
@@ -1291,7 +1291,7 @@ export function QuoteValuesTab({
                           onClick={() => handleStartEdit(product.product_id, currentValue)}
                         >
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Valor UnitÃ¡rio</span>
+                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Valor Unitário</span>
                             <span className={cn(
                               "text-lg font-black tracking-tight",
                               currentValue > 0 ? (isBest ? "text-brand" : "text-foreground") : "text-zinc-300"

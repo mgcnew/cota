@@ -59,7 +59,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     const currentPrice = item.valor_oferecido;
     const initialPrice = item.valor_inicial;
     
-    // Inicia a sequÃªncia com o valor inicial (primeiro de todos)
+    // Inicia a sequência com o valor inicial (primeiro de todos)
     const sequencePrices: number[] = [];
     if (initialPrice > 0) {
       sequencePrices.push(initialPrice);
@@ -67,7 +67,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     
     const seq = [...history].sort((a: any, b: any) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
     seq.forEach((h: any) => {
-      // Evita duplicar o valor inicial se ele jÃ¡ estiver na sequÃªncia
+      // Evita duplicar o valor inicial se ele já estiver na sequência
       if (sequencePrices.length === 0 || sequencePrices[sequencePrices.length - 1] !== h.old_price) {
         sequencePrices.push(h.old_price);
       }
@@ -306,16 +306,16 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           company?.id
         ),
         {
-          loading: 'Enviando relatÃ³rio completo para WhatsApp...',
+          loading: 'Enviando relatório completo para WhatsApp...',
           success: (res: any) => {
             if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
-            return 'RelatÃ³rio enviado com sucesso via WhatsApp!';
+            return 'Relatório enviado com sucesso via WhatsApp!';
           },
           error: (err) => `Falha no envio: ${err.message}`
         }
       );
     } catch (error: any) {
-      toast.error("Erro ao capturar relatÃ³rio: " + error.message);
+      toast.error("Erro ao capturar relatório: " + error.message);
     } finally {
       setIsCapturing(false);
     }
@@ -332,7 +332,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast.success("RelatÃ³rio HTML baixado com sucesso!");
+    toast.success("Relatório HTML baixado com sucesso!");
   };
 
   const handleSendScreenshot = async () => {
@@ -363,17 +363,17 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
       });
 
       const base64Image = canvas.toDataURL("image/jpeg", 0.9);
-      const targetPhone = prompt("NÃºmero do WhatsApp (com DDD):", "");
+      const targetPhone = prompt("Número do WhatsApp (com DDD):", "");
       if (!targetPhone) { setIsCapturing(false); return; }
 
       const cleanPhone = targetPhone.replace(/\D/g, '');
       const result = await sendWhatsAppMedia(
         cleanPhone,
         base64Image,
-        `ðŸ“Š *RelatÃ³rio de NegociaÃ§Ã£o - CotaÃ§Ã£o #${safeStr(quote.id).slice(0, 8)}*\n\n_Documento oficial de compras._`
+        `ðŸ“Š *Relatório de Negociação - Cotação #${safeStr(quote.id).slice(0, 8)}*\n\n_Documento oficial de compras._`
       );
 
-      if (result.success) toast.success("RelatÃ³rio enviado!");
+      if (result.success) toast.success("Relatório enviado!");
       else throw new Error(result.error);
     } catch (error: any) {
       toast.error("Erro ao enviar: " + error.message);
@@ -392,7 +392,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           </div>
           <div className="flex flex-col min-w-0">
             <h2 className="text-sm md:text-base font-black text-foreground tracking-tight leading-none mb-1 truncate">
-              Resumo da NegociaÃ§Ã£o
+              Resumo da Negociação
             </h2>
             <span className="hidden sm:inline text-[9px] md:text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">
               #{safeStr(quote.id).substring(0, 8)}
@@ -614,7 +614,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                     <div className="grid grid-cols-1">
                       <div className="grid grid-cols-[1fr_minmax(70px,auto)_minmax(85px,auto)] md:grid-cols-[1fr_120px_140px] gap-2 px-3 md:px-5 py-2 bg-muted/20 border-b border-border dark:border-white/5/40">
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest truncate">Fornecedor</span>
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">UnitÃ¡rio</span>
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Unitário</span>
                         <span className="text-[8px] font-black text-muted-foreground uppercase tracking-widest text-right">Total</span>
                       </div>
                       {p.allOffers.map((offer, oIdx) => (
@@ -687,8 +687,8 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
           className="rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background border-t border-border dark:border-white/5"
           style={{ height: '95vh', maxHeight: '95vh' }}
         >
-          <DrawerTitle className="sr-only">Resumo da NegociaÃ§Ã£o</DrawerTitle>
-          <DrawerDescription className="sr-only">RelatÃ³rio de negociaÃ§Ã£o da cotaÃ§Ã£o</DrawerDescription>
+          <DrawerTitle className="sr-only">Resumo da Negociação</DrawerTitle>
+          <DrawerDescription className="sr-only">Relatório de negociação da cotação</DrawerDescription>
           {modalContent}
         </DrawerContent>
       </Drawer>
@@ -698,8 +698,8 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[1100px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
-        <DialogTitle className="sr-only">Resumo da NegociaÃ§Ã£o</DialogTitle>
-        <DialogDescription className="sr-only">RelatÃ³rio de negociaÃ§Ã£o da cotaÃ§Ã£o</DialogDescription>
+        <DialogTitle className="sr-only">Resumo da Negociação</DialogTitle>
+        <DialogDescription className="sr-only">Relatório de negociação da cotação</DialogDescription>
         {modalContent}
       </DialogContent>
     </Dialog>

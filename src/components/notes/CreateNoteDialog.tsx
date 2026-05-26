@@ -49,7 +49,7 @@ export function CreateNoteDialog({
           <StickyNote className={cn("h-4 w-4", ds.colors.text.primary)} />
         </div>
         <DialogTitle className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>
-          {editingNote ? "Editar AnotaÃ§Ã£o" : "Nova AnotaÃ§Ã£o"}
+          {editingNote ? "Editar Anotação" : "Nova Anotação"}
         </DialogTitle>
       </div>
     </div>
@@ -60,19 +60,19 @@ export function CreateNoteDialog({
       {Header}
       
       <div className={cn(ds.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4")}>
-        {/* SeÃ§Ã£o: TÃ­tulo e Prioridade */}
+        {/* Seção: Título e Prioridade */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm font-bold flex items-center gap-2">
                 <FileText className="h-3.5 w-3.5 text-brand" />
-                TÃ­tulo
+                Título
               </Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Ex: ReuniÃ£o com fornecedor"
+                placeholder="Ex: Reunião com fornecedor"
                 maxLength={100}
                 className={cn(ds.components.input.root, errors.title ? 'border-red-500 focus-visible:ring-red-500' : '')}
               />
@@ -94,7 +94,7 @@ export function CreateNoteDialog({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="low">Baixa</SelectItem>
-                    <SelectItem value="medium">MÃ©dia</SelectItem>
+                    <SelectItem value="medium">Média</SelectItem>
                     <SelectItem value="high">Alta</SelectItem>
                     <SelectItem value="urgent">Urgente</SelectItem>
                   </SelectContent>
@@ -126,18 +126,18 @@ export function CreateNoteDialog({
           </div>
         </div>
 
-        {/* SeÃ§Ã£o: ConteÃºdo Principal */}
+        {/* Seção: Conteúdo Principal */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <div className="space-y-2">
             <Label htmlFor="content" className="text-sm font-bold flex items-center gap-2">
               <FileText className="h-3.5 w-3.5 text-brand" />
-              ConteÃºdo
+              Conteúdo
             </Label>
             <Textarea
               id="content"
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="Digite os detalhes da anotaÃ§Ã£o..."
+              placeholder="Digite os detalhes da anotação..."
               rows={6}
               maxLength={1000}
               className={cn(ds.components.input.root, "resize-none min-h-[150px]", errors.content ? 'border-red-500 focus-visible:ring-red-500' : '')}
@@ -151,18 +151,18 @@ export function CreateNoteDialog({
           </div>
         </div>
 
-        {/* SeÃ§Ã£o: ObservaÃ§Ã£o */}
+        {/* Seção: Observação */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <div className="space-y-2">
             <Label htmlFor="observation" className="text-sm font-bold flex items-center gap-2">
               <MessageSquare className="h-3.5 w-3.5 text-brand" />
-              ObservaÃ§Ã£o <span className="text-muted-foreground font-normal text-xs">(Opcional)</span>
+              Observação <span className="text-muted-foreground font-normal text-xs">(Opcional)</span>
             </Label>
             <Textarea
               id="observation"
               value={formData.observation}
               onChange={(e) => setFormData({ ...formData, observation: e.target.value })}
-              placeholder="InformaÃ§Ãµes adicionais..."
+              placeholder="Informações adicionais..."
               rows={3}
               maxLength={500}
               className={cn(ds.components.input.root, "resize-none min-h-[80px]")}
@@ -188,7 +188,7 @@ export function CreateNoteDialog({
           className={ds.components.button.primary}
         >
           {editingNote ? <Check className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-          {editingNote ? "Salvar" : "Criar AnotaÃ§Ã£o"}
+          {editingNote ? "Salvar" : "Criar Anotação"}
         </Button>
       </div>
     </div>

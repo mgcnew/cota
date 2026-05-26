@@ -37,7 +37,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
   });
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  // Foco automÃ¡tico no campo nome quando abrir o formulÃ¡rio
+  // Foco automático no campo nome quando abrir o formulário
   useEffect(() => {
     if (step === "form" && open) {
       setTimeout(() => {
@@ -78,7 +78,7 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
       });
       
       if (createMore) {
-        // Limpa apenas o formulÃ¡rio, mantÃ©m na tela de criaÃ§Ã£o
+        // Limpa apenas o formulário, mantém na tela de criação
         setFormData({
           name: "",
           category: "",
@@ -238,14 +238,14 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
                 ref={nameInputRef}
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Ex: Sacola PlÃ¡stica 30x40"
+                placeholder="Ex: Sacola Plástica 30x40"
                 autoFocus
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Unidade de ReferÃªncia *</Label>
+                <Label>Unidade de Referência *</Label>
                 <Select 
                   value={formData.reference_unit} 
                   onValueChange={(v) => setFormData(prev => ({ ...prev, reference_unit: v }))}
@@ -277,11 +277,11 @@ export function PackagingItemsDialog({ open, onOpenChange }: Props) {
             </div>
 
             <div className="space-y-2">
-              <Label>DescriÃ§Ã£o (opcional)</Label>
+              <Label>Descrição (opcional)</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="DescriÃ§Ã£o detalhada..."
+                placeholder="Descrição detalhada..."
                 rows={2}
               />
             </div>

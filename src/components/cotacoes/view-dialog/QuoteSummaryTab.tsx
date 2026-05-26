@@ -41,7 +41,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     if (!containerRef.current || isExportingWhatsApp) return;
     
     setIsExportingWhatsApp(true);
-    const toastId = toast.loading('Preparando relatÃ³rio profissional...');
+    const toastId = toast.loading('Preparando relatório profissional...');
 
     try {
       // 1. Capturar imagem do resumo
@@ -123,7 +123,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       );
 
       if (res.success) {
-        toast.success('RelatÃ³rio enviado com sucesso via WhatsApp!', { id: toastId });
+        toast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
       } else {
         throw new Error(res.error || "Erro no envio");
       }
@@ -142,7 +142,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       setAnalysisResult(result);
     } catch (error) {
       console.error(error);
-      setAnalysisResult("Ocorreu um erro ao gerar a anÃ¡lise.");
+      setAnalysisResult("Ocorreu um erro ao gerar a análise.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -264,7 +264,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
   return (
     <div ref={containerRef} data-capture-id="quote-summary" className="flex flex-col w-full h-auto bg-transparent">
-      {/* 1. SEÃ‡ÃƒO DE STATS COMPACTA */}
+      {/* 1. SEÇÃƒO DE STATS COMPACTA */}
       <div className="bg-card/50 border-b border-border dark:border-white/5/40 px-4 py-3 flex items-center justify-between overflow-x-auto custom-scrollbar">
         <div className="flex items-center gap-6 min-w-max">
           <div className="flex items-center gap-2">
@@ -333,7 +333,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-brand" />
-              <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Resumo da DecisÃ£o (IA)</h3>
+              <h3 className="font-black text-foreground uppercase tracking-widest text-xs">Resumo da Decisão (IA)</h3>
             </div>
             <Button
               variant="outline"
@@ -352,7 +352,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
               className="h-7 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95"
             >
               <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              Exportar DecisÃ£o
+              Exportar Decisão
             </Button>
           </div>
           <div className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed font-medium">
@@ -396,11 +396,11 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
               </div>
             </SelectTrigger>
             <SelectContent className="rounded-xl border-border/50">
-              <SelectItem value="default" className="text-xs">OrdenaÃ§Ã£o PadrÃ£o</SelectItem>
-              <SelectItem value="price-asc" className="text-xs">Menor PreÃ§o</SelectItem>
-              <SelectItem value="price-desc" className="text-xs">Maior PreÃ§o</SelectItem>
+              <SelectItem value="default" className="text-xs">Ordenação Padrão</SelectItem>
+              <SelectItem value="price-asc" className="text-xs">Menor Preço</SelectItem>
+              <SelectItem value="price-desc" className="text-xs">Maior Preço</SelectItem>
               <SelectItem value="savings" className="text-xs">Melhor Economia</SelectItem>
-              <SelectItem value="name" className="text-xs">AlfabÃ©tica (A-Z)</SelectItem>
+              <SelectItem value="name" className="text-xs">Alfabética (A-Z)</SelectItem>
             </SelectContent>
           </Select>
         </div>

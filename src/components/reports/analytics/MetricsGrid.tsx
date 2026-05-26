@@ -1,8 +1,8 @@
 ﻿/**
- * MetricsGrid - Componente para exibir mÃ©tricas em grid responsivo (desktop)
+ * MetricsGrid - Componente para exibir métricas em grid responsivo (desktop)
  * 
- * Renderiza 4 mÃ©tricas em um grid responsivo usando o MetricCard existente.
- * Usa React.memo para evitar re-renders desnecessÃ¡rios.
+ * Renderiza 4 métricas em um grid responsivo usando o MetricCard existente.
+ * Usa React.memo para evitar re-renders desnecessários.
  * 
  * @module components/reports/analytics/MetricsGrid
  * Requirements: 2.1, 2.3, 6.5
@@ -16,7 +16,7 @@ import { TrendingUp, Clock, Users, DollarSign } from "lucide-react";
 import type { MetricsGridProps, Metric } from "@/types/reports";
 
 /**
- * Mapeia o tipo de mÃ©trica para a variante do MetricCard
+ * Mapeia o tipo de métrica para a variante do MetricCard
  */
 const getVariantFromTipo = (tipo: Metric['tipo']): 'success' | 'error' | 'default' => {
   switch (tipo) {
@@ -30,12 +30,12 @@ const getVariantFromTipo = (tipo: Metric['tipo']): 'success' | 'error' | 'defaul
 };
 
 /**
- * Ãcones padrÃ£o para cada posiÃ§Ã£o de mÃ©trica
+ * Ícones padrão para cada posição de métrica
  */
 const DEFAULT_ICONS = [TrendingUp, Clock, Users, DollarSign];
 
 /**
- * Variantes padrÃ£o para cada posiÃ§Ã£o de mÃ©trica
+ * Variantes padrão para cada posição de métrica
  */
 const DEFAULT_VARIANTS: Array<'success' | 'info' | 'warning' | 'default'> = [
   'success',
@@ -65,15 +65,15 @@ function MetricSkeleton() {
 }
 
 /**
- * MetricsGrid - Exibe mÃ©tricas em grid responsivo para desktop
+ * MetricsGrid - Exibe métricas em grid responsivo para desktop
  * 
- * Componente memoizado para evitar re-renders desnecessÃ¡rios.
+ * Componente memoizado para evitar re-renders desnecessários.
  * 
- * @param metrics - Array de mÃ©tricas a serem exibidas (mÃ¡ximo 4)
+ * @param metrics - Array de métricas a serem exibidas (máximo 4)
  * @param isLoading - Estado de carregamento
  */
 export const MetricsGrid = memo(function MetricsGrid({ metrics, isLoading }: MetricsGridProps) {
-  // Garante que sempre temos exatamente 4 mÃ©tricas para o grid
+  // Garante que sempre temos exatamente 4 métricas para o grid
   const displayMetrics = metrics.slice(0, 4);
 
   if (isLoading) {

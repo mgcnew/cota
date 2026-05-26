@@ -49,7 +49,7 @@ interface Props {
 
 const STEPS = [
   { id: "embalagens", title: "Embalagens", icon: Package },
-  { id: "configuracao", title: "ConfiguraÃ§Ã£o", icon: Settings2 },
+  { id: "configuracao", title: "Configuração", icon: Settings2 },
 ];
 
 export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _initialItems, suppliers }: Props) {
@@ -83,7 +83,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     }
   }, [activeStep, open]);
 
-  // filteredItems nÃ£o Ã© mais necessÃ¡rio pois usamos searchResults do hook
+  // filteredItems não é mais necessário pois usamos searchResults do hook
 
   const filteredSuppliers = useMemo(() => {
     const search = searchSupplier.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
@@ -250,7 +250,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitleComponent className="text-lg font-bold text-foreground tracking-tight truncate">
-                Nova CotaÃ§Ã£o
+                Nova Cotação
               </DialogTitleComponent>
               <DialogDescriptionComponent className="text-muted-foreground text-xs font-medium truncate">
                 Etapa {currentStepIndex + 1}/{STEPS.length}
@@ -271,7 +271,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
             {currentStepIndex < STEPS.length - 1 ? (
               <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
                 className="bg-brand hover:bg-brand/90 text-white font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                <span className="hidden sm:inline">PrÃ³ximo</span>
+                <span className="hidden sm:inline">Próximo</span>
                 <ChevronRight className="h-3 w-3 ml-1.5" />
               </Button>
             ) : (
@@ -327,7 +327,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
         {activeStep === "embalagens" && (
           <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start items-stretch">
-              {/* FormulÃ¡rio de SeleÃ§Ã£o */}
+              {/* Formulário de Seleção */}
               <Card className={cn("border-border bg-card shadow-sm h-full flex flex-col rounded-xl relative", isMobile ? "overflow-visible z-20" : "overflow-hidden")}>
                 <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20">
                   <CardTitle className="flex items-center gap-2 text-foreground text-sm font-black uppercase tracking-wide">
@@ -405,7 +405,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                     Package
                   )}
 
-                  {/* Feedback vazio inicial Mobile (quando nÃ£o hÃ¡ busca) */}
+                  {/* Feedback vazio inicial Mobile (quando não há busca) */}
                   {isMobile && searchItem.trim().length === 0 && (
                     <div className="flex flex-col items-center justify-center py-4 text-gray-400">
                       <p className="text-xs font-medium text-center">Digite para buscar embalagens</p>
@@ -451,24 +451,24 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
           </div>
         )}
 
-        {/* Step: ConfiguraÃ§Ã£o (Merge Period, Suppliers and Confirmation) */}
+        {/* Step: Configuração (Merge Period, Suppliers and Confirmation) */}
         {activeStep === "configuracao" && (
           <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
             <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 h-full content-start pb-20">
 
-              {/* Coluna Esquerda: ConfiguraÃ§Ãµes Gerais */}
+              {/* Coluna Esquerda: Configurações Gerais */}
               <div className="h-full">
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-visible relative z-30 h-full flex flex-col">
                   <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20 rounded-t-xl flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-foreground text-sm font-black uppercase tracking-wide">
                       <Clock className="h-4 w-4 text-brand flex-shrink-0" />
-                      <span>PerÃ­odo & Detalhes</span>
+                      <span>Período & Detalhes</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-5 flex-1 flex flex-col min-h-[300px]">
                     <div className="grid grid-cols-2 gap-4 flex-shrink-0">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">InÃ­cio</Label>
+                        <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Início</Label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button variant="outline" className="w-full justify-start text-left font-medium h-10 bg-background border-border hover:bg-muted/40">
@@ -499,8 +499,8 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                     </div>
 
                     <div className="space-y-2 flex-1 flex flex-col">
-                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">ObservaÃ§Ãµes (opcional)</Label>
-                      <Textarea placeholder="InstruÃ§Ãµes para os fornecedores..." value={observacoes} onChange={(e) => setObservacoes(e.target.value)} onFocus={handleInputFocus} className="flex-1 resize-none bg-background border-border text-sm focus:ring-brand/20 min-h-[120px]" />
+                      <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider ml-1">Observações (opcional)</Label>
+                      <Textarea placeholder="Instruções para os fornecedores..." value={observacoes} onChange={(e) => setObservacoes(e.target.value)} onFocus={handleInputFocus} className="flex-1 resize-none bg-background border-border text-sm focus:ring-brand/20 min-h-[120px]" />
                     </div>
                   </CardContent>
                 </Card>

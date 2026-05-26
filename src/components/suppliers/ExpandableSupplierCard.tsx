@@ -193,7 +193,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
               )}
             >
               <Plus className="h-4 w-4 mr-1.5" />
-              CotaÃ§Ã£o
+              Cotação
             </Button>
           </div>
           

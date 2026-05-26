@@ -47,7 +47,7 @@ export function CurrentPricesTooltip({ prices }: CurrentPricesTooltipProps) {
       >
         <div className="space-y-2">
           <p className="font-black text-[10px] uppercase tracking-[0.2em] text-zinc-500 dark:text-zinc-400">
-            CotaÃ§Ãµes Atuais
+            Cotações Atuais
           </p>
           <div className="space-y-1.5">
             {prices.map((price, idx) => (

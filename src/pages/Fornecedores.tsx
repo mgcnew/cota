@@ -179,14 +179,14 @@ function Fornecedores() {
 
     if (!supplier.phone) {
       toast({
-        title: "Telefone nÃ£o encontrado",
-        description: "Este fornecedor nÃ£o possui telefone cadastrado.",
+        title: "Telefone não encontrado",
+        description: "Este fornecedor não possui telefone cadastrado.",
         variant: "destructive"
       });
       return;
     }
 
-    // Busca se existe alguma cotaÃ§Ã£o ativa para este fornecedor para mandar o link
+    // Busca se existe alguma cotação ativa para este fornecedor para mandar o link
     const activeQuote = (supplier as any).activeQuotes?.[0];
     const accessToken = activeQuote?.token || activeQuote?.accessToken || activeQuote?.access_token;
     
@@ -202,12 +202,12 @@ function Fornecedores() {
       } else {
         msg += `\n${baseUrl}/responder/${accessToken}\n\n`;
       }
-      msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo para o MercadÃ£o Novo Boi JoÃ£o Dias.\n\n`;
+      msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo para o Mercadão Novo Boi João Dias.\n\n`;
     }
     
     msg += `Equipe de Compras`;
 
-    // Tenta enviar via API de serviÃ§o padronizada
+    // Tenta enviar via API de serviço padronizada
     try {
       const { sendWhatsApp } = await import("@/lib/whatsapp-service");
       toast({ title: "Iniciando conversa via WhatsApp..." });
@@ -304,7 +304,7 @@ function Fornecedores() {
                 title="Fornecedores"
                 value={stats.total}
                 icon={Building2}
-                trend={{ value: "+15", label: "novos este mÃªs", type: "positive" }}
+                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
                 variant="info"
               />
               <MobileMetricCard
@@ -318,11 +318,11 @@ function Fornecedores() {
                 title="Limite Total"
                 value={stats.totalLimit}
                 icon={DollarSign}
-                trend={{ value: stats.limiteMedioPorAtivo, label: "mÃ©dia por ativo", type: "neutral" }}
+                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
                 variant="default"
               />
               <MobileMetricCard
-                title="CotaÃ§Ãµes"
+                title="Cotações"
                 value={stats.activeQuotes}
                 icon={FileText}
                 trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
@@ -335,7 +335,7 @@ function Fornecedores() {
                 title="Fornecedores"
                 value={stats.total}
                 icon={Building2}
-                trend={{ value: "+15", label: "novos este mÃªs", type: "positive" }}
+                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
                 variant="info"
                 className="hover:scale-[1.02] transition-transform"
               />
@@ -351,12 +351,12 @@ function Fornecedores() {
                 title="Limite Total"
                 value={stats.totalLimit}
                 icon={DollarSign}
-                trend={{ value: stats.limiteMedioPorAtivo, label: "mÃ©dia por ativo", type: "neutral" }}
+                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
                 variant="default"
                 className="hover:scale-[1.02] transition-transform"
               />
               <MetricCard
-                title="CotaÃ§Ãµes"
+                title="Cotações"
                 value={stats.activeQuotes}
                 icon={FileText}
                 trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}

@@ -57,7 +57,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   // Mobile Steps
   const STEPS = [
     { id: "itens", title: "Produtos", icon: Package },
-    { id: "logistica", title: "LogÃ­stica", icon: Building2 },
+    { id: "logistica", title: "Logística", icon: Building2 },
     { id: "resumo", title: "Resumo", icon: ClipboardList },
   ];
   const [activeStep, setActiveStep] = useState(STEPS[0].id);
@@ -143,7 +143,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     setSwipeOffset(0);
   };
 
-  // FunÃ§Ã£o para exportar HTML
+  // Função para exportar HTML
   const handleDownloadHtml = useCallback(() => {
     if (!pedido || itens.length === 0) return;
 
@@ -193,7 +193,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         <tr class="total-row"><td colspan="3" style="text-align: right;">TOTAL</td><td style="text-align: right;">R$ ${formatCurrency(total)}</td></tr>
       </tbody>
     </table>
-    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid ${ds.colors.brand.primary};"><strong style="color: ${ds.colors.brand.primary};">ObservaÃ§Ãµes:</strong><p>${observacoes}</p></div>` : ''}
+    ${observacoes ? `<div style="background: #fff7ed; padding: 20px; border-radius: 8px; border-left: 4px solid ${ds.colors.brand.primary};"><strong style="color: ${ds.colors.brand.primary};">Observações:</strong><p>${observacoes}</p></div>` : ''}
   </div>
 </body>
 </html>`;
@@ -406,8 +406,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     const price = parseFloat(String(newPrice).replace(',', '.')) || 0;
     const factor = parseFloat(unPerBox.replace(',', '.')) || 0;
     if (!price || !factor) return null;
-    if (conversionMode === 'box_to_unit') return { label: 'PreÃ§o por unidade', value: price / factor };
-    return { label: 'PreÃ§o por caixa', value: price * factor };
+    if (conversionMode === 'box_to_unit') return { label: 'Preço por unidade', value: price / factor };
+    return { label: 'Preço por caixa', value: price * factor };
   })();
 
   const handleApplyConversion = () => {
@@ -560,7 +560,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         ) : (
           <>
             <Save className="h-4 w-4" />
-            Salvar AlteraÃ§Ãµes
+            Salvar Alterações
           </>
         )}
       </Button>
@@ -658,7 +658,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             </div>
                             <div className={ds.components.input.group}>
                               <div className="flex items-center justify-between">
-                                <Label className={ds.components.input.label}>PreÃ§o</Label>
+                                <Label className={ds.components.input.label}>Preço</Label>
                                 <button 
                                   type="button" 
                                   onClick={() => setShowCalc(!showCalc)}
@@ -687,7 +687,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                               )}
                             >
                               <ArrowLeftRight className="h-3.5 w-3.5" />
-                              ConversÃ£o
+                              Conversão
                               <ChevronDown className={cn("h-3 w-3 transition-transform", showConversion && "rotate-180")} />
                             </button>
                             
@@ -747,7 +747,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                 disabled={!conversionResult}
                                 className={cn(ds.components.button.primary, "w-full h-11 rounded-xl shadow-lg")}
                               >
-                                Aplicar ConversÃ£o
+                                Aplicar Conversão
                               </Button>
                             </div>
                           )}
@@ -891,9 +891,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   </div>
 
                   <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>ObservaÃ§Ãµes</Label>
+                    <Label className={ds.components.input.label}>Observações</Label>
                     <Textarea
-                      placeholder="Alguma observaÃ§Ã£o?"
+                      placeholder="Alguma observação?"
                       value={observacoes}
                       onChange={(e) => setObservacoes(e.target.value)}
                       disabled={isReadOnly}
@@ -945,11 +945,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               {currentStepIndex === STEPS.length - 1 ? (
                 <Button onClick={handleSubmit} className="flex-1 h-14 rounded-xl bg-brand text-zinc-950 font-bold text-lg shadow-xl disabled:opacity-50" disabled={loading || isReadOnly}>
                   {loading ? <Loader2 className="h-6 w-6 animate-spin mr-2" /> : <Save className="h-6 w-6 mr-2" />}
-                  Finalizar EdiÃ§Ã£o
+                  Finalizar Edição
                 </Button>
               ) : (
                 <Button onClick={nextStep} className="flex-1 h-14 rounded-xl bg-brand text-zinc-950 font-bold text-lg shadow-xl outline-none">
-                  PrÃ³ximo <ChevronRight className="h-6 w-6 ml-1" />
+                  Próximo <ChevronRight className="h-6 w-6 ml-1" />
                 </Button>
               )}
             </div>
@@ -1093,7 +1093,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       <button
                         type="button"
                         onClick={() => setShowCalc(v => !v)}
-                        title="Calculadora (teclado numÃ©rico ativo)"
+                        title="Calculadora (teclado numérico ativo)"
                         className={cn(
                           "h-8 w-8 rounded-lg flex items-center justify-center transition-all",
                           showCalc
@@ -1109,7 +1109,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                       <Input
                         ref={newProductInputRef}
-                        placeholder="Pesquisar produto no catÃ¡logo..."
+                        placeholder="Pesquisar produto no catálogo..."
                         value={newProductSearch}
                         onChange={(e) => { setNewProductSearch(e.target.value); setNewProduct(null); }}
                         onKeyDown={(e) => handleNewItemKeyDown(e, 'search')}
@@ -1182,7 +1182,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500">R$</span>
                           <Input
                             ref={newPriceInputRef}
-                            placeholder="PreÃ§o"
+                            placeholder="Preço"
                             value={newPrice}
                             onChange={(e) => setNewPrice(e.target.value)}
                             onKeyDown={(e) => handleNewItemKeyDown(e, 'price')}
@@ -1200,7 +1200,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                       </Button>
                     </div>
 
-                    {/* â”€ ConversÃ£o de embalagem â”€ */}
+                    {/* â”€ Conversão de embalagem â”€ */}
                     <div className="flex items-center justify-between">
                       <button
                         type="button"
@@ -1213,7 +1213,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         )}
                       >
                         <ArrowLeftRight className="h-3.5 w-3.5" />
-                        Ferramenta de ConversÃ£o
+                        Ferramenta de Conversão
                         <ChevronDown className={cn("h-3 w-3 transition-transform", showConversion && "rotate-180")} />
                       </button>
 
@@ -1240,7 +1240,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                 : "text-zinc-500 hover:text-brand/70"
                             )}
                           >
-                            PreÃ§o da Caixa â†’ Valor Unidade
+                            Preço da Caixa â†’ Valor Unidade
                           </button>
                           <button
                             type="button"
@@ -1252,7 +1252,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                 : "text-zinc-500 hover:text-brand/70"
                             )}
                           >
-                            PreÃ§o Unidade â†’ Valor Caixa
+                            Preço Unidade â†’ Valor Caixa
                           </button>
                         </div>
 
@@ -1285,7 +1285,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                           disabled={!conversionResult}
                           className={cn(ds.components.button.primary, "w-full h-11 rounded-xl shadow-lg shadow-brand/20 font-black uppercase tracking-widest text-xs")}
                         >
-                          Aplicar PreÃ§o Calculado
+                          Aplicar Preço Calculado
                         </Button>
                       </div>
                     )}
@@ -1317,14 +1317,14 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                             ['7', '8', '9', '-'],
                             ['4', '5', '6', '+'],
                             ['1', '2', '3', '='],
-                            ['0', '.', 'Aplicar PreÃ§o'],
+                            ['0', '.', 'Aplicar Preço'],
                           ] as string[][]).map((row, ri) => (
                             <div key={ri} className="grid gap-2.5" style={{ gridTemplateColumns: ri === 4 ? '1fr 1fr 2fr' : 'repeat(4, 1fr)' }}>
                               {row.map(k => {
                                 const isOp = ['+', '-', 'Ã—', 'Ã·'].includes(k);
                                 const isEq = k === '=';
                                 const isAct = k === 'C' || k === 'âŒ«';
-                                const isApply = k === 'Aplicar PreÃ§o';
+                                const isApply = k === 'Aplicar Preço';
                                 return (
                                   <button
                                     key={k}
@@ -1398,7 +1398,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         </p>
                         <div className="flex items-center gap-3 mt-1">
                           <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, item.valorUnitario > 0 ? "text-brand" : "text-zinc-500 italic")}>
-                            {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preÃ§o'}
+                            {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
                           </span>
                           <span className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
                             Ã— {item.quantidade} {item.unidade}
@@ -1450,7 +1450,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
           {/* Tab: Resumo */}
           <TabsContent value="resumo" className="flex-1 overflow-auto m-0 p-6 custom-scrollbar">
             <div className="space-y-4">
-              {/* Cards de EstatÃ­sticas */}
+              {/* Cards de Estatísticas */}
               <div className={cn("grid gap-4", isMobile ? "grid-cols-2" : "grid-cols-4")}>
                 <Card className={ds.components.card.root}>
                   <CardContent className={cn(ds.components.card.body, "space-y-3")}>
@@ -1554,7 +1554,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 </CardContent>
               </Card>
 
-              {/* ObservaÃ§Ãµes */}
+              {/* Observações */}
               {observacoes && (
                 <Card className={ds.components.card.root}>
                   <CardContent className={cn(ds.components.card.body, "space-y-3")}>
@@ -1564,7 +1564,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                         ds.typography.size.sm,
                         ds.typography.weight.bold,
                         ds.colors.text.primary
-                      )}>ObservaÃ§Ãµes</span>
+                      )}>Observações</span>
                     </div>
                     <p className={cn(
                       ds.typography.size.sm,

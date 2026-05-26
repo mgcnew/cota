@@ -119,7 +119,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
               {product.lastOrderPrice}
             </div>
             <div className={cn("text-[9px] uppercase tracking-wider font-medium opacity-60", ds.colors.text.muted)}>
-              Ãºlt. preÃ§o
+              últ. preço
             </div>
           </div>
         </div>
@@ -177,7 +177,7 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
                 e.stopPropagation();
                 handleView();
               }}
-              aria-label="Ver histÃ³rico"
+              aria-label="Ver histórico"
             >
               <History className="w-4 h-4" />
             </Button>

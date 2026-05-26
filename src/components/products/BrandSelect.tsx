@@ -178,7 +178,7 @@ export function BrandSelect({ value, onChange, className }: BrandSelectProps) {
                       {!brands.some(b => b.name.toLowerCase() === searchValue.toLowerCase()) && (
                         <>
                           <CommandSeparator />
-                          <CommandGroup heading="AÃ§Ã£o">
+                          <CommandGroup heading="Ação">
                             <CommandItem
                               onSelect={handleCreate}
                               className="flex items-center gap-2 py-3 cursor-pointer rounded-lg mx-1 my-0.5 text-orange-600 font-medium"

@@ -227,7 +227,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                         <span className={ds.components.table.headerLabel}>Valor</span>
                       </div>
                       <div className="w-[12%] flex justify-end items-center px-2">
-                        <span className={ds.components.table.headerLabel}>AÃ§Ãµes</span>
+                        <span className={ds.components.table.headerLabel}>Ações</span>
                       </div>
                     </div>
                   </TableCell>
@@ -308,7 +308,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                             </span>
                           </div>
                           
-                          {/* AÃ§Ãµes */}
+                          {/* Ações */}
                           <div className="w-[12%] pl-2 flex justify-end">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>

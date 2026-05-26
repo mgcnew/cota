@@ -31,7 +31,7 @@ export function OrderExportTab({
   const selectedSupplier = suppliers.find(s => s.id === fornecedor);
   const calculateTotal = () => itens.reduce((acc, item) => acc + (item.quantidade * item.valorUnitario), 0);
   
-  // Formatar valor em reais (padrÃ£o brasileiro)
+  // Formatar valor em reais (padrão brasileiro)
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
@@ -114,7 +114,7 @@ export function OrderExportTab({
       </div>
       <div class="info-card">
         <strong>Gerado em</strong>
-        <span>${new Date().toLocaleDateString('pt-BR')} Ã s ${new Date().toLocaleTimeString('pt-BR')}</span>
+        <span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span>
       </div>
     </div>
 
@@ -151,14 +151,14 @@ export function OrderExportTab({
 
     ${observacoes ? `
     <div class="observations">
-      <h3>ðŸ“ ObservaÃ§Ãµes</h3>
+      <h3>ðŸ“ Observações</h3>
       <p>${observacoes}</p>
     </div>
     ` : ''}
 
     <div class="footer">
-      <p>Sistema CotaJÃ¡ - Pedido de Compra</p>
-      <p>Este documento foi gerado automaticamente e contÃ©m informaÃ§Ãµes confidenciais.</p>
+      <p>Sistema CotaJá - Pedido de Compra</p>
+      <p>Este documento foi gerado automaticamente e contém informações confidenciais.</p>
     </div>
   </div>
 </body>
@@ -186,7 +186,7 @@ export function OrderExportTab({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header com aÃ§Ãµes */}
+      {/* Header com ações */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-800/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -209,7 +209,7 @@ export function OrderExportTab({
         </div>
       </div>
 
-      {/* EstatÃ­sticas rÃ¡pidas */}
+      {/* Estatísticas rápidas */}
       <div className="flex-shrink-0 px-4 py-3 border-b border-border dark:border-white/5 bg-white dark:bg-gray-900">
         <div className="grid grid-cols-3 gap-4">
           <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export function OrderExportTab({
               <div className="px-3 py-2 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-800/50 flex items-center gap-2">
                 <Eye className="h-4 w-4 text-gray-500" />
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
-                  PrÃ©-visualizaÃ§Ã£o
+                  Pré-visualização
                 </span>
               </div>
               <iframe

@@ -75,7 +75,7 @@ export function CategorySelect({
         </SelectContent>
       </Select>
 
-      {/* BotÃ£o para limpar filtro quando uma categoria especÃ­fica estÃ¡ selecionada */}
+      {/* Botão para limpar filtro quando uma categoria específica está selecionada */}
       {selectedCategory !== "all" && (
         <Button
           variant="ghost"

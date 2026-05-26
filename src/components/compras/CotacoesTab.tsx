@@ -80,7 +80,7 @@ function CotacoesTab() {
     setRelatorioDialogOpen(true);
   }, [setRelatorioDialogOpen]);
 
-  // Ouvir evento de atalho de teclado para nova cotaÃ§Ã£o
+  // Ouvir evento de atalho de teclado para nova cotação
   useEffect(() => {
     const handleNovaEvent = (e: CustomEvent) => {
       if (e.detail?.tab === 'cotacoes') {
@@ -99,9 +99,9 @@ function CotacoesTab() {
       {isMobile ? (
         <div className="mb-4 -mx-1">
           <MobileMetricRibbon>
-            <MobileMetricCard title="CotaÃ§Ãµes Ativas" value={stats.ativas} icon={FileText} variant="info" />
+            <MobileMetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
             <MobileMetricCard 
-              title="AdesÃ£o Fornecedores" 
+              title="Adesão Fornecedores" 
               value={stats.adesaoFormatada} 
               icon={Users} 
               variant="success" 
@@ -109,7 +109,7 @@ function CotacoesTab() {
               onClick={() => handleStatusFilterChange("prontas")}
             />
             <MobileMetricCard
-              title="AÃ§Ãµes Urgentes"
+              title="Ações Urgentes"
               value={stats.vencendo}
               icon={Zap}
               variant="warning"
@@ -127,10 +127,10 @@ function CotacoesTab() {
         </div>
       ) : (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-          <MetricCard title="CotaÃ§Ãµes Ativas" value={stats.ativas} icon={FileText} variant="info" />
+          <MetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
           
           <MetricCard
-            title="AdesÃ£o de Fornecedores"
+            title="Adesão de Fornecedores"
             value={stats.adesaoFormatada}
             icon={Users}
             variant="success"
@@ -143,7 +143,7 @@ function CotacoesTab() {
           />
 
           <MetricCard
-            title="AÃ§Ãµes Urgentes"
+            title="Ações Urgentes"
             value={stats.vencendo}
             icon={Zap}
             variant="warning"
@@ -179,9 +179,9 @@ function CotacoesTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
-                  {stats.prontasParaDecisao} cotaÃ§Ã£o(Ãµes) pronta(s)
+                  {stats.prontasParaDecisao} cotação(ões) pronta(s)
                 </p>
-                <p className={cn("text-xs", ds.colors.text.secondary)}>Todos os fornecedores jÃ¡ responderam</p>
+                <p className={cn("text-xs", ds.colors.text.secondary)}>Todos os fornecedores já responderam</p>
               </div>
               <Button
                 size="sm"
@@ -201,7 +201,7 @@ function CotacoesTab() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className={cn("text-sm font-bold", ds.colors.text.primary)}>
-                  {stats.vencendo} cotaÃ§Ã£o(Ãµes) para vencer
+                  {stats.vencendo} cotação(ões) para vencer
                 </p>
                 <p className={cn("text-xs", ds.colors.text.secondary)}>Prazo termina em menos de 48h</p>
               </div>
@@ -228,7 +228,7 @@ function CotacoesTab() {
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Buscar cotaÃ§Ã£o..."
+                placeholder="Buscar cotação..."
               />
             </div>
 
@@ -242,9 +242,9 @@ function CotacoesTab() {
                     <SelectItem value="all">Todos os Status</SelectItem>
                     <SelectItem value="ativa">ðŸŸ¢ Ativas</SelectItem>
                     <SelectItem value="pendente">ðŸŸ¡ Pendentes</SelectItem>
-                    <SelectItem value="prontas">âœ… Prontas p/ DecisÃ£o</SelectItem>
+                    <SelectItem value="prontas">âœ… Prontas p/ Decisão</SelectItem>
                     <SelectItem value="vencendo">âš ï¸ Vencendo em 48h</SelectItem>
-                    <SelectItem value="concluida">ðŸ”µ ConcluÃ­das</SelectItem>
+                    <SelectItem value="concluida">ðŸ”µ Concluídas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -253,7 +253,7 @@ function CotacoesTab() {
                 size="icon"
                 onClick={handleExportQuotes}
                 className={cn("h-11 w-11 rounded-lg border-border dark:border-white/5", ds.components.button.secondary)}
-                title="RelatÃ³rio de Economia e Resultados"
+                title="Relatório de Economia e Resultados"
               >
                 <Download className="h-4 w-4 text-zinc-600 dark:text-zinc-300" />
               </Button>
@@ -262,7 +262,7 @@ function CotacoesTab() {
                 className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
               >
                 <Plus className="h-4 w-4 mr-1.5" />
-                Nova CotaÃ§Ã£o
+                Nova Cotação
               </Button>
             </div>
           </div>
@@ -279,7 +279,7 @@ function CotacoesTab() {
             { value: 'pendente', label: 'Pendentes' },
             { value: 'prontas', label: 'Prontas' },
             { value: 'vencendo', label: 'Vencendo' },
-            { value: 'concluida', label: 'ConcluÃ­das' },
+            { value: 'concluida', label: 'Concluídas' },
           ].map(status => (
             <button
               key={status.value}
@@ -302,10 +302,10 @@ function CotacoesTab() {
               <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
                 <FileText className="h-8 w-8 text-zinc-400" />
               </div>
-              <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Nenhuma cotaÃ§Ã£o encontrada</h3>
-              <p className="text-zinc-500 max-w-sm mx-auto mb-6">Tente ajustar os filtros ou crie uma nova cotaÃ§Ã£o.</p>
+              <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-100 mb-1">Nenhuma cotação encontrada</h3>
+              <p className="text-zinc-500 max-w-sm mx-auto mb-6">Tente ajustar os filtros ou crie uma nova cotação.</p>
               <Button onClick={() => setAddDialogOpen(true)} className={cn(ds.components.button.primary)}>
-                <Plus className="h-4 w-4 mr-2" /> Nova CotaÃ§Ã£o
+                <Plus className="h-4 w-4 mr-2" /> Nova Cotação
               </Button>
             </div>
           ) : (

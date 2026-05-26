@@ -110,29 +110,29 @@ import { supabase } from "@/integrations/supabase/client";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 
 const productLineSchema = z.object({
-  produtoId: z.string().min(1, "Produto Ã© obrigatÃ³rio"),
-  produtoNome: z.string().min(1, "Produto Ã© obrigatÃ³rio"),
+  produtoId: z.string().min(1, "Produto é obrigatório"),
+  produtoNome: z.string().min(1, "Produto é obrigatório"),
   quantidade: z.string()
-    .min(1, "Quantidade Ã© obrigatÃ³ria")
+    .min(1, "Quantidade é obrigatória")
     .refine(
       (val) => {
         const num = parseFloat(val.replace(',', '.'));
         return !isNaN(num) && num > 0;
       },
-      { message: "Quantidade deve ser um nÃºmero vÃ¡lido maior que zero" }
+      { message: "Quantidade deve ser um número válido maior que zero" }
     ),
-  unidade: z.string().min(1, "Unidade Ã© obrigatÃ³ria"),
+  unidade: z.string().min(1, "Unidade é obrigatória"),
 });
 
 const quoteSchema = z.object({
   produtos: z.array(productLineSchema).min(1, "Adicione pelo menos um produto"),
-  dataInicio: z.date({ required_error: "Data de inÃ­cio Ã© obrigatÃ³ria" }),
-  dataFim: z.date({ required_error: "Data de fim Ã© obrigatÃ³ria" }),
+  dataInicio: z.date({ required_error: "Data de início é obrigatória" }),
+  dataFim: z.date({ required_error: "Data de fim é obrigatória" }),
   dataPlanejada: z.date().optional(),
   fornecedoresIds: z.array(z.string()).min(1, "Selecione pelo menos um fornecedor"),
   observacoes: z.string().optional(),
 }).refine((data) => data.dataFim >= data.dataInicio, {
-  message: "Data de fim deve ser igual ou posterior Ã  data de inÃ­cio",
+  message: "Data de fim deve ser igual ou posterior à data de início",
   path: ["dataFim"],
 }).refine((data) => {
   if (data.dataPlanejada && data.dataInicio) {
@@ -140,7 +140,7 @@ const quoteSchema = z.object({
   }
   return true;
 }, {
-  message: "Data planejada deve ser igual ou posterior Ã  data de inÃ­cio",
+  message: "Data planejada deve ser igual ou posterior à data de início",
   path: ["dataPlanejada"],
 });
 
@@ -203,7 +203,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   const tabs = useMemo(() => [
     { id: "produtos", label: "Produtos", icon: Package },
-    { id: "periodo_fornecedores", label: "PerÃ­odo & Fornecedores", icon: Building2 },
+    { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Building2 },
     { id: "personalizar", label: "Configurar Itens", icon: MousePointerClick },
     { id: "detalhes", label: "Resumo", icon: FileText }
   ], []);
@@ -255,7 +255,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   // Efeito para focar o campo de busca mobile quando o drawer abrir
   useEffect(() => {
     if (showMobileProductSearch && isMobile) {
-      // Pequeno atraso para garantir que a animaÃ§Ã£o do Drawer permitiu o foco
+      // Pequeno atraso para garantir que a animação do Drawer permitiu o foco
       const timer = setTimeout(() => {
         mobileProductSearchRef.current?.focus();
       }, 150);
@@ -263,14 +263,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   }, [showMobileProductSearch, isMobile]);
 
-  // Estados para o novo formulÃ¡rio de produto Ãºnico
+  // Estados para o novo formulário de produto único
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
   const [lastUsedUnit, setLastUsedUnit] = useState("kg");
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
   const [focusedSupplierId, setFocusedSupplierId] = useState<string | null>(null);
 
-  // Estados para cadastro rÃ¡pido inline
+  // Estados para cadastro rápido inline
   const [showQuickCreateProduct, setShowQuickCreateProduct] = useState(false);
   const [showQuickCreateSupplier, setShowQuickCreateSupplier] = useState(false);
 
@@ -302,7 +302,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     name: "produtos",
   });
 
-  // FunÃ§Ã£o para manter os fornecedores sincronizados com os produtos
+  // Função para manter os fornecedores sincronizados com os produtos
   useEffect(() => {
     const currentProductIds = fields.map(f => f.produtoId);
     const prevProductIds = prevProductIdsRef.current;
@@ -314,11 +314,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       const next = { ...prev };
       const supplierIds = Object.keys(next);
       
-      // Se nÃ£o houver fornecedores ainda, nÃ£o fazemos nada (serÃ£o tratados ao selecionar o fornecedor)
+      // Se não houver fornecedores ainda, não fazemos nada (serão tratados ao selecionar o fornecedor)
       if (supplierIds.length > 0) {
         supplierIds.forEach(supplierId => {
-          // Se o fornecedor jÃ¡ tiver atribuiÃ§Ãµes, adicionamos apenas os NOVOS produtos
-          // para manter a "liberdade" de ele jÃ¡ ter removido outros produtos
+          // Se o fornecedor já tiver atribuições, adicionamos apenas os NOVOS produtos
+          // para manter a "liberdade" de ele já ter removido outros produtos
           if (newProductIds.length > 0) {
             const currentAssignments = next[supplierId] || [];
             // Adicionamos os novos ao final, evitando duplicatas
@@ -326,7 +326,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
             next[supplierId] = updatedAssignments;
           }
           
-          // Sempre filtramos para remover IDs que nÃ£o existem mais (produtos deletados)
+          // Sempre filtramos para remover IDs que não existem mais (produtos deletados)
           next[supplierId] = (next[supplierId] || []).filter(id => currentProductIds.includes(id));
         });
       }
@@ -360,10 +360,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         unidade: newProductUnit
       });
 
-      // Salvar Ãºltima unidade usada
+      // Salvar última unidade usada
       setLastUsedUnit(newProductUnit);
 
-      // Limpar o formulÃ¡rio apÃ³s adicionar
+      // Limpar o formulário após adicionar
       setSelectedProduct(null);
       setNewProductQuantity("");
       setProductSearch("");
@@ -375,7 +375,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
       toast({
         title: "âœ… Produto adicionado",
-        description: `${selectedProduct.name} foi adicionado Ã  cotaÃ§Ã£o`,
+        description: `${selectedProduct.name} foi adicionado à cotação`,
         duration: 1500,
       });
     }
@@ -396,7 +396,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   };
 
-  // Handler para busca de produtos e navegaÃ§Ã£o
+  // Handler para busca de produtos e navegação
   const handleProductKeyDown = (e: React.KeyboardEvent) => {
     if (showProductSuggestions && products.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -434,7 +434,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   };
 
-  // Handler para busca de fornecedores e navegaÃ§Ã£o
+  // Handler para busca de fornecedores e navegação
   const handleSupplierKeyDown = (e: React.KeyboardEvent) => {
     if (filteredSuppliers.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -470,7 +470,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
   // Handler para atalhos globais do modal
   const handleModalKeyDown = (e: React.KeyboardEvent) => {
-    // Ctrl+Enter para criar cotaÃ§Ã£o
+    // Ctrl+Enter para criar cotação
     if (e.ctrlKey && e.key === 'Enter' && activeTab === 'detalhes') {
       e.preventDefault();
       form.handleSubmit((data) => onSubmit(data, false))();
@@ -486,7 +486,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       handlePrevious();
     }
 
-    // NÃºmeros 1-5 com Alt para ir direto para a aba
+    // Números 1-5 com Alt para ir direto para a aba
     if (e.altKey && ['1', '2', '3', '4', '5'].includes(e.key)) {
       e.preventDefault();
       const tabIndex = parseInt(e.key) - 1;
@@ -499,7 +499,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
   useEffect(() => {
     if (open) {
       loadInitialData();
-      // Definir unidade padrÃ£o na primeira vez
+      // Definir unidade padrão na primeira vez
       if (!newProductUnit) {
         setNewProductUnit(lastUsedUnit);
       }
@@ -529,7 +529,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   }, [open, activeTab]);
 
-  // Busca dinÃ¢mica de produtos quando o termo de busca muda
+  // Busca dinâmica de produtos quando o termo de busca muda
   useEffect(() => {
     if (debouncedProductSearch.trim().length >= 1) {
       searchProducts(debouncedProductSearch);
@@ -538,7 +538,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     }
   }, [debouncedProductSearch]);
 
-  // Auto-foco quando produto Ã© selecionado
+  // Auto-foco quando produto é selecionado
   useEffect(() => {
     if (selectedProduct && quantityInputRef.current) {
       quantityInputRef.current.focus();
@@ -601,7 +601,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       if (!user) {
         toast({
           title: "Erro",
-          description: "VocÃª precisa estar logado para criar uma cotaÃ§Ã£o",
+          description: "Você precisa estar logado para criar uma cotação",
           variant: "destructive",
         });
         return;
@@ -615,7 +615,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         .single();
 
       if (!companyData) {
-        throw new Error("Empresa nÃ£o encontrada");
+        throw new Error("Empresa não encontrada");
       }
 
       // Calcular status baseado em data_planejada
@@ -709,10 +709,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
       onAdd(data);
       toast({
-        title: "âœ… CotaÃ§Ã£o criada com sucesso",
+        title: "âœ… Cotação criada com sucesso",
         description: keepOpen
-          ? "A cotaÃ§Ã£o foi adicionada! Crie outra cotaÃ§Ã£o."
-          : "A cotaÃ§Ã£o foi adicionada ao sistema.",
+          ? "A cotação foi adicionada! Crie outra cotação."
+          : "A cotação foi adicionada ao sistema.",
         className: "border-green-200 bg-green-50",
       });
 
@@ -730,10 +730,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         }, 100);
       }
     } catch (error: any) {
-      console.error("Erro ao criar cotaÃ§Ã£o:", error);
+      console.error("Erro ao criar cotação:", error);
       toast({
-        title: "âŒ Erro ao criar cotaÃ§Ã£o",
-        description: error.message || "Ocorreu um erro ao criar a cotaÃ§Ã£o",
+        title: "âŒ Erro ao criar cotação",
+        description: error.message || "Ocorreu um erro ao criar a cotação",
         variant: "destructive",
         className: "bg-red-50 border-red-200 text-red-900",
       });
@@ -748,7 +748,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       setSelectedSuppliers(newSuppliers);
       form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
       
-      // Ao selecionar um fornecedor, ele recebe todos os produtos por padrÃ£o
+      // Ao selecionar um fornecedor, ele recebe todos os produtos por padrão
       setSupplierItemAssignments(prev => ({
         ...prev,
         [supplier.id]: fields.map(f => f.produtoId)
@@ -762,7 +762,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     setSelectedSuppliers(newSuppliers);
     form.setValue("fornecedoresIds", newSuppliers.map(s => s.id));
 
-    // Remove as atribuiÃ§Ãµes de itens do fornecedor
+    // Remove as atribuições de itens do fornecedor
     setSupplierItemAssignments(prev => {
       const next = { ...prev };
       delete next[supplierId];
@@ -890,7 +890,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
           <div>
             <DialogTitle className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
               {currentTabIndex === 0 ? "Produtos" : 
-               currentTabIndex === 1 ? "PerÃ­odo & Fornecedores" : 
+               currentTabIndex === 1 ? "Período & Fornecedores" : 
                currentTabIndex === 2 ? "Configurar Itens" : 
                "Resumo"}
             </DialogTitle>
@@ -936,7 +936,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               disabled={!canProceedToNext()}
               className={cn(ds.components.button.primary, "h-9 text-xs px-3 shadow-sm")}
             >
-              PrÃ³ximo
+              Próximo
               <ChevronRight className="ml-1 h-3.5 w-3.5" />
             </Button>
           )}
@@ -1110,7 +1110,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                   <div className="space-y-2">
                     <label className={cn(ds.components.input.label, "flex items-center gap-2")}>
                       <Clock className="h-3.5 w-3.5 text-brand" />
-                      Prazo da CotaÃ§Ã£o
+                      Prazo da Cotação
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {[
@@ -1154,8 +1154,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     {/* Period display */}
                     <p className={cn(ds.typography.size.xs, ds.colors.text.muted, "text-center pt-1")}>
                       {form.watch("dataInicio") && form.watch("dataFim")
-                        ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} atÃ© ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
-                        : "Selecione um perÃ­odo"}
+                        ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                        : "Selecione um período"}
                     </p>
                   </div>
 
@@ -1167,10 +1167,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                   )}>
                     <div>
                       <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>
-                        Agendar cotaÃ§Ã£o
+                        Agendar cotação
                       </p>
                       <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                        {isScheduled ? "SerÃ¡ criada como planejada" : "Inicia imediatamente"}
+                        {isScheduled ? "Será criada como planejada" : "Inicia imediatamente"}
                       </p>
                     </div>
                     <Switch
@@ -1189,7 +1189,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       name="dataPlanejada"
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
-                          <FormLabel className={ds.components.input.label}>Data de AtivaÃ§Ã£o *</FormLabel>
+                          <FormLabel className={ds.components.input.label}>Data de Ativação *</FormLabel>
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -1654,11 +1654,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     </div>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className={ds.colors.text.secondary}>DuraÃ§Ã£o:</span>
+                        <span className={ds.colors.text.secondary}>Duração:</span>
                         <span className={cn(ds.typography.weight.medium, ds.colors.text.primary)}>
                           {form.watch("dataInicio") && form.watch("dataFim")
-                            ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} atÃ© ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
-                            : "NÃ£o definida"}
+                            ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                            : "Não definida"}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -1692,9 +1692,9 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
 
                   {/* Observations */}
                   <div className="space-y-2">
-                    <label className={ds.components.input.label}>ObservaÃ§Ãµes (opcional)</label>
+                    <label className={ds.components.input.label}>Observações (opcional)</label>
                     <Textarea
-                      placeholder="Alguma observaÃ§Ã£o para os fornecedores?"
+                      placeholder="Alguma observação para os fornecedores?"
                       value={form.watch("observacoes") || ""}
                       onChange={(e) => form.setValue("observacoes", e.target.value)}
                       className={cn(ds.components.input.root, "min-h-[80px] text-sm")}
@@ -1716,7 +1716,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         )}>
           <div className="text-center space-y-3">
             <div className={cn("animate-spin h-12 w-12 border-4 rounded-full mx-auto", "border-border", "border-t-brand")} />
-            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotaÃ§Ã£o...</p>
+            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
           </div>
         </div>
       )}
@@ -1793,7 +1793,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         <div className="flex items-start justify-between">
           <div>
             <DialogTitle className={cn(ds.typography.size["lg"], ds.typography.weight.semibold, ds.colors.text.primary, "tracking-tight")}>
-              Nova CotaÃ§Ã£o
+              Nova Cotação
             </DialogTitle>
             <DialogDescription className={cn(ds.colors.text.secondary, "mt-1", ds.typography.size.sm)}>
               Passo {currentTabIndex + 1}: <span className={ds.typography.weight.medium}>{tabs[currentTabIndex]?.label}</span>
@@ -1838,7 +1838,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                 disabled={!canProceedToNext()}
                 className={cn(ds.components.button.primary, "h-9 text-sm px-5")}
               >
-                PrÃ³ximo
+                Próximo
                 <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             )}
@@ -1894,10 +1894,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                     <TabsContent value="produtos" className="h-full m-0 overflow-y-auto custom-scrollbar">
                       <div className={cn("h-full p-3 sm:p-4 md:p-6 pb-24", ds.colors.surface.page)}>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
-                          {/* FormulÃ¡rio de AdiÃ§Ã£o - Lado Esquerdo */}
+                          {/* Formulário de Adição - Lado Esquerdo */}
                           <div className={cn(
                             "flex flex-col space-y-4 h-full min-h-0 pr-2 select-none flex-shrink-0 lg:flex-shrink relative z-[20]",
-                            "pb-20 sm:pb-0" // EspaÃ§o extra para o botÃ£o no mobile
+                            "pb-20 sm:pb-0" // Espaço extra para o botão no mobile
                           )}>
                             <div className="pb-1 border-b border-border dark:border-white/5/50">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
@@ -1906,7 +1906,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               </h3>
                             </div>
                             <div className="space-y-4 pt-2">
-                              {/* Seletor de Produto com Autocomplete DinÃ¢mico */}
+                              {/* Seletor de Produto com Autocomplete Dinâmico */}
                               <div className={ds.components.input.group}>
                                 <label className={ds.components.input.label}>Produto *</label>
                                     <div className="relative group">
@@ -1938,14 +1938,14 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                         tabIndex={0}
                                       />
 
-                                      {/* Indicador de Carregamento DinÃ¢mico */}
+                                      {/* Indicador de Carregamento Dinâmico */}
                                       {isSearchingProducts && (
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                           <Loader2 className="h-4 w-4 animate-spin text-brand" />
                                         </div>
                                       )}
 
-                                      {/* Dropdown de SugestÃµes com Scroll Nativo */}
+                                      {/* Dropdown de Sugestões com Scroll Nativo */}
                                       {showProductSuggestions && products.length > 0 && !selectedProduct && (
                                           <div className="absolute top-full left-0 right-0 mt-1 p-0 border shadow-2xl z-[1000] rounded-xl bg-card overflow-hidden animate-in fade-in slide-in-from-top-2 border-brand/20">
                                             <div className="max-h-[250px] w-full overflow-y-auto custom-scrollbar">
@@ -2001,7 +2001,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                       )}
                                     </div>
 
-                                  {/* Estado Vazio/Nenhum Resultado - Com opÃ§Ã£o de cadastro rÃ¡pido */}
+                                  {/* Estado Vazio/Nenhum Resultado - Com opção de cadastro rápido */}
                                   {showProductSuggestions && productSearch.length >= 1 && products.length === 0 && !selectedProduct && !isSearchingProducts && !showQuickCreateProduct && (
                                     <div className={cn(
                                       "w-full mt-2 rounded-xl border-dashed p-4 text-center animate-in fade-in slide-in-from-top-2",
@@ -2027,7 +2027,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     </div>
                                   )}
 
-                                  {/* FormulÃ¡rio inline de cadastro rÃ¡pido de produto */}
+                                  {/* Formulário inline de cadastro rápido de produto */}
                                   {showQuickCreateProduct && (
                                     <QuickCreateProduct
                                       initialName={productSearch}
@@ -2068,7 +2068,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <label className={ds.components.input.label}>Unidade *</label>
                                   <Select value={newProductUnit} onValueChange={(value) => {
                                     setNewProductUnit(value);
-                                    // Auto-foco no botÃ£o adicionar apÃ³s selecionar unidade
+                                    // Auto-foco no botão adicionar após selecionar unidade
                                     setTimeout(() => {
                                       if (selectedProduct && newProductQuantity) {
                                         addButtonRef.current?.focus();
@@ -2096,7 +2096,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 </div>
                               </div>
 
-                              {/* BotÃ£o Adicionar */}
+                              {/* Botão Adicionar */}
                               <Button
                                 ref={addButtonRef}
                                 type="button"
@@ -2112,7 +2112,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 tabIndex={0}
                               >
                                 <Plus className="h-4 w-4 mr-2" />
-                                Adicionar Ã  Lista (Enter)
+                                Adicionar à Lista (Enter)
                               </Button>
 
                               {/* Dica de atalhos */}
@@ -2150,7 +2150,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 <div className={cn("text-center py-8", ds.colors.text.secondary)}>
                                   <Package className="h-12 w-12 mx-auto mb-3 opacity-20" />
                                   <p className={ds.typography.weight.medium}>Nenhum produto adicionado</p>
-                                  <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulÃ¡rio para adicionar</p>
+                                  <p className={cn(ds.typography.size.xs, "mt-1")}>Use o formulário para adicionar</p>
                                 </div>
                               ) : (
                                 <div className="max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar pr-2">
@@ -2212,7 +2212,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-brand flex-shrink-0" />
                             <span className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
-                              Prazo da CotaÃ§Ã£o
+                              Prazo da Cotação
                             </span>
                           </div>
 
@@ -2224,10 +2224,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           )}>
                             <div>
                               <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>
-                                Agendar cotaÃ§Ã£o
+                                Agendar cotação
                               </p>
                               <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                                {isScheduled ? "SerÃ¡ criada como planejada" : "Inicia imediatamente"}
+                                {isScheduled ? "Será criada como planejada" : "Inicia imediatamente"}
                               </p>
                             </div>
                             <Switch
@@ -2247,7 +2247,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                               render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                   <FormLabel className={ds.components.input.label}>
-                                    Data de AtivaÃ§Ã£o *
+                                    Data de Ativação *
                                   </FormLabel>
                                   <Popover>
                                     <PopoverTrigger asChild>
@@ -2294,7 +2294,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   </Popover>
                                   <FormMessage />
                                   <p className={cn(ds.typography.size.xs, "text-amber-600 dark:text-amber-400 mt-1")}>
-                                    CotaÃ§Ã£o ficarÃ¡ inativa atÃ© esta data.
+                                    Cotação ficará inativa até esta data.
                                   </p>
                                 </FormItem>
                               )}
@@ -2302,7 +2302,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           ) : (
                             <div className="flex flex-col gap-4">
                               <div className="space-y-2">
-                                <label className={ds.components.input.label}>Atalho de PerÃ­odo</label>
+                                <label className={ds.components.input.label}>Atalho de Período</label>
                                 <Select onValueChange={(val) => {
                                   const days = parseInt(val);
                                   const hoje = new Date();
@@ -2313,20 +2313,20 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   form.setValue("dataFim", fim);
                                   
                                   toast({
-                                    title: "â±ï¸ PerÃ­odo aplicado",
-                                    description: `CotaÃ§Ã£o definida para ${days === 0 ? 'hoje' : days + ' dias'}`,
+                                    title: "â±ï¸ Período aplicado",
+                                    description: `Cotação definida para ${days === 0 ? 'hoje' : days + ' dias'}`,
                                     duration: 2000,
                                   });
                                 }}>
                                   <SelectTrigger className={cn(ds.components.input.root, "w-full h-10")}>
-                                    <SelectValue placeholder="Escolha um perÃ­odo rÃ¡pido" />
+                                    <SelectValue placeholder="Escolha um período rápido" />
                                   </SelectTrigger>
                                   <SelectContent className={cn(ds.colors.surface.card, ds.colors.border.default, "border shadow-xl")}>
                                     <SelectItem value="0">Somente hoje</SelectItem>
-                                    <SelectItem value="3">PrÃ³ximos 3 dias</SelectItem>
-                                    <SelectItem value="7">PrÃ³ximos 7 dias (PadrÃ£o)</SelectItem>
-                                    <SelectItem value="15">PrÃ³ximos 15 dias</SelectItem>
-                                    <SelectItem value="30">PrÃ³ximos 30 dias</SelectItem>
+                                    <SelectItem value="3">Próximos 3 dias</SelectItem>
+                                    <SelectItem value="7">Próximos 7 dias (Padrão)</SelectItem>
+                                    <SelectItem value="15">Próximos 15 dias</SelectItem>
+                                    <SelectItem value="30">Próximos 30 dias</SelectItem>
                                   </SelectContent>
                                 </Select>
                               </div>
@@ -2338,7 +2338,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   name="dataInicio"
                                   render={({ field }) => (
                                     <FormItem className="flex flex-col">
-                                      <FormLabel className={ds.components.input.label}>InÃ­cio *</FormLabel>
+                                      <FormLabel className={ds.components.input.label}>Início *</FormLabel>
                                       <Popover>
                                         <PopoverTrigger asChild>
                                           <FormControl>
@@ -2580,13 +2580,13 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   </div>
                                 )}
 
-                                {/* FormulÃ¡rio inline de cadastro rÃ¡pido de fornecedor */}
+                                {/* Formulário inline de cadastro rápido de fornecedor */}
                                 {showQuickCreateSupplier && (
                                   <QuickCreateSupplier
                                     initialName={supplierSearch}
                                     onCreated={(supplier) => {
                                       setShowQuickCreateSupplier(false);
-                                      // Adicionar Ã  lista local de fornecedores e selecionar automaticamente
+                                      // Adicionar à lista local de fornecedores e selecionar automaticamente
                                       const newSupplier = { id: supplier.id, name: supplier.name, contact: supplier.contact };
                                       setSuppliers(prev => [...prev, newSupplier].sort((a, b) => a.name.localeCompare(b.name)));
                                       handleSupplierSelect(newSupplier);
@@ -2618,7 +2618,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   Configurar Envio
                                 </h3>
                                 <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                                  Escolha quais produtos cada fornecedor receberÃ¡.
+                                  Escolha quais produtos cada fornecedor receberá.
                                 </p>
                               </div>
                             </div>
@@ -2682,7 +2682,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   newAssignments[s.id] = currentProductIds;
                                 });
                                 setSupplierItemAssignments(newAssignments);
-                                toast({ title: "âœ… Todos os itens atribuÃ­dos a todos os fornecedores" });
+                                toast({ title: "âœ… Todos os itens atribuídos a todos os fornecedores" });
                               }}
                               className="h-8 text-[10px] uppercase tracking-wider font-bold hover:bg-brand/10 border-brand/30 text-brand"
                             >
@@ -2699,8 +2699,8 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 });
                                 setSupplierItemAssignments(newAssignments);
                                 toast({ 
-                                  title: "âš ï¸ AtribuiÃ§Ãµes limpas",
-                                  description: "Nenhum fornecedor receberÃ¡ itens agora."
+                                  title: "âš ï¸ Atribuições limpas",
+                                  description: "Nenhum fornecedor receberá itens agora."
                                 });
                               }}
                               className="h-8 text-[10px] uppercase tracking-wider font-bold hover:bg-red-50 border-red-200 text-red-500"
@@ -2730,7 +2730,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   onClick={() => changeTab("periodo_fornecedores")}
                                   className="h-9 text-xs"
                                 >
-                                  Voltar para SeleÃ§Ã£o
+                                  Voltar para Seleção
                                 </Button>
                               </div>
                             ) : personalizeViewMode === "by-supplier" ? (
@@ -2816,7 +2816,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 });
                                                 setSupplierItemAssignments(newAssignments);
                                                 toast({ 
-                                                  title: "ðŸ“‹ ConfiguraÃ§Ã£o copiada",
+                                                  title: "ðŸ“‹ Configuração copiada",
                                                   description: `A lista de ${supplier.name} foi aplicada a todos os fornecedores.`,
                                                   duration: 2000
                                                 });
@@ -3006,10 +3006,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   <FileText className="h-6 w-6" />
                                 </div>
                                 <h1 className={cn(ds.typography.size.xl, ds.typography.weight.bold, ds.colors.text.primary)}>
-                                  Revise sua CotaÃ§Ã£o
+                                  Revise sua Cotação
                                 </h1>
                                 <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
-                                  Confira todas as informaÃ§Ãµes antes de enviar para os fornecedores.
+                                  Confira todas as informações antes de enviar para os fornecedores.
                                 </p>
                               </div>
 
@@ -3061,11 +3061,11 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     </div>
                                     <div className="space-y-3 text-sm">
                                       <div className="flex justify-between items-center">
-                                        <span className={ds.colors.text.secondary}>DuraÃ§Ã£o:</span>
+                                        <span className={ds.colors.text.secondary}>Duração:</span>
                                         <span className={cn(ds.typography.weight.medium, ds.colors.text.primary)}>
                                           {form.watch("dataInicio") && form.watch("dataFim")
-                                            ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} atÃ© ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
-                                            : "NÃ£o definida"}
+                                            ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                                            : "Não definida"}
                                         </span>
                                       </div>
                                       <div className="flex justify-between items-center">
@@ -3140,7 +3140,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
               "border-border",
               "border-t-brand"
             )}></div>
-            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotaÃ§Ã£o...</p>
+            <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary)}>Criando cotação...</p>
           </div>
         </div>
       )}
@@ -3270,7 +3270,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                           Nenhum produto encontrado
                         </p>
                         <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
-                          NÃ£o encontramos "{productSearch}" no catÃ¡logo.
+                          Não encontramos "{productSearch}" no catálogo.
                         </p>
                       </div>
 

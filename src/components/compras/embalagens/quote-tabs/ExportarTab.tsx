@@ -38,9 +38,9 @@ export function ExportarTab({
           <div className="w-14 h-14 mx-auto mb-3 rounded-xl bg-muted flex items-center justify-center">
             <FileDown className="h-7 w-7 text-muted-foreground" />
           </div>
-          <h3 className="text-base font-bold text-foreground mb-1.5 tracking-tight">Exportar RelatÃ³rio</h3>
+          <h3 className="text-base font-bold text-foreground mb-1.5 tracking-tight">Exportar Relatório</h3>
           <p className="text-[11px] text-muted-foreground max-w-sm mx-auto leading-relaxed">
-            Gere um PDF ou HTML com o comparativo completo para documentaÃ§Ã£o e aprovaÃ§Ã£o.
+            Gere um PDF ou HTML com o comparativo completo para documentação e aprovação.
           </p>
         </div>
 
@@ -48,16 +48,16 @@ export function ExportarTab({
           <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
             <div className="px-3 py-2 border-b border-border dark:border-white/5/50 bg-muted/20">
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <FileText className="h-3 w-3" />ConteÃºdo
+                <FileText className="h-3 w-3" />Conteúdo
               </h4>
             </div>
             <div className="p-3 space-y-2">
               {[
-                `PerÃ­odo: ${quote.dataInicio} a ${quote.dataFim}`,
+                `Período: ${quote.dataInicio} a ${quote.dataFim}`,
                 `${quote.itens.length} embalagens comparadas`,
                 `${quote.fornecedores.length} fornecedores participantes`,
-                "Tabela de preÃ§os detalhada",
-                "Destaque dos melhores preÃ§os",
+                "Tabela de preços detalhada",
+                "Destaque dos melhores preços",
                 "Ranking de fornecedores"
               ].map((text, i) => (
                 <div key={i} className="flex items-center gap-2 text-[11px] font-medium text-muted-foreground">

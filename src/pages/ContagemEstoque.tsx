@@ -159,7 +159,7 @@ export default function ContagemEstoque() {
                 Contagem de Estoque
               </h1>
               <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                Gerencie conferÃªncias de entrada e contagens avulsas
+                Gerencie conferências de entrada e contagens avulsas
               </p>
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function ContagemEstoque() {
             title="Pendentes"
             value={stats.pendentes}
             icon={Clock}
-            trend={{ value: "Aguardando", label: "inÃ­cio", type: "neutral" }}
+            trend={{ value: "Aguardando", label: "início", type: "neutral" }}
             variant="warning"
             className="hover:scale-[1.02] transition-transform w-full"
           />
@@ -202,7 +202,7 @@ export default function ContagemEstoque() {
             title="Finalizadas"
             value={stats.finalizadas}
             icon={CheckCircle}
-            trend={{ value: "ConcluÃ­das", label: "com sucesso", type: "positive" }}
+            trend={{ value: "Concluídas", label: "com sucesso", type: "positive" }}
             variant="success"
             className="hover:scale-[1.02] transition-transform w-full"
           />
@@ -212,7 +212,7 @@ export default function ContagemEstoque() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-1">
           <div className="flex-1">
             <SearchInput
-              placeholder="Buscar por fornecedor, data ou observaÃ§Ã£o..."
+              placeholder="Buscar por fornecedor, data ou observação..."
               value={searchTerm}
               onChange={setSearchTerm}
             />
@@ -235,7 +235,7 @@ export default function ContagemEstoque() {
             className="w-full sm:w-auto h-11 border-brand/20 hover:bg-brand/5 dark:border-brand/30 dark:hover:bg-brand/10 text-brand"
           >
             <FileText className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">RelatÃ³rio</span>
+            <span className="hidden sm:inline">Relatório</span>
           </Button>
           <Button
             onClick={() => setCreateDialogOpen(true)}
@@ -263,7 +263,7 @@ export default function ContagemEstoque() {
                   Nenhuma contagem encontrada
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  NÃ£o encontramos registros com os filtros atuais. Tente alterar a busca ou crie uma nova contagem.
+                  Não encontramos registros com os filtros atuais. Tente alterar a busca ou crie uma nova contagem.
                 </p>
               </div>
               <Button

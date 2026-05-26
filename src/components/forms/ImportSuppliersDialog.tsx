@@ -70,10 +70,10 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     const template = [
       {
         nome: "Holambra",
-        contato: "JoÃ£o Silva",
+        contato: "João Silva",
         telefone: "(11) 99999-9999",
         email: "contato@holambra.com.br",
-        endereco: "Av. Principal, 123 - SÃ£o Paulo/SP",
+        endereco: "Av. Principal, 123 - São Paulo/SP",
         limite: "R$ 25.000",
         status: "active",
         avaliacao: 4.8
@@ -83,7 +83,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         contato: "Maria Santos",
         telefone: "(11) 88888-8888",
         email: "vendas@seara.com.br",
-        endereco: "Rua Comercial, 456 - SÃ£o Paulo/SP",
+        endereco: "Rua Comercial, 456 - São Paulo/SP",
         limite: "R$ 50.000",
         status: "active",
         avaliacao: 4.6
@@ -116,7 +116,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         !selectedFile.name.endsWith('.xlsx') && 
         !selectedFile.name.endsWith('.xls')) {
       toast({
-        title: "Formato invÃ¡lido",
+        title: "Formato inválido",
         description: "Por favor, selecione um arquivo CSV ou Excel (.xlsx, .xls)",
         variant: "destructive"
       });
@@ -139,16 +139,16 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      // Mapear colunas (flexÃ­vel para diferentes formatos)
+      // Mapear colunas (flexível para diferentes formatos)
       const mapped = jsonData.map((row: any, index: number) => {
         const name = row.nome || row.name || row.fornecedor || row.Nome || row.Name || row.Fornecedor || '';
         const contact = row.contato || row.contact || row.responsavel || row.Contato || row.Contact || row.Responsavel || '';
         
         if (!name) {
-          errors.push(`Linha ${index + 2}: Nome Ã© obrigatÃ³rio`);
+          errors.push(`Linha ${index + 2}: Nome é obrigatório`);
         }
         if (!contact) {
-          errors.push(`Linha ${index + 2}: Contato/ResponsÃ¡vel Ã© obrigatÃ³rio`);
+          errors.push(`Linha ${index + 2}: Contato/Responsável é obrigatório`);
         }
 
         // Processar status
@@ -184,7 +184,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       if (mapped.length === 0) {
         toast({
           title: "Arquivo vazio",
-          description: "O arquivo nÃ£o contÃ©m dados vÃ¡lidos",
+          description: "O arquivo não contém dados válidos",
           variant: "destructive"
         });
       } else {
@@ -197,7 +197,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       console.error('Erro ao processar arquivo:', error);
       toast({
         title: "Erro ao processar arquivo",
-        description: "Verifique se o arquivo estÃ¡ no formato correto",
+        description: "Verifique se o arquivo está no formato correto",
         variant: "destructive"
       });
     } finally {
@@ -217,10 +217,10 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     setIsProcessing(true);
 
     try {
-      // 1. Verificar autenticaÃ§Ã£o
+      // 1. Verificar autenticação
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        throw new Error("UsuÃ¡rio nÃ£o autenticado");
+        throw new Error("Usuário não autenticado");
       }
 
       // 2. Get company_id
@@ -231,10 +231,10 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         .single();
 
       if (!companyData) {
-        throw new Error("Empresa nÃ£o encontrada");
+        throw new Error("Empresa não encontrada");
       }
 
-      // 3. Preparar dados para inserÃ§Ã£o
+      // 3. Preparar dados para inserção
       const suppliersToInsert = parsedData.map(s => ({
         company_id: companyData.company_id,
         name: s.name,
@@ -242,7 +242,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
         phone: s.phone || null,
         email: s.email || null,
         address: s.address || null,
-        cnpj: null, // CNPJ nÃ£o estÃ¡ no template, mas pode ser adicionado
+        cnpj: null, // CNPJ não está no template, mas pode ser adicionado
         limit: s.limit || null,
       }));
 
@@ -258,7 +258,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
 
       toast({
-        title: "ImportaÃ§Ã£o concluÃ­da",
+        title: "Importação concluída",
         description: `${data?.length || parsedData.length} fornecedores importados com sucesso`,
       });
 
@@ -270,8 +270,8 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
     } catch (error: any) {
       console.error('Erro ao importar fornecedores:', error);
       toast({
-        title: "Erro na importaÃ§Ã£o",
-        description: error.message || "NÃ£o foi possÃ­vel importar os fornecedores",
+        title: "Erro na importação",
+        description: error.message || "Não foi possível importar os fornecedores",
         variant: "destructive"
       });
     } finally {
@@ -325,7 +325,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
             <div>
               <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">Importar Fornecedores</DialogTitle>
               <DialogDescription className="text-sm text-gray-500 dark:text-gray-400">
-                Importe mÃºltiplos fornecedores usando arquivos CSV ou Excel
+                Importe múltiplos fornecedores usando arquivos CSV ou Excel
               </DialogDescription>
             </div>
           </div>
@@ -343,7 +343,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                   <div>
                     <p className="font-medium text-gray-900 dark:text-gray-100 text-sm">Precisa de um template?</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Baixe um arquivo de exemplo para facilitar a importaÃ§Ã£o
+                      Baixe um arquivo de exemplo para facilitar a importação
                     </p>
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Selecione um arquivo</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                    Formatos aceitos: CSV, XLSX, XLS (mÃ¡x. 10MB)
+                    Formatos aceitos: CSV, XLSX, XLS (máx. 10MB)
                   </p>
                   <input
                     ref={fileInputRef}
@@ -420,7 +420,7 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
                           <div className="flex items-start gap-2">
                             <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
                             <div className="space-y-1">
-                              <p className="font-medium text-xs text-red-600 dark:text-red-400">Avisos de validaÃ§Ã£o:</p>
+                              <p className="font-medium text-xs text-red-600 dark:text-red-400">Avisos de validação:</p>
                               {validationErrors.slice(0, 3).map((error, i) => (
                                 <p key={i} className="text-[11px] text-red-500/80">{error}</p>
                               ))}
@@ -479,11 +479,11 @@ export function ImportSuppliersDialog({ onSuppliersImported, trigger }: ImportSu
               <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-1 h-1 rounded-full bg-orange-400"></span>
-                  <strong>nome</strong>: Fornecedor (obrigatÃ³rio)
+                  <strong>nome</strong>: Fornecedor (obrigatório)
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-1 h-1 rounded-full bg-orange-400"></span>
-                  <strong>contato</strong>: ResponsÃ¡vel (obrigatÃ³rio)
+                  <strong>contato</strong>: Responsável (obrigatório)
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-1 h-1 rounded-full bg-gray-400"></span>

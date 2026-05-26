@@ -16,11 +16,11 @@ const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"
 const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
 const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
 const TABS = [
-  { value: "cotacoes", icon: FileText, label: "CotaÃ§Ãµes" },
+  { value: "cotacoes", icon: FileText, label: "Cotações" },
   { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
   { value: "lista", icon: ShoppingBasket, label: "Lista" },
   { value: "embalagens", icon: Package, label: "Embalagens" },
-  { value: "analise", icon: BarChart3, label: "AnÃ¡lise" },
+  { value: "analise", icon: BarChart3, label: "Análise" },
   { value: "calculadora", icon: Keyboard, label: "Calculadora" }
 ];
 
@@ -55,7 +55,7 @@ function Compras() {
     {
       key: '1',
       action: () => activeTab !== 'calculadora' && handleTabChange('cotacoes'),
-      description: 'Ir para CotaÃ§Ãµes'
+      description: 'Ir para Cotações'
     },
     {
       key: '2',
@@ -75,7 +75,7 @@ function Compras() {
     {
       key: '5',
       action: () => activeTab !== 'calculadora' && handleTabChange('analise'),
-      description: 'Ir para AnÃ¡lise'
+      description: 'Ir para Análise'
     },
     {
       key: '6',
@@ -89,7 +89,7 @@ function Compras() {
         const event = new CustomEvent('compras:nova', { detail: { tab: activeTab } });
         window.dispatchEvent(event);
       },
-      description: 'Nova cotaÃ§Ã£o/pedido'
+      description: 'Nova cotação/pedido'
     },
     {
       key: 'f',
@@ -143,7 +143,7 @@ function Compras() {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           {/* Page Header + Inline Tabs */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-6 md:mb-10 pb-4 md:pb-8 md:border-b border-zinc-200/70 dark:border-zinc-800">
-            {/* TÃ­tulo */}
+            {/* Título */}
             <div className="flex items-center gap-2 md:gap-3 shrink-0">
               <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
                 <ShoppingBag className="h-6 w-6 text-brand" />
@@ -153,7 +153,7 @@ function Compras() {
                   Compras
                 </h1>
                 <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                  Gerencie cotaÃ§Ãµes e pedidos de compra
+                  Gerencie cotações e pedidos de compra
                 </p>
               </div>
             </div>

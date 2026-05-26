@@ -16,7 +16,7 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
   const { data, isLoading } = useProductPriceHistory(productId);
   const { orderHistory = [] } = (data as any) || {};
 
-  // Encontrar o MENOR preÃ§o entre todos os pedidos confirmados
+  // Encontrar o MENOR preço entre todos os pedidos confirmados
   const bestOrderEntry = useMemo(() => {
     if (!orderHistory || orderHistory.length === 0) return null;
     return orderHistory.reduce((min: any, current: any) => 
@@ -59,7 +59,7 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
         >
           <div className="p-3 border-b border-border dark:border-white/5 bg-gray-50/50 dark:bg-gray-900/50">
             <p className="font-black text-[10px] uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
-              Melhor PreÃ§o Fechado
+              Melhor Preço Fechado
             </p>
           </div>
           
@@ -77,7 +77,7 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
               </div>
             ) : (
               <div className="space-y-4 animate-in fade-in zoom-in-95 duration-300">
-                {/* PreÃ§o Principal */}
+                {/* Preço Principal */}
                 <div className="text-center">
                   <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">
                     {formatCurrency(bestOrderEntry.price)}
@@ -104,7 +104,7 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-[9px] font-black text-gray-400 uppercase tracking-wider">Origem</span>
                     <Badge variant="outline" className="text-[8px] px-1.5 py-0 h-4 bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-border dark:border-white/5 font-black uppercase tracking-tighter">
-                      {bestOrderEntry.quotationId ? 'CotaÃ§Ã£o Convertida' : 'Pedido Direto'}
+                      {bestOrderEntry.quotationId ? 'Cotação Convertida' : 'Pedido Direto'}
                     </Badge>
                   </div>
                 </div>
@@ -115,7 +115,7 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
           {bestOrderEntry && (
             <div className="p-2 border-t border-border dark:border-white/5 bg-emerald-50/30 dark:bg-emerald-900/10 text-center">
               <p className="text-[8px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-[0.1em]">
-                PreÃ§o final de Ãºltima linha
+                Preço final de última linha
               </p>
             </div>
           )}

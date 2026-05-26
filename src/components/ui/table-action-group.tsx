@@ -55,7 +55,7 @@ export function TableActionGroup({
   onFinalize,
   additionalActions = [],
   dropdownItems = [],
-  dropdownLabel = "AÃ§Ãµes",
+  dropdownLabel = "Ações",
   className,
   showView = true,
   showEdit = true,
@@ -66,7 +66,7 @@ export function TableActionGroup({
   deleteLabel = "Excluir",
   finalizeLabel = "Finalizar",
 }: TableActionGroupProps) {
-  // Construir lista de aÃ§Ãµes do dropdown
+  // Construir lista de ações do dropdown
   const allActions: DropdownItem[] = [];
 
   if (showView && onView) {
@@ -96,7 +96,7 @@ export function TableActionGroup({
     });
   }
 
-  // Adicionar aÃ§Ãµes adicionais
+  // Adicionar ações adicionais
   additionalActions.forEach((action) => {
     if (!action.hidden) {
       allActions.push(action);
@@ -110,7 +110,7 @@ export function TableActionGroup({
     }
   });
 
-  // Adicionar delete por Ãºltimo (destrutivo)
+  // Adicionar delete por último (destrutivo)
   if (showDelete && onDelete) {
     allActions.push({
       icon: <Trash2 className="h-4 w-4" />,

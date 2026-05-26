@@ -102,7 +102,7 @@ export function CreateStockCountDialog({
       {Header}
       
       <div className={cn(ds.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4")}>
-        {/* SeÃ§Ã£o: Tipo de Contagem */}
+        {/* Seção: Tipo de Contagem */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
             <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
@@ -173,7 +173,7 @@ export function CreateStockCountDialog({
                     Contagem Livre
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Sem vÃ­nculo com pedido
+                    Sem vínculo com pedido
                   </p>
                 </div>
                 {countType === "from_scratch" && (
@@ -200,7 +200,7 @@ export function CreateStockCountDialog({
             ) : availableOrders.length === 0 ? (
               <div className="flex flex-col items-center py-6 bg-muted/20 rounded-lg border border-border dark:border-white/5 border-dashed text-center">
                 <FileBox className="w-8 h-8 text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">Nenhum pedido disponÃ­vel</p>
+                <p className="text-sm text-muted-foreground">Nenhum pedido disponível</p>
                 <p className="text-xs text-muted-foreground/70">Use contagem livre</p>
               </div>
             ) : (
@@ -245,7 +245,7 @@ export function CreateStockCountDialog({
           </div>
         )}
 
-        {/* InformaÃ§Ãµes da Contagem */}
+        {/* Informações da Contagem */}
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
             <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
@@ -281,7 +281,7 @@ export function CreateStockCountDialog({
                 <Input
                   value={counterName}
                   onChange={(e) => setCounterName(e.target.value)}
-                  placeholder="Nome de quem estÃ¡ contando"
+                  placeholder="Nome de quem está contando"
                   className={cn(ds.components.input.root, "pl-9")}
                 />
               </div>
@@ -293,8 +293,8 @@ export function CreateStockCountDialog({
                   <Scale className="w-4 h-4 text-brand" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium">BalanÃ§o Mensal</h4>
-                  <p className="text-xs text-muted-foreground">Esta contagem Ã© para fechamento?</p>
+                  <h4 className="text-sm font-medium">Balanço Mensal</h4>
+                  <p className="text-xs text-muted-foreground">Esta contagem é para fechamento?</p>
                 </div>
               </div>
               <Switch
@@ -309,10 +309,10 @@ export function CreateStockCountDialog({
         <div className={cn(ds.components.card.flat, "p-4 space-y-4")}>
           <h3 className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", ds.colors.text.muted)}>
             <span className="w-1 h-4 bg-brand/20 rounded-full"></span>
-            ObservaÃ§Ãµes
+            Observações
           </h3>
           <Textarea
-            placeholder="Adicione observaÃ§Ãµes opcionais sobre esta contagem..."
+            placeholder="Adicione observações opcionais sobre esta contagem..."
             value={countNotes}
             onChange={(e) => setCountNotes(e.target.value)}
             rows={2}

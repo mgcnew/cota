@@ -89,7 +89,7 @@ function Produtos() {
     }
   }, [loading, user]);
 
-  // Busca direta no Supabase como fallback (quando a busca local pode nÃ£o ter todos os produtos)
+  // Busca direta no Supabase como fallback (quando a busca local pode não ter todos os produtos)
   const [dbSearchResults, setDbSearchResults] = useState<Product[]>([]);
   const [isDbSearching, setIsDbSearching] = useState(false);
 
@@ -188,7 +188,7 @@ function Produtos() {
       const extraFromDb = dbSearchResults.filter(dbP => !existingIds.has(dbP.id));
       
       if (extraFromDb.length > 0) {
-        // Enriquecer dados do DB com dados completos do cache se possÃ­vel
+        // Enriquecer dados do DB com dados completos do cache se possível
         const allProductsMap = new Map(safeProducts.map(p => [p.id, p]));
         const enriched = extraFromDb.map(dbP => allProductsMap.get(dbP.id) || dbP);
         results = [...results, ...enriched];
@@ -218,7 +218,7 @@ function Produtos() {
     if (safeFilteredProducts.length === 0) {
       toast({
         title: "Nenhum produto para exportar",
-        description: "NÃ£o hÃ¡ produtos filtrados para exportar.",
+        description: "Não há produtos filtrados para exportar.",
         variant: "destructive",
       });
       return;
@@ -241,17 +241,17 @@ function Produtos() {
       columns: {
         name: 'Nome',
         category: 'Categoria',
-        barcode: 'CÃ³digo de Barras',
+        barcode: 'Código de Barras',
         unit: 'Unidade',
         status: 'Status',
-        price: 'PreÃ§o',
+        price: 'Preço',
         bestSupplier: 'Melhor Fornecedor',
-        quotesCount: 'CotaÃ§Ãµes'
+        quotesCount: 'Cotações'
       }
     });
 
     toast({
-      title: "ExportaÃ§Ã£o realizada",
+      title: "Exportação realizada",
       description: `${exportData.length} produtos exportados com sucesso.`,
     });
   }, [safeFilteredProducts, toast, exportToCSV]);
@@ -310,13 +310,13 @@ function Produtos() {
                   Produtos
                 </h1>
                 <p className={cn(designSystem.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                  Gerencie seu catÃ¡logo de itens e categorias
+                  Gerencie seu catálogo de itens e categorias
                 </p>
               </div>
             </div>
           </div>
 
-          {/* MÃ©tricas essenciais */}
+          {/* Métricas essenciais */}
           {isMobile ? (
             <MobileMetricRibbon className="mb-4 mt-2">
               <MobileMetricCard
@@ -332,13 +332,13 @@ function Produtos() {
                 variant="info"
               />
               <MobileMetricCard
-                title="CotaÃ§Ãµes"
+                title="Cotações"
                 value={stats.activeQuotes}
                 icon={ClipboardList}
                 variant="success"
               />
               <MobileMetricCard
-                title="Valor MÃ©dio"
+                title="Valor Médio"
                 value={stats.averageValue}
                 icon={DollarSign}
                 variant="default"
@@ -361,14 +361,14 @@ function Produtos() {
                 className="hover:scale-[1.02] transition-transform"
               />
               <MetricCard
-                title="CotaÃ§Ãµes"
+                title="Cotações"
                 value={stats.activeQuotes}
                 icon={ClipboardList}
                 variant="success"
                 className="hover:scale-[1.02] transition-transform"
               />
               <MetricCard
-                title="Valor MÃ©dio"
+                title="Valor Médio"
                 value={stats.averageValue}
                 icon={DollarSign}
                 variant="default"

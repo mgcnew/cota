@@ -58,7 +58,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
   const filteredResults = useMemo(() => {
     const query = debouncedSearch.trim();
     
-    // SÃ³ busca se tiver pelo menos 2 caracteres
+    // Só busca se tiver pelo menos 2 caracteres
     if (query.length < 2) {
       return {
         produtos: [],
@@ -170,20 +170,20 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
         {/* Header otimizado para mobile */}
         <div className="relative border-b border-border dark:border-white/5 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shrink-0">
           <div className="relative flex items-center px-3 sm:px-4 py-3 sm:py-3.5 gap-2 sm:gap-3">
-            {/* Ãcone de busca */}
+            {/* Ícone de busca */}
             <div className="p-2 rounded-lg bg-primary/10 dark:bg-primary/20 shrink-0">
               <Search className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
 
             {/* Input de busca */}
             <CommandInput 
-              placeholder={isMobile ? "Buscar..." : "Buscar cotaÃ§Ãµes, produtos, fornecedores..."} 
+              placeholder={isMobile ? "Buscar..." : "Buscar cotações, produtos, fornecedores..."} 
               value={searchQuery}
               onValueChange={setSearchQuery}
               className="flex-1 border-0 bg-transparent text-sm sm:text-base text-foreground placeholder:text-muted-foreground focus:ring-0 focus:outline-none h-auto"
             />
 
-            {/* BotÃ£o de limpar (mobile) ou ESC (desktop) */}
+            {/* Botão de limpar (mobile) ou ESC (desktop) */}
             {searchQuery && isMobile ? (
               <button
                 onClick={() => setSearchQuery('')}
@@ -225,7 +225,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
               Busca Global
             </h3>
             <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto">
-              Digite para buscar produtos, fornecedores, cotaÃ§Ãµes e pedidos em todo o sistema
+              Digite para buscar produtos, fornecedores, cotações e pedidos em todo o sistema
             </p>
           </div>
         )}
@@ -286,7 +286,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
                   </p>
                 </div>
                   <Badge variant="secondary" className="shrink-0 text-xs">
-                    {produto.quotesCount} cotaÃ§Ã£o(Ãµes)
+                    {produto.quotesCount} cotação(ões)
                 </Badge>
               </CommandItem>
             ))}
@@ -332,7 +332,7 @@ export function GlobalSearch({ open, onOpenChange }: GlobalSearchProps) {
 
         {searchQuery.trim().length >= 2 && filteredResults.cotacoes.length > 0 && (
           <>
-            <CommandGroup heading="CotaÃ§Ãµes">
+            <CommandGroup heading="Cotações">
             {filteredResults.cotacoes.slice(0, 5).map((cotacao) => (
               <CommandItem
                 key={cotacao.id}
@@ -407,7 +407,7 @@ export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
             onClick={onClick}
             className={cn(
               "relative transition-all duration-200 active:scale-95 touch-manipulation",
-              // Mobile: apenas Ã­cone
+              // Mobile: apenas ícone
               "w-9 h-9 p-0 rounded-lg md:w-full md:h-10 md:px-4 md:justify-start",
               "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
               "border border-input hover:bg-accent hover:text-accent-foreground"
@@ -420,7 +420,7 @@ export function GlobalSearchTrigger({ onClick }: { onClick: () => void }) {
             <div className="hidden md:flex items-center w-full gap-3">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span className="text-muted-foreground font-normal flex-1 text-left text-sm truncate">
-                Buscar cotaÃ§Ãµes, produtos...
+                Buscar cotações, produtos...
               </span>
               <kbd className="hidden lg:inline-flex h-5 px-1.5 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground">
                 âŒ˜K

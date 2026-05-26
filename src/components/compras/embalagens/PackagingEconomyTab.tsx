@@ -16,7 +16,7 @@ export function PackagingEconomyTab() {
   const { orders } = usePackagingOrders();
   const [selectedQuoteId, setSelectedQuoteId] = useState<string>("");
 
-  // Filtrar cotaÃ§Ãµes concluÃ­das que foram convertidas em pedidos
+  // Filtrar cotações concluídas que foram convertidas em pedidos
   const completedQuotesWithOrders = useMemo(() => {
     return quotes.filter(quote => {
       const hasOrder = orders.some(order => order.quoteId === quote.id);
@@ -24,7 +24,7 @@ export function PackagingEconomyTab() {
     });
   }, [quotes, orders]);
 
-  // Dados da cotaÃ§Ã£o selecionada
+  // Dados da cotação selecionada
   const analysisData = useMemo(() => {
     if (!selectedQuoteId) return null;
 
@@ -94,7 +94,7 @@ export function PackagingEconomyTab() {
     // Ordenar fornecedores por total (menor para maior)
     const sortedSuppliers = Object.values(supplierData).sort((a, b) => a.totalGeral - b.totalGeral);
 
-    // Calcular economia em relaÃ§Ã£o ao vencedor
+    // Calcular economia em relação ao vencedor
     const vencedor = sortedSuppliers[0];
     const suppliersComEconomia = sortedSuppliers.map(supplier => ({
       ...supplier,
@@ -126,23 +126,23 @@ export function PackagingEconomyTab() {
           </div>
           <div className="flex-1">
             <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>
-              AnÃ¡lise de Economia
+              Análise de Economia
             </h3>
             <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "opacity-70")}>
-              Compare o vencedor com os concorrentes e visualize a poupanÃ§a real
+              Compare o vencedor com os concorrentes e visualize a poupança real
             </p>
           </div>
         </div>
       </div>
 
-      {/* Seletor de CotaÃ§Ã£o */}
+      {/* Seletor de Cotação */}
       <div className={cn(ds.components.card.root, "p-6")}>
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2.5 rounded-xl bg-brand/10 text-brand border border-brand/20">
             <Target className="h-5 w-5" />
           </div>
           <h3 className={cn(ds.typography.size.base, ds.typography.weight.bold, ds.colors.text.primary)}>
-            Selecione uma CotaÃ§Ã£o
+            Selecione uma Cotação
           </h3>
         </div>
         
@@ -151,15 +151,15 @@ export function PackagingEconomyTab() {
             <div className="p-4 rounded-full bg-muted/30 mb-4">
               <AlertCircle className="h-10 w-10 text-muted-foreground/40" />
             </div>
-            <p className={cn("text-base font-bold", ds.colors.text.primary)}>Nenhuma cotaÃ§Ã£o concluÃ­da</p>
+            <p className={cn("text-base font-bold", ds.colors.text.primary)}>Nenhuma cotação concluída</p>
             <p className={cn("text-sm mt-1 max-w-xs mx-auto opacity-60 text-center", ds.colors.text.secondary)}>
-              Complete uma cotaÃ§Ã£o e converta em pedido para ver a anÃ¡lise de economia detalhada aqui.
+              Complete uma cotação e converta em pedido para ver a análise de economia detalhada aqui.
             </p>
           </div>
         ) : (
           <Select value={selectedQuoteId} onValueChange={setSelectedQuoteId}>
             <SelectTrigger className={cn("w-full h-14 rounded-2xl transition-all hover:border-brand/50", ds.components.input.root)}>
-              <SelectValue placeholder="Escolha uma cotaÃ§Ã£o para analisar..." />
+              <SelectValue placeholder="Escolha uma cotação para analisar..." />
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-border/50 shadow-2xl">
               {completedQuotesWithOrders.map(quote => (
@@ -169,7 +169,7 @@ export function PackagingEconomyTab() {
                       <CheckCircle2 className="h-5 w-5 text-brand" />
                     </div>
                     <div>
-                      <p className="font-bold text-sm">CotaÃ§Ã£o #{quote.id.substring(0, 8)}</p>
+                      <p className="font-bold text-sm">Cotação #{quote.id.substring(0, 8)}</p>
                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest opacity-60">
                         {quote.itens?.length || 0} itens cotados
                       </p>
@@ -182,7 +182,7 @@ export function PackagingEconomyTab() {
         )}
       </div>
 
-      {/* AnÃ¡lise de Economia */}
+      {/* Análise de Economia */}
       {analysisData && (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
           {/* Card do Vencedor */}
@@ -208,7 +208,7 @@ export function PackagingEconomyTab() {
                     <Badge className="bg-brand/10 text-brand border-brand/20 text-[10px] font-black uppercase tracking-widest px-2 py-0.5">
                       {analysisData.vencedor.itens.length} Itens Ganhos
                     </Badge>
-                    <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Melhor custo-benefÃ­cio</span>
+                    <span className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Melhor custo-benefício</span>
                   </div>
                 </div>
               </div>
@@ -221,7 +221,7 @@ export function PackagingEconomyTab() {
             </div>
           </div>
 
-          {/* ComparaÃ§Ã£o por Fornecedor */}
+          {/* Comparação por Fornecedor */}
           <div className="space-y-4">
             <div className="flex items-center gap-3 px-2">
               <div className="p-1.5 rounded-lg bg-brand/10 border border-brand/20">
@@ -314,7 +314,7 @@ export function PackagingEconomyTab() {
                             </div>
                             <div className="space-y-1">
                               <span className={cn("text-[11px] font-black uppercase tracking-widest", ds.colors.text.primary)}>
-                                Potencial de PoupanÃ§a:
+                                Potencial de Poupança:
                               </span>
                               <p className="text-[10px] font-medium opacity-60">Economia real ao optar pelo vencedor</p>
                             </div>
@@ -352,9 +352,9 @@ export function PackagingEconomyTab() {
               </div>
               <div>
                 <h3 className={cn(ds.typography.size.xl, "font-black", ds.colors.text.primary, "tracking-tighter")}>
-                  Resumo EstratÃ©gico de Economia
+                  Resumo Estratégico de Economia
                 </h3>
-                <p className={cn("text-xs font-bold uppercase tracking-widest opacity-50 mt-1", ds.colors.text.secondary)}>AnÃ¡lise comparativa direta de performance</p>
+                <p className={cn("text-xs font-bold uppercase tracking-widest opacity-50 mt-1", ds.colors.text.secondary)}>Análise comparativa direta de performance</p>
               </div>
             </div>
             
@@ -382,7 +382,7 @@ export function PackagingEconomyTab() {
                     <div className="flex items-center gap-1.5 mt-2">
                       <div className="w-1 h-1 rounded-full bg-brand animate-pulse" />
                       <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-40", ds.colors.text.muted)}>
-                        PoupanÃ§a Efetiva
+                        Poupança Efetiva
                       </p>
                     </div>
                   </div>

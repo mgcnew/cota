@@ -30,12 +30,12 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // States para armazenar as ediÃ§Ãµes do usuÃ¡rio para cada item
-  // A chave Ã© o id do order entry item.
+  // States para armazenar as edições do usuário para cada item
+  // A chave é o id do order entry item.
   const [itemQuantities, setItemQuantities] = useState<Record<string, string>>({});
   const [itemTotals, setItemTotals] = useState<Record<string, string>>({});
 
-  // Helpers de formataÃ§Ã£o para moeda BRL
+  // Helpers de formatação para moeda BRL
   const formatInputToBRL = (value: string) => {
     const digitOnly = value.replace(/\D/g, "");
     if (!digitOnly) return "";
@@ -73,7 +73,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
     setItemTotals(prev => ({ ...prev, [itemId]: formatInputToBRL(value) }));
   };
 
-  // CÃ¡lculos reativos em tempo real
+  // Cálculos reativos em tempo real
   const summary = useMemo(() => {
     if (!order) return { totalGeral: 0, newEconomy: 0 };
     
@@ -84,9 +84,9 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
       totalGeral += valorTotalItem;
     });
 
-    const originalTotal = order.totalValue || 1; // previne divisÃµes por 0
-    // ProporÃ§Ã£o de economia = economia original / total original 
-    // Nova Economia = Nova Total * ProporÃ§Ã£o
+    const originalTotal = order.totalValue || 1; // previne divisões por 0
+    // Proporção de economia = economia original / total original 
+    // Nova Economia = Nova Total * Proporção
     const proportion = order.economiaEstimada / originalTotal;
     const newEconomy = totalGeral * proportion;
 
@@ -109,7 +109,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
         const qtd = parseFloat(itemQuantities[item.id]) || item.quantidade;
         const vTotalVal = itemTotals[item.id] ? parseBRLToNumber(itemTotals[item.id]) : item.valorTotal;
         const vTotal = vTotalVal || item.valorTotal;
-        // O valor unitÃ¡rio Ã© sempre o total/quantidade
+        // O valor unitário é sempre o total/quantidade
         const vUnit = qtd > 0 ? vTotal / qtd : 0;
         
         return {
@@ -131,7 +131,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
       resetForm();
     } catch (e) {
       console.error(e);
-      // O erro Ã© lidado pela mutation, mas se cairmos aqui garantimos liberar a interface
+      // O erro é lidado pela mutation, mas se cairmos aqui garantimos liberar a interface
     } finally {
       setIsSubmitting(false);
     }

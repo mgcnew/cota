@@ -35,7 +35,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
   const { data: quoteHistory = [], isLoading: quotesLoading, error: quotesError } = useSupplierQuoteHistory(supplierId);
   const { data: orderHistory = [], isLoading: ordersLoading, error: ordersError } = useSupplierOrderHistory(isOpen && activeTab === "orders" ? supplierId : "");
 
-  // FunÃ§Ã£o para gerenciar abertura/fechamento e manter scroll
+  // Função para gerenciar abertura/fechamento e manter scroll
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen) {
       scrollPositionRef.current = window.scrollY;
@@ -155,7 +155,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
 
   const uniqueProducts = filteredAndSortedProducts;
 
-  // ConteÃºdo do modal (reutilizado em mobile e desktop)
+  // Conteúdo do modal (reutilizado em mobile e desktop)
   const modalContent = (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 overflow-hidden flex flex-col">
       <div className={cn("px-4 sm:px-6 py-2 border-b", designSystem.colors.border.subtle)}>
@@ -165,7 +165,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
             className="data-[state=active]:text-primary"
           >
             <Package className="h-3.5 w-3.5 mr-1.5" />
-            CotaÃ§Ãµes
+            Cotações
           </TabsTrigger>
           <TabsTrigger
             value="orders"
@@ -185,7 +185,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
               <div className={cn(designSystem.components.card.flat, "p-4 space-y-4")}>
                 <h4 className={cn(designSystem.typography.size.xs, designSystem.typography.weight.bold, "uppercase tracking-wider flex items-center gap-2", designSystem.colors.text.muted)}>
                   <span className="w-1 h-4 bg-primary/20 rounded-full"></span>
-                  Resumo de CotaÃ§Ãµes
+                  Resumo de Cotações
                 </h4>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm">
@@ -193,15 +193,15 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                     <span className={cn("font-bold", designSystem.colors.text.primary)}>{quoteStats.totalQuotes}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className={designSystem.colors.text.secondary}>VitÃ³rias</span>
+                    <span className={designSystem.colors.text.secondary}>Vitórias</span>
                     <span className="font-bold text-emerald-500">{quoteStats.wonQuotes}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className={designSystem.colors.text.secondary}>Taxa de vitÃ³ria</span>
+                    <span className={designSystem.colors.text.secondary}>Taxa de vitória</span>
                     <span className={cn("font-bold", designSystem.colors.text.primary)}>{quoteStats.totalQuotes ? `${quoteStats.winRate.toFixed(1)}%` : "-"}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className={designSystem.colors.text.secondary}>PreÃ§o mÃ©dio</span>
+                    <span className={designSystem.colors.text.secondary}>Preço médio</span>
                     <span className={cn("font-bold", designSystem.colors.text.primary)}>{quoteStats.totalQuotes ? `R$ ${quoteStats.avgPrice.toFixed(2)}` : '-'}</span>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                             variant={quote.isWinner ? "success" : "secondary"}
                             className="mt-1"
                           >
-                            {quote.isWinner ? "Venceu" : "NÃ£o venceu"}
+                            {quote.isWinner ? "Venceu" : "Não venceu"}
                           </Badge>
                         </div>
                       </div>
@@ -377,7 +377,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
               </div>
               <div className="flex-1 min-w-0">
                 <DrawerTitle className={cn(designSystem.typography.size.base, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
-                  HistÃ³rico do Fornecedor
+                  Histórico do Fornecedor
                 </DrawerTitle>
                 <p className={cn("text-xs truncate", designSystem.colors.text.secondary)}>
                   {supplierName}
@@ -409,7 +409,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
             </div>
             <div className="flex-1 min-w-0">
               <DialogTitle className={cn(designSystem.typography.size.lg, designSystem.typography.weight.bold, designSystem.colors.text.primary)}>
-                HistÃ³rico do Fornecedor
+                Histórico do Fornecedor
               </DialogTitle>
               <p className={cn("text-xs truncate", designSystem.colors.text.secondary)}>
                 {supplierName}

@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
 
 const loginSchema = z.object({
-  email: z.string().trim().email({ message: "E-mail invÃ¡lido" }),
-  password: z.string().min(8, { message: "A senha deve ter no mÃ­nimo 8 caracteres" }),
+  email: z.string().trim().email({ message: "E-mail inválido" }),
+  password: z.string().min(8, { message: "A senha deve ter no mínimo 8 caracteres" }),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -78,7 +78,7 @@ export default function Auth() {
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast({
-            title: "Credenciais invÃ¡lidas",
+            title: "Credenciais inválidas",
             description: "E-mail ou senha incorretos. Tente novamente.",
             variant: "destructive",
           });

@@ -107,7 +107,7 @@ export default function Landing() {
               ds.typography.weight.extrabold,
               ds.colors.text.primary
             )}>
-              GestÃ£o de CotaÃ§Ãµes{" "}
+              Gestão de Cotações{" "}
               <span className="text-brand">Inteligente</span>
             </h1>
 

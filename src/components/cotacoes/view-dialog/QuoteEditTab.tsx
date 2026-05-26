@@ -80,7 +80,7 @@ export function QuoteEditTab({
 
         if (error) throw error;
         
-        // Mantemos a lista original para feedback visual, similar ao modal de nova cotaÃ§Ã£o
+        // Mantemos a lista original para feedback visual, similar ao modal de nova cotação
         setDynamicProducts(data || []);
       } catch (error) {
         console.error("Erro na busca de produtos:", error);
@@ -125,7 +125,7 @@ export function QuoteEditTab({
       .slice(0, 30);
   }, [suppliersNotInQuote, supplierSearch, safeStr]);
 
-  // Combinar produtos locais e dinÃ¢micos (evitando duplicatas)
+  // Combinar produtos locais e dinâmicos (evitando duplicatas)
   const allProducts = useMemo(() => {
     const combined = [...dynamicProducts];
     filteredProductsLocal.forEach(p => {
@@ -134,7 +134,7 @@ export function QuoteEditTab({
       }
     });
 
-    // Filtro final rigoroso para evitar que produtos jÃ¡ na cotaÃ§Ã£o apareÃ§am (inclusive do Supabase)
+    // Filtro final rigoroso para evitar que produtos já na cotação apareçam (inclusive do Supabase)
     return combined.filter(p => !products.some(pi => pi.product_id === p.id));
   }, [dynamicProducts, filteredProductsLocal, products]);
 
@@ -254,7 +254,7 @@ export function QuoteEditTab({
         "p-4 space-y-4 transition-all duration-300",
         ((productSearch.length > 0 && !selectedProduct) || (supplierSearch.length > 0 && !selectedSupplier)) ? "pb-80" : "pb-10"
       )}>
-        {/* GestÃ£o de Produtos */}
+        {/* Gestão de Produtos */}
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2">
@@ -394,7 +394,7 @@ export function QuoteEditTab({
           </div>
         </div>
 
-        {/* GestÃ£o de Fornecedores */}
+        {/* Gestão de Fornecedores */}
         <div className="space-y-3 pt-5 border-t border-border dark:border-white/5">
           <div className="flex items-center gap-2 px-1">
             <div className="p-1 rounded-lg bg-brand/10">

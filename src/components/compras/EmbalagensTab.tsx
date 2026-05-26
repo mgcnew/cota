@@ -113,12 +113,12 @@ function EmbalagensTab() {
     });
   }, []);
 
-  // IDs de cotaÃ§Ãµes que jÃ¡ foram convertidas em pedidos
+  // IDs de cotações que já foram convertidas em pedidos
   const convertedQuoteIds = useMemo(() => {
     return new Set(orders.filter(o => o.quoteId).map(o => o.quoteId));
   }, [orders]);
 
-  // Filtrar cotaÃ§Ãµes (INCLUINDO as concluÃ­das para histÃ³rico)
+  // Filtrar cotações (INCLUINDO as concluídas para histórico)
   const filteredQuotes = useMemo(() => {
     return quotes.filter(q => {
       const itemNames = q.itens.map(i => i.packagingName.toLowerCase()).join(' ');
@@ -139,7 +139,7 @@ function EmbalagensTab() {
 
   const paginatedData = paginate(filteredQuotes);
 
-  // EstatÃ­sticas (excluindo cotaÃ§Ãµes jÃ¡ convertidas)
+  // Estatísticas (excluindo cotações já convertidas)
   const stats = useMemo(() => {
     const quotesNaoConvertidas = quotes.filter(q => !convertedQuoteIds.has(q.id));
     const ativas = quotesNaoConvertidas.filter(q => q.status === "ativa").length;
@@ -179,7 +179,7 @@ function EmbalagensTab() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
             <div className="text-center md:text-left">
               <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Portal de Embalagens</h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gerencie fluxos e acompanhe o balanÃ§o de compras deste setor.</p>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gerencie fluxos e acompanhe o balanço de compras deste setor.</p>
             </div>
             
             <div className="flex w-full md:w-auto items-center gap-2">
@@ -189,24 +189,24 @@ function EmbalagensTab() {
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
               >
                 <Package className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">GestÃ£o de Itens</span>
+                <span className="hidden sm:inline">Gestão de Itens</span>
               </Button>
               <Button
                 onClick={() => setAddDialogOpen(true)}
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
               >
                 <Plus className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Nova CotaÃ§Ã£o</span>
+                <span className="hidden sm:inline">Nova Cotação</span>
               </Button>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { id: "cotacoes", icon: ClipboardList, label: "CotaÃ§Ãµes", desc: "Gerencie orÃ§amentos e compare preÃ§os", badge: stats.prontasParaDecisao },
-              { id: "pedidos", icon: ShoppingCart, label: "Pedidos", desc: "Acompanhe reposiÃ§Ãµes geradas" },
-              { id: "analise", icon: BarChart3, label: "AnÃ¡lise", desc: "MÃ©tricas gerenciais gerais" },
-              { id: "economia", icon: Calculator, label: "PoupanÃ§a", desc: "Monitoramento de saving" }
+              { id: "cotacoes", icon: ClipboardList, label: "Cotações", desc: "Gerencie orçamentos e compare preços", badge: stats.prontasParaDecisao },
+              { id: "pedidos", icon: ShoppingCart, label: "Pedidos", desc: "Acompanhe reposições geradas" },
+              { id: "analise", icon: BarChart3, label: "Análise", desc: "Métricas gerenciais gerais" },
+              { id: "economia", icon: Calculator, label: "Poupança", desc: "Monitoramento de saving" }
             ].map(card => (
               <button 
                 key={card.id}
@@ -239,7 +239,7 @@ function EmbalagensTab() {
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
               </Button>
               <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 capitalize">
-                {activeSubTab === "cotacoes" ? "CotaÃ§Ãµes de Embalagem" : activeSubTab} 
+                {activeSubTab === "cotacoes" ? "Cotações de Embalagem" : activeSubTab} 
               </h2>
             </div>
           </div>
@@ -251,7 +251,7 @@ function EmbalagensTab() {
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm")}
               >
                 <Package className="h-4 w-4 mr-2" />
-                GestÃ£o de Itens
+                Gestão de Itens
               </Button>
             )}
             {activeSubTab === "cotacoes" && (
@@ -260,7 +260,7 @@ function EmbalagensTab() {
                 className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm transition-colors")}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Nova CotaÃ§Ã£o
+                Nova Cotação
               </Button>
             )}
           </div>
@@ -278,27 +278,27 @@ function EmbalagensTab() {
         </Button>
       )}
 
-      {/* CotaÃ§Ãµes Content */}
+      {/* Cotações Content */}
       {activeSubTab === "cotacoes" && (
         <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-          {/* MÃ©tricas */}
+          {/* Métricas */}
           {isMobile ? (
             <MobileMetricRibbon>
               <MobileMetricCard
-                title="CotaÃ§Ãµes Ativas"
+                title="Cotações Ativas"
                 value={stats.ativas.toString()}
                 icon={PackageOpen}
                 variant="info"
               />
               <MobileMetricCard
-                title="Prontas p/ DecisÃ£o"
+                title="Prontas p/ Decisão"
                 value={stats.prontasParaDecisao.toString()}
                 icon={CheckCircle2}
                 variant="success"
                 onClick={() => setStatusFilter("prontas")}
               />
               <MobileMetricCard
-                title="ConcluÃ­das"
+                title="Concluídas"
                 value={stats.concluidas.toString()}
                 icon={CircleCheck}
                 variant="warning"
@@ -313,16 +313,16 @@ function EmbalagensTab() {
             </MobileMetricRibbon>
           ) : (
             <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-              <MetricCard title="CotaÃ§Ãµes Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
+              <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
               <MetricCard
-                title="Prontas p/ DecisÃ£o"
+                title="Prontas p/ Decisão"
                 value={stats.prontasParaDecisao.toString()}
                 icon={CheckCircle2}
                 variant="success"
                 onClick={() => setStatusFilter("prontas")}
               />
               <MetricCard
-                title="ConcluÃ­das"
+                title="Concluídas"
                 value={stats.concluidas.toString()}
                 icon={CircleCheck}
                 variant="warning"
@@ -362,8 +362,8 @@ function EmbalagensTab() {
                     <SelectContent>
                       <SelectItem value="all">Todos os Status</SelectItem>
                       <SelectItem value="ativa">ðŸŸ¢ Ativas</SelectItem>
-                      <SelectItem value="prontas">âœ… Prontas p/ DecisÃ£o</SelectItem>
-                      <SelectItem value="concluida">ðŸ”µ ConcluÃ­das</SelectItem>
+                      <SelectItem value="prontas">âœ… Prontas p/ Decisão</SelectItem>
+                      <SelectItem value="concluida">ðŸ”µ Concluídas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -379,9 +379,9 @@ function EmbalagensTab() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
-                      {stats.prontasParaDecisao} cotaÃ§Ã£o(Ãµes) pronta(s) para decisÃ£o
+                      {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
                     </p>
-                    <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados jÃ¡ enviaram suas propostas</p>
+                    <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados já enviaram suas propostas</p>
                   </div>
                   <Button
                     size="sm"
@@ -400,9 +400,9 @@ function EmbalagensTab() {
               {paginatedData.items.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-border dark:border-white/5">
                   <Package className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
-                  <p className="text-zinc-500 font-medium">Nenhuma cotaÃ§Ã£o de embalagem encontrada</p>
+                  <p className="text-zinc-500 font-medium">Nenhuma cotação de embalagem encontrada</p>
                   <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setAddDialogOpen(true)}>
-                    <Plus className="h-4 w-4 mr-2" />Criar Primeira CotaÃ§Ã£o
+                    <Plus className="h-4 w-4 mr-2" />Criar Primeira Cotação
                   </Button>
                 </div>
               ) : isMobile ? (
@@ -436,7 +436,7 @@ function EmbalagensTab() {
               )}
             </div>
 
-            {/* PaginaÃ§Ã£o */}
+            {/* Paginação */}
             {paginatedData.pagination.totalPages > 1 && (
               <div className={cn("mt-2", !isMobile && "pt-6 border-t border-border dark:border-white/5")}>
                 <DataPagination

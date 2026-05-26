@@ -50,7 +50,7 @@ export function CategorySelectForm({
   useEffect(() => {
     if (open) {
       setSearchValue(value ? value.toUpperCase() : "");
-      // Pequeno delay para focar o input apÃ³s a animaÃ§Ã£o do popover
+      // Pequeno delay para focar o input após a animação do popover
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open, value]);
@@ -172,7 +172,7 @@ export function CategorySelectForm({
                   {searchValue.trim().length > 0 && !uniqueCategories.some(c => c.toUpperCase() === searchValue.toUpperCase()) && (
                     <>
                       <CommandSeparator className="my-1 border-border dark:border-white/5" />
-                      <CommandGroup heading="AÃ§Ã£o">
+                      <CommandGroup heading="Ação">
                         <CommandItem
                           onSelect={handleCreate}
                           className="flex items-center gap-2 py-3 px-3 cursor-pointer rounded-lg mx-1 my-0.5 text-orange-600 font-bold hover:bg-orange-50 dark:hover:bg-orange-950/20"
@@ -186,7 +186,7 @@ export function CategorySelectForm({
 
                   {searchValue.trim().length > 0 && filteredCategories.length === 0 && !uniqueCategories.some(c => c.toUpperCase() === searchValue.toUpperCase()) && (
                     <CommandEmpty className="p-8 text-center">
-                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Categoria nÃ£o encontrada</p>
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-medium">Categoria não encontrada</p>
                     </CommandEmpty>
                   )}
                 </>

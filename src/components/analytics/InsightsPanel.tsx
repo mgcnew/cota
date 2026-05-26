@@ -71,20 +71,20 @@ export function InsightsPanel({
   const categoriaLabels = {
     economia: 'ðŸ’° Oportunidades de Economia',
     performance: 'âš¡ Melhorias de Performance',
-    recomendacao: 'ðŸŽ¯ RecomendaÃ§Ãµes EstratÃ©gicas',
-    tendencia: 'ðŸ“Š TendÃªncias e PadrÃµes',
+    recomendacao: 'ðŸŽ¯ Recomendações Estratégicas',
+    tendencia: 'ðŸ“Š Tendências e Padrões',
   };
 
   return (
     <div className="space-y-6">
-      {/* Header com botÃ£o de gerar */}
+      {/* Header com botão de gerar */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">
             Insights com IA
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            AnÃ¡lises inteligentes geradas com Gemini
+            Análises inteligentes geradas com Gemini
           </p>
           {lastGenerated && (
             <p className="text-xs text-muted-foreground mt-1">
@@ -141,8 +141,8 @@ export function InsightsPanel({
             Nenhum insight gerado ainda
           </h3>
           <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
-            Clique em "Gerar Insights" para que a IA analise seus dados e forneÃ§a
-            recomendaÃ§Ãµes personalizadas para otimizar suas cotaÃ§Ãµes e economias.
+            Clique em "Gerar Insights" para que a IA analise seus dados e forneça
+            recomendações personalizadas para otimizar suas cotações e economias.
           </p>
         </div>
       )}

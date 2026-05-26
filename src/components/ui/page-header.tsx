@@ -21,7 +21,7 @@ export function PageHeader({
 }: PageHeaderProps) {
     return (
         <div className={cn("flex flex-col gap-5 md:gap-6 pb-5 md:pb-6", className)}>
-            {/* Header principal com tÃ­tulo e aÃ§Ãµes */}
+            {/* Header principal com título e ações */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="flex items-center gap-3 md:gap-4">
                     {Icon && (

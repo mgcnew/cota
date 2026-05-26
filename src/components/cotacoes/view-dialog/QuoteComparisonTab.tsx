@@ -83,7 +83,7 @@ export function QuoteComparisonTab({
                                     </div>
                                     <div>
                                         <h3 className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase mb-0.5">
-                                            Melhor OpÃ§Ã£o
+                                            Melhor Opção
                                         </h3>
                                         <p className="font-bold text-sm text-gray-900 dark:text-white">
                                             {bestSupplier.nome}
@@ -185,7 +185,7 @@ export function QuoteComparisonTab({
                                                 const showOriginalUnit = shouldShowOriginalUnit(fornecedor.id, product.product_id);
                                                 const metadata = getPricingMetadata(fornecedor.id, product.product_id);
 
-                                                // Calcular economia usando preÃ§os normalizados
+                                                // Calcular economia usando preços normalizados
                                                 const allNormalizedPrices = currentQuote.fornecedoresParticipantes
                                                     .map(f => getNormalizedPrice(f.id, product.product_id))
                                                     .filter(v => v > 0);
@@ -221,9 +221,9 @@ export function QuoteComparisonTab({
                                                                         </TooltipTrigger>
                                                                         <TooltipContent>
                                                                             <div className="text-xs space-y-1">
-                                                                                <p><strong>PreÃ§o normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/un</p>
+                                                                                <p><strong>Preço normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/un</p>
                                                                                 {showOriginalUnit && (
-                                                                                    <p><strong>PreÃ§o original:</strong> R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}</p>
+                                                                                    <p><strong>Preço original:</strong> R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}</p>
                                                                                 )}
                                                                                 <p><strong>Total:</strong> R$ {(normalizedUnitPrice * product.quantidade).toFixed(2)}</p>
                                                                             </div>
@@ -256,7 +256,7 @@ export function QuoteComparisonTab({
                         </table>
                     </ScrollArea>
 
-                    {/* RodapÃ© com AÃ§Ã£o de Converter */}
+                    {/* Rodapé com Ação de Converter */}
                     {bestSupplier && currentQuote.status !== 'finalizada' && !readOnly && (
                         <div className="flex-shrink-0 p-2.5 sm:p-3 border-t border-border dark:border-white/5 bg-white dark:bg-gray-950">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
@@ -287,7 +287,7 @@ export function QuoteComparisonTab({
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>Converter cotaÃ§Ã£o em pedido</p>
+                                            <p>Converter cotação em pedido</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>

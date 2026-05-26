@@ -124,7 +124,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
 
       if (error) throw error;
 
-      toast({ title: "Marca excluÃ­da com sucesso" });
+      toast({ title: "Marca excluída com sucesso" });
       fetchBrands();
     } catch (error) {
       console.error('Error deleting brand:', error);
@@ -200,7 +200,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
               />
             </div>
             <div className="sm:w-32 space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">AvaliaÃ§Ã£o</Label>
+              <Label className="text-xs font-bold uppercase tracking-wider text-zinc-500">Avaliação</Label>
               <div className="flex items-center gap-1.5 h-10 px-3 border rounded-lg bg-zinc-50 dark:bg-zinc-900 border-border dark:border-white/5">
                 {[1, 2, 3, 4, 5].map((rating) => (
                   <button
@@ -328,7 +328,7 @@ export function BrandManagementDialog({ open, onOpenChange }: BrandManagementDia
                           <AlertDialogHeader>
                             <AlertDialogTitle className="text-zinc-900 dark:text-white">Excluir marca?</AlertDialogTitle>
                             <AlertDialogDescription className="text-zinc-500">
-                              Esta aÃ§Ã£o nÃ£o pode ser desfeita. Isso excluirÃ¡ permanentemente a marca
+                              Esta ação não pode ser desfeita. Isso excluirá permanentemente a marca
                               <strong className="text-zinc-900 dark:text-white"> {brand.name}</strong>.
                             </AlertDialogDescription>
                           </AlertDialogHeader>

@@ -16,8 +16,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 import type { Supplier } from "@/hooks/useSuppliers";
 
-const CLIENT_NAME = "Novo Boi JoÃ£o Dias";
-const CLIENT_RAZAO = "Novo Boi Dias MercadÃ£o Ltda";
+const CLIENT_NAME = "Novo Boi João Dias";
+const CLIENT_RAZAO = "Novo Boi Dias Mercadão Ltda";
 const CLIENT_CNPJ = "63.195.471/0001-12";
 
 interface WhatsappTabProps {
@@ -157,7 +157,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(message);
-    toast({ title: "Copiado!", description: "Mensagem copiada para a Ã¡rea de transferÃªncia." });
+    toast({ title: "Copiado!", description: "Mensagem copiada para a área de transferência." });
   }, [message]);
 
   return (
@@ -191,8 +191,8 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
                 </span>
               )}
               {!supplier.access_token && (
-                <span className="text-[10px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1 underline underline-offset-2 animate-pulse" title="Link indisponÃ­vel. Recarregue a pÃ¡gina ou sincronize.">
-                  <AlertCircle className="h-2.5 w-2.5" />Link indisponÃ­vel
+                <span className="text-[10px] text-red-600 dark:text-red-400 font-bold flex items-center gap-1 underline underline-offset-2 animate-pulse" title="Link indisponível. Recarregue a página ou sincronize.">
+                  <AlertCircle className="h-2.5 w-2.5" />Link indisponível
                 </span>
               )}
               {isSent && (
@@ -259,7 +259,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
           <div className="flex items-center gap-2">
             <Package className="h-3 w-3 text-muted-foreground" />
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              {items.length} {items.length === 1 ? "item" : "itens"} nesta cotaÃ§Ã£o
+              {items.length} {items.length === 1 ? "item" : "itens"} nesta cotação
             </p>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -306,7 +306,7 @@ export function WhatsappTab({ quote, availableSuppliers }: WhatsappTabProps) {
           <MessageCircle className="h-7 w-7 text-muted-foreground" />
         </div>
         <p className="text-sm font-bold text-foreground">Nenhum fornecedor cadastrado</p>
-        <p className="text-xs text-muted-foreground mt-1">Adicione fornecedores na aba "Editar" para enviar cotaÃ§Ãµes.</p>
+        <p className="text-xs text-muted-foreground mt-1">Adicione fornecedores na aba "Editar" para enviar cotações.</p>
       </div>
     );
   }
@@ -321,7 +321,7 @@ export function WhatsappTab({ quote, availableSuppliers }: WhatsappTabProps) {
           </div>
           <h3 className="text-base font-black text-foreground tracking-tight">Enviar por WhatsApp</h3>
           <p className="text-[11px] text-muted-foreground mt-1 max-w-xs mx-auto leading-relaxed">
-            Solicite cotaÃ§Ãµes de embalagens direto para cada fornecedor via WhatsApp.
+            Solicite cotações de embalagens direto para cada fornecedor via WhatsApp.
           </p>
         </div>
 

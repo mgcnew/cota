@@ -32,8 +32,8 @@ export default function DeleteSupplierDialog({
     if (supplier) {
       onDelete(supplier.id);
       toast({
-        title: "Fornecedor excluÃ­do",
-        description: `${supplier.name} foi excluÃ­do com sucesso.`,
+        title: "Fornecedor excluído",
+        description: `${supplier.name} foi excluído com sucesso.`,
         variant: "destructive",
       });
       onOpenChange(false);
@@ -44,10 +44,10 @@ export default function DeleteSupplierDialog({
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="!bg-white/80 dark:!bg-gray-950/80 backdrop-blur-xl border border-gray-200/60 dark:border-gray-700/30">
         <AlertDialogHeader>
-          <AlertDialogTitle className="dark:text-white">Confirmar exclusÃ£o</AlertDialogTitle>
+          <AlertDialogTitle className="dark:text-white">Confirmar exclusão</AlertDialogTitle>
           <AlertDialogDescription className="dark:text-gray-400">
             Tem certeza que deseja excluir o fornecedor{" "}
-            <strong className="dark:text-gray-200">{supplier?.name}</strong>? Esta aÃ§Ã£o nÃ£o pode ser desfeita.
+            <strong className="dark:text-gray-200">{supplier?.name}</strong>? Esta ação não pode ser desfeita.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-0">

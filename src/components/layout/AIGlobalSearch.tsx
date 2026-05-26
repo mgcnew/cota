@@ -38,7 +38,7 @@ function FormattedMessage({ content }: { content: string }) {
   );
 }
 
-// ConteÃºdo do chat - memoizado para evitar re-renders
+// Conteúdo do chat - memoizado para evitar re-renders
 const ChatContent = memo(function ChatContent({
   conversationHistory,
   isLoading,
@@ -56,7 +56,7 @@ const ChatContent = memo(function ChatContent({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Foco automÃ¡tico e bloqueio de enters
+  // Foco automático e bloqueio de enters
   useEffect(() => {
     inputRef.current?.focus();
   }, [isLoading]);
@@ -70,9 +70,9 @@ const ChatContent = memo(function ChatContent({
 
   const exampleQuestions = [
     "Quanto gastei em novembro de 2025?",
-    "Quanto jÃ¡ gastei com a Holambra?",
-    "Qual o valor mÃ©dio pago no arroz?",
-    "Qual o menor preÃ§o do feijÃ£o?",
+    "Quanto já gastei com a Holambra?",
+    "Qual o valor médio pago no arroz?",
+    "Qual o menor preço do feijão?",
   ];
 
   return (
@@ -86,10 +86,10 @@ const ChatContent = memo(function ChatContent({
                 <Sparkles strokeWidth={1.5} className="h-6 w-6 text-foreground/80" />
               </div>
               <h3 className={cn(designSystem.typography.size.lg, "font-semibold text-foreground mb-1 tracking-tight")}>
-                Assistente de InteligÃªncia Artificial
+                Assistente de Inteligência Artificial
               </h3>
               <p className="text-sm font-medium text-muted-foreground mb-6 max-w-xs mx-auto">
-                Explore seus dados financeiros ou orÃ§amentos usando comandos naturais.
+                Explore seus dados financeiros ou orçamentos usando comandos naturais.
               </p>
               
               <div className="flex flex-col gap-2 w-full max-w-sm mx-auto">
@@ -160,7 +160,7 @@ const ChatContent = memo(function ChatContent({
         <div className="flex items-center gap-2 max-w-2xl mx-auto w-full">
           <Input
             ref={inputRef}
-            placeholder="FaÃ§a sua pergunta..."
+            placeholder="Faça sua pergunta..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -190,13 +190,13 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
   const [conversationHistory, setConversationHistory] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Dados sÃ³ sÃ£o carregados quando o modal estÃ¡ aberto
+  // Dados só são carregados quando o modal está aberto
   const { products } = useProducts();
   const { suppliers } = useSuppliers();
   const { cotacoes } = useCotacoes();
   const { pedidos } = usePedidos();
 
-  // Buscar dados financeiros apenas quando aberto (sem limites para dar contexto completo Ã  IA)
+  // Buscar dados financeiros apenas quando aberto (sem limites para dar contexto completo à IA)
   const { data: orderItems = [] } = useQuery({
     queryKey: ["order-items-for-ai"],
     queryFn: async () => {
@@ -275,7 +275,7 @@ export function AIGlobalSearch({ open, onOpenChange }: AIGlobalSearchProps) {
     staleTime: 5 * 60 * 1000,
   });
 
-  // Scroll automÃ¡tico para a Ãºltima mensagem
+  // Scroll automático para a última mensagem
   useEffect(() => {
     if (conversationHistory.length > 0 && scrollAreaRef.current) {
       const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');

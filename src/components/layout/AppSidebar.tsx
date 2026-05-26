@@ -73,7 +73,7 @@ interface MenuCategory {
 
 const menuCategories: MenuCategory[] = [
   {
-    title: "VisÃ£o Geral",
+    title: "Visão Geral",
     items: [{ title: "Dashboard", url: "/dashboard", icon: LayoutDashboard }]
   },
   {
@@ -84,7 +84,7 @@ const menuCategories: MenuCategory[] = [
     ]
   },
   {
-    title: "OperaÃ§Ãµes",
+    title: "Operações",
     items: [
       { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart }
     ]
@@ -96,14 +96,14 @@ const menuCategories: MenuCategory[] = [
   {
     title: "Ferramentas",
     items: [
-      { title: "AnotaÃ§Ãµes", url: "/dashboard/anotacoes", icon: StickyNote },
+      { title: "Anotações", url: "/dashboard/anotacoes", icon: StickyNote },
       { title: "Etiquetas", url: "/dashboard/etiquetas", icon: ScanLine },
       { title: "Faixas", url: "/dashboard/faixas", icon: Flag }
     ]
   },
   {
-    title: "AnÃ¡lises",
-    items: [{ title: "RelatÃ³rios", url: "/dashboard/relatorios", icon: BarChart3 }]
+    title: "Análises",
+    items: [{ title: "Relatórios", url: "/dashboard/relatorios", icon: BarChart3 }]
   }
 ];
 
@@ -149,7 +149,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
       await signOut();
       toast({
         title: "Logout realizado com sucesso!",
-        description: "VocÃª saiu do sistema.",
+        description: "Você saiu do sistema.",
       });
       navigate("/", { replace: true });
     } catch (error) {
@@ -200,7 +200,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
         {expanded && (
           <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">
             <p className="text-sm font-semibold text-foreground truncate">
-              {profile?.full_name || user?.email?.split("@")[0] || "UsuÃ¡rio"}
+              {profile?.full_name || user?.email?.split("@")[0] || "Usuário"}
             </p>
             <p className="text-xs text-muted-foreground truncate">Membro</p>
           </div>
@@ -359,21 +359,21 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                   </div>
                 </DropdownMenuTrigger>
               </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={16} className="font-semibold text-xs">Menu do UsuÃ¡rio</TooltipContent>
+              <TooltipContent side="right" sideOffset={16} className="font-semibold text-xs">Menu do Usuário</TooltipContent>
             </Tooltip>
           </TooltipProvider>
 
           <DropdownMenuContent side="right" sideOffset={12} align="end" className="w-56 rounded-lg border-border shadow-lg bg-card p-1 z-[60]">
             <DropdownMenuLabel className="font-normal px-2 py-2">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-bold leading-none">{profile?.full_name || "UsuÃ¡rio"}</p>
+                <p className="text-sm font-bold leading-none">{profile?.full_name || "Usuário"}</p>
                 <p className="text-[11px] leading-tight text-muted-foreground line-clamp-1">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             
             <DropdownMenuSeparator className="bg-border/50 my-1" />
 
-            {/* AlternÃ¢ncia de Empresas, caso tenha mais de uma */}
+            {/* Alternância de Empresas, caso tenha mais de uma */}
             <div className="px-2 py-1.5 w-full">
               <CompanySelector />
             </div>
@@ -385,7 +385,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
 
             <DropdownMenuItem onClick={() => navigate('/dashboard/configuracoes')} className="cursor-pointer rounded-md py-2 text-sm">
               <Settings className="mr-3 h-4 w-4 opacity-70" />
-              <span className="font-medium text-sm">ConfiguraÃ§Ãµes</span>
+              <span className="font-medium text-sm">Configurações</span>
             </DropdownMenuItem>
             
             <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer rounded-md py-2 text-sm">
@@ -402,7 +402,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* NotificaÃ§Ãµes WhatsApp */}
+        {/* Notificações WhatsApp */}
         <WhatsAppNotificationBell />
 
       </div>
@@ -554,7 +554,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     setMobileMenuOpen(false);
                   }}
                   className="p-2.5 rounded-md text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
-                  title="ConfiguraÃ§Ãµes"
+                  title="Configurações"
                 >
                   <Settings className="w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:rotate-45 transition-all" />
                 </button>

@@ -109,7 +109,7 @@ export function QuickRegistrationModal({
         });
       } else {
         toast({
-          title: "Produto nÃ£o localizado",
+          title: "Produto não localizado",
           description: "Digite o nome manualmente.",
         });
         setTimeout(() => nameInputRef.current?.focus(), 300);
@@ -171,8 +171,8 @@ export function QuickRegistrationModal({
       } catch (err: any) {
         console.error("Error starting scanner:", err);
         if (mounted) {
-          let msg = "Erro ao iniciar cÃ¢mera.";
-          if (err?.name === 'NotAllowedError') msg = "PermissÃ£o de cÃ¢mera negada.";
+          let msg = "Erro ao iniciar câmera.";
+          if (err?.name === 'NotAllowedError') msg = "Permissão de câmera negada.";
           setCameraError(msg);
         }
       }
@@ -303,7 +303,7 @@ export function QuickRegistrationModal({
                 ds.colors.text.primary,
                 "leading-none"
               )}>
-                Cadastro RÃ¡pido
+                Cadastro Rápido
               </DialogTitle>
               <p className={cn(
                 ds.typography.size.xs,
@@ -347,7 +347,7 @@ export function QuickRegistrationModal({
                 {!isScanning && !cameraError && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-white">
                     <Loader2 className="h-8 w-8 animate-spin mb-2" />
-                    <span className={cn(ds.typography.size.sm)}>Iniciando cÃ¢mera...</span>
+                    <span className={cn(ds.typography.size.sm)}>Iniciando câmera...</span>
                   </div>
                 )}
                 
@@ -380,7 +380,7 @@ export function QuickRegistrationModal({
                     
                     <div className="absolute bottom-6 left-0 right-0 text-center">
                       <span className="bg-black/50 backdrop-blur-md text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
-                        Aponte para o cÃ³digo
+                        Aponte para o código
                       </span>
                     </div>
                   </div>
@@ -445,7 +445,7 @@ export function QuickRegistrationModal({
                     isSearching ? "text-blue-600 dark:text-blue-400" : "text-brand",
                     "uppercase tracking-wider"
                   )}>
-                    {isSearching ? "Buscando produto..." : "CÃ³digo detectado"}
+                    {isSearching ? "Buscando produto..." : "Código detectado"}
                   </p>
                   <p className={cn(
                     "font-mono tracking-widest",
@@ -469,7 +469,7 @@ export function QuickRegistrationModal({
             {/* Manual barcode input */}
             {mode === 'manual' && (
               <div className="space-y-1.5">
-                <Label className={cn(ds.components.input.label)}>CÃ³digo de Barras</Label>
+                <Label className={cn(ds.components.input.label)}>Código de Barras</Label>
                 <Input
                   ref={barcodeInputRef}
                   value={barcode}
@@ -490,7 +490,7 @@ export function QuickRegistrationModal({
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={barcode ? "Nome serÃ¡ preenchido automaticamente..." : "Escaneie primeiro ou digite o cÃ³digo"}
+                placeholder={barcode ? "Nome será preenchido automaticamente..." : "Escaneie primeiro ou digite o código"}
                 className={cn(ds.components.input.root, "h-12 text-base")}
                 autoComplete="off"
                 disabled={!barcode && mode === 'scanner'}
@@ -501,7 +501,7 @@ export function QuickRegistrationModal({
             {mode === 'scanner' && barcode && (
               <div className="space-y-1.5">
                 <Label className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                  Editar cÃ³digo (se necessÃ¡rio)
+                  Editar código (se necessário)
                 </Label>
                 <Input
                   value={barcode}
@@ -545,7 +545,7 @@ export function QuickRegistrationModal({
             ) : (
               <Zap className="h-5 w-5" />
             )}
-            Salvar e PrÃ³ximo
+            Salvar e Próximo
           </Button>
           
           <div className="grid grid-cols-2 gap-2">

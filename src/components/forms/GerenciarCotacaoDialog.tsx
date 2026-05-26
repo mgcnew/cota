@@ -117,12 +117,12 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     setMounted(true);
   }, []);
 
-  // Debug removido pois jÃ¡ confirmamos que o BD estÃ¡ OK
+  // Debug removido pois já confirmamos que o BD está OK
   const keyboardOffset = useKeyboardOffset();
   
   const isFinalizada = quote?.status === "finalizada";
 
-  // Memos globais para evitar recÃ¡lculos
+  // Memos globais para evitar recálculos
   const products = useMemo(() => {
     if (!quote) return [];
     const rawItems = quote._raw?.quote_items || [];
@@ -199,7 +199,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     let bestSupplierId = null;
     let bestSupplierName = "";
 
-    // Filtra apenas preÃ§os > 0
+    // Filtra apenas preços > 0
     const validPrices = supplierItems.filter((i: any) => i?.product_id === productId && i?.valor_oferecido > 0);
 
     if (validPrices.length > 0) {
@@ -218,7 +218,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     return { bestPrice, bestSupplierId, bestSupplierName };
   }, [supplierItems, fornecedores]);
 
-  // CÃ¡lculos para o Resumo
+  // Cálculos para o Resumo
   const stats = useMemo(() => {
     const totalProdutos = products.length;
     const totalFornecedores = fornecedores.length;
@@ -227,7 +227,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     let melhorTotal = 0;
     let melhorFornecedor = "";
 
-    // LÃ³gica simplificada para melhor fornecedor total (se necessÃ¡rio)
+    // Lógica simplificada para melhor fornecedor total (se necessário)
 
     return {
       totalProdutos,
@@ -284,7 +284,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     }).sort((a: any, b: any) => b.savings - a.savings);
   }, [products, fornecedores, getBestPriceInfoForProduct, getSupplierProductValue]);
 
-  // Callbacks de AÃ§Ã£o
+  // Callbacks de Ação
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["cotacoes"] });
   }, [queryClient]);
@@ -297,7 +297,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     await removeSupplierProduct.mutateAsync(params);
   }, [removeSupplierProduct]);
 
-  // ExportaÃ§Ã£o em HTML
+  // Exportação em HTML
   const generateHtmlComparative = useCallback(() => {
     if (!quote || !products.length) return "";
 
@@ -309,7 +309,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     const comparison = products.map((product: any) => {
       const fornecedores = quote.fornecedoresParticipantes
         .map((f: any) => {
-          // Normalizar valores para comparaÃ§Ã£o
+          // Normalizar valores para comparação
           const item = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === product.product_id);
           const valor = item?.valor_oferecido || 0;
           const valorInicial = Number(item?.valor_inicial) || valor;
@@ -336,7 +336,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         })
         .filter((f: any) => f.valorOferecido > 0);
 
-      // Marcar melhor preÃ§o
+      // Marcar melhor preço
       if (fornecedores.length > 0) {
         const menorValor = Math.min(...fornecedores.map((f: any) => f.valorNormalizado));
         fornecedores.forEach((f: any) => {
@@ -376,7 +376,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comparativo de CotaÃ§Ã£o - ${quote.id.substring(0, 8)}</title>
+  <title>Comparativo de Cotação - ${quote.id.substring(0, 8)}</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -452,8 +452,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   <div class="container">
     <div class="header">
       <div class="header-content">
-        <h1>ðŸ“Š COMPARATIVO DE COTAÃ‡ÃƒO</h1>
-        <p>ReferÃªncia #${quote.id.substring(0, 8).toUpperCase()}</p>
+        <h1>ðŸ“Š COMPARATIVO DE COTAÇÃƒO</h1>
+        <p>Referência #${quote.id.substring(0, 8).toUpperCase()}</p>
       </div>
       <div class="header-badge">
         <span>Itens Analisados</span>
@@ -463,11 +463,11 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
     <div class="info-grid">
       <div class="info-card">
-        <strong>InÃ­cio da CotaÃ§Ã£o</strong>
+        <strong>Início da Cotação</strong>
         <span>${quote.dataInicio}</span>
       </div>
       <div class="info-card">
-        <strong>Fim da CotaÃ§Ã£o</strong>
+        <strong>Fim da Cotação</strong>
         <span>${quote.dataFim}</span>
       </div>
       <div class="info-card">
@@ -506,7 +506,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           </div>
           ${comp.fornecedores.length === 0 ? `
             <div class="no-response">
-              NinguÃ©m enviou preÃ§os para este item.
+              Ninguém enviou preços para este item.
             </div>
           ` : `
             <table class="comparative-table">
@@ -515,7 +515,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   <th>Fornecedor Participante</th>
                   <th>Val. Inicial</th>
                   <th>Proposta (Unidade/Quant.)</th>
-                  <th>PreÃ§o Custo Normalizado</th>
+                  <th>Preço Custo Normalizado</th>
                   <th>Economia</th>
                   <th>Resultado</th>
                 </tr>
@@ -547,7 +547,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     </td>
                     <td>
                       ${f.isMelhorPreco
-              ? '<span class="badge badge-winner">ðŸ† Melhor OpÃ§Ã£o</span>'
+              ? '<span class="badge badge-winner">ðŸ† Melhor Opção</span>'
               : `<span class="badge ${diferencaClass}">+${diferenca.toFixed(1)}% mais caro</span>`
             }
                     </td>
@@ -561,8 +561,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     </div>
 
     <div class="footer">
-      <p>Sistema CotaJÃ¡ - Comparativo de CotaÃ§Ã£o</p>
-      <p>Este documento foi gerado automaticamente e contÃ©m informaÃ§Ãµes confidenciais.</p>
+      <p>Sistema CotaJá - Comparativo de Cotação</p>
+      <p>Este documento foi gerado automaticamente e contém informações confidenciais.</p>
     </div>
   </div>
 </body>
@@ -576,13 +576,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     if (isExportingWhatsApp) return;
     
     setIsExportingWhatsApp(true);
-    const toastId = sonnerToast.loading('Preparando relatÃ³rio para WhatsApp...');
+    const toastId = sonnerToast.loading('Preparando relatório para WhatsApp...');
 
     try {
       const html = generateHtmlComparative();
-      if (!html) throw new Error("NÃ£o hÃ¡ dados para exportar.");
+      if (!html) throw new Error("Não há dados para exportar.");
 
-      // Capturar imagem do que estÃ¡ visÃ­vel no momento
+      // Capturar imagem do que está visível no momento
       let base64Image = "";
       if (captureRef.current) {
         await new Promise(resolve => setTimeout(resolve, 400));
@@ -619,7 +619,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       );
 
       if (res.success) {
-        sonnerToast.success('RelatÃ³rio enviado com sucesso via WhatsApp!', { id: toastId });
+        sonnerToast.success('Relatório enviado com sucesso via WhatsApp!', { id: toastId });
       } else {
         throw new Error(res.error || "Erro no envio");
       }
@@ -643,14 +643,14 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         <div className="flex items-center justify-between py-3 px-5 border-b bg-card min-h-[64px]">
 
           <div className="flex items-center gap-4 relative z-10 flex-1 min-w-0">
-            {/* TÃ­tulo - Mais compacto */}
+            {/* Título - Mais compacto */}
             <div className="flex items-center gap-3 min-w-max">
               <div className="p-2 rounded-[10px] bg-brand/10 border border-brand/20">
                 <ClipboardList className="h-4 w-4 text-brand" />
               </div>
               <div className="flex flex-col">
                 <DialogTitleComponent className="text-base font-black text-foreground tracking-tight leading-none mb-1">
-                  CotaÃ§Ã£o
+                  Cotação
                 </DialogTitleComponent>
                 <span className="text-[10px] font-black uppercase text-muted-foreground tracking-widest leading-none">
                   #{safeStr(quote.id).substring(0, 8)}
@@ -658,7 +658,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               </div>
             </div>
 
-            {/* Tabs - FlexÃ­vel e Desenhado como pÃ­lulas (Pills) com Scroll */}
+            {/* Tabs - Flexível e Desenhado como pílulas (Pills) com Scroll */}
             <div className="flex-1 min-w-0 flex items-center pl-4 border-l border-border/50 ml-2 overflow-hidden">
               {isMobile ? (
                 <Select value={activeTab} onValueChange={setActiveTab}>
@@ -669,7 +669,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     {[
                       { id: 'resumo', label: 'Resumo' },
                       { id: 'valores', label: 'Valores' },
-                      { id: 'converter', label: 'ConversÃ£o', hide: isFinalizada },
+                      { id: 'converter', label: 'Conversão', hide: isFinalizada },
                       { id: 'editar', label: 'Ajustes', hide: isFinalizada }
                     ].filter(tab => !tab.hide).map((tab) => (
                       <SelectItem key={tab.id} value={tab.id} className="text-xs font-semibold">
@@ -684,8 +684,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     {[
                       { id: 'resumo', label: 'Resumo' },
                       { id: 'valores', label: 'Valores' },
-                      { id: 'converter', label: 'DecisÃ£o', hide: isFinalizada },
-                      { id: 'editar', label: 'ConfiguraÃ§Ãµes', hide: isFinalizada }
+                      { id: 'converter', label: 'Decisão', hide: isFinalizada },
+                      { id: 'editar', label: 'Configurações', hide: isFinalizada }
                     ].filter(tab => !tab.hide).map((tab) => (
                       <TabsTrigger
                         key={tab.id}
@@ -710,7 +710,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   size="icon"
                   onClick={() => setShowResumoDialog(true)}
                   className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="RelatÃ³rio Profissional"
+                  title="Relatório Profissional"
                 >
                   <Sparkles className="h-4 w-4" />
                 </Button>
@@ -721,7 +721,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   onClick={handleWhatsAppExport}
                   disabled={isExportingWhatsApp}
                   className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                  title="Enviar RelatÃ³rio via WhatsApp"
+                  title="Enviar Relatório via WhatsApp"
                 >
                   {isExportingWhatsApp ? (
                     <Loader2 className="h-4 w-4 animate-spin text-brand" />
@@ -831,7 +831,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             onClick={handleWhatsAppExport}
             disabled={isExportingWhatsApp}
             className="text-brand hover:bg-brand/10 h-10 w-10 rounded-xl transition-all"
-            title="Enviar RelatÃ³rio via WhatsApp"
+            title="Enviar Relatório via WhatsApp"
           >
             {isExportingWhatsApp ? (
               <Loader2 className="h-5 w-5 animate-spin text-brand" />
@@ -855,8 +855,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             paddingBottom: keyboardOffset > 0 ? 0 : 'env(safe-area-inset-bottom, 20px)'
           }}
         >
-          <DrawerTitle className="sr-only">Gerenciar CotaÃ§Ã£o</DrawerTitle>
-          <DrawerDescription className="sr-only">Detalhes e aÃ§Ãµes da cotaÃ§Ã£o</DrawerDescription>
+          <DrawerTitle className="sr-only">Gerenciar Cotação</DrawerTitle>
+          <DrawerDescription className="sr-only">Detalhes e ações da cotação</DrawerDescription>
           {modalContent}
         </DrawerContent>
       </Drawer>
@@ -867,8 +867,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-[1000px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
-          <DialogTitle className="sr-only">Gerenciar CotaÃ§Ã£o</DialogTitle>
-          <DialogDescription className="sr-only">Detalhes e aÃ§Ãµes da cotaÃ§Ã£o</DialogDescription>
+          <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
+          <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
           {modalContent}
         </DialogContent>
       </Dialog>

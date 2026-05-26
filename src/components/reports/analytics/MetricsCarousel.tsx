@@ -1,8 +1,8 @@
 ﻿/**
- * MetricsCarousel - Componente para exibir mÃ©tricas em carousel (mobile)
+ * MetricsCarousel - Componente para exibir métricas em carousel (mobile)
  * 
- * Implementa carousel com navegaÃ§Ã£o para mÃ©tricas em dispositivos mÃ³veis.
- * Usa React.memo para evitar re-renders desnecessÃ¡rios.
+ * Implementa carousel com navegação para métricas em dispositivos móveis.
+ * Usa React.memo para evitar re-renders desnecessários.
  * 
  * @module components/reports/analytics/MetricsCarousel
  * Requirements: 2.2, 6.5
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import type { MetricsCarouselProps, Metric } from "@/types/reports";
 
 /**
- * Mapeia o tipo de mÃ©trica para a variante do MetricCard
+ * Mapeia o tipo de métrica para a variante do MetricCard
  */
 const getVariantFromTipo = (tipo: Metric['tipo']): 'success' | 'error' | 'default' => {
   switch (tipo) {
@@ -32,12 +32,12 @@ const getVariantFromTipo = (tipo: Metric['tipo']): 'success' | 'error' | 'defaul
 };
 
 /**
- * Ãcones padrÃ£o para cada posiÃ§Ã£o de mÃ©trica
+ * Ícones padrão para cada posição de métrica
  */
 const DEFAULT_ICONS = [TrendingUp, Clock, Users, DollarSign];
 
 /**
- * Variantes padrÃ£o para cada posiÃ§Ã£o de mÃ©trica
+ * Variantes padrão para cada posição de métrica
  */
 const DEFAULT_VARIANTS: Array<'success' | 'info' | 'warning' | 'default'> = [
   'success',
@@ -65,17 +65,17 @@ function MetricSkeleton() {
 }
 
 /**
- * MetricsCarousel - Exibe mÃ©tricas em carousel para mobile
+ * MetricsCarousel - Exibe métricas em carousel para mobile
  * 
- * Componente memoizado para evitar re-renders desnecessÃ¡rios.
+ * Componente memoizado para evitar re-renders desnecessários.
  * 
- * @param metrics - Array de mÃ©tricas a serem exibidas
+ * @param metrics - Array de métricas a serem exibidas
  * @param isLoading - Estado de carregamento
  */
 export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoading }: MetricsCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   
-  // Garante que sempre temos mÃ©tricas para exibir
+  // Garante que sempre temos métricas para exibir
   const displayMetrics = metrics.slice(0, 4);
   const totalMetrics = displayMetrics.length || 4;
 
@@ -97,7 +97,7 @@ export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoadin
     return (
       <div className="relative">
         <MetricSkeleton />
-        {/* Indicadores de navegaÃ§Ã£o skeleton */}
+        {/* Indicadores de navegação skeleton */}
         <div className="flex justify-center gap-2 mt-4">
           {[0, 1, 2, 3].map((index) => (
             <Skeleton key={index} className="h-2 w-2 rounded-full" />
@@ -112,7 +112,7 @@ export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoadin
       <Card className="border-2 border-dashed border-gray-300 dark:border-gray-600">
         <CardContent className="p-6 text-center">
           <p className="text-gray-500 dark:text-gray-400">
-            Nenhuma mÃ©trica disponÃ­vel
+            Nenhuma métrica disponível
           </p>
         </CardContent>
       </Card>
@@ -127,14 +127,14 @@ export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoadin
 
   return (
     <div className="relative">
-      {/* BotÃµes de navegaÃ§Ã£o */}
+      {/* Botões de navegação */}
       <div className="absolute inset-y-0 left-0 flex items-center z-10">
         <Button
           variant="ghost"
           size="icon"
           onClick={handlePrev}
           className="h-8 w-8 rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md hover:bg-white dark:hover:bg-gray-800 -ml-2"
-          aria-label="MÃ©trica anterior"
+          aria-label="Métrica anterior"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -146,13 +146,13 @@ export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoadin
           size="icon"
           onClick={handleNext}
           className="h-8 w-8 rounded-full bg-white/80 dark:bg-gray-800/80 shadow-md hover:bg-white dark:hover:bg-gray-800 -mr-2"
-          aria-label="PrÃ³xima mÃ©trica"
+          aria-label="Próxima métrica"
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
-      {/* Card da mÃ©trica atual */}
+      {/* Card da métrica atual */}
       <div className="px-6">
         <MetricCard
           title={currentMetric.titulo}
@@ -169,7 +169,7 @@ export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoadin
         />
       </div>
 
-      {/* Indicadores de navegaÃ§Ã£o (dots) */}
+      {/* Indicadores de navegação (dots) */}
       <div className="flex justify-center gap-2 mt-4">
         {displayMetrics.map((_, index) => (
           <button
@@ -181,13 +181,13 @@ export const MetricsCarousel = memo(function MetricsCarousel({ metrics, isLoadin
                 ? "bg-primary w-4"
                 : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500"
             )}
-            aria-label={`Ir para mÃ©trica ${index + 1}`}
+            aria-label={`Ir para métrica ${index + 1}`}
             aria-current={index === activeIndex ? "true" : "false"}
           />
         ))}
       </div>
 
-      {/* Contador de posiÃ§Ã£o */}
+      {/* Contador de posição */}
       <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
         {activeIndex + 1} de {displayMetrics.length}
       </p>

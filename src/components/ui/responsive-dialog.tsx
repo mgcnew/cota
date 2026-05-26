@@ -1,7 +1,7 @@
 ﻿/**
  * ResponsiveDialog - Wrapper que converte Dialog para Drawer no mobile
  * 
- * Este componente substitui o Dialog padrÃ£o e automaticamente:
+ * Este componente substitui o Dialog padrão e automaticamente:
  * - Renderiza como Drawer (bottom sheet) no mobile
  * - Renderiza como Dialog (modal centralizado) no desktop
  * 

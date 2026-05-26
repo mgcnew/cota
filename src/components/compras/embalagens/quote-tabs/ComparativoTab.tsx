@@ -34,7 +34,7 @@ export function ComparativoTab({
       <div className="p-4 space-y-3 pb-10">
         <div className="flex items-center justify-between">
           <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <TrendingDown className="h-3 w-3" />AnÃ¡lise Comparativa
+            <TrendingDown className="h-3 w-3" />Análise Comparativa
           </h3>
           <div className="flex bg-muted/20 border border-border dark:border-white/5/50 rounded-md p-0.5">
             <Button 
@@ -105,7 +105,7 @@ export function ComparativoTab({
                   <div>
                     <h4 className="font-semibold text-[13px] text-foreground">{group.supplierName}</h4>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mt-0.5">
-                      {group.itens.length} itens â€¢ {group.vitorias} vitÃ³rias
+                      {group.itens.length} itens â€¢ {group.vitorias} vitórias
                     </p>
                   </div>
                 </div>

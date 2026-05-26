@@ -106,8 +106,8 @@ export default function PackagingOrderPortal() {
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl mb-6">
             <PackageSearch className="h-8 w-8 animate-pulse" />
           </div>
-          <h1 className="text-xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase italic">CotÃ¡JÃ¡</h1>
-          <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.3em] mt-2">Portal de ConfirmaÃ§Ã£o</p>
+          <h1 className="text-xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight uppercase italic">CotáJá</h1>
+          <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.3em] mt-2">Portal de Confirmação</p>
           
           <div className="mt-10 w-32 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div className="h-full bg-blue-600 rounded-full animate-[progress_1.5s_ease-in-out_infinite]"></div>
@@ -122,8 +122,8 @@ export default function PackagingOrderPortal() {
     return (
       <div className="h-screen w-full flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6 text-center font-sans">
         <AlertCircle className="h-12 w-12 text-zinc-300 mb-4" />
-        <h1 className="text-xl font-extrabold text-zinc-900 dark:text-zinc-50">Pedido nÃ£o encontrado</h1>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Este link expirou ou Ã© invÃ¡lido.</p>
+        <h1 className="text-xl font-extrabold text-zinc-900 dark:text-zinc-50">Pedido não encontrado</h1>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Este link expirou ou é inválido.</p>
       </div>
     );
   }
@@ -138,8 +138,8 @@ export default function PackagingOrderPortal() {
               <CheckCircle2 className="h-8 w-8" />
             </div>
             <div className="space-y-1">
-              <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 italic uppercase tracking-tighter">LogÃ­stica Sincronizada</h1>
-              <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">ConfirmaÃ§Ã£o Processada</p>
+              <h1 className="text-2xl font-black text-zinc-900 dark:text-zinc-50 italic uppercase tracking-tighter">Logística Sincronizada</h1>
+              <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Confirmação Processada</p>
             </div>
           </div>
 
@@ -167,8 +167,8 @@ export default function PackagingOrderPortal() {
                   <div className="w-40 h-16 mb-6 opacity-40 mix-blend-multiply dark:mix-blend-normal hover:opacity-100 transition-opacity">
                     <img src="/images/logo-joao-dias-transparent.png" alt="Novo Boi" className="w-full h-full object-contain" />
                   </div>
-                  <h4 className="text-xs font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-2">Muito obrigado pela confirmaÃ§Ã£o!</h4>
-                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed px-4">O setor logÃ­stico foi notificado e os itens estÃ£o aguardando o recebimento oficial.</p>
+                  <h4 className="text-xs font-black text-zinc-900 dark:text-zinc-50 uppercase tracking-widest mb-2">Muito obrigado pela confirmação!</h4>
+                  <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 leading-relaxed px-4">O setor logístico foi notificado e os itens estão aguardando o recebimento oficial.</p>
                </div>
 
                <div className="px-8 py-4 bg-zinc-900 text-white flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
@@ -194,9 +194,9 @@ export default function PackagingOrderPortal() {
              </div>
              <div className="text-left">
                <h1 className="text-base font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50 leading-none">
-                 OlÃ¡, {supplier?.name || "Fornecedor"}!
+                 Olá, {supplier?.name || "Fornecedor"}!
                </h1>
-               <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mt-1">ConfirmaÃ§Ã£o de Pedido</span>
+               <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mt-1">Confirmação de Pedido</span>
              </div>
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 rounded-full text-[9px] font-black uppercase tracking-widest border border-blue-100 dark:border-blue-800/40">
@@ -224,7 +224,7 @@ export default function PackagingOrderPortal() {
                 <Calendar className="h-4 w-4" />
               </div>
               <div>
-                <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-0.5">PrevisÃ£o Entrega</p>
+                <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-0.5">Previsão Entrega</p>
                 <p className="text-sm font-black text-zinc-900 dark:text-zinc-50">
                   {order.delivery_date ? order.delivery_date.split('-').reverse().join('/') : "--/--/--"}
                 </p>
@@ -261,7 +261,7 @@ export default function PackagingOrderPortal() {
                         </span>
                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest italic flex items-center gap-1.5">
                           @ R$ {price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          {isBox && <span className="text-blue-500 font-black not-italic text-[9px]">(PreÃ§o por KG/UN)</span>}
+                          {isBox && <span className="text-blue-500 font-black not-italic text-[9px]">(Preço por KG/UN)</span>}
                         </span>
                      </div>
                    </div>
@@ -273,7 +273,7 @@ export default function PackagingOrderPortal() {
                       {isBox ? (
                         <div className="flex flex-col items-end">
                           <p className="text-[10px] font-black text-blue-600 dark:text-blue-400 animate-pulse">A confirmar</p>
-                          <p className="text-[8px] font-bold text-zinc-400 uppercase">PreÃ§o p/ KG</p>
+                          <p className="text-[8px] font-bold text-zinc-400 uppercase">Preço p/ KG</p>
                         </div>
                       ) : (
                         <p className="text-sm font-black text-zinc-900 dark:text-zinc-50 tabular-nums font-sans">
@@ -302,7 +302,7 @@ export default function PackagingOrderPortal() {
                     : `R$ ${(order.total_value || order.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                 </p>
                 {order.order_items?.some((it: any) => (it.unidade || it.unit || '').toUpperCase().includes('CX')) && (
-                  <p className="text-[9px] font-bold text-zinc-500 mt-2 uppercase tracking-widest italic">* Itens por KG serÃ£o pesados no recebimento</p>
+                  <p className="text-[9px] font-bold text-zinc-500 mt-2 uppercase tracking-widest italic">* Itens por KG serão pesados no recebimento</p>
                 )}
               </div>
               <div className="w-14 h-14 bg-blue-600 rounded-2xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
@@ -316,7 +316,7 @@ export default function PackagingOrderPortal() {
           <div className="mt-6 p-5 rounded-2xl border border-border dark:border-white/5 bg-white/50 dark:bg-zinc-900/30 text-left">
             <h5 className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mb-2 flex items-center gap-2">
               <AlertCircle className="h-3 w-3" />
-              ObservaÃ§Ãµes do Comprador
+              Observações do Comprador
             </h5>
             <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 leading-relaxed italic">"{order.observations}"</p>
           </div>

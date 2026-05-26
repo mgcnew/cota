@@ -30,13 +30,13 @@ const categoriaConfig = {
   },
   recomendacao: {
     icon: Target,
-    label: 'RecomendaÃ§Ã£o',
+    label: 'Recomendação',
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
   },
   tendencia: {
     icon: BarChart3,
-    label: 'TendÃªncia',
+    label: 'Tendência',
     color: 'text-purple-600 dark:text-purple-400',
     bgColor: 'bg-purple-50 dark:bg-purple-950/30',
   },
@@ -44,7 +44,7 @@ const categoriaConfig = {
 
 const prioridadeConfig = {
   alta: { label: 'Alta', variant: 'destructive' as const },
-  media: { label: 'MÃ©dia', variant: 'default' as const },
+  media: { label: 'Média', variant: 'default' as const },
   baixa: { label: 'Baixa', variant: 'secondary' as const },
 };
 
@@ -84,7 +84,7 @@ export function InsightCard({ insight }: InsightCardProps) {
           {insight.acaoSugerida && (
             <div className="pt-2 border-t border-border dark:border-white/5">
               <p className="text-sm font-medium text-foreground">
-                ðŸ’¡ AÃ§Ã£o Sugerida:
+                ðŸ’¡ Ação Sugerida:
               </p>
               <p className="text-sm text-muted-foreground mt-1">
                 {insight.acaoSugerida}

@@ -72,9 +72,9 @@ function ChartSkeleton({ title }: { title: string }) {
 }
 
 /**
- * PerformanceCharts - Componente memoizado para grÃ¡ficos de performance
+ * PerformanceCharts - Componente memoizado para gráficos de performance
  * 
- * Usa React.memo para evitar re-renders desnecessÃ¡rios.
+ * Usa React.memo para evitar re-renders desnecessários.
  * Requirements: 6.5
  */
 export const PerformanceCharts = memo(function PerformanceCharts({
@@ -106,10 +106,10 @@ export const PerformanceCharts = memo(function PerformanceCharts({
   // Top 5 fornecedores
   const topFornecedores = performanceFornecedores.slice(0, 5);
 
-  // Cores para os grÃ¡ficos
+  // Cores para os gráficos
   const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
 
-  // Dados para pizza chart - distribuiÃ§Ã£o de scores
+  // Dados para pizza chart - distribuição de scores
   const pieData = topFornecedores.map((f, index) => ({
     name: f.fornecedor.substring(0, 20) + (f.fornecedor.length > 20 ? '...' : ''),
     value: f.score,
@@ -119,15 +119,15 @@ export const PerformanceCharts = memo(function PerformanceCharts({
 
   // Dados para economia total por fornecedor - extrair de "R$ X,XX"
   const economiaData = topFornecedores.map(f => {
-    // Extrair valor numÃ©rico de "R$ X,XX" (formato brasileiro: R$ 1.234,56)
+    // Extrair valor numérico de "R$ X,XX" (formato brasileiro: R$ 1.234,56)
     let economiaNum = 0;
     if (f.economia) {
       if (f.economia.includes('R$')) {
-        // Remove "R$" e espaÃ§os, depois trata separador decimal brasileiro
+        // Remove "R$" e espaços, depois trata separador decimal brasileiro
         let economiaStr = f.economia.replace(/[R$\s]/g, '').trim();
-        // Se tem vÃ­rgula, Ã© separador decimal brasileiro
+        // Se tem vírgula, é separador decimal brasileiro
         if (economiaStr.includes(',')) {
-          // Remove pontos (milhares) e troca vÃ­rgula por ponto (decimal)
+          // Remove pontos (milhares) e troca vírgula por ponto (decimal)
           economiaStr = economiaStr.replace(/\./g, '').replace(',', '.');
         }
         economiaNum = parseFloat(economiaStr) || 0;
@@ -153,8 +153,8 @@ export const PerformanceCharts = memo(function PerformanceCharts({
       const taxaStr = f.taxaResposta.replace(/[%\s]/g, '').replace(',', '.');
       taxaResposta = parseFloat(taxaStr) || 0;
     } else {
-      // Fallback: calcular a partir de cotacoes e respondidas se disponÃ­vel
-      // Isso nÃ£o estÃ¡ disponÃ­vel nos dados, entÃ£o deixamos como 0
+      // Fallback: calcular a partir de cotacoes e respondidas se disponível
+      // Isso não está disponível nos dados, então deixamos como 0
       taxaResposta = 0;
     }
     return {
@@ -199,7 +199,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
     );
   };
 
-  // Verificar se hÃ¡ dados
+  // Verificar se há dados
   const hasData = topFornecedores.length > 0 || tendenciasMensais.length > 0;
 
   // Loading state with skeleton loaders
@@ -212,9 +212,9 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 lg:gap-4">
           <ChartSkeleton title="Top 5 Fornecedores" />
-          <ChartSkeleton title="DistribuiÃ§Ã£o de Performance" />
-          <ChartSkeleton title="EvoluÃ§Ã£o Mensal - CotaÃ§Ãµes" />
-          <ChartSkeleton title="EvoluÃ§Ã£o Mensal - Economia" />
+          <ChartSkeleton title="Distribuição de Performance" />
+          <ChartSkeleton title="Evolução Mensal - Cotações" />
+          <ChartSkeleton title="Evolução Mensal - Economia" />
           <ChartSkeleton title="Taxa de Resposta" />
           <ChartSkeleton title="Economia por Fornecedor" />
         </div>
@@ -226,10 +226,10 @@ export const PerformanceCharts = memo(function PerformanceCharts({
     <div className="space-y-4 sm:space-y-6">
       <div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">
-          AnÃ¡lise de Performance
+          Análise de Performance
         </h2>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          VisualizaÃ§Ãµes detalhadas de mÃ©tricas e tendÃªncias
+          Visualizações detalhadas de métricas e tendências
         </p>
       </div>
 
@@ -237,8 +237,8 @@ export const PerformanceCharts = memo(function PerformanceCharts({
         <Card className="bg-white dark:bg-[#1C1F26] border border-gray-200/60 dark:border-gray-700/30 shadow-sm">
           <CardContent className="p-12 text-center">
             <BarChart3 className="h-16 w-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-            <p className="text-base text-gray-600 dark:text-gray-400 mb-2">Nenhum dado disponÃ­vel</p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">NÃ£o hÃ¡ dados para exibir nos grÃ¡ficos no perÃ­odo selecionado</p>
+            <p className="text-base text-gray-600 dark:text-gray-400 mb-2">Nenhum dado disponível</p>
+            <p className="text-sm text-gray-500 dark:text-gray-500">Não há dados para exibir nos gráficos no período selecionado</p>
           </CardContent>
         </Card>
       ) : (
@@ -296,11 +296,11 @@ export const PerformanceCharts = memo(function PerformanceCharts({
           </CardContent>
         </Card>
 
-        {/* Pizza Chart - DistribuiÃ§Ã£o de Performance */}
+        {/* Pizza Chart - Distribuição de Performance */}
         <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-purple-500/60 dark:border-purple-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-              DistribuiÃ§Ã£o de Performance - Top 5
+              Distribuição de Performance - Top 5
             </CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
@@ -333,7 +333,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
                 </Pie>
                   <Tooltip 
                     content={<CustomTooltip formatter={(value: number, name: string, entry: any) => {
-                      // Para o grÃ¡fico de pizza, tentar obter nome completo
+                      // Para o gráfico de pizza, tentar obter nome completo
                       let fullName = name;
                       try {
                         if (entry?.payload?.fullName) {
@@ -342,7 +342,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
                           fullName = entry.payload.name;
                         }
                       } catch (e) {
-                        // Ignorar erro e usar o nome padrÃ£o
+                        // Ignorar erro e usar o nome padrão
                       }
                       return `Score: ${value.toFixed(1)}${fullName !== name ? ` (${fullName})` : ''}`;
                     }} />}
@@ -353,11 +353,11 @@ export const PerformanceCharts = memo(function PerformanceCharts({
           </CardContent>
         </Card>
 
-        {/* TendÃªncia Mensal - CotaÃ§Ãµes */}
+        {/* Tendência Mensal - Cotações */}
         <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-emerald-500/60 dark:border-emerald-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-              EvoluÃ§Ã£o Mensal - NÃºmero de CotaÃ§Ãµes
+              Evolução Mensal - Número de Cotações
             </CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
@@ -391,7 +391,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
                     axisLine={false}
                   />
                 <Tooltip 
-                    content={<CustomTooltip formatter={(value: number) => `${value} cotaÃ§Ãµes`} />}
+                    content={<CustomTooltip formatter={(value: number) => `${value} cotações`} />}
                   />
                   <Legend 
                     wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }}
@@ -403,7 +403,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
                     dataKey="cotacoes"
                     fill="url(#colorCotacoes)"
                     stroke="none"
-                    name="CotaÃ§Ãµes"
+                    name="Cotações"
                     isAnimationActive={true}
                     animationDuration={800}
                   />
@@ -412,7 +412,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
                   dataKey="cotacoes"
                     stroke="#10b981"
                     strokeWidth={3}
-                  name="CotaÃ§Ãµes"
+                  name="Cotações"
                     dot={{ 
                       fill: '#10b981', 
                       strokeWidth: 2, 
@@ -436,11 +436,11 @@ export const PerformanceCharts = memo(function PerformanceCharts({
           </CardContent>
         </Card>
 
-        {/* TendÃªncia Mensal - Economia */}
+        {/* Tendência Mensal - Economia */}
         <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-green-500/60 dark:border-green-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-              EvoluÃ§Ã£o Mensal - Taxa de Economia
+              Evolução Mensal - Taxa de Economia
             </CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">
@@ -519,7 +519,7 @@ export const PerformanceCharts = memo(function PerformanceCharts({
           </CardContent>
         </Card>
 
-        {/* GrÃ¡fico de Barras - Taxa de Resposta */}
+        {/* Gráfico de Barras - Taxa de Resposta */}
         <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-indigo-500/60 dark:border-indigo-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
@@ -579,11 +579,11 @@ export const PerformanceCharts = memo(function PerformanceCharts({
           </CardContent>
         </Card>
 
-        {/* Novo GrÃ¡fico - Economia Total por Fornecedor */}
+        {/* Novo Gráfico - Economia Total por Fornecedor */}
         <Card className="bg-white dark:bg-[#1C1F26] border-l-2 border-orange-500/60 dark:border-orange-400/60 border border-gray-200/60 dark:border-gray-700/30 shadow-sm dark:shadow-none">
           <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-4 pt-3 sm:pt-4">
             <CardTitle className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white">
-              Economia AlcanÃ§ada por Fornecedor
+              Economia Alcançada por Fornecedor
             </CardTitle>
           </CardHeader>
           <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4">

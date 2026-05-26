@@ -54,7 +54,7 @@ const priorityConfig: Record<Priority, { label: string; icon: any; color: string
     bg: "bg-gray-100 dark:bg-gray-800",
   },
   medium: {
-    label: "MÃ©dia",
+    label: "Média",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -181,7 +181,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
 
       toast({
         title: "Sucesso",
-        description: `${selectedItems.length} itens adicionados Ã  lista.`,
+        description: `${selectedItems.length} itens adicionados à lista.`,
       });
 
       onOpenChange(false);
@@ -423,11 +423,11 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">ObservaÃ§Ãµes (Opcional)</Label>
+                <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Observações (Opcional)</Label>
                 <Textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="ObservaÃ§Ãµes para todos os itens..."
+                  placeholder="Observações para todos os itens..."
                   className="bg-white dark:bg-gray-800 border-border dark:border-white/5 text-sm min-h-[80px]"
                 />
               </div>
@@ -477,7 +477,7 @@ export function AddProductToListDialog({ open, onOpenChange }: AddProductToListD
           ) : (
             <Check className="w-5 h-5 mr-2" />
           )}
-          Adicionar Ã  Lista
+          Adicionar à Lista
         </Button>
       )}
     </div>

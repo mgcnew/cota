@@ -53,7 +53,7 @@ export function LastPaidPricesTooltip({ productId }: LastPaidPricesTooltipProps)
           {isLoading ? (
             <p className="text-xs text-muted-foreground">Carregando...</p>
           ) : entries.length === 0 ? (
-            <p className="text-xs text-muted-foreground">Sem histÃ³rico de pedidos</p>
+            <p className="text-xs text-muted-foreground">Sem histórico de pedidos</p>
           ) : (
             <div className="space-y-2">
               {entries.map((e: any) => (

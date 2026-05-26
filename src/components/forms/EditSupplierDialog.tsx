@@ -41,12 +41,12 @@ import { Button } from "@/components/ui/button";
 import { Building2, X } from "lucide-react";
 
 const supplierSchema = z.object({
-  name: z.string().trim().min(1, "Nome Ã© obrigatÃ³rio").max(100, "Nome muito longo"),
-  contact: z.string().trim().min(1, "Contato Ã© obrigatÃ³rio").max(100, "Contato muito longo"),
+  name: z.string().trim().min(1, "Nome é obrigatório").max(100, "Nome muito longo"),
+  contact: z.string().trim().min(1, "Contato é obrigatório").max(100, "Contato muito longo"),
   phone: z.string().trim().max(20, "Telefone muito longo").optional(),
-  email: z.string().trim().email("Email invÃ¡lido").max(255, "Email muito longo").optional().or(z.literal("")),
-  address: z.string().trim().max(200, "EndereÃ§o muito longo").optional(),
-  limit: z.string().trim().min(1, "Limite Ã© obrigatÃ³rio"),
+  email: z.string().trim().email("Email inválido").max(255, "Email muito longo").optional().or(z.literal("")),
+  address: z.string().trim().max(200, "Endereço muito longo").optional(),
+  limit: z.string().trim().min(1, "Limite é obrigatório"),
   status: z.enum(["active", "inactive", "pending"]),
   delivery_schedule: z.array(z.number()).optional(),
 });
@@ -125,7 +125,7 @@ export default function EditSupplierDialog({
     }
   };
 
-  // FunÃ§Ã£o para gerenciar abertura/fechamento e manter scroll
+  // Função para gerenciar abertura/fechamento e manter scroll
   const handleOpenChange = (newOpen: boolean) => {
     if (newOpen) {
       scrollPositionRef.current = window.scrollY;
@@ -158,11 +158,11 @@ export default function EditSupplierDialog({
           Editar Fornecedor
         </DialogTitleComponent>
       </div>
-      {/* BotÃ£o de fechar removido - usando o nativo do DialogContent */}
+      {/* Botão de fechar removido - usando o nativo do DialogContent */}
     </div>
   );
 
-  // ConteÃºdo do formulÃ¡rio (reutilizado em mobile e desktop)
+  // Conteúdo do formulário (reutilizado em mobile e desktop)
   const content = (
     <>
       {Header}
@@ -170,7 +170,7 @@ export default function EditSupplierDialog({
         <form onSubmit={form.handleSubmit(onSubmit)} className={cn("flex flex-col h-full overflow-hidden", designSystem.colors.surface.page)} id="edit-supplier-form">
           <div className={cn(designSystem.components.modal.body, "flex-1 overflow-y-auto custom-scrollbar space-y-4 p-4 sm:p-6")}>
 
-            {/* SeÃ§Ã£o: InformaÃ§Ãµes Principais */}
+            {/* Seção: Informações Principais */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
               <FormField
                 control={form.control}
@@ -199,7 +199,7 @@ export default function EditSupplierDialog({
                     <FormLabel className={designSystem.typography.size.sm}>Nome do Contato*</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Ex: JoÃ£o Silva"
+                        placeholder="Ex: João Silva"
                         className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
@@ -211,7 +211,7 @@ export default function EditSupplierDialog({
               />
             </div>
 
-            {/* SeÃ§Ã£o: Contato & LocalizaÃ§Ã£o */}
+            {/* Seção: Contato & Localização */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
@@ -259,10 +259,10 @@ export default function EditSupplierDialog({
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className={designSystem.typography.size.sm}>EndereÃ§o</FormLabel>
+                    <FormLabel className={designSystem.typography.size.sm}>Endereço</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Rua, nÃºmero, bairro, cidade"
+                        placeholder="Rua, número, bairro, cidade"
                         className={designSystem.components.input.root}
                         onFocus={handleInputFocus}
                         {...field}
@@ -274,7 +274,7 @@ export default function EditSupplierDialog({
               />
             </div>
 
-            {/* SeÃ§Ã£o: Status & Limites */}
+            {/* Seção: Status & Limites */}
             <div className={cn(designSystem.components.card.flat, "p-4 sm:p-5 space-y-4")}>
               <FormField
                 control={form.control}
@@ -290,7 +290,7 @@ export default function EditSupplierDialog({
                           { id: 3, label: 'Qua' },
                           { id: 4, label: 'Qui' },
                           { id: 5, label: 'Sex' },
-                          { id: 6, label: 'SÃ¡b' },
+                          { id: 6, label: 'Sáb' },
                           { id: 0, label: 'Dom' },
                         ].map((day) => {
                           const isSelected = field.value?.includes(day.id);
@@ -328,7 +328,7 @@ export default function EditSupplierDialog({
                   name="limit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className={designSystem.typography.size.sm}>Limite de CrÃ©dito*</FormLabel>
+                      <FormLabel className={designSystem.typography.size.sm}>Limite de Crédito*</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="R$ 25.000"
@@ -368,7 +368,7 @@ export default function EditSupplierDialog({
             </div>
           </div>
 
-          {/* Footer com botÃµes */}
+          {/* Footer com botões */}
           <div className={cn(designSystem.components.modal.footer, "py-3 sm:py-4")}>
             <div className={cn("flex w-full gap-2", isMobile ? "flex-col" : "justify-end")}>
               <Button
@@ -391,7 +391,7 @@ export default function EditSupplierDialog({
                     Salvando...
                   </>
                 ) : (
-                  'Salvar AlteraÃ§Ãµes'
+                  'Salvar Alterações'
                 )}
               </Button>
             </div>

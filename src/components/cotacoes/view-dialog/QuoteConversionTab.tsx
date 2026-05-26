@@ -58,8 +58,8 @@ export function QuoteConversionTab({
   };
 
   useEffect(() => {
-    // Inicializa as seleÃ§Ãµes apenas uma vez quando os produtos carregarem
-    // e se ainda nÃ£o houver seleÃ§Ãµes feitas pelo usuÃ¡rio
+    // Inicializa as seleções apenas uma vez quando os produtos carregarem
+    // e se ainda não houver seleções feitas pelo usuário
     if (Object.keys(productSelections).length === 0 && products.length > 0) {
       const initialSelections: Record<string, string> = {};
       let hasSelections = false;
@@ -75,13 +75,13 @@ export function QuoteConversionTab({
       if (hasSelections) {
         setProductSelections(initialSelections);
       } else {
-        // Se nenhum produto tem melhor fornecedor (ex: sem preÃ§os), 
+        // Se nenhum produto tem melhor fornecedor (ex: sem preços), 
         // marcamos como inicializado com um objeto vazio mas evitamos o loop
-        // definindo um valor que impeÃ§a a re-execuÃ§Ã£o desta lÃ³gica se necessÃ¡rio,
+        // definindo um valor que impeça a re-execução desta lógica se necessário,
         // mas aqui o products.length > 0 e Object.keys(productSelections).length === 0
         // continuaria sendo verdade. 
-        // Vamos usar uma marcaÃ§Ã£o interna ou apenas aceitar que se nÃ£o hÃ¡ fornecedores,
-        // nÃ£o fazemos o set.
+        // Vamos usar uma marcação interna ou apenas aceitar que se não há fornecedores,
+        // não fazemos o set.
       }
     }
   }, [products, getBestPriceInfoForProduct, productSelections]);
@@ -162,7 +162,7 @@ export function QuoteConversionTab({
     return Array.from(groups.values());
   }, [productSelections, productAllocations, pedidoSubTab, products, fornecedores, getSupplierProductValue, safeStr]);
 
-  // Total da seleÃ§Ã£o para exibiÃ§Ã£o no botÃ£o/header
+  // Total da seleção para exibição no botão/header
   const totalDisplay = totalSelecao;
 
   const handleConvertToOrder = () => {
@@ -175,7 +175,7 @@ export function QuoteConversionTab({
       return;
     }
 
-    // ValidaÃ§Ã£o de alocaÃ§Ã£o incompleta em modo dividido
+    // Validação de alocação incompleta em modo dividido
     if (pedidoSubTab === 'dividido') {
       const incompleteProducts = products.filter(product => {
         const allocs = productAllocations[product.product_id] || {};
@@ -184,7 +184,7 @@ export function QuoteConversionTab({
       });
 
       if (incompleteProducts.length > 0) {
-        if (!confirm(`Alguns produtos nÃ£o foram totalmente alocados ou excedem a quantidade total. Deseja continuar mesmo assim?\n\nProdutos: ${incompleteProducts.map(p => safeStr(p.product_name)).join(', ')}`)) {
+        if (!confirm(`Alguns produtos não foram totalmente alocados ou excedem a quantidade total. Deseja continuar mesmo assim?\n\nProdutos: ${incompleteProducts.map(p => safeStr(p.product_name)).join(', ')}`)) {
           return;
         }
       }
@@ -204,7 +204,7 @@ export function QuoteConversionTab({
   };
 
   const handleWhatsAppExport = () => {
-    // Calcular estatÃ­sticas para o export baseado nas SELEÃ‡Ã•ES ATUAIS
+    // Calcular estatísticas para o export baseado nas SELEÇÃ•ES ATUAIS
     const statsExport = {
       totalProdutos: products.length,
       totalFornecedores: fornecedores.length,
@@ -228,7 +228,7 @@ export function QuoteConversionTab({
           product_name: p.product_name,
           quantidade: p.quantidade,
           unidade: p.unidade,
-          bestPrice: unitPrice, // PreÃ§o unitÃ¡rio selecionado
+          bestPrice: unitPrice, // Preço unitário selecionado
           bestSupplierId: group.supplierId,
           initialOffer: unitInitialOffer,
           allPrices: [],
@@ -237,12 +237,12 @@ export function QuoteConversionTab({
       })
     }));
 
-    // Economia Real: DiferenÃ§a entre a primeira oferta do fornecedor e o preÃ§o final selecionado
+    // Economia Real: Diferença entre a primeira oferta do fornecedor e o preço final selecionado
     const totalNegotiatedSavings = groupedDataExport.reduce((acc, g) => 
       acc + g.items.reduce((sum, i: any) => sum + (Math.max(0, (i.initialOffer - i.bestPrice)) * i.quantidade), 0), 0
     );
 
-    // Economia de Mercado: DiferenÃ§a entre o melhor preÃ§o global e o selecionado
+    // Economia de Mercado: Diferença entre o melhor preço global e o selecionado
     const totalMarketPotential = groupedDataExport.reduce((acc, g) => 
       acc + g.items.reduce((sum, i: any) => sum + (i.savings > 0 ? i.savings * i.quantidade : 0), 0), 0
     );
@@ -263,8 +263,8 @@ export function QuoteConversionTab({
         return res;
       }),
       {
-        loading: 'Enviando relatÃ³rio para WhatsApp...',
-        success: 'RelatÃ³rio enviado com sucesso via API!',
+        loading: 'Enviando relatório para WhatsApp...',
+        success: 'Relatório enviado com sucesso via API!',
         error: (err) => `Falha no envio via API: ${err.message}`
       }
     );
@@ -284,7 +284,7 @@ export function QuoteConversionTab({
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 pb-16">
         <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border dark:border-white/5/50">
           <div className="flex flex-col gap-0.5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">EstratÃ©gia</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
             <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
           </div>
           <div className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export function QuoteConversionTab({
               className="h-8 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
             >
               <Sparkles className="h-3.5 w-3.5 mr-1" />
-              RelatÃ³rio Visual
+              Relatório Visual
             </Button>
             <Button
               variant="outline"
@@ -305,7 +305,7 @@ export function QuoteConversionTab({
               className="h-8 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
             >
               <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              RelatÃ³rio Texto
+              Relatório Texto
             </Button>
             <Tabs value={pedidoSubTab} onValueChange={(val) => {
               setPedidoSubTab(val);
@@ -482,11 +482,11 @@ export function QuoteConversionTab({
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">ObservaÃ§Ãµes do Pedido</label>
+            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Observações do Pedido</label>
             <Input
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              placeholder="Ex: Entregar apÃ³s as 14h..."
+              placeholder="Ex: Entregar após as 14h..."
               className="h-9 rounded-lg font-bold text-xs bg-background"
             />
           </div>

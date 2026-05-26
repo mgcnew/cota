@@ -107,7 +107,7 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
           
           <div className="text-right flex-shrink-0">
             <div className={cn("text-sm", ds.components.dataDisplay.money)}>{cotacao.melhorPreco || 'R$ 0,00'}</div>
-            <div className={cn("text-[9px] uppercase tracking-wider", ds.colors.text.muted)}>melhor preÃ§o</div>
+            <div className={cn("text-[9px] uppercase tracking-wider", ds.colors.text.muted)}>melhor preço</div>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
               onClick={() => onView(cotacao)}
             >
               <Eye className="w-4 h-4 mr-2" />
-              Resumo da DecisÃ£o
+              Resumo da Decisão
             </Button>
           ) : (
             <Button 
@@ -152,7 +152,7 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
               onClick={() => onManage(cotacao)}
             >
               <ClipboardList className="w-4 h-4 mr-2" />
-              {isProntaParaDecisao ? "Fechar CotaÃ§Ã£o" : "Negociar CotaÃ§Ã£o"}
+              {isProntaParaDecisao ? "Fechar Cotação" : "Negociar Cotação"}
             </Button>
           )}
           
@@ -162,7 +162,7 @@ export const MobileQuoteCard = memo(function MobileQuoteCard({
               variant="outline"
               className="h-10 w-10 rounded-xl border-border dark:border-white/5 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0"
               onClick={() => onDelete(cotacao)}
-              aria-label="Excluir cotaÃ§Ã£o"
+              aria-label="Excluir cotação"
             >
               <Trash2 className="w-4 h-4" />
             </Button>

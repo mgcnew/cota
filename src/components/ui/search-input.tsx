@@ -11,8 +11,8 @@ interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
 }
 
 /**
- * Busca EstÃ¡tica Premium - Design Minimalista com Sombra Sutil
- * Substitui o modelo de expansÃ£o por um estado fixo e profissional.
+ * Busca Estática Premium - Design Minimalista com Sombra Sutil
+ * Substitui o modelo de expansão por um estado fixo e profissional.
  */
 export const SearchInput = memo(function SearchInput({
   value,

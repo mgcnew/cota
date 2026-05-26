@@ -130,8 +130,8 @@ function PedidosTab() {
         return aIsClosed ? 1 : -1;
       }
       
-      // Se tÃªm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
-      // Se tÃªm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
+      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
+      // Se têm o mesmo tipo de status, ordena pela data mais recente (created_at ou data do pedido)
       const [da, ma, ya] = a.dataPedido.split('/').map(Number);
       const aDate = (a._raw as any)?.created_at ? new Date((a._raw as any).created_at).getTime() : new Date(ya, ma - 1, da).getTime();
       const [db, mb, yb] = b.dataPedido.split('/').map(Number);
@@ -167,10 +167,10 @@ function PedidosTab() {
     if (receiveOrderId && pedidos.length > 0) {
       const orderToReceive = pedidos.find(p => p.id?.toString() === receiveOrderId.toString());
       if (orderToReceive) {
-        // Usa setTimeout para garantir que a renderizaÃ§Ã£o inicial nÃ£o atropele o estado do dialog
+        // Usa setTimeout para garantir que a renderização inicial não atropele o estado do dialog
         setTimeout(() => {
           handleRegistrarEntrega(orderToReceive);
-          // Limpar o parÃ¢metro da URL
+          // Limpar o parâmetro da URL
           setSearchParams(prev => {
             prev.delete("receiveOrder");
             return prev;
@@ -210,7 +210,7 @@ function PedidosTab() {
               variant="success"
               trend={{
                 value: stats.variacaoFaturadoFormatada,
-                label: stats.variacaoType === 'negative' ? 'furo de preÃ§o' : 'ganho extra',
+                label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
                 type: stats.variacaoType
               }}
             />
@@ -228,7 +228,7 @@ function PedidosTab() {
             variant="success"
             trend={{
               value: stats.variacaoFaturadoFormatada,
-              label: stats.variacaoType === 'negative' ? 'furo de preÃ§o' : 'ganho extra',
+              label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
               type: stats.variacaoType
             }}
           />

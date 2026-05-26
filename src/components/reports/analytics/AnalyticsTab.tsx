@@ -2,7 +2,7 @@
  * AnalyticsTab - Componente principal da aba Analytics
  * 
  * Orquestra MetricsGrid/Carousel, PerformanceCharts e InsightsPanel.
- * Implementa lazy loading para charts e otimizaÃ§Ãµes de performance.
+ * Implementa lazy loading para charts e otimizações de performance.
  * 
  * @module components/reports/analytics/AnalyticsTab
  * Requirements: 2.4, 2.5, 6.5
@@ -72,12 +72,12 @@ function InsightsSkeleton() {
 }
 
 /**
- * AnalyticsTab - Aba de Analytics com mÃ©tricas, grÃ¡ficos e insights
+ * AnalyticsTab - Aba de Analytics com métricas, gráficos e insights
  * 
- * Componente memoizado com otimizaÃ§Ãµes de performance usando useMemo e useCallback.
+ * Componente memoizado com otimizações de performance usando useMemo e useCallback.
  * 
- * @param startDate - Data inicial do perÃ­odo
- * @param endDate - Data final do perÃ­odo
+ * @param startDate - Data inicial do período
+ * @param endDate - Data final do período
  * @param selectedFornecedores - Fornecedores selecionados para filtro
  * @param selectedProdutos - Produtos selecionados para filtro
  */
@@ -142,7 +142,7 @@ export const AnalyticsTab = memo(function AnalyticsTab({
 
   /**
    * Memoized handler para gerar insights
-   * Usa useCallback para evitar recriaÃ§Ã£o da funÃ§Ã£o em cada render
+   * Usa useCallback para evitar recriação da função em cada render
    */
   const handleGenerateInsights = useCallback(() => {
     generateInsights(analyticsDataForInsights);
@@ -150,8 +150,8 @@ export const AnalyticsTab = memo(function AnalyticsTab({
 
   return (
     <div className="space-y-6">
-      {/* SeÃ§Ã£o de MÃ©tricas */}
-      <section aria-label="MÃ©tricas de performance">
+      {/* Seção de Métricas */}
+      <section aria-label="Métricas de performance">
         {isMobile ? (
           <MetricsCarousel 
             metrics={metricas} 
@@ -165,8 +165,8 @@ export const AnalyticsTab = memo(function AnalyticsTab({
         )}
       </section>
 
-      {/* SeÃ§Ã£o de GrÃ¡ficos - Lazy loaded */}
-      <section aria-label="GrÃ¡ficos de performance">
+      {/* Seção de Gráficos - Lazy loaded */}
+      <section aria-label="Gráficos de performance">
         <Suspense fallback={<ChartsSkeleton />}>
           <PerformanceCharts
             performanceFornecedores={performanceFornecedores}
@@ -175,7 +175,7 @@ export const AnalyticsTab = memo(function AnalyticsTab({
         </Suspense>
       </section>
 
-      {/* SeÃ§Ã£o de Insights - Lazy loaded */}
+      {/* Seção de Insights - Lazy loaded */}
       <section aria-label="Insights com IA">
         <Suspense fallback={<InsightsSkeleton />}>
           <InsightsPanel

@@ -69,8 +69,8 @@ export default function ProcurementCalculator() {
         setFormula("");
       } else {
         toast({
-          title: "Erro no cÃ¡lculo",
-          description: "Verifique a expressÃ£o informada.",
+          title: "Erro no cálculo",
+          description: "Verifique a expressão informada.",
           variant: "destructive"
         });
       }
@@ -132,7 +132,7 @@ export default function ProcurementCalculator() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast({
-      description: "Valor copiado para a Ã¡rea de transferÃªncia",
+      description: "Valor copiado para a área de transferência",
     });
   };
 
@@ -168,7 +168,7 @@ export default function ProcurementCalculator() {
               </div>
               <div>
                 <CardTitle className="text-lg">Calculadora de Compras</CardTitle>
-                <CardDescription>Otimizada para cÃ¡lculos de margem e impostos</CardDescription>
+                <CardDescription>Otimizada para cálculos de margem e impostos</CardDescription>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function ProcurementCalculator() {
           {/* Display */}
           <div className="relative group">
             <div className="absolute top-2 left-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
-              {formula || "ExpressÃ£o"}
+              {formula || "Expressão"}
             </div>
             <div 
               className={cn(
@@ -207,7 +207,7 @@ export default function ProcurementCalculator() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Teclado NumÃ©rico e Operadores */}
+            {/* Teclado Numérico e Operadores */}
             <div className="grid grid-cols-4 gap-2">
               {[ "7", "8", "9", "Ã·", "4", "5", "6", "x", "1", "2", "3", "-", "0", ".", "%", "+" ].map((btn) => (
                 <Button
@@ -234,7 +234,7 @@ export default function ProcurementCalculator() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                  <Percent className="h-3 w-3" /> AcrÃ©scimos (+%)
+                  <Percent className="h-3 w-3" /> Acréscimos (+%)
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {[5, 10, 15, 20, 30, 50].map(p => (
@@ -273,7 +273,7 @@ export default function ProcurementCalculator() {
               <div className="space-y-2 pt-2 border-t border-border dark:border-white/5">
                 <div className="flex items-center justify-between">
                   <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                    CÃ¡lculo de Margem (DivisÃ£o por 1-%)
+                    Cálculo de Margem (Divisão por 1-%)
                   </p>
                   <TooltipProvider>
                     <Tooltip>
@@ -281,7 +281,7 @@ export default function ProcurementCalculator() {
                         <div className="p-1 cursor-help"><KeyboardIcon className="h-3 w-3 text-muted-foreground" /></div>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-[200px] text-[10px]">
-                        Calcula o preÃ§o de venda para atingir a margem desejada. FÃ³rmula: Custo / (1 - Margem/100)
+                        Calcula o preço de venda para atingir a margem desejada. Fórmula: Custo / (1 - Margem/100)
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -305,20 +305,20 @@ export default function ProcurementCalculator() {
         </CardContent>
       </Card>
 
-      {/* HistÃ³rico */}
+      {/* Histórico */}
       <Card className="border-none shadow-xl bg-white dark:bg-[#1A1C20] flex flex-col">
         <CardHeader className="pb-4 border-b border-border dark:border-white/5">
           <div className="flex items-center gap-2">
             <History className="h-5 w-5 text-brand" />
-            <CardTitle className="text-lg">HistÃ³rico de CÃ¡lculos</CardTitle>
+            <CardTitle className="text-lg">Histórico de Cálculos</CardTitle>
           </div>
         </CardHeader>
         <CardContent className="flex-1 p-0 overflow-y-auto max-h-[600px]">
           {history.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-6 text-center text-muted-foreground">
               <RotateCcw className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">Nenhum cÃ¡lculo recente</p>
-              <p className="text-[10px] uppercase font-bold tracking-tighter mt-1 opacity-50">Os resultados aparecerÃ£o aqui</p>
+              <p className="text-sm">Nenhum cálculo recente</p>
+              <p className="text-[10px] uppercase font-bold tracking-tighter mt-1 opacity-50">Os resultados aparecerão aqui</p>
             </div>
           ) : (
             <div className="divide-y divide-border dark:divide-white/5">
@@ -349,7 +349,7 @@ export default function ProcurementCalculator() {
               className="w-full text-[10px] font-black uppercase tracking-widest h-8"
               onClick={() => setHistory([])}
             >
-              Apagar HistÃ³rico
+              Apagar Histórico
             </Button>
           </div>
         )}

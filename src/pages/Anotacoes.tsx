@@ -72,7 +72,7 @@ export default function Anotacoes() {
             </div>
             <div>
               <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                AnotaÃ§Ãµes
+                Anotações
               </h1>
               <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
                 Gerencie suas tarefas e lembretes de forma simples
@@ -99,7 +99,7 @@ export default function Anotacoes() {
                   className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto font-bold dark:text-white")}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Criar AnotaÃ§Ã£o
+                  Criar Anotação
                 </Button>
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function Anotacoes() {
                 {pinnedNotes.length > 0 && (
                   <div className="flex items-center gap-2">
                     <StickyNote className="h-4 w-4 text-muted-foreground" />
-                    <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Outras AnotaÃ§Ãµes</h2>
+                    <h2 className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Outras Anotações</h2>
                   </div>
                 )}
                 <ResponsiveGrid gap="md" config={{ mobile: 1, tablet: 2, desktop: 3 }}>
@@ -215,7 +215,7 @@ export default function Anotacoes() {
                   <p className="text-sm text-muted-foreground">
                     {searchQuery 
                       ? "Tente buscar por outro termo ou limpe o filtro." 
-                      : "Crie uma nova anotaÃ§Ã£o para comeÃ§ar a organizar suas tarefas."}
+                      : "Crie uma nova anotação para começar a organizar suas tarefas."}
                   </p>
                 </div>
                 {!searchQuery && (
@@ -225,7 +225,7 @@ export default function Anotacoes() {
                     className="mt-4"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Nova AnotaÃ§Ã£o
+                    Nova Anotação
                   </Button>
                 )}
               </div>
@@ -241,7 +241,7 @@ export default function Anotacoes() {
                 <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <h2 className={cn(ds.typography.size.lg, "font-semibold text-foreground")}>
-                ConcluÃ­das ({finalResolvedNotes.length})
+                Concluídas ({finalResolvedNotes.length})
               </h2>
             </div>
             

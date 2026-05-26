@@ -34,14 +34,14 @@ interface ReportType {
 }
 
 const REPORT_TYPES: ReportType[] = [
-  { id: "economia", titulo: "AnÃ¡lise de Economia", descricao: "Economia gerada por perÃ­odo", icone: DollarSign, categoria: 'financeiro' },
-  { id: "fornecedores", titulo: "Performance Fornecedores", descricao: "Taxa de vitÃ³ria e score", icone: Building2, categoria: 'estrategico' },
-  { id: "comparativo", titulo: "Comparativo de PreÃ§os", descricao: "VariaÃ§Ã£o de preÃ§os por produto", icone: BarChart3, categoria: 'operacional' },
-  { id: "eficiencia", titulo: "EficiÃªncia do Processo", descricao: "Taxa de conversÃ£o e ROI", icone: TrendingUp, categoria: 'estrategico' },
-  { id: "pedidos", titulo: "AnÃ¡lise de Pedidos", descricao: "Volume e valores de pedidos", icone: ShoppingCart, categoria: 'operacional' },
-  { id: "produtos", titulo: "AnÃ¡lise de Produtos", descricao: "Produtos mais cotados", icone: Package, categoria: 'operacional' },
+  { id: "economia", titulo: "Análise de Economia", descricao: "Economia gerada por período", icone: DollarSign, categoria: 'financeiro' },
+  { id: "fornecedores", titulo: "Performance Fornecedores", descricao: "Taxa de vitória e score", icone: Building2, categoria: 'estrategico' },
+  { id: "comparativo", titulo: "Comparativo de Preços", descricao: "Variação de preços por produto", icone: BarChart3, categoria: 'operacional' },
+  { id: "eficiencia", titulo: "Eficiência do Processo", descricao: "Taxa de conversão e ROI", icone: TrendingUp, categoria: 'estrategico' },
+  { id: "pedidos", titulo: "Análise de Pedidos", descricao: "Volume e valores de pedidos", icone: ShoppingCart, categoria: 'operacional' },
+  { id: "produtos", titulo: "Análise de Produtos", descricao: "Produtos mais cotados", icone: Package, categoria: 'operacional' },
   { id: "tempo-resposta", titulo: "Tempo de Resposta", descricao: "Performance de resposta", icone: Timer, categoria: 'operacional' },
-  { id: "conversao", titulo: "Taxa de ConversÃ£o", descricao: "ConversÃ£o cotaÃ§Ãµes em pedidos", icone: Target, categoria: 'estrategico' },
+  { id: "conversao", titulo: "Taxa de Conversão", descricao: "Conversão cotações em pedidos", icone: Target, categoria: 'estrategico' },
 ];
 
 /**
@@ -90,30 +90,30 @@ function ReportTableSkeleton() {
 }
 
 const COLUMN_NAMES: Record<string, string> = {
-  periodo: 'PerÃ­odo', totalCotacoes: 'Total CotaÃ§Ãµes', economiaGerada: 'Economia',
+  periodo: 'Período', totalCotacoes: 'Total Cotações', economiaGerada: 'Economia',
   economiaPercentual: 'Economia (%)', melhorFornecedor: 'Melhor Fornecedor',
-  nome: 'Nome', cotacoesVencidas: 'CotaÃ§Ãµes Vencidas', taxaVitoria: 'Taxa VitÃ³ria',
-  valorMedioOfertas: 'Valor MÃ©dio', tempoMedioResposta: 'Tempo Resposta', score: 'Score',
-  produto: 'Produto', categoria: 'Categoria', cotacoes: 'CotaÃ§Ãµes',
-  menorPreco: 'Menor PreÃ§o', maiorPreco: 'Maior PreÃ§o', precoMedio: 'PreÃ§o MÃ©dio',
-  variacao: 'VariaÃ§Ã£o (%)', fornecedorMaisBarato: 'Melhor Fornecedor',
+  nome: 'Nome', cotacoesVencidas: 'Cotações Vencidas', taxaVitoria: 'Taxa Vitória',
+  valorMedioOfertas: 'Valor Médio', tempoMedioResposta: 'Tempo Resposta', score: 'Score',
+  produto: 'Produto', categoria: 'Categoria', cotacoes: 'Cotações',
+  menorPreco: 'Menor Preço', maiorPreco: 'Maior Preço', precoMedio: 'Preço Médio',
+  variacao: 'Variação (%)', fornecedorMaisBarato: 'Melhor Fornecedor',
   cotacoesIniciadas: 'Iniciadas', cotacoesFinalizadas: 'Finalizadas',
-  taxaConversao: 'ConversÃ£o (%)', tempoMedioCotacao: 'Tempo MÃ©dio',
-  fornecedoresPorCotacao: 'Fornec./CotaÃ§Ã£o', economiaTotal: 'Economia Total', roi: 'ROI (%)',
-  totalPedidos: 'Total Pedidos', valorTotal: 'Valor Total', valorMedio: 'Valor MÃ©dio',
+  taxaConversao: 'Conversão (%)', tempoMedioCotacao: 'Tempo Médio',
+  fornecedoresPorCotacao: 'Fornec./Cotação', economiaTotal: 'Economia Total', roi: 'ROI (%)',
+  totalPedidos: 'Total Pedidos', valorTotal: 'Valor Total', valorMedio: 'Valor Médio',
   pedidosEntregues: 'Entregues', pedidosPendentes: 'Pendentes', pedidosCancelados: 'Cancelados',
   taxaEntrega: 'Taxa Entrega (%)', fornecedorFrequente: 'Fornecedor Frequente',
-  valorMinimo: 'Valor MÃ­n.', valorMaximo: 'Valor MÃ¡x.', variacaoPreco: 'VariaÃ§Ã£o (%)',
-  economiaPotencial: 'Economia Potencial', tendencia: 'TendÃªncia',
-  fornecedor: 'Fornecedor', respostasRecebidas: 'Respostas', tempoMinimo: 'Tempo MÃ­n.',
-  tempoMaximo: 'Tempo MÃ¡x.', taxaResposta: 'Taxa Resposta (%)', status: 'Status',
-  pedidosGerados: 'Pedidos Gerados', valorCotacoes: 'Valor CotaÃ§Ãµes', valorPedidos: 'Valor Pedidos'
+  valorMinimo: 'Valor Mín.', valorMaximo: 'Valor Máx.', variacaoPreco: 'Variação (%)',
+  economiaPotencial: 'Economia Potencial', tendencia: 'Tendência',
+  fornecedor: 'Fornecedor', respostasRecebidas: 'Respostas', tempoMinimo: 'Tempo Mín.',
+  tempoMaximo: 'Tempo Máx.', taxaResposta: 'Taxa Resposta (%)', status: 'Status',
+  pedidosGerados: 'Pedidos Gerados', valorCotacoes: 'Valor Cotações', valorPedidos: 'Valor Pedidos'
 };
 
 /**
- * ReportGenerator - Componente memoizado para geraÃ§Ã£o de relatÃ³rios
+ * ReportGenerator - Componente memoizado para geração de relatórios
  * 
- * Usa React.memo para evitar re-renders desnecessÃ¡rios.
+ * Usa React.memo para evitar re-renders desnecessários.
  * Requirements: 6.5
  */
 export const ReportGenerator = memo(function ReportGenerator({ startDate, endDate, onOpenPeriodDialog }: ReportGeneratorProps) {
@@ -123,7 +123,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
   const [loading, setLoading] = useState(false);
   const [hasAttemptedGeneration, setHasAttemptedGeneration] = useState(false);
 
-  // Hooks de relatÃ³rios
+  // Hooks de relatórios
   const reportEconomia = useReportEconomia();
   const reportFornecedores = useReportFornecedores();
   const reportComparativo = useReportComparativo();
@@ -138,13 +138,13 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
   [selectedType]);
 
   const dateRangeText = useMemo(() => {
-    if (!startDate || !endDate) return 'Selecionar perÃ­odo';
+    if (!startDate || !endDate) return 'Selecionar período';
     return `${startDate.toLocaleDateString('pt-BR')} - ${endDate.toLocaleDateString('pt-BR')}`;
   }, [startDate, endDate]);
 
   const generateReport = useCallback(async () => {
     if (!startDate || !endDate) {
-      toast({ title: "Selecione um perÃ­odo", variant: "destructive" });
+      toast({ title: "Selecione um período", variant: "destructive" });
       return;
     }
 
@@ -164,7 +164,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
       }
       setReportData(data);
     } catch (error) {
-      toast({ title: "Erro ao gerar relatÃ³rio", variant: "destructive" });
+      toast({ title: "Erro ao gerar relatório", variant: "destructive" });
       setReportData([]);
     } finally {
       setLoading(false);
@@ -173,7 +173,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
 
   const downloadReport = useCallback(async (format: 'pdf' | 'excel') => {
     if (!reportData || reportData.length === 0) {
-      toast({ title: "Gere o relatÃ³rio primeiro", variant: "destructive" });
+      toast({ title: "Gere o relatório primeiro", variant: "destructive" });
       return;
     }
 
@@ -199,7 +199,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
       doc.setFontSize(16);
       doc.text(selectedReport.titulo, 20, 20);
       doc.setFontSize(10);
-      doc.text(`PerÃ­odo: ${dateRangeText}`, 20, 30);
+      doc.text(`Período: ${dateRangeText}`, 20, 30);
       let y = 45;
       reportData.slice(0, 20).forEach((row, i) => {
         if (y > 270) { doc.addPage(); y = 20; }
@@ -209,7 +209,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
       });
       doc.save(`${filename}.pdf`);
     }
-    toast({ title: "Download concluÃ­do" });
+    toast({ title: "Download concluído" });
   }, [reportData, selectedType, selectedReport, dateRangeText, toast]);
 
   const formatCellValue = (key: string, value: any) => {
@@ -225,20 +225,20 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
 
   return (
     <div className="space-y-6">
-      {/* SeleÃ§Ã£o de RelatÃ³rio */}
+      {/* Seleção de Relatório */}
       <Card className="card-standard">
         <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
           <CardTitle className="text-base flex items-center gap-2">
             <div className="card-icon-container icon-bg-purple">
               <FileText className="h-4 w-4" />
             </div>
-            Gerar RelatÃ³rio
+            Gerar Relatório
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
-              <Label className="text-sm">Tipo de RelatÃ³rio</Label>
+              <Label className="text-sm">Tipo de Relatório</Label>
               <Select value={selectedType} onValueChange={(v) => { setSelectedType(v); setReportData(null); setHasAttemptedGeneration(false); }}>
                 <SelectTrigger>
                   <SelectValue />
@@ -257,7 +257,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm">PerÃ­odo</Label>
+              <Label className="text-sm">Período</Label>
               <Button variant="outline" onClick={onOpenPeriodDialog} className="w-full justify-start">
                 <Calendar className="h-4 w-4 mr-2" />
                 {dateRangeText}
@@ -265,7 +265,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
             </div>
 
             <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-              <Label className="text-sm">AÃ§Ãµes</Label>
+              <Label className="text-sm">Ações</Label>
               <div className="flex gap-2">
                 <Button 
                   onClick={generateReport} 
@@ -297,7 +297,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
             </div>
           </div>
 
-          {/* Info do relatÃ³rio selecionado */}
+          {/* Info do relatório selecionado */}
           <div className="panel-highlight flex items-center gap-3">
             <div className="card-icon-container icon-bg-purple">
               <selectedReport.icone className="h-5 w-5" />
@@ -314,7 +314,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
       {/* Loading Skeleton */}
       {loading && <ReportTableSkeleton />}
 
-      {/* Resultado do RelatÃ³rio */}
+      {/* Resultado do Relatório */}
       {!loading && reportData && reportData.length > 0 && (
         <Card className="card-standard overflow-hidden">
           <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
@@ -361,7 +361,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
             </div>
             {reportData.length > 10 && (
               <div className="p-3 text-center text-xs text-gray-500 border-t">
-                Mostrando 10 de {reportData.length} registros. Baixe o relatÃ³rio para ver todos.
+                Mostrando 10 de {reportData.length} registros. Baixe o relatório para ver todos.
               </div>
             )}
           </CardContent>
@@ -380,7 +380,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
                 Nenhum dado encontrado
               </h3>
               <p className="empty-state-description">
-                NÃ£o foram encontrados dados para o relatÃ³rio "{selectedReport.titulo}" no perÃ­odo selecionado.
+                Não foram encontrados dados para o relatório "{selectedReport.titulo}" no período selecionado.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Button 
@@ -389,7 +389,7 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
                   className="flex items-center gap-2 btn-enhanced"
                 >
                   <CalendarDays className="h-4 w-4" />
-                  Alterar perÃ­odo
+                  Alterar período
                 </Button>
                 <Button 
                   variant="outline"
@@ -401,17 +401,17 @@ export const ReportGenerator = memo(function ReportGenerator({ startDate, endDat
                 </Button>
               </div>
               <p className="text-xs text-gray-400 dark:text-gray-500 pt-2">
-                Dica: Tente expandir o perÃ­odo de datas ou selecionar outro tipo de relatÃ³rio.
+                Dica: Tente expandir o período de datas ou selecionar outro tipo de relatório.
               </p>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Lista de RelatÃ³rios DisponÃ­veis */}
+      {/* Lista de Relatórios Disponíveis */}
       <Card className="card-standard overflow-hidden">
         <CardHeader className="card-header-standard px-4 sm:px-6 pt-4 sm:pt-6">
-          <CardTitle className="text-base">RelatÃ³rios DisponÃ­veis</CardTitle>
+          <CardTitle className="text-base">Relatórios Disponíveis</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="grid gap-px bg-gray-100 dark:bg-gray-800 sm:grid-cols-2">

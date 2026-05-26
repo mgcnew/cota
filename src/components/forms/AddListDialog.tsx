@@ -31,9 +31,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useProducts } from "@/hooks/useProducts";
 import { useDebounce } from "@/hooks/useDebounce";
 
-// DefiniÃ§Ã£o dos schemas (Zod) poderia ser movida para um arquivo separado, 
-// mas para simplificar vamos manter a validaÃ§Ã£o manual/inline por enquanto 
-// para seguir o padrÃ£o do AddPedidoDialog, ou adaptar conforme necessÃ¡rio.
+// Definição dos schemas (Zod) poderia ser movida para um arquivo separado, 
+// mas para simplificar vamos manter a validação manual/inline por enquanto 
+// para seguir o padrão do AddPedidoDialog, ou adaptar conforme necessário.
 
 interface ListItem {
   nome: string;
@@ -54,7 +54,7 @@ interface AddListDialogProps {
 }
 
 const STEPS = [
-  { id: "info", title: "InformaÃ§Ãµes", icon: ListTodo },
+  { id: "info", title: "Informações", icon: ListTodo },
   { id: "itens", title: "Itens", icon: Package },
 ];
 
@@ -91,7 +91,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
 
-  // Reset e InicializaÃ§Ã£o
+  // Reset e Inicialização
   useEffect(() => {
     if (open) {
       if (activeStep === "info") {
@@ -141,11 +141,11 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
     const qtd = parseFloat(newItemQuantity);
 
     if (!nome || nome.trim().length < 2) {
-      toast({ title: "Nome invÃ¡lido", description: "O item precisa de pelo menos 2 caracteres.", variant: "destructive" });
+      toast({ title: "Nome inválido", description: "O item precisa de pelo menos 2 caracteres.", variant: "destructive" });
       return;
     }
     if (!qtd || qtd <= 0) {
-      toast({ title: "Quantidade invÃ¡lida", description: "A quantidade deve ser maior que zero.", variant: "destructive" });
+      toast({ title: "Quantidade inválida", description: "A quantidade deve ser maior que zero.", variant: "destructive" });
       return;
     }
 
@@ -169,7 +169,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
   const selectProductFromList = (product: any) => {
     setSelectedProduct(product);
     setNewItemName(product.name);
-    setProductSearch(""); // Limpa a busca visualmente, mas mantÃ©m o item selecionado
+    setProductSearch(""); // Limpa a busca visualmente, mas mantém o item selecionado
     setHighlightedProductIndex(-1);
     setTimeout(() => {
       quantityInputRef.current?.focus();
@@ -329,7 +329,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
             {currentStepIndex < STEPS.length - 1 ? (
               <Button type="button" size="sm" onClick={handleNext} disabled={!canProceed()}
                 className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs shadow-md h-9 px-4 rounded-lg active:scale-95 transition-transform">
-                <span className="hidden sm:inline">PrÃ³ximo</span>
+                <span className="hidden sm:inline">Próximo</span>
                 <ChevronRight className="h-3 w-3 ml-1.5" />
               </Button>
             ) : (
@@ -379,14 +379,14 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
       {/* Content */}
       <div className="flex-1 relative bg-gray-50 dark:bg-black">
         
-        {/* Step: InformaÃ§Ãµes */}
+        {/* Step: Informações */}
         {activeStep === "info" && (
           <div className="h-full p-4 sm:p-6 flex flex-col justify-start">
              <Card className="border-border dark:border-white/5 bg-white dark:bg-gray-900 shadow-sm">
               <CardHeader className="pb-3 border-b border-border dark:border-white/5 bg-gray-50 dark:bg-gray-900">
                 <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white text-sm font-black uppercase tracking-wide">
                   <ListTodo className="h-4 w-4 text-gray-500" />
-                  <span>InformaÃ§Ãµes BÃ¡sicas</span>
+                  <span>Informações Básicas</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
@@ -394,7 +394,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                   <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Nome da Lista</Label>
                   <Input 
                     ref={nameInputRef}
-                    placeholder="Ex: Rancho do MÃªs, Churrasco..." 
+                    placeholder="Ex: Rancho do Mês, Churrasco..." 
                     value={listName}
                     onChange={(e) => setListName(e.target.value)}
                     onKeyDown={(e) => {
@@ -406,7 +406,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                     onFocus={handleInputFocus}
                     className="h-11 bg-white dark:bg-gray-950 border-border dark:border-white/5 text-sm font-medium rounded-lg focus:ring-gray-400/20" 
                   />
-                  <p className="text-[10px] text-gray-400 pl-1">MÃ­nimo de 3 caracteres</p>
+                  <p className="text-[10px] text-gray-400 pl-1">Mínimo de 3 caracteres</p>
                 </div>
               </CardContent>
             </Card>
@@ -484,7 +484,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                   <Button onClick={handleAddItem} 
                     className="w-full bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-bold uppercase tracking-wider text-xs h-9 rounded-lg shadow-sm">
                     <Plus className="h-3.5 w-3.5 mr-2" />
-                    Adicionar Ã  Lista
+                    Adicionar à Lista
                   </Button>
                 </CardContent>
               </Card>
@@ -508,7 +508,7 @@ export default function AddListDialog({ open, onOpenChange, onSave }: AddListDia
                       {itens.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-gray-400">
                           <ClipboardList className="h-8 w-8 opacity-20 mb-2" />
-                          <p className="text-xs font-medium">Sua lista estÃ¡ vazia</p>
+                          <p className="text-xs font-medium">Sua lista está vazia</p>
                         </div>
                       ) : (
                         itens.map((item, index) => (

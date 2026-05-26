@@ -54,7 +54,7 @@ const priorityConfig = {
     badge: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-border dark:border-white/5",
   },
   medium: {
-    label: "MÃ©dia",
+    label: "Média",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -131,7 +131,7 @@ export function ShoppingListTable({
               Lista vazia
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              Adicione produtos para comeÃ§ar sua lista de compras
+              Adicione produtos para começar sua lista de compras
             </p>
           </div>
         </div>
@@ -166,13 +166,13 @@ export function ShoppingListTable({
                   <span className={designSystem.components.table.headerLabel}>Prioridade</span>
                 </div>
                 <div className="w-[13%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>PreÃ§o Est.</span>
+                  <span className={designSystem.components.table.headerLabel}>Preço Est.</span>
                 </div>
                 <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className={designSystem.components.table.headerLabel}>ObservaÃ§Ãµes</span>
+                  <span className={designSystem.components.table.headerLabel}>Observações</span>
                 </div>
                 <div className="w-[10%] px-2 flex justify-end items-center">
-                  <span className={designSystem.components.table.headerLabel}>AÃ§Ãµes</span>
+                  <span className={designSystem.components.table.headerLabel}>Ações</span>
                 </div>
               </div>
             </TableCell>
@@ -245,7 +245,7 @@ export function ShoppingListTable({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="low">Baixa</SelectItem>
-                            <SelectItem value="medium">MÃ©dia</SelectItem>
+                            <SelectItem value="medium">Média</SelectItem>
                             <SelectItem value="high">Alta</SelectItem>
                             <SelectItem value="urgent">Urgente</SelectItem>
                           </SelectContent>

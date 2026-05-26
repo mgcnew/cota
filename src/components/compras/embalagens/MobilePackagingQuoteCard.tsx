@@ -90,7 +90,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
             </div>
             <div className="min-w-0">
               <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-2">
-                CotaÃ§Ã£o #{quoteNumber.toString().padStart(4, '0')}
+                Cotação #{quoteNumber.toString().padStart(4, '0')}
                 {isPronta && (
                   <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">
                     Pronta
@@ -106,7 +106,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
           
           <div className="text-right flex-shrink-0">
             <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
-              Melhor PreÃ§o
+              Melhor Preço
             </span>
             <span className={cn(
               "text-sm font-black transition-colors",
@@ -242,4 +242,5 @@ const CircleCheck = ({ className }: { className?: string }) => (
   >
     <polyline points="20 6 9 17 4 12"/>
   </svg>
-);
+);
+

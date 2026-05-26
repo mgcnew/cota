@@ -62,12 +62,12 @@ export default function DeleteQuoteDialog({
             <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-xl">
               <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
             </div>
-            <AlertDialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Confirmar ExclusÃ£o</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-bold text-gray-900 dark:text-white">Confirmar Exclusão</AlertDialogTitle>
           </div>
           <AlertDialogDescription className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-            Tem certeza que deseja excluir a cotaÃ§Ã£o <strong className="text-gray-900 dark:text-white">#{quote?.id.substring(0, 8)}</strong>?
+            Tem certeza que deseja excluir a cotação <strong className="text-gray-900 dark:text-white">#{quote?.id.substring(0, 8)}</strong>?
             <br />
-            Esta aÃ§Ã£o removerÃ¡ permanentemente todos os preÃ§os e fornecedores vinculados.
+            Esta ação removerá permanentemente todos os preços e fornecedores vinculados.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 mt-4">
@@ -88,7 +88,7 @@ export default function DeleteQuoteDialog({
                   Excluindo...
                 </>
               ) : (
-                "Confirmar ExclusÃ£o"
+                "Confirmar Exclusão"
               )}
             </Button>
           </AlertDialogAction>

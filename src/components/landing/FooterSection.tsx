@@ -18,7 +18,7 @@ const FooterSection = memo(function FooterSection() {
               />
             </div>
             <p className={cn("text-xs max-w-xs leading-relaxed", ds.typography.weight.medium, ds.colors.text.muted)}>
-              Plataforma interna de gestÃ£o de cotaÃ§Ãµes e compras.
+              Plataforma interna de gestão de cotações e compras.
             </p>
           </div>
 
@@ -40,7 +40,7 @@ const FooterSection = memo(function FooterSection() {
         {/* Bottom line */}
         <div className="mt-8 pt-6 border-t border-border dark:border-white/5/60">
           <p className={cn("text-[11px]", ds.colors.text.muted)}>
-            Â© {new Date().getFullYear()} CotaJÃ¡ Â· Sistema de Uso Restrito
+            Â© {new Date().getFullYear()} CotaJá Â· Sistema de Uso Restrito
           </p>
         </div>
       </div>

@@ -61,7 +61,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                 Valor
               </div>
             </TableHead>
-            <TableHead className="text-right table-header py-4 px-6">AÃ§Ãµes</TableHead>
+            <TableHead className="text-right table-header py-4 px-6">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

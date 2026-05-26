@@ -42,7 +42,7 @@ const priorityConfig = {
     accent: "border-l-gray-400",
   },
   medium: {
-    label: "MÃ©dia",
+    label: "Média",
     icon: Minus,
     color: "text-blue-600 dark:text-blue-400",
     badge: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border-blue-200 dark:border-blue-800",
@@ -187,7 +187,7 @@ export const ShoppingListCard = memo(function ShoppingListCard({
                 </div>
               </div>
               <div className="bg-muted/50 rounded-lg p-2.5">
-                <p className="text-xs text-muted-foreground mb-0.5">PreÃ§o Est.</p>
+                <p className="text-xs text-muted-foreground mb-0.5">Preço Est.</p>
                 <p
                   className={cn(
                     "font-semibold",

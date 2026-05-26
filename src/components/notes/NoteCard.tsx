@@ -36,7 +36,7 @@ const categoryConfig: Record<string, { color: string; bg: string; border: string
 
 const importanceConfig = {
   low: { label: "Baixa", color: "text-zinc-400" },
-  medium: { label: "MÃ©dia", color: "text-indigo-500" },
+  medium: { label: "Média", color: "text-indigo-500" },
   high: { label: "Alta", color: "text-orange-500" },
   urgent: { label: "Urgente", color: "text-red-500" },
 };
@@ -112,7 +112,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
                 <div className="p-1 rounded bg-brand/10">
                   <MessageSquare className="h-2.5 w-2.5 text-brand" />
                 </div>
-                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Alt. ObservaÃ§Ã£o</span>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">Alt. Observação</span>
               </div>
               <p className="text-xs text-muted-foreground/80 italic line-clamp-2 pl-2 border-l-2 border-brand/30">
                 {note.observation}

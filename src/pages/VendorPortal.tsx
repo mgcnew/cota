@@ -130,7 +130,7 @@ export default function VendorPortal() {
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
   
-  // Helper para formatar string de digitaÃ§Ã£o para Real (ex: "1250" -> "12,50")
+  // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
   const formatInputToBRL = (value: string) => {
     const digitOnly = value.replace(/\D/g, "");
     if (!digitOnly) return "";
@@ -144,7 +144,7 @@ export default function VendorPortal() {
   useEffect(() => {
     async function loadData() {
       if (!token) {
-        setError("Link de acesso invÃ¡lido ou expirado.");
+        setError("Link de acesso inválido ou expirado.");
         setLoading(false);
         return;
       }
@@ -171,35 +171,35 @@ export default function VendorPortal() {
             
             let { data: result, error: tokenError } = await supabase.rpc('get_vendor_quote_data', { p_token: tk });
             
-            if (tokenError) console.log("Erro na cotaÃ§Ã£o padrÃ£o (possÃ­vel redirecionamento para embalagens):", tokenError.message);
+            if (tokenError) console.log("Erro na cotação padrão (possível redirecionamento para embalagens):", tokenError.message);
 
-            // Tentativa backup: Se nÃ£o achou na cotaÃ§Ã£o normal (ou deu erro), tenta na de embalagens
+            // Tentativa backup: Se não achou na cotação normal (ou deu erro), tenta na de embalagens
             if (tokenError || !result) {
               const { data: pkgResult, error: pkgError } = await supabase.rpc('get_packaging_vendor_quote_data', { p_token: tk });
               
               if (pkgResult) {
-                console.log("CotaÃ§Ã£o de embalagens carregada com sucesso!");
+                console.log("Cotação de embalagens carregada com sucesso!");
                 result = pkgResult;
-                tokenError = null; // Limpa o erro da cotaÃ§Ã£o padrÃ£o jÃ¡ que achamos a de embalagens
+                tokenError = null; // Limpa o erro da cotação padrão já que achamos a de embalagens
               } else if (pkgError) {
                 console.error("Erro ao buscar embalagens:", pkgError);
-                // Se o erro for de token invÃ¡lido em ambos, mantemos o primeiro erro ou o mais descritivo
+                // Se o erro for de token inválido em ambos, mantemos o primeiro erro ou o mais descritivo
                 lastError = pkgError || tokenError;
               }
             }
 
             if (!result) {
               console.error("Falha final no token", tk, { result, tokenError, lastError });
-              lastError = lastError || tokenError || { message: 'Token nÃ£o encontrado ou invÃ¡lido' };
+              lastError = lastError || tokenError || { message: 'Token não encontrado ou inválido' };
               hasErrors = true;
               return;
             }
 
             const qd = result as unknown as QuoteData;
             if (!mainQuoteData) {
-              mainQuoteData = { ...qd }; // Shallow copy para permitir mutaÃ§Ã£o do deadline
+              mainQuoteData = { ...qd }; // Shallow copy para permitir mutação do deadline
             } else {
-              // Assume sempre o menor prazo (a data mais prÃ³xima/menor)
+              // Assume sempre o menor prazo (a data mais próxima/menor)
               if (qd.deadline) {
                 if (
                   !mainQuoteData.deadline || 
@@ -209,7 +209,7 @@ export default function VendorPortal() {
                 }
               }
 
-              // Assume a data de criaÃ§Ã£o mais antiga
+              // Assume a data de criação mais antiga
               if ((qd as any).created_at) {
                 if (
                   !mainQuoteData.created_at ||
@@ -223,7 +223,7 @@ export default function VendorPortal() {
             if (qd.status === 'ativa' || qd.status === 'ativo' || qd.status === 'pendente') {
               anyOpen = true;
               const formattedItems = (qd.items || []).map(item => {
-                // Para itens de embalagem com histÃ³rico, prÃ©-preencher com last_spec
+                // Para itens de embalagem com histórico, pré-preencher com last_spec
                 const spec = item.last_spec as HistoryVariant | null;
                 const hasCurrentData = item.quantidade_venda || item.quantidade_unidades_estimada;
                 return {
@@ -235,7 +235,7 @@ export default function VendorPortal() {
                     ? Number(item.valor_oferecido).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                     : "",
                   quantidade_por_caixa: item.quantidade_por_caixa ? String(item.quantidade_por_caixa) : "",
-                  // PrÃ©-preencher com dados jÃ¡ salvos nesta cotaÃ§Ã£o, ou do last_spec
+                  // Pré-preencher com dados já salvos nesta cotação, ou do last_spec
                   quantidade_venda: hasCurrentData ? (item.quantidade_venda || '') : (spec?.quantidade_venda || ''),
                   quantidade_unidades_estimada: hasCurrentData ? (item.quantidade_unidades_estimada || '') : (spec?.quantidade_unidades_estimada || ''),
                   unidade_venda: hasCurrentData ? (item.unidade_venda || 'kg') : (spec?.unidade_venda || 'kg'),
@@ -259,16 +259,16 @@ export default function VendorPortal() {
         }
 
         if (!anyOpen) {
-          setError("Todas as cotaÃ§Ãµes deste link jÃ¡ foram encerradas e nÃ£o aceitam mais propostas.");
+          setError("Todas as cotações deste link já foram encerradas e não aceitam mais propostas.");
         } else {
           setData(mainQuoteData);
           setItems(allItems);
         }
       } catch (err: any) {
-        console.error("Erro ao carregar cotaÃ§Ãµes:", err);
+        console.error("Erro ao carregar cotações:", err);
         setError(err.message || "Erro ao carregar os dados. Tente novamente.");
         toast({
-          title: "Erro TÃ©cnico",
+          title: "Erro Técnico",
           description: err.message,
           variant: "destructive"
         });
@@ -334,8 +334,8 @@ export default function VendorPortal() {
     
     if (!hasAnyPrice) {
       toast({
-        title: "CotaÃ§Ã£o vazia",
-        description: "Por favor, informe o preÃ§o de pelo menos um produto.",
+        title: "Cotação vazia",
+        description: "Por favor, informe o preço de pelo menos um produto.",
         variant: "destructive"
       });
       return;
@@ -359,7 +359,7 @@ export default function VendorPortal() {
             const numValue = parseFloat(i.valor_oferecido!.toString().replace(/\./g, "").replace(",", "."));
             const qtdCaixa = i.quantidade_por_caixa ? parseInt(i.quantidade_por_caixa, 10) : null;
 
-            // Base payload (cotaÃ§Ã£o geral)
+            // Base payload (cotação geral)
             const base: any = {
               product_id: i.product_id,
               valor_oferecido: numValue,
@@ -399,19 +399,19 @@ export default function VendorPortal() {
 
       // Notificar o setor de compras
       if (data?.supplier_name) {
-        const notifyMsg = `ðŸ”” *Nova Resposta de CotaÃ§Ã£o!*\n\nO fornecedor *${data.supplier_name}* acaba de preencher uma cotaÃ§Ã£o no portal.\n\nOs preÃ§os jÃ¡ estÃ£o disponÃ­veis no sistema para conferÃªncia.`;
+        const notifyMsg = `ðŸ”” *Nova Resposta de Cotação!*\n\nO fornecedor *${data.supplier_name}* acaba de preencher uma cotação no portal.\n\nOs preços já estão disponíveis no sistema para conferência.`;
         await sendWhatsApp("11966670314", notifyMsg, data.company_id);
       }
 
       // Evita conflito de DOM: primeiro para o loading, depois transiciona para sucesso
       setSaving(false);
-      // Fecha a tela de confirmaÃ§Ã£o para permitir que a tela de sucesso apareÃ§a
+      // Fecha a tela de confirmação para permitir que a tela de sucesso apareça
       setIsConfirming(false);
       
       // Aguarda o React finalizar o render antes de trocar a tela inteira
       requestAnimationFrame(() => {
         setSuccess(true);
-        // Scroll somente apÃ³s o React montar a tela de sucesso
+        // Scroll somente após o React montar a tela de sucesso
         requestAnimationFrame(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         });
@@ -421,7 +421,7 @@ export default function VendorPortal() {
       setSaving(false);
       toast({
         title: "Falha ao enviar",
-        description: "NÃ£o foi possÃ­vel processar sua proposta no momento.",
+        description: "Não foi possível processar sua proposta no momento.",
         variant: "destructive"
       });
     }
@@ -450,12 +450,12 @@ export default function VendorPortal() {
                 <Box className="w-7 h-7 text-white" />
               </div>
               <h1 className="text-4xl font-black tracking-tight text-white">
-                CotÃ¡<span className="text-blue-500">JA</span>
+                Cotá<span className="text-blue-500">JA</span>
               </h1>
             </div>
 
             <p className="text-zinc-400 font-medium tracking-wide text-sm uppercase text-center mb-10">
-              MÃ³dulo Fornecedor
+              Módulo Fornecedor
             </p>
 
             <div className="flex flex-col items-center gap-3">
@@ -479,7 +479,7 @@ export default function VendorPortal() {
               <AlertCircle className="h-8 w-8" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">Acesso IndisponÃ­vel</h2>
+              <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">Acesso Indisponível</h2>
               <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">{error}</p>
             </div>
             <Button onClick={() => window.location.reload()} className="w-full bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-zinc-200 text-white dark:text-zinc-900 h-12 rounded-xl font-bold transition-all active:scale-95">
@@ -503,10 +503,10 @@ export default function VendorPortal() {
 
             <div className="space-y-2">
               <h2 className="text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
-                Confirme as InformaÃ§Ãµes
+                Confirme as Informações
               </h2>
               <p className="text-zinc-500 dark:text-zinc-400 font-medium text-sm">
-                Antes de enviar sua cotaÃ§Ã£o, verifique os dados de faturamento para os quais os pedidos serÃ£o emitidos.
+                Antes de enviar sua cotação, verifique os dados de faturamento para os quais os pedidos serão emitidos.
               </p>
             </div>
 
@@ -514,7 +514,7 @@ export default function VendorPortal() {
               <div className="absolute top-0 left-0 w-1 h-full bg-blue-400" />
               <div className="space-y-1">
                 <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Dados para Faturamento</p>
-                <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">Novo Boi JoÃ£o Dias MercadÃ£o LTDA</p>
+                <p className="text-base font-bold text-zinc-800 dark:text-zinc-200">Novo Boi João Dias Mercadão LTDA</p>
                 <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">CNPJ: 63.195.471/0001-12</p>
               </div>
 
@@ -522,7 +522,7 @@ export default function VendorPortal() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Data da CotaÃ§Ã£o</p>
+                  <p className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">Data da Cotação</p>
                   <p className="text-sm font-bold text-zinc-700 dark:text-zinc-300">
                     {data?.created_at ? new Date(data.created_at).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR')}
                   </p>
@@ -580,7 +580,7 @@ export default function VendorPortal() {
             <div className="relative mx-auto w-56 sm:w-64 drop-shadow-2xl">
                <img 
                  src="/images/logo-joao-dias-transparent.png" 
-                 alt="Logo Novo Boi JoÃ£o Dias" 
+                 alt="Logo Novo Boi João Dias" 
                  className="w-full h-auto object-contain mix-blend-multiply" 
                />
             </div>
@@ -588,16 +588,16 @@ export default function VendorPortal() {
             <div className="space-y-8 w-full">
               <div className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-700 rounded-full font-bold text-[15px] border border-emerald-100 shadow-sm">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                <span>CotaÃ§Ã£o Enviada com Sucesso</span>
+                <span>Cotação Enviada com Sucesso</span>
               </div>
 
               <div className="space-y-6 px-4">
                 <p className="text-zinc-700 font-medium text-lg leading-relaxed">
-                  O <strong className="text-zinc-900 font-black text-xl block mt-1">MercadÃ£o Novo Boi JoÃ£o Dias</strong> agradece a sua participaÃ§Ã£o. 
+                  O <strong className="text-zinc-900 font-black text-xl block mt-1">Mercadão Novo Boi João Dias</strong> agradece a sua participação. 
                 </p>
                 <div className="w-12 h-1.5 bg-zinc-100 mx-auto rounded-full" />
                 <p className="text-zinc-500 font-medium text-sm sm:text-base leading-relaxed max-w-sm mx-auto">
-                  Sua proposta foi registrada de forma segura no nosso sistema e a equipe de compras jÃ¡ foi notificada.
+                  Sua proposta foi registrada de forma segura no nosso sistema e a equipe de compras já foi notificada.
                 </p>
               </div>
             </div>
@@ -640,9 +640,9 @@ export default function VendorPortal() {
                </div>
                <div>
                  <h1 className="text-base font-extrabold leading-none tracking-tight text-zinc-900 dark:text-zinc-50">
-                   OlÃ¡, {data.supplier_name}!
+                   Olá, {data.supplier_name}!
                  </h1>
-                 <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 block">Portal de CotaÃ§Ãµes</span>
+                 <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest mt-0.5 block">Portal de Cotações</span>
                </div>
             </div>
             <div className="hidden sm:block">
@@ -661,7 +661,7 @@ export default function VendorPortal() {
               Resumo dos Itens
             </h2>
             <p className="text-zinc-500 dark:text-zinc-400 font-semibold text-sm">
-              Insira seus melhores preÃ§os abaixo.
+              Insira seus melhores preços abaixo.
             </p>
           </div>
 
@@ -705,7 +705,7 @@ export default function VendorPortal() {
                       <input
                         type="text"
                         inputMode="decimal"
-                        placeholder={isPkg ? "PreÃ§o do Pacote/Fardo" : (item.unidade?.toUpperCase().startsWith('CX') ? "PreÃ§o do KG ou UN" : "PreÃ§o UnitÃ¡rio")}
+                        placeholder={isPkg ? "Preço do Pacote/Fardo" : (item.unidade?.toUpperCase().startsWith('CX') ? "Preço do KG ou UN" : "Preço Unitário")}
                         className="w-full pl-9 h-10 text-sm font-bold bg-zinc-100/50 dark:bg-zinc-700/50 border-transparent rounded-lg focus:bg-white dark:focus:bg-zinc-800 focus:ring-2 focus:ring-blue-600/5 focus:border-blue-600 dark:focus:border-blue-500 transition-all outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-inner"
                         value={item.valor_oferecido || ""}
                         onChange={(e) => handlePriceChange(item.product_id, item._token, e.target.value)}
@@ -745,10 +745,10 @@ export default function VendorPortal() {
                   />
                 </div>
 
-                {/* ==================== SEÃ‡ÃƒO EMBALAGEM: Detalhes + Smart Memory ==================== */}
+                {/* ==================== SEÇÃƒO EMBALAGEM: Detalhes + Smart Memory ==================== */}
                 {isPkg && (
                   <div className="mt-3 border-t border-border dark:border-white/5 pt-3">
-                    {/* BotÃ£o de expandir/colapsar */}
+                    {/* Botão de expandir/colapsar */}
                     <button
                       type="button"
                       onClick={() => toggleSpecExpanded(item.product_id, item._token)}
@@ -767,14 +767,14 @@ export default function VendorPortal() {
 
                     {isExpanded && (
                       <div className="mt-2 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                        {/* Banner de memÃ³ria: dados da Ãºltima cotaÃ§Ã£o */}
+                        {/* Banner de memória: dados da última cotação */}
                         {hasHistory && specConfirmed === undefined && (
                           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/40 rounded-xl p-3 space-y-2">
                             <div className="flex items-start gap-2">
                               <Info className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                               <div>
                                 <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300">
-                                  Dados da Ãºltima cotaÃ§Ã£o preenchidos automaticamente
+                                  Dados da última cotação preenchidos automaticamente
                                 </p>
                                 <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
                                   Peso: {item.last_spec?.quantidade_venda || 'â€”'}{item.last_spec?.unidade_venda || 'kg'} Â· 
@@ -801,7 +801,7 @@ export default function VendorPortal() {
                           </div>
                         )}
 
-                        {/* Chips de variantes histÃ³ricas (quando clicou "Mudou") */}
+                        {/* Chips de variantes históricas (quando clicou "Mudou") */}
                         {specConfirmed === false && variants.length > 0 && (
                           <div className="space-y-1.5">
                             <p className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-1">Valores anteriores:</p>
@@ -820,7 +820,7 @@ export default function VendorPortal() {
                           </div>
                         )}
 
-                        {/* Campos editÃ¡veis (sempre visÃ­veis quando expandido, editÃ¡veis quando nÃ£o confirmado) */}
+                        {/* Campos editáveis (sempre visíveis quando expandido, editáveis quando não confirmado) */}
                         {(specConfirmed !== true || !hasHistory) && (
                           <div className="grid grid-cols-2 gap-2.5">
                             {/* Peso do Pacote */}
@@ -900,7 +900,7 @@ export default function VendorPortal() {
                           </div>
                         )}
 
-                        {/* CÃ¡lculo de custo por unidade em tempo real */}
+                        {/* Cálculo de custo por unidade em tempo real */}
                         {costPerUnit !== null && (
                           <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 dark:bg-zinc-950 rounded-xl">
                             <div className="flex flex-col">
@@ -953,7 +953,7 @@ export default function VendorPortal() {
               className="flex-1 sm:flex-none h-10 px-6 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              {saving ? "Enviando..." : "Enviar CotaÃ§Ã£o"}
+              {saving ? "Enviando..." : "Enviar Cotação"}
             </Button>
           </div>
         </div>

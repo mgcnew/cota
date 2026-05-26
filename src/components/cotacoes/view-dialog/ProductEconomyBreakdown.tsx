@@ -237,7 +237,7 @@ export function ProductEconomyBreakdown({
       <div className="flex flex-col items-center justify-center h-full min-h-[300px] space-y-4">
         <Package className="h-12 w-12 text-gray-300 dark:text-gray-600" />
         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-          Nenhum produto com mÃºltiplos fornecedores
+          Nenhum produto com múltiplos fornecedores
         </p>
       </div>
     );
@@ -267,7 +267,7 @@ export function ProductEconomyBreakdown({
           <Badge className="bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-700">
             R$ {unitEconomy.toFixed(2)} /{baseUnit} na cx
           </Badge>
-          <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Qtd/cx nÃ£o informada" />
+          <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" title="Qtd/cx não informada" />
         </div>
       );
     }
@@ -316,7 +316,7 @@ export function ProductEconomyBreakdown({
       <div className="mt-2 p-2.5 bg-amber-50/50 dark:bg-amber-900/10 rounded-lg border border-amber-200/50 dark:border-amber-800/30 flex items-center gap-2">
         <AlertCircle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
         <p className="text-[10px] font-bold text-amber-700 dark:text-amber-400 leading-tight">
-          Economia de R$ {unitEconomy.toFixed(2)} /{baseUnit} na cx â€” <span className="italic font-medium">Qtd por caixa nÃ£o informada</span>
+          Economia de R$ {unitEconomy.toFixed(2)} /{baseUnit} na cx â€” <span className="italic font-medium">Qtd por caixa não informada</span>
         </p>
       </div>
     );
@@ -341,7 +341,7 @@ export function ProductEconomyBreakdown({
               {hasPartialEconomies && (
                 <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
                   <AlertCircle className="h-3 w-3" />
-                  Alguns itens estÃ£o com economia parcial (qtd/cx nÃ£o informada)
+                  Alguns itens estão com economia parcial (qtd/cx não informada)
                 </p>
               )}
             </div>
@@ -416,7 +416,7 @@ export function ProductEconomyBreakdown({
                     {/* Best Price */}
                     <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800/50">
                       <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                        Melhor PreÃ§o
+                        Melhor Preço
                       </p>
                       <p className="text-sm font-bold text-green-600 dark:text-green-400">
                         R$ {item.bestPrice.valorUnitario.toFixed(2)}/un
@@ -432,7 +432,7 @@ export function ProductEconomyBreakdown({
                     {/* Worst Price */}
                     <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 border border-red-200 dark:border-red-800/50">
                       <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                        Pior PreÃ§o
+                        Pior Preço
                       </p>
                       <p className="text-sm font-bold text-red-600 dark:text-red-400">
                         R$ {item.worstPrice.valorUnitario.toFixed(2)}/un
@@ -452,7 +452,7 @@ export function ProductEconomyBreakdown({
               ) : (
                 <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3 border border-border dark:border-white/5">
                   <p className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
-                    PreÃ§o Ãšnico
+                    Preço Ãšnico
                   </p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">
                     R$ {item.bestPrice.valorUnitario.toFixed(2)}/un

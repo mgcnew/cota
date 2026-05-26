@@ -68,8 +68,8 @@ export const StockCountListDesktop = memo(({ counts, onView, onFinalize, onDelet
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Setor / Tipo</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Respondente</TableHead>
             <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Status</TableHead>
-            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">ObservaÃ§Ãµes</TableHead>
-            <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">AÃ§Ãµes</TableHead>
+            <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Observações</TableHead>
+            <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground h-12">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

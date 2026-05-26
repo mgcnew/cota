@@ -105,10 +105,10 @@ export function ManagePackagingQuoteDialog({
     }, 300);
   };
 
-  // Helper para obter a data da Ãºltima compra
+  // Helper para obter a data da última compra
   const getLastPurchaseInfo = useCallback((packagingId: string) => {
-    // Encontra o pedido mais recente que contÃ©m este item
-    // Os pedidos jÃ¡ vÃªm ordenados por data de criaÃ§Ã£o decrescente do hook
+    // Encontra o pedido mais recente que contém este item
+    // Os pedidos já vêm ordenados por data de criação decrescente do hook
     const lastOrder = orders.find(order => 
       order.status !== 'cancelado' && 
       order.itens.some(item => item.packagingId === packagingId)
@@ -116,11 +116,11 @@ export function ManagePackagingQuoteDialog({
 
     if (!lastOrder) return null;
     
-    // Encontra o item especÃ­fico dentro do pedido para pegar o preÃ§o se necessÃ¡rio
+    // Encontra o item específico dentro do pedido para pegar o preço se necessário
     const item = lastOrder.itens.find(i => i.packagingId === packagingId);
     
     return {
-      date: lastOrder.orderDate, // JÃ¡ estÃ¡ formatada como DD/MM/YYYY
+      date: lastOrder.orderDate, // Já está formatada como DD/MM/YYYY
       price: item?.valorUnitario || 0,
       supplierName: lastOrder.supplierName
     };
@@ -218,8 +218,8 @@ export function ManagePackagingQuoteDialog({
   const handleCopyBestPricesSummary = useCallback(() => {
     if (!quote || !bestPricesData.length) return;
     
-    let text = `ðŸ† *RESUMO DE MELHORES PREÃ‡OS - EMBALAGENS*\n`;
-    text += `*CotaÃ§Ã£o:* ${quote.dataInicio} - ${quote.dataFim}\n\n`;
+    let text = `ðŸ† *RESUMO DE MELHORES PREÇOS - EMBALAGENS*\n`;
+    text += `*Cotação:* ${quote.dataInicio} - ${quote.dataFim}\n\n`;
     
     bestPricesData.forEach((item, idx) => {
       text += `${idx + 1}. *${item.packagingName}*\n`;
@@ -233,7 +233,7 @@ export function ManagePackagingQuoteDialog({
     });
     
     navigator.clipboard.writeText(text);
-    toast({ title: "Copiado!", description: "Resumo de melhores preÃ§os copiado." });
+    toast({ title: "Copiado!", description: "Resumo de melhores preços copiado." });
   }, [quote, bestPricesData, toast]);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -246,7 +246,7 @@ export function ManagePackagingQuoteDialog({
       
       const vitorias = group.itens.filter((i: any) => i.isMelhorPreco);
       if (vitorias.length > 0) {
-        text += `âœ… *ITENS COM MELHOR PREÃ‡O (${vitorias.length}):*\n`;
+        text += `âœ… *ITENS COM MELHOR PREÇO (${vitorias.length}):*\n`;
         vitorias.forEach((item: any) => {
           text += `â€¢ ${item.packagingName}: ${formatCurrency(item.custoPorUnidade)}/un\n`;
           text += `  (Total: ${formatCurrency(item.valorTotal)} - ${item.quantidadeVenda}${item.unidadeVenda})\n`;
@@ -264,7 +264,7 @@ export function ManagePackagingQuoteDialog({
 
       navigator.clipboard.writeText(text);
       setCopiedId(group.supplierId);
-      toast({ title: "Copiado!", description: "Resumo copiado para a Ã¡rea de transferÃªncia." });
+      toast({ title: "Copiado!", description: "Resumo copiado para a área de transferência." });
       setTimeout(() => setCopiedId(null), 2000);
     } catch (err) {
       toast({ title: "Erro ao copiar", variant: "destructive" });
@@ -301,10 +301,10 @@ export function ManagePackagingQuoteDialog({
 <body>
   <div class="container">
     <div class="header">
-      <h1>Resumo de CotaÃ§Ã£o</h1>
+      <h1>Resumo de Cotação</h1>
       <p><strong>Fornecedor:</strong> ${group.supplierName}</p>
       <p><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
-      <p><strong>CotaÃ§Ã£o:</strong> ${quote.dataInicio} - ${quote.dataFim}</p>
+      <p><strong>Cotação:</strong> ${quote.dataInicio} - ${quote.dataFim}</p>
     </div>
     
     <table>
@@ -312,7 +312,7 @@ export function ManagePackagingQuoteDialog({
         <tr>
           <th>Item</th>
           <th>Formato</th>
-          <th>PreÃ§o Unit.</th>
+          <th>Preço Unit.</th>
           <th>Total</th>
         </tr>
       </thead>
@@ -330,8 +330,8 @@ export function ManagePackagingQuoteDialog({
     
     <div class="total-box">
       <div>
-        <p class="total-label">Total Vencido em VitÃ³rias</p>
-        <p style="font-size: 14px; opacity: 0.8;">${group.vitorias} itens com melhor preÃ§o</p>
+        <p class="total-label">Total Vencido em Vitórias</p>
+        <p style="font-size: 14px; opacity: 0.8;">${group.vitorias} itens com melhor preço</p>
       </div>
       <div style="text-align: right; margin-left: auto;">
         <p class="total-value">${formatCurrency(group.valorTotalGanhos)}</p>
@@ -339,7 +339,7 @@ export function ManagePackagingQuoteDialog({
     </div>
     
     <div class="footer">
-      <p>Gerado automaticamente pelo Sistema CotaJÃ¡ â€¢ Embalagens</p>
+      <p>Gerado automaticamente pelo Sistema CotaJá â€¢ Embalagens</p>
     </div>
   </div>
 </body>
@@ -380,7 +380,7 @@ export function ManagePackagingQuoteDialog({
     }).filter(s => s.itens.length > 0).sort((a, b) => b.vitorias - a.vitorias);
   }, [quote, comparison]);
 
-  // Embalagens e fornecedores nÃ£o presentes na cotaÃ§Ã£o
+  // Embalagens e fornecedores não presentes na cotação
   const packagingNotInQuote = useMemo(() => {
     if (!quote) return availablePackagingItems;
     const idsInQuote = quote.itens.map(i => i.packagingId);
@@ -463,7 +463,7 @@ export function ManagePackagingQuoteDialog({
     }
   }, [editingItem, formData.valorTotal, handleSaveItem]);
 
-  // FunÃ§Ã£o para gerar PDF comparativo
+  // Função para gerar PDF comparativo
   const handleGeneratePDF = useCallback(() => {
     if (!quote || !comparison.length) return;
 
@@ -485,32 +485,32 @@ export function ManagePackagingQuoteDialog({
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text("COMPARATIVO DE COTAÃ‡ÃƒO", pageWidth / 2, 15, { align: "center" });
+    doc.text("COMPARATIVO DE COTAÇÃƒO", pageWidth / 2, 15, { align: "center" });
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.text("Embalagens", pageWidth / 2, 23, { align: "center" });
     doc.setFontSize(9);
-    doc.text(`PerÃ­odo: ${quote.dataInicio} a ${quote.dataFim}`, pageWidth / 2, 30, { align: "center" });
+    doc.text(`Período: ${quote.dataInicio} a ${quote.dataFim}`, pageWidth / 2, 30, { align: "center" });
 
     y = 45;
 
-    // Info da cotaÃ§Ã£o
+    // Info da cotação
     doc.setTextColor(accent[0], accent[1], accent[2]);
     doc.setFontSize(9);
-    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} Ã s ${new Date().toLocaleTimeString('pt-BR')}`, margin, y);
+    doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, margin, y);
     doc.text(`Total: ${quote.itens.length} embalagens | ${quote.fornecedores.length} fornecedores`, pageWidth - margin, y, { align: "right" });
     
     y += 15;
 
     // Para cada embalagem
     comparison.forEach((comp, idx) => {
-      // Verificar se precisa de nova pÃ¡gina
+      // Verificar se precisa de nova página
       if (y > 250) {
         doc.addPage();
         y = 20;
       }
 
-      // TÃ­tulo da embalagem com fundo
+      // Título da embalagem com fundo
       doc.setFillColor(249, 250, 251); // gray-50
       doc.rect(margin, y - 5, pageWidth - margin * 2, 10, 'F');
       
@@ -530,7 +530,7 @@ export function ManagePackagingQuoteDialog({
         return;
       }
 
-      // CabeÃ§alho da tabela
+      // Cabeçalho da tabela
       doc.setFillColor(243, 244, 246); // gray-100
       doc.rect(margin, y - 4, pageWidth - margin * 2, 8, 'F');
       doc.setTextColor(gray[0], gray[1], gray[2]);
@@ -574,7 +574,7 @@ export function ManagePackagingQuoteDialog({
         // Status
         if (isWinner) {
           doc.setTextColor(0, 0, 0); // Black
-          doc.text("ðŸ† MELHOR PREÃ‡O", margin + 140, y);
+          doc.text("ðŸ† MELHOR PREÇO", margin + 140, y);
         } else {
           doc.setTextColor(107, 114, 128); // gray-500
           doc.text(`+${f.diferencaPercentual.toFixed(1)}%`, margin + 140, y);
@@ -605,7 +605,7 @@ export function ManagePackagingQuoteDialog({
     doc.setFontSize(9);
     doc.setFont("helvetica", "normal");
     
-    // Contar vitÃ³rias por fornecedor
+    // Contar vitórias por fornecedor
     const winsPerSupplier: Record<string, { name: string; wins: number }> = {};
     comparison.forEach(comp => {
       const winner = comp.fornecedores.find(f => f.isMelhorPreco);
@@ -621,14 +621,14 @@ export function ManagePackagingQuoteDialog({
     const winnersText = sortedWinners.map(w => `${w.name}: ${w.wins} item(s)`).join(" | ");
     doc.text(winnersText || "Nenhum vencedor definido", margin + 5, y + 5);
     
-    // RodapÃ©
+    // Rodapé
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(gray[0], gray[1], gray[2]);
-      doc.text(`PÃ¡gina ${i} de ${pageCount}`, pageWidth / 2, 290, { align: "center" });
-      doc.text("Sistema CotaJÃ¡ - Comparativo de Embalagens", margin, 290);
+      doc.text(`Página ${i} de ${pageCount}`, pageWidth / 2, 290, { align: "center" });
+      doc.text("Sistema CotaJá - Comparativo de Embalagens", margin, 290);
     }
 
     // Salvar
@@ -655,7 +655,7 @@ export function ManagePackagingQuoteDialog({
     );
   }
 
-  // FunÃ§Ã£o para gerar HTML comparativo
+  // Função para gerar HTML comparativo
   const generateHtmlComparative = useCallback(() => {
     if (!quote || !comparison.length) return "";
 
@@ -678,7 +678,7 @@ export function ManagePackagingQuoteDialog({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comparativo de CotaÃ§Ã£o - Embalagens</title>
+  <title>Comparativo de Cotação - Embalagens</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f9fafb; color: #1f2937; line-height: 1.6; }
@@ -723,13 +723,13 @@ export function ManagePackagingQuoteDialog({
 <body>
   <div class="container">
     <div class="header">
-      <h1>ðŸ† COMPARATIVO DE COTAÃ‡ÃƒO</h1>
+      <h1>ðŸ† COMPARATIVO DE COTAÇÃƒO</h1>
       <p>Embalagens</p>
     </div>
 
     <div class="info-grid">
       <div class="info-card">
-        <strong>PerÃ­odo</strong>
+        <strong>Período</strong>
         <span>${quote.dataInicio} a ${quote.dataFim}</span>
       </div>
       <div class="info-card">
@@ -742,7 +742,7 @@ export function ManagePackagingQuoteDialog({
       </div>
       <div class="info-card">
         <strong>Gerado em</strong>
-        <span>${new Date().toLocaleDateString('pt-BR')} Ã s ${new Date().toLocaleTimeString('pt-BR')}</span>
+        <span>${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</span>
       </div>
     </div>
 
@@ -754,7 +754,7 @@ export function ManagePackagingQuoteDialog({
           <div class="winner-card">
             <div class="rank">#${idx + 1} - ${w.wins} ${w.wins === 1 ? 'item' : 'itens'}</div>
             <div class="name">${w.name}</div>
-            <div class="wins">Melhor preÃ§o em ${w.wins} ${w.wins === 1 ? 'embalagem' : 'embalagens'}</div>
+            <div class="wins">Melhor preço em ${w.wins} ${w.wins === 1 ? 'embalagem' : 'embalagens'}</div>
           </div>
         `).join('')}
       </div>
@@ -789,7 +789,7 @@ export function ManagePackagingQuoteDialog({
                     <td><strong>R$ ${f.custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
                     <td>
                       ${f.isMelhorPreco 
-                        ? '<span class="badge badge-winner">ðŸ† MELHOR PREÃ‡O</span>' 
+                        ? '<span class="badge badge-winner">ðŸ† MELHOR PREÇO</span>' 
                         : '<span class="badge badge-difference">+' + f.diferencaPercentual.toFixed(1) + '%</span>'
                       }
                     </td>
@@ -803,8 +803,8 @@ export function ManagePackagingQuoteDialog({
     </div>
 
     <div class="footer">
-      <p>Sistema CotaJÃ¡ - Comparativo de Embalagens</p>
-      <p>Este documento foi gerado automaticamente e contÃ©m informaÃ§Ãµes confidenciais.</p>
+      <p>Sistema CotaJá - Comparativo de Embalagens</p>
+      <p>Este documento foi gerado automaticamente e contém informações confidenciais.</p>
     </div>
   </div>
 </body>
@@ -814,7 +814,7 @@ export function ManagePackagingQuoteDialog({
     return html;
   }, [quote, comparison]);
 
-  // FunÃ§Ã£o para baixar HTML
+  // Função para baixar HTML
   const handleDownloadHtml = useCallback(() => {
     const html = generateHtmlComparative();
     if (!html || !quote) return;
@@ -870,7 +870,7 @@ export function ManagePackagingQuoteDialog({
               </div>
               <div className="min-w-0 flex flex-col justify-center">
                 <DialogTitleComponent className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight truncate">
-                  Gerenciar CotaÃ§Ã£o
+                  Gerenciar Cotação
                 </DialogTitleComponent>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
                   <Badge 
@@ -901,7 +901,7 @@ export function ManagePackagingQuoteDialog({
                 <SelectTrigger className="w-28 h-9 text-xs font-bold bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
                 <SelectContent className="bg-background border-border">
                   <SelectItem value="ativa" className="text-xs font-bold">Ativa</SelectItem>
-                  <SelectItem value="concluida" className="text-xs font-bold">ConcluÃ­da</SelectItem>
+                  <SelectItem value="concluida" className="text-xs font-bold">Concluída</SelectItem>
                   <SelectItem value="cancelada" className="text-xs font-bold">Cancelada</SelectItem>
                 </SelectContent>
               </Select>
@@ -911,7 +911,7 @@ export function ManagePackagingQuoteDialog({
               </Button>
             </div>
           </div>
-          <DialogDescriptionComponent className="sr-only">Gerenciar cotaÃ§Ã£o de embalagens</DialogDescriptionComponent>
+          <DialogDescriptionComponent className="sr-only">Gerenciar cotação de embalagens</DialogDescriptionComponent>
         </div>
 
         {/* Tabs */}
@@ -966,11 +966,11 @@ export function ManagePackagingQuoteDialog({
             />
           </TabsContent>
 
-          {/* Tab Editar CotaÃ§Ã£o */}
+          {/* Tab Editar Cotação */}
           <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-background">
             <ScrollArea className="h-full">
               <div className="p-4 space-y-4">
-                {/* SeÃ§Ã£o Embalagens */}
+                {/* Seção Embalagens */}
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
                   <div className="px-3 py-2 border-b bg-muted/50">
                     <h3 className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5">
@@ -998,7 +998,7 @@ export function ManagePackagingQuoteDialog({
                   )}
                   <div className="p-4 bg-background">
                     {quote.itens.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Package className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhuma embalagem na cotaÃ§Ã£o</p></div>
+                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Package className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhuma embalagem na cotação</p></div>
                     ) : (
                       <div className="flex flex-col gap-2.5">
                         {quote.itens.map((item, index) => (
@@ -1019,7 +1019,7 @@ export function ManagePackagingQuoteDialog({
                   </div>
                 </Card>
 
-                {/* SeÃ§Ã£o Fornecedores */}
+                {/* Seção Fornecedores */}
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
                   <div className="px-3 py-2 border-b bg-muted/50">
                     <h3 className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5">
@@ -1047,7 +1047,7 @@ export function ManagePackagingQuoteDialog({
                   )}
                   <div className="p-4 bg-background">
                     {quote.fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhum fornecedor na cotaÃ§Ã£o</p></div>
+                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {quote.fornecedores.map((fornecedor) => (
@@ -1185,14 +1185,14 @@ export function ManagePackagingQuoteDialog({
                                             <p className="font-bold mb-1">Ãšltima Compra:</p>
                                             <p>Data: {lastPurchase.date}</p>
                                             <p>Fornecedor: {lastPurchase.supplierName}</p>
-                                            <p>PreÃ§o: {formatCurrency(lastPurchase.price)}</p>
+                                            <p>Preço: {formatCurrency(lastPurchase.price)}</p>
                                           </TooltipContent>
                                         </Tooltip>
                                       </TooltipProvider>
                                     );
                                   })()}
                                 </div>
-                                {isBestPrice && <span className="text-[10px] font-bold text-foreground uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor PreÃ§o</span>}
+                                {isBestPrice && <span className="text-[10px] font-bold text-foreground uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor Preço</span>}
                               </div>
                             </div>
                             {!isEditing && <Button size="sm" variant="outline" onClick={() => handleEditItem(selectedSupplier, item.packagingId)} 
@@ -1202,10 +1202,10 @@ export function ManagePackagingQuoteDialog({
                             <div className="space-y-4 bg-muted/60 -m-1 p-4 rounded-lg border border-border dark:border-white/5 shadow-inner">
                               {/* Grid Principal de Inputs */}
                               <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-5">
-                                {/* PreÃ§o */}
+                                {/* Preço */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸ’° PreÃ§o (R$)" : "ðŸ’° PreÃ§o Pacote/Fardo (R$) *"}
+                                    {isMobile ? "ðŸ’° Preço (R$)" : "ðŸ’° Preço Pacote/Fardo (R$) *"}
                                   </Label>
                                   <Input 
                                     ref={valorTotalInputRef} 
@@ -1257,10 +1257,10 @@ export function ManagePackagingQuoteDialog({
                                   />
                                 </div>
 
-                                {/* PeÃ§as no Pack */}
+                                {/* Peças no Pack */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸŽ¯ PeÃ§as/Pack" : "ðŸŽ¯ Total PeÃ§as no Pack *"}
+                                    {isMobile ? "ðŸŽ¯ Peças/Pack" : "ðŸŽ¯ Total Peças no Pack *"}
                                   </Label>
                                   <Input 
                                     type="number" 
@@ -1303,7 +1303,7 @@ export function ManagePackagingQuoteDialog({
                                   />
                                 </div>
                               </div>
-                              {/* CÃ¡lculo transparente */}
+                              {/* Cálculo transparente */}
                               {custoPorUnidadePreview && (
                                 <div className="bg-background/80 p-3.5 rounded-xl border border-border dark:border-white/5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                                   <div className="flex flex-col text-center sm:text-left">
@@ -1331,9 +1331,9 @@ export function ManagePackagingQuoteDialog({
                             </div>
                           ) : supplierItem?.valorTotal ? (
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border dark:border-white/5">
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸ’° PreÃ§o Pacote</span><p className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸ’° Preço Pacote</span><p className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</p></div>
                               <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸ“¦ Formato</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸŽ¯ PeÃ§as no Pacote</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeUnidadesEstimada} un</p></div>
+                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸŽ¯ Peças no Pacote</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeUnidadesEstimada} un</p></div>
                               <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Custo/un</span><p className={cn("font-black text-base", isBestPrice ? "text-emerald-600" : "text-foreground")}>{formatCurrency(supplierItem.custoPorUnidade)}</p></div>
                             </div>
                           ) : <div className="p-4 rounded-lg border-2 border-dashed border-border bg-muted/50 text-center"><p className="text-xs text-muted-foreground font-medium">Nenhum valor informado</p></div>}

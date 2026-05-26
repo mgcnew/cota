@@ -90,7 +90,7 @@ export function CommunicationHubDrawer({
             Central de WhatsApp
           </SheetTitle>
           <SheetDescription>
-            HistÃ³rico recente de interaÃ§Ãµes e respostas dos fornecedores.
+            Histórico recente de interações e respostas dos fornecedores.
           </SheetDescription>
         </SheetHeader>
 
@@ -102,7 +102,7 @@ export function CommunicationHubDrawer({
               </div>
             ) : notifications.length === 0 ? (
               <div className="text-center py-10 text-muted-foreground">
-                Nenhuma interaÃ§Ã£o registrada ainda.
+                Nenhuma interação registrada ainda.
               </div>
             ) : (
               notifications.map((notif) => (
@@ -141,7 +141,7 @@ export function CommunicationHubDrawer({
                     {notif.supplier?.name || "Fornecedor Desconhecido"}
                   </h4>
                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                    Respondeu Ã  sua solicitaÃ§Ã£o de cotaÃ§Ã£o via WhatsApp.
+                    Respondeu à sua solicitação de cotação via WhatsApp.
                   </p>
 
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-border dark:border-white/5/50">
@@ -154,7 +154,7 @@ export function CommunicationHubDrawer({
                         onSelectNotification?.(notif.quote_id);
                       }}
                     >
-                      Ver CotaÃ§Ã£o
+                      Ver Cotação
                       <ArrowRight className="h-3 w-3" />
                     </Button>
 

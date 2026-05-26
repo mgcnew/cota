@@ -32,7 +32,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
 
   const bestPricesBySupplier = useMemo(() => {
     const grouped = bestPricesData.reduce((acc, curr) => {
-      // Agrupar apenas itens que tÃªm preÃ§o
+      // Agrupar apenas itens que têm preço
       if (curr.bestPrice > 0 && curr.bestSupplierId) {
         if (!acc[curr.bestSupplierId]) {
           acc[curr.bestSupplierId] = {
@@ -132,7 +132,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                             </Badge>
                           )}
                         </>
-                      ) : <Badge variant="outline" className="text-muted-foreground bg-muted text-[9px] font-bold border-border">Sem preÃ§o</Badge>}
+                      ) : <Badge variant="outline" className="text-muted-foreground bg-muted text-[9px] font-bold border-border">Sem preço</Badge>}
                     </div>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
           <div className="space-y-3">
             {bestPricesBySupplier.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground text-xs">
-                Nenhum vencedor atribuÃ­do ainda
+                Nenhum vencedor atribuído ainda
               </div>
             ) : (
               bestPricesBySupplier.map((group) => (
@@ -202,7 +202,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                                         </div>
                                       ))
                                   ) : (
-                                    <span className="text-xs text-muted-foreground italic">Nenhum outro preÃ§o registrado.</span>
+                                    <span className="text-xs text-muted-foreground italic">Nenhum outro preço registrado.</span>
                                   )}
                                 </div>
                               </div>
