@@ -403,7 +403,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     .winners-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .winner-card { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
     .winner-card.first-place { background: linear-gradient(to right, #ecfdf5, #ffffff); border-color: #6ee7b7; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
-    .winner-card.first-place::before { content: 'ðŸ¥‡ TOP 1'; position: absolute; top: 12px; right: 12px; background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; }
+    .winner-card.first-place::before { content: '🥇 TOP 1'; position: absolute; top: 12px; right: 12px; background: #10b981; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 900; }
     .winner-card .rank { background: #1e293b; color: white; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; display: inline-block; margin-bottom: 12px; width: max-content; }
     .winner-card.first-place .rank { background: #059669; }
     .winner-card .name { font-weight: 900; color: #0f172a; margin-bottom: 6px; font-size: 18px; letter-spacing: -0.5px; }
@@ -452,7 +452,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   <div class="container">
     <div class="header">
       <div class="header-content">
-        <h1>ðŸ“Š COMPARATIVO DE COTAÇÃƒO</h1>
+        <h1>📊 COMPARATIVO DE COTAÇÃƒO</h1>
         <p>Referência #${quote.id.substring(0, 8).toUpperCase()}</p>
       </div>
       <div class="header-badge">
@@ -482,7 +482,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
     ${winsPerSupplier.length > 0 ? `
     <div class="winners-section">
-      <h2>ðŸŽ¯ Ranking de Vencedores</h2>
+      <h2>🎯 Ranking de Vencedores</h2>
       <div class="winners-list">
         ${winsPerSupplier.map((w: any, idx: number) => `
           <div class="winner-card ${idx === 0 ? 'first-place' : ''}">
@@ -547,7 +547,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                     </td>
                     <td>
                       ${f.isMelhorPreco
-              ? '<span class="badge badge-winner">ðŸ† Melhor Opção</span>'
+              ? '<span class="badge badge-winner">🏆 Melhor Opção</span>'
               : `<span class="badge ${diferencaClass}">+${diferenca.toFixed(1)}% mais caro</span>`
             }
                     </td>

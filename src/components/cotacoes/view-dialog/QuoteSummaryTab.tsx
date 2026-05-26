@@ -256,7 +256,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
             </span>
           </div>
         ) : (
-          <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">â€”</span>
+          <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
         )}
       </div>
     </div>

@@ -128,7 +128,7 @@ export function QuoteValuesTab({
     const fetchOtherQuotes = async () => {
       if (!selectedSupplier || !quoteId) return;
 
-      console.log("ðŸ” [QuoteValues] Scanning other quotes for supplier:", selectedSupplier);
+      console.log("🔍 [QuoteValues] Scanning other quotes for supplier:", selectedSupplier);
 
       try {
         const { data, error } = await supabase
@@ -147,11 +147,11 @@ export function QuoteValuesTab({
           .in('quotes.status', ['ativa', 'ativo', 'aberto', 'pendente']);
 
         if (error) {
-          console.error("âŒ [QuoteValues] Error fetching other quotes:", error);
+          console.error("❌ [QuoteValues] Error fetching other quotes:", error);
           return;
         }
 
-        console.log("ðŸ“Š [QuoteValues] Other quotes found for supplier:", data);
+        console.log("📊 [QuoteValues] Other quotes found for supplier:", data);
 
         const formatted = (data || []).map((q: any) => {
           const quoteInfo = Array.isArray(q.quotes) ? q.quotes[0] : q.quotes;
@@ -162,10 +162,10 @@ export function QuoteValuesTab({
           };
         }).filter(q => q.token);
         
-        console.log("âœ… [QuoteValues] Formatted other quotes with tokens:", formatted);
+        console.log("✅ [QuoteValues] Formatted other quotes with tokens:", formatted);
         setOtherOpenQuotes(formatted);
       } catch (err) {
-        console.error("âŒ [QuoteValues] Unexpected error scanning quotes:", err);
+        console.error("❌ [QuoteValues] Unexpected error scanning quotes:", err);
       }
     };
 
@@ -364,9 +364,9 @@ export function QuoteValuesTab({
           }
           
           if (useGroupedLink && otherOpenQuotes.length > 0) {
-            msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
+            msg += `🛡️ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
           } else {
-            msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
+            msg += `🛡️ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
           }
         }
         
@@ -377,7 +377,7 @@ export function QuoteValuesTab({
         console.log('[WhatsApp DEBUG] Resultado:', JSON.stringify(result));
         
         if (result.success) {
-          toast({ title: "âœ… Cotação enviada com sucesso!", variant: "default" });
+          toast({ title: "✅ Cotação enviada com sucesso!", variant: "default" });
           setSentSuppliers(prev => ({ ...prev, [supplierId]: true }));
         } else {
           throw new Error(result.error || "Erro desconhecido");
@@ -391,7 +391,7 @@ export function QuoteValuesTab({
         });
       }
     } else {
-      console.log('[WhatsApp DEBUG] âŒ Caiu no modo MANUAL (wa.me link)');
+      console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
       const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
       let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
 
@@ -410,9 +410,9 @@ export function QuoteValuesTab({
         }
         
         if (useGroupedLink && otherOpenQuotes.length > 0) {
-          msg += `ðŸ›¡ï¸ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
+          msg += `🛡️ *Acesso Unificado:* Link único reunindo tudo o que precisamos cotar agora.`;
         } else {
-          msg += `ðŸ›¡ï¸ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
+          msg += `🛡️ *Link Seguro:* Acesso exclusivo e seguro para sua empresa.`;
         }
       }
 
@@ -472,11 +472,11 @@ export function QuoteValuesTab({
 
     if (successCount > 0) {
       toast({
-        title: `âœ… ${successCount} cotação${successCount > 1 ? 'ões' : ''} enviada${successCount > 1 ? 's' : ''}!`,
+        title: `✅ ${successCount} cotação${successCount > 1 ? 'ões' : ''} enviada${successCount > 1 ? 's' : ''}!`,
         description: failCount > 0 ? `${failCount} falha${failCount > 1 ? 's' : ''} no envio.` : undefined,
       });
     } else if (failCount > 0) {
-      toast({ title: "âŒ Nenhuma cotação foi enviada.", variant: "destructive" });
+      toast({ title: "❌ Nenhuma cotação foi enviada.", variant: "destructive" });
     }
   }, [isSendingAll, linkSuppliers, sentSuppliers, handleWhatsApp, useGroupedLink, toast]);
 
@@ -603,7 +603,7 @@ export function QuoteValuesTab({
                         "text-[8px] font-black uppercase tracking-tighter",
                         fornecedor.status === 'respondido' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
                       )}>
-                        {fornecedor.status === 'respondido' ? "ðŸ“² VIA PORTAL" : "Pendente"}
+                        {fornecedor.status === 'respondido' ? "📲 VIA PORTAL" : "Pendente"}
                       </span>
                     </div>
                     <div
@@ -621,7 +621,7 @@ export function QuoteValuesTab({
                             ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
                             : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
                       )}
-                      title={sentSuppliers[fornecedor.id] ? "âœ… Cotação já enviada" : "Enviar Cotação via WhatsApp"}
+                      title={sentSuppliers[fornecedor.id] ? "✅ Cotação já enviada" : "Enviar Cotação via WhatsApp"}
                     >
                       {sentSuppliers[fornecedor.id] 
                         ? <CheckCircle2 className="h-3 w-3" />
@@ -947,7 +947,7 @@ export function QuoteValuesTab({
                               />
                               <p className="text-[10px] font-bold text-zinc-500 uppercase">
                                 {product.quantidade} {product.unidade}
-                                {isBest && <span className="ml-2 text-brand font-black">ðŸ†</span>}
+                                {isBest && <span className="ml-2 text-brand font-black">🏆</span>}
                               </p>
                             </div>
                           )}
@@ -1250,7 +1250,7 @@ export function QuoteValuesTab({
                         </div>
                         {isBest && (
                           <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full text-[10px] font-black shadow-lg shadow-brand/20">
-                            ðŸ†
+                            🏆
                           </div>
                         )}
                       </div>
