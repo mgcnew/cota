@@ -107,7 +107,7 @@ export const designSystem = {
         },
         // Sidebar (Painel Lateral)
         sidebar: {
-            wrapper: "h-full w-full bg-card/80 backdrop-blur-xl border border-white/5 rounded-2xl shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden flex flex-col",
+            wrapper: "h-full w-full bg-card/80 backdrop-blur-xl border border-white/5 rounded-lg shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden flex flex-col",
             header: "flex items-center h-16 px-4 border-b border-white/5 transition-all duration-300",
             body: "flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1 custom-scrollbar",
             footer: "p-2 border-t border-white/5",
@@ -130,7 +130,7 @@ export const designSystem = {
             secondary: {
                 wrapper: "w-full md:w-72 flex-shrink-0 flex flex-col bg-zinc-50/30 dark:bg-background/20 border-r border-zinc-100 dark:border-zinc-800",
                 header: "p-4 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-background/40",
-                item: "w-full text-left p-3 rounded-2xl border transition-all duration-200 relative overflow-hidden group",
+                item: "w-full text-left p-3 rounded-md border transition-all duration-200 relative overflow-hidden group",
                 itemActive: "bg-white dark:bg-card border-zinc-200 dark:border-zinc-800 shadow-md ring-1 ring-brand/20",
                 itemInactive: "bg-transparent border-transparent hover:bg-zinc-100 dark:hover:bg-card/50"
             }

@@ -317,7 +317,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                 variant="ghost"
                 onClick={onOpenAI}
                 className={cn(
-                  "relative group w-10 h-10 p-0 rounded-xl flex items-center justify-center transition-all duration-300 overflow-hidden outline-none ring-0",
+                  "relative group w-9 h-9 p-0 rounded-md flex items-center justify-center transition-all duration-300 overflow-hidden outline-none ring-0",
                   "bg-brand/10 text-brand hover:bg-brand/20 border-transparent",
                   "active:scale-95 mx-auto"
                 )}
@@ -345,8 +345,8 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                 <DropdownMenuTrigger asChild>
                   <div 
                     className={cn(
-                      "w-10 h-10 rounded-xl bg-muted/50 hover:bg-accent flex items-center justify-center overflow-hidden cursor-pointer",
-                      "transition-all duration-300 hover:scale-105 active:scale-95 group relative border border-border mx-auto text-muted-foreground hover:text-foreground"
+                      "w-9 h-9 rounded-md bg-muted/50 hover:bg-accent flex items-center justify-center overflow-hidden cursor-pointer",
+                      "transition-all duration-200 active:scale-95 group relative border border-border mx-auto text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {profile?.avatar_url ? (
@@ -363,7 +363,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             </Tooltip>
           </TooltipProvider>
 
-          <DropdownMenuContent side="right" sideOffset={20} align="end" className="w-64 rounded-2xl border-border/40 shadow-2xl bg-card/95 backdrop-blur-xl p-2 z-[60]">
+          <DropdownMenuContent side="right" sideOffset={12} align="end" className="w-56 rounded-lg border-border shadow-lg bg-card p-1 z-[60]">
             <DropdownMenuLabel className="font-normal px-2 py-2">
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-bold leading-none">{profile?.full_name || "Usuário"}</p>
@@ -378,24 +378,24 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
               <CompanySelector />
             </div>
 
-            <DropdownMenuItem onClick={() => navigate('/dashboard/faixas')} className="cursor-pointer rounded-xl py-2.5">
+            <DropdownMenuItem onClick={() => navigate('/dashboard/faixas')} className="cursor-pointer rounded-md py-2 text-sm">
               <Flag className="mr-3 h-4 w-4 text-brand" />
               <span className="font-medium text-sm">Faixas</span>
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={() => navigate('/dashboard/configuracoes')} className="cursor-pointer rounded-xl py-2.5">
+            <DropdownMenuItem onClick={() => navigate('/dashboard/configuracoes')} className="cursor-pointer rounded-md py-2 text-sm">
               <Settings className="mr-3 h-4 w-4 opacity-70" />
               <span className="font-medium text-sm">Configurações</span>
             </DropdownMenuItem>
             
-            <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer rounded-xl py-2.5">
+            <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="cursor-pointer rounded-md py-2 text-sm">
               {theme === 'dark' ? <Sun className="mr-3 h-4 w-4 text-emerald-400" /> : <Moon className="mr-3 h-4 w-4 text-indigo-400" />}
               <span className="font-medium text-sm">{theme === 'dark' ? 'Modo Claro' : 'Modo Escuro'}</span>
             </DropdownMenuItem>
             
             <DropdownMenuSeparator className="bg-border/50 my-1" />
             
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer rounded-xl py-2.5 text-red-500 hover:text-red-600 focus:text-red-500 hover:bg-red-500/10 focus:bg-red-500/10 transition-colors">
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer rounded-md py-2 text-sm text-red-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10">
               <LogOut className="mr-3 h-4 w-4 opacity-80" />
               <span className="font-bold text-sm">Sair do Sistema</span>
             </DropdownMenuItem>
@@ -431,7 +431,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             variant="ghost"
             size="icon"
             aria-label="Menu"
-            className="md:hidden fixed top-3 right-3 z-[100] h-12 w-12 rounded-2xl bg-background/40 backdrop-blur-xl border border-white/5 shadow-xl active:scale-90 transition-all group overflow-hidden touch-manipulation"
+            className="md:hidden fixed top-3 right-3 z-[100] h-10 w-10 rounded-lg bg-background/80 backdrop-blur-xl border border-border/30 shadow-md active:scale-90 transition-all group overflow-hidden touch-manipulation"
           >
             <div className="relative w-6 h-6">
               <span className={cn(
@@ -465,7 +465,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     navigate('/dashboard');
                     setMobileMenuOpen(false);
                   }}
-                  className="p-1.5 rounded-xl bg-white shadow-md ring-1 ring-brand/10 w-10 h-10 active:scale-95 transition-transform cursor-pointer overflow-hidden"
+                  className="p-1 rounded-md bg-white shadow-sm border border-border/20 w-9 h-9 active:scale-95 transition-transform cursor-pointer overflow-hidden"
                 >
                   <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
                 </div>
@@ -492,7 +492,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                       to={item.url}
                       onClick={handleMobileNavigation}
                       className={cn(
-                        "flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-200 relative group",
+                        "flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-150 relative group",
                         "active:scale-[0.98]",
                         isActive
                           ? "bg-brand/10 text-brand font-bold shadow-[0_4px_12px_-4px_rgba(var(--brand-rgb),0.2)]"
@@ -537,7 +537,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                 {/* Theme Toggle */}
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-3 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
+                  className="p-2.5 rounded-md text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
                   title="Alternar Tema"
                 >
                   {theme === 'dark' ? (
@@ -553,7 +553,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     navigate('/dashboard/configuracoes');
                     setMobileMenuOpen(false);
                   }}
-                  className="p-3 rounded-xl text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
+                  className="p-2.5 rounded-md text-muted-foreground hover:bg-background hover:text-foreground active:scale-95 transition-all group"
                   title="Configurações"
                 >
                   <Settings className="w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:rotate-45 transition-all" />
@@ -565,7 +565,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="p-3 rounded-xl text-red-500/80 hover:bg-red-500/10 active:scale-95 transition-all group"
+                  className="p-2.5 rounded-md text-red-500/80 hover:bg-red-500/10 active:scale-95 transition-all group"
                   title="Sair"
                 >
                   <LogOut className="w-5 h-5 opacity-90 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
