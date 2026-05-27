@@ -1082,6 +1082,30 @@ export function QuoteValuesTab({
                                 })()}
                               </div>
 
+                              {/* Observação do fornecedor */}
+                              <div className="w-6 flex justify-center">
+                                {(() => {
+                                  const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                  const obs = itemData?.observacoes;
+                                  if (!obs) return <div className="w-6" />;
+                                  return (
+                                    <TooltipProvider delayDuration={100}>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="cursor-help flex items-center justify-center h-6 w-6 rounded-md text-amber-500 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
+                                            <MessageCircle className="h-3.5 w-3.5" />
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent side="left" className="max-w-[240px] bg-zinc-900 border-zinc-800 text-white shadow-xl p-3">
+                                          <p className="text-[10px] font-black uppercase tracking-widest text-amber-400 mb-1">Obs. Fornecedor</p>
+                                          <p className="text-xs text-white/80 leading-relaxed">{obs}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  );
+                                })()}
+                              </div>
+
                               {/* Savings % */}
                               <div className="w-[45px] flex justify-end">
                                 {(() => {

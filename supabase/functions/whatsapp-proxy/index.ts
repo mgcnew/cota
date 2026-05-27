@@ -108,6 +108,7 @@ serve(async (req) => {
     });
   }
 
+  console.log("whatsapp-proxy sending", { endpoint, phone, kind: body.kind });
   try {
     const upstream = await fetch(endpoint, {
       method: "POST",
@@ -121,8 +122,13 @@ serve(async (req) => {
     const status = upstream.status;
     let data: unknown = text;
     try { data = JSON.parse(text); } catch { /* keep raw */ }
+    if (!upstream.ok) {
+      console.error("whatsapp-proxy upstream error", status, text);
+    }
+    // Always return 200 from the edge function itself so the Supabase SDK
+    // delivers the body to the caller — upstream status is in the payload.
     return new Response(JSON.stringify({ status, data }), {
-      status: upstream.ok ? 200 : 502,
+      status: 200,
       headers: { ...headers, "Content-Type": "application/json" },
     });
   } catch (err) {

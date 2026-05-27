@@ -20,10 +20,19 @@ async function invokeProxy(payload: Record<string, unknown>): Promise<SendMessag
 
   if (error) throw new Error(error.message);
   if (data?.error) throw new Error(data.error);
+  const wApiStatus = data?.status ?? 200;
+  console.log("[W-API] status:", wApiStatus, "response:", JSON.stringify(data?.data));
+  const ok = wApiStatus >= 200 && wApiStatus < 300;
+  if (!ok) {
+    const msg = typeof data?.data === "object" && data.data !== null
+      ? (data.data as any).message ?? (data.data as any).error ?? JSON.stringify(data.data)
+      : String(data?.data ?? `W-API error ${wApiStatus}`);
+    throw new Error(`W-API ${wApiStatus}: ${msg}`);
+  }
   return {
-    status: data?.status ?? 200,
+    status: wApiStatus,
     data: data?.data,
-    success: (data?.status ?? 0) >= 200 && (data?.status ?? 0) < 300,
+    success: true,
   };
 }
 

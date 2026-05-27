@@ -695,7 +695,7 @@ export default function VendorPortal() {
             <AlertDialogFooter className="flex-col gap-2 sm:flex-col">
               <AlertDialogAction
                 onClick={handleSubmit}
-                className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/20 transition-all active:scale-95"
+                className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-sm transition-all active:scale-95"
               >
                 <Send className="h-4 w-4 mr-2" />
                 Confirmar e Enviar Agora
