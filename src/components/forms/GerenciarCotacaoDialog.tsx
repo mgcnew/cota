@@ -351,29 +351,27 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             </div>
 
             <div className="flex items-center gap-1.5">
-              {!isMobile && (
-                <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={handleWhatsAppExport}
-                    disabled={isExportingWhatsApp}
-                    className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                    title="Enviar para WhatsApp"
-                  >
-                    {isExportingWhatsApp ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowResumoDialog(true)}
-                    className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
-                    title="Relatório Profissional"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
+              <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleWhatsAppExport}
+                  disabled={isExportingWhatsApp}
+                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                  title="Enviar para WhatsApp"
+                >
+                  {isExportingWhatsApp ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowResumoDialog(true)}
+                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                  title="Relatório Profissional"
+                >
+                  <Sparkles className="h-4 w-4" />
+                </Button>
+              </div>
               <Button
                 variant="ghost"
                 size="icon"

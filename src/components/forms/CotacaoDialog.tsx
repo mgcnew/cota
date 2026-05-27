@@ -1,5 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -163,6 +165,7 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
   };
 
   const bestSupplier = getBestSupplier();
+  const isMobile = useIsMobile();
 
   const buildProductSelections = () => {
     if (!products || products.length === 0 || !cotacao) return [];
@@ -274,17 +277,47 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
   const cotacaoProduto = safeStr(cotacao.produto);
 
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 bg-white dark:bg-gray-900 [&>button]:hidden">
-        <div className="flex flex-col h-full">
+  const nestedDialogs = (
+    <>
+      {convertDialogOpen && selectedSupplierForConversion && (
+        <ConvertToOrderDialog
+          open={convertDialogOpen}
+          onOpenChange={setConvertDialogOpen}
+          quote={{ id: cotacao.id, produto: cotacaoProduto, quantidade: cotacaoQuantidade }}
+          supplier={{ id: selectedSupplierForConversion.id, name: selectedSupplierForConversion.name }}
+          products={getConversionProducts()}
+          totalValue={getConversionProducts().reduce((sum, p) => sum + p.value, 0)}
+          onConfirm={handleConfirmConversion}
+        />
+      )}
+      {showSelectSupplierDialog && (
+        <SelectSupplierPerProductDialog
+          open={showSelectSupplierDialog}
+          onOpenChange={setShowSelectSupplierDialog}
+          products={buildProductSelections()}
+          onConfirm={handleSupplierSelectionConfirm}
+        />
+      )}
+      {showMultipleOrdersDialog && (
+        <ConvertToMultipleOrdersDialog
+          open={showMultipleOrdersDialog}
+          onOpenChange={setShowMultipleOrdersDialog}
+          supplierOrders={supplierOrdersForConversion}
+          onConfirm={handleConfirmMultipleOrders}
+        />
+      )}
+    </>
+  );
+
+  const modalContent = (
+    <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-3 border-b bg-background">
             <div className="flex items-center gap-2.5">
               <div className="p-1.5 rounded-lg bg-teal-500/10"><ClipboardList className="h-4 w-4 text-teal-600 dark:text-teal-400" /></div>
               <div>
-                <DialogTitle className="text-base font-bold">Cotação #{cotacaoId}</DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground line-clamp-1">{cotacaoProduto}</DialogDescription>
+                <h2 className="text-base font-bold leading-none">Cotação #{cotacaoId}</h2>
+                <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{cotacaoProduto}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -445,31 +478,33 @@ export default function CotacaoDialog({ open, onOpenChange, cotacao, onUpdateSup
             </ScrollArea>
           </Tabs>
         </div>
+  );
 
-        {/* Dialogs */}
-        {convertDialogOpen && selectedSupplierForConversion && (
-          <ConvertToOrderDialog 
-            open={convertDialogOpen} 
-            onOpenChange={setConvertDialogOpen} 
-            quote={{ id: cotacao.id, produto: cotacaoProduto, quantidade: cotacaoQuantidade }}
-            supplier={{ id: selectedSupplierForConversion.id, name: selectedSupplierForConversion.name }}
-            products={getConversionProducts()} 
-            totalValue={getConversionProducts().reduce((sum, p) => sum + p.value, 0)}
-            onConfirm={handleConfirmConversion} 
-          />
-        )}
-        {showSelectSupplierDialog && (
-          <SelectSupplierPerProductDialog 
-            open={showSelectSupplierDialog} 
-            onOpenChange={setShowSelectSupplierDialog} 
-            products={buildProductSelections()} 
-            onConfirm={handleSupplierSelectionConfirm} 
-          />
-        )}
-        {showMultipleOrdersDialog && (
-          <ConvertToMultipleOrdersDialog open={showMultipleOrdersDialog} onOpenChange={setShowMultipleOrdersDialog} supplierOrders={supplierOrdersForConversion} onConfirm={handleConfirmMultipleOrders} />
-        )}
-      </DialogContent>
-    </Dialog>
+  if (isMobile) {
+    return (
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent className="h-[92vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background border-t border-border dark:border-white/5">
+            <DrawerTitle className="sr-only">Cotação</DrawerTitle>
+            <DrawerDescription className="sr-only">Detalhes da cotação</DrawerDescription>
+            {modalContent}
+          </DrawerContent>
+        </Drawer>
+        {nestedDialogs}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 bg-background [&>button]:hidden">
+          <DialogTitle className="sr-only">Cotação</DialogTitle>
+          <DialogDescription className="sr-only">Detalhes da cotação</DialogDescription>
+          {modalContent}
+        </DialogContent>
+      </Dialog>
+      {nestedDialogs}
+    </>
   );
 }

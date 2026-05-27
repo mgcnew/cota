@@ -1713,7 +1713,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
-        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-white dark:bg-gray-900">
+        <DrawerContent className="h-[95vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background">
           {modalInnerContent}
         </DrawerContent>
       </Drawer>
@@ -1728,7 +1728,7 @@ export default function ViewQuoteDialog({ quote, quoteId, onUpdateSupplierProduc
           {trigger}
         </DialogTrigger>
       )}
-      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[850px] h-[88vh] sm:h-[85vh] max-h-[800px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-white dark:bg-gray-900 [&>button]:hidden">
+      <DialogContent hideClose className="w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[850px] h-[88vh] sm:h-[85vh] max-h-[800px] overflow-hidden border border-gray-200/60 dark:border-gray-700/30 shadow-xl rounded-xl sm:rounded-2xl p-0 flex flex-col bg-background [&>button]:hidden">
         {modalInnerContent}
       </DialogContent>
     </Dialog>

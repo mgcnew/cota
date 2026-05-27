@@ -82,15 +82,19 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     <div
       key={item.productId}
       className={cn(
-        "grid md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-2 md:gap-4 items-center px-3 py-2 rounded-xl border transition-all duration-200",
+        "grid grid-cols-[1fr_auto] md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-x-2 gap-y-1 md:gap-4 items-start md:items-center px-3 py-2.5 md:py-2 rounded-xl border transition-all duration-200",
         item.bestPrice > 0
           ? "bg-card border-border hover:border-brand/30 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] dark:hover:shadow-none"
           : "bg-muted/30 border-border/50 opacity-60 grayscale-[0.5]"
       )}
     >
-      <div className="min-w-0 pr-2">
+      {/* Product name — col 1 */}
+      <div className="min-w-0 pr-2 self-center">
         <p className="font-bold text-xs text-zinc-900 dark:text-zinc-50 truncate leading-tight uppercase tracking-tight" title={item.productName}>
           {safeStr(item.productName)}
+        </p>
+        <p className="md:hidden text-[10px] text-muted-foreground mt-0.5">
+          {safeStr(item.quantidade)} {safeStr(item.unidade)}
         </p>
       </div>
 
@@ -106,19 +110,20 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         </span>
       </div>
 
-      <div className="text-right flex items-center justify-end gap-2">
+      {/* Price — col 2 on mobile (row 1) */}
+      <div className="flex items-center justify-end gap-2 self-center">
         {item.bestPrice > 0 ? (
           <div className="flex flex-col items-end">
             <div className="flex items-center gap-1.5">
               {item.savings > 0 && (
-                <span className="px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
+                <span className="hidden sm:inline px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
                   -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
                 </span>
               )}
               <span className="text-sm font-black text-brand tracking-tight">
                 R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
-              <CurrentPricesTooltip prices={item.allPrices} />
+              <span className="hidden md:inline"><CurrentPricesTooltip prices={item.allPrices} /></span>
             </div>
           </div>
         ) : (
@@ -126,11 +131,12 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         )}
       </div>
 
-      <div className="flex justify-end items-center pr-2 min-w-0">
+      {/* Supplier — spans both cols on mobile (row 2), col 5 on desktop */}
+      <div className="col-span-2 md:col-span-1 flex items-center justify-start md:justify-end md:pr-2 min-w-0">
         {item.bestSupplierName ? (
-          <div className="flex items-center justify-end gap-1.5 max-w-full">
-            <div className="w-5 h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              <Building2 className="h-3 w-3 text-zinc-400" />
+          <div className="flex items-center gap-1.5 max-w-full">
+            <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-zinc-400" />
             </div>
             <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>
               {safeStr(item.bestSupplierName)}
@@ -207,7 +213,10 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
             )}
           >
             <ListFilter className="h-3.5 w-3.5 mr-2" />
-            <span className="text-[10px] font-black uppercase tracking-widest">{groupBySupplier ? "Desagrupar" : "Agrupar por Fornecedor"}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest">
+              <span className="hidden sm:inline">{groupBySupplier ? "Desagrupar" : "Agrupar por Fornecedor"}</span>
+              <span className="sm:hidden">{groupBySupplier ? "Desagrupar" : "Agrupar"}</span>
+            </span>
           </Button>
 
           <Select value={sortBy} onValueChange={setSortBy}>
