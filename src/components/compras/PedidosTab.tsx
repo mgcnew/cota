@@ -385,7 +385,7 @@ function PedidosTab() {
             <>
               {/* Mobile Cards View */}
               <div className="md:hidden">
-                <div className="space-y-3 p-2 pb-24">
+                <div className="space-y-2 p-3 pb-4">
                   {paginatedData.items.map((pedido) => (
                     <MobileOrderCard
                       key={pedido.id}
