@@ -112,15 +112,16 @@ const VendorItem = memo(function VendorItem({
   return (
     <div
       key={`${item.product_id}-${item._token}`}
-      className={cn(
-        "bg-white dark:bg-zinc-900 border rounded-2xl overflow-hidden transition-all duration-200",
-        hasFilled
-          ? "border-blue-100 dark:border-blue-900/50 shadow-sm shadow-blue-500/5"
-          : "border-zinc-100 dark:border-white/5"
-      )}
+      className="relative bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl overflow-hidden transition-all duration-300"
     >
+      {/* Left accent border by fill state */}
+      <div className={cn(
+        "absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl transition-all duration-500",
+        hasFilled ? "bg-blue-500" : "bg-zinc-200 dark:bg-zinc-700/60"
+      )} />
+
       {/* Cabeçalho do item */}
-      <div className="px-4 pt-4 pb-3">
+      <div className="pl-5 pr-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
@@ -141,8 +142,8 @@ const VendorItem = memo(function VendorItem({
             </p>
           </div>
           {hasFilled && (
-            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+            <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm shadow-emerald-500/30 animate-in zoom-in-75 duration-200">
+              <CheckCircle2 className="h-4 w-4 text-white" />
             </div>
           )}
         </div>
@@ -198,7 +199,7 @@ const VendorItem = memo(function VendorItem({
           <button
             type="button"
             onClick={() => onToggleSpec(item.product_id, item._token)}
-            className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+            className="w-full flex items-center justify-between pl-5 pr-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
           >
             <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
               <Scale className="h-3 w-3" />
@@ -209,7 +210,7 @@ const VendorItem = memo(function VendorItem({
           </button>
 
           {isExpanded && (
-            <div className="px-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="pl-5 pr-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
               {hasHistory && specConfirmed === undefined && (
                 <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl p-3 space-y-2.5">
                   <div className="flex items-start gap-2">
@@ -721,29 +722,52 @@ export default function VendorPortal() {
                 <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Portal de Cotações</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 rounded-full border border-emerald-100 dark:border-emerald-800/30 flex-shrink-0">
-              <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-              <span className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Seguro</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {items.length > 0 && (
+                <span className={cn(
+                  "text-[10px] font-black tabular-nums transition-colors duration-300",
+                  allFilled ? "text-emerald-600 dark:text-emerald-400" : "text-blue-600 dark:text-blue-400"
+                )}>
+                  {itemsFilled}/{items.length}
+                </span>
+              )}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 dark:bg-emerald-950/30 rounded-full border border-emerald-100 dark:border-emerald-800/30">
+                <ShieldCheck className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-[9px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Seguro</span>
+              </div>
             </div>
+          </div>
+          {/* Progress bar */}
+          <div className="h-0.5 w-full bg-zinc-100 dark:bg-zinc-800">
+            <div
+              className={cn(
+                "h-full transition-all duration-500",
+                allFilled ? "bg-emerald-500" : "bg-blue-500"
+              )}
+              style={{ width: items.length > 0 ? `${(itemsFilled / items.length) * 100}%` : '0%' }}
+            />
           </div>
         </header>
 
         {/* INFO FATURAMENTO */}
         <div className="max-w-xl mx-auto px-4 pt-5">
-          <div className="flex items-center justify-between bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl px-4 py-3">
-            <div>
-              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Faturar para</p>
-              <p className="text-[13px] font-bold text-zinc-800 dark:text-zinc-100">Mercadão Novo Boi João Dias</p>
-              <p className="text-[10px] text-zinc-400 font-medium">CNPJ 63.195.471/0001-12</p>
-            </div>
-            {data.deadline && (
-              <div className="text-right">
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Prazo</p>
-                <p className="text-[13px] font-bold text-zinc-800 dark:text-zinc-100">
-                  {new Date(data.deadline).toLocaleDateString('pt-BR')}
-                </p>
+          <div className="relative bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-2xl" />
+            <div className="flex items-center justify-between pl-5 pr-4 py-3">
+              <div className="min-w-0">
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Faturar para</p>
+                <p className="text-[13px] font-bold text-zinc-800 dark:text-zinc-100 truncate">Mercadão Novo Boi João Dias</p>
+                <p className="text-[10px] text-zinc-400 font-medium">CNPJ 63.195.471/0001-12</p>
               </div>
-            )}
+              {data.deadline && (
+                <div className="text-right flex-shrink-0 ml-3">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Prazo</p>
+                  <p className="text-[13px] font-bold text-zinc-800 dark:text-zinc-100">
+                    {new Date(data.deadline).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -779,16 +803,32 @@ export default function VendorPortal() {
         {/* BARRA DE AÇÃO FLUTUANTE */}
         <div className="fixed bottom-0 left-0 right-0 z-50 p-3">
           <div className="max-w-xl mx-auto">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl shadow-zinc-900/20 dark:shadow-black/40 p-3 flex items-center gap-3">
+            <div className={cn(
+              "border rounded-2xl shadow-2xl p-3 flex items-center gap-3 transition-all duration-300",
+              allFilled
+                ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/50 shadow-emerald-500/10"
+                : "bg-white dark:bg-zinc-900 border-zinc-200 dark:border-white/10 shadow-zinc-900/20 dark:shadow-black/40"
+            )}>
               {/* Progresso */}
               <div className="flex-1 min-w-0 pl-1">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Progresso</span>
-                  <span className="text-[10px] font-black text-zinc-600 dark:text-zinc-300">{itemsFilled}/{items.length}</span>
+                  {allFilled ? (
+                    <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Tudo preenchido!
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-black text-zinc-500 dark:text-zinc-400">
+                      {items.length - itemsFilled} {items.length - itemsFilled === 1 ? 'pendente' : 'pendentes'}
+                    </span>
+                  )}
                 </div>
-                <div className="h-1 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all duration-500"
+                    className={cn(
+                      "h-full rounded-full transition-all duration-500",
+                      allFilled ? "bg-emerald-500" : "bg-blue-500"
+                    )}
                     style={{ width: items.length > 0 ? `${(itemsFilled / items.length) * 100}%` : '0%' }}
                   />
                 </div>
@@ -801,7 +841,7 @@ export default function VendorPortal() {
                 className={cn(
                   "h-12 px-6 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 flex-shrink-0 shadow-lg",
                   allFilled
-                    ? "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
+                    ? "bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30"
                     : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20"
                 )}
               >
@@ -810,7 +850,7 @@ export default function VendorPortal() {
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    Enviar Proposta
+                    {allFilled ? "Enviar Tudo" : "Enviar Proposta"}
                   </>
                 )}
               </button>
