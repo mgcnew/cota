@@ -287,31 +287,12 @@ export function QuoteConversionTab({
   return (
     <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 pb-16">
-        <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-muted/30 border border-border dark:border-white/5/50">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
-            <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onShowResumo}
-              className="h-8 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
-            >
-              <Sparkles className="h-3.5 w-3.5 mr-1" />
-              Relatório Visual
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleWhatsAppExport}
-              disabled={Object.keys(productSelections).length === 0}
-              className="h-8 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
-            >
-              <MessageCircle className="h-3.5 w-3.5 mr-1" />
-              Relatório Texto
-            </Button>
+        <div className="flex flex-col gap-2 px-3 py-2.5 rounded-xl bg-muted/30 border border-border dark:border-white/5/50">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
+              <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
+            </div>
             <Tabs value={pedidoSubTab} onValueChange={(val) => {
               setPedidoSubTab(val);
               if (val === "melhores") {
@@ -352,6 +333,27 @@ export function QuoteConversionTab({
                 <TabsTrigger value="dividido" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Dividido</TabsTrigger>
               </TabsList>
             </Tabs>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShowResumo}
+              className="h-7 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
+            >
+              <Sparkles className="h-3 w-3 mr-1" />
+              <span className="hidden xs:inline">Relatório</span> Visual
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleWhatsAppExport}
+              disabled={Object.keys(productSelections).length === 0}
+              className="h-7 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
+            >
+              <MessageCircle className="h-3 w-3 mr-1" />
+              <span className="hidden xs:inline">Relatório</span> Texto
+            </Button>
           </div>
         </div>
 

@@ -1,20 +1,18 @@
-﻿import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { 
-  Truck, Package, DollarSign, TrendingDown, 
-  Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon 
+import {
+  Truck, Package, TrendingDown,
+  Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon,
 } from "lucide-react";
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { cn } from "@/lib/utils";
@@ -32,27 +30,23 @@ interface ItemEntrega {
   unidadePedida: string;
   quantidadeEntregue: number;
   unidadeEntregue: string;
-  valorUnitario: number; // Preço acordado originalmente
-  valorFaturado: number; // Preço real cobrado na NFe
-  maiorValor: number; // Teto para cálculo da economia
-  fatorEmbalagem: number; // Fator de caixa (itens por caixa)
-  isBoxUnit: boolean; // Se a unidade é do tipo caixa
-  quantidadePorEmbalagemOriginal: number | null; // Valor original vindo da cotação
+  valorUnitario: number;
+  valorFaturado: number;
+  maiorValor: number;
+  fatorEmbalagem: number;
+  isBoxUnit: boolean;
+  quantidadePorEmbalagemOriginal: number | null;
 }
 
-/**
- * Detecta se a unidade é do tipo "caixa"
- */
 function isBoxLikeUnit(unit: string): boolean {
   const normalized = unit.toLowerCase().trim();
-  return normalized === 'cx' || normalized === 'caixa' || normalized === 'caixas' || normalized.startsWith('cx');
+  return normalized === "cx" || normalized === "caixa" || normalized === "caixas" || normalized.startsWith("cx");
 }
 
 export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const { updateQuantidadeEntregue, isUpdating } = usePedidos();
   const [itensEntrega, setItensEntrega] = useState<ItemEntrega[]>([]);
 
-  // Inicializar itens quando o pedido mudar
   useEffect(() => {
     if (pedido?.items) {
       setItensEntrega(
@@ -60,22 +54,22 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           const quantidadePedida = item.quantidade_pedida || item.quantity || 1;
           const numUnit = Number(item.valor_unitario_cotado || item.unit_price) || 1;
           const baseUnitCost = numUnit * quantidadePedida;
-          const computedFactor = baseUnitCost > 0 ? Math.round(Number(item.total_price || baseUnitCost) / baseUnitCost) : 1;
+          const computedFactor = baseUnitCost > 0
+            ? Math.round(Number(item.total_price || baseUnitCost) / baseUnitCost)
+            : 1;
           const fallbackFator = computedFactor < 1 ? 1 : computedFactor;
-
-          // Prioridade: quantidade_por_embalagem do DB > fator computado > 1
           const qtdEmbalagem = item.quantidade_por_embalagem || null;
           const fatorEmbalagem = qtdEmbalagem || fallbackFator;
-          const unitStr = item.unidade_pedida || item.unidade_entregue || 'un';
+          const unitStr = item.unidade_pedida || item.unidade_entregue || "un";
           const isBox = isBoxLikeUnit(unitStr);
 
           return {
-            itemId: item.id || '',
+            itemId: item.id || "",
             productName: item.product_name,
             quantidadePedida: item.quantidade_pedida || item.quantity,
             unidadePedida: unitStr,
             quantidadeEntregue: item.quantidade_entregue || 0,
-            unidadeEntregue: item.unidade_entregue || 'kg',
+            unidadeEntregue: item.unidade_entregue || "kg",
             valorUnitario: item.valor_unitario_cotado || item.unit_price,
             valorFaturado: item.unit_price,
             maiorValor: item.maior_valor_cotado || item.unit_price,
@@ -88,48 +82,40 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     }
   }, [pedido]);
 
-  // Calcular economia que seria feita
-  const economiaEsperada = useMemo(() => {
-    return itensEntrega.reduce((sum, item) => {
-      if (item.maiorValor > item.valorUnitario) {
-        return sum + ((item.maiorValor - item.valorUnitario) * item.quantidadePedida * item.fatorEmbalagem);
-      }
-      return sum;
-    }, 0);
-  }, [itensEntrega]);
+  const economiaEsperada = useMemo(() =>
+    itensEntrega.reduce((sum, item) =>
+      item.maiorValor > item.valorUnitario
+        ? sum + (item.maiorValor - item.valorUnitario) * item.quantidadePedida * item.fatorEmbalagem
+        : sum, 0),
+    [itensEntrega]
+  );
 
-  // Calcular economia real considerando quebra/excesso e preço NFe
-  const economiaRealPreview = useMemo(() => {
-    return itensEntrega.reduce((sum, item) => {
-      if (item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado) {
-        const diferenca = item.maiorValor - item.valorFaturado;
-        return sum + (diferenca * item.quantidadeEntregue * item.fatorEmbalagem);
-      }
-      return sum;
-    }, 0);
-  }, [itensEntrega]);
+  const economiaRealPreview = useMemo(() =>
+    itensEntrega.reduce((sum, item) =>
+      item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado
+        ? sum + (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * item.fatorEmbalagem
+        : sum, 0),
+    [itensEntrega]
+  );
 
-  // Valor total baseado na quantidade entregue multiplicada pelo valor REAL da Nfe
-  const valorTotalEntregue = useMemo(() => {
-    return itensEntrega.reduce((sum, item) => {
-      return sum + (item.quantidadeEntregue * item.valorFaturado * item.fatorEmbalagem);
-    }, 0);
-  }, [itensEntrega]);
+  const valorTotalEntregue = useMemo(() =>
+    itensEntrega.reduce((sum, item) =>
+      sum + item.quantidadeEntregue * item.valorFaturado * item.fatorEmbalagem, 0),
+    [itensEntrega]
+  );
 
   const handleQuantidadeChange = (index: number, value: string) => {
-    const quantidade = parseFloat(value) || 0;
     setItensEntrega(prev => {
       const updated = [...prev];
-      updated[index] = { ...updated[index], quantidadeEntregue: quantidade };
+      updated[index] = { ...updated[index], quantidadeEntregue: parseFloat(value) || 0 };
       return updated;
     });
   };
 
   const handlePrecoChange = (index: number, value: string) => {
-    const preco = parseFloat(value) || 0;
     setItensEntrega(prev => {
       const updated = [...prev];
-      updated[index] = { ...updated[index], valorFaturado: preco };
+      updated[index] = { ...updated[index], valorFaturado: parseFloat(value.replace(",", ".")) || 0 };
       return updated;
     });
   };
@@ -143,32 +129,6 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     });
   };
 
-  const handleSubmit = async () => {
-    if (!pedido) return;
-
-    // Agora permitimos enviar itens com quantidade zero (representa FALTA)
-    const itensParaAtualizar = itensEntrega
-      .map(item => ({
-        itemId: item.itemId,
-        quantidadeEntregue: item.quantidadeEntregue,
-        unidadeEntregue: item.unidadeEntregue,
-        valorFaturado: item.valorFaturado,
-        fatorEmbalagem: item.fatorEmbalagem,
-      }));
-
-    if (itensParaAtualizar.length === 0) return;
-
-    try {
-      await updateQuantidadeEntregue({
-        pedidoId: pedido.id,
-        itens: itensParaAtualizar,
-      });
-      onOpenChange(false);
-    } catch (error) {
-      console.error('Erro ao registrar entrega:', error);
-    }
-  };
-
   const handleMarcarFalta = (index: number) => {
     setItensEntrega(prev => {
       const updated = [...prev];
@@ -177,305 +137,364 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     });
   };
 
+  const handleSubmit = async () => {
+    if (!pedido) return;
+    const itensParaAtualizar = itensEntrega.map(item => ({
+      itemId: item.itemId,
+      quantidadeEntregue: item.quantidadeEntregue,
+      unidadeEntregue: item.unidadeEntregue,
+      valorFaturado: item.valorFaturado,
+      fatorEmbalagem: item.fatorEmbalagem,
+    }));
+    if (itensParaAtualizar.length === 0) return;
+    try {
+      await updateQuantidadeEntregue({ pedidoId: pedido.id, itens: itensParaAtualizar });
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Erro ao registrar entrega:", error);
+    }
+  };
+
+  const isMobile = useIsMobile();
   const veioDeCotacao = pedido?.quote_id != null;
-  // Agora validamos se os campos foram manipulados/conferidos, mesmo que zerados
   const todosPreenchidos = itensEntrega.every(item => item.quantidadeEntregue >= 0);
   const hasBoxItems = itensEntrega.some(item => item.isBoxUnit);
+  const fugaEconomia = veioDeCotacao && (economiaEsperada - economiaRealPreview) > 0.05 && todosPreenchidos;
 
   if (!pedido) return null;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 border border-border dark:border-white/5 shadow-2xl rounded-xl bg-card">
-        {/* Header Compacto */}
-        <DialogHeader className="px-5 py-4 border-b border-border dark:border-white/5 bg-muted/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-500">
-                <Truck className="h-4 w-4" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg font-bold text-foreground tracking-tight flex items-center gap-2">
-                  Registrar Recebimento
-                  {veioDeCotacao && (
-                    <Badge variant="outline" className="h-[18px] px-1.5 text-[9px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-bold uppercase tracking-wider">
-                      Via Cotação
-                    </Badge>
-                  )}
-                </DialogTitle>
-                <p className="text-xs text-muted-foreground font-medium mt-0.5">
-                  {pedido.supplier_name} <span className="mx-1 opacity-50">â€¢</span> Pedido #{pedido.id.substring(0, 8)}
-                </p>
-              </div>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-full">
-              <X className="h-4 w-4" />
-            </Button>
+  const modalContent = (
+    <div className="flex flex-col h-full">
+        {/* Header */}
+        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border dark:border-white/5 bg-muted/30 flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+            <Truck className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
           </div>
-        </DialogHeader>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-bold text-foreground leading-none">
+              Registrar Recebimento
+            </h2>
+            <p className="text-xs text-muted-foreground font-medium mt-1 truncate">
+              {pedido.supplier_name}
+              <span className="mx-1.5 opacity-40">·</span>
+              Pedido #{pedido.id.substring(0, 8)}
+            </p>
+          </div>
+          {veioDeCotacao && (
+            <Badge variant="outline" className="shrink-0 text-[9px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 font-bold uppercase tracking-wider">
+              Via Cotação
+            </Badge>
+          )}
+          <Button
+            variant="ghost" size="icon"
+            onClick={() => onOpenChange(false)}
+            className="h-8 w-8 text-muted-foreground hover:bg-muted rounded-lg shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-        <div className="flex-1 flex flex-col p-5 overflow-y-auto custom-scrollbar">
-          {/* Aviso se não veio de cotação */}
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+          {/* Aviso: pedido direto sem cotação */}
           {!veioDeCotacao && (
-            <div className="flex items-start gap-2 p-3 mb-4 bg-amber-500/10 rounded-lg border border-amber-500/20">
-              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5" />
+            <div className="flex items-start gap-2.5 p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
               <div className="text-xs text-amber-700 dark:text-amber-400">
-                <span className="font-semibold block">Pedido direto s/ cotação</span>
+                <span className="font-bold block">Pedido direto s/ cotação</span>
                 <span className="opacity-80">A economia real não será calculada para este registro.</span>
               </div>
             </div>
           )}
 
-          {/* Alerta de IA: Fuga de Economia */}
-          {veioDeCotacao && (economiaEsperada - economiaRealPreview) > 0.05 && todosPreenchidos && (
-            <div className="flex items-start gap-4 p-4 mb-4 bg-amber-500/5 rounded-xl border border-amber-500/20 shadow-sm animate-in fade-in duration-500">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 shrink-0 border border-amber-500/20">
-                <Sparkles className="h-5 w-5 text-amber-600" />
+          {/* Alerta IA: fuga de economia */}
+          {fugaEconomia && (
+            <div className="flex items-start gap-4 p-4 bg-amber-500/5 rounded-xl border border-amber-500/20 animate-in fade-in duration-300">
+              <div className="p-2 rounded-xl bg-amber-500/10 shrink-0 border border-amber-500/20">
+                <Sparkles className="h-4 w-4 text-amber-600" />
               </div>
               <div className="text-sm space-y-1">
-                <p className="font-bold flex items-center gap-1.5 text-amber-600 tracking-tight text-[15px]">
-                  Alerta Cota Aki AI
-                </p>
-                <p className="font-medium text-foreground/80 leading-relaxed pr-4">
-                  Observamos alterações de preço cobrado ou quebras de volume neste faturamento. Você terá uma <strong className="text-amber-500 font-bold">fuga de economia de R$ {(economiaEsperada - economiaRealPreview).toFixed(2).replace('.', ',')}</strong> na consolidação em relação à expectativa base.
+                <p className="font-bold text-amber-600 text-[13px]">Alerta Cota Aki AI</p>
+                <p className="text-foreground/80 leading-relaxed text-xs">
+                  Alterações de preço ou quebra de volume detectadas. Fuga de economia de{" "}
+                  <strong className="text-amber-500">
+                    R$ {(economiaEsperada - economiaRealPreview).toFixed(2).replace(".", ",")}
+                  </strong>{" "}
+                  em relação à expectativa base.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Lista Compacta de Itens */}
-          <div className="border border-border dark:border-white/5 rounded-lg overflow-hidden bg-card shadow-sm">
-            <div className="hidden sm:grid grid-cols-12 gap-4 p-3 bg-muted/50 border-b border-border dark:border-white/5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider items-center">
-              <div className="col-span-4">Produto Pedido</div>
-              <div className="col-span-2 text-right">Qtd Pedida</div>
-              <div className="col-span-2 text-right">Custo NFe / Unit</div>
-              <div className={cn("text-right pr-2", hasBoxItems ? "col-span-2" : "col-span-4")}>Qtd Recebida</div>
-              {hasBoxItems && (
-                <div className="col-span-2 text-right pr-2">Un/Caixa</div>
-              )}
+          {/* Tabela de itens */}
+          <div className="border border-border dark:border-white/5 rounded-xl overflow-hidden">
+            {/* Cabeçalho da tabela (desktop) */}
+            <div className="hidden sm:grid gap-2.5 px-4 py-2.5 bg-muted/50 border-b border-border dark:border-white/5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider"
+              style={{ gridTemplateColumns: hasBoxItems ? "1fr 100px 120px 1fr 90px" : "1fr 100px 120px 1fr" }}>
+              <div>Produto</div>
+              <div className="text-right">Custo NFe</div>
+              <div className="text-right">Qtd Recebida</div>
+              <div className="text-right">Economia</div>
+              {hasBoxItems && <div className="text-right">Un/Cx</div>}
             </div>
-            
-            <div className="divide-y divide-border">
-            {itensEntrega.map((item, index) => {
-              const diff = item.quantidadeEntregue - item.quantidadePedida;
-              const isDifferent = item.quantidadeEntregue > 0 && Math.abs(diff) > 0.001;
-              
-              return (
-                <div key={item.itemId || index} className="grid sm:grid-cols-12 gap-3 sm:gap-4 p-3 sm:items-center hover:bg-muted/30 transition-colors">
-                  <div className="sm:col-span-4 flex items-start sm:items-center gap-3 min-w-0">
-                    <div className={cn(
-                      "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 mt-1 sm:mt-0",
-                      item.isBoxUnit 
-                        ? "bg-amber-500/5 border-amber-500/10" 
-                        : "bg-brand/5 border-brand/10"
-                    )}>
-                      {item.isBoxUnit 
-                        ? <BoxIcon className="h-4 w-4 text-amber-600/70" />
-                        : <Package className="h-4 w-4 text-brand/70" />
-                      }
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-foreground tracking-tight leading-none mb-1" title={item.productName}>
-                        {item.productName}
-                      </p>
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {item.isBoxUnit && (
-                          <Badge variant="outline" className="h-[16px] px-1 text-[8px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 font-bold uppercase tracking-wider">
-                            Caixa
-                          </Badge>
-                        )}
-                        {veioDeCotacao && item.maiorValor > item.valorUnitario && (
-                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
-                            Econ. R$ {((item.maiorValor - item.valorUnitario) * item.fatorEmbalagem).toFixed(2)}/{item.unidadeEntregue}
-                          </p>
-                        )}
+
+            <div className="divide-y divide-border dark:divide-white/5">
+              {itensEntrega.map((item, index) => {
+                const diff = item.quantidadeEntregue - item.quantidadePedida;
+                const isDifferent = item.quantidadeEntregue > 0 && Math.abs(diff) > 0.001;
+                const isFalta = item.quantidadeEntregue === 0;
+                const economiaItem = veioDeCotacao && item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado
+                  ? (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * item.fatorEmbalagem
+                  : null;
+
+                return (
+                  <div key={item.itemId || index} className="px-4 py-3.5 hover:bg-muted/20 transition-colors space-y-3">
+                    {/* Produto */}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={cn(
+                        "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0",
+                        item.isBoxUnit ? "bg-amber-500/5 border-amber-500/10" : "bg-brand/5 border-brand/10"
+                      )}>
+                        {item.isBoxUnit
+                          ? <BoxIcon className="h-4 w-4 text-amber-600/70" />
+                          : <Package className="h-4 w-4 text-brand/70" />
+                        }
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm text-foreground truncate">{item.productName}</p>
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                          <span className="text-xs text-muted-foreground">
+                            Pedido: <strong>{item.quantidadePedida} {item.unidadePedida}</strong>
+                          </span>
+                          {item.isBoxUnit && (
+                            <Badge variant="outline" className="h-4 px-1 text-[8px] bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20 font-bold uppercase">
+                              Caixa
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="sm:col-span-2 flex flex-col sm:items-end justify-center pt-2 sm:pt-0 border-t sm:border-0 border-border/50 mt-2 sm:mt-0">
-                    <p className="sm:hidden text-[10px] text-muted-foreground uppercase font-bold tracking-widest mb-0.5">Qtd Pedida</p>
-                    <span className="font-semibold text-foreground text-sm">{item.quantidadePedida} <span className="text-xs text-muted-foreground uppercase ml-0.5">{item.unidadePedida}</span></span>
-                  </div>
+                    {/* Inputs row: Custo NFe | Qtd Recebida | Economia | Un/Caixa? */}
+                    <div className="grid gap-2.5 items-start"
+                      style={{ gridTemplateColumns: hasBoxItems ? "100px 120px 1fr 90px" : "100px 120px 1fr" }}>
 
-                  <div className="sm:col-span-2 flex flex-col sm:items-end justify-center pt-2 sm:pt-0">
-                    <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest mb-1">Custo NFe</p>
-                    <div className="relative w-full max-w-[120px] ml-auto">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-black text-muted-foreground uppercase pointer-events-none">
-                        R$
-                      </span>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={item.valorFaturado === 0 ? '' : item.valorFaturado}
-                        onChange={(e) => handlePrecoChange(index, e.target.value)}
-                        onFocus={(e) => e.target.select()}
-                        placeholder="0.00"
-                        className={cn(
-                          "h-10 pl-8 pr-2 w-full text-right font-black text-sm transition-all focus-within:ring-1",
-                          item.valorFaturado !== item.valorUnitario ? "border-amber-500/50 focus-visible:ring-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400" : "bg-background"
+                      {/* Custo NFe */}
+                      <div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Custo NFe</p>
+                        <div className="relative">
+                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground pointer-events-none">R$</span>
+                          <Input
+                            type="text" inputMode="decimal"
+                            value={item.valorFaturado === 0 ? "" : item.valorFaturado.toFixed(2)}
+                            onChange={e => handlePrecoChange(index, e.target.value)}
+                            onFocus={e => e.target.select()}
+                            placeholder="0,00"
+                            className={cn(
+                              "h-9 pl-7 pr-1.5 text-right font-black text-sm",
+                              item.valorFaturado !== item.valorUnitario
+                                ? "border-amber-500/50 bg-amber-500/5 text-amber-600 dark:text-amber-400"
+                                : ""
+                            )}
+                          />
+                        </div>
+                        {item.valorFaturado !== item.valorUnitario ? (
+                          <p className="text-[10px] font-bold mt-1 text-amber-500 text-right leading-none">
+                            Cotado: {item.valorUnitario.toFixed(2)}
+                          </p>
+                        ) : (
+                          <div className="mt-1 h-[14px]" />
                         )}
-                      />
-                    </div>
-                    {item.valorFaturado !== item.valorUnitario && (
-                       <span className="text-[10px] font-bold mt-1 text-amber-500 text-right w-full block">
-                         Cotado: R$ {item.valorUnitario.toFixed(2)}
-                       </span>
-                    )}
-                    {item.valorFaturado === item.valorUnitario && (
-                       <span className="opacity-0 text-[10px] font-bold mt-1 text-right w-full block">
-                         -
-                       </span>
-                    )}
-                  </div>
+                      </div>
 
-                  <div className={cn("flex flex-col justify-center pt-2 sm:pt-0", hasBoxItems ? "sm:col-span-2" : "sm:col-span-4")}>
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="sm:hidden text-[10px] text-emerald-500 uppercase font-bold tracking-widest">Recebida</p>
-                      <button 
-                        onClick={() => handleMarcarFalta(index)}
-                        className="text-[9px] font-bold text-amber-600 hover:text-amber-700 uppercase tracking-tighter"
-                      >
-                        Marcar Falta
-                      </button>
-                    </div>
-                    <div className="relative w-full">
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={item.quantidadeEntregue === 0 ? '' : item.quantidadeEntregue}
-                        onChange={(e) => handleQuantidadeChange(index, e.target.value)}
-                        onFocus={(e) => e.target.select()}
-                        placeholder="0.00"
-                        className={cn(
-                          "h-10 pr-10 text-right font-black text-sm transition-all",
-                          item.quantidadeEntregue === 0 ? "border-red-500/50 bg-red-500/5 text-red-600" :
-                          isDifferent ? (diff > 0 ? "border-blue-500/50 focus-visible:ring-blue-500/30 bg-blue-500/5 text-blue-600 dark:text-blue-400" : "border-amber-500/50 focus-visible:ring-amber-500/30 bg-amber-500/5 text-amber-600 dark:text-amber-400") : "bg-background"
-                        )}
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase pointer-events-none">
-                        {item.unidadeEntregue}
-                      </span>
-                    </div>
-                    {item.quantidadeEntregue === 0 && (
-                       <span className="text-[10px] font-bold mt-1.5 text-right text-red-500 flex items-center justify-end gap-1 uppercase tracking-tighter">
-                         <X className="h-3 w-3" />
-                         Produto em Falta
-                       </span>
-                    )}
-                    {item.quantidadeEntregue > 0 && isDifferent && (
-                       <span className={cn("text-[10px] font-bold mt-1.5 text-right flex items-center justify-end gap-1", diff > 0 ? "text-blue-500" : "text-amber-500")}>
-                         <AlertCircle className="h-3 w-3" />
-                         {diff > 0 ? `Sobrou ${diff.toFixed(2)}` : `Faltou ${Math.abs(diff).toFixed(2)}`}
-                       </span>
-                    )}
-                  </div>
-
-                  {/* Coluna: Qtd por Caixa (aparece quando existem itens em caixa) */}
-                  {hasBoxItems && (
-                    <div className="sm:col-span-2 flex flex-col justify-center pt-2 sm:pt-0">
-                      {item.isBoxUnit ? (
-                        <>
-                          <p className="sm:hidden text-[10px] text-amber-500 uppercase font-bold tracking-widest mb-1">Un/Caixa</p>
-                          <div className="relative w-full">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min="1"
-                              value={item.fatorEmbalagem === 1 && !item.quantidadePorEmbalagemOriginal ? '' : item.fatorEmbalagem}
-                              onChange={(e) => handleFatorEmbalagemChange(index, e.target.value)}
-                              onFocus={(e) => e.target.select()}
-                              placeholder="Qtd..."
-                              className={cn(
-                                "h-10 pr-10 text-right font-black text-sm transition-all",
-                                item.quantidadePorEmbalagemOriginal
-                                  ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
-                                  : item.fatorEmbalagem > 1
-                                    ? "bg-amber-500/5 border-amber-500/30 text-amber-700 dark:text-amber-400"
-                                    : "bg-background"
-                              )}
-                            />
-                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground uppercase pointer-events-none">
-                              un/cx
-                            </span>
-                          </div>
-                          {item.quantidadePorEmbalagemOriginal ? (
-                            <span className="text-[10px] font-medium mt-1 text-emerald-600 dark:text-emerald-500 text-right w-full block">
-                              Cotado: {item.quantidadePorEmbalagemOriginal} un/cx
-                            </span>
+                      {/* Qtd Recebida */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recebida</p>
+                          {!isFalta ? (
+                            <button
+                              onClick={() => handleMarcarFalta(index)}
+                              className="text-[9px] font-bold text-amber-500 hover:text-amber-600 uppercase tracking-tight px-1.5 py-0.5 rounded hover:bg-amber-500/10 transition-colors"
+                            >
+                              Falta
+                            </button>
                           ) : (
-                            <span className="text-[10px] font-medium mt-1 text-amber-500 text-right w-full block italic">
-                              Não informado na cotação
-                            </span>
+                            <span className="text-[9px] font-bold text-red-500 uppercase tracking-tight">Em falta</span>
                           )}
-                        </>
-                      ) : (
-                        // Célula vazia para manter o grid alinhado
-                        <div className="h-10" />
+                        </div>
+                        <div className="relative">
+                          <Input
+                            type="number" step="0.01" min="0"
+                            value={item.quantidadeEntregue === 0 ? "" : item.quantidadeEntregue}
+                            onChange={e => handleQuantidadeChange(index, e.target.value)}
+                            onFocus={e => e.target.select()}
+                            placeholder="0.00"
+                            className={cn(
+                              "h-9 pr-9 text-right font-black text-sm",
+                              isFalta
+                                ? "border-red-500/40 bg-red-500/5 text-red-500"
+                                : isDifferent
+                                  ? diff > 0
+                                    ? "border-blue-500/40 bg-blue-500/5 text-blue-600 dark:text-blue-400"
+                                    : "border-amber-500/40 bg-amber-500/5 text-amber-600 dark:text-amber-400"
+                                  : ""
+                            )}
+                          />
+                          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase pointer-events-none">
+                            {item.unidadeEntregue}
+                          </span>
+                        </div>
+                        {isFalta ? (
+                          <p className="text-[10px] font-bold mt-1 text-red-500 flex items-center justify-end gap-1 leading-none">
+                            <AlertCircle className="h-3 w-3 shrink-0" />Em falta
+                          </p>
+                        ) : isDifferent ? (
+                          <p className={cn("text-[10px] font-bold mt-1 flex items-center justify-end gap-1 leading-none",
+                            diff > 0 ? "text-blue-500" : "text-amber-500")}>
+                            <AlertCircle className="h-3 w-3 shrink-0" />
+                            {diff > 0 ? `+${diff.toFixed(2)}` : `-${Math.abs(diff).toFixed(2)}`}
+                          </p>
+                        ) : (
+                          <div className="mt-1 h-[14px]" />
+                        )}
+                      </div>
+
+                      {/* Economia por item */}
+                      <div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Economia</p>
+                        <div className={cn(
+                          "h-9 rounded-md border px-3 flex items-center justify-between gap-2",
+                          economiaItem !== null
+                            ? "bg-emerald-500/5 border-emerald-500/20"
+                            : "bg-muted/30 border-border dark:border-white/5"
+                        )}>
+                          {economiaItem !== null ? (
+                            <>
+                              <span className="text-[9px] font-bold text-emerald-600/70 dark:text-emerald-500/70 uppercase tracking-wide whitespace-nowrap">
+                                Ec. parcial
+                              </span>
+                              <span className="font-black text-sm text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                R$ {economiaItem.toFixed(2)}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-muted-foreground mx-auto">—</span>
+                          )}
+                        </div>
+                        <div className="mt-1 h-[14px]" />
+                      </div>
+
+                      {/* Un/Caixa (condicional) */}
+                      {hasBoxItems && (
+                        <div>
+                          {item.isBoxUnit ? (
+                            <>
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Un/Cx</p>
+                              <div className="relative">
+                                <Input
+                                  type="number" step="0.01" min="1"
+                                  value={item.fatorEmbalagem === 1 && !item.quantidadePorEmbalagemOriginal ? "" : item.fatorEmbalagem}
+                                  onChange={e => handleFatorEmbalagemChange(index, e.target.value)}
+                                  onFocus={e => e.target.select()}
+                                  placeholder="—"
+                                  className={cn(
+                                    "h-9 pr-1.5 text-right font-black text-sm",
+                                    item.quantidadePorEmbalagemOriginal
+                                      ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
+                                      : item.fatorEmbalagem > 1
+                                        ? "bg-amber-500/5 border-amber-500/30 text-amber-700 dark:text-amber-400"
+                                        : ""
+                                  )}
+                                />
+                              </div>
+                              {item.quantidadePorEmbalagemOriginal ? (
+                                <p className="text-[10px] font-medium mt-1 text-emerald-600 dark:text-emerald-500 text-right leading-none">
+                                  Cot.: {item.quantidadePorEmbalagemOriginal}
+                                </p>
+                              ) : (
+                                <div className="mt-1 h-[14px]" />
+                              )}
+                            </>
+                          ) : (
+                            <div />
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
-                </div>
-              )
-            })}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* Resumo Final e Ações Footer */}
-        <div className="px-5 py-4 bg-muted/30 border-t border-border dark:border-white/5 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8 flex-1">
+        {/* Footer */}
+        <div className="flex-shrink-0 px-5 py-4 bg-muted/30 border-t border-border dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-8">
             <div>
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-0.5">Total Recebido</span>
-              <span className="font-black text-2xl text-foreground tracking-tight">
-                R$ {valorTotalEntregue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-              </span>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Total Recebido</p>
+              <p className="font-black text-xl text-foreground tracking-tight">
+                R$ {valorTotalEntregue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+              </p>
             </div>
-            
             {veioDeCotacao && economiaRealPreview > 0 && (
-              <div className="pl-0 sm:pl-8 border-l-0 sm:border-l border-border relative">
-                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest block mb-0.5 flex items-center gap-1">
-                  <TrendingDown className="h-3 w-3" /> Economia Real Obtida
-                </span>
-                <span className="font-black text-2xl text-emerald-600 dark:text-emerald-400 tracking-tight">
-                  R$ {economiaRealPreview.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </span>
+              <div className="pl-8 border-l border-border">
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-0.5 flex items-center gap-1">
+                  <TrendingDown className="h-3 w-3" />Economia Real
+                </p>
+                <p className="font-black text-xl text-emerald-600 dark:text-emerald-400 tracking-tight">
+                  R$ {economiaRealPreview.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </p>
               </div>
             )}
           </div>
 
-          <div className="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
               disabled={isUpdating}
-              className="h-10 px-4 text-xs font-semibold flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none h-9 px-4 text-xs font-semibold"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!todosPreenchidos || isUpdating}
-              className="h-10 px-6 text-xs font-bold flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+              className="flex-1 sm:flex-none h-9 px-6 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
             >
-              {isUpdating ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Confirmar
-                </>
-              )}
+              {isUpdating
+                ? <><Loader2 className="h-4 w-4 animate-spin" />Salvando...</>
+                : <><CheckCircle2 className="h-4 w-4" />Confirmar</>
+              }
             </Button>
           </div>
         </div>
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-[92vh] rounded-t-2xl p-0 overflow-hidden flex flex-col bg-background border-t border-border dark:border-white/5">
+          <DrawerTitle className="sr-only">Registrar Recebimento</DrawerTitle>
+          <DrawerDescription className="sr-only">Registre as quantidades recebidas</DrawerDescription>
+          {modalContent}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        hideClose
+        className="w-[95vw] max-w-[720px] max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl border border-border dark:border-white/5 shadow-2xl bg-background [&>button]:hidden"
+      >
+        <DialogTitle className="sr-only">Registrar Recebimento</DialogTitle>
+        <DialogDescription className="sr-only">Registre as quantidades recebidas</DialogDescription>
+        {modalContent}
       </DialogContent>
     </Dialog>
   );
 }
-
