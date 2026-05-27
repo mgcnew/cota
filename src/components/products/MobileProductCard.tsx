@@ -1,15 +1,20 @@
-﻿import { memo, useCallback } from "react";
-import { Button } from "@/components/ui/button";
+import { memo, useCallback } from "react";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { LazyImage } from "@/components/responsive/LazyImage";
-import { 
-  History, Package, Trash2, ClipboardList, 
-  TrendingUp, TrendingDown, Minus, Edit, Eye
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  History, Package, Trash2, ClipboardList,
+  TrendingUp, TrendingDown, Minus, Edit, MoreVertical,
 } from "lucide-react";
 import { capitalize } from "@/lib/text-utils";
 import type { Product } from "@/hooks/useProducts";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 
 interface MobileProductCardProps {
   product: Product;
@@ -19,18 +24,26 @@ interface MobileProductCardProps {
   style?: React.CSSProperties;
 }
 
-const abbreviateName = (name: string, maxLength: number = 28) => {
-  if (name.length <= maxLength) return name;
-  return name.substring(0, maxLength - 3) + '...';
+const getProductStatus = (product: Product) => {
+  if (product.quotesCount === 0) return "sem_cotacao";
+  if (product.lastOrderPrice === "R$ 0,00") return "pendente";
+  if (product.quotesCount >= 3) return "ativo";
+  return "cotado";
 };
 
-/**
- * Mobile product card redesigned to match the quotation table style
- * - Floating card style with glassmorphism
- * - Shortened status labels for better mobile fit
- * - Row click for viewing history
- * - Explicit actions buttons for edit/delete
- */
+const STATUS_ACCENT: Record<string, string> = {
+  ativo:       "bg-emerald-500",
+  cotado:      "bg-blue-500",
+  pendente:    "bg-amber-500",
+  sem_cotacao: "bg-orange-400",
+};
+
+const getTrendIcon = (trend: "up" | "down" | "stable") => {
+  if (trend === "up")   return <TrendingUp   className="h-3 w-3 text-emerald-500" />;
+  if (trend === "down") return <TrendingDown  className="h-3 w-3 text-red-400"     />;
+  return                       <Minus         className="h-3 w-3 text-zinc-400"    />;
+};
+
 export const MobileProductCard = memo<MobileProductCardProps>(({
   product,
   onEdit,
@@ -38,172 +51,109 @@ export const MobileProductCard = memo<MobileProductCardProps>(({
   onHistory,
   style,
 }) => {
-  const handleEdit = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(product);
-  }, [onEdit, product]);
-
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(product);
-  }, [onDelete, product]);
-
-  const handleView = useCallback(() => {
-    onHistory?.(product);
-  }, [onHistory, product]);
-
-  const getProductStatus = (product: Product) => {
-    if (product.quotesCount === 0) return "sem_cotacao";
-    if (product.lastOrderPrice === "R$ 0,00") return "pendente";
-    if (product.quotesCount >= 3) return "ativo";
-    return "cotado";
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      ativo: "Ativo",
-      inativo: "Inat.",
-      cotado: "Cotado",
-      pendente: "Pend.",
-      sem_cotacao: "S/ Cot."
-    };
-    return labels[status] || capitalize(status);
-  };
-
-  const getTrendIcon = (trend: "up" | "down" | "stable") => {
-    if (trend === "up") return <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />;
-    if (trend === "down") return <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />;
-    return <Minus className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />;
-  };
-
   const status = getProductStatus(product);
+  const accent = STATUS_ACCENT[status] ?? "bg-zinc-400";
+
+  const handleEdit    = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onEdit(product);    }, [onEdit,    product]);
+  const handleDelete  = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onDelete(product);  }, [onDelete,  product]);
+  const handleHistory = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onHistory?.(product); }, [onHistory, product]);
 
   return (
-    <div 
-      onClick={handleView}
+    <div
       style={style}
-      className={cn(
-        "bg-white dark:bg-card/80 backdrop-blur-md rounded-2xl border border-zinc-200/80 dark:border-zinc-800/60 shadow-sm overflow-hidden touch-manipulation relative active:scale-[0.98] transition-all duration-200",
-      )}
+      className="relative bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm active:scale-[0.99] transition-transform"
     >
-      <div className="p-4">
-        {/* Header: Image, Name, Price */}
-        <div className="flex justify-between items-start mb-3 gap-2">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-xl bg-brand/10 dark:bg-brand/20 flex items-center justify-center flex-shrink-0 overflow-hidden border border-brand/10">
-              {product.image_url ? (
-                <LazyImage 
-                  src={product.image_url} 
-                  alt={product.name} 
-                  className="w-10 h-10 rounded-xl object-cover"
-                  showSkeleton={true}
-                  fallback={<Package className="h-5 w-5 text-brand" />}
-                />
-              ) : (
-                <Package className="h-5 w-5 text-brand" />
-              )}
-            </div>
-            
-            <div className="min-w-0">
-              <h3 className={cn("text-sm truncate leading-tight", ds.typography.weight.bold, ds.colors.text.primary)}>
-                {capitalize(product.name)}
-              </h3>
-              <p className={cn("text-[10px] uppercase font-mono tracking-tight opacity-70 mt-0.5", ds.colors.text.secondary)}>
-                {abbreviateName(product.brand_name || product.category, 20)}
-              </p>
-            </div>
-          </div>
-          
-          <div className="text-right flex-shrink-0">
-            <div className={cn("text-sm font-bold", ds.components.dataDisplay.money)}>
-              {product.lastOrderPrice}
-            </div>
-            <div className={cn("text-[9px] uppercase tracking-wider font-medium opacity-60", ds.colors.text.muted)}>
-              últ. preço
-            </div>
-          </div>
-        </div>
+      {/* Left accent border by status */}
+      <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-xl", accent)} />
 
-        {/* Info Row: Status, Performance, Trend */}
-        <div className="flex items-center justify-between mb-4 bg-zinc-50/80 dark:bg-zinc-800/40 rounded-xl p-2.5 border border-border dark:border-white/5/50">
-          <StatusBadge 
-            status={status} 
-            customLabel={getStatusLabel(status)}
-            className="h-6"
-          />
-          
-          <div className="flex items-center gap-4">
-            <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
-              <ClipboardList className="w-3.5 h-3.5 opacity-70" />
-              <span className="text-[11px] font-bold">{product.quotesCount || 0}</span>
-            </div>
-            
-            <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
-              {getTrendIcon(product.trend)}
-              <span className="text-[11px] font-medium opacity-70">Tend.</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-          <Button 
-            className={cn(
-              "flex-1 h-10 rounded-xl touch-target active:scale-[0.96] transition-transform",
-              ds.components.button.primary
+      <div className="pl-4 pr-3 py-3">
+        {/* Top row: image + name + price + menu */}
+        <div className="flex items-center gap-3">
+          {/* Thumbnail */}
+          <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0 overflow-hidden border border-border dark:border-white/5">
+            {product.image_url ? (
+              <LazyImage
+                src={product.image_url}
+                alt={product.name}
+                className="w-full h-full object-cover"
+                showSkeleton
+                fallback={<Package className="h-4 w-4 text-muted-foreground" />}
+              />
+            ) : (
+              <Package className="h-4 w-4 text-muted-foreground" />
             )}
-            onClick={handleEdit}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Editar
-          </Button>
-          
-          <Button
-            size="icon"
-            variant="outline"
-            className="h-10 w-10 rounded-xl border-border dark:border-white/5 text-red-500 hover:text-red-600 hover:border-red-200 dark:hover:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/30 touch-target shrink-0 active:scale-[0.96] transition-transform"
-            onClick={handleDelete}
-            aria-label="Excluir produto"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          </div>
 
-          {onHistory && (
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-10 w-10 rounded-xl border-border dark:border-white/5 text-zinc-500 hover:text-brand hover:border-brand/30 hover:bg-brand/5 touch-target shrink-0 active:scale-[0.96] transition-transform"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleView();
-              }}
-              aria-label="Ver histórico"
-            >
-              <History className="w-4 h-4" />
-            </Button>
-          )}
+          {/* Name + category */}
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-foreground truncate leading-tight">
+              {capitalize(product.name)}
+            </p>
+            <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+              {capitalize(product.brand_name || product.category || "—")}
+            </p>
+          </div>
+
+          {/* Price */}
+          <div className="text-right shrink-0 mr-1">
+            <p className="text-[13px] font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+              {product.lastOrderPrice}
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">por {product.unit || "un"}</p>
+          </div>
+
+          {/* Actions menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all shrink-0 touch-manipulation"
+                onClick={e => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={handleEdit} className="gap-2">
+                <Edit className="h-4 w-4" /> Editar
+              </DropdownMenuItem>
+              {onHistory && (
+                <DropdownMenuItem onClick={handleHistory} className="gap-2">
+                  <History className="h-4 w-4" /> Histórico de Preços
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleDelete} className="gap-2 text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/30">
+                <Trash2 className="h-4 w-4" /> Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Bottom row: status + cotações + trend */}
+        <div className="flex items-center gap-3 mt-2.5 pt-2.5 border-t border-border dark:border-white/5">
+          <StatusBadge status={status} className="text-[10px] h-5 px-2" />
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground ml-auto">
+            <ClipboardList className="h-3 w-3" />
+            <span className="font-medium">{product.quotesCount || 0} cot.</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {getTrendIcon(product.trend)}
+          </div>
         </div>
       </div>
     </div>
   );
-}, (prevProps, nextProps) => {
-  return (
-    prevProps.product.id === nextProps.product.id &&
-    prevProps.product.name === nextProps.product.name &&
-    prevProps.product.category === nextProps.product.category &&
-    prevProps.product.lastOrderPrice === nextProps.product.lastOrderPrice &&
-    prevProps.product.quotesCount === nextProps.product.quotesCount &&
-    prevProps.product.trend === nextProps.product.trend &&
-    prevProps.product.barcode === nextProps.product.barcode &&
-    prevProps.product.bestSupplier === nextProps.product.bestSupplier &&
-    prevProps.product.image_url === nextProps.product.image_url &&
-    prevProps.product.brand_id === nextProps.product.brand_id &&
-    prevProps.product.brand_name === nextProps.product.brand_name &&
-    prevProps.product.brand_rating === nextProps.product.brand_rating
-  );
-});
+}, (prev, next) =>
+  prev.product.id              === next.product.id              &&
+  prev.product.name            === next.product.name            &&
+  prev.product.category        === next.product.category        &&
+  prev.product.lastOrderPrice  === next.product.lastOrderPrice  &&
+  prev.product.quotesCount     === next.product.quotesCount     &&
+  prev.product.trend           === next.product.trend           &&
+  prev.product.image_url       === next.product.image_url       &&
+  prev.product.brand_name      === next.product.brand_name
+);
 
 MobileProductCard.displayName = "MobileProductCard";
 
 export default MobileProductCard;
-

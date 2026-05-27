@@ -484,7 +484,7 @@ function Produtos() {
               ) : (
                 <>
                   {/* Mobile Cards View */}
-                  <div className="md:hidden space-y-2 p-4 bg-zinc-50/50 dark:bg-zinc-900/20">
+                  <div className="md:hidden space-y-2 p-3 pb-4">
                     {paginatedData.items.map((product) => (
                       <MobileProductCard
                         key={product.id}
