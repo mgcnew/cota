@@ -1,18 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
-const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ?? "http://localhost:8087")
-  .split(",")
-  .map((o) => o.trim());
-
-function corsHeaders(origin: string | null) {
-  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    "Access-Control-Allow-Origin": allow,
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Vary": "Origin",
-  };
-}
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 type Kind = "text" | "image" | "document";
 
@@ -32,8 +24,7 @@ function formatPhone(raw: string): string {
 }
 
 serve(async (req) => {
-  const origin = req.headers.get("origin");
-  const headers = corsHeaders(origin);
+  const headers = corsHeaders;
 
   if (req.method === "OPTIONS") return new Response(null, { headers });
   if (req.method !== "POST") {
