@@ -1,9 +1,8 @@
-import { useState, useMemo, Suspense, lazy, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { ClipboardList, X, Loader2, Sparkles, MessageCircle } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
@@ -26,46 +25,11 @@ interface GerenciarCotacaoDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-// Lazy loading dos componentes das abas
-const QuoteSummaryTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteSummaryTab").then(m => ({ default: m.QuoteSummaryTab })));
-const QuoteValuesTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteValuesTab").then(m => ({ default: m.QuoteValuesTab })));
-const QuoteConversionTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteConversionTab").then(m => ({ default: m.QuoteConversionTab })));
-const QuoteEditTab = lazy(() => import("@/components/cotacoes/view-dialog/QuoteEditTab").then(m => ({ default: m.QuoteEditTab })));
+import { QuoteSummaryTab } from "@/components/cotacoes/view-dialog/QuoteSummaryTab";
+import { QuoteValuesTab } from "@/components/cotacoes/view-dialog/QuoteValuesTab";
+import { QuoteConversionTab } from "@/components/cotacoes/view-dialog/QuoteConversionTab";
+import { QuoteEditTab } from "@/components/cotacoes/view-dialog/QuoteEditTab";
 
-// Skeleton para cada aba
-const TabSkeleton = ({ type }: { type: string }) => {
-  if (type === 'resumo') {
-    return (
-      <div className="p-5 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
-        </div>
-        <Skeleton className="h-[400px] rounded-xl" />
-      </div>
-    );
-  }
-  if (type === 'valores') {
-    return (
-      <div className="h-full flex">
-        <div className="w-64 border-r border-border dark:border-white/5 p-3 space-y-2">
-          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-12 rounded-lg" />)}
-        </div>
-        <div className="flex-1 p-5 space-y-4">
-          <div className="flex justify-between">
-            <Skeleton className="h-10 w-48 rounded-lg" />
-            <Skeleton className="h-10 w-24 rounded-lg" />
-          </div>
-          {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="h-16 rounded-lg" />)}
-        </div>
-      </div>
-    );
-  }
-  return (
-    <div className="p-5 space-y-4">
-      {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
-    </div>
-  );
-};
 
 export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange }: GerenciarCotacaoDialogProps) {
   const { data: company } = useCompany();
@@ -444,16 +408,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         </div>
 
         <div className="flex-1 min-h-0 relative bg-background/50 flex flex-col overflow-visible">
-          <Suspense fallback={<TabSkeleton type={activeTab} />}>
             <TabsContent value="resumo" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
-              {activeTab === 'resumo' && (
-                <QuoteSummaryTab
-                  stats={stats}
-                  melhorTotal={melhorTotal}
-                  productPricesData={productPricesData}
-                  safeStr={safeStr}
-                />
-              )}
+              <QuoteSummaryTab
+                stats={stats}
+                melhorTotal={melhorTotal}
+                productPricesData={productPricesData}
+                safeStr={safeStr}
+              />
             </TabsContent>
 
             <TabsContent value="valores" className="flex-1 min-h-0 m-0 p-0 overflow-hidden data-[state=active]:flex flex-col">
@@ -517,7 +478,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                 />
               )}
             </TabsContent>
-          </Suspense>
         </div>
       </Tabs>
 
