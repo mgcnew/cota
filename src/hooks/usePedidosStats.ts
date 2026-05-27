@@ -23,8 +23,9 @@ export interface OrderData {
 
 export function usePedidosStats(pedidos: OrderData[]) {
   return useMemo(() => {
-    const pedidosAtivos = pedidos.filter(p => p.status === "pendente" || p.status === "processando").length;
+    const pedidosAtivos = pedidos.filter(p => p.status === "pendente").length;
     const pedidosEntreguesCount = pedidos.filter(p => p.status === "entregue").length;
+    const pedidosAguardandoList = pedidos.filter(p => p.status === "confirmado" || p.status === "enviado");
     const pedidosValidos = pedidos.filter(p => p.status !== "cancelado");
     
     const totalValue = pedidosValidos.reduce((acc, p) => {
@@ -61,6 +62,8 @@ export function usePedidosStats(pedidos: OrderData[]) {
     return {
       pedidosAtivos,
       pedidosEntregues: pedidosEntreguesCount,
+      pedidosAguardando: pedidosAguardandoList.length,
+      pedidosAguardandoList,
       totalValueFormatado: totalValue > 0 ? totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
       economiaReal: economiaRealTotal,
       variacaoFaturadoTotal,

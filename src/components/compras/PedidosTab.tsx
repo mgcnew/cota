@@ -7,7 +7,7 @@ import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-selec
 import { SearchInput } from "@/components/ui/search-input";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2 } from "lucide-react";
+import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2, PackageCheck } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { designSystem as ds } from "@/styles/design-system";
@@ -200,7 +200,7 @@ function PedidosTab() {
         <div className="mb-4 -mx-1">
           <MobileMetricRibbon>
             <MobileMetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
-            <MobileMetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
+            <MobileMetricCard title="Aguardando" value={stats.pedidosAguardando} icon={PackageCheck} variant="info" />
             <MobileMetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
             <MobileMetricCard
               title="Economia Real"
@@ -218,7 +218,34 @@ function PedidosTab() {
       ) : (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
           <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
-          <MetricCard title="Entregues" value={stats.pedidosEntregues} icon={Truck} variant="success" />
+          <MetricCard
+            title="Aguardando Entrega"
+            value={stats.pedidosAguardando}
+            icon={PackageCheck}
+            variant="info"
+            popoverContent={
+              stats.pedidosAguardandoList.length === 0 ? (
+                <div className="p-4 text-center text-xs text-muted-foreground">Nenhum pedido aguardando entrega</div>
+              ) : (
+                <div>
+                  <div className="px-3 py-2 border-b border-border bg-muted/40">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Aguardando Entrega</p>
+                  </div>
+                  <div className="max-h-52 overflow-y-auto divide-y divide-border">
+                    {stats.pedidosAguardandoList.map((p) => (
+                      <div key={p.id} className="px-3 py-2.5 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-foreground truncate">{p.fornecedor}</p>
+                          <p className="text-[10px] text-muted-foreground">{p.dataPedido}</p>
+                        </div>
+                        <span className="text-xs font-bold text-foreground shrink-0">{p.total}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            }
+          />
           <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
           <MetricCard
             title="Economia Real"

@@ -5,7 +5,7 @@ import { useBreakpoint } from "@/hooks/useBreakpoint";
 import type { Quote } from "@/hooks/useCotacoes";
 import { useCotacoesFilters } from "@/hooks/useCotacoesFilters";
 import { useCotacoesDialogs } from "@/hooks/useCotacoesDialogs";
-import { Plus, FileText, Download, Users, Zap, Sparkles } from "lucide-react";
+import { Plus, FileText, Download, Users, Zap, CheckCircle2 } from "lucide-react";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { designSystem as ds } from "@/styles/design-system";
@@ -100,13 +100,12 @@ function CotacoesTab() {
         <div className="mb-4 -mx-1">
           <MobileMetricRibbon>
             <MobileMetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
-            <MobileMetricCard 
-              title="Adesão Fornecedores" 
-              value={stats.adesaoFormatada} 
-              icon={Users} 
-              variant="success" 
-              trend={{ value: `${stats.prontasParaDecisao} prontas`, label: "p/ fechar", type: "positive" }} 
-              onClick={() => handleStatusFilterChange("prontas")}
+            <MobileMetricCard
+              title="Adesão Fornecedores"
+              value={stats.adesaoFormatada}
+              icon={Users}
+              variant="success"
+              trend={{ value: `${stats.pendentes} pendentes`, label: "aguardando", type: "neutral" }}
             />
             <MobileMetricCard
               title="Ações Urgentes"
@@ -117,11 +116,11 @@ function CotacoesTab() {
               onClick={() => handleStatusFilterChange("vencendo")}
             />
             <MobileMetricCard
-              title="Economia Negociada"
-              value={stats.economiaTrabalhoFormatada}
-              icon={Sparkles}
+              title="Prontas p/ Fechar"
+              value={stats.prontasParaDecisao}
+              icon={CheckCircle2}
               variant="success"
-              trend={{ value: stats.economiaPotencialFormatada, label: "mercado", type: "neutral" }}
+              onClick={() => handleStatusFilterChange("prontas")}
             />
           </MobileMetricRibbon>
         </div>
@@ -135,11 +134,10 @@ function CotacoesTab() {
             icon={Users}
             variant="success"
             trend={{
-              value: `${stats.prontasParaDecisao} prontas`,
-              label: "p/ fechar",
-              type: "positive"
+              value: `${stats.pendentes} pendentes`,
+              label: "aguardando",
+              type: "neutral"
             }}
-            onClick={() => handleStatusFilterChange("prontas")}
           />
 
           <MetricCard
@@ -156,15 +154,16 @@ function CotacoesTab() {
           />
 
           <MetricCard
-            title="Economia Real Negociada"
-            value={stats.economiaTrabalhoFormatada}
-            icon={Sparkles}
+            title="Prontas p/ Fechar"
+            value={stats.prontasParaDecisao}
+            icon={CheckCircle2}
             variant="success"
             trend={{
-              value: stats.economiaPotencialFormatada,
-              label: "mercado",
-              type: "neutral"
+              value: "Todos responderam",
+              label: "aguardando decisão",
+              type: "positive"
             }}
+            onClick={() => handleStatusFilterChange("prontas")}
           />
         </ResponsiveGrid>
       )}

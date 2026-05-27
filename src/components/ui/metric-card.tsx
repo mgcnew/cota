@@ -1,6 +1,7 @@
 import { memo } from "react";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface MetricCardProps {
   title: string;
@@ -15,6 +16,7 @@ interface MetricCardProps {
   className?: string;
   onClick?: () => void;
   subtitle?: string;
+  popoverContent?: React.ReactNode;
 }
 
 const VARIANTS: Record<string, { border: string; icon: string; iconBg: string; value: string }> = {
@@ -59,6 +61,7 @@ export const MetricCard = memo(function MetricCard({
   className,
   onClick,
   subtitle,
+  popoverContent,
 }: MetricCardProps) {
   const v = VARIANTS[variant];
 
@@ -76,9 +79,26 @@ export const MetricCard = memo(function MetricCard({
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-none">
-          {title}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-none">
+            {title}
+          </span>
+          {popoverContent && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
+                  <Info className="w-3 h-3" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-0" align="start">
+                {popoverContent}
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
         <div className={cn("p-1.5 rounded-md shrink-0", v.iconBg)}>
           <Icon className={cn("w-3.5 h-3.5", v.icon)} />
         </div>

@@ -794,7 +794,7 @@ export function QuoteValuesTab({
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within:text-brand transition-colors pointer-events-none" />
                       <input
                         type="text"
-                        placeholder="Pesquisar produto..."
+                        placeholder="Filtrar..."
                         value={productSearch}
                         onChange={e => setProductSearch(e.target.value)}
                         className="w-full pl-7 pr-2 h-7 rounded-lg text-[11px] bg-background/80 border border-border/40 focus:border-brand/50 focus:ring-1 focus:ring-brand/20 focus:outline-none text-foreground placeholder:text-zinc-400"
@@ -1201,7 +1201,7 @@ export function QuoteValuesTab({
               <div className="relative group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 focus-within:text-brand transition-colors" />
                 <Input
-                  placeholder="Pesquisar produto..."
+                  placeholder="Filtrar..."
                   value={productSearch}
                   onChange={e => setProductSearch(e.target.value)}
                   className="pl-9 h-9 rounded-xl text-xs bg-muted/20 border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand"
