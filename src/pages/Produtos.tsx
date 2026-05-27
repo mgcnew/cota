@@ -64,7 +64,6 @@ function Produtos() {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
@@ -299,17 +298,6 @@ function Produtos() {
     setSelectedCategories(prev => checked ? [...prev, normalized] : prev.filter(c => c !== normalized));
   }, []);
 
-  const handleRowSelect = useCallback((productId: string, checked: boolean) => {
-    setSelectedProductIds(prev => {
-      const next = new Set(prev);
-      checked ? next.add(productId) : next.delete(productId);
-      return next;
-    });
-  }, []);
-
-  const handleSelectAll = useCallback((checked: boolean) => {
-    setSelectedProductIds(checked ? new Set(paginatedData.items.map(p => p.id)) : new Set());
-  }, [paginatedData.items]);
 
   if (loading || productsLoading) {
     return (
@@ -515,9 +503,7 @@ function Produtos() {
                       onEdit={handleEditProduct}
                       onDelete={handleDeleteProduct}
                       onHistory={handleHistoryProduct}
-                      selectedIds={selectedProductIds}
-                      onRowSelect={handleRowSelect}
-                      onSelectAll={handleSelectAll}
+
                     />
                   </div>
 
