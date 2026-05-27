@@ -235,7 +235,9 @@ export default function VendorPortal() {
       const channels = tokens.map(tk =>
         supabase.channel(`vendor-portal-${tk}`)
           .on('postgres_changes' as any, { event: 'UPDATE', table: 'quotes' }, (payload: any) => {
-            if (payload.new?.status === 'concluida') location.reload();
+            if (payload.new?.status === 'concluida') {
+              setError("Esta cotação foi encerrada e não aceita mais propostas.");
+            }
           })
           .subscribe()
       );
@@ -243,22 +245,31 @@ export default function VendorPortal() {
     }
   }, [token]);
 
-  const handlePriceChange = (productId: string, itemToken: string | undefined, value: string) => {
+  const handlePriceChange = useCallback((productId: string, itemToken: string | undefined, value: string) => {
     const formatted = formatInputToBRL(value);
-    setItems(items.map(item =>
+    setItems(prev => prev.map(item =>
       (item.product_id === productId && item._token === itemToken)
         ? { ...item, valor_oferecido: formatted }
         : item
     ));
-  };
+  }, []);
 
-  const handleObsChange = (productId: string, itemToken: string | undefined, value: string) => {
-    setItems(items.map(item =>
+  const handleObsChange = useCallback((productId: string, itemToken: string | undefined, value: string) => {
+    setItems(prev => prev.map(item =>
       (item.product_id === productId && item._token === itemToken)
         ? { ...item, observacoes: value }
         : item
     ));
-  };
+  }, []);
+
+  const handleBoxQtyChange = useCallback((productId: string, itemToken: string | undefined, value: string) => {
+    const val = value.replace(/\D/g, "");
+    setItems(prev => prev.map(it =>
+      (it.product_id === productId && it._token === itemToken)
+        ? { ...it, quantidade_por_caixa: val }
+        : it
+    ));
+  }, []);
 
   const handleReview = () => {
     const hasAnyPrice = items.some(i => {
@@ -584,13 +595,7 @@ export default function VendorPortal() {
                             placeholder="Unidades por caixa (opcional)"
                             className="w-full pl-16 pr-4 h-10 rounded-xl text-xs font-bold bg-amber-50/60 dark:bg-amber-950/10 border border-amber-200/60 dark:border-amber-800/30 focus:bg-white dark:focus:bg-zinc-800 focus:border-amber-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
                             value={item.quantidade_por_caixa || ""}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/\D/g, "");
-                              setItems(items.map(it =>
-                                (it.product_id === item.product_id && it._token === item._token)
-                                  ? { ...it, quantidade_por_caixa: val } : it
-                              ));
-                            }}
+                            onChange={(e) => handleBoxQtyChange(item.product_id, item._token, e.target.value)}
                           />
                         </div>
                       </div>

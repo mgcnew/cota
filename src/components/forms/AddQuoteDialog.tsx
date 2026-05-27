@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+﻿import { useState, useEffect, useRef, useMemo, useCallback, memo } from "react";
 import { QuickCreateProduct } from "@/components/forms/QuickCreateProduct";
 import { QuickCreateSupplier } from "@/components/forms/QuickCreateSupplier";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -166,7 +166,7 @@ interface AddQuoteDialogProps {
   defaultSupplierId?: string | null;
 }
 
-export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange, defaultSupplierId }: AddQuoteDialogProps) {
+function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange, defaultSupplierId }: AddQuoteDialogProps) {
   const isMobile = useIsMobile();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -367,7 +367,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       }, 50);
 
       toast({
-        title: "âœ… Produto adicionado",
+        title: "Produto adicionado",
         description: `${selectedProduct.name} foi adicionado à cotação`,
         duration: 1500,
       });
@@ -1072,10 +1072,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         >
                           <div className="flex-1 min-w-0">
                             <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
-                              {form.watch(`produtos.${index}.produtoNome`)}
+                              {field.produtoNome}
                             </p>
                             <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
-                              {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                              {field.quantidade} {field.unidade}
                             </p>
                           </div>
                           <Button
@@ -1629,10 +1629,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       {fields.map((field, index) => (
                         <div key={field.id} className="flex justify-between items-center text-sm">
                           <span className={cn(ds.colors.text.secondary, "truncate pr-3")}>
-                            {form.watch(`produtos.${index}.produtoNome`)}
+                            {field.produtoNome}
                           </span>
                           <span className={cn(ds.typography.weight.medium, ds.colors.text.primary, "flex-shrink-0")}>
-                            {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                            {field.quantidade} {field.unidade}
                           </span>
                         </div>
                       ))}
@@ -1743,10 +1743,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-sm break-words")}>
-                            {form.watch(`produtos.${index}.produtoNome`)}
+                            {field.produtoNome}
                           </h4>
                           <p className={cn("text-xs mt-1", ds.colors.text.secondary)}>
-                            {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                            {field.quantidade} {field.unidade}
                           </p>
                         </div>
                         <Button
@@ -2159,7 +2159,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                           <div className="flex items-start justify-between gap-2">
                                             <div className="flex-1 min-w-0">
                                               <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-xs sm:text-sm break-words")}>
-                                                {form.watch(`produtos.${index}.produtoNome`) || `Produto ${index + 1}`}
+                                                {field.produtoNome || `Produto ${index + 1}`}
                                               </h4>
                                               <div className={cn("text-[11px] sm:text-xs text-muted-foreground mt-0.5 flex items-center gap-2")}>
                                                 <span className={cn(
@@ -2167,7 +2167,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                   ds.colors.surface.card,
                                                   "px-1.5 rounded border"
                                                 )}>
-                                                  {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                                  {field.quantidade} {field.unidade}
                                                 </span>
                                               </div>
                                             </div>
@@ -3023,10 +3023,10 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                     {fields.slice(0, 5).map((field, index) => (
                                       <div key={field.id} className="flex justify-between items-center text-sm">
                                         <span className={cn(ds.colors.text.secondary, "truncate pr-4")}>
-                                          {form.watch(`produtos.${index}.produtoNome`) || "Produto"}
+                                          {field.produtoNome || "Produto"}
                                         </span>
                                         <span className={cn(ds.typography.weight.medium, ds.colors.text.primary, "flex-shrink-0")}>
-                                          {form.watch(`produtos.${index}.quantidade`)} {form.watch(`produtos.${index}.unidade`)}
+                                          {field.quantidade} {field.unidade}
                                         </span>
                                       </div>
                                     ))}
@@ -3288,4 +3288,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
     </Dialog>
   );
 }
+
+export default memo(AddQuoteDialog);
 
