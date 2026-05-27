@@ -22,6 +22,7 @@ export const MobileMetricRibbon = memo(function MobileMetricRibbon({
       {/* Embla viewport */}
       <div
         className="overflow-hidden cursor-grab active:cursor-grabbing"
+        style={{ touchAction: 'pan-y' }}
         ref={emblaRef}
       >
         <div className="flex gap-3 pl-0 pr-14">
