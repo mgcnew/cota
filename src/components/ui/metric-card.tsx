@@ -71,7 +71,7 @@ export const MetricCard = memo(function MetricCard({
         "group relative bg-card border border-border dark:border-white/5 rounded-lg p-4",
         "border-l-[3px]",
         v.border,
-        "transition-all duration-150",
+        "transition-[transform,box-shadow] duration-150 ease-out",
         "hover:shadow-md hover:-translate-y-px",
         onClick && "cursor-pointer active:translate-y-0 active:shadow-sm",
         className
@@ -88,7 +88,7 @@ export const MetricCard = memo(function MetricCard({
               <PopoverTrigger asChild>
                 <button
                   onClick={(e) => e.stopPropagation()}
-                  className="text-muted-foreground/50 group-hover:text-muted-foreground transition-colors duration-150"
+                  className="text-muted-foreground/50 group-hover:text-muted-foreground"
                 >
                   <Info className="w-3 h-3" />
                 </button>
