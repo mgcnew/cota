@@ -207,6 +207,11 @@ function PedidosTab() {
               value={stats.economiaNegociadaFormatada}
               icon={TrendingDown}
               variant="success"
+              trend={{
+                value: `Confirmada: ${stats.economiaRealFormatada}`,
+                label: "nas entregas",
+                type: "positive"
+              }}
             />
           </MobileMetricRibbon>
         </div>
@@ -247,7 +252,11 @@ function PedidosTab() {
             value={stats.economiaNegociadaFormatada}
             icon={TrendingDown}
             variant="success"
-            subtitle="desconto obtido nas cotações"
+            trend={{
+              value: `Confirmada: ${stats.economiaRealFormatada}`,
+              label: "nas entregas registradas",
+              type: "positive"
+            }}
           />
         </ResponsiveGrid>
       )}
