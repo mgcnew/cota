@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal, Eye, EyeOff, SlidersHorizontal } from "lucide-react";
+import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal, Eye, EyeOff, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { DataPagination } from "@/components/ui/data-pagination";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper } from "@/components/layout/PageWrapper";
@@ -508,17 +508,37 @@ function Produtos() {
                   </div>
 
                   {/* Pagination */}
-                  <div className="p-4 bg-white dark:bg-card">
-                    <DataPagination
-                      currentPage={paginatedData.pagination.currentPage}
-                      totalPages={paginatedData.pagination.totalPages}
-                      itemsPerPage={paginatedData.pagination.itemsPerPage}
-                      totalItems={safeFilteredProducts.length}
-                      onPageChange={paginatedData.pagination.goToPage}
-                      onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                      startIndex={(paginatedData.pagination.currentPage - 1) * paginatedData.pagination.itemsPerPage}
-                      endIndex={Math.min(paginatedData.pagination.currentPage * paginatedData.pagination.itemsPerPage, safeFilteredProducts.length)}
-                    />
+                  <div className="px-3.5 py-2 border-t border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
+                    <Pagination className="w-full max-w-xs mx-0">
+                      <PaginationContent className="w-full justify-between">
+                        <PaginationItem>
+                          <PaginationLink
+                            size="icon"
+                            aria-label="Página anterior"
+                            onClick={() => paginatedData.pagination.goToPage(paginatedData.pagination.currentPage - 1)}
+                            className={cn(paginatedData.pagination.currentPage <= 1 && "pointer-events-none opacity-40")}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem>
+                          <span className="text-muted-foreground text-xs">
+                            Página <span className="text-foreground font-medium">{paginatedData.pagination.currentPage}</span> de{" "}
+                            <span className="text-foreground font-medium">{paginatedData.pagination.totalPages || 1}</span>
+                          </span>
+                        </PaginationItem>
+                        <PaginationItem>
+                          <PaginationLink
+                            size="icon"
+                            aria-label="Próxima página"
+                            onClick={() => paginatedData.pagination.goToPage(paginatedData.pagination.currentPage + 1)}
+                            className={cn(paginatedData.pagination.currentPage >= paginatedData.pagination.totalPages && "pointer-events-none opacity-40")}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </PaginationLink>
+                        </PaginationItem>
+                      </PaginationContent>
+                    </Pagination>
                   </div>
                 </>
               )}
