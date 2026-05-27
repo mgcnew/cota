@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -70,6 +70,257 @@ function parseTokensDefensively(token: string | undefined): string[] {
   return decodedToken.split(',').map(t => t.trim()).filter(Boolean);
 }
 
+function formatInputToBRL(value: string): string {
+  const digitOnly = value.replace(/\D/g, "");
+  if (!digitOnly) return "";
+  const numericValue = parseInt(digitOnly, 10) / 100;
+  return numericValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+interface VendorItemProps {
+  item: QuoteItem;
+  index: number;
+  onPriceChange: (productId: string, token: string | undefined, value: string) => void;
+  onObsChange: (productId: string, token: string | undefined, value: string) => void;
+  onBoxQtyChange: (productId: string, token: string | undefined, value: string) => void;
+  onUpdateField: (productId: string, token: string | undefined, field: string, value: any) => void;
+  onToggleSpec: (productId: string, token: string | undefined) => void;
+  onConfirmSpec: (productId: string, token: string | undefined, confirmed: boolean) => void;
+  onApplyVariant: (productId: string, token: string | undefined, variant: HistoryVariant) => void;
+}
+
+const VendorItem = memo(function VendorItem({
+  item, index,
+  onPriceChange, onObsChange, onBoxQtyChange, onUpdateField,
+  onToggleSpec, onConfirmSpec, onApplyVariant,
+}: VendorItemProps) {
+  const isPkg = !!item.is_packaging;
+  const hasHistory = isPkg && !!item.last_spec;
+  const variants = (item.history_variants || []) as HistoryVariant[];
+  const isExpanded = item._spec_expanded;
+  const specConfirmed = item._spec_confirmed;
+
+  const pkgPrice = item.valor_oferecido ? parseFloat(String(item.valor_oferecido).replace(/\./g, '').replace(',', '.')) : 0;
+  const pkgUnits = item.quantidade_unidades_estimada ? parseInt(String(item.quantidade_unidades_estimada), 10) : 0;
+  const costPerUnit = pkgPrice > 0 && pkgUnits > 0 ? pkgPrice / pkgUnits : null;
+
+  const hasFilled = (() => {
+    const val = item.valor_oferecido?.toString().replace(",", ".");
+    return !!(val && Number(val) > 0);
+  })();
+
+  return (
+    <div
+      key={`${item.product_id}-${item._token}`}
+      className={cn(
+        "bg-white dark:bg-zinc-900 border rounded-2xl overflow-hidden transition-all duration-200",
+        hasFilled
+          ? "border-blue-100 dark:border-blue-900/50 shadow-sm shadow-blue-500/5"
+          : "border-zinc-100 dark:border-white/5"
+      )}
+    >
+      {/* Cabeçalho do item */}
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[9px] font-black text-zinc-300 dark:text-zinc-600 tabular-nums">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {isPkg && (
+                <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 dark:bg-blue-950/30 px-1.5 py-0.5 rounded-md border border-blue-100 dark:border-blue-900/40">
+                  Embalagem
+                </span>
+              )}
+            </div>
+            <h3 className="text-[15px] font-extrabold text-zinc-900 dark:text-zinc-50 leading-snug">
+              {item.product_name}
+            </h3>
+            <p className="text-[11px] font-bold text-zinc-400 mt-0.5">
+              {item.quantidade} {item.unidade}
+            </p>
+          </div>
+          {hasFilled && (
+            <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+            </div>
+          )}
+        </div>
+
+        {/* Inputs */}
+        <div className="space-y-2">
+          {/* Preço */}
+          <div className="relative">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-zinc-300 dark:text-zinc-600 pointer-events-none select-none">R$</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              placeholder={isPkg ? "Preço do fardo/pacote" : item.unidade?.toUpperCase().startsWith('CX') ? "Preço do kg ou unidade" : "Preço unitário"}
+              className="w-full pl-10 pr-4 h-12 rounded-xl text-[15px] font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all"
+              value={item.valor_oferecido || ""}
+              onChange={(e) => onPriceChange(item.product_id, item._token, e.target.value)}
+            />
+          </div>
+
+          {/* Qtd por caixa (apenas para CX) */}
+          {!isPkg && item.unidade?.toUpperCase().startsWith('CX') && (
+            <div>
+              <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 px-1 mb-1.5">
+                Informe o valor do quilo ou da unidade
+              </p>
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 pointer-events-none">QTD/CX</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Unidades por caixa (opcional)"
+                  className="w-full pl-16 pr-4 h-10 rounded-xl text-xs font-bold bg-amber-50/60 dark:bg-amber-950/10 border border-amber-200/60 dark:border-amber-800/30 focus:bg-white dark:focus:bg-zinc-800 focus:border-amber-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
+                  value={item.quantidade_por_caixa || ""}
+                  onChange={(e) => onBoxQtyChange(item.product_id, item._token, e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Observações */}
+          <input
+            placeholder="Observação / Marca (opcional)"
+            className="w-full h-10 px-4 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-300 dark:focus:border-white/10 outline-none text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all"
+            value={item.observacoes || ""}
+            onChange={(e) => onObsChange(item.product_id, item._token, e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Seção embalagem */}
+      {isPkg && (
+        <div className="border-t border-zinc-100 dark:border-white/5">
+          <button
+            type="button"
+            onClick={() => onToggleSpec(item.product_id, item._token)}
+            className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
+          >
+            <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Scale className="h-3 w-3" />
+              Detalhes da embalagem
+              <span className="text-zinc-400 font-medium normal-case tracking-normal">(recomendado)</span>
+            </span>
+            {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-zinc-400" /> : <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />}
+          </button>
+
+          {isExpanded && (
+            <div className="px-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+              {hasHistory && specConfirmed === undefined && (
+                <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl p-3 space-y-2.5">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300">Dados da última cotação</p>
+                      <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
+                        Peso: {item.last_spec?.quantidade_venda || '—'}{item.last_spec?.unidade_venda || 'kg'} · {item.last_spec?.quantidade_unidades_estimada || '—'} unidades
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => onConfirmSpec(item.product_id, item._token, true)}
+                      className="flex-1 h-9 text-[10px] font-black uppercase tracking-wider rounded-xl bg-emerald-500 text-white flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+                      <CheckCircle2 className="h-3 w-3" /> Continua igual
+                    </button>
+                    <button type="button" onClick={() => onConfirmSpec(item.product_id, item._token, false)}
+                      className="flex-1 h-9 text-[10px] font-black uppercase tracking-wider rounded-xl bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+                      <RefreshCw className="h-3 w-3" /> Mudou
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {specConfirmed === false && variants.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Valores anteriores:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {variants.map((v, vi) => (
+                      <button key={vi} type="button" onClick={() => onApplyVariant(item.product_id, item._token, v)}
+                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 transition-colors active:scale-95">
+                        {v.quantidade_venda}{v.unidade_venda} · {v.quantidade_unidades_estimada}un
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {(specConfirmed !== true || !hasHistory) && (
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Scale className="h-2.5 w-2.5" /> Peso (kg)</label>
+                    <input type="text" inputMode="decimal" placeholder="Ex: 2.5"
+                      className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
+                      value={item.quantidade_venda || ''}
+                      onChange={(e) => onUpdateField(item.product_id, item._token, 'quantidade_venda', e.target.value)} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Hash className="h-2.5 w-2.5" /> Qtd Unidades</label>
+                    <input type="text" inputMode="numeric" placeholder="Ex: 800"
+                      className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
+                      value={item.quantidade_unidades_estimada || ''}
+                      onChange={(e) => onUpdateField(item.product_id, item._token, 'quantidade_unidades_estimada', e.target.value.replace(/\D/g, ''))} />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Vende como</label>
+                    <select className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 appearance-none"
+                      value={item.unidade_venda || 'kg'}
+                      onChange={(e) => onUpdateField(item.product_id, item._token, 'unidade_venda', e.target.value)}>
+                      <option value="kg">KG</option>
+                      <option value="un">Unidade</option>
+                      <option value="fardo">Fardo</option>
+                      <option value="pacote">Pacote</option>
+                      <option value="bobina">Bobina</option>
+                      <option value="rolo">Rolo</option>
+                      <option value="caixa">Caixa</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Espessura (mm)</label>
+                    <input type="text" inputMode="decimal" placeholder="Ex: 0.08"
+                      className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
+                      value={item.gramatura || ''}
+                      onChange={(e) => onUpdateField(item.product_id, item._token, 'gramatura', e.target.value)} />
+                  </div>
+                </div>
+              )}
+
+              {specConfirmed === true && hasHistory && (
+                <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
+                  <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {item.quantidade_venda}{item.unidade_venda} · {item.quantidade_unidades_estimada} unidades
+                  </span>
+                  <button type="button" onClick={() => onConfirmSpec(item.product_id, item._token, false)}
+                    className="text-[10px] font-bold text-blue-600 dark:text-blue-400 underline underline-offset-2">
+                    Alterar
+                  </button>
+                </div>
+              )}
+
+              {costPerUnit !== null && (
+                <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 dark:bg-zinc-950 rounded-xl">
+                  <div>
+                    <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Custo por unidade</p>
+                    <p className="text-[10px] text-zinc-500">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(pkgPrice)} ÷ {pkgUnits} un</p>
+                  </div>
+                  <span className="text-lg font-black text-white">
+                    R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(costPerUnit)}
+                    <span className="text-[9px] font-black text-zinc-500 ml-0.5">/un</span>
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
 export default function VendorPortal() {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
@@ -136,13 +387,6 @@ export default function VendorPortal() {
     mediaQuery.addEventListener("change", handler);
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
-
-  const formatInputToBRL = (value: string) => {
-    const digitOnly = value.replace(/\D/g, "");
-    if (!digitOnly) return "";
-    const numericValue = parseInt(digitOnly, 10) / 100;
-    return numericValue.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
 
   useEffect(() => {
     async function loadData() {
@@ -512,233 +756,20 @@ export default function VendorPortal() {
             )}
           </div>
 
-          {items.map((item, index) => {
-            const isPkg = !!item.is_packaging;
-            const hasHistory = isPkg && !!item.last_spec;
-            const variants = (item.history_variants || []) as HistoryVariant[];
-            const isExpanded = item._spec_expanded;
-            const specConfirmed = item._spec_confirmed;
-
-            const pkgPrice = item.valor_oferecido ? parseFloat(String(item.valor_oferecido).replace(/\./g, '').replace(',', '.')) : 0;
-            const pkgUnits = item.quantidade_unidades_estimada ? parseInt(String(item.quantidade_unidades_estimada), 10) : 0;
-            const costPerUnit = pkgPrice > 0 && pkgUnits > 0 ? pkgPrice / pkgUnits : null;
-
-            const hasFilled = (() => {
-              const val = item.valor_oferecido?.toString().replace(",", ".");
-              return !!(val && Number(val) > 0);
-            })();
-
-            return (
-              <div
-                key={`${item.product_id}-${item._token}`}
-                className={cn(
-                  "bg-white dark:bg-zinc-900 border rounded-2xl overflow-hidden transition-all duration-200",
-                  hasFilled
-                    ? "border-blue-100 dark:border-blue-900/50 shadow-sm shadow-blue-500/5"
-                    : "border-zinc-100 dark:border-white/5"
-                )}
-              >
-                {/* Cabeçalho do item */}
-                <div className="px-4 pt-4 pb-3">
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[9px] font-black text-zinc-300 dark:text-zinc-600 tabular-nums">
-                          {String(index + 1).padStart(2, '0')}
-                        </span>
-                        {isPkg && (
-                          <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest bg-blue-50 dark:bg-blue-950/30 px-1.5 py-0.5 rounded-md border border-blue-100 dark:border-blue-900/40">
-                            Embalagem
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="text-[15px] font-extrabold text-zinc-900 dark:text-zinc-50 leading-snug">
-                        {item.product_name}
-                      </h3>
-                      <p className="text-[11px] font-bold text-zinc-400 mt-0.5">
-                        {item.quantidade} {item.unidade}
-                      </p>
-                    </div>
-                    {hasFilled && (
-                      <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-white" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Inputs */}
-                  <div className="space-y-2">
-                    {/* Preço */}
-                    <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-zinc-300 dark:text-zinc-600 pointer-events-none select-none">R$</span>
-                      <input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={isPkg ? "Preço do fardo/pacote" : item.unidade?.toUpperCase().startsWith('CX') ? "Preço do kg ou unidade" : "Preço unitário"}
-                        className="w-full pl-10 pr-4 h-12 rounded-xl text-[15px] font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all"
-                        value={item.valor_oferecido || ""}
-                        onChange={(e) => handlePriceChange(item.product_id, item._token, e.target.value)}
-                      />
-                    </div>
-
-                    {/* Qtd por caixa (apenas para CX) */}
-                    {!isPkg && item.unidade?.toUpperCase().startsWith('CX') && (
-                      <div>
-                        <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 px-1 mb-1.5">
-                          Informe o valor do quilo ou da unidade
-                        </p>
-                        <div className="relative">
-                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-zinc-400 pointer-events-none">QTD/CX</span>
-                          <input
-                            type="text"
-                            inputMode="numeric"
-                            placeholder="Unidades por caixa (opcional)"
-                            className="w-full pl-16 pr-4 h-10 rounded-xl text-xs font-bold bg-amber-50/60 dark:bg-amber-950/10 border border-amber-200/60 dark:border-amber-800/30 focus:bg-white dark:focus:bg-zinc-800 focus:border-amber-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
-                            value={item.quantidade_por_caixa || ""}
-                            onChange={(e) => handleBoxQtyChange(item.product_id, item._token, e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Observações */}
-                    <input
-                      placeholder="Observação / Marca (opcional)"
-                      className="w-full h-10 px-4 rounded-xl text-xs font-medium bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-zinc-300 dark:focus:border-white/10 outline-none text-zinc-700 dark:text-zinc-300 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all"
-                      value={item.observacoes || ""}
-                      onChange={(e) => handleObsChange(item.product_id, item._token, e.target.value)}
-                    />
-                  </div>
-                </div>
-
-                {/* Seção embalagem */}
-                {isPkg && (
-                  <div className="border-t border-zinc-100 dark:border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => toggleSpecExpanded(item.product_id, item._token)}
-                      className="w-full flex items-center justify-between px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors"
-                    >
-                      <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <Scale className="h-3 w-3" />
-                        Detalhes da embalagem
-                        <span className="text-zinc-400 font-medium normal-case tracking-normal">(recomendado)</span>
-                      </span>
-                      {isExpanded ? <ChevronUp className="h-3.5 w-3.5 text-zinc-400" /> : <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />}
-                    </button>
-
-                    {isExpanded && (
-                      <div className="px-4 pb-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                        {hasHistory && specConfirmed === undefined && (
-                          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl p-3 space-y-2.5">
-                            <div className="flex items-start gap-2">
-                              <Info className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="text-[11px] font-bold text-amber-800 dark:text-amber-300">Dados da última cotação</p>
-                                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">
-                                  Peso: {item.last_spec?.quantidade_venda || '—'}{item.last_spec?.unidade_venda || 'kg'} · {item.last_spec?.quantidade_unidades_estimada || '—'} unidades
-                                </p>
-                              </div>
-                            </div>
-                            <div className="flex gap-2">
-                              <button type="button" onClick={() => confirmSpec(item.product_id, item._token, true)}
-                                className="flex-1 h-9 text-[10px] font-black uppercase tracking-wider rounded-xl bg-emerald-500 text-white flex items-center justify-center gap-1.5 active:scale-95 transition-all">
-                                <CheckCircle2 className="h-3 w-3" /> Continua igual
-                              </button>
-                              <button type="button" onClick={() => confirmSpec(item.product_id, item._token, false)}
-                                className="flex-1 h-9 text-[10px] font-black uppercase tracking-wider rounded-xl bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-200 flex items-center justify-center gap-1.5 active:scale-95 transition-all">
-                                <RefreshCw className="h-3 w-3" /> Mudou
-                              </button>
-                            </div>
-                          </div>
-                        )}
-
-                        {specConfirmed === false && variants.length > 0 && (
-                          <div className="space-y-1.5">
-                            <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Valores anteriores:</p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {variants.map((v, vi) => (
-                                <button key={vi} type="button" onClick={() => applyVariant(item.product_id, item._token, v)}
-                                  className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/30 hover:bg-blue-100 transition-colors active:scale-95">
-                                  {v.quantidade_venda}{v.unidade_venda} · {v.quantidade_unidades_estimada}un
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {(specConfirmed !== true || !hasHistory) && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Scale className="h-2.5 w-2.5" /> Peso (kg)</label>
-                              <input type="text" inputMode="decimal" placeholder="Ex: 2.5"
-                                className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
-                                value={item.quantidade_venda || ''}
-                                onChange={(e) => updateItemField(item.product_id, item._token, 'quantidade_venda', e.target.value)} />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest flex items-center gap-1"><Hash className="h-2.5 w-2.5" /> Qtd Unidades</label>
-                              <input type="text" inputMode="numeric" placeholder="Ex: 800"
-                                className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
-                                value={item.quantidade_unidades_estimada || ''}
-                                onChange={(e) => updateItemField(item.product_id, item._token, 'quantidade_unidades_estimada', e.target.value.replace(/\D/g, ''))} />
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Vende como</label>
-                              <select className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 appearance-none"
-                                value={item.unidade_venda || 'kg'}
-                                onChange={(e) => updateItemField(item.product_id, item._token, 'unidade_venda', e.target.value)}>
-                                <option value="kg">KG</option>
-                                <option value="un">Unidade</option>
-                                <option value="fardo">Fardo</option>
-                                <option value="pacote">Pacote</option>
-                                <option value="bobina">Bobina</option>
-                                <option value="rolo">Rolo</option>
-                                <option value="caixa">Caixa</option>
-                              </select>
-                            </div>
-                            <div className="space-y-1">
-                              <label className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Espessura (mm)</label>
-                              <input type="text" inputMode="decimal" placeholder="Ex: 0.08"
-                                className="w-full h-10 px-3 rounded-xl text-xs font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:border-blue-500 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 transition-all"
-                                value={item.gramatura || ''}
-                                onChange={(e) => updateItemField(item.product_id, item._token, 'gramatura', e.target.value)} />
-                            </div>
-                          </div>
-                        )}
-
-                        {specConfirmed === true && hasHistory && (
-                          <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 dark:bg-emerald-950/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30">
-                            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
-                              <CheckCircle2 className="h-3 w-3" />
-                              {item.quantidade_venda}{item.unidade_venda} · {item.quantidade_unidades_estimada} unidades
-                            </span>
-                            <button type="button" onClick={() => confirmSpec(item.product_id, item._token, false)}
-                              className="text-[10px] font-bold text-blue-600 dark:text-blue-400 underline underline-offset-2">
-                              Alterar
-                            </button>
-                          </div>
-                        )}
-
-                        {costPerUnit !== null && (
-                          <div className="flex items-center justify-between px-4 py-3 bg-zinc-900 dark:bg-zinc-950 rounded-xl">
-                            <div>
-                              <p className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Custo por unidade</p>
-                              <p className="text-[10px] text-zinc-500">R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(pkgPrice)} ÷ {pkgUnits} un</p>
-                            </div>
-                            <span className="text-lg font-black text-white">
-                              R$ {new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(costPerUnit)}
-                              <span className="text-[9px] font-black text-zinc-500 ml-0.5">/un</span>
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {items.map((item, index) => (
+            <VendorItem
+              key={`${item.product_id}-${item._token}`}
+              item={item}
+              index={index}
+              onPriceChange={handlePriceChange}
+              onObsChange={handleObsChange}
+              onBoxQtyChange={handleBoxQtyChange}
+              onUpdateField={updateItemField}
+              onToggleSpec={toggleSpecExpanded}
+              onConfirmSpec={confirmSpec}
+              onApplyVariant={applyVariant}
+            />
+          ))}
 
           <div className="pt-4 pb-2 text-center">
             <p className="text-[9px] font-bold text-zinc-300 dark:text-zinc-700 uppercase tracking-[0.2em]">CotáJA · Portal Fornecedor</p>
