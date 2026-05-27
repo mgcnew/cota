@@ -33,7 +33,13 @@ export function usePedidosStats(pedidos: OrderData[]) {
       return acc + (parseFloat(cleanValue) || 0);
     }, 0);
     
-    // Economia REAL = Diferença entre o maior preço de mercado e o preço faturado final
+    // Economia Negociada = desconto obtido na negociação (primeira oferta - preço final) × qtd pedida
+    // Soma todos os pedidos com origem em cotação, exceto cancelados
+    const economiaNegociadaTotal = pedidos
+      .filter(p => p.status !== "cancelado" && p.quote_id)
+      .reduce((sum, p) => sum + (p.economia_estimada || 0), 0);
+
+    // Economia REAL = confirmada na entrega (mesmo baseline, mas com qtd e preço da NFe)
     const economiaRealTotal = pedidos
       .filter(p => p.status === "entregue" && p.quote_id)
       .reduce((sum, p) => sum + (p.economia_real || 0), 0);
@@ -65,6 +71,10 @@ export function usePedidosStats(pedidos: OrderData[]) {
       pedidosAguardando: pedidosAguardandoList.length,
       pedidosAguardandoList,
       totalValueFormatado: totalValue > 0 ? totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+      economiaNegociada: economiaNegociadaTotal,
+      economiaNegociadaFormatada: economiaNegociadaTotal > 0
+        ? `R$ ${economiaNegociadaTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
+        : 'R$ 0',
       economiaReal: economiaRealTotal,
       variacaoFaturadoTotal,
       economiaRealFormatada: `R$ ${economiaRealTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`,

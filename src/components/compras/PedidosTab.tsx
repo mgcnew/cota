@@ -203,15 +203,10 @@ function PedidosTab() {
             <MobileMetricCard title="Aguardando" value={stats.pedidosAguardando} icon={PackageCheck} variant="info" />
             <MobileMetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
             <MobileMetricCard
-              title="Economia Real"
-              value={stats.economiaRealFormatada}
+              title="Economia Negociada"
+              value={stats.economiaNegociadaFormatada}
               icon={TrendingDown}
               variant="success"
-              trend={{
-                value: stats.variacaoFaturadoFormatada,
-                label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
-                type: stats.variacaoType
-              }}
             />
           </MobileMetricRibbon>
         </div>
@@ -248,15 +243,11 @@ function PedidosTab() {
           />
           <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
           <MetricCard
-            title="Economia Real"
-            value={stats.economiaRealFormatada}
+            title="Economia Negociada"
+            value={stats.economiaNegociadaFormatada}
             icon={TrendingDown}
             variant="success"
-            trend={{
-              value: stats.variacaoFaturadoFormatada,
-              label: stats.variacaoType === 'negative' ? 'furo de preço' : 'ganho extra',
-              type: stats.variacaoType
-            }}
+            subtitle="desconto obtido nas cotações"
           />
         </ResponsiveGrid>
       )}
