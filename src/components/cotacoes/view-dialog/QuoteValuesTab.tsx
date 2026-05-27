@@ -787,22 +787,19 @@ export function QuoteValuesTab({
             )}
 
             {!isMobile && (
-              <div className="px-6 py-3 border-b border-border dark:border-white/5/50 bg-muted/30 flex-shrink-0">
-                  <div className="flex items-center justify-between gap-4 mb-3">
-                    <div className="relative group flex-1 max-w-xs">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-brand transition-colors" />
+              <div className="px-6 py-2 border-b border-border dark:border-white/5/50 bg-muted/30 flex-shrink-0">
+                  <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
+                    <div className="w-10" />
+                    <div className="relative group">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within:text-brand transition-colors pointer-events-none" />
                       <input
                         type="text"
                         placeholder="Pesquisar produto..."
                         value={productSearch}
                         onChange={e => setProductSearch(e.target.value)}
-                        className="w-full pl-9 h-8 rounded-xl text-xs bg-background border border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand focus:outline-none px-3"
+                        className="w-full pl-7 pr-2 h-7 rounded-lg text-[11px] bg-background/80 border border-border/40 focus:border-brand/50 focus:ring-1 focus:ring-brand/20 focus:outline-none text-foreground placeholder:text-zinc-400"
                       />
                     </div>
-                  </div>
-                  <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
-                    <div className="w-10" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">Negociação e Valor</span>
