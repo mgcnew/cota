@@ -13,8 +13,8 @@ export const MobileMetricRibbon = memo(function MobileMetricRibbon({
 }: MobileMetricRibbonProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
-    skipSnaps: false,
-    dragFree: false,
+    skipSnaps: true,
+    dragFree: true,
   });
 
   return (

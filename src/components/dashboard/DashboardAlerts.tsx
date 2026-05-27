@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertTriangle, ArrowRight, CalendarClock, X } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 interface QuoteStat {
   id: string;
@@ -22,6 +23,7 @@ interface DashboardAlertsProps {
 
 export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSuppliers = [] }: DashboardAlertsProps) => {
   const navigate = useNavigate();
+  const { isMobile } = useBreakpoint();
   const [dismissedSuppliers, setDismissedSuppliers] = useState<string[]>([]);
 
   useEffect(() => {
@@ -53,6 +55,73 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
     return null;
   }
 
+  // Mobile: compact horizontal banners
+  if (isMobile) {
+    return (
+      <div className="flex flex-col gap-2 mb-4">
+        {prontasParaDecisao.length > 0 && (
+          <button
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 active:opacity-80 transition-opacity text-left"
+            onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
+          >
+            <div className="p-1.5 rounded-lg bg-emerald-500 shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-emerald-800 dark:text-emerald-200 leading-tight">
+                {prontasParaDecisao.length} pronta{prontasParaDecisao.length > 1 ? 's' : ''} para decisão
+              </p>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400">Todos os fornecedores responderam</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-emerald-500 shrink-0" />
+          </button>
+        )}
+
+        {vencendo.length > 0 && (
+          <button
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 active:opacity-80 transition-opacity text-left"
+            onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
+          >
+            <div className="p-1.5 rounded-lg bg-amber-500 shrink-0">
+              <AlertTriangle className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-amber-800 dark:text-amber-200 leading-tight">
+                {vencendo.length} vencendo em 48h
+              </p>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400">Prazo expirando em breve</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-amber-500 shrink-0" />
+          </button>
+        )}
+
+        {visibleSuppliers.map(supplier => (
+          <div
+            key={supplier.id}
+            className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50"
+          >
+            <div className="p-1.5 rounded-lg bg-blue-500 shrink-0">
+              <CalendarClock className="h-3.5 w-3.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-blue-800 dark:text-blue-200 leading-tight truncate">
+                Pedido programado · {supplier.name}
+              </p>
+              <p className="text-[11px] text-blue-600 dark:text-blue-400">Hoje é o dia programado</p>
+            </div>
+            <button
+              className="p-1 rounded text-blue-400 hover:text-blue-600 shrink-0"
+              onClick={() => handleDismiss(supplier.id)}
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop: full cards grid
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
       {/* Cotações Prontas para Decisão */}
@@ -82,8 +151,8 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
                 )}
               </div>
             </div>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className="bg-emerald-600 hover:bg-emerald-700 text-white transition-smooth"
               onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
             >
@@ -115,8 +184,8 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
                 ))}
               </div>
             </div>
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               variant="outline"
               className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 transition-smooth"
               onClick={() => navigate('/dashboard/compras?tab=cotacoes')}
@@ -154,16 +223,16 @@ export const DashboardAlerts = memo(({ prontasParaDecisao, vencendo, scheduledSu
                 Hoje é o dia programado para fechar com este fornecedor.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   variant="outline"
                   className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 transition-smooth flex-1"
                   onClick={() => navigate(`/dashboard/compras?tab=cotacoes&open=new&supplierId=${supplier.id}`)}
                 >
                   Nova Cotação
                 </Button>
-                <Button 
-                  size="sm" 
+                <Button
+                  size="sm"
                   className="bg-blue-600 hover:bg-blue-700 text-white transition-smooth flex-1"
                   onClick={() => navigate(`/dashboard/compras?tab=pedidos&open=new&supplierId=${supplier.id}`)}
                 >

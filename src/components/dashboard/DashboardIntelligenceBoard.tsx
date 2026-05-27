@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
 
 interface SupplierStats {
   name: string;
@@ -43,6 +44,7 @@ export const DashboardIntelligenceBoard = memo(({
   recentQuotes,
   onViewAllActivities,
 }: DashboardIntelligenceBoardProps) => {
+  const { isMobile } = useBreakpoint();
 
   return (
     <div className="flex flex-col gap-4 lg:h-full">
@@ -60,6 +62,26 @@ export const DashboardIntelligenceBoard = memo(({
             <p className="text-xs text-muted-foreground text-center py-6">
               Dados insuficientes no período.
             </p>
+          ) : isMobile ? (
+            <div className="divide-y divide-border dark:divide-white/5">
+              {topSuppliers.slice(0, 3).map((supplier, idx) => (
+                <div key={idx} className="px-4 py-3 flex items-center gap-3">
+                  <span className={cn(
+                    "w-6 h-6 rounded-full inline-flex items-center justify-center text-[10px] font-bold text-white shrink-0",
+                    RANK_COLORS[idx] ?? "bg-muted-foreground"
+                  )}>
+                    {idx + 1}
+                  </span>
+                  <span className="flex-1 min-w-0 text-[13px] font-medium text-foreground truncate">
+                    <CapitalizedText>{supplier.name}</CapitalizedText>
+                  </span>
+                  <span className="text-[12px] font-semibold text-foreground shrink-0">{supplier.quotes} vic.</span>
+                  <span className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                    {(supplier.economiaPercentual || 0).toFixed(1)}%
+                  </span>
+                </div>
+              ))}
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -119,6 +141,29 @@ export const DashboardIntelligenceBoard = memo(({
             <p className="text-xs text-muted-foreground text-center py-6">
               Sem histórico recente.
             </p>
+          ) : isMobile ? (
+            <div className="divide-y divide-border dark:divide-white/5">
+              {recentQuotes.slice(0, 5).map((quote, idx) => {
+                const s = STATUS_CONFIG[quote.status?.toLowerCase()] ?? { dot: "bg-muted-foreground", label: "Atualizado" };
+                const hasPrice = quote.bestPrice && quote.bestPrice !== 'Sem ofertas';
+                return (
+                  <div key={idx} className="px-4 py-3 flex items-center gap-3">
+                    <span className={cn("w-2 h-2 rounded-full shrink-0 mt-0.5", s.dot)} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-foreground truncate">
+                        <CapitalizedText>{quote.product}</CapitalizedText>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{s.label} · {quote.date}</p>
+                    </div>
+                    {hasPrice && (
+                      <span className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400 shrink-0">
+                        {quote.bestPrice}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           ) : (
             <Table>
               <TableHeader>

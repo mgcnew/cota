@@ -1,11 +1,13 @@
 import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, Truck, Package } from 'lucide-react';
+import { ClipboardList, Truck, Package, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { CapitalizedText } from '@/components/ui/capitalized-text';
+import { useBreakpoint } from '@/hooks/useBreakpoint';
+import { cn } from '@/lib/utils';
 
 interface QuoteItem {
   id: string;
@@ -35,6 +37,7 @@ interface DashboardOperationsBoardProps {
 export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: DashboardOperationsBoardProps) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState('quotes');
+  const { isMobile } = useBreakpoint();
 
   return (
     <Card className="p-0 h-full flex flex-col">
@@ -82,6 +85,33 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
                 label="Nenhuma cotação ativa"
                 action={{ label: "Criar cotação", onClick: () => navigate('/dashboard/compras?tab=cotacoes') }}
               />
+            ) : isMobile ? (
+              <div className="divide-y divide-border dark:divide-white/5">
+                {activeQuotes.map(quote => (
+                  <button
+                    key={quote.id}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 active:bg-muted/50 transition-colors"
+                    onClick={() => navigate(`/dashboard/compras?tab=cotacoes&manageQuote=${quote.id}`)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">
+                        <CapitalizedText>{quote.produtoResumo || quote.produto}</CapitalizedText>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        Vence {quote.dataFim} · {quote.fornecedores} resp.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {quote.melhorPreco && (
+                        <span className="text-[12px] font-semibold text-emerald-600 dark:text-emerald-400">
+                          {quote.melhorPreco}
+                        </span>
+                      )}
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40" />
+                    </div>
+                  </button>
+                ))}
+              </div>
             ) : (
               <CardContent className="p-0">
                 <Table>
@@ -130,6 +160,31 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
                 label="Nenhuma entrega pendente"
                 action={{ label: "Ver histórico", onClick: () => navigate('/dashboard/compras?tab=pedidos') }}
               />
+            ) : isMobile ? (
+              <div className="divide-y divide-border dark:divide-white/5">
+                {pendingOrders.map(order => (
+                  <button
+                    key={order.id}
+                    className="w-full text-left px-4 py-3 flex items-center gap-3 active:bg-muted/50 transition-colors"
+                    onClick={() => navigate(`/dashboard/compras?tab=pedidos&receiveOrder=${order.id}`)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-foreground truncate">
+                        <CapitalizedText>{order.supplier_name}</CapitalizedText>
+                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                        {new Date(order.order_date).toLocaleDateString('pt-BR')} · {order.items?.length || 0} iten{(order.items?.length || 0) !== 1 ? 's' : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[12px] font-semibold text-foreground">
+                        R$ {order.total_value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </span>
+                      <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40" />
+                    </div>
+                  </button>
+                ))}
+              </div>
             ) : (
               <CardContent className="p-0">
                 <Table>
