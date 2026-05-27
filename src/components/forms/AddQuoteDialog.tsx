@@ -856,11 +856,11 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
   };
 
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-  // MOBILE-SPECIFIC CONTENT â€” Linear flow, large touch targets
+  // MOBILE-SPECIFIC CONTENT â€" Linear flow, large touch targets
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   const mobileContent = (
     <>
-      {/* Mobile Header â€” minimal, sticky */}
+      {/* Mobile Header â€" minimal, sticky */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
         <div className="flex items-center gap-3">
           {currentTabIndex > 0 ? (
@@ -881,15 +881,15 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
             </button>
           )}
           <div>
-            <DialogTitle className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
-              {currentTabIndex === 0 ? "Produtos" : 
-               currentTabIndex === 1 ? "Período & Fornecedores" : 
-               currentTabIndex === 2 ? "Configurar Itens" : 
+            <h2 className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
+              {currentTabIndex === 0 ? "Produtos" :
+               currentTabIndex === 1 ? "Período & Fornecedores" :
+               currentTabIndex === 2 ? "Configurar Itens" :
                "Resumo"}
-            </DialogTitle>
-            <DialogDescription className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+            </h2>
+            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
               Passo {currentTabIndex + 1} de {tabs.length}
-            </DialogDescription>
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -936,7 +936,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
         </div>
       </div>
 
-      {/* Progress bar â€” thin, clean */}
+      {/* Progress bar â€" thin, clean */}
       <div className="flex gap-1.5 px-4 pb-3">
         {tabs.map((_, idx) => (
           <div
@@ -963,7 +963,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
             onSubmit={form.handleSubmit((data) => onSubmit(data, false))}
             className="flex flex-col flex-1 min-h-0 overflow-hidden"
           >
-            {/* â”€â”€ STEP 1: Products â”€â”€ */}
+            {/* â"€â"€ STEP 1: Products â"€â"€ */}
             {activeTab === "produtos" && (
               <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Quick add area */}
@@ -997,7 +997,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                     <ChevronRight className="h-4 w-4 text-zinc-300 flex-shrink-0" />
                   </div>
 
-                  {/* Quantity + Unit â€” only show when product is selected */}
+                  {/* Quantity + Unit â€" only show when product is selected */}
                   {selectedProduct && (
                     <div className="flex gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
                       <div className="flex-1">
@@ -1049,8 +1049,8 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                   )}
                 </div>
 
-                {/* Product list â€” scrollable */}
-                <div className="flex-1 overflow-y-auto px-4 pb-24">
+                {/* Product list â€" scrollable */}
+                <div className="flex-1 overflow-y-auto px-4 pb-6">
                   {fields.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <div className={cn("w-16 h-16 rounded-2xl flex items-center justify-center mb-4", ds.colors.surface.section)}>
@@ -1095,9 +1095,9 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
               </div>
             )}
 
-            {/* â”€â”€ STEP 2: Period & Suppliers â”€â”€ */}
+            {/* â"€â"€ STEP 2: Period & Suppliers â"€â"€ */}
             {activeTab === "periodo_fornecedores" && (
-              <div className="flex-1 overflow-y-auto px-4 pb-24">
+              <div className="flex-1 overflow-y-auto px-4 pb-6">
                 <div className="space-y-5">
                   {/* Period shortcuts */}
                   <div className="space-y-2">
@@ -1367,7 +1367,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
               </div>
             )}
 
-            {/* â”€â”€ STEP 3: Personalize â”€â”€ */}
+            {/* â"€â"€ STEP 3: Personalize â"€â"€ */}
             {activeTab === "personalizar" && (
               <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header controls */}
@@ -1443,7 +1443,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                 </div>
 
                 {/* List of items */}
-                <div className="flex-1 overflow-y-auto px-4 pb-24 space-y-3">
+                <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-3">
                   {personalizeViewMode === "by-supplier" ? (
                     selectedSuppliers
                       .filter(s => s.name.toLowerCase().includes(personalizeSearch.toLowerCase()))
@@ -1613,9 +1613,9 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
               </div>
             )}
 
-            {/* â”€â”€ STEP 4: Review â”€â”€ */}
+            {/* â"€â"€ STEP 4: Review â"€â"€ */}
             {activeTab === "detalhes" && (
-              <div className="flex-1 overflow-y-auto px-4 pb-24">
+              <div className="flex-1 overflow-y-auto px-4 pb-6">
                 <div className="space-y-4">
                   {/* Products summary */}
                   <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
@@ -1714,7 +1714,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
         </div>
       )}
 
-      {/* Mobile Cart Drawer â€” reused from desktop */}
+      {/* Mobile Cart Drawer â€" reused from desktop */}
       <Drawer open={showMobileCart} onOpenChange={setShowMobileCart}>
         <DrawerContent className="max-h-[85vh]">
           <DrawerHeader className="border-b border-border dark:border-white/5/50 pb-4">
@@ -1777,7 +1777,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
   );
 
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-  // DESKTOP CONTENT â€” Tabs, side-by-side layout (unchanged)
+  // DESKTOP CONTENT â€" Tabs, side-by-side layout (unchanged)
   // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   const modalInnerContent = (
     <>
@@ -1844,7 +1844,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
           </div>
         </div>
 
-        {/* Progress bar â€” thin, clean */}
+        {/* Progress bar â€" thin, clean */}
         <div className="flex gap-1.5 px-4 pb-3">
           {tabs.map((_, idx) => {
             const isCompleted = currentTabIndex > idx;
@@ -2739,7 +2739,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                       "border shadow-sm overflow-hidden rounded-2xl transition-all",
                                       isExpanded ? "border-brand/30" : "border-border/60 hover:border-brand/20"
                                     )}>
-                                      {/* Collapsed Card Header â€” always visible */}
+                                      {/* Collapsed Card Header â€" always visible */}
                                       <button
                                         type="button"
                                         onClick={() => toggleExpanded(`supplier-${supplier.id}`)}
@@ -2777,7 +2777,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                         </div>
                                       </button>
 
-                                      {/* Expanded Content â€” only rendered when open */}
+                                      {/* Expanded Content â€" only rendered when open */}
                                       {isExpanded && (
                                         <>
                                           <div className="px-4 py-2 border-t border-b border-border dark:border-white/5/40 bg-muted/20 flex flex-wrap items-center gap-1 sm:gap-2">
@@ -3140,30 +3140,18 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
     </>
   );
 
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {trigger && (
-        <DialogTrigger asChild>
-          {trigger}
-        </DialogTrigger>
-      )}
-      <DialogContent
-        hideClose
-        className={cn(
-          "p-0 flex flex-col",
-          ds.components.modal.content,
-          "border backdrop-blur-xl",
-          isMobile
-            ? "w-full h-[100dvh] max-h-[100dvh] rounded-none border-none inset-0"
-            : "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] rounded-xl sm:rounded-2xl"
-        )}
-        onKeyDown={!isMobile ? handleModalKeyDown : undefined}
-      >
-        {isMobile ? mobileContent : modalInnerContent}
-
-        {/* Mobile Product Search Drawer â€” rendered at DialogContent level so it's always available */}
-        <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
-          <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
+  // Mobile: bottom-sheet Drawer — handles keyboard avoidance natively
+  if (isMobile) {
+    return (
+      <>
+        {trigger}
+        <Drawer open={open} onOpenChange={setOpen}>
+          <DrawerContent className="h-[95vh] flex flex-col rounded-t-2xl p-0 overflow-hidden bg-background border-t border-border dark:border-white/5">
+            <DrawerTitle className="sr-only">Nova Cotação</DrawerTitle>
+            <DrawerDescription className="sr-only">Crie uma nova cotação passo a passo</DrawerDescription>
+            {mobileContent}
+            <Drawer nested open={showMobileProductSearch} onOpenChange={setShowMobileProductSearch}>
+              <DrawerContent className={cn("h-[94vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
             <DrawerHeader className="border-b border-border dark:border-white/5/50 pb-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
@@ -3284,6 +3272,31 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
             </div>
           </DrawerContent>
         </Drawer>
+          </DrawerContent>
+        </Drawer>
+      </>
+    );
+  }
+
+  // Desktop: Dialog
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
+      <DialogContent
+        hideClose
+        className={cn(
+          "p-0 flex flex-col",
+          ds.components.modal.content,
+          "border backdrop-blur-xl",
+          "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] rounded-xl sm:rounded-2xl"
+        )}
+        onKeyDown={handleModalKeyDown}
+      >
+        {modalInnerContent}
       </DialogContent>
     </Dialog>
   );
