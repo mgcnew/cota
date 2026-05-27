@@ -1,24 +1,26 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { memo, useCallback } from "react";
-import { 
-  Building2, 
-  DollarSign, 
-  FileText, 
-  TrendingUp, 
-  Edit, 
-  Trash2, 
-  MessageCircle, 
-  Eye, 
-  Phone, 
-  Mail, 
-  MapPin,
-  Plus
+import {
+  Building2,
+  FileText,
+  TrendingUp,
+  Edit,
+  Trash2,
+  MessageCircle,
+  MoreVertical,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { capitalize } from "@/lib/text-utils";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 
 interface Supplier {
   id: string;
@@ -46,10 +48,20 @@ interface ExpandableSupplierCardProps {
   renderRating: (rating: number) => React.ReactNode;
 }
 
-/**
- * ExpandableSupplierCard - Redesigned Floating Supplier Card for Mobile
- * Aligned with Procurement & Products premium design system.
- */
+const STATUS_ACCENT: Record<string, string> = {
+  active:   "bg-emerald-500",
+  inactive: "bg-zinc-400",
+  pending:  "bg-amber-500",
+};
+
+const formatLimitBRL = (input: string) => {
+  if (!input) return "R$ 0,00";
+  const hasK = /k/i.test(input);
+  const numeric = parseFloat(input.replace(/[^\d,]/g, "").replace(",", ".")) || 0;
+  const value = hasK ? numeric * 1000 : numeric;
+  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
+};
+
 export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   supplier,
   onEdit,
@@ -59,171 +71,104 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   onViewHistory,
   renderRating,
 }: ExpandableSupplierCardProps): JSX.Element {
-  
-  const formatLimitBRL = (input: string) => {
-    if (!input) return "R$ 0,00";
-    const hasK = /k/i.test(input);
-    const numeric = parseFloat(input.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-    const value = hasK ? numeric * 1000 : numeric;
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  };
+  const accent = STATUS_ACCENT[supplier.status] ?? "bg-zinc-400";
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "active": return "Ativo";
-      case "inactive": return "Inat.";
-      case "pending": return "Pend.";
-      default: return status;
-    }
-  };
-
-  const handleEdit = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit?.(supplier);
-  }, [onEdit, supplier]);
-
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(supplier);
-  }, [onDelete, supplier]);
-
-  const handleWhatsApp = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onWhatsApp(supplier);
-  }, [onWhatsApp, supplier]);
-
-  const handleAddQuote = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onAddQuote?.(supplier);
-  }, [onAddQuote, supplier]);
-
-  const handleView = () => {
-    onViewHistory?.(supplier);
-  };
+  const handleEdit      = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onEdit?.(supplier);       }, [onEdit,       supplier]);
+  const handleDelete    = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onDelete(supplier);       }, [onDelete,     supplier]);
+  const handleWhatsApp  = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onWhatsApp(supplier);     }, [onWhatsApp,   supplier]);
+  const handleAddQuote  = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onAddQuote?.(supplier);   }, [onAddQuote,   supplier]);
 
   return (
-    <div 
-      onClick={handleView}
-      className={cn(
-        "group relative overflow-hidden transition-all duration-300",
-        "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md",
-        "rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50",
-        "shadow-sm hover:shadow-md hover:border-brand/30 dark:hover:border-brand/30",
-        "active:scale-[0.98] cursor-pointer"
-      )}
+    <div
+      onClick={() => onViewHistory?.(supplier)}
+      className="relative bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm active:scale-[0.99] transition-transform cursor-pointer"
     >
-      <div className="p-4">
-        {/* Header Section */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-brand/10 dark:bg-brand/20 flex items-center justify-center flex-shrink-0 border border-brand/10">
-              <Building2 className="h-5 w-5 text-brand" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate leading-tight">
-                {capitalize(supplier.name)}
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
-                {capitalize(supplier.contact)}
-              </p>
-            </div>
+      {/* Left accent border by status */}
+      <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-xl", accent)} />
+
+      <div className="pl-4 pr-3 py-3">
+        {/* Top row: icon + name + limit + menu */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0 border border-border dark:border-white/5">
+            <Building2 className="h-4 w-4 text-muted-foreground" />
           </div>
-          
-          <div className="text-right flex-shrink-0">
-            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
-              Limite
-            </span>
-            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">
+
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-foreground truncate leading-tight">
+              {capitalize(supplier.name)}
+            </p>
+            <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+              {capitalize(supplier.contact) || "—"}
+            </p>
+          </div>
+
+          <div className="text-right shrink-0 mr-1">
+            <p className="text-[13px] font-bold text-foreground tabular-nums">
               {formatLimitBRL(supplier.limit)}
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">limite</p>
+          </div>
+
+          {/* Secondary actions menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all shrink-0 touch-manipulation"
+                onClick={e => e.stopPropagation()}
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem onClick={handleEdit} className="gap-2">
+                <Edit className="h-4 w-4" /> Editar
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleDelete}
+                className="gap-2 text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/30"
+              >
+                <Trash2 className="h-4 w-4" /> Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        {/* Info row: status + rating + stats */}
+        <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border dark:border-white/5">
+          <StatusBadge status={supplier.status} className="text-[10px] h-5 px-2 shrink-0" />
+          <div className="shrink-0">{renderRating(supplier.rating)}</div>
+          <div className="flex items-center gap-3 ml-auto text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              <span className="font-medium">{supplier.totalQuotes} cot.</span>
+            </span>
+            <span className="flex items-center gap-1">
+              <TrendingUp className="h-3 w-3 text-emerald-500" />
+              <span className="font-medium">{supplier.avgPrice}</span>
             </span>
           </div>
         </div>
 
-        {/* Status and Analytics Row */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <StatusBadge 
-              status={supplier.status} 
-              customLabel={getStatusLabel(supplier.status)}
-              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider h-auto"
-            />
-            {renderRating(supplier.rating)}
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <FileText className="h-3.5 w-3.5 text-blue-500/70" />
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                {supplier.totalQuotes}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5 text-emerald-500/70" />
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                {supplier.avgPrice}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-border dark:border-white/5/50">
-          <div className="flex-1 flex gap-2">
-            <Button
-              onClick={handleWhatsApp}
-              variant="outline"
-              className={cn(
-                "flex-1 h-11 rounded-xl",
-                "text-emerald-600 dark:text-emerald-400",
-                "border-emerald-100 dark:border-emerald-900/30",
-                "bg-emerald-50/50 dark:bg-emerald-900/10",
-                "hover:bg-emerald-100 dark:hover:bg-emerald-900/20",
-                "font-bold text-xs px-2"
-              )}
-            >
-              <MessageCircle className="h-4 w-4 mr-1.5" />
-              Zap
-            </Button>
-
-            <Button
-              onClick={handleAddQuote}
-              variant="default"
-              className={cn(
-                "flex-1 h-11 rounded-xl bg-brand hover:bg-brand/90 text-zinc-950 font-bold text-xs"
-              )}
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Cotação
-            </Button>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleEdit}
-              variant="outline"
-              size="icon"
-              className={cn(
-                "h-11 w-11 rounded-xl border-border dark:border-white/5",
-                "text-zinc-600 dark:text-zinc-400 hover:text-brand hover:border-brand",
-                "bg-zinc-50/50 dark:bg-zinc-800/30"
-              )}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            
-            <Button
-              onClick={handleDelete}
-              variant="outline"
-              size="icon"
-              className={cn(
-                "h-11 w-11 rounded-xl border-border dark:border-white/5",
-                "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20",
-                "bg-zinc-50/50 dark:bg-zinc-800/30"
-              )}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+        {/* Primary CTA row */}
+        <div className="flex gap-2 mt-2.5">
+          <Button
+            onClick={handleWhatsApp}
+            variant="outline"
+            size="sm"
+            className="flex-1 h-9 rounded-lg text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 font-semibold text-xs gap-1.5"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            WhatsApp
+          </Button>
+          <Button
+            onClick={handleAddQuote}
+            size="sm"
+            className="flex-1 h-9 rounded-lg bg-brand hover:bg-brand/90 text-white dark:text-zinc-950 font-semibold text-xs gap-1.5"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Nova Cotação
+          </Button>
         </div>
       </div>
     </div>
@@ -231,4 +176,3 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
 });
 
 export default ExpandableSupplierCard;
-
