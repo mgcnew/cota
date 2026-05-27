@@ -40,8 +40,15 @@ export function usePedidosStats(pedidos: OrderData[]) {
       .reduce((sum, p) => sum + (p.economia_estimada || 0), 0);
 
     // Economia REAL = confirmada na entrega (mesmo baseline, mas com qtd e preço da NFe)
-    const economiaRealTotal = pedidos
-      .filter(p => p.status === "entregue" && p.quote_id)
+    const pedidosEntreguesComEconomia = pedidos
+      .filter(p => p.status === "entregue" && p.quote_id && (p.economia_real || 0) > 0)
+      .sort((a, b) => {
+        const [da, ma, ya] = a.dataPedido.split('/').map(Number);
+        const [db, mb, yb] = b.dataPedido.split('/').map(Number);
+        return new Date(yb, mb - 1, db).getTime() - new Date(ya, ma - 1, da).getTime();
+      });
+
+    const economiaRealTotal = pedidosEntreguesComEconomia
       .reduce((sum, p) => sum + (p.economia_real || 0), 0);
 
     // Variação de Faturamento = (Preço Faturado - Preço Negociado) * Qtd Entregue
@@ -71,6 +78,7 @@ export function usePedidosStats(pedidos: OrderData[]) {
       pedidosAguardando: pedidosAguardandoList.length,
       pedidosAguardandoList,
       totalValueFormatado: totalValue > 0 ? totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+      pedidosEntreguesComEconomia,
       economiaNegociada: economiaNegociadaTotal,
       economiaNegociadaFormatada: economiaNegociadaTotal > 0
         ? `R$ ${economiaNegociadaTotal.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`
