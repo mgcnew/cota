@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense, memo, useMemo, Component } from "react";
 import type { ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ShoppingBag, FileText, ShoppingCart, Loader2, Keyboard, BarChart3, Package } from "lucide-react";
+import { ShoppingBag, LayoutList, Loader2, Keyboard, BarChart3, Package } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -35,17 +35,14 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
 }
 
 // Lazy load tab contents for better performance
-const CotacoesTab = lazy(() => import("@/components/compras/CotacoesTab"));
-const PedidosTab = lazy(() => import("@/components/compras/PedidosTab"));
+const ProdutosTab = lazy(() => import("@/components/compras/ProdutosTab"));
 const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
 const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
 const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
 const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
 
 const TABS = [
-  { value: "cotacoes", icon: FileText, label: "Cotações" },
-  { value: "pedidos", icon: ShoppingCart, label: "Pedidos" },
-  // { value: "lista", icon: ShoppingBasket, label: "Lista" },
+  { value: "produtos", icon: LayoutList, label: "Produtos" },
   { value: "embalagens", icon: Package, label: "Embalagens" },
   { value: "analise", icon: BarChart3, label: "Análise" },
   { value: "calculadora", icon: Keyboard, label: "Calculadora" },
@@ -60,11 +57,22 @@ const TabLoader = () => (
 function Compras() {
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
-  const [activeTab, setActiveTab] = useState(() => searchParams.get("tab") || "cotacoes");
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = searchParams.get("tab");
+    // redirect legacy tab values
+    if (tab === "cotacoes" || tab === "pedidos") return "produtos";
+    return tab || "produtos";
+  });
 
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (tab && TABS.some(t => t.value === tab)) setActiveTab(tab);
+    if (!tab) return;
+    if (tab === "cotacoes" || tab === "pedidos") {
+      setActiveTab("produtos");
+      setSearchParams({ tab: "produtos" }, { replace: true });
+    } else if (TABS.some(t => t.value === tab)) {
+      setActiveTab(tab);
+    }
   }, [searchParams]);
 
   const handleTabChange = (value: string) => {
@@ -73,12 +81,10 @@ function Compras() {
   };
 
   const shortcuts = useMemo(() => [
-    { key: '1', action: () => activeTab !== 'calculadora' && handleTabChange('cotacoes'), description: 'Ir para Cotações' },
-    { key: '2', action: () => activeTab !== 'calculadora' && handleTabChange('pedidos'), description: 'Ir para Pedidos' },
-    { key: '3', action: () => activeTab !== 'calculadora' && handleTabChange('lista'), description: 'Ir para Lista' },
-    { key: '4', action: () => activeTab !== 'calculadora' && handleTabChange('embalagens'), description: 'Ir para Embalagens' },
-    { key: '5', action: () => activeTab !== 'calculadora' && handleTabChange('analise'), description: 'Ir para Análise' },
-    { key: '6', action: () => handleTabChange('calculadora'), description: 'Ir para Calculadora' },
+    { key: '1', action: () => activeTab !== 'calculadora' && handleTabChange('produtos'), description: 'Ir para Produtos' },
+    { key: '2', action: () => activeTab !== 'calculadora' && handleTabChange('embalagens'), description: 'Ir para Embalagens' },
+    { key: '3', action: () => activeTab !== 'calculadora' && handleTabChange('analise'), description: 'Ir para Análise' },
+    { key: '4', action: () => handleTabChange('calculadora'), description: 'Ir para Calculadora' },
     {
       key: 'n', ctrl: true,
       action: () => window.dispatchEvent(new CustomEvent('compras:nova', { detail: { tab: activeTab } })),
@@ -159,8 +165,7 @@ function Compras() {
         <ChunkErrorBoundary>
           <Suspense fallback={<TabLoader />}>
             <div key={activeTab} className="animate-page-enter">
-              {activeTab === "cotacoes" && <CotacoesTab />}
-              {activeTab === "pedidos" && <PedidosTab />}
+              {activeTab === "produtos" && <ProdutosTab />}
               {activeTab === "analise" && <AnaliseTab />}
               {activeTab === "lista" && <ListaComprasTab />}
               {activeTab === "embalagens" && <EmbalagensTab />}
