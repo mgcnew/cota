@@ -1,11 +1,15 @@
 import { useState, useMemo, useEffect } from "react";
-import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox, MessageCircle, Sparkles } from "lucide-react";
+import { Package, DollarSign, Trophy, TrendingDown, ShoppingCart, Calendar, FileText, Building2, Inbox, MessageCircle, Sparkles, CalendarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { useCompany } from "@/hooks/useCompany";
 import { designSystem } from "@/styles/design-system";
@@ -42,6 +46,7 @@ export function QuoteConversionTab({
   const [productSelections, setProductSelections] = useState<Record<string, string>>({});
   const [productAllocations, setProductAllocations] = useState<Record<string, Record<string, number>>>({});
   const [deliveryDate, setDeliveryDate] = useState("");
+  const [dateOpen, setDateOpen] = useState(false);
   const [observations, setObservations] = useState("");
   const [allowItemsWithoutPrice, setAllowItemsWithoutPrice] = useState(false);
 
@@ -473,13 +478,37 @@ export function QuoteConversionTab({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border dark:border-white/5/50 shadow-sm relative overflow-hidden">
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Entrega *</label>
-            <Input
-              type="date"
-              value={deliveryDate}
-              onChange={(e) => setDeliveryDate(e.target.value)}
-              className="h-9 rounded-lg font-bold text-xs bg-background"
-              min={new Date().toISOString().split('T')[0]}
-            />
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger asChild>
+                <button className={cn(
+                  "w-full h-9 rounded-lg border px-3 flex items-center justify-between gap-2 text-xs font-bold bg-background transition-colors",
+                  deliveryDate ? "text-foreground border-border" : "text-muted-foreground border-border/50",
+                  "hover:border-brand/50 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
+                )}>
+                  <span>
+                    {deliveryDate
+                      ? format(parseISO(deliveryDate), "dd/MM/yyyy", { locale: ptBR })
+                      : "Selecionar data"}
+                  </span>
+                  <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={deliveryDate ? parseISO(deliveryDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      setDeliveryDate(format(date, "yyyy-MM-dd"));
+                    }
+                    setDateOpen(false);
+                  }}
+                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  locale={ptBR}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Observações do Pedido</label>

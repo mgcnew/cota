@@ -1,7 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
-import { Package } from "lucide-react";
-console.log('[WhatsApp DEBUG] QuoteValuesTab.tsx carregado!');
-import { Building2, Search, ArrowLeft, DollarSign, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Power, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Package, Building2, Search, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Send, CheckCircle2, Loader2 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
@@ -80,6 +78,9 @@ export function QuoteValuesTab({
   const [otherOpenQuotes, setOtherOpenQuotes] = useState<any[]>([]);
   const [useGroupedLink, setUseGroupedLink] = useState(false);
 
+  // Confirmação de remoção de produto
+  const [removeConfirmProductId, setRemoveConfirmProductId] = useState<string | null>(null);
+
   // Tracking de envios WhatsApp
   const [sentSuppliers, setSentSuppliers] = useState<Record<string, boolean>>({});
   const [isSendingAll, setIsSendingAll] = useState(false);
@@ -128,8 +129,6 @@ export function QuoteValuesTab({
     const fetchOtherQuotes = async () => {
       if (!selectedSupplier || !quoteId) return;
 
-      console.log("🔍 [QuoteValues] Scanning other quotes for supplier:", selectedSupplier);
-
       try {
         const { data, error } = await supabase
           .from('quote_suppliers')
@@ -146,12 +145,7 @@ export function QuoteValuesTab({
           .neq('quote_id', quoteId)
           .in('quotes.status', ['ativa', 'ativo', 'aberto', 'pendente']);
 
-        if (error) {
-          console.error("❌ [QuoteValues] Error fetching other quotes:", error);
-          return;
-        }
-
-        console.log("📊 [QuoteValues] Other quotes found for supplier:", data);
+        if (error) return;
 
         const formatted = (data || []).map((q: any) => {
           const quoteInfo = Array.isArray(q.quotes) ? q.quotes[0] : q.quotes;
@@ -161,11 +155,10 @@ export function QuoteValuesTab({
             status: quoteInfo?.status || 'desconhecido'
           };
         }).filter(q => q.token);
-        
-        console.log("✅ [QuoteValues] Formatted other quotes with tokens:", formatted);
+
         setOtherOpenQuotes(formatted);
-      } catch (err) {
-        console.error("❌ [QuoteValues] Unexpected error scanning quotes:", err);
+      } catch {
+        // silently ignore
       }
     };
 
@@ -239,25 +232,22 @@ export function QuoteValuesTab({
     setEditedQtdPerBox({});
   }, []);
 
-  const handleRemoveItem = useCallback(async (productId: string) => {
+  const handleRemoveItem = useCallback((productId: string) => {
     if (!selectedSupplier || isReadOnly) return;
-    
-    // Confirmação simples
-    if (!window.confirm("Deseja realmente remover este produto deste fornecedor? Ele não verá mais este item no portal.")) {
-      return;
-    }
+    setRemoveConfirmProductId(productId);
+  }, [selectedSupplier, isReadOnly]);
 
+  const confirmRemoveItem = useCallback(async () => {
+    if (!removeConfirmProductId || !selectedSupplier) return;
+    const productId = removeConfirmProductId;
+    setRemoveConfirmProductId(null);
     try {
-      await onRemoveSupplierProduct({
-        quoteId,
-        supplierId: selectedSupplier,
-        productId
-      });
+      await onRemoveSupplierProduct({ quoteId, supplierId: selectedSupplier, productId });
       onRefresh();
     } catch {
       toast({ title: "Erro ao remover produto", variant: "destructive" });
     }
-  }, [selectedSupplier, isReadOnly, onRemoveSupplierProduct, quoteId, onRefresh, toast]);
+  }, [removeConfirmProductId, selectedSupplier, onRemoveSupplierProduct, quoteId, onRefresh, toast]);
 
 
   const handleInputChange = (productId: string, value: string) => {
@@ -319,15 +309,11 @@ export function QuoteValuesTab({
       const { error } = await supabase
         .from('short_links')
         .insert([{ id: shortId, original_tokens: originalTokens }]);
-        
-      if (error) {
-        console.error("[ShortLink] Erro ao criar:", error);
-        return null;
-      }
-      
+
+      if (error) return null;
+
       return shortId;
-    } catch (err) {
-      console.error("[ShortLink] Falha:", err);
+    } catch {
       return null;
     }
   };
@@ -352,9 +338,7 @@ export function QuoteValuesTab({
           const currentToken = targetSupplier?.accessToken || targetSupplier?.access_token || accessToken;
           const tokens = useGroupedLink ? [currentToken, ...otherOpenQuotes.map(q => q.token)].join(',') : currentToken;
 
-          // Tenta encurtar o link
-          console.log('[WhatsApp DEBUG] Gerando link curto para:', tokens);
-          const shortId = await getShortLink(tokens);
+            const shortId = await getShortLink(tokens);
           
           if (shortId) {
             msg += `\n${baseUrl}/r/${shortId}\n\n`;
@@ -372,9 +356,7 @@ export function QuoteValuesTab({
         
         msg += `\n\nEquipe de Compras`;
         
-        console.log('[WhatsApp DEBUG] Mensagem gerada, chamando sendWhatsAppMessage...');
         const result = await sendWhatsAppMessage(null, phone, msg);
-        console.log('[WhatsApp DEBUG] Resultado:', JSON.stringify(result));
         
         if (result.success) {
           toast({ title: "✅ Cotação enviada com sucesso!", variant: "default" });
@@ -383,15 +365,13 @@ export function QuoteValuesTab({
           throw new Error(result.error || "Erro desconhecido");
         }
       } catch (error: any) {
-        console.error("[WhatsApp DEBUG] Erro no envio via API:", error);
-        toast({ 
-          title: "Erro ao enviar via API", 
+        toast({
+          title: "Erro ao enviar via API",
           description: error?.message || "Erro de validação ou conexão",
-          variant: "destructive" 
+          variant: "destructive"
         });
       }
     } else {
-      console.log('[WhatsApp DEBUG] ❌ Caiu no modo MANUAL (wa.me link)');
       const greetingName = contactPerson || targetSupplier?.contact || targetSupplier?.contato || supplierName;
       let msg = await generateWhatsAppMessage(greetingName, products, !!accessToken);
 
@@ -461,8 +441,7 @@ export function QuoteValuesTab({
         successCount++;
         // Small delay between sends to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 800));
-      } catch (err) {
-        console.error(`[BulkSend] Erro ao enviar para ${supplier.nome}:`, err);
+      } catch {
         failCount++;
       }
     }
@@ -525,24 +504,41 @@ export function QuoteValuesTab({
       </AlertDialogContent>
     </AlertDialog>
 
+    {/* AlertDialog para confirmação de remoção de produto */}
+    <AlertDialog open={!!removeConfirmProductId} onOpenChange={(open) => !open && setRemoveConfirmProductId(null)}>
+      <AlertDialogContent className="rounded-2xl border-border/50 shadow-2xl max-w-sm">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-base font-black tracking-tight flex items-center gap-2">
+            <Trash2 className="h-4 w-4 text-red-500" />
+            Remover Produto?
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+            Este produto será removido da lista deste fornecedor. Ele não verá mais este item no portal.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="gap-2 sm:gap-2">
+          <AlertDialogCancel className="rounded-xl text-xs font-black uppercase tracking-widest">
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-red-600/20"
+            onClick={confirmRemoveItem}
+          >
+            Remover
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
       {/* Sidebar - Lista de Fornecedores */}
       <div className={cn(
         "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10 h-full",
       )}>
         <div className="p-3 border-b border-border dark:border-white/5/50 bg-card/50">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-zinc-400" />
             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
-          </div>
-          <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-brand transition-colors" />
-            <Input
-              placeholder="Pesquisar produto..."
-              value={productSearch}
-              onChange={e => setProductSearch(e.target.value)}
-              className="pl-9 h-9 rounded-xl text-xs bg-background border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand"
-            />
           </div>
         </div>
 
@@ -603,7 +599,7 @@ export function QuoteValuesTab({
                         "text-[8px] font-black uppercase tracking-tighter",
                         fornecedor.status === 'respondido' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
                       )}>
-                        {fornecedor.status === 'respondido' ? "📲 VIA PORTAL" : "Pendente"}
+                        {fornecedor.status === 'respondido' ? "Via Portal" : "Pendente"}
                       </span>
                     </div>
                     <div
@@ -631,15 +627,10 @@ export function QuoteValuesTab({
                   </div>
                   
                   {/* Indicador de Acesso ao Portal */}
-                  {fornecedor.accessToken ? (
-                    <div className="absolute right-0 bottom-0 px-1.5 py-0.5 bg-brand/10 text-[6px] text-brand rounded-tl-md font-black uppercase tracking-tighter">
-                      ACESSO ATIVO
-                    </div>
-                  ) : (
-                    <div className="absolute right-0 bottom-0 px-1.5 py-0.5 bg-red-500/5 text-[6px] text-red-400 rounded-tl-md font-black uppercase tracking-tighter">
-                      SEM ACESSO
-                    </div>
-                  )}
+                  <div className={cn(
+                    "absolute right-1.5 top-1.5 w-1.5 h-1.5 rounded-full",
+                    fornecedor.accessToken ? "bg-brand shadow-[0_0_6px_hsl(var(--brand)/0.6)]" : "bg-zinc-300 dark:bg-zinc-600"
+                  )} title={fornecedor.accessToken ? "Acesso ao portal ativo" : "Sem acesso ao portal"} />
                   
                   {isSelected && (
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-brand" />
@@ -797,6 +788,18 @@ export function QuoteValuesTab({
 
             {!isMobile && (
               <div className="px-6 py-3 border-b border-border dark:border-white/5/50 bg-muted/30 flex-shrink-0">
+                  <div className="flex items-center justify-between gap-4 mb-3">
+                    <div className="relative group flex-1 max-w-xs">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 group-focus-within:text-brand transition-colors" />
+                      <input
+                        type="text"
+                        placeholder="Pesquisar produto..."
+                        value={productSearch}
+                        onChange={e => setProductSearch(e.target.value)}
+                        className="w-full pl-9 h-8 rounded-xl text-xs bg-background border border-border/50 shadow-sm focus:border-brand/50 focus:ring-1 focus:ring-brand focus:outline-none px-3"
+                      />
+                    </div>
+                  </div>
                   <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
                     <div className="w-10" />
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Produto</span>

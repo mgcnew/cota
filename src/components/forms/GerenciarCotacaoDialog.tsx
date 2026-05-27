@@ -438,8 +438,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
               {[
                 { id: 'resumo', label: 'Resumo' },
                 { id: 'valores', label: 'Valores' },
-                { id: 'converter', label: 'Decisão', hide: isFinalizada },
-                { id: 'editar', label: 'Configurações', hide: isFinalizada },
+                { id: 'converter', label: 'Converter em Pedido', hide: isFinalizada },
+                { id: 'editar', label: 'Editar', hide: isFinalizada },
               ].filter(tab => !tab.hide).map((tab) => (
                 <TabsTrigger
                   key={tab.id}
@@ -556,7 +556,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[1000px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
+        <DialogContent hideClose className="max-w-[1000px] h-[85vh] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
           <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
           <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
           {modalContent}

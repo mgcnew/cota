@@ -235,10 +235,10 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Unid.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Quant.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Custo Vencedor</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right pr-4">Melhor Proposta</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right pr-4">Melhor Fornecedor</span>
         </div>
 
-        <div className="p-4 space-y-2 pb-16">
+        <div className="p-4 space-y-2 pb-4">
           {filteredAndSortedData.length > 0 ? (
             groupBySupplier && groupedData ? (
               groupedData.map(group => (
