@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/search-input";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useExportCSV } from "@/hooks/useExportCSV";
-import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal, Eye, EyeOff } from "lucide-react";
+import { Package, Plus, Tags, DollarSign, ClipboardList, Download, Loader2, Award, FileUp, MoreHorizontal, Eye, EyeOff, SlidersHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { CategorySelect } from "@/components/ui/category-select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
@@ -61,7 +63,8 @@ function Produtos() {
   const { paginate } = usePagination<Product>({ initialItemsPerPage: isMobile ? 8 : 10 });
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [historyProduct, setHistoryProduct] = useState<Product | null>(null);
@@ -74,6 +77,14 @@ function Produtos() {
 
   const safeProducts = useMemo(() => products || [], [products]);
   const safeCategories = useMemo(() => categories || [], [categories]);
+
+  const categoryCounts = useMemo(() =>
+    safeProducts.reduce((acc, p) => {
+      const cat = p.category || '';
+      if (cat) acc[cat] = (acc[cat] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  , [safeProducts]);
 
   const [activeTab, setActiveTab] = useState("all");
 
@@ -143,7 +154,6 @@ function Produtos() {
 
   const filteredProducts = useMemo(() => {
     const searchNormalized = normalizeText(debouncedSearchQuery);
-    const categoryNormalized = normalizeText(selectedCategory);
 
     // Filter logic specialized for inclusion
     const isMatch = (product: Product) => {
@@ -158,7 +168,7 @@ function Produtos() {
                             productBrandNormalized.includes(searchNormalized) ||
                             productBarcode.includes(searchNormalized);
       
-      const matchesCategory = categoryNormalized === "all" || productCategoryNormalized === categoryNormalized;
+      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(productCategoryNormalized);
       
       return { matchesSearch, matchesCategory };
     };
@@ -175,7 +185,7 @@ function Produtos() {
 
     // 2. If we have a search query but local results are empty OR category match is empty,
     // we try to relax category filter to show all search matches
-    if (searchNormalized && (results.length === 0 || categoryNormalized !== "all")) {
+    if (searchNormalized && (results.length === 0 || selectedCategories.length > 0)) {
       const allSearchMatches = safeProducts.filter(p => isMatch(p).matchesSearch);
       if (allSearchMatches.length > 0) {
         results = allSearchMatches;
@@ -200,7 +210,7 @@ function Produtos() {
       const bDate = new Date(b.updated_at || 0).getTime();
       return bDate - aDate;
     });
-  }, [safeProducts, debouncedSearchQuery, selectedCategory, dbSearchResults]);
+  }, [safeProducts, debouncedSearchQuery, selectedCategories, dbSearchResults]);
 
   // Counts for tabs
   const counts = useMemo(() => {
@@ -283,6 +293,23 @@ function Produtos() {
   const handleHistoryProduct = useCallback((product: Product) => {
     setHistoryProduct(product);
   }, []);
+
+  const handleCategoryChange = useCallback((checked: boolean, category: string) => {
+    const normalized = normalizeText(category);
+    setSelectedCategories(prev => checked ? [...prev, normalized] : prev.filter(c => c !== normalized));
+  }, []);
+
+  const handleRowSelect = useCallback((productId: string, checked: boolean) => {
+    setSelectedProductIds(prev => {
+      const next = new Set(prev);
+      checked ? next.add(productId) : next.delete(productId);
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback((checked: boolean) => {
+    setSelectedProductIds(checked ? new Set(paginatedData.items.map(p => p.id)) : new Set());
+  }, [paginatedData.items]);
 
   if (loading || productsLoading) {
     return (
@@ -378,53 +405,78 @@ function Produtos() {
           )}
 
           <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm mb-8">
-            <div className="p-4 md:p-5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-900/50">
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                <div className="flex-1 max-w-xl">
+            <div className="flex flex-wrap items-center gap-2.5 px-3.5 py-2.5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <div className="w-full sm:w-56">
                   <SearchInput
                     value={searchQuery}
                     onChange={setSearchQuery}
-                    placeholder="Pesquisar por nome, categoria ou marca..."
+                    placeholder="Pesquisar..."
                   />
                 </div>
-                <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-                  <div className="w-full sm:w-[240px]">
-                    <CategorySelect
-                      categories={safeCategories}
-                      products={safeProducts}
-                      selectedCategory={selectedCategory}
-                      onCategoryChange={setSelectedCategory}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn(designSystem.components.button.secondary, "h-11 px-4 flex items-center justify-center")}
-                        >
-                          <MoreHorizontal className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-[200px]">
-                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[44px]">
-                          <Download className="h-4 w-4 mr-2" /> Exportar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[44px]">
-                          <FileUp className="h-4 w-4 mr-2" /> Importar CSV
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button
-                      onClick={handleAddProduct}
-                      className={cn(designSystem.components.button.primary, "h-11 px-6")}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      <span>Novo Produto</span>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 shrink-0 gap-1.5 text-sm">
+                      <SlidersHorizontal className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Categoria</span>
+                      {selectedCategories.length > 0 && (
+                        <Badge className="h-4 min-w-4 px-1 text-[10px] font-bold bg-brand text-white border-0 rounded-full">
+                          {selectedCategories.length}
+                        </Badge>
+                      )}
                     </Button>
-                  </div>
-                </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-52 p-3" align="start">
+                    <div className="space-y-3">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Filtrar por categoria</p>
+                      <div className="space-y-2.5 max-h-52 overflow-y-auto">
+                        {safeCategories.filter(c => c && c !== 'all').map(cat => (
+                          <div key={cat} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`cat-${cat}`}
+                              checked={selectedCategories.includes(normalizeText(cat))}
+                              onCheckedChange={checked => handleCategoryChange(checked === true, cat)}
+                            />
+                            <Label htmlFor={`cat-${cat}`} className="flex flex-1 items-center justify-between font-normal text-sm cursor-pointer gap-2">
+                              <span className="capitalize truncate">{cat}</span>
+                              <span className="text-muted-foreground text-[11px] tabular-nums shrink-0">{categoryCounts[cat] || 0}</span>
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      {selectedCategories.length > 0 && (
+                        <button
+                          onClick={() => setSelectedCategories([])}
+                          className="text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          Limpar filtros
+                        </button>
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[180px]">
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleExportProducts(); }} className="min-h-[40px]">
+                      <Download className="h-4 w-4 mr-2" /> Exportar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={(e) => { e.preventDefault(); handleImportProducts(); }} className="min-h-[40px]">
+                      <FileUp className="h-4 w-4 mr-2" /> Importar CSV
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button onClick={handleAddProduct} className={cn(designSystem.components.button.primary, "h-9 px-4")}>
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Novo Produto</span>
+                  <span className="sm:hidden">Novo</span>
+                </Button>
               </div>
             </div>
 
@@ -463,6 +515,9 @@ function Produtos() {
                       onEdit={handleEditProduct}
                       onDelete={handleDeleteProduct}
                       onHistory={handleHistoryProduct}
+                      selectedIds={selectedProductIds}
+                      onRowSelect={handleRowSelect}
+                      onSelectAll={handleSelectAll}
                     />
                   </div>
 

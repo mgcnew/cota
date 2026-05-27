@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { TableActionGroup } from "@/components/ui/table-action-group";
 import { LazyImage } from "@/components/responsive/LazyImage";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { capitalize } from "@/lib/text-utils";
@@ -15,6 +16,9 @@ interface ProductListDesktopProps {
   onEdit: (product: Product) => void;
   onDelete: (product: Product) => void;
   onHistory: (product: Product) => void;
+  selectedIds?: Set<string>;
+  onRowSelect?: (productId: string, checked: boolean) => void;
+  onSelectAll?: (checked: boolean) => void;
 }
 
 const getProductStatus = (product: Product) => {
@@ -56,7 +60,7 @@ const extractPrice = (priceStr: string): number => {
   return parseFloat(cleaned) || 0;
 };
 
-export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory }: ProductListDesktopProps) => {
+export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory, selectedIds = new Set(), onRowSelect, onSelectAll }: ProductListDesktopProps) => {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
@@ -107,7 +111,18 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
       <Table>
           <TableHeader>
             <TableRow>
-              <SortHeader label="Produto" sortId="name" className="pl-6 w-[28%]" />
+              <TableHead className="w-10 pl-4">
+                <Checkbox
+                  checked={products.length > 0 && products.every(p => selectedIds.has(p.id))}
+                  onCheckedChange={checked => onSelectAll?.(checked === true)}
+                  aria-label="Selecionar todos"
+                  className="data-[state=indeterminate]:bg-brand"
+                  {...(products.some(p => selectedIds.has(p.id)) && !products.every(p => selectedIds.has(p.id))
+                    ? { 'data-state': 'indeterminate' as const }
+                    : {})}
+                />
+              </TableHead>
+              <SortHeader label="Produto" sortId="name" className="pl-2 w-[26%]" />
               <SortHeader label="Categoria" sortId="category" className="w-[15%]" />
               <TableHead className="text-center w-[12%]">Status</TableHead>
               <SortHeader label="Preço" sortId="price" className="w-[10%]" />
@@ -119,9 +134,21 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
 
           <TableBody>
             {sortedProducts.map((product) => (
-              <TableRow key={product.id} className="group">
+              <TableRow
+                key={product.id}
+                className={cn("group", selectedIds.has(product.id) && "bg-brand/5 dark:bg-brand/10")}
+              >
+                {/* Checkbox */}
+                <TableCell className="w-10 pl-4 pr-0">
+                  <Checkbox
+                    checked={selectedIds.has(product.id)}
+                    onCheckedChange={checked => onRowSelect?.(product.id, checked === true)}
+                    aria-label={`Selecionar ${product.name}`}
+                  />
+                </TableCell>
+
                 {/* Produto */}
-                <TableCell className="pl-6 pr-4">
+                <TableCell className="pl-2 pr-4">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-lg bg-card flex items-center justify-center flex-shrink-0 overflow-hidden border border-border dark:border-white/5 shadow-sm">
                       {product.image_url ? (
