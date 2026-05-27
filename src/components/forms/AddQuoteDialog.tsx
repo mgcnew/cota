@@ -167,14 +167,7 @@ interface AddQuoteDialogProps {
 }
 
 export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: externalOnOpenChange, defaultSupplierId }: AddQuoteDialogProps) {
-  console.log("[AddQuoteDialog] Componente renderizado. Open state:", externalOpen);
   const isMobile = useIsMobile();
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;
   const setOpen = externalOnOpenChange || setInternalOpen;
@@ -2122,7 +2115,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 ds.colors.text.secondary,
                                 ds.colors.border.subtle
                               )}>
-                                <p className={cn(ds.typography.weight.medium, "text-brand")}>âŒ¨ï¸ Atalhos de Teclado</p>
+                                <p className={cn(ds.typography.weight.medium, "text-brand")}>Atalhos de Teclado</p>
                                 <div className="flex justify-center gap-4">
                                   <span className="flex items-center gap-1.5">
                                     <kbd className={cn("px-2 py-1 rounded text-[10px]", ds.colors.surface.section, ds.colors.border.default, "border font-mono")}>Tab</kbd>
@@ -2313,7 +2306,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   form.setValue("dataFim", fim);
                                   
                                   toast({
-                                    title: "â±ï¸ Período aplicado",
+                                    title: "Período aplicado",
                                     description: `Cotação definida para ${days === 0 ? 'hoje' : days + ' dias'}`,
                                     duration: 2000,
                                   });
@@ -2682,7 +2675,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                   newAssignments[s.id] = currentProductIds;
                                 });
                                 setSupplierItemAssignments(newAssignments);
-                                toast({ title: "âœ… Todos os itens atribuídos a todos os fornecedores" });
+                                toast({ title: "Todos os itens atribuídos a todos os fornecedores" });
                               }}
                               className="h-8 text-[10px] uppercase tracking-wider font-bold hover:bg-brand/10 border-brand/30 text-brand"
                             >
@@ -2699,7 +2692,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                 });
                                 setSupplierItemAssignments(newAssignments);
                                 toast({ 
-                                  title: "âš ï¸ Atribuições limpas",
+                                  title: "Atribuições limpas",
                                   description: "Nenhum fornecedor receberá itens agora."
                                 });
                               }}
@@ -2816,7 +2809,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                                                 });
                                                 setSupplierItemAssignments(newAssignments);
                                                 toast({ 
-                                                  title: "ðŸ“‹ Configuração copiada",
+                                                  title: "Configuração copiada",
                                                   description: `A lista de ${supplier.name} foi aplicada a todos os fornecedores.`,
                                                   duration: 2000
                                                 });
@@ -3157,7 +3150,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
       <DialogContent
         hideClose
         className={cn(
-          "p-0 flex flex-col [&>button]:hidden",
+          "p-0 flex flex-col",
           ds.components.modal.content,
           "border backdrop-blur-xl",
           isMobile
@@ -3166,7 +3159,7 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
         )}
         onKeyDown={!isMobile ? handleModalKeyDown : undefined}
       >
-        {mounted ? (isMobile ? mobileContent : modalInnerContent) : null}
+        {isMobile ? mobileContent : modalInnerContent}
 
         {/* Mobile Product Search Drawer â€” rendered at DialogContent level so it's always available */}
         <Drawer open={showMobileProductSearch && isMobile} onOpenChange={setShowMobileProductSearch}>
@@ -3228,7 +3221,6 @@ export default function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onO
                         variant="ghost"
                         type="button"
                         onClick={() => {
-                          console.log("[AddQuoteDialog] Produto selecionado mobile:", product.name);
                           setSelectedProduct(product);
                           if (product.unit) setNewProductUnit(product.unit);
                           setProductSearch("");
