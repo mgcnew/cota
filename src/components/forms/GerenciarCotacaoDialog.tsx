@@ -74,9 +74,6 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const [isExportingWhatsApp, setIsExportingWhatsApp] = useState(false);
   const captureRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (activeTab === 'converter' && !open) setActiveTab('resumo');
-  }, [open, activeTab]);
 
   const {
     cotacoes,
@@ -101,14 +98,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   }, [cotacoes, initialQuote]);
 
   const queryClient = useQueryClient();
-  const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Debug removido pois já confirmamos que o BD está OK
   const keyboardOffset = useKeyboardOffset();
   
   const isFinalizada = quote?.status === "concluida";
@@ -147,12 +137,13 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     return quote._supplierItems || [];
   }, [quote?._supplierItems, quote]); // Add quote to dependency to force re-calc
 
-  // Redirect if tab becomes invalid after finishing
+  // Reset to resumo when closing or when quote is finalized and on an invalid tab
   useEffect(() => {
+    if (!open) { setActiveTab('resumo'); return; }
     if (isFinalizada && (activeTab === 'converter' || activeTab === 'editar')) {
       setActiveTab('resumo');
     }
-  }, [isFinalizada, activeTab]);
+  }, [open, isFinalizada, activeTab]);
 
   // Helpers
   const safeStr = useCallback((val: any) => val || "", []);
@@ -179,8 +170,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
       const normalized = normalizePrice(priceMetadata, product.quantidade, product.unidade);
       return normalized.valorTotal;
-    } catch (error) {
-      console.error('Error normalizing total price:', error);
+    } catch {
       return item.valor_oferecido * product.quantidade;
     }
   }, [supplierItems, products]);
@@ -370,7 +360,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     }
   }, [quote, products, supplierItems, company?.name, company?.id, isExportingWhatsApp, safeStr]);
 
-  if (!mounted || !initialQuote || !quote) return null;
+  if (!initialQuote || !quote) return null;
 
   const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
