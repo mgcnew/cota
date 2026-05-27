@@ -6,9 +6,6 @@ import {
   StickyNote,
   CheckCircle2,
   Trash2,
-  Pin,
-  Tag,
-  Filter
 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useAnotacoes } from "@/hooks/useAnotacoes";
@@ -18,7 +15,6 @@ import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
 
 export default function Anotacoes() {
   const {
@@ -64,67 +60,55 @@ export default function Anotacoes() {
   return (
     <PageWrapper>
       <div className={cn(ds.layout.container.page, "")}>
-        {/* Page Header - Standardized with Dashboard Style */}
-        <div className="flex flex-col gap-4 md:gap-6 mb-6 md:mb-10">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-              <StickyNote className="h-6 w-6 text-brand" />
-            </div>
-            <div>
-              <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                Anotações
-              </h1>
-              <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                Gerencie suas tarefas e lembretes de forma simples
-              </p>
-            </div>
+        {/* Page Header */}
+        <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
+          <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
+            <StickyNote className="h-6 w-6 text-brand" />
           </div>
-          
-          {/* Unified Actions Bar */}
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-              {/* Search Field */}
-              <div className="flex-1 max-w-xl">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Pesquisar em suas notas..."
-                />
-              </div>
-              
-              {/* Actions Group */}
-              <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-                <Button
-                  onClick={() => setShowCreateDialog(true)}
-                  className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto font-bold dark:text-white")}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Criar Anotação
-                </Button>
-              </div>
-            </div>
+          <div>
+            <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
+              Anotações
+            </h1>
+            <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
+              Gerencie suas tarefas e lembretes de forma simples
+            </p>
+          </div>
+        </div>
 
-            {/* Category Filter Bar */}
-            <div className="flex flex-wrap items-center gap-2 pb-2">
-              <div className="flex items-center gap-2 mr-2 text-muted-foreground">
-                <Filter className="h-3.5 w-3.5" />
-                <span className="text-[10px] font-black uppercase tracking-wider">Filtrar:</span>
-              </div>
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
-                  className={cn(
-                    "px-4 py-1.5 rounded-xl text-xs font-bold transition-all border",
-                    selectedCategory === cat
-                      ? "bg-brand text-zinc-950 dark:text-white border-brand"
-                      : "bg-zinc-100/50 dark:bg-zinc-900/50 text-muted-foreground border-transparent hover:border-zinc-300 dark:hover:border-zinc-700"
-                  )}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
+        {/* Compact Actions Bar */}
+        <div className="flex flex-wrap items-center gap-2.5 mb-6">
+          <div className="w-full sm:w-56">
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Pesquisar..."
+            />
+          </div>
+          <div className="flex items-center gap-1.5 flex-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors border shrink-0",
+                  selectedCategory === cat
+                    ? "bg-brand text-white border-brand"
+                    : "bg-white dark:bg-zinc-800/40 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+          <div className="ml-auto shrink-0">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className={cn(ds.components.button.primary, "h-9 px-4")}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Nova Anotação</span>
+              <span className="sm:hidden">Nova</span>
+            </Button>
           </div>
         </div>
 

@@ -5,31 +5,36 @@ import { cn } from "@/lib/utils";
 import { Note, Importance } from "@/hooks/useNotes";
 import { designSystem as ds } from "@/styles/design-system";
 
-const categoryConfig: Record<string, { color: string; bg: string; border: string }> = {
+const categoryConfig: Record<string, { color: string; bg: string; border: string; accent: string }> = {
   "Geral": {
     color: "text-zinc-500",
     bg: "bg-zinc-50 dark:bg-zinc-900/40",
     border: "border-border dark:border-white/5",
+    accent: "bg-zinc-400",
   },
   "Trabalho": {
     color: "text-blue-500",
     bg: "bg-blue-50/50 dark:bg-blue-900/10",
     border: "border-blue-100 dark:border-blue-800/50",
+    accent: "bg-blue-500",
   },
   "Pessoal": {
     color: "text-emerald-500",
     bg: "bg-emerald-50/50 dark:bg-emerald-900/10",
     border: "border-emerald-100 dark:border-emerald-800/50",
+    accent: "bg-emerald-500",
   },
   "Urgente": {
     color: "text-red-500",
     bg: "bg-red-50/50 dark:bg-red-900/10",
     border: "border-red-100 dark:border-red-800/50",
+    accent: "bg-red-500",
   },
   "Ideias": {
     color: "text-amber-500",
     bg: "bg-amber-50/50 dark:bg-amber-900/10",
     border: "border-amber-100 dark:border-amber-800/50",
+    accent: "bg-amber-500",
   },
 };
 
@@ -60,8 +65,8 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
         "border-border dark:border-white/5 hover:border-brand/40 shadow-none hover:shadow-xl",
         note.pinned && "ring-1 ring-brand/30 border-brand/30"
       )}>
-        {/* Category Accent Line */}
-        <div className={cn("absolute top-0 left-0 w-full h-1", config.color.replace("text-", "bg-"))} />
+        {/* Category Accent — left border */}
+        <div className={cn("absolute top-0 left-0 w-1 h-full rounded-l-xl", config.accent)} />
         
         {/* Pin Button */}
         <button
@@ -78,7 +83,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
         </button>
 
         {/* Header */}
-        <div className="p-6 pb-2">
+        <div className="pl-8 pr-6 pt-6 pb-2">
           <div className="flex items-center gap-2 mb-2">
             <span className={cn(
               "text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border",
@@ -99,7 +104,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
         </div>
 
         {/* Content */}
-        <div className="px-6 py-2 flex-1">
+        <div className="pl-8 pr-6 py-2 flex-1">
           <p className="text-sm text-muted-foreground/90 leading-relaxed whitespace-pre-wrap line-clamp-6">
             {note.content}
           </p>
@@ -120,13 +125,13 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
         </div>
 
         {/* Action Tray */}
-        <div className="p-4 px-6 flex items-center justify-between mt-auto bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-border dark:border-white/5/50">
+        <div className="pl-8 pr-4 py-3 flex items-center justify-between mt-auto bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-border dark:border-white/5/50">
           <div className="flex items-center text-[10px] font-bold text-muted-foreground/60 tracking-wider">
             <Clock className="h-3 w-3 mr-1.5 text-brand/60" />
             {new Date(note.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
             <Button
               variant="ghost"
               size="icon"
