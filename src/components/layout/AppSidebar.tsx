@@ -421,14 +421,14 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
         </div>
       </div>
 
-      {/* Mobile Sidebar */}
+      {/* Mobile Sidebar — hidden, replaced by MobileBottomNav */}
       <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
         <SheetTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
             aria-label="Menu"
-            className="md:hidden fixed top-3 right-3 z-[100] h-10 w-10 rounded-lg bg-background/80 backdrop-blur-xl border border-border dark:border-white/5/30 shadow-md active:scale-90 transition-all group overflow-hidden touch-manipulation"
+            className="hidden fixed top-3 right-3 z-[100] h-10 w-10 rounded-lg bg-background/80 backdrop-blur-xl border border-border dark:border-white/5/30 shadow-md active:scale-90 transition-all group overflow-hidden touch-manipulation"
           >
             <div className="relative w-6 h-6">
               <span className={cn(

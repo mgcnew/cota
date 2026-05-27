@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { GlobalSearch } from "./GlobalSearch";
 import { AIGlobalSearch } from "./AIGlobalSearch";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { designSystem } from "@/styles/design-system";
 
 export function AppLayout() {
@@ -42,6 +43,9 @@ export function AppLayout() {
           </SmoothPageTransition>
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
 
       {/* AI Search Dialog */}
       <AIGlobalSearch open={aiSearchOpen} onOpenChange={setAiSearchOpen} />

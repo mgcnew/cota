@@ -4,7 +4,6 @@ import { useSearchParams } from "react-router-dom";
 import { ShoppingBag, LayoutList, Loader2, Keyboard, BarChart3, Package } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -56,7 +55,6 @@ const TabLoader = () => (
 
 function Compras() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState(() => {
     const tab = searchParams.get("tab");
     // redirect legacy tab values
@@ -101,38 +99,7 @@ function Compras() {
 
   return (
     <PageWrapper>
-      {/* Mobile Bottom Navigation */}
-      {isMobile && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#16181C]/95 backdrop-blur-xl border-t border-border dark:border-white/5 pb-safe shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.15)]">
-          <div className="flex items-center justify-between px-2 py-2">
-            {TABS.map((tab) => {
-              const isActive = activeTab === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => handleTabChange(tab.value)}
-                  className={cn(
-                    "relative flex items-center justify-center gap-2 h-12 transition-all duration-300 rounded-full touch-manipulation",
-                    isActive
-                      ? "bg-brand text-white px-4 flex-1 shadow-md"
-                      : "text-zinc-500 hover:text-brand dark:text-zinc-400 dark:hover:text-zinc-100 px-3 flex-shrink-0"
-                  )}
-                  aria-label={tab.label}
-                >
-                  <tab.icon className={cn("h-[18px] w-[18px] shrink-0 transition-transform duration-300", isActive && "scale-110")} />
-                  {isActive && (
-                    <span className="text-[13px] font-semibold tracking-tight whitespace-nowrap animate-in fade-in slide-in-from-left-2 duration-300">
-                      {tab.label}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <div className={cn(ds.layout.container.page, isMobile ? "pb-24" : "")}>
+      <div className={ds.layout.container.page}>
         {/* Page Header */}
         <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800">
           <div className={cn("hidden sm:flex p-2.5 rounded-xl border transition-all", ds.components.card.root)}>
