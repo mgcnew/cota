@@ -3,13 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { capitalize } from "@/lib/text-utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { StatusSelect, ORDER_STATUS_OPTIONS } from "@/components/ui/status-select";
 import { SearchInput } from "@/components/ui/search-input";
-import { DataPagination } from "@/components/ui/data-pagination";
 import { usePagination } from "@/hooks/usePagination";
-import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2, PackageCheck } from "lucide-react";
+import { ShoppingCart, Plus, Truck, Clock, Trash2, DollarSign, Package, MoreVertical, ClipboardCheck, TrendingDown, Loader2, PackageCheck, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
 import AddPedidoDialog from "@/components/forms/AddPedidoDialog";
@@ -288,41 +287,60 @@ function PedidosTab() {
       {/* Unified Container for Search, Table and Mobile Cards */}
       <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm mb-8">
         {/* Header / Actions Bar */}
-        <div className="p-3 md:p-4 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-            {/* Search Field */}
-            <div className="flex-1 max-w-xl">
+        <div className="flex flex-wrap items-center gap-2.5 px-3.5 py-2.5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="w-full sm:w-56">
               <SearchInput
                 value={searchTerm}
                 onChange={setSearchTerm}
-                placeholder="Buscar pedido..."
+                placeholder="Pesquisar..."
               />
             </div>
-
-            <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-              <div className="hidden md:block">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className={cn("w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm transition-all", ds.colors.text.primary)}>
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos os Status</SelectItem>
-                    <SelectItem value="pendente">Pendentes</SelectItem>
-                    <SelectItem value="enviado">Enviados</SelectItem>
-                    <SelectItem value="confirmado">Confirmados</SelectItem>
-                    <SelectItem value="entregue">Entregues</SelectItem>
-                    <SelectItem value="cancelado">Cancelados</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                onClick={() => setAddDialogOpen(true)}
-                className={cn(ds.components.button.primary, "h-11 px-6 w-full sm:w-auto")}
-              >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Novo Pedido
-              </Button>
-            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 shrink-0 gap-1.5 text-sm">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Status</span>
+                  {statusFilter !== 'all' && (
+                    <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 text-[10px] font-bold bg-brand text-white rounded-full">1</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-1.5" align="start">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">Filtrar por status</p>
+                {[
+                  { value: 'all',       label: 'Todos os Status' },
+                  { value: 'pendente',  label: 'Pendentes' },
+                  { value: 'enviado',   label: 'Enviados' },
+                  { value: 'confirmado',label: 'Confirmados' },
+                  { value: 'entregue',  label: 'Entregues' },
+                  { value: 'cancelado', label: 'Cancelados' },
+                ].map(item => (
+                  <button
+                    key={item.value}
+                    onClick={() => setStatusFilter(item.value)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-1.5 text-sm rounded-md transition-colors",
+                      statusFilter === item.value
+                        ? "bg-brand text-white font-medium"
+                        : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              onClick={() => setAddDialogOpen(true)}
+              className={cn(ds.components.button.primary, "h-9 px-4")}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Novo Pedido</span>
+              <span className="sm:hidden">Novo</span>
+            </Button>
           </div>
         </div>
 
@@ -393,17 +411,37 @@ function PedidosTab() {
               </div>
 
               {/* Pagination */}
-              <div className="border-t border-border dark:border-white/5 bg-zinc-50/30 dark:bg-muted/20 p-4">
-                <DataPagination
-                  currentPage={paginatedData.pagination.currentPage}
-                  totalPages={paginatedData.pagination.totalPages}
-                  itemsPerPage={paginatedData.pagination.itemsPerPage}
-                  totalItems={paginatedData.pagination.totalItems}
-                  onPageChange={paginatedData.pagination.goToPage}
-                  onItemsPerPageChange={paginatedData.pagination.setItemsPerPage}
-                  startIndex={paginatedData.pagination.startIndex}
-                  endIndex={paginatedData.pagination.endIndex}
-                />
+              <div className="px-3.5 py-2 border-t border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
+                <Pagination className="w-full max-w-xs mx-0">
+                  <PaginationContent className="w-full justify-between">
+                    <PaginationItem>
+                      <PaginationLink
+                        size="icon"
+                        aria-label="Página anterior"
+                        onClick={() => paginatedData.pagination.goToPage(paginatedData.pagination.currentPage - 1)}
+                        className={cn(paginatedData.pagination.currentPage <= 1 && "pointer-events-none opacity-40")}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <span className="text-muted-foreground text-xs">
+                        Página <span className="text-foreground font-medium">{paginatedData.pagination.currentPage}</span> de{" "}
+                        <span className="text-foreground font-medium">{paginatedData.pagination.totalPages || 1}</span>
+                      </span>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink
+                        size="icon"
+                        aria-label="Próxima página"
+                        onClick={() => paginatedData.pagination.goToPage(paginatedData.pagination.currentPage + 1)}
+                        className={cn(paginatedData.pagination.currentPage >= paginatedData.pagination.totalPages && "pointer-events-none opacity-40")}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </PaginationLink>
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
               </div>
             </>
           )}
