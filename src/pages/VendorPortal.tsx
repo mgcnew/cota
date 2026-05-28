@@ -796,9 +796,6 @@ export default function VendorPortal() {
             />
           ))}
 
-          <div className="pt-4 pb-2 text-center">
-            <p className="text-[9px] font-bold text-zinc-300 dark:text-zinc-700 uppercase tracking-[0.2em]">CotáJA · Portal Fornecedor</p>
-          </div>
         </main>
 
         {/* BARRA DE AÇÃO */}
