@@ -35,7 +35,7 @@ export function AppLayout() {
         className={cn(
           "flex-1 w-full overflow-y-auto overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
           "pb-20 md:pb-6 pt-3 md:mt-3 md:mb-3",
-          isSidebarExpanded ? "md:pl-[17rem] md:pr-3" : "md:pl-[4.25rem] md:pr-3"
+          isSidebarExpanded ? "md:pl-[17rem]" : "md:pl-[4.25rem]"
         )}
       >
         <SmoothPageTransition>
