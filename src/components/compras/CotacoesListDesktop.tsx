@@ -81,7 +81,7 @@ export const CotacoesListDesktop = memo(({
               <SortHeader label="Fornec." sortId="fornecedores" className="w-[10%]" />
               <SortHeader label="Itens" sortId="itens" className="w-[8%]" />
               <SortHeader label="Prazo" sortId="prazo" className="w-[11%]" />
-              <TableHead className="text-right w-[12%]">Ações</TableHead>
+              <TableHead className="w-[12%]">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -209,7 +209,7 @@ export const CotacoesListDesktop = memo(({
                   </TableCell>
 
                   {/* Ações */}
-                  <TableCell className="text-right">
+                  <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-accent data-[state=open]:bg-accent transition-colors">
