@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -335,6 +335,7 @@ export default function VendorPortal() {
   const [data, setData] = useState<QuoteData | null>(null);
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isDark, setIsDark] = useState(false);
+  const actionBarRef = useRef<HTMLDivElement>(null);
 
   const updateItemField = useCallback((productId: string, itemToken: string | undefined, field: string, value: any) => {
     setItems(prev => prev.map(item =>
@@ -379,6 +380,23 @@ export default function VendorPortal() {
   useEffect(() => {
     const timer = setTimeout(() => setShowSplash(false), 1200);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Keep action bar above the keyboard using the visualViewport API
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => {
+      if (!actionBarRef.current) return;
+      const offset = window.innerHeight - vv.height - vv.offsetTop;
+      actionBarRef.current.style.bottom = `${Math.max(0, offset)}px`;
+    };
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
   }, []);
 
   useEffect(() => {
@@ -801,7 +819,7 @@ export default function VendorPortal() {
         </main>
 
         {/* BARRA DE AÇÃO FLUTUANTE */}
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-3">
+        <div ref={actionBarRef} className="fixed bottom-0 left-0 right-0 z-50 p-3" style={{ transition: 'bottom 0.1s ease-out' }}>
           <div className="max-w-xl mx-auto">
             <div className={cn(
               "border rounded-2xl shadow-2xl p-3 flex items-center gap-3 transition-all duration-300",

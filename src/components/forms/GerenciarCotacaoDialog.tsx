@@ -226,7 +226,8 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           nome: f.nome,
           fornecedorId: f.id,
           value: currentPrice,
-          valor_inicial: initialPrice
+          valor_inicial: initialPrice,
+          observacoes: item?.observacoes ?? null,
         };
       }).filter((p: any) => p.value > 0).sort((a: any, b: any) => a.value - b.value);
 
@@ -236,6 +237,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
       const savings = averagePrice > 0 && bestPrice > 0 ? averagePrice - bestPrice : 0;
 
+      const bestItem = allPrices.find((p: any) => p.fornecedorId === bestSupplierId);
       return {
         productId: product.product_id,
         productName: product.product_name,
@@ -244,6 +246,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         bestPrice,
         bestSupplierId,
         bestSupplierName,
+        bestObservacoes: bestItem?.observacoes ?? null,
         allPrices,
         savings
       };

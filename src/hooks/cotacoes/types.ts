@@ -27,6 +27,7 @@ export interface SupplierItemWithPricing {
   brand_name?: string;
   brand_rating?: number | null;
   updated_by_type: "comprador" | "fornecedor" | null;
+  observacoes?: string | null;
   created_at: string;
   updated_at?: string;
 }

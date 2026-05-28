@@ -88,7 +88,7 @@ export function useCotacoesQuery() {
             valor_oferecido, valor_inicial, price_history,
             unidade_preco, fator_conversao, quantidade_por_embalagem,
             brand_id, brands(name, manual_rating),
-            updated_by_type, created_at
+            updated_by_type, observacoes, created_at
           `)
           .in("quote_id", quoteIds)
           .order("created_at", { ascending: false });
@@ -136,6 +136,7 @@ export function useCotacoesQuery() {
                 brand_name: it.brands?.name,
                 brand_rating: it.brands?.manual_rating,
                 updated_by_type: it.updated_by_type,
+                observacoes: it.observacoes ?? null,
                 created_at: it.created_at,
                 updated_at: it.updated_at,
               }))

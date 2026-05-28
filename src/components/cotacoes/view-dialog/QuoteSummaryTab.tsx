@@ -132,16 +132,23 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       </div>
 
       {/* Supplier — spans both cols on mobile (row 2), col 5 on desktop */}
-      <div className="col-span-2 md:col-span-1 flex items-center justify-start md:justify-end md:pr-2 min-w-0">
+      <div className="col-span-2 md:col-span-1 flex flex-col items-start md:items-end md:pr-2 min-w-0 gap-0.5">
         {item.bestSupplierName ? (
-          <div className="flex items-center gap-1.5 max-w-full">
-            <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-              <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-zinc-400" />
+          <>
+            <div className="flex items-center gap-1.5 max-w-full">
+              <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-zinc-400" />
+              </div>
+              <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>
+                {safeStr(item.bestSupplierName)}
+              </span>
             </div>
-            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>
-              {safeStr(item.bestSupplierName)}
-            </span>
-          </div>
+            {item.bestObservacoes && (
+              <p className="text-[9px] text-amber-600 dark:text-amber-400 italic truncate max-w-full md:text-right" title={item.bestObservacoes}>
+                "{item.bestObservacoes}"
+              </p>
+            )}
+          </>
         ) : (
           <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
         )}
