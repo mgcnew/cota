@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, X, Loader2, Sparkles, MessageCircle } from "lucide-react";
+import { ClipboardList, X, Loader2, Sparkles, MessageCircle, LayoutList, DollarSign, ShoppingCart, Pencil } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -389,24 +389,30 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             </div>
           </div>
 
-          {/* Tab bar - line variant */}
-          <div className="overflow-x-auto [&::-webkit-scrollbar]:hidden px-5" style={{ scrollbarWidth: 'none' }}>
-            <TabsList variant="line" className="w-max min-w-full">
+          {/* Tab bar */}
+          <div className="border-b border-border dark:border-white/5 px-2">
+            <div className={cn("grid gap-0", isFinalizada ? "grid-cols-2" : "grid-cols-4")}>
               {[
-                { id: 'resumo', label: 'Resumo' },
-                { id: 'valores', label: 'Valores' },
-                { id: 'converter', label: 'Converter em Pedido', hide: isFinalizada },
-                { id: 'editar', label: 'Editar', hide: isFinalizada },
+                { id: 'resumo',    label: 'Resumo',   icon: LayoutList },
+                { id: 'valores',   label: 'Valores',  icon: DollarSign },
+                { id: 'converter', label: 'Pedido',   icon: ShoppingCart, hide: isFinalizada },
+                { id: 'editar',    label: 'Editar',   icon: Pencil,       hide: isFinalizada },
               ].filter(tab => !tab.hide).map((tab) => (
-                <TabsTrigger
+                <button
                   key={tab.id}
-                  value={tab.id}
-                  variant="line"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 py-2.5 px-1 text-center border-b-2 transition-colors",
+                    activeTab === tab.id
+                      ? "border-brand text-brand"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  )}
                 >
-                  {tab.label}
-                </TabsTrigger>
+                  <tab.icon className="h-4 w-4" />
+                  <span className="text-[10px] font-semibold leading-none">{tab.label}</span>
+                </button>
               ))}
-            </TabsList>
+            </div>
           </div>
         </div>
 
