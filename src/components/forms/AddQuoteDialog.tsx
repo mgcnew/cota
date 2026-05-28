@@ -512,7 +512,6 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
       setProducts([]);
       setShowQuickCreateProduct(false);
       setShowQuickCreateSupplier(false);
-      setShowMobileProductSearch(false);
       setShowMobileCart(false);
     }
   }, [open, activeTab]);
