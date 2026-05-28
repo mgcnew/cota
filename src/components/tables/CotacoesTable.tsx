@@ -1,4 +1,4 @@
-﻿import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -45,7 +45,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                 <div className="hidden sm:flex w-[12%] pl-2 justify-center">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Fornecedores</span>
                 </div>
-                <div className="w-[10%] px-4 flex justify-end">
+                <div className="w-[10%] pl-4 flex justify-start">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Ações</span>
                 </div>
               </div>
@@ -54,7 +54,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
         </TableHeader>
         <TableBody>
           {cotacoes.map((cotacao, index) => (
-            <TableRow 
+            <TableRow
               key={cotacao.id}
               className={cn(
                 "sm:hover:bg-accent/50 border-b border-border dark:border-white/5",
@@ -68,7 +68,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                   </div>
                   <div className="min-w-0">
                     <div className="table-cell-primary font-mono truncate">
-                      {cotacao.id.length > 12 
+                      {cotacao.id.length > 12
                         ? `${cotacao.id.substring(0, 8)}...${cotacao.id.substring(cotacao.id.length - 4)}`
                         : cotacao.id
                       }
@@ -81,7 +81,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                   </div>
                 </div>
               </TableCell>
-              
+
               <TableCell className="hidden md:table-cell py-4">
                 <div className="min-w-0">
                   <div className="table-cell-primary truncate" title={cotacao.produto}>
@@ -97,7 +97,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                   </div>
                 </div>
               </TableCell>
-              
+
               <TableCell className="hidden lg:table-cell py-4">
                 <div className="text-sm space-y-1">
                   <div className="flex items-center gap-1 text-foreground">
@@ -110,11 +110,11 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                   </div>
                 </div>
               </TableCell>
-              
+
               <TableCell className="py-4">
                 {getStatusBadge(cotacao.status)}
               </TableCell>
-              
+
               <TableCell className="py-4">
                 <div className="space-y-1">
                   <div className="font-bold text-success text-base">{cotacao.melhorPreco}</div>
@@ -127,68 +127,66 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                   </div>
                 </div>
               </TableCell>
-              
+
               <TableCell className="hidden sm:table-cell py-4">
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   className="bg-primary/10 border-primary/20 text-primary font-medium"
                 >
                   <Building2 className="h-3 w-3 mr-1" />
                   {cotacao.fornecedores}
                 </Badge>
               </TableCell>
-              
-              <TableCell className="py-4 px-4">
-                <div className="flex justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-8 w-8 p-0 hover:bg-accent transition-colors duration-200"
-                      >
-                        <MoreVertical className="h-4 w-4 transition-colors duration-200" />
-                        <span className="sr-only">Abrir menu de ações</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem 
-                        onClick={() => onView(cotacao)}
-                        className="cursor-pointer"
-                      >
-                        <Eye className="h-4 w-4 mr-2 text-blue-600" />
-                        <span>Visualizar</span>
-                      </DropdownMenuItem>
-                      
-                      {cotacao.status !== "concluida" && (
-                        <>
-                          <DropdownMenuItem 
-                            onClick={() => onEdit(cotacao)}
-                            className="cursor-pointer"
-                          >
-                            <Edit className="h-4 w-4 mr-2 text-amber-600" />
-                            <span>Editar</span>
-                          </DropdownMenuItem>
-                          
-                          <DropdownMenuItem 
-                            onClick={() => onDelete(cotacao)}
-                            className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            <span>Excluir</span>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      
-                      {cotacao.status === "concluida" && (
-                        <DropdownMenuItem disabled className="text-gray-400">
-                          <FileText className="h-4 w-4 mr-2" />
-                          <span>Cotação concluída</span>
+
+              <TableCell className="py-4 pl-4 pr-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 hover:bg-accent transition-colors duration-200"
+                    >
+                      <MoreVertical className="h-4 w-4 transition-colors duration-200" />
+                      <span className="sr-only">Abrir menu de ações</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => onView(cotacao)}
+                      className="cursor-pointer"
+                    >
+                      <Eye className="h-4 w-4 mr-2 text-blue-600" />
+                      <span>Visualizar</span>
+                    </DropdownMenuItem>
+
+                    {cotacao.status !== "concluida" && (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onEdit(cotacao)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4 mr-2 text-amber-600" />
+                          <span>Editar</span>
                         </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+
+                        <DropdownMenuItem
+                          onClick={() => onDelete(cotacao)}
+                          className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          <span>Excluir</span>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+
+                    {cotacao.status === "concluida" && (
+                      <DropdownMenuItem disabled className="text-gray-400">
+                        <FileText className="h-4 w-4 mr-2" />
+                        <span>Cotação concluída</span>
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
