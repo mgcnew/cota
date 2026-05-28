@@ -45,7 +45,7 @@ export function CotacoesTable({ cotacoes, onView, onEdit, onDelete, getStatusBad
                 <div className="hidden sm:flex w-[12%] pl-2 justify-center">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Fornecedores</span>
                 </div>
-                <div className="w-[10%] pl-4 flex justify-end">
+                <div className="w-[10%] px-4 flex justify-end">
                   <span className="uppercase tracking-wide text-[11px] font-semibold text-teal-900 dark:text-teal-100">Ações</span>
                 </div>
               </div>
