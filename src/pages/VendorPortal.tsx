@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, memo } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -335,8 +335,6 @@ export default function VendorPortal() {
   const [data, setData] = useState<QuoteData | null>(null);
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isDark, setIsDark] = useState(false);
-  const actionBarRef = useRef<HTMLDivElement>(null);
-  const mainRef = useRef<HTMLDivElement>(null);
 
   const updateItemField = useCallback((productId: string, itemToken: string | undefined, field: string, value: any) => {
     setItems(prev => prev.map(item =>
@@ -383,27 +381,6 @@ export default function VendorPortal() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Keep action bar above the keyboard and adjust main padding to match
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
-    const update = () => {
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      if (actionBarRef.current) {
-        actionBarRef.current.style.bottom = `${offset}px`;
-      }
-      if (mainRef.current) {
-        const barH = actionBarRef.current?.offsetHeight ?? 72;
-        mainRef.current.style.paddingBottom = `${barH + offset + 24}px`;
-      }
-    };
-    vv.addEventListener('resize', update);
-    vv.addEventListener('scroll', update);
-    return () => {
-      vv.removeEventListener('resize', update);
-      vv.removeEventListener('scroll', update);
-    };
-  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -699,7 +676,7 @@ export default function VendorPortal() {
 
   return (
     <div className={rootClasses}>
-      <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
+      <div className="h-[100dvh] flex flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
 
         {/* AlertDialog de confirmação — aparece SOBRE o formulário */}
         <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
@@ -796,7 +773,7 @@ export default function VendorPortal() {
         </div>
 
         {/* LISTA DE ITENS */}
-        <main ref={mainRef} className="max-w-xl mx-auto px-4 py-5 pb-36 space-y-3">
+        <main className="flex-1 overflow-y-auto max-w-xl w-full mx-auto px-4 py-5 pb-6 space-y-3">
           <div className="flex items-center justify-between mb-1">
             <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">{items.length} {items.length === 1 ? 'item' : 'itens'}</p>
             {itemsFilled > 0 && (
@@ -824,8 +801,8 @@ export default function VendorPortal() {
           </div>
         </main>
 
-        {/* BARRA DE AÇÃO FLUTUANTE */}
-        <div ref={actionBarRef} className="fixed bottom-0 left-0 right-0 z-50 p-3" style={{ transition: 'bottom 0.1s ease-out' }}>
+        {/* BARRA DE AÇÃO */}
+        <div className="flex-shrink-0 w-full p-3 border-t border-zinc-100 dark:border-white/5 bg-zinc-50 dark:bg-zinc-950">
           <div className="max-w-xl mx-auto">
             <div className={cn(
               "border rounded-2xl shadow-2xl p-3 flex items-center gap-3 transition-all duration-300",
