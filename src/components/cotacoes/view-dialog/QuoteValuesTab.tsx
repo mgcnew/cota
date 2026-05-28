@@ -536,9 +536,35 @@ export function QuoteValuesTab({
         "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10 h-full",
       )}>
         <div className="p-3 border-b border-border dark:border-white/5/50 bg-card/50">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-4 w-4 text-zinc-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-zinc-400" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Participantes</span>
+            </div>
+            {linkSuppliers.length > 0 && (
+              <button
+                onClick={handleBulkSendClick}
+                disabled={isSendingAll || unsentLinkCount === 0}
+                className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight border transition-all shrink-0",
+                  isSendingAll
+                    ? "bg-brand/10 text-brand border-brand/20 cursor-wait"
+                    : unsentLinkCount === 0
+                      ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default"
+                      : "bg-brand text-black border-brand hover:bg-brand/90"
+                )}
+                title={unsentLinkCount === 0 ? "Todos já enviados" : `Enviar para ${unsentLinkCount} fornecedor${unsentLinkCount > 1 ? 'es' : ''}`}
+              >
+                {isSendingAll ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : unsentLinkCount === 0 ? (
+                  <CheckCircle2 className="h-3 w-3" />
+                ) : (
+                  <Send className="h-3 w-3" />
+                )}
+                {isSendingAll ? "..." : unsentLinkCount === 0 ? "Enviados" : `Enviar (${unsentLinkCount})`}
+              </button>
+            )}
           </div>
         </div>
 
