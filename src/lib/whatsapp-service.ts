@@ -262,7 +262,7 @@ export function generateWhatsAppGreeting(
 
 /**
  * Generates a self-contained HTML report for the quotation.
- * Always light mode, responsive, economy-first layout.
+ * Always light mode, card-based (no horizontal scroll), responsive.
  */
 export function generateQuoteReportHTML(opts: {
   quoteId: string;
@@ -283,10 +283,11 @@ export function generateQuoteReportHTML(opts: {
     : 0;
   const today = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 
-  // ── Build content ──────────────────────────────────────────────────────────
+  // ── Build content (card-based, no tables) ─────────────────────────────────
   let sections = "";
 
   if (opts.viewMode === "comparative") {
+    // Each product = card; each supplier = flex row inside
     opts.productsData.forEach((p, idx) => {
       const unit = (p.unidade || "un").toUpperCase();
       const sorted = [...(p.allOffers || [])].sort((a: any, b: any) => {
@@ -295,39 +296,47 @@ export function generateQuoteReportHTML(opts: {
         return a.price - b.price;
       });
 
-      let rows = "";
+      let offerRows = "";
       sorted.forEach((o: any, oIdx: number) => {
         const neg = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
-        const priceCell = neg
-          ? `<span class="old-price">${fmt(o.initialPrice)}</span>${fmt(o.price)}`
-          : fmt(o.price);
-        const econPerUnit = o.initialPrice > 0 && o.initialPrice > o.price ? (o.initialPrice - o.price) : 0;
-        const econTotal = econPerUnit * (p.quantidade || 1);
+        const econTotal = (o.initialPrice > 0 && o.initialPrice > o.price)
+          ? (o.initialPrice - o.price) * (p.quantidade || 1) : 0;
 
-        rows += `<tr class="${o.isWinner ? "row-winner" : ""}">
-          <td>${o.isWinner ? '<span class="badge-best">✓ Melhor</span>' : `<span class="badge-rank">#${oIdx + 1}</span>`} ${o.supplierName}</td>
-          <td class="num">${priceCell}</td>
-          <td class="num"><strong>${fmt(o.total)}</strong></td>
-          <td class="num">${econTotal > 0 ? `<span class="econ">${fmt(econTotal)}</span>` : "—"}</td>
-        </tr>`;
+        offerRows += `
+          <div class="offer-row ${o.isWinner ? "offer-winner" : ""}">
+            <div class="offer-left">
+              ${o.isWinner
+                ? `<span class="badge-best">✓</span>`
+                : `<span class="badge-rank">${oIdx + 1}</span>`}
+              <span class="offer-name">${o.supplierName}</span>
+            </div>
+            <div class="offer-right">
+              <div class="offer-price">
+                ${neg ? `<span class="old-price">${fmt(o.initialPrice)}</span>` : ""}
+                <strong>${fmt(o.price)}</strong>
+                <span class="offer-unit">/ ${unit}</span>
+              </div>
+              <div class="offer-total">${fmt(o.total)}</div>
+              ${econTotal > 0 ? `<div class="offer-econ">-${fmt(econTotal)}</div>` : ""}
+            </div>
+          </div>`;
       });
 
-      sections += `<div class="card">
-        <div class="card-head">
-          <div class="card-num">${idx + 1}</div>
-          <div>
-            <div class="card-title">${(p.productName || "").toUpperCase()}</div>
-            <div class="card-sub">${p.quantidade} ${unit}</div>
+      sections += `
+        <div class="card">
+          <div class="card-head">
+            <div class="card-num">${idx + 1}</div>
+            <div class="card-info">
+              <div class="card-title">${(p.productName || "").toUpperCase()}</div>
+              <div class="card-sub">${p.quantidade} ${unit}</div>
+            </div>
           </div>
-        </div>
-        <div class="tw"><table>
-          <thead><tr><th>Fornecedor</th><th class="num">Val. Unit.</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
-      </div>`;
+          <div class="offers">${offerRows}</div>
+        </div>`;
     });
 
   } else {
+    // Each supplier = card; each product = flex row inside
     (opts.groupedData || []).forEach(g => {
       if (g.name === "Pendente / Sem Vencedor") return;
       const groupEcon = g.items.reduce((sum: number, i: any) => {
@@ -336,39 +345,43 @@ export function generateQuoteReportHTML(opts: {
         return sum + (vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0);
       }, 0);
 
-      let rows = "";
+      let productRows = "";
       g.items.forEach((i: any) => {
         const unit = (i.unidade || "un").toUpperCase();
         const wo = (i.allOffers || []).find((o: any) => o.isWinner);
         const vi = wo?.initialPrice || i.bestPrice;
         const econItem = vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0;
-        const negCell = vi > i.bestPrice
-          ? `<span class="old-price">${fmt(vi)}</span>${fmt(i.bestPrice)}`
-          : fmt(i.bestPrice);
 
-        rows += `<tr>
-          <td>${i.productName || i.product_name}</td>
-          <td class="num">${i.quantidade} ${unit}</td>
-          <td class="num">${negCell}</td>
-          <td class="num"><strong>${fmt(i.totalItem)}</strong></td>
-          <td class="num">${econItem > 0 ? `<span class="econ">${fmt(econItem)}</span>` : "—"}</td>
-        </tr>`;
+        productRows += `
+          <div class="offer-row">
+            <div class="offer-left">
+              <span class="offer-name">${i.productName || i.product_name}</span>
+              <span class="offer-unit-pill">${i.quantidade} ${unit}</span>
+            </div>
+            <div class="offer-right">
+              <div class="offer-price">
+                ${econItem > 0 ? `<span class="old-price">${fmt(vi)}</span>` : ""}
+                <strong>${fmt(i.bestPrice)}</strong>
+                <span class="offer-unit">/ ${unit}</span>
+              </div>
+              <div class="offer-total">${fmt(i.totalItem)}</div>
+              ${econItem > 0 ? `<div class="offer-econ">-${fmt(econItem)}</div>` : ""}
+            </div>
+          </div>`;
       });
 
-      sections += `<div class="card">
-        <div class="card-head supplier-head">
-          <div class="card-num">🏢</div>
-          <div style="flex:1">
-            <div class="card-title">${g.name.toUpperCase()}</div>
-            <div class="card-sub">${g.items.length} ${g.items.length === 1 ? "item" : "itens"}${groupEcon > 0 ? ` &nbsp;·&nbsp; <span class="econ">${fmt(groupEcon)} economizados</span>` : ""}</div>
+      sections += `
+        <div class="card">
+          <div class="card-head supplier-head">
+            <div class="card-icon">🏢</div>
+            <div class="card-info" style="flex:1">
+              <div class="card-title">${g.name.toUpperCase()}</div>
+              <div class="card-sub">${g.items.length} ${g.items.length === 1 ? "item" : "itens"}${groupEcon > 0 ? ` · <span class="econ-inline">${fmt(groupEcon)} economizados</span>` : ""}</div>
+            </div>
+            <div class="group-total">${fmt(g.total)}</div>
           </div>
-          <div class="group-total">${fmt(g.total)}</div>
-        </div>
-        <div class="tw"><table>
-          <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Val. Unit.</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
-      </div>`;
+          <div class="offers">${productRows}</div>
+        </div>`;
     });
   }
 
@@ -382,78 +395,80 @@ export function generateQuoteReportHTML(opts: {
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#0f172a;-webkit-font-smoothing:antialiased;color-scheme:light}
-  a{color:inherit;text-decoration:none}
-  .page{max-width:860px;margin:0 auto;padding:32px 16px 56px}
+  .page{max-width:760px;margin:0 auto;padding:28px 16px 52px}
 
-  /* header */
-  .doc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid #e2e8f0;margin-bottom:24px;flex-wrap:wrap}
-  .doc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:5px}
-  .doc-title{font-size:22px;font-weight:900;letter-spacing:-.4px;line-height:1}
-  .doc-meta{font-size:12px;color:#64748b;margin-top:5px}
-  .doc-ref{text-align:right}
-  .doc-id{font-size:12px;font-weight:600;color:#94a3b8;font-variant-numeric:tabular-nums}
-  .doc-date{font-size:12px;color:#64748b;margin-top:3px}
+  /* ── Doc header ── */
+  .doc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:18px;border-bottom:1px solid #e2e8f0;margin-bottom:22px;flex-wrap:wrap}
+  .doc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:4px}
+  .doc-title{font-size:20px;font-weight:900;letter-spacing:-.3px;line-height:1.1}
+  .doc-meta{font-size:11px;color:#64748b;margin-top:4px}
+  .doc-ref{text-align:right;flex-shrink:0}
+  .doc-id{font-size:11px;font-weight:600;color:#94a3b8}
+  .doc-date{font-size:11px;color:#94a3b8;margin-top:2px}
 
-  /* economy hero */
-  .hero{background:#0f172a;border-radius:14px;padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
-  .hero-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748b;margin-bottom:5px}
-  .hero-value{font-size:36px;font-weight:900;color:#34d399;letter-spacing:-1px;line-height:1;word-break:break-all}
-  .hero-sub{font-size:12px;color:#475569;margin-top:6px}
-  .hero-right{text-align:right;flex-shrink:0}
-  .hero-pct{font-size:28px;font-weight:900;color:#34d399;letter-spacing:-.5px;line-height:1}
-  .hero-pct-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:4px}
-  .hero-total-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-top:14px;margin-bottom:3px}
-  .hero-total{font-size:18px;font-weight:800;color:#e2e8f0;letter-spacing:-.3px}
+  /* ── Economy hero ── */
+  .hero{background:#0f172a;border-radius:14px;padding:22px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .hero-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748b;margin-bottom:4px}
+  .hero-value{font-size:34px;font-weight:900;color:#34d399;letter-spacing:-1px;line-height:1}
+  .hero-sub{font-size:11px;color:#475569;margin-top:5px}
+  .hero-right{text-align:right}
+  .hero-pct-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:3px}
+  .hero-pct{font-size:26px;font-weight:900;color:#34d399;letter-spacing:-.4px;line-height:1}
+  .hero-total-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-top:12px;margin-bottom:2px}
+  .hero-total{font-size:16px;font-weight:800;color:#cbd5e1}
 
-  /* stat cards */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px}
-  .stat{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px}
-  .stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:5px}
-  .stat-value{font-size:18px;font-weight:800;color:#0f172a}
+  /* ── Stats ── */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}
+  .stat{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px}
+  .stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:4px}
+  .stat-value{font-size:17px;font-weight:800;color:#0f172a}
 
-  /* section title */
-  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#64748b;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f0}
+  /* ── Section title ── */
+  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#64748b;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e2e8f0}
 
-  /* cards */
-  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px}
-  .card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+  /* ── Cards ── */
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:12px}
+  .card-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
   .supplier-head{background:#f0fdf9;border-bottom-color:#bbf7d0}
-  .card-num{width:30px;height:30px;background:#e2e8f0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#64748b;flex-shrink:0}
-  .card-title{font-size:13px;font-weight:800;color:#0f172a;letter-spacing:-.2px}
-  .card-sub{font-size:10px;color:#64748b;font-weight:500;margin-top:2px}
-  .group-total{font-size:15px;font-weight:800;color:#059669;margin-left:auto;white-space:nowrap}
+  .card-num{width:28px;height:28px;background:#e2e8f0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#64748b;flex-shrink:0}
+  .card-icon{font-size:18px;flex-shrink:0;line-height:1}
+  .card-info{}
+  .card-title{font-size:12px;font-weight:800;color:#0f172a;letter-spacing:-.1px}
+  .card-sub{font-size:10px;color:#64748b;font-weight:500;margin-top:1px}
+  .econ-inline{color:#059669;font-weight:700}
+  .group-total{font-size:14px;font-weight:800;color:#059669;margin-left:auto;white-space:nowrap;flex-shrink:0}
 
-  /* table */
-  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{width:100%;border-collapse:collapse;min-width:380px}
-  thead th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;padding:9px 16px;text-align:left;background:#fff;border-bottom:1px solid #f1f5f9;white-space:nowrap}
-  th.num,td.num{text-align:right}
-  tbody tr{border-bottom:1px solid #f8fafc}
-  tbody tr:last-child{border-bottom:none}
-  tbody td{padding:11px 16px;font-size:12px;color:#334155;font-weight:500;white-space:nowrap}
-  .row-winner{background:#f0fdf9}
-  .row-winner td{color:#065f46}
-  .row-winner td:first-child{font-weight:700;border-left:3px solid #10b981;padding-left:13px}
-  .badge-best{display:inline-flex;align-items:center;gap:3px;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;margin-right:6px;white-space:nowrap}
-  .badge-rank{display:inline-block;background:#f1f5f9;color:#94a3b8;padding:2px 6px;border-radius:6px;font-size:9px;font-weight:700;margin-right:6px}
-  .old-price{text-decoration:line-through;color:#94a3b8;font-size:10px;margin-right:5px}
-  .econ{color:#059669;font-weight:700}
+  /* ── Offer rows (replaces tables) ── */
+  .offers{display:flex;flex-direction:column}
+  .offer-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;border-bottom:1px solid #f8fafc}
+  .offer-row:last-child{border-bottom:none}
+  .offer-winner{background:#f0fdf9}
+  .offer-winner .offer-name{font-weight:700;color:#065f46}
+  .offer-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+  .offer-name{font-size:12px;font-weight:500;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .offer-unit-pill{font-size:10px;font-weight:600;color:#94a3b8;background:#f1f5f9;padding:1px 6px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+  .offer-right{display:flex;align-items:center;gap:10px;flex-shrink:0;text-align:right}
+  .offer-price{display:flex;align-items:baseline;gap:3px;font-size:13px;color:#0f172a;white-space:nowrap}
+  .offer-price strong{font-weight:800}
+  .offer-unit{font-size:10px;color:#94a3b8;font-weight:500}
+  .offer-total{font-size:12px;font-weight:700;color:#334155;white-space:nowrap;min-width:80px;text-align:right}
+  .offer-econ{font-size:11px;font-weight:700;color:#059669;white-space:nowrap;min-width:72px;text-align:right}
+  .offer-winner .offer-price strong{color:#059669}
+  .offer-winner .offer-total{color:#065f46;font-weight:800}
+  .badge-best{display:inline-flex;align-items:center;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:800;flex-shrink:0}
+  .badge-rank{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#f1f5f9;color:#94a3b8;border-radius:5px;font-size:9px;font-weight:700;flex-shrink:0}
+  .old-price{text-decoration:line-through;color:#94a3b8;font-size:10px}
 
-  /* footer */
-  .footer{text-align:center;padding-top:20px;border-top:1px solid #e2e8f0;margin-top:8px;font-size:10px;color:#94a3b8;font-weight:500}
+  /* ── Footer ── */
+  .footer{text-align:center;padding-top:18px;border-top:1px solid #e2e8f0;margin-top:6px;font-size:10px;color:#94a3b8;font-weight:500}
 
-  @media(max-width:640px){
-    .page{padding:16px 12px 40px}
-    .hero{padding:18px 20px}
+  @media(max-width:480px){
+    .stats{grid-template-columns:1fr 1fr}
     .hero-value{font-size:26px}
-    .hero-pct{font-size:22px}
-    .stats{grid-template-columns:1fr 1fr;gap:8px}
-    .stat{padding:12px}
-    .stat-value{font-size:16px}
-    .doc-title{font-size:18px}
-    .card-head{padding:12px 14px}
-    thead th,tbody td{padding:8px 10px;font-size:11px}
-    table{min-width:320px}
+    .hero-pct{font-size:20px}
+    .doc-title{font-size:17px}
+    .offer-right{gap:6px}
+    .offer-total,.offer-econ{min-width:60px}
   }
   @media print{
     body{background:#fff}
@@ -470,11 +485,11 @@ export function generateQuoteReportHTML(opts: {
     <div>
       <div class="doc-eyebrow">CotaJá · Relatório de Negociação</div>
       <div class="doc-title">${opts.companyName}</div>
-      <div class="doc-meta">Data de referência: ${opts.dateLabel}</div>
+      <div class="doc-meta">Referência: ${opts.dateLabel}</div>
     </div>
     <div class="doc-ref">
-      <div class="doc-id">Ref. #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
-      <div class="doc-date">Gerado em ${today}</div>
+      <div class="doc-id">#${opts.quoteId.slice(0, 8).toUpperCase()}</div>
+      <div class="doc-date">${today}</div>
     </div>
   </div>
 
@@ -491,28 +506,26 @@ export function generateQuoteReportHTML(opts: {
       <div class="hero-total-label">Total negociado</div>
       <div class="hero-total">${fmt(opts.totalMelhorPreco)}</div>
     </div>
-  </div>
-  ` : `
+  </div>` : `
   <div class="hero">
     <div>
       <div class="hero-label">Total negociado</div>
       <div class="hero-value">${fmt(opts.totalMelhorPreco)}</div>
       <div class="hero-sub">melhor opção por item</div>
     </div>
-  </div>
-  `}
+  </div>`}
 
   <div class="stats">
     <div class="stat"><div class="stat-label">Produtos</div><div class="stat-value">${opts.totalProdutos}</div></div>
     <div class="stat"><div class="stat-label">Fornecedores</div><div class="stat-value">${opts.totalFornecedores}</div></div>
     <div class="stat"><div class="stat-label">Responderam</div><div class="stat-value">${opts.fornecedoresRespondidos}/${opts.totalFornecedores}</div></div>
-    <div class="stat"><div class="stat-label">Gerado em</div><div class="stat-value" style="font-size:13px;font-weight:700">${new Date().toLocaleDateString("pt-BR")}</div></div>
+    <div class="stat"><div class="stat-label">Gerado em</div><div class="stat-value" style="font-size:12px;padding-top:3px">${new Date().toLocaleDateString("pt-BR")}</div></div>
   </div>
 
   <div class="section-title">${opts.viewMode === "comparative" ? "Comparativo por Produto" : "Itens por Fornecedor Vencedor"}</div>
   ${sections}
 
-  <div class="footer">CotaJá · Relatório gerado automaticamente · Ref. #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
+  <div class="footer">CotaJá · Relatório gerado automaticamente · #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
 </div>
 </body>
 </html>`;
