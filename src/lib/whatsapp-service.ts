@@ -263,6 +263,7 @@ export function generateWhatsAppGreeting(
 /**
  * Generates a self-contained HTML report for the quotation.
  * Always light mode, card-based (no horizontal scroll), responsive.
+ * Contains two tabs: Melhores Preços (winners) + Comparativo por Produto.
  */
 export function generateQuoteReportHTML(opts: {
   quoteId: string;
@@ -274,7 +275,7 @@ export function generateQuoteReportHTML(opts: {
   totalMelhorPreco: number;
   totalEconomiaReal: number;
   productsData: any[];
-  viewMode: "winners" | "comparative";
+  viewMode?: "winners" | "comparative";
   groupedData?: { name: string; items: any[]; total: number }[];
 }): string {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -283,106 +284,108 @@ export function generateQuoteReportHTML(opts: {
     : 0;
   const today = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 
-  // ── Build content (card-based, no tables) ─────────────────────────────────
-  let sections = "";
+  // ── Build winners section (by supplier) ───────────────────────────────────
+  let winnersSection = "";
+  (opts.groupedData || []).forEach(g => {
+    if (g.name === "Pendente / Sem Vencedor") return;
+    const groupEcon = g.items.reduce((sum: number, i: any) => {
+      const wo = (i.allOffers || []).find((o: any) => o.isWinner);
+      const vi = wo?.initialPrice || i.bestPrice;
+      return sum + (vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0);
+    }, 0);
 
-  if (opts.viewMode === "comparative") {
-    // Each product = card; each supplier = flex row inside
-    opts.productsData.forEach((p, idx) => {
-      const unit = (p.unidade || "un").toUpperCase();
-      const sorted = [...(p.allOffers || [])].sort((a: any, b: any) => {
-        if (a.isWinner) return -1;
-        if (b.isWinner) return 1;
-        return a.price - b.price;
-      });
+    let productRows = "";
+    g.items.forEach((i: any) => {
+      const unit = (i.unidade || "un").toUpperCase();
+      const wo = (i.allOffers || []).find((o: any) => o.isWinner);
+      const vi = wo?.initialPrice || i.bestPrice;
+      const econItem = vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0;
 
-      let offerRows = "";
-      sorted.forEach((o: any, oIdx: number) => {
-        const neg = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
-        const econTotal = (o.initialPrice > 0 && o.initialPrice > o.price)
-          ? (o.initialPrice - o.price) * (p.quantidade || 1) : 0;
-
-        offerRows += `
-          <div class="offer-row ${o.isWinner ? "offer-winner" : ""}">
-            <div class="offer-left">
-              ${o.isWinner
-                ? `<span class="badge-best">✓</span>`
-                : `<span class="badge-rank">${oIdx + 1}</span>`}
-              <span class="offer-name">${o.supplierName}</span>
-            </div>
-            <div class="offer-right">
-              <div class="offer-price">
-                ${neg ? `<span class="old-price">${fmt(o.initialPrice)}</span>` : ""}
-                <strong>${fmt(o.price)}</strong>
-                <span class="offer-unit">/ ${unit}</span>
-              </div>
-              <div class="offer-total">${fmt(o.total)}</div>
-              ${econTotal > 0 ? `<div class="offer-econ">-${fmt(econTotal)}</div>` : ""}
-            </div>
-          </div>`;
-      });
-
-      sections += `
-        <div class="card">
-          <div class="card-head">
-            <div class="card-num">${idx + 1}</div>
-            <div class="card-info">
-              <div class="card-title">${(p.productName || "").toUpperCase()}</div>
-              <div class="card-sub">${p.quantidade} ${unit}</div>
-            </div>
+      productRows += `
+        <div class="offer-row">
+          <div class="offer-left">
+            <span class="offer-name">${i.productName || i.product_name}</span>
+            <span class="offer-unit-pill">${i.quantidade} ${unit}</span>
           </div>
-          <div class="offers">${offerRows}</div>
+          <div class="offer-right">
+            <div class="offer-price">
+              ${econItem > 0 ? `<span class="old-price">${fmt(vi)}</span>` : ""}
+              <strong>${fmt(i.bestPrice)}</strong>
+              <span class="offer-unit">/ ${unit}</span>
+            </div>
+            <div class="offer-total">${fmt(i.totalItem)}</div>
+            ${econItem > 0 ? `<div class="offer-econ">-${fmt(econItem)}</div>` : ""}
+          </div>
         </div>`;
     });
 
-  } else {
-    // Each supplier = card; each product = flex row inside
-    (opts.groupedData || []).forEach(g => {
-      if (g.name === "Pendente / Sem Vencedor") return;
-      const groupEcon = g.items.reduce((sum: number, i: any) => {
-        const wo = (i.allOffers || []).find((o: any) => o.isWinner);
-        const vi = wo?.initialPrice || i.bestPrice;
-        return sum + (vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0);
-      }, 0);
-
-      let productRows = "";
-      g.items.forEach((i: any) => {
-        const unit = (i.unidade || "un").toUpperCase();
-        const wo = (i.allOffers || []).find((o: any) => o.isWinner);
-        const vi = wo?.initialPrice || i.bestPrice;
-        const econItem = vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0;
-
-        productRows += `
-          <div class="offer-row">
-            <div class="offer-left">
-              <span class="offer-name">${i.productName || i.product_name}</span>
-              <span class="offer-unit-pill">${i.quantidade} ${unit}</span>
-            </div>
-            <div class="offer-right">
-              <div class="offer-price">
-                ${econItem > 0 ? `<span class="old-price">${fmt(vi)}</span>` : ""}
-                <strong>${fmt(i.bestPrice)}</strong>
-                <span class="offer-unit">/ ${unit}</span>
-              </div>
-              <div class="offer-total">${fmt(i.totalItem)}</div>
-              ${econItem > 0 ? `<div class="offer-econ">-${fmt(econItem)}</div>` : ""}
-            </div>
-          </div>`;
-      });
-
-      sections += `
-        <div class="card">
-          <div class="card-head supplier-head">
-            <div class="card-icon">🏢</div>
-            <div class="card-info" style="flex:1">
-              <div class="card-title">${g.name.toUpperCase()}</div>
-              <div class="card-sub">${g.items.length} ${g.items.length === 1 ? "item" : "itens"}${groupEcon > 0 ? ` · <span class="econ-inline">${fmt(groupEcon)} economizados</span>` : ""}</div>
-            </div>
-            <div class="group-total">${fmt(g.total)}</div>
+    winnersSection += `
+      <div class="card">
+        <div class="card-head supplier-head">
+          <div class="card-icon">🏢</div>
+          <div class="card-info" style="flex:1">
+            <div class="card-title">${g.name.toUpperCase()}</div>
+            <div class="card-sub">${g.items.length} ${g.items.length === 1 ? "item" : "itens"}${groupEcon > 0 ? ` · <span class="econ-inline">${fmt(groupEcon)} economizados</span>` : ""}</div>
           </div>
-          <div class="offers">${productRows}</div>
+          <div class="group-total">${fmt(g.total)}</div>
+        </div>
+        <div class="offers">${productRows}</div>
+      </div>`;
+  });
+  if (!winnersSection) {
+    winnersSection = `<div class="empty-state">Nenhum vencedor definido ainda.</div>`;
+  }
+
+  // ── Build comparative section (by product, all suppliers) ─────────────────
+  let comparativeSection = "";
+  opts.productsData.forEach((p, idx) => {
+    const unit = (p.unidade || "un").toUpperCase();
+    const sorted = [...(p.allOffers || [])].sort((a: any, b: any) => {
+      if (a.isWinner) return -1;
+      if (b.isWinner) return 1;
+      return a.price - b.price;
+    });
+
+    let offerRows = "";
+    sorted.forEach((o: any, oIdx: number) => {
+      const neg = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
+      const econTotal = (o.initialPrice > 0 && o.initialPrice > o.price)
+        ? (o.initialPrice - o.price) * (p.quantidade || 1) : 0;
+
+      offerRows += `
+        <div class="offer-row ${o.isWinner ? "offer-winner" : ""}">
+          <div class="offer-left">
+            ${o.isWinner
+              ? `<span class="badge-best">✓</span>`
+              : `<span class="badge-rank">${oIdx + 1}</span>`}
+            <span class="offer-name">${o.supplierName}</span>
+          </div>
+          <div class="offer-right">
+            <div class="offer-price">
+              ${neg ? `<span class="old-price">${fmt(o.initialPrice)}</span>` : ""}
+              <strong>${fmt(o.price)}</strong>
+              <span class="offer-unit">/ ${unit}</span>
+            </div>
+            <div class="offer-total">${fmt(o.total)}</div>
+            ${econTotal > 0 ? `<div class="offer-econ">-${fmt(econTotal)}</div>` : ""}
+          </div>
         </div>`;
     });
+
+    comparativeSection += `
+      <div class="card">
+        <div class="card-head">
+          <div class="card-num">${idx + 1}</div>
+          <div class="card-info">
+            <div class="card-title">${(p.productName || "").toUpperCase()}</div>
+            <div class="card-sub">${p.quantidade} ${unit} · ${sorted.length} fornecedor${sorted.length !== 1 ? "es" : ""}</div>
+          </div>
+        </div>
+        <div class="offers">${offerRows}</div>
+      </div>`;
+  });
+  if (!comparativeSection) {
+    comparativeSection = `<div class="empty-state">Nenhum dado comparativo disponível.</div>`;
   }
 
   return `<!DOCTYPE html>
@@ -423,6 +426,13 @@ export function generateQuoteReportHTML(opts: {
   .stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:4px}
   .stat-value{font-size:17px;font-weight:800;color:#0f172a}
 
+  /* ── Tabs ── */
+  .tab-bar{display:flex;gap:0;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:4px;margin-bottom:16px}
+  .tab-btn{flex:1;padding:9px 12px;border:none;background:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
+  .tab-btn.active{background:#0f172a;color:#f8fafc;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .tab-btn:not(.active):hover{background:#f1f5f9;color:#0f172a}
+  .tab-icon{font-size:13px;line-height:1}
+
   /* ── Section title ── */
   .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#64748b;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e2e8f0}
 
@@ -438,7 +448,7 @@ export function generateQuoteReportHTML(opts: {
   .econ-inline{color:#059669;font-weight:700}
   .group-total{font-size:14px;font-weight:800;color:#059669;margin-left:auto;white-space:nowrap;flex-shrink:0}
 
-  /* ── Offer rows (replaces tables) ── */
+  /* ── Offer rows ── */
   .offers{display:flex;flex-direction:column}
   .offer-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;border-bottom:1px solid #f8fafc}
   .offer-row:last-child{border-bottom:none}
@@ -459,6 +469,9 @@ export function generateQuoteReportHTML(opts: {
   .badge-rank{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:#f1f5f9;color:#94a3b8;border-radius:5px;font-size:9px;font-weight:700;flex-shrink:0}
   .old-price{text-decoration:line-through;color:#94a3b8;font-size:10px}
 
+  /* ── Empty state ── */
+  .empty-state{text-align:center;padding:32px 16px;font-size:13px;color:#94a3b8}
+
   /* ── Footer ── */
   .footer{text-align:center;padding-top:18px;border-top:1px solid #e2e8f0;margin-top:6px;font-size:10px;color:#94a3b8;font-weight:500}
 
@@ -469,12 +482,15 @@ export function generateQuoteReportHTML(opts: {
     .doc-title{font-size:17px}
     .offer-right{gap:6px}
     .offer-total,.offer-econ{min-width:60px}
+    .tab-btn{font-size:11px;padding:8px 8px;gap:4px}
   }
   @media print{
     body{background:#fff}
     .page{padding:0;max-width:100%}
     .card{break-inside:avoid}
     .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .tab-bar{display:none}
+    .tab-panel{display:block!important}
   }
 </style>
 </head>
@@ -522,11 +538,35 @@ export function generateQuoteReportHTML(opts: {
     <div class="stat"><div class="stat-label">Gerado em</div><div class="stat-value" style="font-size:12px;padding-top:3px">${new Date().toLocaleDateString("pt-BR")}</div></div>
   </div>
 
-  <div class="section-title">${opts.viewMode === "comparative" ? "Comparativo por Produto" : "Itens por Fornecedor Vencedor"}</div>
-  ${sections}
+  <div class="tab-bar">
+    <button class="tab-btn active" id="btn-winners" onclick="switchTab('winners')">
+      <span class="tab-icon">🏆</span> Melhores Preços
+    </button>
+    <button class="tab-btn" id="btn-comparative" onclick="switchTab('comparative')">
+      <span class="tab-icon">📊</span> Comparativo por Produto
+    </button>
+  </div>
+
+  <div id="panel-winners" class="tab-panel">
+    <div class="section-title">Itens por Fornecedor Vencedor</div>
+    ${winnersSection}
+  </div>
+
+  <div id="panel-comparative" class="tab-panel" style="display:none">
+    <div class="section-title">Comparativo por Produto — todos os fornecedores</div>
+    ${comparativeSection}
+  </div>
 
   <div class="footer">CotaJá · Relatório gerado automaticamente · #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
 </div>
+<script>
+function switchTab(tab) {
+  document.getElementById('panel-winners').style.display = tab === 'winners' ? 'block' : 'none';
+  document.getElementById('panel-comparative').style.display = tab === 'comparative' ? 'block' : 'none';
+  document.getElementById('btn-winners').classList.toggle('active', tab === 'winners');
+  document.getElementById('btn-comparative').classList.toggle('active', tab === 'comparative');
+}
+</script>
 </body>
 </html>`;
 }
