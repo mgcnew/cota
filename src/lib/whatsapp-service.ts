@@ -410,15 +410,15 @@ export function generateQuoteReportHTML(opts: {
   .doc-date{font-size:11px;color:#94a3b8;margin-top:2px}
 
   /* ── Economy hero ── */
-  .hero{background:#0f172a;border-radius:14px;padding:22px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .hero-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748b;margin-bottom:4px}
-  .hero-value{font-size:34px;font-weight:900;color:#34d399;letter-spacing:-1px;line-height:1}
-  .hero-sub{font-size:11px;color:#475569;margin-top:5px}
+  .hero{background:#1d4ed8;border-radius:14px;padding:22px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .hero-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#bfdbfe;margin-bottom:4px}
+  .hero-value{font-size:34px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1}
+  .hero-sub{font-size:11px;color:#93c5fd;margin-top:5px}
   .hero-right{text-align:right}
-  .hero-pct-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:3px}
-  .hero-pct{font-size:26px;font-weight:900;color:#34d399;letter-spacing:-.4px;line-height:1}
-  .hero-total-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-top:12px;margin-bottom:2px}
-  .hero-total{font-size:16px;font-weight:800;color:#cbd5e1}
+  .hero-pct-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#bfdbfe;margin-bottom:3px}
+  .hero-pct{font-size:26px;font-weight:900;color:#fff;letter-spacing:-.4px;line-height:1}
+  .hero-total-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#bfdbfe;margin-top:12px;margin-bottom:2px}
+  .hero-total{font-size:16px;font-weight:800;color:#dbeafe}
 
   /* ── Stats ── */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:24px}

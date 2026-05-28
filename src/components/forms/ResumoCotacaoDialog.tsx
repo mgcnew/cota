@@ -481,10 +481,10 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                 {formatCurrency(totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial)}
               </p>
             </div>
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 md:p-3">
+            <div className="bg-blue-600 border border-blue-500 rounded-xl p-2.5 md:p-3">
               <div className="flex items-center gap-1.5 md:gap-2 mb-1 md:mb-1.5">
-                <div className="p-1 bg-brand rounded-md text-black"><DollarSign className="h-2.5 w-2.5 md:h-3 md:w-3" /></div>
-                <span className="text-[7px] md:text-[8px] font-black text-zinc-400 uppercase tracking-widest">Total Pedido</span>
+                <div className="p-1 bg-white/20 rounded-md text-white"><DollarSign className="h-2.5 w-2.5 md:h-3 md:w-3" /></div>
+                <span className="text-[7px] md:text-[8px] font-black text-blue-200 uppercase tracking-widest">Total Pedido</span>
               </div>
               <p className="text-base md:text-lg font-black text-white tracking-tighter leading-none truncate" title={formatCurrency(totalMelhorPreco)}>
                 {formatCurrency(totalMelhorPreco)}
