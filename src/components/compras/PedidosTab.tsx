@@ -114,8 +114,11 @@ function PedidosTab() {
 
   const filteredPedidos = useMemo(() => {
     const filtered = pedidos.filter(pedido => {
-      const matchesSearch = pedido.fornecedor.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        pedido.id.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
+      const term = debouncedSearchTerm.toLowerCase();
+      const matchesSearch = !term ||
+        pedido.fornecedor.toLowerCase().includes(term) ||
+        pedido.id.toLowerCase().includes(term) ||
+        (pedido.produtos as string[] ?? []).some((p: string) => p.toLowerCase().includes(term));
       const matchesStatus = statusFilter === "all" || pedido.status === statusFilter;
       return matchesSearch && matchesStatus;
     });

@@ -36,7 +36,10 @@ export function useCotacoesFilters(cotacoes: Quote[] = []) {
 
     const filtered = cotacoes.filter(c => {
       const matchText = debouncedSearchTerm.toLowerCase();
-      const matchesSearch = c.produto.toLowerCase().includes(matchText) || c.id.toLowerCase().includes(matchText);
+      const matchesSearch = !matchText ||
+        c.produto.toLowerCase().includes(matchText) ||
+        c.id.toLowerCase().includes(matchText) ||
+        (c.produtosLista ?? []).some(p => p.toLowerCase().includes(matchText));
 
       // Filtros especiais
       if (statusFilter === "prontas") {
