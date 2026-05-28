@@ -193,6 +193,14 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
   const prevTabIndexRef = useRef(0);
   const prevProductIdsRef = useRef<string[]>([]);
 
+  // Clean up Vaul's scroll lock if the component unmounts while the drawer is open
+  useEffect(() => {
+    return () => {
+      document.body.removeAttribute('data-scroll-locked');
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const tabs = useMemo(() => [
     { id: "produtos", label: "Produtos", icon: Package },
     { id: "periodo_fornecedores", label: "Período & Fornecedores", icon: Building2 },
