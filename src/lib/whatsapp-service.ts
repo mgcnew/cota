@@ -262,7 +262,7 @@ export function generateWhatsAppGreeting(
 
 /**
  * Generates a self-contained HTML report for the quotation.
- * Responsive, dark-themed, audit-ready.
+ * Always light mode, responsive, economy-first layout.
  */
 export function generateQuoteReportHTML(opts: {
   quoteId: string;
@@ -278,9 +278,13 @@ export function generateQuoteReportHTML(opts: {
   groupedData?: { name: string; items: any[]; total: number }[];
 }): string {
   const fmt = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const economyPct = opts.totalMelhorPreco > 0
+    ? (opts.totalEconomiaReal / (opts.totalMelhorPreco + opts.totalEconomiaReal) * 100)
+    : 0;
+  const today = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 
-  // --- Header ---
-  let items = "";
+  // ── Build content ──────────────────────────────────────────────────────────
+  let sections = "";
 
   if (opts.viewMode === "comparative") {
     opts.productsData.forEach((p, idx) => {
@@ -294,89 +298,77 @@ export function generateQuoteReportHTML(opts: {
       let rows = "";
       sorted.forEach((o: any, oIdx: number) => {
         const neg = o.wasNegotiated && o.initialPrice > 0 && Math.abs(o.initialPrice - o.price) > 0.001;
-        const winClass = o.isWinner ? "winner" : "";
-        const badge = o.isWinner ? `<span class="badge-winner">🏆 Vencedor</span>` : `<span class="rank">#${oIdx + 1}</span>`;
-        const initialCell = o.initialPrice > 0 ? fmt(o.initialPrice) : "-";
         const priceCell = neg
-          ? `<span class="old-price">${fmt(o.initialPrice)}</span> → <strong>${fmt(o.price)}</strong>`
+          ? `<span class="old-price">${fmt(o.initialPrice)}</span>${fmt(o.price)}`
           : fmt(o.price);
-        const econPerUnit = o.initialPrice > 0 && o.initialPrice > o.price
-          ? (o.initialPrice - o.price)
-          : 0;
+        const econPerUnit = o.initialPrice > 0 && o.initialPrice > o.price ? (o.initialPrice - o.price) : 0;
         const econTotal = econPerUnit * (p.quantidade || 1);
-        const econCell = econTotal > 0
-          ? `<span class="econ-positive">${fmt(econTotal)}</span>`
-          : "-";
 
-        rows += `
-          <tr class="${winClass}">
-            <td>${badge} ${o.supplierName}</td>
-            <td class="num">${initialCell}</td>
-            <td class="num">${priceCell}</td>
-            <td class="num"><strong>${fmt(o.total)}</strong></td>
-            <td class="num">${econCell}</td>
-          </tr>`;
+        rows += `<tr class="${o.isWinner ? "row-winner" : ""}">
+          <td>${o.isWinner ? '<span class="badge-best">✓ Melhor</span>' : `<span class="badge-rank">#${oIdx + 1}</span>`} ${o.supplierName}</td>
+          <td class="num">${priceCell}</td>
+          <td class="num"><strong>${fmt(o.total)}</strong></td>
+          <td class="num">${econTotal > 0 ? `<span class="econ">${fmt(econTotal)}</span>` : "—"}</td>
+        </tr>`;
       });
 
-      items += `
-        <div class="product-card">
-          <div class="product-header">
-            <span class="product-idx">${idx + 1}</span>
-            <div>
-              <h3>${(p.productName || "").toUpperCase()}</h3>
-              <span class="demand">${p.quantidade} ${unit}</span>
-            </div>
+      sections += `<div class="card">
+        <div class="card-head">
+          <div class="card-num">${idx + 1}</div>
+          <div>
+            <div class="card-title">${(p.productName || "").toUpperCase()}</div>
+            <div class="card-sub">${p.quantidade} ${unit}</div>
           </div>
-          <div class="table-wrap">
-          <table>
-            <thead><tr><th>Fornecedor</th><th class="num">Val. Inicial</th><th class="num">Val. Final</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-          </div>
-        </div>`;
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Fornecedor</th><th class="num">Val. Unit.</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
     });
+
   } else {
-    // Winners grouped view
     (opts.groupedData || []).forEach(g => {
       if (g.name === "Pendente / Sem Vencedor") return;
+      const groupEcon = g.items.reduce((sum: number, i: any) => {
+        const wo = (i.allOffers || []).find((o: any) => o.isWinner);
+        const vi = wo?.initialPrice || i.bestPrice;
+        return sum + (vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0);
+      }, 0);
+
       let rows = "";
       g.items.forEach((i: any) => {
         const unit = (i.unidade || "un").toUpperCase();
-        // Economia do item = valor_inicial do vencedor - valor_final do vencedor × qtd
-        const winnerOffer = (i.allOffers || []).find((o: any) => o.isWinner);
-        const valorInicial = winnerOffer?.initialPrice || i.bestPrice;
-        const econItem = valorInicial > i.bestPrice ? (valorInicial - i.bestPrice) * (i.quantidade || 1) : 0;
-        rows += `
-          <tr>
-            <td>${i.productName || i.product_name}</td>
-            <td class="num">${i.quantidade} ${unit}</td>
-            <td class="num">${fmt(valorInicial)}</td>
-            <td class="num">${fmt(i.bestPrice)}</td>
-            <td class="num"><strong>${fmt(i.totalItem)}</strong></td>
-            <td class="num">${econItem > 0 ? `<span class="econ-positive">${fmt(econItem)}</span>` : "-"}</td>
-          </tr>`;
+        const wo = (i.allOffers || []).find((o: any) => o.isWinner);
+        const vi = wo?.initialPrice || i.bestPrice;
+        const econItem = vi > i.bestPrice ? (vi - i.bestPrice) * (i.quantidade || 1) : 0;
+        const negCell = vi > i.bestPrice
+          ? `<span class="old-price">${fmt(vi)}</span>${fmt(i.bestPrice)}`
+          : fmt(i.bestPrice);
+
+        rows += `<tr>
+          <td>${i.productName || i.product_name}</td>
+          <td class="num">${i.quantidade} ${unit}</td>
+          <td class="num">${negCell}</td>
+          <td class="num"><strong>${fmt(i.totalItem)}</strong></td>
+          <td class="num">${econItem > 0 ? `<span class="econ">${fmt(econItem)}</span>` : "—"}</td>
+        </tr>`;
       });
-      const groupEcon = g.items.reduce((sum: number, i: any) => {
-        const winnerOffer = (i.allOffers || []).find((o: any) => o.isWinner);
-        const valorInicial = winnerOffer?.initialPrice || i.bestPrice;
-        return sum + (valorInicial > i.bestPrice ? (valorInicial - i.bestPrice) * (i.quantidade || 1) : 0);
-      }, 0);
-      items += `
-        <div class="product-card">
-          <div class="product-header supplier-header">
-            <span class="product-idx">🏢</span>
-            <div>
-              <h3>${g.name.toUpperCase()}</h3>
-              <span class="demand">${g.items.length} itens — Subtotal: ${fmt(g.total)}${groupEcon > 0 ? ` — Economia: ${fmt(groupEcon)}` : ""}</span>
-            </div>
+
+      sections += `<div class="card">
+        <div class="card-head supplier-head">
+          <div class="card-num">🏢</div>
+          <div style="flex:1">
+            <div class="card-title">${g.name.toUpperCase()}</div>
+            <div class="card-sub">${g.items.length} ${g.items.length === 1 ? "item" : "itens"}${groupEcon > 0 ? ` &nbsp;·&nbsp; <span class="econ">${fmt(groupEcon)} economizados</span>` : ""}</div>
           </div>
-          <div class="table-wrap">
-          <table>
-            <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Val. Inicial</th><th class="num">Val. Final</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-          </div>
-        </div>`;
+          <div class="group-total">${fmt(g.total)}</div>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th>Produto</th><th class="num">Qtd</th><th class="num">Val. Unit.</th><th class="num">Total</th><th class="num">Economia</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>`;
     });
   }
 
@@ -385,91 +377,142 @@ export function generateQuoteReportHTML(opts: {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Relatório de Negociação — #${opts.quoteId.slice(0, 8)}</title>
+<title>Relatório de Negociação — #${opts.quoteId.slice(0, 8).toUpperCase()}</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#e4e4e7;padding:24px;min-height:100vh}
-  .container{max-width:900px;margin:0 auto;overflow-x:hidden}
-  .header{display:flex;align-items:center;gap:16px;padding-bottom:20px;border-bottom:2px solid #27272a;margin-bottom:24px;flex-wrap:wrap}
-  .logo{width:48px;height:48px;background:#18181b;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;border:3px solid #3f3f46;flex-shrink:0}
-  .header h1{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px}
-  .header p{font-size:11px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-top:3px;word-break:break-all}
-  .header p span.brand{color:#10b981}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
-  .stat-card{background:#18181b;border:1px solid #27272a;border-radius:14px;padding:16px}
-  .stat-card .label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#71717a;margin-bottom:6px}
-  .stat-card .value{font-size:20px;font-weight:900;letter-spacing:-1px;word-break:break-all}
-  .stat-card.economy .value{color:#10b981}
-  .product-card{background:#18181b;border:1px solid #27272a;border-radius:16px;overflow:hidden;margin-bottom:16px}
-  .product-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #27272a;flex-wrap:wrap}
-  .product-idx{width:32px;height:32px;background:#27272a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;color:#a1a1aa;flex-shrink:0}
-  .product-header h3{font-size:14px;font-weight:900;letter-spacing:-0.3px}
-  .demand{font-size:10px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px}
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
-  table{width:100%;border-collapse:collapse;min-width:480px}
-  thead th{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#52525b;padding:10px 16px;text-align:left;background:#111;white-space:nowrap}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#f1f5f9;color:#0f172a;-webkit-font-smoothing:antialiased;color-scheme:light}
+  a{color:inherit;text-decoration:none}
+  .page{max-width:860px;margin:0 auto;padding:32px 16px 56px}
+
+  /* header */
+  .doc-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:20px;border-bottom:1px solid #e2e8f0;margin-bottom:24px;flex-wrap:wrap}
+  .doc-eyebrow{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:5px}
+  .doc-title{font-size:22px;font-weight:900;letter-spacing:-.4px;line-height:1}
+  .doc-meta{font-size:12px;color:#64748b;margin-top:5px}
+  .doc-ref{text-align:right}
+  .doc-id{font-size:12px;font-weight:600;color:#94a3b8;font-variant-numeric:tabular-nums}
+  .doc-date{font-size:12px;color:#64748b;margin-top:3px}
+
+  /* economy hero */
+  .hero{background:#0f172a;border-radius:14px;padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .hero-label{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#64748b;margin-bottom:5px}
+  .hero-value{font-size:36px;font-weight:900;color:#34d399;letter-spacing:-1px;line-height:1;word-break:break-all}
+  .hero-sub{font-size:12px;color:#475569;margin-top:6px}
+  .hero-right{text-align:right;flex-shrink:0}
+  .hero-pct{font-size:28px;font-weight:900;color:#34d399;letter-spacing:-.5px;line-height:1}
+  .hero-pct-label{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:4px}
+  .hero-total-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#64748b;margin-top:14px;margin-bottom:3px}
+  .hero-total{font-size:18px;font-weight:800;color:#e2e8f0;letter-spacing:-.3px}
+
+  /* stat cards */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px}
+  .stat{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px}
+  .stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:5px}
+  .stat-value{font-size:18px;font-weight:800;color:#0f172a}
+
+  /* section title */
+  .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#64748b;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #e2e8f0}
+
+  /* cards */
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px}
+  .card-head{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+  .supplier-head{background:#f0fdf9;border-bottom-color:#bbf7d0}
+  .card-num{width:30px;height:30px;background:#e2e8f0;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#64748b;flex-shrink:0}
+  .card-title{font-size:13px;font-weight:800;color:#0f172a;letter-spacing:-.2px}
+  .card-sub{font-size:10px;color:#64748b;font-weight:500;margin-top:2px}
+  .group-total{font-size:15px;font-weight:800;color:#059669;margin-left:auto;white-space:nowrap}
+
+  /* table */
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:380px}
+  thead th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;padding:9px 16px;text-align:left;background:#fff;border-bottom:1px solid #f1f5f9;white-space:nowrap}
   th.num,td.num{text-align:right}
-  tbody tr{border-top:1px solid #1e1e22;transition:background .15s}
-  tbody tr:hover{background:#1c1c20}
-  tbody td{padding:12px 16px;font-size:12px;white-space:nowrap}
-  tr.winner{background:rgba(16,185,129,0.06)}
-  tr.winner td{color:#34d399;font-weight:700}
-  .badge-winner{display:inline-block;background:rgba(16,185,129,0.15);color:#10b981;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:2px 8px;border-radius:999px;margin-right:6px}
-  .rank{display:inline-block;background:#27272a;color:#71717a;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;margin-right:6px}
-  .old-price{text-decoration:line-through;color:#71717a;font-size:10px;margin-right:4px}
-  .econ-positive{color:#10b981;font-weight:800}
-  .footer{text-align:center;padding:24px 0 12px;border-top:2px solid #27272a;margin-top:24px;color:#52525b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
-  .footer strong{color:#10b981}
-  @media(max-width:768px){
-    body{padding:12px}
+  tbody tr{border-bottom:1px solid #f8fafc}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{padding:11px 16px;font-size:12px;color:#334155;font-weight:500;white-space:nowrap}
+  .row-winner{background:#f0fdf9}
+  .row-winner td{color:#065f46}
+  .row-winner td:first-child{font-weight:700;border-left:3px solid #10b981;padding-left:13px}
+  .badge-best{display:inline-flex;align-items:center;gap:3px;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:700;margin-right:6px;white-space:nowrap}
+  .badge-rank{display:inline-block;background:#f1f5f9;color:#94a3b8;padding:2px 6px;border-radius:6px;font-size:9px;font-weight:700;margin-right:6px}
+  .old-price{text-decoration:line-through;color:#94a3b8;font-size:10px;margin-right:5px}
+  .econ{color:#059669;font-weight:700}
+
+  /* footer */
+  .footer{text-align:center;padding-top:20px;border-top:1px solid #e2e8f0;margin-top:8px;font-size:10px;color:#94a3b8;font-weight:500}
+
+  @media(max-width:640px){
+    .page{padding:16px 12px 40px}
+    .hero{padding:18px 20px}
+    .hero-value{font-size:26px}
+    .hero-pct{font-size:22px}
     .stats{grid-template-columns:1fr 1fr;gap:8px}
-    .stat-card{padding:12px;border-radius:10px}
-    .stat-card .value{font-size:16px}
-    .stat-card .label{font-size:8px;letter-spacing:1px}
-    .header h1{font-size:16px}
-    .header p{font-size:10px;letter-spacing:1px}
-    .logo{width:40px;height:40px;font-size:16px;border-radius:10px}
-    .product-header{padding:12px 14px}
-    .product-header h3{font-size:12px}
-    .product-card{border-radius:12px;margin-bottom:12px}
-    thead th{padding:8px 10px;font-size:8px;letter-spacing:1px}
-    tbody td{padding:8px 10px;font-size:11px}
-    .footer{font-size:9px;padding:16px 0 8px;margin-top:16px}
+    .stat{padding:12px}
+    .stat-value{font-size:16px}
+    .doc-title{font-size:18px}
+    .card-head{padding:12px 14px}
+    thead th,tbody td{padding:8px 10px;font-size:11px}
+    table{min-width:320px}
   }
-  @media(max-width:480px){
-    .stats{grid-template-columns:1fr 1fr;gap:6px}
-    .stat-card .value{font-size:14px}
-    .header{gap:10px}
-    .header h1{font-size:14px}
-    table{min-width:400px}
-    thead th,tbody td{padding:6px 8px;font-size:10px}
-  }
-  @media print{body{background:#fff;color:#000}
-    .product-card,.stat-card{border-color:#ddd}
-    tr.winner{background:#f0fdf4}tr.winner td{color:#047857}
+  @media print{
+    body{background:#fff}
+    .page{padding:0;max-width:100%}
+    .card{break-inside:avoid}
+    .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
 </style>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <div class="logo">M</div>
+<div class="page">
+
+  <div class="doc-header">
     <div>
-      <h1>Relatório de Negociação</h1>
-      <p><span class="brand">#${opts.quoteId.slice(0, 8)}</span> &bull; ${opts.dateLabel} &bull; ${opts.companyName}</p>
+      <div class="doc-eyebrow">CotaJá · Relatório de Negociação</div>
+      <div class="doc-title">${opts.companyName}</div>
+      <div class="doc-meta">Data de referência: ${opts.dateLabel}</div>
+    </div>
+    <div class="doc-ref">
+      <div class="doc-id">Ref. #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
+      <div class="doc-date">Gerado em ${today}</div>
     </div>
   </div>
 
+  ${opts.totalEconomiaReal > 0 ? `
+  <div class="hero">
+    <div>
+      <div class="hero-label">Economia obtida na negociação</div>
+      <div class="hero-value">${fmt(opts.totalEconomiaReal)}</div>
+      <div class="hero-sub">em relação aos preços iniciais praticados</div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-pct-label">Redução média</div>
+      <div class="hero-pct">${economyPct.toFixed(1)}%</div>
+      <div class="hero-total-label">Total negociado</div>
+      <div class="hero-total">${fmt(opts.totalMelhorPreco)}</div>
+    </div>
+  </div>
+  ` : `
+  <div class="hero">
+    <div>
+      <div class="hero-label">Total negociado</div>
+      <div class="hero-value">${fmt(opts.totalMelhorPreco)}</div>
+      <div class="hero-sub">melhor opção por item</div>
+    </div>
+  </div>
+  `}
+
   <div class="stats">
-    <div class="stat-card"><div class="label">Itens Cotados</div><div class="value">${opts.totalProdutos}</div></div>
-    <div class="stat-card"><div class="label">Fornecedores</div><div class="value">${opts.fornecedoresRespondidos}/${opts.totalFornecedores}</div></div>
-    <div class="stat-card economy"><div class="label">Economia Capturada</div><div class="value">${fmt(opts.totalEconomiaReal)}</div></div>
-    <div class="stat-card"><div class="label">Total Negociado</div><div class="value">${fmt(opts.totalMelhorPreco)}</div></div>
+    <div class="stat"><div class="stat-label">Produtos</div><div class="stat-value">${opts.totalProdutos}</div></div>
+    <div class="stat"><div class="stat-label">Fornecedores</div><div class="stat-value">${opts.totalFornecedores}</div></div>
+    <div class="stat"><div class="stat-label">Responderam</div><div class="stat-value">${opts.fornecedoresRespondidos}/${opts.totalFornecedores}</div></div>
+    <div class="stat"><div class="stat-label">Gerado em</div><div class="stat-value" style="font-size:13px;font-weight:700">${new Date().toLocaleDateString("pt-BR")}</div></div>
   </div>
 
-  ${items}
+  <div class="section-title">${opts.viewMode === "comparative" ? "Comparativo por Produto" : "Itens por Fornecedor Vencedor"}</div>
+  ${sections}
 
-  <div class="footer">Relatório auditado via <strong>CotaJá</strong> — Inteligência de Compras</div>
+  <div class="footer">CotaJá · Relatório gerado automaticamente · Ref. #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
 </div>
 </body>
 </html>`;
