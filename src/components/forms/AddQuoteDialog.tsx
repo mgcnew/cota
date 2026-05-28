@@ -955,34 +955,93 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
               <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Quick add area */}
                 <div className="px-4 pb-3 space-y-3 flex-shrink-0">
-                  {/* Product selector */}
-                  <div
-                    onClick={() => {
-                      setShowMobileProductSearch(true);
-                    }}
-                    className={cn(
-                      "flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer active:scale-[0.98] transition-all",
-                      selectedProduct
-                        ? "border-brand/30 bg-brand/5"
-                        : cn(ds.colors.surface.card, ds.colors.border.default)
+                  {/* Product selector — inline search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none z-10" />
+                    <Input
+                      ref={productSearchRef}
+                      placeholder="Buscar produto..."
+                      value={selectedProduct ? selectedProduct.name : productSearch}
+                      onChange={(e) => {
+                        setProductSearch(e.target.value);
+                        setSelectedProduct(null);
+                        setShowProductSuggestions(true);
+                      }}
+                      onFocus={() => {
+                        if (selectedProduct) {
+                          setSelectedProduct(null);
+                          setProductSearch("");
+                        }
+                        setShowProductSuggestions(true);
+                      }}
+                      onBlur={() => setTimeout(() => setShowProductSuggestions(false), 200)}
+                      className={cn(ds.components.input.root, "pl-10 h-12 text-base", selectedProduct && "border-brand/30 bg-brand/5")}
+                    />
+                    {isSearchingProducts && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <Loader2 className="h-4 w-4 animate-spin text-brand" />
+                      </div>
                     )}
-                  >
-                    <div className={cn(
-                      "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-                      selectedProduct ? "bg-brand/15 text-brand" : ds.colors.surface.section
-                    )}>
-                      {selectedProduct ? <Check className="h-5 w-5" /> : <Search className="h-5 w-5 text-zinc-400" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={cn(
-                        ds.typography.size.sm,
-                        selectedProduct ? cn(ds.typography.weight.semibold, ds.colors.text.primary) : ds.colors.text.secondary
-                      )}>
-                        {selectedProduct ? selectedProduct.name : "Toque para buscar produto..."}
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-zinc-300 flex-shrink-0" />
+                    {selectedProduct && (
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedProduct(null); setProductSearch(""); }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
+
+                  {/* Inline results list */}
+                  {showProductSuggestions && !selectedProduct && (
+                    <div className={cn("rounded-xl border overflow-hidden", ds.colors.surface.card, ds.colors.border.default)}>
+                      {productSearch.length === 0 ? (
+                        <p className={cn("text-center py-4", ds.typography.size.sm, ds.colors.text.secondary)}>
+                          Digite para buscar
+                        </p>
+                      ) : products.length > 0 ? (
+                        <div className="max-h-48 overflow-y-auto divide-y divide-border dark:divide-white/5">
+                          {products.map((product) => (
+                            <button
+                              key={product.id}
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setSelectedProduct(product);
+                                if (product.unit) setNewProductUnit(product.unit);
+                                setProductSearch("");
+                                setShowProductSuggestions(false);
+                                setTimeout(() => {
+                                  quantityInputRef.current?.focus();
+                                  quantityInputRef.current?.select();
+                                }, 50);
+                              }}
+                              className={cn("w-full text-left flex items-center gap-3 px-3 py-2.5 active:bg-brand/10 transition-colors", ds.colors.surface.hover)}
+                            >
+                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.colors.surface.section)}>
+                                <Package className="h-4 w-4 text-zinc-400" />
+                              </div>
+                              <span className={cn("text-sm font-medium truncate", ds.colors.text.primary)}>{product.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : !isSearchingProducts ? (
+                        <div className="p-3 text-center space-y-2">
+                          <p className={cn(ds.typography.size.sm, ds.colors.text.secondary)}>
+                            Nenhum resultado para "{productSearch}"
+                          </p>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); setShowQuickCreateProduct(true); setShowProductSuggestions(false); }}
+                            className={cn("text-sm font-bold text-brand")}
+                          >
+                            + Cadastrar este produto
+                          </button>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
 
                   {/* Quantity + Unit â€" only show when product is selected */}
                   {selectedProduct && (
