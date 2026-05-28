@@ -40,8 +40,8 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
   const { isMobile } = useBreakpoint();
 
   return (
-    <Card className="p-0 h-full flex flex-col">
-      <Tabs value={tab} onValueChange={setTab} className="h-full flex flex-col">
+    <Card className="p-0 md:h-full flex flex-col">
+      <Tabs value={tab} onValueChange={setTab} className="md:h-full flex flex-col">
 
         {/* Header com tabs */}
         <div className="px-4 pt-2 border-b border-border dark:border-white/5 shrink-0">
@@ -76,7 +76,7 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
         </div>
 
         {/* Conteúdo */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex-1 md:overflow-y-auto custom-scrollbar">
 
           <TabsContent value="quotes" className="m-0">
             {activeQuotes.length === 0 ? (
