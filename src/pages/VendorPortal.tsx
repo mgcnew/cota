@@ -336,6 +336,7 @@ export default function VendorPortal() {
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isDark, setIsDark] = useState(false);
   const actionBarRef = useRef<HTMLDivElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
 
   const updateItemField = useCallback((productId: string, itemToken: string | undefined, field: string, value: any) => {
     setItems(prev => prev.map(item =>
@@ -382,14 +383,19 @@ export default function VendorPortal() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Keep action bar above the keyboard using the visualViewport API
+  // Keep action bar above the keyboard and adjust main padding to match
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
     const update = () => {
-      if (!actionBarRef.current) return;
-      const offset = window.innerHeight - vv.height - vv.offsetTop;
-      actionBarRef.current.style.bottom = `${Math.max(0, offset)}px`;
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      if (actionBarRef.current) {
+        actionBarRef.current.style.bottom = `${offset}px`;
+      }
+      if (mainRef.current) {
+        const barH = actionBarRef.current?.offsetHeight ?? 72;
+        mainRef.current.style.paddingBottom = `${barH + offset + 24}px`;
+      }
     };
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
@@ -790,7 +796,7 @@ export default function VendorPortal() {
         </div>
 
         {/* LISTA DE ITENS */}
-        <main className="max-w-xl mx-auto px-4 py-5 pb-36 space-y-3">
+        <main ref={mainRef} className="max-w-xl mx-auto px-4 py-5 pb-36 space-y-3">
           <div className="flex items-center justify-between mb-1">
             <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">{items.length} {items.length === 1 ? 'item' : 'itens'}</p>
             {itemsFilled > 0 && (
