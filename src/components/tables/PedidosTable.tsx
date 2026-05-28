@@ -61,7 +61,7 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                 Valor
               </div>
             </TableHead>
-            <TableHead className="table-header py-4 pl-4 pr-2">Ações</TableHead>
+            <TableHead className="text-right table-header py-4 px-4">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -136,8 +136,8 @@ export function PedidosTable({ pedidos, onView, onEdit, onDelete, getStatusBadge
                 <div className="font-bold text-success text-base">{pedido.total}</div>
               </TableCell>
               
-              <TableCell className="py-4 pl-4 pr-2">
-                <div className="flex justify-start gap-1">
+              <TableCell className="py-4 px-4">
+                <div className="flex justify-end gap-1">
                   <Button 
                     variant="ghost" 
                     size="sm"
