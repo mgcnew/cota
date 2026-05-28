@@ -17,6 +17,7 @@ interface MetricCardProps {
   onClick?: () => void;
   subtitle?: string;
   popoverContent?: React.ReactNode;
+  pulse?: boolean;
 }
 
 const VARIANTS: Record<string, { border: string; icon: string; iconBg: string; value: string }> = {
@@ -62,6 +63,7 @@ export const MetricCard = memo(function MetricCard({
   onClick,
   subtitle,
   popoverContent,
+  pulse,
 }: MetricCardProps) {
   const v = VARIANTS[variant];
 
@@ -78,6 +80,12 @@ export const MetricCard = memo(function MetricCard({
       )}
       onClick={onClick}
     >
+      {pulse && (
+        <span className={cn("absolute top-2.5 right-2.5 flex h-2 w-2", v.icon)}>
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-current" />
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-current" />
+        </span>
+      )}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-none">

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle2, AlertTriangle, Truck, DollarSign } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Truck, DollarSign, BarChart3 } from 'lucide-react';
 
 import { MetricCard } from '@/components/ui/metric-card';
 import { MobileMetricCard } from '@/components/dashboard/MobileMetricCard';
@@ -103,6 +103,7 @@ export const DashboardActionRow = memo(({
         subtitle="Cotações prontas para decisão"
         icon={CheckCircle2}
         variant="default"
+        pulse={prontasParaDecisao.length > 0}
         onClick={prontasParaDecisao.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=prontas') : undefined}
       />
 
@@ -112,6 +113,7 @@ export const DashboardActionRow = memo(({
         subtitle="Cotações expirando em breve"
         icon={AlertTriangle}
         variant="warning"
+        pulse={vencendo.length > 0}
         onClick={vencendo.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=vencendo') : undefined}
       />
 
@@ -121,6 +123,7 @@ export const DashboardActionRow = memo(({
         subtitle="Aguardando entrega"
         icon={Truck}
         variant="info"
+        pulse={pedidosEmTransito > 0}
         onClick={pedidosEmTransito > 0 ? () => navigate('/dashboard/compras?tab=pedidos') : undefined}
       />
 
@@ -130,6 +133,7 @@ export const DashboardActionRow = memo(({
         subtitle="Nas cotações fechadas"
         icon={DollarSign}
         variant="success"
+        onClick={() => navigate('/dashboard/relatorios')}
       />
     </div>
   );
