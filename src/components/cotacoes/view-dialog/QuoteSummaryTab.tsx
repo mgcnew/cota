@@ -68,7 +68,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         groups[supplierName] = { name: supplierName, items: [], total: 0 };
       }
       groups[supplierName].items.push(item);
-      groups[supplierName].total += (item.bestPrice > 0 ? item.bestPrice * item.quantidade : 0);
+      groups[supplierName].total += (item.bestPrice > 0 ? item.bestPrice : 0);
     });
     
     return Object.values(groups).sort((a, b) => {
@@ -113,7 +113,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       {/* Price — col 2 on mobile (row 1) */}
       <div className="flex items-center justify-end gap-2 self-center">
         {item.bestPrice > 0 ? (
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end gap-0.5">
             <div className="flex items-center gap-1.5">
               {item.savings > 0 && (
                 <span className="hidden sm:inline px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
@@ -121,10 +121,14 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                 </span>
               )}
               <span className="text-sm font-black text-brand tracking-tight">
-                R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                R$ {(item.bestUnitPrice ?? item.bestPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
+              <span className="text-[9px] font-bold text-muted-foreground">/{safeStr(item.unidade)}</span>
               <span className="hidden md:inline"><CurrentPricesTooltip prices={item.allPrices} /></span>
             </div>
+            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
+              Subtotal: R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </span>
           </div>
         ) : (
           <span className="text-[9px] font-bold text-zinc-400 uppercase italic">Pendente</span>
@@ -250,7 +254,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Item Adquirido</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Unid.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Quant.</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Custo Vencedor</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Preço Unit. / Subtotal</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right pr-4">Melhor Fornecedor</span>
         </div>
 

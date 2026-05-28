@@ -61,6 +61,10 @@ export function QuoteEditTab({
   const [dynamicProducts, setDynamicProducts] = useState<any[]>([]);
   const [isSearchingProducts, setIsSearchingProducts] = useState(false);
   const [isSearchingSuppliers, setIsSearchingSuppliers] = useState(false);
+  const [isAddingProduct, setIsAddingProduct] = useState(false);
+  const [isAddingSupplier, setIsAddingSupplier] = useState(false);
+  const [savingQuantity, setSavingQuantity] = useState<string | null>(null);
+  const [editQuantities, setEditQuantities] = useState<Record<string, string>>({});
 
   // Busca reativa de produtos via Supabase
   useEffect(() => {
@@ -217,6 +221,7 @@ export function QuoteEditTab({
 
   const handleAddProduct = async () => {
     if (!selectedProductToAdd) return;
+    setIsAddingProduct(true);
     try {
       await onAddQuoteItem({
         quoteId,
@@ -232,11 +237,14 @@ export function QuoteEditTab({
       toast({ title: "Produto adicionado!" });
     } catch {
       toast({ title: "Erro ao adicionar produto", variant: "destructive" });
+    } finally {
+      setIsAddingProduct(false);
     }
   };
 
   const handleAddSupplier = async () => {
     if (!selectedSupplierToAdd) return;
+    setIsAddingSupplier(true);
     try {
       await onAddQuoteSupplier(selectedSupplierToAdd);
       setSelectedSupplierToAdd("");
@@ -245,6 +253,8 @@ export function QuoteEditTab({
       toast({ title: "Fornecedor adicionado!" });
     } catch {
       toast({ title: "Erro ao adicionar fornecedor", variant: "destructive" });
+    } finally {
+      setIsAddingSupplier(false);
     }
   };
 
@@ -328,8 +338,8 @@ export function QuoteEditTab({
                     <SelectItem value="metade" className="text-xs font-bold">METADE</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={handleAddProduct} disabled={!selectedProductToAdd} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
-                  <Plus className="h-4 w-4" />
+                <Button onClick={handleAddProduct} disabled={!selectedProductToAdd || isAddingProduct} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
+                  {isAddingProduct ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 </Button>
               </div>
             </div>
@@ -346,23 +356,38 @@ export function QuoteEditTab({
                     <div className="flex flex-col">
                       <span className="text-[11px] font-black text-foreground uppercase tracking-tight truncate">{safeStr(p.product_name)}</span>
                       <div className="flex items-center gap-1 mt-0.5">
-                        <Input 
-                          type="number" 
-                          defaultValue={p.quantidade} 
-                          className="w-14 h-6 text-[10px] p-1 font-black bg-background border-border/50 focus:border-brand/50 focus:ring-0 rounded-md transition-all h-auto"
-                          onClick={(e) => e.stopPropagation()}
-                          onBlur={(e) => {
-                            const val = Number(e.target.value);
-                            if (val !== Number(p.quantidade)) {
-                              onUpdateQuoteItemQuantity(p.product_id, val, p.unidade);
-                            }
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              (e.target as HTMLInputElement).blur();
-                            }
-                          }}
-                        />
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            value={editQuantities[p.product_id] ?? String(p.quantidade)}
+                            onChange={(e) => setEditQuantities(prev => ({ ...prev, [p.product_id]: e.target.value }))}
+                            className={cn("w-14 h-6 text-[10px] p-1 font-black bg-background border-border/50 focus:border-brand/50 focus:ring-0 rounded-md transition-all", savingQuantity === p.product_id && "opacity-50 pointer-events-none")}
+                            onClick={(e) => e.stopPropagation()}
+                            onBlur={async (e) => {
+                              const val = Number(e.target.value);
+                              if (val > 0 && val !== Number(p.quantidade)) {
+                                setSavingQuantity(p.product_id);
+                                try {
+                                  await onUpdateQuoteItemQuantity(p.product_id, val, p.unidade);
+                                  toast({ title: "Quantidade atualizada!" });
+                                } catch {
+                                  toast({ title: "Erro ao atualizar quantidade", variant: "destructive" });
+                                  setEditQuantities(prev => ({ ...prev, [p.product_id]: String(p.quantidade) }));
+                                } finally {
+                                  setSavingQuantity(null);
+                                }
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                (e.target as HTMLInputElement).blur();
+                              }
+                            }}
+                          />
+                          {savingQuantity === p.product_id && (
+                            <Loader2 className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 animate-spin text-brand" />
+                          )}
+                        </div>
                         <Select 
                           defaultValue={p.unidade || "un"} 
                           onValueChange={(val) => onUpdateQuoteItemQuantity(p.product_id, Number(p.quantidade), val)}
@@ -451,8 +476,8 @@ export function QuoteEditTab({
               )}
             </div>
             
-            <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
-              <Plus className="h-4 w-4" />
+            <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || isAddingSupplier} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
+              {isAddingSupplier ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             </Button>
           </div>
 

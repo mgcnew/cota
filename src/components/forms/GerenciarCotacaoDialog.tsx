@@ -148,6 +148,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     }
 
     let bestNormalized = Infinity;
+    let bestUnitPrice = 0;
     let bestSupplierId = null;
     let bestSupplierName = "";
 
@@ -163,6 +164,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         const compare = normalized.valorTotal > 0 ? normalized.valorTotal : priceItem.valor_oferecido;
         if (compare < bestNormalized) {
           bestNormalized = compare;
+          bestUnitPrice = normalized.valorUnitario;
           bestSupplierId = priceItem.supplier_id;
           const supplier = fornecedores.find((f: any) => f.id === priceItem.supplier_id);
           bestSupplierName = supplier ? supplier.nome : "";
@@ -170,6 +172,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       } catch {
         if (priceItem.valor_oferecido < bestNormalized) {
           bestNormalized = priceItem.valor_oferecido;
+          bestUnitPrice = priceItem.valor_oferecido;
           bestSupplierId = priceItem.supplier_id;
           const supplier = fornecedores.find((f: any) => f.id === priceItem.supplier_id);
           bestSupplierName = supplier ? supplier.nome : "";
@@ -179,6 +182,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
     return {
       bestPrice: bestNormalized === Infinity ? 0 : bestNormalized,
+      bestUnitPrice: bestNormalized === Infinity ? 0 : bestUnitPrice,
       bestSupplierId,
       bestSupplierName,
     };
@@ -204,16 +208,9 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     };
   }, [products, fornecedores]);
 
-  const melhorTotal = useMemo(() => {
-    return products.reduce((total: number, product: any) => {
-      const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
-      return total + bestPrice;
-    }, 0);
-  }, [products, getBestPriceInfoForProduct]);
-
   const productPricesData = useMemo(() => {
     return products.map((product: any) => {
-      const { bestPrice, bestSupplierId, bestSupplierName } = getBestPriceInfoForProduct(product.product_id);
+      const { bestPrice, bestUnitPrice, bestSupplierId, bestSupplierName } = getBestPriceInfoForProduct(product.product_id);
 
       const allPrices = fornecedores.map((f: any) => {
         const item = supplierItems.find((i: any) => i?.supplier_id === f.id && i?.product_id === product.product_id);
@@ -244,6 +241,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         quantidade: product.quantidade,
         unidade: product.unidade,
         bestPrice,
+        bestUnitPrice,
         bestSupplierId,
         bestSupplierName,
         bestObservacoes: bestItem?.observacoes ?? null,
@@ -252,6 +250,10 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
       };
     }).sort((a: any, b: any) => b.savings - a.savings);
   }, [products, fornecedores, getBestPriceInfoForProduct, getSupplierProductValue]);
+
+  const melhorTotal = useMemo(() => {
+    return productPricesData.reduce((total, item) => total + (item.bestPrice > 0 ? item.bestPrice : 0), 0);
+  }, [productPricesData]);
 
   // Callbacks de Ação
   const handleRefresh = useCallback(() => {
