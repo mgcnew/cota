@@ -264,40 +264,47 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
           })
         ) : (
           <TooltipProvider delayDuration={0}>
-            <div className="flex flex-col gap-2 mt-2 items-center w-full">
-              {allMenuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = item.url === "/dashboard"
-                  ? location.pathname === "/dashboard"
-                  : location.pathname.startsWith(item.url);
+            <div className="flex flex-col items-center w-full gap-1">
+              {menuCategories.map((category, catIdx) => (
+                <div key={category.title} className="flex flex-col items-center w-full gap-1">
+                  {catIdx > 0 && (
+                    <div className="w-7 border-t border-border/40 my-1.5" />
+                  )}
+                  {category.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = item.url === "/dashboard"
+                      ? location.pathname === "/dashboard"
+                      : location.pathname.startsWith(item.url);
 
-                return (
-                  <Tooltip key={item.title}>
-                    <TooltipTrigger asChild>
-                      <NavLink
-                        to={item.url}
-                        className={cn(
-                          "relative flex items-center justify-center w-10 h-10 mx-auto transition-all duration-300 group rounded-none",
-                          isActive
-                            ? "text-brand shadow-[inset_0_-2px_0_0_hsl(var(--brand))] bg-transparent"
-                            : "text-muted-foreground hover:text-foreground hover:bg-transparent"
-                        )}
-                      >
-                        <Icon
-                          className={cn("w-5 h-5 transition-transform group-hover:scale-110", isActive && "text-brand")}
-                        />
-                      </NavLink>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      side="right"
-                      sideOffset={12}
-                      className="font-medium text-xs"
-                    >
-                      {item.title}
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
+                    return (
+                      <Tooltip key={item.title}>
+                        <TooltipTrigger asChild>
+                          <NavLink
+                            to={item.url}
+                            className={cn(
+                              "relative flex items-center justify-center w-9 h-9 mx-auto transition-all duration-200 group rounded-xl",
+                              isActive
+                                ? "text-brand bg-brand/10"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                            )}
+                          >
+                            <Icon
+                              className={cn("w-[18px] h-[18px] transition-transform group-hover:scale-110", isActive && "text-brand")}
+                            />
+                          </NavLink>
+                        </TooltipTrigger>
+                        <TooltipContent
+                          side="right"
+                          sideOffset={12}
+                          className="font-medium text-xs"
+                        >
+                          {item.title}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </TooltipProvider>
         )}
@@ -413,7 +420,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
       <div
         className={cn(
           "hidden md:flex fixed z-50 left-3 top-3 bottom-3 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-          isSidebarExpanded ? "w-64" : "w-20"
+          isSidebarExpanded ? "w-64" : "w-14"
         )}
       >
         <div className={designSystem.layout.sidebar.wrapper}>

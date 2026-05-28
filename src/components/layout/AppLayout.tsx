@@ -26,23 +26,22 @@ export function AppLayout() {
   // Removed unused handleLogout since it will be in Sidebar
 
   return (
-    <div className="min-h-screen w-full bg-background overflow-x-hidden">
+    <div className="h-screen w-full bg-background overflow-hidden flex flex-col">
       {/* Desktop Sidebar Flutuante */}
       <AppSidebar onOpenAI={() => setAiSearchOpen(true)} />
 
       {/* Main Content Area */}
-      <div className="flex flex-col w-full min-h-screen relative">
-        <main
-          className={cn(
-            "flex-1 w-full pb-20 md:pb-4 pt-3 md:pt-3 overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-            isSidebarExpanded ? "md:pl-[17rem] md:pr-3" : "md:pl-[5.75rem] md:pr-3"
-          )}
-        >
-          <SmoothPageTransition>
-            <Outlet />
-          </SmoothPageTransition>
-        </main>
-      </div>
+      <main
+        className={cn(
+          "flex-1 w-full overflow-y-auto overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+          "pb-20 md:pb-6 pt-3 md:mt-3 md:mb-3",
+          isSidebarExpanded ? "md:pl-[17rem] md:pr-3" : "md:pl-[4.25rem] md:pr-3"
+        )}
+      >
+        <SmoothPageTransition>
+          <Outlet />
+        </SmoothPageTransition>
+      </main>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
