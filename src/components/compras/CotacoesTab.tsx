@@ -237,35 +237,7 @@ function CotacoesTab() {
           </div>
         </div>
 
-        {/* Mobile Filter Chips */}
-        <div className="md:hidden flex overflow-x-auto gap-2 p-3 pb-3 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30 scroll-smooth" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          <style dangerouslySetInnerHTML={{__html: `
-            .md\\:hidden::-webkit-scrollbar { display: none; }
-          `}} />
-          {[
-            { value: 'all', label: 'Todos' },
-            { value: 'ativa', label: 'Ativas' },
-            { value: 'pendente', label: 'Pendentes' },
-            { value: 'prontas', label: 'Prontas' },
-            { value: 'vencendo', label: 'Vencendo' },
-            { value: 'concluida', label: 'Concluídas' },
-          ].map(status => (
-            <button
-              key={status.value}
-              onClick={() => handleStatusFilterChange(status.value)}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap transition-colors border touch-manipulation active:scale-95",
-                statusFilter === status.value 
-                  ? "bg-brand text-white border-brand shadow-md" 
-                  : "bg-white text-zinc-500 border-zinc-200 hover:bg-zinc-50 dark:bg-zinc-800/40 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
-              )}
-            >
-              {status.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="w-full">
+<div className="w-full">
           {paginatedData.items.length === 0 && !isLoading ? (
             <div className="p-8 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
