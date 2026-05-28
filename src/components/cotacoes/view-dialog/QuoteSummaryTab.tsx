@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from "react";
-import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter } from "lucide-react";
+import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, EyeOff, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -27,7 +27,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [groupBySupplier, setGroupBySupplier] = useState(false);
+  const [hiddenSuppliers, setHiddenSuppliers] = useState<Set<string>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const hideSupplier = (name: string) =>
+    setHiddenSuppliers(prev => new Set([...prev, name]));
+
+  const restoreAll = () => setHiddenSuppliers(new Set());
 
   const topSuppliersCount = useMemo(() => {
     const wins = new Set();
@@ -261,30 +267,57 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
         <div className="p-4 space-y-2 pb-4">
           {filteredAndSortedData.length > 0 ? (
             groupBySupplier && groupedData ? (
-              groupedData.map(group => (
-                <div key={group.name} className="mt-4 first:mt-0 mb-4 bg-card rounded-2xl p-3 border border-border dark:border-white/5/40 shadow-sm">
-                  <div className="flex items-center justify-between mb-3 px-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
-                        {group.name === "Pendente / Sem Vencedor" ? <Package className="h-3 w-3 text-zinc-400" /> : <Building2 className="h-3 w-3 text-brand" />}
+              <>
+                {groupedData.filter(g => !hiddenSuppliers.has(g.name)).map(group => (
+                  <div key={group.name} className="mt-4 first:mt-0 mb-4 bg-card rounded-2xl p-3 border border-border dark:border-white/5/40 shadow-sm">
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                          {group.name === "Pendente / Sem Vencedor" ? <Package className="h-3 w-3 text-zinc-400" /> : <Building2 className="h-3 w-3 text-brand" />}
+                        </div>
+                        <span className="text-[11px] font-black text-zinc-700 dark:text-zinc-300 uppercase tracking-widest">{safeStr(group.name)}</span>
+                        <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded-md font-bold">{group.items.length} itens</span>
                       </div>
-                      <span className="text-[11px] font-black text-zinc-700 dark:text-zinc-300 uppercase tracking-widest">{safeStr(group.name)}</span>
-                      <span className="text-[9px] bg-zinc-100 dark:bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded-md font-bold">{group.items.length} itens</span>
+                      <div className="flex items-center gap-2">
+                        {group.name !== "Pendente / Sem Vencedor" && (
+                          <div className="flex items-baseline gap-1 bg-green-500/10 px-2 py-1 rounded-lg border border-green-500/20">
+                            <span className="text-[9px] font-black text-green-600 dark:text-green-500 uppercase">Subtotal</span>
+                            <span className="text-xs font-black text-green-600 dark:text-green-500">
+                              R$ {group.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                            </span>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => hideSupplier(group.name)}
+                          className="flex items-center gap-1 px-2 py-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+                          title="Ocultar fornecedor"
+                        >
+                          <EyeOff className="h-3 w-3" />
+                          <span className="text-[9px] font-bold uppercase">Ocultar</span>
+                        </button>
+                      </div>
                     </div>
-                    {group.name !== "Pendente / Sem Vencedor" && (
-                      <div className="flex items-baseline gap-1 bg-green-500/10 px-2 py-1 rounded-lg border border-green-500/20">
-                        <span className="text-[9px] font-black text-green-600 dark:text-green-500 uppercase">Subtotal</span>
-                        <span className="text-xs font-black text-green-600 dark:text-green-500">
-                          R$ {group.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    )}
+                    <div className="space-y-1">
+                      {group.items.map(renderItem)}
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    {group.items.map(renderItem)}
+                ))}
+                {hiddenSuppliers.size > 0 && (
+                  <div className="flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border dark:border-white/10 bg-muted/20 mt-2">
+                    <EyeOff className="h-3.5 w-3.5 text-muted-foreground/50" />
+                    <span className="text-[11px] text-muted-foreground">
+                      {hiddenSuppliers.size} fornecedor{hiddenSuppliers.size > 1 ? 'es' : ''} oculto{hiddenSuppliers.size > 1 ? 's' : ''}
+                    </span>
+                    <button
+                      onClick={restoreAll}
+                      className="flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
+                    >
+                      <Eye className="h-3 w-3" />
+                      Restaurar
+                    </button>
                   </div>
-                </div>
-              ))
+                )}
+              </>
             ) : (
               filteredAndSortedData.map(renderItem)
             )
