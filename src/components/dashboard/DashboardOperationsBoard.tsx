@@ -44,11 +44,11 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
       <Tabs value={tab} onValueChange={setTab} className="h-full flex flex-col">
 
         {/* Header com tabs */}
-        <div className="px-4 pt-3 pb-0 border-b border-border dark:border-white/5 shrink-0">
-          <TabsList className="h-8 bg-transparent p-0 gap-4 w-full justify-start rounded-none border-none shadow-none">
+        <div className="px-4 pt-4 border-b border-border dark:border-white/5 shrink-0">
+          <TabsList className="h-9 bg-transparent p-0 gap-5 w-full justify-start rounded-none border-none shadow-none mb-[-1px]">
             <TabsTrigger
               value="quotes"
-              className="h-8 px-0 pb-2 text-xs font-semibold rounded-none border-b-2 border-transparent bg-transparent shadow-none
+              className="h-9 px-0 pb-2.5 text-xs font-semibold rounded-none border-b-2 border-transparent bg-transparent shadow-none
                          text-muted-foreground data-[state=active]:border-brand data-[state=active]:text-brand data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
@@ -61,7 +61,7 @@ export const DashboardOperationsBoard = memo(({ activeQuotes, pendingOrders }: D
             </TabsTrigger>
             <TabsTrigger
               value="orders"
-              className="h-8 px-0 pb-2 text-xs font-semibold rounded-none border-b-2 border-transparent bg-transparent shadow-none
+              className="h-9 px-0 pb-2.5 text-xs font-semibold rounded-none border-b-2 border-transparent bg-transparent shadow-none
                          text-muted-foreground data-[state=active]:border-blue-500 data-[state=active]:text-blue-500 data-[state=active]:bg-transparent data-[state=active]:shadow-none"
             >
               <Truck className="h-3.5 w-3.5 mr-1.5" />
