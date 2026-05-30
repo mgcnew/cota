@@ -74,17 +74,19 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = PACKAGING_ORDER_STATUS.find(s => s.value === status);
-    
-    let badgeClass: string = ds.components.badge.outline as string;
-    if (status === "confirmado") badgeClass = ds.components.badge.active as string;
-    if (status === "entregue") badgeClass = ds.components.badge.success as string;
-    if (status === "cancelado") badgeClass = ds.components.badge.destructive as string;
 
-    const IconComponent = status === "pendente" ? Clock : status === "confirmado" ? CheckCircle2 : status === "entregue" ? Truck : Clock;
-    
+    const config: Record<string, { cls: string; Icon: typeof Clock }> = {
+      pendente:   { cls: "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800/30", Icon: Clock },
+      confirmado: { cls: ds.components.badge.active as string,       Icon: CheckCircle2 },
+      entregue:   { cls: ds.components.badge.success as string,      Icon: Truck },
+      cancelado:  { cls: ds.components.badge.destructive as string,  Icon: CircleDot },
+    };
+
+    const { cls, Icon } = config[status] ?? { cls: ds.components.badge.outline as string, Icon: Clock };
+
     return (
-      <Badge className={cn(badgeClass, "gap-1.5")}>
-        <IconComponent className="h-3 w-3" />
+      <Badge className={cn(cls, "gap-1.5")}>
+        <Icon className="h-3 w-3" />
         {statusConfig?.label || status}
       </Badge>
     );
@@ -174,8 +176,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         <div className="w-full">
           {paginatedData.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
-              <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
-              <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
+              <ShoppingCart className="h-16 w-16 text-muted-foreground/30 mb-6" />
+              <p className="text-muted-foreground font-medium">Nenhum pedido de embalagem encontrado</p>
               <Button variant="outline" className="mt-6 rounded-xl" onClick={onCreateOrder}>
                 <Plus className="h-4 w-4 mr-2" />Criar Primeiro Pedido
               </Button>

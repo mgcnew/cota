@@ -62,9 +62,17 @@ export const PackagingQuotesTable = memo(({
         </Badge>
       );
     }
-    if (quote.status === "concluida") return <Badge className={ds.components.badge.secondary}>Concluída</Badge>;
+    if (quote.status === "concluida") return (
+      <Badge className="bg-zinc-100 text-zinc-600 border border-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700">
+        Concluída
+      </Badge>
+    );
     if (quote.status === "cancelada") return <Badge className={ds.components.badge.destructive}>Cancelada</Badge>;
-    return <Badge className={ds.components.badge.outline}>Ativa</Badge>;
+    return (
+      <Badge className="bg-brand/10 text-brand border border-brand/20 dark:bg-brand/15 dark:text-brand dark:border-brand/30">
+        Ativa
+      </Badge>
+    );
   };
 
   return (
@@ -93,10 +101,7 @@ export const PackagingQuotesTable = memo(({
               {/* Cotação # */}
               <TableCell>
                 <div className="flex items-center gap-2.5">
-                  <div className={cn(
-                    "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border",
-                    isPronta ? "bg-brand/10 border-brand/20" : "bg-brand/10 border-brand/20"
-                  )}>
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border bg-brand/10 border-brand/20">
                     {isPronta ? (
                       <CheckCircle2 className="h-4 w-4 text-brand" />
                     ) : (
@@ -150,7 +155,7 @@ export const PackagingQuotesTable = memo(({
                     "inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-full text-[12px] tabular-nums font-medium border",
                     respondidos === total
                       ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50"
-                      : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                      : "bg-brand/10 text-brand border-brand/20"
                   )}>
                     {respondidos}/{total}
                   </span>
