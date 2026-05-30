@@ -137,6 +137,13 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const currentStepIndex = STEPS.findIndex(s => s.id === activeStep);
   const progress = ((currentStepIndex + 1) / STEPS.length) * 100;
 
+  // Mobile uses 2 visible steps — "confirmar" becomes a confirmation bottom sheet
+  const mobileSteps = useMemo(() => STEPS.filter(s => s.id !== "confirmar"), []);
+  const mobileCurrentStepIndex = mobileSteps.findIndex(s => s.id === activeStep);
+  const isMobileLastStep =
+    mobileCurrentStepIndex === mobileSteps.length - 1 && activeStep !== "confirmar";
+  const [showConfirmDrawer, setShowConfirmDrawer] = useState(false);
+
   // Load data
   useEffect(() => {
     if (open) {
@@ -221,6 +228,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setShowQuickCreateProduct(false);
     setShowQuickCreateSupplier(false);
     setShowMobileSupplierSearch(false);
+    setShowConfirmDrawer(false);
   };
 
   const loadLastPrices = async () => {
@@ -1616,7 +1624,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       {/* Mobile Header */}
       <div className={cn(ds.components.modal.header, "flex-shrink-0 px-4 py-3")}>
         <div className="flex items-center gap-3">
-          {currentStepIndex > 0 && (
+          {mobileCurrentStepIndex > 0 && (
             <Button
               type="button"
               variant="ghost"
@@ -1629,10 +1637,10 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           )}
           <div className="flex-1 min-w-0">
             <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, "text-brand uppercase tracking-wider")}>
-              Novo Pedido Â· Passo {currentStepIndex + 1} de {STEPS.length}
+              Novo Pedido Â· Passo {mobileCurrentStepIndex + 1} de {mobileSteps.length}
             </p>
             <h2 className={cn(ds.components.modal.title, "mt-0.5")}>
-              {STEPS[currentStepIndex].title}
+              {mobileSteps[mobileCurrentStepIndex]?.title || "Produtos"}
             </h2>
           </div>
           <Button
@@ -1647,12 +1655,12 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         </div>
         {/* Segmented progress bar */}
         <div className="mt-3 flex gap-1.5">
-          {STEPS.map((_, i) => (
+          {mobileSteps.map((_, i) => (
             <div
               key={i}
               className={cn(
                 "h-1 flex-1 rounded-full transition-all duration-300",
-                i <= currentStepIndex ? "bg-brand" : "bg-zinc-200 dark:bg-zinc-800"
+                i <= mobileCurrentStepIndex ? "bg-brand" : "bg-zinc-200 dark:bg-zinc-800"
               )}
             />
           ))}
@@ -2088,7 +2096,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         "flex-shrink-0 px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] border-t flex items-center gap-3",
         ds.colors.surface.section, ds.colors.border.default
       )}>
-        {currentStepIndex > 0 && (
+        {mobileCurrentStepIndex > 0 && (
           <Button
             type="button"
             variant="outline"
@@ -2098,7 +2106,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
           </Button>
         )}
-        {currentStepIndex < STEPS.length - 1 ? (
+        {isMobileLastStep ? (
+          <Button
+            type="button"
+            onClick={() => setShowConfirmDrawer(true)}
+            disabled={!canProceed() || loading}
+            className={cn(ds.components.button.primary, "flex-1 h-12 text-base")}
+          >
+            Revisar e Criar <ChevronRight className="h-4 w-4 ml-2" />
+          </Button>
+        ) : (
           <Button
             type="button"
             onClick={handleNext}
@@ -2106,19 +2123,6 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
             className={cn(ds.components.button.primary, "flex-1 h-12 text-base")}
           >
             Próximo <ChevronRight className="h-4 w-4 ml-2" />
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading || !canProceed()}
-            className={cn(ds.components.button.primary, "flex-1 h-12 text-base")}
-          >
-            {loading ? (
-              <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Criando...</>
-            ) : (
-              <><Check className="h-5 w-5 mr-2" /> Criar Pedido</>
-            )}
           </Button>
         )}
       </div>
@@ -2194,6 +2198,109 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                 <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-widest")}>Digite para buscar</p>
               </div>
             )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* â”€â”€ Confirmation Drawer â€" replaces the old "Confirmar" step on mobile â”€â”€ */}
+      <Drawer open={showConfirmDrawer} onOpenChange={setShowConfirmDrawer}>
+        <DrawerContent className={cn("max-h-[92vh] flex flex-col", ds.colors.surface.card, ds.colors.border.default, "border-t")}>
+          <DrawerHeader className={cn("border-b pb-3 px-4 flex-shrink-0", ds.colors.border.default)}>
+            <DrawerTitle className={cn(ds.typography.weight.bold, ds.colors.text.primary, "text-left flex items-center gap-2")}>
+              <Check className="h-5 w-5 text-brand" />
+              Revisão Final
+            </DrawerTitle>
+            <DrawerDescription className={cn(ds.colors.text.secondary, "text-left")}>
+              Confira os detalhes antes de criar o pedido.
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className={cn("p-3 rounded-xl border", ds.colors.surface.section, ds.colors.border.default)}>
+                <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider mb-1.5 flex items-center gap-1.5")}>
+                  <Building2 className="h-3 w-3" /> Fornecedor
+                </p>
+                <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>
+                  {suppliers.find(s => s.id === fornecedor)?.name || "—"}
+                </p>
+              </div>
+              <div className={cn("p-3 rounded-xl border", ds.colors.surface.section, ds.colors.border.default)}>
+                <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider mb-1.5 flex items-center gap-1.5")}>
+                  <CalendarIcon className="h-3 w-3" /> Entrega
+                </p>
+                <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary)}>
+                  {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "—"}
+                </p>
+              </div>
+            </div>
+
+            {/* Items Summary */}
+            <div className={cn("rounded-xl border overflow-hidden", ds.colors.border.default)}>
+              <div className={cn("px-4 py-3 flex items-center justify-between border-b", ds.colors.surface.section, ds.colors.border.default)}>
+                <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "flex items-center gap-2")}>
+                  <ShoppingCart className="h-4 w-4 text-brand" /> Itens do Pedido
+                </span>
+                <Badge className={cn(ds.components.badge.base, "bg-brand/10 text-brand border-brand/20")}>{itens.length}</Badge>
+              </div>
+              <div className={cn("divide-y", ds.colors.border.default)}>
+                {itens.map((item, index) => (
+                  <div key={index} className={cn("flex items-center justify-between px-4 py-3", ds.colors.surface.card)}>
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "truncate")}>{item.produto}</p>
+                      <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
+                        {item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}
+                      </p>
+                    </div>
+                    <p className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "ml-3")}>
+                      R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className={cn("px-4 py-3 flex items-center justify-between border-t", ds.colors.surface.section, ds.colors.border.default)}>
+                <span className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider")}>Total</span>
+                <span className={cn(ds.typography.size.lg, ds.typography.weight.bold, "text-brand")}>
+                  R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            {observacoes && (
+              <div className={cn("p-3 rounded-xl border", ds.colors.surface.section, ds.colors.border.default)}>
+                <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider mb-1.5 flex items-center gap-1.5")}>
+                  <FileText className="h-3 w-3" /> Observações
+                </p>
+                <p className={cn(ds.typography.size.sm, ds.colors.text.primary)}>{observacoes}</p>
+              </div>
+            )}
+          </div>
+
+          <div className={cn(
+            "flex-shrink-0 px-4 pt-3 pb-[calc(12px+env(safe-area-inset-bottom))] border-t flex items-center gap-3",
+            ds.colors.surface.section, ds.colors.border.default
+          )}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowConfirmDrawer(false)}
+              disabled={loading}
+              className={cn(ds.components.button.secondary, "h-12 px-5")}
+            >
+              Voltar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading || !canProceed()}
+              className={cn(ds.components.button.primary, "flex-1 h-12 text-base font-bold")}
+            >
+              {loading ? (
+                <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Criando...</>
+              ) : (
+                <><Check className="h-5 w-5 mr-2" /> Criar Pedido</>
+              )}
+            </Button>
           </div>
         </DrawerContent>
       </Drawer>
