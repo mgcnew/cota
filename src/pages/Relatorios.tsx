@@ -208,52 +208,118 @@ export default function Relatorios() {
           </CardContent>
         </Card>
 
-        {/* ── Grid: gráfico + tabela de produtos ────────────────────────────── */}
+        {/* ── Grid: coluna esquerda (2 gráficos desktop / 1 mobile) + tabela ── */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
-          {/* Economia por mês */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold text-foreground">Economia por mês (R$)</CardTitle>
-              <p className="text-xs text-muted-foreground">Últimos 6 meses — quanto você economizou comparando fornecedores</p>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {isLoading ? (
-                <div className="h-[220px] flex items-center justify-center">
-                  <Skeleton className="h-full w-full rounded-lg" />
-                </div>
-              ) : economiaPorMes.every(m => m.economia === 0) ? (
-                <div className="h-[220px] flex flex-col items-center justify-center text-muted-foreground gap-2">
-                  <TrendingUp className="h-8 w-8 opacity-30" />
-                  <p className="text-sm">Nenhuma economia registrada no período</p>
-                  <p className="text-xs opacity-70">Cote com 2+ fornecedores por produto para gerar comparação</p>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={220}>
-                  <BarChart data={economiaPorMes} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.3} vertical={false} />
-                    <XAxis dataKey="mes" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-                    <YAxis
-                      tick={{ fontSize: 10 }}
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`}
-                    />
-                    <Tooltip content={<ChartTooltip />} />
-                    <Bar dataKey="economia" radius={[6, 6, 0, 0]} name="Economia">
-                      {economiaPorMes.map((entry, index) => (
-                        <Cell
-                          key={index}
-                          fill={entry.economia > 0 ? "#3b82f6" : "#e4e4e7"}
-                          className={entry.economia > 0 ? "" : "dark:fill-zinc-700"}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          {/* Coluna esquerda: dois cards empilhados no desktop, um no mobile */}
+          <div className="flex flex-col gap-6">
+
+            {/* Economia por mês */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-foreground">Economia por mês (R$)</CardTitle>
+                <p className="text-xs text-muted-foreground">Últimos 6 meses — quanto você economizou comparando fornecedores</p>
+              </CardHeader>
+              <CardContent className="pt-0">
+                {isLoading ? (
+                  <Skeleton className="h-[170px] w-full rounded-lg" />
+                ) : economiaPorMes.every(m => m.economia === 0) ? (
+                  <div className="h-[170px] flex flex-col items-center justify-center text-muted-foreground gap-2">
+                    <TrendingUp className="h-8 w-8 opacity-30" />
+                    <p className="text-sm">Nenhuma economia registrada</p>
+                    <p className="text-xs opacity-70">Cote com 2+ fornecedores por produto</p>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={170}>
+                    <BarChart data={economiaPorMes} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.3} vertical={false} />
+                      <XAxis dataKey="mes" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                      <YAxis
+                        tick={{ fontSize: 10 }}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`}
+                      />
+                      <Tooltip content={<ChartTooltip />} />
+                      <Bar dataKey="economia" radius={[6, 6, 0, 0]} name="Economia">
+                        {economiaPorMes.map((entry, index) => (
+                          <Cell
+                            key={index}
+                            fill={entry.economia > 0 ? "#3b82f6" : "#e4e4e7"}
+                            className={entry.economia > 0 ? "" : "dark:fill-zinc-700"}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Top fornecedores por economia — só desktop */}
+            <Card className="hidden lg:flex lg:flex-col">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold text-foreground">Top fornecedores — economia gerada</CardTitle>
+                <p className="text-xs text-muted-foreground">Quem ofereceu os menores preços e gerou mais economia</p>
+              </CardHeader>
+              <CardContent className="pt-0 flex-1">
+                {isLoading ? (
+                  <Skeleton className="h-[190px] w-full rounded-lg" />
+                ) : rankingFornecedores.filter(f => f.economiaGerada > 0).length === 0 ? (
+                  <div className="h-[190px] flex flex-col items-center justify-center text-muted-foreground gap-2">
+                    <Users className="h-8 w-8 opacity-30" />
+                    <p className="text-sm">Sem dados de economia por fornecedor</p>
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={190}>
+                    <BarChart
+                      data={rankingFornecedores
+                        .filter(f => f.economiaGerada > 0)
+                        .slice(0, 5)
+                        .map(f => ({
+                          nome: f.nome.length > 16 ? f.nome.slice(0, 16) + "…" : f.nome,
+                          nomeCompleto: f.nome,
+                          economia: f.economiaGerada,
+                        }))}
+                      layout="vertical"
+                      margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.3} horizontal={false} />
+                      <XAxis
+                        type="number"
+                        tick={{ fontSize: 10 }}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="nome"
+                        width={100}
+                        tick={{ fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const d = payload[0].payload;
+                          return (
+                            <div className="bg-card border border-border rounded-xl px-4 py-3 shadow-lg text-sm">
+                              <p className="font-semibold text-foreground mb-1">{d.nomeCompleto}</p>
+                              <p className="text-green-600 dark:text-green-400 font-bold">{formatCurrency(d.economia)}</p>
+                            </div>
+                          );
+                        }}
+                      />
+                      <Bar dataKey="economia" radius={[0, 6, 6, 0]} fill="#3b82f6" name="Economia gerada" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+          </div>
 
           {/* Produtos com maior variação de preço */}
           <Card>
