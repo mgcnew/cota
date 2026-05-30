@@ -311,10 +311,10 @@ function EmbalagensTab() {
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={“all”}>Todos os Status</SelectItem>
-                      <SelectItem value={“ativa”}>🟢 Ativas</SelectItem>
-                      <SelectItem value={“prontas”}>✅ Prontas p/ Decisão</SelectItem>
-                      <SelectItem value={“concluida”}>🔵 Concluídas</SelectItem>
+                      <SelectItem value={"all"}>Todos os Status</SelectItem>
+                      <SelectItem value={"ativa"}>🟢 Ativas</SelectItem>
+                      <SelectItem value={"prontas"}>✅ Prontas p/ Decisão</SelectItem>
+                      <SelectItem value={"concluida"}>🔵 Concluídas</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
