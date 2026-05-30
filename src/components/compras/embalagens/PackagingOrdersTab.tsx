@@ -1,7 +1,7 @@
 ﻿import { useState, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableRow, TableHeader } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePagination } from "@/hooks/usePagination";
@@ -200,144 +200,110 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
               })}
             </div>
           ) : (
-            <Table className={ds.components.table.root}>
-              <TableHeader className={ds.components.table.header}>
-                <TableRow className="border-none hover:bg-transparent">
-                  <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
-                    <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
-                      <div className="w-[14%] flex items-center gap-3">
-                        <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
-                          <ShoppingCart className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
-                        </div>
-                        <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Pedido</span>
-                      </div>
-                      <div className="w-[18%] pl-2 flex items-center gap-2">
-                        <span className={ds.components.table.headerLabel}>Fornecedor</span>
-                      </div>
-                      <div className="w-[20%] pl-2 flex items-center gap-2">
-                        <span className={ds.components.table.headerLabel}>Itens</span>
-                      </div>
-                      <div className="w-[12%] pl-2 flex items-center gap-2">
-                        <span className={ds.components.table.headerLabel}>Entrega</span>
-                      </div>
-                      <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                        <span className={ds.components.table.headerLabel}>Status</span>
-                      </div>
-                      <div className="w-[12%] pl-2 flex items-center gap-2">
-                        <span className={ds.components.table.headerLabel}>Valor</span>
-                      </div>
-                      <div className="w-[12%] flex justify-end items-center px-2">
-                        <span className={ds.components.table.headerLabel}>Ações</span>
-                      </div>
-                    </div>
-                  </TableCell>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[16%]">Pedido</TableHead>
+                  <TableHead className="w-[18%]">Fornecedor</TableHead>
+                  <TableHead className="w-[22%]">Itens</TableHead>
+                  <TableHead className="w-[12%]">Entrega</TableHead>
+                  <TableHead className="w-[12%]">Status</TableHead>
+                  <TableHead className="w-[12%]">Valor</TableHead>
+                  <TableHead className="text-right w-[8%] pr-4">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {paginatedData.items.map((order, index) => {
                   const numero = paginatedData.pagination.startIndex + index + 1;
                   const isEntregue = order.status === "entregue";
-                  
-                  return (
-                    <TableRow key={order.id} className="group border-none hover:bg-transparent">
-                      <TableCell colSpan={7} className={ds.components.table.cell}>
-                        <div className={cn(
-                          ds.components.table.row,
-                          ds.components.table.rowWrapper,
-                          isEntregue && ds.components.table.rowActive
-                        )}>
-                          {/* Pedido */}
-                          <div className="w-[14%] flex items-center gap-3">
-                            <div className={cn(
-                              "w-9 h-9 rounded-xl flex items-center justify-center border transition-colors",
-                              isEntregue 
-                                ? "bg-brand/10 border-brand/20" 
-                                : "bg-muted/50 border-border/50"
-                            )}>
-                              {isEntregue ? (
-                                <CheckCircle2 className="h-4 w-4 text-brand" />
-                              ) : (
-                                <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-                              )}
-                            </div>
-                            <div>
-                              <span className={ds.components.dataDisplay.code}>#{numero.toString().padStart(4, '0')}</span>
-                              <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>{order.orderDate}</p>
-                            </div>
-                          </div>
 
-                          {/* Fornecedor */}
-                          <div className="w-[18%] pl-2">
-                            <CapitalizedText className={cn(ds.components.dataDisplay.highlight, "truncate block max-w-[140px]")}>
-                              {order.supplierName}
-                            </CapitalizedText>
-                            <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>{order.itens.length} item(ns)</p>
+                  return (
+                    <TableRow key={order.id} className="group">
+                      {/* Pedido # */}
+                      <TableCell>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center flex-shrink-0">
+                            {isEntregue
+                              ? <CheckCircle2 className="h-4 w-4 text-brand" />
+                              : <ShoppingCart className="h-4 w-4 text-brand" />}
                           </div>
-                          
-                          {/* Itens */}
-                          <div className="w-[20%] pl-2">
-                            <CapitalizedText className={cn(ds.components.dataDisplay.highlight, "truncate block max-w-[160px]")}>
-                              {order.itens.slice(0, 2).map(i => i.packagingName).join(', ')}
-                            </CapitalizedText>
-                            {order.itens.length > 2 && (
-                              <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>+{order.itens.length - 2} mais</p>
-                            )}
-                          </div>
-                          
-                          {/* Entrega */}
-                          <div className="w-[12%] pl-2">
-                            {order.deliveryDate ? (
-                              <div className={cn("flex items-center gap-1.5", ds.components.dataDisplay.secondary)}>
-                                <Truck className="h-3 w-3 opacity-50" />
-                                <span>{order.deliveryDate}</span>
-                              </div>
-                            ) : (
-                              <span className={ds.components.dataDisplay.secondary}>-</span>
-                            )}
-                          </div>
-                          
-                          {/* Status */}
-                          <div className="w-[12%] pl-2 flex justify-center">
-                            {getStatusBadge(order.status)}
-                          </div>
-                          
-                          {/* Valor */}
-                          <div className="w-[12%] pl-2">
-                            <span className={ds.components.dataDisplay.money}>
-                              {formatCurrency(order.totalValue)}
+                          <div>
+                            <span className="font-bold text-[11px] text-brand tabular-nums">
+                              #{numero.toString().padStart(4, "0")}
                             </span>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">{order.orderDate}</p>
                           </div>
-                          
-                          {/* Ações */}
-                          <div className="w-[12%] pl-2 flex justify-end">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className={ds.components.button.size.icon}>
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
-                                <DropdownMenuItem onClick={() => handleViewDetails(order)} className="rounded-lg gap-2">
-                                  <Eye className="h-4 w-4 text-blue-500" />Ver Detalhes
+                        </div>
+                      </TableCell>
+
+                      {/* Fornecedor */}
+                      <TableCell>
+                        <CapitalizedText className="font-medium text-foreground truncate block max-w-[150px]">
+                          {order.supplierName}
+                        </CapitalizedText>
+                        <span className="text-[11px] text-muted-foreground">{order.itens.length} item(ns)</span>
+                      </TableCell>
+
+                      {/* Itens */}
+                      <TableCell>
+                        <CapitalizedText className="font-medium text-foreground truncate block max-w-[180px]">
+                          {order.itens.slice(0, 2).map(i => i.packagingName).join(", ")}
+                        </CapitalizedText>
+                        {order.itens.length > 2 && (
+                          <span className="text-[11px] text-muted-foreground">+{order.itens.length - 2} mais</span>
+                        )}
+                      </TableCell>
+
+                      {/* Entrega */}
+                      <TableCell>
+                        {order.deliveryDate ? (
+                          <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground whitespace-nowrap">
+                            <Truck className="h-3 w-3 opacity-50" />{order.deliveryDate}
+                          </span>
+                        ) : (
+                          <span className="text-[12px] text-muted-foreground/40">—</span>
+                        )}
+                      </TableCell>
+
+                      {/* Status */}
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+
+                      {/* Valor */}
+                      <TableCell>
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400 tracking-tight">
+                          {formatCurrency(order.totalValue)}
+                        </span>
+                      </TableCell>
+
+                      {/* Ações */}
+                      <TableCell className="pr-4">
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-accent data-[state=open]:bg-accent transition-colors">
+                                <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-52 overflow-hidden rounded-xl">
+                              <DropdownMenuItem onClick={() => handleViewDetails(order)} className="gap-2 py-2 cursor-pointer focus:bg-blue-50 dark:focus:bg-blue-900/20">
+                                <Eye className="h-4 w-4 text-blue-500" />Ver Detalhes
+                              </DropdownMenuItem>
+                              {order.status === "pendente" && (
+                                <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, "confirmado")} className="gap-2 py-2 cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-900/20">
+                                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />Confirmar Pedido
                                 </DropdownMenuItem>
-                                <DropdownMenuSeparator className={ds.components.separator.horizontal} />
-                                {order.status === "pendente" && (
-                                  <DropdownMenuItem onClick={() => handleUpdateStatus(order.id, 'confirmado')} className="rounded-lg gap-2 text-emerald-500">
-                                    <CheckCircle2 className="h-4 w-4" />Confirmar
-                                  </DropdownMenuItem>
-                                )}
-                                {(order.status === "pendente" || order.status === "confirmado") && (
-                                  <DropdownMenuItem onClick={() => handleConfirmDelivery(order)} className="rounded-lg gap-2 text-brand">
-                                    <Truck className="h-4 w-4" />Marcar Entregue
-                                  </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator className={ds.components.separator.horizontal} />
-                                <DropdownMenuItem onClick={() => handleDelete(order.id)} className="rounded-lg gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                                  <Trash2 className="h-4 w-4" />Excluir
+                              )}
+                              {(order.status === "pendente" || order.status === "confirmado") && (
+                                <DropdownMenuItem onClick={() => handleConfirmDelivery(order)} className="gap-2 py-2 cursor-pointer focus:bg-brand/10">
+                                  <Truck className="h-4 w-4 text-brand" />Marcar Entregue
                                 </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleDelete(order.id)} className="gap-2 py-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20">
+                                <Trash2 className="h-4 w-4" />Excluir Pedido
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>
