@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense, memo, useMemo, Component } from "react";
 import type { ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ShoppingBag, LayoutList, Loader2, Keyboard, BarChart3, Package } from "lucide-react";
+import { ShoppingBag, LayoutList, Loader2, Keyboard, BarChart3 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { designSystem as ds } from "@/styles/design-system";
@@ -37,12 +37,10 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
 const ProdutosTab = lazy(() => import("@/components/compras/ProdutosTab"));
 const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
 const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
-const EmbalagensTab = lazy(() => import("@/components/compras/EmbalagensTab"));
 const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
 
 const TABS = [
   { value: "produtos", icon: LayoutList, label: "Produtos" },
-  { value: "embalagens", icon: Package, label: "Embalagens" },
   { value: "analise", icon: BarChart3, label: "Análise" },
   { value: "calculadora", icon: Keyboard, label: "Calculadora" },
 ];
@@ -80,9 +78,8 @@ function Compras() {
 
   const shortcuts = useMemo(() => [
     { key: '1', action: () => activeTab !== 'calculadora' && handleTabChange('produtos'), description: 'Ir para Produtos' },
-    { key: '2', action: () => activeTab !== 'calculadora' && handleTabChange('embalagens'), description: 'Ir para Embalagens' },
-    { key: '3', action: () => activeTab !== 'calculadora' && handleTabChange('analise'), description: 'Ir para Análise' },
-    { key: '4', action: () => handleTabChange('calculadora'), description: 'Ir para Calculadora' },
+    { key: '2', action: () => activeTab !== 'calculadora' && handleTabChange('analise'), description: 'Ir para Análise' },
+    { key: '3', action: () => handleTabChange('calculadora'), description: 'Ir para Calculadora' },
     {
       key: 'n', ctrl: true,
       action: () => window.dispatchEvent(new CustomEvent('compras:nova', { detail: { tab: activeTab } })),
@@ -135,7 +132,6 @@ function Compras() {
               {activeTab === "produtos" && <ProdutosTab />}
               {activeTab === "analise" && <AnaliseTab />}
               {activeTab === "lista" && <ListaComprasTab />}
-              {activeTab === "embalagens" && <EmbalagensTab />}
               {activeTab === "calculadora" && <ProcurementCalculator />}
             </div>
           </Suspense>
