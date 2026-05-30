@@ -420,8 +420,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         {!isReadOnly && (
           <div className="space-y-3 p-4 rounded-xl border border-brand/20 bg-brand/5 mb-4">
             {/* Add item row */}
-            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-              <div className="relative flex-1 min-w-0 overflow-visible">
+            <div className="space-y-2 sm:flex sm:items-center sm:gap-2 sm:space-y-0">
+              <div className="relative w-full sm:flex-1 sm:min-w-0 overflow-visible">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400" />
                 <Input
                   ref={newProductInputRef}
@@ -458,31 +458,33 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 )}
               </div>
 
-              <Input ref={newQuantityInputRef} type="number" placeholder="Qtd" value={newQuantity}
-                onChange={e => setNewQuantity(e.target.value)} onKeyDown={e => handleNewItemKeyDown(e, "quantity")}
-                className={cn(ds.components.input.root, "h-9 text-center w-20 shrink-0")} />
+              <div className="flex items-center gap-2">
+                <Input ref={newQuantityInputRef} type="number" placeholder="Qtd" value={newQuantity}
+                  onChange={e => setNewQuantity(e.target.value)} onKeyDown={e => handleNewItemKeyDown(e, "quantity")}
+                  className={cn(ds.components.input.root, "h-9 text-center w-20 shrink-0")} />
 
-              <Select value={newProductUnit} onValueChange={setNewProductUnit}>
-                <SelectTrigger className={cn(ds.components.input.root, "h-9 w-[72px] shrink-0")}>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["un","kg","pct","cx","g","l","ml","metade"].map(u => (
-                    <SelectItem key={u} value={u} className="font-bold uppercase">{u}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select value={newProductUnit} onValueChange={setNewProductUnit}>
+                  <SelectTrigger className={cn(ds.components.input.root, "h-9 w-[72px] shrink-0")}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["un","kg","pct","cx","g","l","ml","metade"].map(u => (
+                      <SelectItem key={u} value={u} className="font-bold uppercase">{u}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <div className="relative shrink-0">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">R$</span>
-                <Input ref={newPriceInputRef} placeholder="Preço" value={newPrice}
-                  onChange={e => setNewPrice(e.target.value)} onKeyDown={e => handleNewItemKeyDown(e, "price")}
-                  className={cn(ds.components.input.root, "h-9 pl-7 text-center w-28 font-bold")} />
+                <div className="relative shrink-0">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">R$</span>
+                  <Input ref={newPriceInputRef} placeholder="Preço" value={newPrice}
+                    onChange={e => setNewPrice(e.target.value)} onKeyDown={e => handleNewItemKeyDown(e, "price")}
+                    className={cn(ds.components.input.root, "h-9 pl-7 text-center w-28 font-bold")} />
+                </div>
+
+                <Button onClick={handleAddNewItem} className={cn(ds.components.button.primary, "h-9 px-3 shrink-0")}>
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
-
-              <Button onClick={handleAddNewItem} className={cn(ds.components.button.primary, "h-9 px-3 shrink-0")}>
-                <Plus className="h-4 w-4" />
-              </Button>
             </div>
 
             {/* Tool toggles */}

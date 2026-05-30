@@ -2384,7 +2384,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className={cn(
-          "h-[95vh] flex flex-col rounded-t-2xl p-0 overflow-hidden border-t",
+          "h-[95vh] flex flex-col rounded-t-2xl p-0 overflow-hidden border-t [&>div:first-child]:hidden",
           ds.colors.surface.page,
           ds.colors.border.default
         )}>
