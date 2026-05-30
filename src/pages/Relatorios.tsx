@@ -315,7 +315,11 @@ export default function Relatorios() {
                             );
                           }}
                         />
-                        <Bar dataKey="economia" radius={[0, 6, 6, 0]} fill="#3b82f6" name="Economia gerada" />
+                        <Bar dataKey="economia" radius={[0, 6, 6, 0]} name="Economia gerada">
+                          {["#3b82f6", "#8b5cf6", "#ec4899", "#f59e0b", "#10b981"].map((color, index) => (
+                            <Cell key={index} fill={color} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
