@@ -4,8 +4,9 @@ import {
 } from "recharts";
 import {
   FileText, TrendingUp, Users, ShoppingCart, AlertTriangle, RefreshCw, Calendar,
-  ArrowUpDown, Clock,
+  ArrowUpDown, Clock, CheckCircle2, XCircle, MinusCircle,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +57,29 @@ function TableRowSkeleton({ cols }: { cols: number }) {
   );
 }
 
+// ── Skeleton de card mobile ──────────────────────────────────────────────────────
+
+function CardSkeleton() {
+  return (
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border/50">
+      <Skeleton className="h-7 w-7 rounded-full shrink-0" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-3 w-24" />
+      </div>
+      <Skeleton className="h-5 w-20" />
+    </div>
+  );
+}
+
+// ── Taxa resposta — ícone colorido ───────────────────────────────────────────────
+
+function RespostaIcon({ taxa }: { taxa: number }) {
+  if (taxa >= 80) return <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />;
+  if (taxa >= 50) return <MinusCircle className="h-3.5 w-3.5 text-amber-500" />;
+  return <XCircle className="h-3.5 w-3.5 text-red-500" />;
+}
+
 // ── Componente principal ────────────────────────────────────────────────────────
 
 export default function Relatorios() {
@@ -81,15 +105,14 @@ export default function Relatorios() {
     rankingFornecedores,
   } = useRelatorioData({ startDate, endDate });
 
+  const isMobile = useIsMobile();
+
   const handleApplyPreset = useCallback((days: number) => {
     applyPreset(days);
     setIsPeriodOpen(false);
   }, [applyPreset]);
 
   const loading = isLoading || loadingPeriod;
-
-  // Cor das barras: verde se tem economia, cinza se não tem
-  const BAR_COLORS = ["#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#dbeafe", "#eff6ff"];
 
   return (
     <PageWrapper>
@@ -143,12 +166,12 @@ export default function Relatorios() {
             ) : (
               <>
                 <p className="text-sm text-muted-foreground mb-1">Economia gerada cotando no período</p>
-                <div className="flex items-baseline gap-3 mb-4">
-                  <span className="text-4xl font-black text-foreground tracking-tight">
+                <div className="flex flex-wrap items-baseline gap-3 mb-4">
+                  <span className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
                     {formatCurrency(economiaTotal)}
                   </span>
                   {economiaTotal > 0 && (
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-semibold">
+                    <Badge className="hidden sm:inline-flex bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-semibold">
                       <TrendingUp className="h-3 w-3 mr-1" />
                       ao comparar fornecedores
                     </Badge>
@@ -240,18 +263,43 @@ export default function Relatorios() {
             </CardHeader>
             <CardContent className="pt-0 px-0">
               {isLoading ? (
-                <table className="w-full">
-                  <tbody>
-                    {Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={4} />)}
-                  </tbody>
-                </table>
+                <div>
+                  {Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)}
+                </div>
               ) : variacaoProdutos.length === 0 ? (
                 <div className="h-[220px] flex flex-col items-center justify-center text-muted-foreground gap-2 px-6">
                   <ArrowUpDown className="h-8 w-8 opacity-30" />
                   <p className="text-sm text-center">Não há dados suficientes para calcular variação</p>
                   <p className="text-xs opacity-70 text-center">Necessário pelo menos 2 fornecedores respondendo ao mesmo produto</p>
                 </div>
+              ) : isMobile ? (
+                /* Mobile: produto + faixa de preço inline, badge de variação à direita */
+                <div>
+                  {variacaoProdutos.map((p, i) => (
+                    <div key={i} className="flex items-start justify-between gap-3 px-4 py-3 border-b border-border/50">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-foreground text-sm truncate" title={p.produto}>{p.produto}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">
+                          {p.numFornecedores} fornecedores · {formatCurrency(p.precoMin)} → {formatCurrency(p.precoMax)}
+                        </div>
+                      </div>
+                      <Badge
+                        className={cn(
+                          "text-xs font-bold shrink-0 mt-0.5",
+                          p.variacaoPercent >= 20
+                            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                            : p.variacaoPercent >= 10
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                        )}
+                      >
+                        {formatPercent(p.variacaoPercent)}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
               ) : (
+                /* Desktop: tabela completa com colunas min/máx */
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
@@ -303,17 +351,68 @@ export default function Relatorios() {
           </CardHeader>
           <CardContent className="pt-0 px-0">
             {isLoading ? (
-              <table className="w-full">
-                <tbody>
-                  {Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={5} />)}
-                </tbody>
-              </table>
+              <div>
+                {Array.from({ length: 5 }).map((_, i) => <CardSkeleton key={i} />)}
+              </div>
             ) : rankingFornecedores.length === 0 ? (
               <div className="py-12 flex flex-col items-center justify-center text-muted-foreground gap-2">
                 <Users className="h-8 w-8 opacity-30" />
                 <p className="text-sm">Nenhum fornecedor encontrado no período</p>
               </div>
+            ) : isMobile ? (
+              /* Mobile: cada fornecedor como card compacto */
+              <div>
+                {rankingFornecedores.map((f, i) => (
+                  <div key={i} className="flex items-start gap-3 px-4 py-3.5 border-b border-border/50">
+                    {/* Posição */}
+                    <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground shrink-0 mt-0.5">
+                      {i + 1}
+                    </div>
+
+                    {/* Info principal */}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-foreground text-sm truncate">{f.nome}</div>
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <ShoppingCart className="h-3 w-3" />
+                          {f.cotacoes} {f.cotacoes === 1 ? "cotação" : "cotações"}
+                        </span>
+                        <span className="flex items-center gap-1 text-xs">
+                          <RespostaIcon taxa={f.taxaResposta} />
+                          <span className={cn(
+                            "font-medium",
+                            f.taxaResposta >= 80 ? "text-green-600 dark:text-green-400"
+                              : f.taxaResposta >= 50 ? "text-amber-600 dark:text-amber-400"
+                              : "text-red-600 dark:text-red-400"
+                          )}>
+                            {formatPercent(f.taxaResposta)} resp.
+                          </span>
+                        </span>
+                        {f.tempoMedio !== null && (
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            {f.tempoMedio.toFixed(1)}d
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Economia gerada — destaque */}
+                    <div className="text-right shrink-0">
+                      {f.economiaGerada > 0 ? (
+                        <span className="text-sm font-bold text-green-600 dark:text-green-400">
+                          {formatCurrency(f.economiaGerada)}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
+                      <div className="text-[10px] text-muted-foreground mt-0.5">economia</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
+              /* Desktop: tabela completa */
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -323,7 +422,7 @@ export default function Relatorios() {
                       <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cotações</th>
                       <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Taxa resposta</th>
                       <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Economia gerada</th>
-                      <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Tempo médio</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Tempo médio</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -353,7 +452,7 @@ export default function Relatorios() {
                             <span className="text-muted-foreground text-xs">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right hidden sm:table-cell">
+                        <td className="px-4 py-3 text-right">
                           {f.tempoMedio !== null ? (
                             <span className="flex items-center justify-end gap-1 text-muted-foreground text-xs">
                               <Clock className="h-3 w-3" />
