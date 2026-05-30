@@ -46,39 +46,45 @@ function isBoxLikeUnit(unit: string): boolean {
 export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const { updateQuantidadeEntregue, isUpdating } = usePedidos();
   const [itensEntrega, setItensEntrega] = useState<ItemEntrega[]>([]);
+  // Estado de string bruta para o campo Un/Cx — evita que o campo
+  // seja apagado enquanto o usuário ainda está digitando (ex: "1" → "10")
+  const [fatorRaw, setFatorRaw] = useState<string[]>([]);
 
   useEffect(() => {
     if (pedido?.items) {
-      setItensEntrega(
-        pedido.items.map(item => {
-          const quantidadePedida = item.quantidade_pedida || item.quantity || 1;
-          const numUnit = Number(item.valor_unitario_cotado || item.unit_price) || 1;
-          const baseUnitCost = numUnit * quantidadePedida;
-          const computedFactor = baseUnitCost > 0
-            ? Math.round(Number(item.total_price || baseUnitCost) / baseUnitCost)
-            : 1;
-          const fallbackFator = computedFactor < 1 ? 1 : computedFactor;
-          const qtdEmbalagem = item.quantidade_por_embalagem || null;
-          const fatorEmbalagem = qtdEmbalagem || fallbackFator;
-          const unitStr = item.unidade_pedida || item.unidade_entregue || "un";
-          const isBox = isBoxLikeUnit(unitStr);
+      const itens = pedido.items.map(item => {
+        const quantidadePedida = item.quantidade_pedida || item.quantity || 1;
+        const numUnit = Number(item.valor_unitario_cotado || item.unit_price) || 1;
+        const baseUnitCost = numUnit * quantidadePedida;
+        const computedFactor = baseUnitCost > 0
+          ? Math.round(Number(item.total_price || baseUnitCost) / baseUnitCost)
+          : 1;
+        const fallbackFator = computedFactor < 1 ? 1 : computedFactor;
+        const qtdEmbalagem = item.quantidade_por_embalagem || null;
+        const fatorEmbalagem = qtdEmbalagem || fallbackFator;
+        const unitStr = item.unidade_pedida || item.unidade_entregue || "un";
+        const isBox = isBoxLikeUnit(unitStr);
 
-          return {
-            itemId: item.id || "",
-            productName: item.product_name,
-            quantidadePedida: item.quantidade_pedida || item.quantity,
-            unidadePedida: unitStr,
-            quantidadeEntregue: item.quantidade_entregue || 0,
-            unidadeEntregue: item.unidade_entregue || "kg",
-            valorUnitario: item.valor_unitario_cotado || item.unit_price,
-            valorFaturado: item.unit_price,
-            maiorValor: item.maior_valor_cotado || item.unit_price,
-            fatorEmbalagem,
-            isBoxUnit: isBox,
-            quantidadePorEmbalagemOriginal: qtdEmbalagem,
-          };
-        })
-      );
+        return {
+          itemId: item.id || "",
+          productName: item.product_name,
+          quantidadePedida: item.quantidade_pedida || item.quantity,
+          unidadePedida: unitStr,
+          quantidadeEntregue: item.quantidade_entregue || 0,
+          unidadeEntregue: item.unidade_entregue || "kg",
+          valorUnitario: item.valor_unitario_cotado || item.unit_price,
+          valorFaturado: item.unit_price,
+          maiorValor: item.maior_valor_cotado || item.unit_price,
+          fatorEmbalagem,
+          isBoxUnit: isBox,
+          quantidadePorEmbalagemOriginal: qtdEmbalagem,
+        };
+      });
+      setItensEntrega(itens);
+      // Inicializa a string bruta: mostra o valor se veio da cotação, vazio caso contrário
+      setFatorRaw(itens.map(item =>
+        item.quantidadePorEmbalagemOriginal ? String(item.fatorEmbalagem) : ""
+      ));
     }
   }, [pedido]);
 
@@ -121,12 +127,16 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   };
 
   const handleFatorEmbalagemChange = (index: number, value: string) => {
-    const fator = parseFloat(value) || 1;
-    setItensEntrega(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], fatorEmbalagem: fator < 1 ? 1 : fator };
-      return updated;
-    });
+    // Mantém a string bruta para o campo não apagar enquanto o usuário digita
+    setFatorRaw(prev => { const u = [...prev]; u[index] = value; return u; });
+    const fator = parseFloat(value);
+    if (!isNaN(fator) && fator >= 1) {
+      setItensEntrega(prev => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], fatorEmbalagem: fator };
+        return updated;
+      });
+    }
   };
 
   const handleMarcarFalta = (index: number) => {
@@ -393,7 +403,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                               <div className="relative">
                                 <Input
                                   type="number" step="0.01" min="1"
-                                  value={item.fatorEmbalagem === 1 && !item.quantidadePorEmbalagemOriginal ? "" : item.fatorEmbalagem}
+                                  value={fatorRaw[index] ?? ""}
                                   onChange={e => handleFatorEmbalagemChange(index, e.target.value)}
                                   onFocus={e => e.target.select()}
                                   placeholder="—"
