@@ -1,12 +1,15 @@
-import { Badge } from "@/components/ui/badge";
+import { memo } from "react";
+import { Calendar, MoreVertical, Eye, Trash2, ShoppingCart, FileText, Package, Building2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableRow, TableHeader } from "@/components/ui/table";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Package, Calendar, DollarSign, Building2, MoreVertical, Eye, Trash2, ShoppingCart, CheckCircle2, CircleDot, Info, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
-import type { PackagingQuoteDisplay } from "@/types/packaging";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
+import type { PackagingQuoteDisplay } from "@/types/packaging";
 
 interface PackagingQuotesTableProps {
   quotes: PackagingQuoteDisplay[];
@@ -17,15 +20,31 @@ interface PackagingQuotesTableProps {
   onConvertToOrder: (quote: PackagingQuoteDisplay) => void;
 }
 
-export function PackagingQuotesTable({ 
-  quotes, 
+type PrazoUrgency = "expired" | "urgent" | "normal" | null;
+
+const getPrazoUrgency = (dataFim: string): PrazoUrgency => {
+  if (!dataFim || dataFim === "-") return null;
+  const parts = dataFim.split(/[\/\-]/).map(Number);
+  if (parts.length < 3 || parts.some(isNaN)) return null;
+  const [df, mf, yf] = parts;
+  const prazo = new Date(yf, mf - 1, df);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const em48h = new Date(hoje.getTime() + 48 * 60 * 60 * 1000);
+  if (prazo < hoje) return "expired";
+  if (prazo <= em48h) return "urgent";
+  return "normal";
+};
+
+export const PackagingQuotesTable = memo(({
+  quotes,
   startIndex,
-  onManage, 
+  onManage,
   onViewSummary,
-  onDelete, 
-  onConvertToOrder 
-}: PackagingQuotesTableProps) {
-  
+  onDelete,
+  onConvertToOrder,
+}: PackagingQuotesTableProps) => {
+
   const getQuoteStatus = (quote: PackagingQuoteDisplay) => {
     const respondidos = quote.fornecedores.filter(f => f.status === "respondido").length;
     const total = quote.fornecedores.length;
@@ -35,7 +54,6 @@ export function PackagingQuotesTable({
 
   const getStatusBadge = (quote: PackagingQuoteDisplay) => {
     const { isPronta } = getQuoteStatus(quote);
-    
     if (isPronta) {
       return (
         <Badge className={cn(ds.components.badge.success, "gap-1.5")}>
@@ -44,171 +62,182 @@ export function PackagingQuotesTable({
         </Badge>
       );
     }
-    
-    if (quote.status === "concluida") {
-      return <Badge className={ds.components.badge.secondary}>Concluída</Badge>;
-    }
-    
-    if (quote.status === "cancelada") {
-      return <Badge className={ds.components.badge.destructive}>Cancelada</Badge>;
-    }
-    
+    if (quote.status === "concluida") return <Badge className={ds.components.badge.secondary}>Concluída</Badge>;
+    if (quote.status === "cancelada") return <Badge className={ds.components.badge.destructive}>Cancelada</Badge>;
     return <Badge className={ds.components.badge.outline}>Ativa</Badge>;
   };
 
   return (
-    <Table className={ds.components.table.root}>
-      <TableHeader className={ds.components.table.header}>
-        <TableRow className="border-none hover:bg-transparent">
-          <TableCell colSpan={7} className="px-1 pb-0 pt-0 border-none">
-            <div className={cn(ds.components.table.headerWrapper, ds.components.table.accents.brand.bg, ds.components.table.accents.brand.border)}>
-              <div className="w-[12%] flex items-center gap-3">
-                <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0", ds.components.table.accents.brand.bg)}>
-                  <Package className={cn("h-4 w-4", ds.components.table.accents.brand.icon)} />
-                </div>
-                <span className={cn(ds.components.table.headerLabel, ds.components.table.accents.brand.text)}>Cotação</span>
-              </div>
-              <div className="w-[22%] pl-2 flex items-center gap-2">
-                <span className={ds.components.table.headerLabel}>Embalagens</span>
-              </div>
-              <div className="w-[14%] pl-2 flex items-center gap-2">
-                <span className={ds.components.table.headerLabel}>Período</span>
-              </div>
-              <div className="w-[12%] pl-2 flex justify-center items-center gap-2">
-                <span className={ds.components.table.headerLabel}>Status</span>
-              </div>
-              <div className="w-[16%] pl-2 flex items-center gap-2">
-                <span className={ds.components.table.headerLabel}>Melhor Preço</span>
-              </div>
-              <div className="w-[12%] pl-2 flex items-center gap-2">
-                <span className={ds.components.table.headerLabel}>Fornec.</span>
-              </div>
-              <div className="w-[12%] flex justify-end items-center px-2">
-                <span className={ds.components.table.headerLabel}>Ações</span>
-              </div>
-            </div>
-          </TableCell>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-[14%]">Cotação</TableHead>
+          <TableHead className="w-[22%]">Embalagens</TableHead>
+          <TableHead className="w-[12%]">Status</TableHead>
+          <TableHead className="w-[16%]">Melhor Preço</TableHead>
+          <TableHead className="w-[10%]">Fornec.</TableHead>
+          <TableHead className="w-[8%]">Itens</TableHead>
+          <TableHead className="w-[11%]">Prazo</TableHead>
+          <TableHead className="text-right w-[7%] pr-4">Ações</TableHead>
         </TableRow>
       </TableHeader>
+
       <TableBody>
         {quotes.map((quote, index) => {
           const { respondidos, total, isPronta } = getQuoteStatus(quote);
           const numero = startIndex + index + 1;
-          
-          return (
-            <TableRow key={quote.id} className="group border-none hover:bg-transparent">
-              <TableCell colSpan={7} className={ds.components.table.cell}>
-                <div className={cn(
-                  ds.components.table.row,
-                  ds.components.table.rowWrapper,
-                  isPronta && ds.components.table.rowActive
-                )}>
-                  {/* Cotação */}
-                  <div className="w-[12%] flex items-center gap-3">
-                    <div className={cn(
-                      "w-9 h-9 rounded-xl flex items-center justify-center border transition-colors",
-                      isPronta 
-                        ? "bg-brand/10 border-brand/20" 
-                        : "bg-muted/50 border-border/50"
-                    )}>
-                      {isPronta ? (
-                        <CheckCircle2 className="h-4 w-4 text-brand" />
-                      ) : (
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div>
-                      <span className={ds.components.dataDisplay.code}>#{numero.toString().padStart(4, '0')}</span>
-                      <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>{quote.itens.length} item(ns)</p>
-                    </div>
-                  </div>
+          const urgency = getPrazoUrgency(quote.dataFim);
 
-                  {/* Embalagens */}
-                  <div className="w-[22%] pl-2">
-                    <CapitalizedText className={cn(ds.components.dataDisplay.highlight, "truncate block max-w-[180px]")}>
-                      {quote.itens.slice(0, 2).map(i => i.packagingName).join(', ') || 'Sem itens'}
+          return (
+            <TableRow key={quote.id} className="group">
+              {/* Cotação # */}
+              <TableCell>
+                <div className="flex items-center gap-2.5">
+                  <div className={cn(
+                    "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border",
+                    isPronta ? "bg-brand/10 border-brand/20" : "bg-brand/10 border-brand/20"
+                  )}>
+                    {isPronta ? (
+                      <CheckCircle2 className="h-4 w-4 text-brand" />
+                    ) : (
+                      <Package className="h-4 w-4 text-brand" />
+                    )}
+                  </div>
+                  <span className="font-bold text-[11px] text-brand tabular-nums">
+                    #{numero.toString().padStart(4, "0")}
+                  </span>
+                </div>
+              </TableCell>
+
+              {/* Embalagens */}
+              <TableCell>
+                <CapitalizedText className="font-medium text-foreground truncate block max-w-[200px]">
+                  {quote.itens.slice(0, 2).map(i => i.packagingName).join(", ") || "Sem itens"}
+                </CapitalizedText>
+                {quote.itens.length > 2 && (
+                  <span className="text-[11px] text-muted-foreground">
+                    +{quote.itens.length - 2} mais
+                  </span>
+                )}
+              </TableCell>
+
+              {/* Status */}
+              <TableCell>{getStatusBadge(quote)}</TableCell>
+
+              {/* Melhor Preço */}
+              <TableCell>
+                <div className="flex flex-col">
+                  <span className={cn(
+                    "font-medium tracking-tight",
+                    quote.melhorPreco === "-" ? "text-muted-foreground" : "text-emerald-600 dark:text-emerald-400"
+                  )}>
+                    {quote.melhorPreco || "-"}
+                  </span>
+                  {quote.melhorFornecedor && quote.melhorFornecedor !== "-" && (
+                    <CapitalizedText as="span" className="text-[11px] text-muted-foreground truncate max-w-[120px]">
+                      {quote.melhorFornecedor}
                     </CapitalizedText>
-                    {quote.itens.length > 2 && (
-                      <p className={cn("mt-0.5", ds.components.dataDisplay.secondary)}>+{quote.itens.length - 2} mais</p>
-                    )}
-                  </div>
-                  
-                  {/* Período */}
-                  <div className="w-[14%] pl-2">
-                    <div className={cn("flex items-center gap-1", ds.components.dataDisplay.secondary)}>
-                      <Calendar className="h-3 w-3 opacity-50" />
-                      <span>{quote.dataInicio}</span>
-                    </div>
-                    <div className={cn("flex items-center gap-1 mt-0.5", ds.components.dataDisplay.secondary)}>
-                      <Calendar className="h-3 w-3 opacity-50" />
-                      <span>{quote.dataFim}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Status */}
-                  <div className="w-[12%] pl-2 flex justify-center">
-                    {getStatusBadge(quote)}
-                  </div>
-                  
-                  {/* Melhor Preço */}
-                  <div className="w-[16%] pl-2">
-                    <span className={cn(
-                      ds.components.dataDisplay.money,
-                      quote.melhorPreco === '-' && "text-muted-foreground"
-                    )}>
-                      {quote.melhorPreco}
-                    </span>
-                    {quote.melhorFornecedor !== '-' && (
-                      <CapitalizedText as="p" className={cn("mt-0.5 truncate max-w-[120px]", ds.components.dataDisplay.secondary)}>
-                        {quote.melhorFornecedor}
-                      </CapitalizedText>
-                    )}
-                  </div>
-                  
-                  {/* Fornecedores */}
-                  <div className="w-[12%] pl-2">
-                    <div className={cn(
-                      "flex items-center gap-1.5 px-2 py-1 rounded-lg w-fit border transition-colors",
-                      respondidos === total && total > 0
-                        ? "bg-brand/5 border-brand/20 text-brand"
-                        : "bg-muted/30 border-border/50 text-muted-foreground"
-                    )}>
-                      <Building2 className="h-3.5 w-3.5" />
-                      <span className="font-bold text-xs">
-                        {respondidos}/{total}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Ações */}
-                  <div className="w-[12%] pl-2 flex justify-end">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className={ds.components.button.size.icon}>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className={cn(ds.components.card.root, "p-1 min-w-[160px]")}>
-                        <DropdownMenuItem onClick={() => onManage(quote)} disabled={quote.status === "concluida"} className="rounded-lg gap-2">
-                          <Eye className="h-4 w-4 text-blue-500" />Negociar Cotação
-                        </DropdownMenuItem>
-                        {quote.status === "concluida" && onViewSummary && (
-                          <DropdownMenuItem onClick={() => onViewSummary(quote)} className="rounded-lg gap-2 text-brand">
-                            <FileText className="h-4 w-4" />Resumo da Cotação
+                  )}
+                </div>
+              </TableCell>
+
+              {/* Fornecedores */}
+              <TableCell>
+                {total === 0 ? (
+                  <span className="text-[12px] text-muted-foreground/40">—</span>
+                ) : (
+                  <span className={cn(
+                    "inline-flex items-center justify-center min-w-[36px] px-2 py-0.5 rounded-full text-[12px] tabular-nums font-medium border",
+                    respondidos === total
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50"
+                      : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50"
+                  )}>
+                    {respondidos}/{total}
+                  </span>
+                )}
+              </TableCell>
+
+              {/* Itens */}
+              <TableCell>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-foreground">{quote.itens.length}</span>
+                  {quote.itens.length > 0 && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground cursor-help transition-colors" />
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[250px]">
+                          <p className="font-bold mb-1 text-xs">Embalagens cotadas:</p>
+                          <ul className="space-y-0.5 text-xs">
+                            {quote.itens.map((item, idx) => (
+                              <li key={idx} className="truncate">• {item.packagingName}</li>
+                            ))}
+                          </ul>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
+                </div>
+              </TableCell>
+
+              {/* Prazo */}
+              <TableCell>
+                {!quote.dataFim || quote.dataFim === "-" ? (
+                  <span className="text-[12px] text-muted-foreground/40">—</span>
+                ) : urgency === "expired" ? (
+                  <span className="inline-flex items-center gap-1 text-[12px] font-medium whitespace-nowrap text-red-500 dark:text-red-400">
+                    <Calendar className="h-3 w-3" />{quote.dataFim}
+                  </span>
+                ) : urgency === "urgent" ? (
+                  <span className="inline-flex items-center gap-1 text-[12px] font-medium whitespace-nowrap text-amber-500 dark:text-amber-400">
+                    <Calendar className="h-3 w-3" />{quote.dataFim}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[12px] text-muted-foreground whitespace-nowrap">
+                    <Calendar className="h-3 w-3 opacity-50" />{quote.dataFim}
+                  </span>
+                )}
+              </TableCell>
+
+              {/* Ações */}
+              <TableCell className="pr-4">
+                <div className="flex justify-end">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-accent data-[state=open]:bg-accent transition-colors">
+                        <MoreVertical className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-52 overflow-hidden rounded-xl">
+                      {quote.status === "concluida" ? (
+                        onViewSummary && (
+                          <DropdownMenuItem onClick={() => onViewSummary(quote)} className="gap-2 py-2 cursor-pointer focus:bg-blue-50 dark:focus:bg-blue-900/20">
+                            <FileText className="h-4 w-4 text-blue-500" />
+                            Resumo da Cotação
                           </DropdownMenuItem>
-                        )}
-                        {isPronta && quote.status !== "concluida" && (
-                          <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="rounded-lg gap-2 text-emerald-500">
-                            <ShoppingCart className="h-4 w-4" />Converter em Pedido
+                        )
+                      ) : (
+                        <>
+                          <DropdownMenuItem onClick={() => onManage(quote)} className="gap-2 py-2 cursor-pointer focus:bg-emerald-50 dark:focus:bg-emerald-900/20">
+                            <Eye className="h-4 w-4 text-emerald-500" />
+                            Negociar Cotação
                           </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator className={ds.components.separator.horizontal} />
-                        <DropdownMenuItem onClick={() => onDelete(quote)} className="rounded-lg gap-2 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
-                          <Trash2 className="h-4 w-4" />Excluir
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                          {isPronta && (
+                            <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="gap-2 py-2 cursor-pointer focus:bg-brand/10">
+                              <ShoppingCart className="h-4 w-4 text-brand" />
+                              Converter em Pedido
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => onDelete(quote)} className="gap-2 py-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-900/20">
+                            <Trash2 className="h-4 w-4" />
+                            Excluir Cotação
+                          </DropdownMenuItem>
+                        </>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </TableCell>
             </TableRow>
@@ -217,4 +246,4 @@ export function PackagingQuotesTable({
       </TableBody>
     </Table>
   );
-}
+});
