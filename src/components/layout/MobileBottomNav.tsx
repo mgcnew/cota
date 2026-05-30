@@ -15,6 +15,7 @@ import {
   Moon,
   PackageOpen,
   TrendingUp,
+  ScanLine,
   User,
 } from "lucide-react";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
@@ -31,6 +32,7 @@ const MORE_NAV_ITEMS = [
   { label: "Relatórios",  icon: BarChart3,   href: "/dashboard/relatorios"  },
   { label: "Embalagens",  icon: PackageOpen, href: "/dashboard/embalagens" },
   { label: "Análise",     icon: TrendingUp,  href: "/dashboard/analise-compras" },
+  { label: "Etiquetas",  icon: ScanLine,    href: "/dashboard/etiquetas" },
 ];
 
 const MORE_ROUTES = MORE_NAV_ITEMS.map(i => i.href.split("?")[0]);

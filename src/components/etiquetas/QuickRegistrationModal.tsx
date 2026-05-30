@@ -1,13 +1,13 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
-import { 
-  Loader2, Scan, CheckCircle2, RotateCcw, AlertCircle, Save, 
-  X, Keyboard, Camera, Package, Zap
+import {
+  Loader2, Scan, CheckCircle2, RotateCcw, AlertCircle, Save,
+  X, Keyboard, Camera, Zap
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -24,14 +24,10 @@ type Mode = 'scanner' | 'manual';
 
 const SCANNER_ELEMENT_ID = "quick-scanner-reader";
 
-export function QuickRegistrationModal({
-  open,
-  onOpenChange,
-  onSave
-}: QuickRegistrationModalProps) {
+export function QuickRegistrationModal({ open, onOpenChange, onSave }: QuickRegistrationModalProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  
+
   const [mode, setMode] = useState<Mode>('scanner');
   const [barcode, setBarcode] = useState("");
   const [productName, setProductName] = useState("");
@@ -41,101 +37,87 @@ export function QuickRegistrationModal({
   const [isSearching, setIsSearching] = useState(false);
   const [savedCount, setSavedCount] = useState(0);
   const [lastSavedName, setLastSavedName] = useState("");
-  
+  const [scannerPaused, setScannerPaused] = useState(false);
+
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const barcodeInputRef = useRef<HTMLInputElement>(null);
 
-  // Reset state when modal opens
+  // On open: desktop defaults to manual, mobile to scanner
   useEffect(() => {
     if (open) {
-      setMode('scanner');
+      setMode(isMobile ? 'scanner' : 'manual');
       setBarcode("");
       setProductName("");
       setCameraError(null);
       setIsSearching(false);
       setSavedCount(0);
       setLastSavedName("");
+      setScannerPaused(false);
     } else {
       stopScanner();
     }
-  }, [open]);
+  }, [open, isMobile]);
 
-  // â”€â”€ API Lookup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // API Lookup
   const fetchProductInfo = useCallback(async (code: string) => {
     setIsSearching(true);
     try {
-      // 1. Open Food Facts BR
+      let name = "";
+
       let response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${code}.json`);
       let data = await response.json();
-      
-      let name = "";
       if (data.status === 1 && data.product) {
-         name = data.product.product_name_pt || 
-                data.product.product_name || 
-                data.product.generic_name_pt || 
-                data.product.generic_name || 
-                "";
+        name = data.product.product_name_pt || data.product.product_name ||
+               data.product.generic_name_pt || data.product.generic_name || "";
       }
 
-      // Global fallback
       if (!name) {
-          response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
-          data = await response.json();
-          if (data.status === 1 && data.product) {
-              name = data.product.product_name_pt || data.product.product_name || "";
-          }
+        response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+        data = await response.json();
+        if (data.status === 1 && data.product) {
+          name = data.product.product_name_pt || data.product.product_name || "";
+        }
       }
 
-      // 2. UPCItemDB fallback
       if (!name) {
-          try {
-             const responseUpc = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
-             const dataUpc = await responseUpc.json();
-             if (dataUpc.code === 'OK' && dataUpc.items && dataUpc.items.length > 0) {
-                 name = dataUpc.items[0].title;
-             }
-          } catch(e) {
-             console.warn("UPC fallback error", e);
-          }
+        try {
+          const upc = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
+          const upcData = await upc.json();
+          if (upcData.code === 'OK' && upcData.items?.length > 0) name = upcData.items[0].title;
+        } catch { /* ignore */ }
       }
 
       if (name) {
         setProductName(name);
-        toast({ 
-         title: "Produto encontrado!", 
-         description: name,
-         className: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200"
+        toast({
+          title: "Produto encontrado!",
+          description: name,
+          className: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200"
         });
       } else {
-        toast({
-          title: "Produto não localizado",
-          description: "Digite o nome manualmente.",
-        });
+        toast({ title: "Produto não localizado", description: "Digite o nome manualmente." });
         setTimeout(() => nameInputRef.current?.focus(), 300);
       }
-    } catch (e) {
-      console.error("Error fetching product", e);
+    } catch {
       setTimeout(() => nameInputRef.current?.focus(), 300);
     } finally {
       setIsSearching(false);
     }
   }, [toast]);
 
-  // â”€â”€ Scanner Lifecycle â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Scanner lifecycle — pauses when a code is detected, resumes on "próximo"
   useEffect(() => {
     let mounted = true;
 
     const initScanner = async () => {
-      if (!open || mode !== 'scanner') return;
+      if (!open || mode !== 'scanner' || scannerPaused) return;
 
       await new Promise(resolve => setTimeout(resolve, 150));
       if (!mounted) return;
 
       try {
-        if (scannerRef.current) {
-          await stopScanner();
-        }
+        if (scannerRef.current) await stopScanner();
 
         const html5QrCode = new Html5Qrcode(SCANNER_ELEMENT_ID, {
           formatsToSupport: [
@@ -145,40 +127,30 @@ export function QuickRegistrationModal({
             Html5QrcodeSupportedFormats.UPC_E,
             Html5QrcodeSupportedFormats.CODE_128,
             Html5QrcodeSupportedFormats.CODE_39,
-            Html5QrcodeSupportedFormats.QR_CODE
+            Html5QrcodeSupportedFormats.QR_CODE,
           ],
-          verbose: false
+          verbose: false,
         });
         scannerRef.current = html5QrCode;
 
         await html5QrCode.start(
           { facingMode: "environment" },
-          {
-            fps: 15,
-            aspectRatio: 1.0,
-          },
+          { fps: 15, aspectRatio: 16 / 9 },
           (decodedText) => {
-            if (mounted) {
-              handleScanSuccess(decodedText);
-            }
+            if (mounted) handleScanSuccess(decodedText);
           },
-          () => {
-            // Ignore frame errors
-          }
+          () => { /* ignore frame errors */ }
         );
-        
+
         if (mounted) setIsScanning(true);
       } catch (err: any) {
-        console.error("Error starting scanner:", err);
-        if (mounted) {
-          let msg = "Erro ao iniciar câmera.";
-          if (err?.name === 'NotAllowedError') msg = "Permissão de câmera negada.";
-          setCameraError(msg);
-        }
+        if (!mounted) return;
+        const msg = err?.name === 'NotAllowedError' ? "Permissão de câmera negada." : "Erro ao iniciar câmera.";
+        setCameraError(msg);
       }
     };
 
-    if (open && mode === 'scanner') {
+    if (open && mode === 'scanner' && !scannerPaused) {
       initScanner();
     }
 
@@ -186,26 +158,24 @@ export function QuickRegistrationModal({
       mounted = false;
       stopScanner();
     };
-  }, [open, mode]);
+  }, [open, mode, scannerPaused]);
 
   const stopScanner = async () => {
     if (scannerRef.current) {
       try {
-        if (scannerRef.current.isScanning) {
-          await scannerRef.current.stop();
-        }
+        if (scannerRef.current.isScanning) await scannerRef.current.stop();
         scannerRef.current.clear();
-      } catch (e) {
-        console.warn("Error stopping scanner:", e);
-      }
+      } catch { /* ignore */ }
       scannerRef.current = null;
       setIsScanning(false);
     }
   };
 
-  // â”€â”€ Handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleScanSuccess = useCallback(async (decodedText: string) => {
     if (navigator.vibrate) navigator.vibrate(200);
+    // Pause the scanner immediately after a successful read
+    setScannerPaused(true);
+    await stopScanner();
     setBarcode(decodedText);
     setProductName("");
     fetchProductInfo(decodedText);
@@ -221,11 +191,14 @@ export function QuickRegistrationModal({
     setMode('scanner');
     setBarcode("");
     setProductName("");
+    setScannerPaused(false);
   };
 
+  // "Próximo": clear current and resume scanner
   const handleRescan = () => {
     setBarcode("");
     setProductName("");
+    setScannerPaused(false);
   };
 
   const handleSubmit = async (keepScanning = false) => {
@@ -237,79 +210,58 @@ export function QuickRegistrationModal({
       if (success) {
         setLastSavedName(productName);
         setSavedCount(prev => prev + 1);
-        
         toast({
           title: "Cadastrado!",
           description: productName,
           className: "bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-200",
         });
-        
         if (keepScanning) {
-          // Reset for next scan
           setBarcode("");
           setProductName("");
+          setScannerPaused(false);
         } else {
           onOpenChange(false);
         }
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
+    } catch { /* ignore */ } finally {
       setIsSaving(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSubmit(true);
-    }
+    if (e.key === 'Enter') handleSubmit(true);
   };
 
   const canSave = productName.trim().length > 0 && barcode.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent 
+      <DialogContent
         className={cn(
           "p-0 gap-0 overflow-hidden shadow-xl flex flex-col m-0",
           ds.colors.surface.page,
           ds.colors.border.default,
-          // Mobile first (full screen)
           "fixed inset-0 w-full h-[100dvh] max-h-[100dvh] max-w-none rounded-none border-none",
-          "translate-x-0 translate-y-0 top-0 left-0 right-0 bottom-0", 
-          // Desktop overrides
+          "translate-x-0 translate-y-0 top-0 left-0 right-0 bottom-0",
           "sm:inset-auto sm:w-[96vw] sm:max-w-[600px] sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border",
           "sm:top-[50%] sm:left-[50%] sm:-translate-x-[50%] sm:-translate-y-[50%]"
         )}
         hideClose={isMobile}
       >
-        {/* â”€â”€â”€ Header â”€â”€â”€ */}
+        {/* Header */}
         <div className={cn(
           "flex-shrink-0 border-b px-4 py-3 flex items-center justify-between",
-          ds.colors.surface.section,
-          ds.colors.border.default
+          ds.colors.surface.section, ds.colors.border.default
         )}>
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-9 h-9 rounded-xl flex items-center justify-center shadow-lg",
-              "bg-brand"
-            )}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-lg bg-brand">
               <Scan className="h-4 w-4 text-zinc-950 stroke-[2.5]" />
             </div>
             <div>
-              <DialogTitle className={cn(
-                ds.typography.size.sm,
-                ds.typography.weight.bold,
-                ds.colors.text.primary,
-                "leading-none"
-              )}>
+              <DialogTitle className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary, "leading-none")}>
                 Cadastro Rápido
               </DialogTitle>
-              <p className={cn(
-                ds.typography.size.xs,
-                ds.colors.text.secondary,
-                "mt-0.5"
-              )}>
+              <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
                 {mode === 'scanner' ? 'Escaneie e cadastre' : 'Digite manualmente'}
               </p>
             </div>
@@ -322,43 +274,47 @@ export function QuickRegistrationModal({
               </Badge>
             )}
             {isMobile && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-                className={cn(ds.components.button.ghost, "h-9 w-9")}
-              >
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className={cn(ds.components.button.ghost, "h-9 w-9")}>
                 <X className="h-4 w-4" />
               </Button>
             )}
           </div>
         </div>
 
-        {/* â”€â”€â”€ Content â”€â”€â”€ */}
+        {/* Content */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
-          
-          {/* Scanner View */}
+
+          {/* Scanner view */}
           {mode === 'scanner' && (
             <div className="flex-shrink-0">
               <div className={cn(
                 "relative bg-black overflow-hidden flex items-center justify-center",
-                isMobile ? "h-[35vh]" : "h-[250px] mx-4 mt-4 rounded-xl"
+                isMobile ? "h-[38vh]" : "h-[220px] mx-4 mt-4 rounded-xl"
               )}>
-                {!isScanning && !cameraError && (
+                {/* Loading state */}
+                {!isScanning && !cameraError && !scannerPaused && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-white">
                     <Loader2 className="h-8 w-8 animate-spin mb-2" />
                     <span className={cn(ds.typography.size.sm)}>Iniciando câmera...</span>
                   </div>
                 )}
-                
+
+                {/* Paused state (code detected) */}
+                {scannerPaused && !barcode && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-white bg-black/80">
+                    <CheckCircle2 className="h-10 w-10 text-brand mb-2" />
+                    <span className={cn(ds.typography.size.sm, "font-bold")}>Código lido!</span>
+                  </div>
+                )}
+
+                {/* Camera error */}
                 {cameraError && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center z-10 bg-zinc-900 text-white p-4 text-center">
                     <AlertCircle className="h-10 w-10 text-red-400 mb-2" />
                     <p className={cn(ds.typography.size.sm, ds.typography.weight.bold)}>{cameraError}</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => { setCameraError(null); setMode('scanner'); }} 
+                    <Button
+                      variant="outline" size="sm"
+                      onClick={() => { setCameraError(null); setScannerPaused(false); }}
                       className="mt-4 border-white/20 text-white hover:bg-white/10"
                     >
                       Tentar Novamente
@@ -367,18 +323,18 @@ export function QuickRegistrationModal({
                 )}
 
                 <div id={SCANNER_ELEMENT_ID} className="w-full h-full" />
-                
+
                 {/* Scan overlay */}
-                {isScanning && (
+                {isScanning && !scannerPaused && (
                   <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-3 left-3 w-6 h-6 border-t-3 border-l-3 border-brand/70 rounded-tl-lg" />
-                    <div className="absolute top-3 right-3 w-6 h-6 border-t-3 border-r-3 border-brand/70 rounded-tr-lg" />
-                    <div className="absolute bottom-3 left-3 w-6 h-6 border-b-3 border-l-3 border-brand/70 rounded-bl-lg" />
-                    <div className="absolute bottom-3 right-3 w-6 h-6 border-b-3 border-r-3 border-brand/70 rounded-br-lg" />
-                    
-                    <div className="absolute left-0 right-0 h-[2px] bg-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.5)] animate-[scan-full_3s_infinite]" />
-                    
-                    <div className="absolute bottom-6 left-0 right-0 text-center">
+                    {/* Corner guides */}
+                    <div className="absolute top-3 left-3 w-6 h-6 border-t-[3px] border-l-[3px] border-brand rounded-tl-lg" />
+                    <div className="absolute top-3 right-3 w-6 h-6 border-t-[3px] border-r-[3px] border-brand rounded-tr-lg" />
+                    <div className="absolute bottom-3 left-3 w-6 h-6 border-b-[3px] border-l-[3px] border-brand rounded-bl-lg" />
+                    <div className="absolute bottom-3 right-3 w-6 h-6 border-b-[3px] border-r-[3px] border-brand rounded-br-lg" />
+                    {/* Scan line */}
+                    <div className="absolute left-0 right-0 h-[2px] bg-red-500/60 shadow-[0_0_12px_rgba(239,68,68,0.6)] animate-[scan-full_2.5s_ease-in-out_infinite]" />
+                    <div className="absolute bottom-5 left-0 right-0 text-center">
                       <span className="bg-black/50 backdrop-blur-md text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-widest">
                         Aponte para o código
                       </span>
@@ -388,79 +344,45 @@ export function QuickRegistrationModal({
               </div>
 
               {/* Mode toggle */}
-              <div className="flex items-center justify-center gap-2 py-2 px-4">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleManualMode}
-                  className={cn(ds.typography.size.xs, "gap-1.5 text-muted-foreground")}
-                >
-                  <Keyboard className="h-3.5 w-3.5" />
-                  Digitar manualmente
+              <div className="flex items-center justify-center py-2 px-4">
+                <Button variant="ghost" size="sm" onClick={handleManualMode} className={cn(ds.typography.size.xs, "gap-1.5 text-muted-foreground")}>
+                  <Keyboard className="h-3.5 w-3.5" /> Digitar manualmente
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Manual mode header */}
+          {/* Manual mode toggle */}
           {mode === 'manual' && (
-            <div className="flex items-center justify-center gap-2 py-3 px-4 border-b border-border dark:border-white/5/50">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleScannerMode}
-                className={cn(ds.typography.size.xs, "gap-1.5 text-muted-foreground")}
-              >
-                <Camera className="h-3.5 w-3.5" />
-                Voltar ao scanner
+            <div className="flex items-center justify-center gap-2 py-3 px-4 border-b border-border dark:border-white/5">
+              <Button variant="ghost" size="sm" onClick={handleScannerMode} className={cn(ds.typography.size.xs, "gap-1.5 text-muted-foreground")}>
+                <Camera className="h-3.5 w-3.5" /> {isMobile ? "Voltar ao scanner" : "Usar câmera"}
               </Button>
             </div>
           )}
 
-          {/* â”€â”€â”€ Form Section â”€â”€â”€ */}
+          {/* Form */}
           <div className="flex-1 px-4 py-4 space-y-4">
-            
-            {/* Scanned barcode indicator */}
+
+            {/* Detected barcode indicator */}
             {barcode && mode === 'scanner' && (
               <div className={cn(
                 "flex items-center gap-3 p-3 rounded-xl border",
-                isSearching 
-                  ? "bg-blue-500/5 border-blue-500/20" 
-                  : "bg-brand/5 border-brand/20"
+                isSearching ? "bg-blue-500/5 border-blue-500/20" : "bg-brand/5 border-brand/20"
               )}>
-                <div className={cn(
-                  "w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0",
-                  isSearching ? "bg-blue-500/10" : "bg-brand/10"
-                )}>
-                  {isSearching ? (
-                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-                  ) : (
-                    <CheckCircle2 className="h-5 w-5 text-brand" />
-                  )}
+                <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0", isSearching ? "bg-blue-500/10" : "bg-brand/10")}>
+                  {isSearching
+                    ? <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                    : <CheckCircle2 className="h-5 w-5 text-brand" />
+                  }
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className={cn(
-                    ds.typography.size.xs,
-                    ds.typography.weight.bold,
-                    isSearching ? "text-blue-600 dark:text-blue-400" : "text-brand",
-                    "uppercase tracking-wider"
-                  )}>
+                  <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, isSearching ? "text-blue-600 dark:text-blue-400" : "text-brand", "uppercase tracking-wider")}>
                     {isSearching ? "Buscando produto..." : "Código detectado"}
                   </p>
-                  <p className={cn(
-                    "font-mono tracking-widest",
-                    ds.typography.size.lg,
-                    ds.typography.weight.bold,
-                    ds.colors.text.primary
-                  )}>{barcode}</p>
+                  <p className={cn("font-mono tracking-widest", ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>{barcode}</p>
                 </div>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  onClick={handleRescan} 
-                  title="Limpar"
-                  className="h-8 w-8 flex-shrink-0"
-                >
+                <Button size="icon" variant="ghost" onClick={handleRescan} title="Escanear outro" className="h-8 w-8 flex-shrink-0">
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -474,6 +396,7 @@ export function QuickRegistrationModal({
                   ref={barcodeInputRef}
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
+                  onBlur={() => barcode && !productName && fetchProductInfo(barcode)}
                   placeholder="Ex: 7891234567890"
                   className={cn(ds.components.input.root, "font-mono text-lg h-12 tracking-wider")}
                   autoComplete="off"
@@ -482,7 +405,7 @@ export function QuickRegistrationModal({
               </div>
             )}
 
-            {/* Product name input */}
+            {/* Product name */}
             <div className="space-y-1.5">
               <Label className={cn(ds.components.input.label)}>Nome do Produto</Label>
               <Input
@@ -497,7 +420,7 @@ export function QuickRegistrationModal({
               />
             </div>
 
-            {/* Barcode edit (scanner mode, when barcode exists) */}
+            {/* Edit barcode (scanner mode) */}
             {mode === 'scanner' && barcode && (
               <div className="space-y-1.5">
                 <Label className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
@@ -513,71 +436,43 @@ export function QuickRegistrationModal({
 
             {/* Last saved feedback */}
             {lastSavedName && (
-              <div className={cn(
-                "flex items-center gap-2 p-2.5 rounded-lg text-green-700 dark:text-green-400",
-                "bg-green-500/5 border border-green-500/15"
-              )}>
+              <div className={cn("flex items-center gap-2 p-2.5 rounded-lg text-green-700 dark:text-green-400", "bg-green-500/5 border border-green-500/15")}>
                 <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-                <span className={cn(ds.typography.size.xs)}>
-                  Ãšltimo: <strong>{lastSavedName}</strong>
-                </span>
+                <span className={cn(ds.typography.size.xs)}>Último: <strong>{lastSavedName}</strong></span>
               </div>
             )}
           </div>
         </div>
 
-        {/* â”€â”€â”€ Footer (Fixed) â”€â”€â”€ */}
-        <div className={cn(
-          "flex-shrink-0 border-t px-4 py-3 space-y-2",
-          ds.colors.surface.section,
-          ds.colors.border.default
-        )}>
-          <Button 
-            onClick={() => handleSubmit(true)} 
+        {/* Footer */}
+        <div className={cn("flex-shrink-0 border-t px-4 py-3 space-y-2", ds.colors.surface.section, ds.colors.border.default)}>
+          <Button
+            onClick={() => handleSubmit(true)}
             disabled={!canSave || isSaving}
-            className={cn(
-              ds.components.button.primary,
-              "w-full h-12 font-black text-base uppercase tracking-wider gap-2"
-            )}
+            className={cn(ds.components.button.primary, "w-full h-12 font-black text-base uppercase tracking-wider gap-2")}
           >
-            {isSaving ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <Zap className="h-5 w-5" />
-            )}
+            {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5" />}
             Salvar e Próximo
           </Button>
-          
           <div className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => handleSubmit(false)} 
-              disabled={!canSave || isSaving} 
-              className={cn(ds.components.button.secondary, "h-10 font-bold gap-1.5")}
-            >
-              <Save className="h-3.5 w-3.5" />
-              Apenas Salvar
+            <Button variant="outline" onClick={() => handleSubmit(false)} disabled={!canSave || isSaving} className={cn(ds.components.button.secondary, "h-10 font-bold gap-1.5")}>
+              <Save className="h-3.5 w-3.5" /> Apenas Salvar
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={() => onOpenChange(false)} 
-              className={cn(ds.components.button.ghost, "h-10")}
-            >
+            <Button variant="ghost" onClick={() => onOpenChange(false)} className={cn(ds.components.button.ghost, "h-10")}>
               Fechar
             </Button>
           </div>
         </div>
       </DialogContent>
-      
+
       <style>{`
         @keyframes scan-full {
-          0% { top: 10%; opacity: 0; }
-          20% { opacity: 1; }
-          80% { opacity: 1; }
+          0%   { top: 10%; opacity: 0; }
+          15%  { opacity: 1; }
+          85%  { opacity: 1; }
           100% { top: 90%; opacity: 0; }
         }
       `}</style>
     </Dialog>
   );
 }
-
