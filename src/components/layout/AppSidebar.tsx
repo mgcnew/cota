@@ -93,9 +93,7 @@ const menuCategories: MenuCategory[] = [
   {
     title: "Ferramentas",
     items: [
-      { title: "Anotações", url: "/dashboard/anotacoes", icon: StickyNote },
-      { title: "Etiquetas", url: "/dashboard/etiquetas", icon: ScanLine },
-      { title: "Faixas", url: "/dashboard/faixas", icon: Flag }
+      { title: "Etiquetas", url: "/dashboard/etiquetas", icon: ScanLine }
     ]
   },
   {
@@ -381,6 +379,11 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
             <div className="px-2 py-1.5 w-full">
               <CompanySelector />
             </div>
+
+            <DropdownMenuItem onClick={() => navigate('/dashboard/anotacoes')} className="cursor-pointer rounded-md py-2 text-sm">
+              <StickyNote className="mr-3 h-4 w-4 opacity-70" />
+              <span className="font-medium text-sm">Anotações</span>
+            </DropdownMenuItem>
 
             <DropdownMenuItem onClick={() => navigate('/dashboard/faixas')} className="cursor-pointer rounded-md py-2 text-sm">
               <Flag className="mr-3 h-4 w-4 text-brand" />
