@@ -1,4 +1,5 @@
 ﻿import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useLastUsedUnits } from "@/hooks/useLastUsedUnits";
 import {
   Dialog,
   DialogContent,
@@ -110,6 +111,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("un");
+  const { getUnit, saveProductUnit } = useLastUsedUnits();
   const [newProductPrice, setNewProductPrice] = useState("");
   const [lastUsedPrices, setLastUsedPrices] = useState<Record<string, number>>({});
   const [showQuickCreateProduct, setShowQuickCreateProduct] = useState(false);
@@ -270,6 +272,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     
     if (selectedProduct) {
       setLastUsedPrices(prev => ({ ...prev, [selectedProduct.id]: preco }));
+      saveProductUnit(selectedProduct.id, newProductUnit, selectedProduct.unit);
     }
     
     // Reset inputs but keep adding
@@ -291,10 +294,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
     setSearchedProducts([]);
     setHighlightedProductIndex(-1);
     
-    // Set default unit and price
-    if (product.unit) {
-      setNewProductUnit(product.unit);
-    }
+    // Set default unit and price — cascata: cadastro > histórico > fallback
+    setNewProductUnit(getUnit(product.id, product.unit, "un"));
     
     if (lastUsedPrices[product.id]) {
       setNewProductPrice(lastUsedPrices[product.id].toString());
@@ -571,7 +572,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         e.preventDefault();
         setSelectedProduct(p);
         setProductSearch(p.name);
-        setNewProductUnit(p.unit || 'un');
+        setNewProductUnit(getUnit(p.id, p.unit, 'un'));
         setShowProductSuggestions(false);
         setHighlightedProductIndex(-1);
         setTimeout(() => quantityInputRef.current?.focus(), 50);
@@ -822,7 +823,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                             onCreated={(product) => {
                               setShowQuickCreateProduct(false);
                               setSelectedProduct({ id: product.id, name: product.name, unit: product.unit });
-                              setNewProductUnit(product.unit || 'un');
+                              setNewProductUnit(getUnit(product.id, product.unit, 'un'));
                               setProductSearch("");
                               setTimeout(() => {
                                 quantityInputRef.current?.focus();

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AnimatedTabContent } from "@/components/ui/animated-tabs";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useLastUsedUnits } from "@/hooks/useLastUsedUnits";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { designSystem as ds } from "@/styles/design-system";
 import {
@@ -269,7 +270,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
 // Estados para o novo formulário de produto único
   const [newProductQuantity, setNewProductQuantity] = useState("");
   const [newProductUnit, setNewProductUnit] = useState("");
-  const [lastUsedUnit, setLastUsedUnit] = useState("kg");
+  const { getUnit, saveProductUnit } = useLastUsedUnits();
   const [supplierPopoverOpen, setSupplierPopoverOpen] = useState(false);
   const [focusedSupplierId, setFocusedSupplierId] = useState<string | null>(null);
 
@@ -362,8 +363,8 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
         unidade: newProductUnit
       });
 
-      // Salvar última unidade usada
-      setLastUsedUnit(newProductUnit);
+      // Salvar unidade no cadastro do produto se ainda não tinha
+      saveProductUnit(selectedProduct.id, newProductUnit, selectedProduct.unit);
 
       // Limpar o formulário após adicionar
       setSelectedProduct(null);
@@ -501,10 +502,8 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
   useEffect(() => {
     if (open) {
       loadInitialData();
-      // Definir unidade padrão na primeira vez
-      if (!newProductUnit) {
-        setNewProductUnit(lastUsedUnit);
-      }
+      // Limpa unidade ao abrir para que o próximo produto selecionado preencha corretamente
+      setNewProductUnit("");
       // Auto-foco no seletor correspondente ao abrir ou trocar de aba
       setTimeout(() => {
         if (activeTab === 'produtos' && productSearchRef.current) {
@@ -1015,7 +1014,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                               onMouseDown={(e) => {
                                 e.preventDefault();
                                 setSelectedProduct(product);
-                                if (product.unit) setNewProductUnit(product.unit);
+                                setNewProductUnit(getUnit(product.id, product.unit));
                                 setProductSearch("");
                                 setShowProductSuggestions(false);
                                 setTimeout(() => {
@@ -2187,9 +2186,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                                   onMouseDown={(e) => {
                                                     e.preventDefault();
                                                     setSelectedProduct(product);
-                                                    if (product.unit) {
-                                                      setNewProductUnit(product.unit);
-                                                    }
+                                                    setNewProductUnit(getUnit(product.id, product.unit));
                                                     setProductSearch("");
                                                     setShowProductSuggestions(false);
                                                     setHighlightedProductIndex(-1);
@@ -2264,7 +2261,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                       onCreated={(product) => {
                                         setShowQuickCreateProduct(false);
                                         setSelectedProduct({ id: product.id, name: product.name, unit: product.unit });
-                                        setNewProductUnit(product.unit || "kg");
+                                        setNewProductUnit(getUnit(product.id, product.unit));
                                         setProductSearch("");
                                         setTimeout(() => {
                                           quantityInputRef.current?.focus();
