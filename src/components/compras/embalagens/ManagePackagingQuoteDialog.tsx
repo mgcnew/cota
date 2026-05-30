@@ -232,14 +232,14 @@ export function ManagePackagingQuoteDialog({
   const handleCopyBestPricesSummary = useCallback(() => {
     if (!quote || !bestPricesData.length) return;
     
-    let text = `ðŸ† *RESUMO DE MELHORES PREÇOS - EMBALAGENS*\n`;
+    let text = `🏆 *RESUMO DE MELHORES PREÇOS - EMBALAGENS*\n`;
     text += `*Cotação:* ${quote.dataInicio} - ${quote.dataFim}\n\n`;
     
     bestPricesData.forEach((item, idx) => {
       text += `${idx + 1}. *${item.packagingName}*\n`;
       if (item.bestPrice > 0) {
-        text += `   ðŸ’° Melhor: ${formatCurrency(item.bestPrice)}/un (${item.bestSupplierName})\n`;
-        if (item.savings > 0) text += `   ðŸ“ˆ Econ. estimada: ${formatCurrency(item.savings)}/un\n`;
+        text += `   💰 Melhor: ${formatCurrency(item.bestPrice)}/un (${item.bestSupplierName})\n`;
+        if (item.savings > 0) text += `   📈 Econ. estimada: ${formatCurrency(item.savings)}/un\n`;
       } else {
         text += `   âš ï¸ Sem ofertas preenchidas\n`;
       }
@@ -304,7 +304,7 @@ export function ManagePackagingQuoteDialog({
 
   const handleCopySupplierSummary = useCallback((group: any) => {
     try {
-      let text = `ðŸ“‹ *COMPARATIVO DE EMBALAGENS*\n`;
+      let text = `📋 *COMPARATIVO DE EMBALAGENS*\n`;
       text += `*Fornecedor:* ${group.supplierName}\n`;
       text += `*Data:* ${new Date().toLocaleDateString('pt-BR')}\n\n`;
       
@@ -320,7 +320,7 @@ export function ManagePackagingQuoteDialog({
 
       const outros = group.itens.filter((i: any) => !i.isMelhorPreco);
       if (outros.length > 0) {
-        text += `ðŸ“Š *OUTROS ITENS COTADOS:*\n`;
+        text += `📊 *OUTROS ITENS COTADOS:*\n`;
         outros.forEach((item: any) => {
           text += `â€¢ ${item.packagingName}: ${formatCurrency(item.custoPorUnidade)}/un (+${item.diferencaPercentual.toFixed(1)}%)\n`;
         });
@@ -549,7 +549,7 @@ export function ManagePackagingQuoteDialog({
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text("COMPARATIVO DE COTAÇÃƒO", pageWidth / 2, 15, { align: "center" });
+    doc.text("COMPARATIVO DE COTAÇÃO", pageWidth / 2, 15, { align: "center" });
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
     doc.text("Embalagens", pageWidth / 2, 23, { align: "center" });
@@ -638,7 +638,7 @@ export function ManagePackagingQuoteDialog({
         // Status
         if (isWinner) {
           doc.setTextColor(0, 0, 0); // Black
-          doc.text("ðŸ† MELHOR PREÇO", margin + 140, y);
+          doc.text("🏆 MELHOR PREÇO", margin + 140, y);
         } else {
           doc.setTextColor(107, 114, 128); // gray-500
           doc.text(`+${f.diferencaPercentual.toFixed(1)}%`, margin + 140, y);
@@ -787,7 +787,7 @@ export function ManagePackagingQuoteDialog({
 <body>
   <div class="container">
     <div class="header">
-      <h1>ðŸ† COMPARATIVO DE COTAÇÃƒO</h1>
+      <h1>🏆 COMPARATIVO DE COTAÇÃO</h1>
       <p>Embalagens</p>
     </div>
 
@@ -812,7 +812,7 @@ export function ManagePackagingQuoteDialog({
 
     ${sortedWinners.length > 0 ? `
     <div class="winners-section">
-      <h2>ðŸŽ¯ Vencedores por Fornecedor</h2>
+      <h2>🎯 Vencedores por Fornecedor</h2>
       <div class="winners-list">
         ${sortedWinners.map((w, idx) => `
           <div class="winner-card">
@@ -853,7 +853,7 @@ export function ManagePackagingQuoteDialog({
                     <td><strong>R$ ${f.custoPorUnidade.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></td>
                     <td>
                       ${f.isMelhorPreco 
-                        ? '<span class="badge badge-winner">ðŸ† MELHOR PREÇO</span>' 
+                        ? '<span class="badge badge-winner">🏆 MELHOR PREÇO</span>'
                         : '<span class="badge badge-difference">+' + f.diferencaPercentual.toFixed(1) + '%</span>'
                       }
                     </td>
@@ -1318,11 +1318,11 @@ export function ManagePackagingQuoteDialog({
                                         <Tooltip>
                                           <TooltipTrigger asChild>
                                             <div className="cursor-help inline-flex">
-                                              <Info className="h-3.5 w-3.5 text-blue-500 hover:text-blue-600 transition-colors" />
+                                              <Info className="h-3.5 w-3.5 text-brand hover:text-brand/80 transition-colors" />
                                             </div>
                                           </TooltipTrigger>
                                           <TooltipContent className="max-w-[200px] text-xs">
-                                            <p className="font-bold mb-1">Ãšltima Compra:</p>
+                                            <p className="font-bold mb-1">Última Compra:</p>
                                             <p>Data: {lastPurchase.date}</p>
                                             <p>Fornecedor: {lastPurchase.supplierName}</p>
                                             <p>Preço: {formatCurrency(lastPurchase.price)}</p>
@@ -1332,20 +1332,20 @@ export function ManagePackagingQuoteDialog({
                                     );
                                   })()}
                                 </div>
-                                {isBestPrice && <span className="text-[10px] font-bold text-foreground uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor Preço</span>}
+                                {isBestPrice && <span className="text-[10px] font-bold text-brand uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor Preço</span>}
                               </div>
                             </div>
-                            {!isEditing && <Button size="sm" variant="outline" onClick={() => handleEditItem(selectedSupplier, item.packagingId)} 
-                              className="h-7 text-xs font-bold uppercase tracking-wider bg-background border-border hover:bg-muted"><Edit2 className="h-3 w-3 mr-1.5" />Editar</Button>}
+                            {!isEditing && <Button size="sm" variant="outline" onClick={() => handleEditItem(selectedSupplier, item.packagingId)}
+                              className="h-9 px-3 text-xs font-bold bg-background border-border hover:bg-muted hover:border-brand/40 touch-manipulation"><Edit2 className="h-3.5 w-3.5 mr-1.5" />Editar</Button>}
                           </div>
                           {isEditing ? (
                             <div className="space-y-4 bg-muted/60 -m-1 p-4 rounded-lg border border-border dark:border-white/5 shadow-inner">
                               {/* Grid Principal de Inputs */}
-                              <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-5">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-4">
                                 {/* Preço */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸ’° Preço (R$)" : "ðŸ’° Preço Pacote/Fardo (R$) *"}
+                                    {isMobile ? "Preço (R$)" : "Preço Pacote/Fardo (R$) *"}
                                   </Label>
                                   <Input 
                                     ref={valorTotalInputRef} 
@@ -1362,7 +1362,7 @@ export function ManagePackagingQuoteDialog({
                                 {/* Unidade */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸ“¦ Venda" : "ðŸ“¦ Vendido como *"}
+                                    {isMobile ? "Venda" : "Vendido como *"}
                                   </Label>
                                   <Select 
                                     value={formData.unidadeVenda} 
@@ -1384,7 +1384,7 @@ export function ManagePackagingQuoteDialog({
                                 {/* Qtd Compra */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸ”¢ Qtd Compra" : "ðŸ”¢ Qtd. Comprada *"}
+                                    {isMobile ? "Qtd Compra" : "Qtd. Comprada *"}
                                   </Label>
                                   <Input 
                                     type="number" 
@@ -1400,7 +1400,7 @@ export function ManagePackagingQuoteDialog({
                                 {/* Peças no Pack */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸŽ¯ Peças/Pack" : "ðŸŽ¯ Total Peças no Pack *"}
+                                    {isMobile ? "Peças/Pack" : "Total Peças no Pack *"}
                                   </Label>
                                   <Input 
                                     type="number" 
@@ -1416,7 +1416,7 @@ export function ManagePackagingQuoteDialog({
                                 {/* Gramatura */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸ“ Espessura" : "ðŸ“ Espessura (mm)"}
+                                    {isMobile ? "Espessura" : "Espessura (mm)"}
                                   </Label>
                                   <Input 
                                     type="number" 
@@ -1424,15 +1424,15 @@ export function ManagePackagingQuoteDialog({
                                     value={formData.gramatura} 
                                     onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} 
                                     onFocus={handleInputFocus} 
-                                    placeholder="0.08" 
-                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
+                                    placeholder="0.08"
+                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
                                   />
                                 </div>
 
                                 {/* Tamanho */}
                                 <div className="space-y-1 group flex flex-col">
                                   <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "ðŸ“ Tamanho" : "ðŸ“ Tamanho (LxA)"}
+                                    {isMobile ? "Tamanho" : "Tamanho (LxA)"}
                                   </Label>
                                   <Input 
                                     value={formData.dimensoes} 
@@ -1452,7 +1452,7 @@ export function ManagePackagingQuoteDialog({
                                       <div className="p-1 bg-brand/10 rounded-md">
                                         <TrendingDown className="h-3 w-3 text-brand" />
                                       </div>
-                                      <span className="text-[9px] font-bold uppercase tracking-tighter">R$ {formData.valorTotal || '0'} Ã· {formData.quantidadeUnidadesEstimada || '0'} unidades</span>
+                                      <span className="text-[9px] font-bold uppercase tracking-tighter">R$ {formData.valorTotal || '0'} ÷ {formData.quantidadeUnidadesEstimada || '0'} unidades</span>
                                     </div>
                                   </div>
                                   <div className="flex items-baseline gap-1.5">
@@ -1470,11 +1470,29 @@ export function ManagePackagingQuoteDialog({
                               </div>
                             </div>
                           ) : supplierItem?.valorTotal ? (
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-muted/50 p-3 rounded-lg border border-border dark:border-white/5">
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸ’° Preço Pacote</span><p className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸ“¦ Formato</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">ðŸŽ¯ Peças no Pacote</span><p className="font-medium text-muted-foreground">{supplierItem.quantidadeUnidadesEstimada} un</p></div>
-                              <div><span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block mb-0.5">Custo/un</span><p className={cn("font-black text-base", isBestPrice ? "text-emerald-600" : "text-foreground")}>{formatCurrency(supplierItem.custoPorUnidade)}</p></div>
+                            <div className="flex items-center justify-between gap-3 bg-muted/40 px-3 py-2.5 rounded-lg border border-border dark:border-white/5">
+                              {/* Detalhes secundários */}
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground min-w-0 flex-1 flex-wrap">
+                                <span>
+                                  <span className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</span>
+                                  <span className="opacity-60 ml-1">/ pacote</span>
+                                </span>
+                                <span className="opacity-50">·</span>
+                                <span>{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</span>
+                                {supplierItem.quantidadeUnidadesEstimada && (
+                                  <>
+                                    <span className="opacity-50">·</span>
+                                    <span>{supplierItem.quantidadeUnidadesEstimada} un</span>
+                                  </>
+                                )}
+                              </div>
+                              {/* Custo/un em destaque */}
+                              <div className="text-right flex-shrink-0">
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Custo/un</p>
+                                <p className={cn("font-extrabold text-base tabular-nums", isBestPrice ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
+                                  {formatCurrency(supplierItem.custoPorUnidade)}
+                                </p>
+                              </div>
                             </div>
                           ) : <div className="p-4 rounded-lg border-2 border-dashed border-border bg-muted/50 text-center"><p className="text-xs text-muted-foreground font-medium">Nenhum valor informado</p></div>}
                         </Card>
