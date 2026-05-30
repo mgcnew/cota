@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon, CheckCircle, Clock } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -22,42 +22,35 @@ export function DateRangePicker({
   endDate,
   onStartDateChange,
   onEndDateChange,
-  className
+  className,
 }: DateRangePickerProps) {
   const [isStartOpen, setIsStartOpen] = useState(false);
   const [isEndOpen, setIsEndOpen] = useState(false);
   const isMobile = useIsMobile();
 
-  const applyPreset = (days: number) => {
-    const end = new Date();
-    const start = new Date();
-    start.setDate(end.getDate() - days);
-    
-    onStartDateChange(start);
-    onEndDateChange(end);
-    setIsStartOpen(false);
-    setIsEndOpen(false);
-  };
+  const triggerClass = (hasValue: boolean) =>
+    cn(
+      "w-full justify-start text-left font-normal",
+      hasValue
+        ? "border-brand/50 bg-brand/5 text-brand"
+        : "text-muted-foreground"
+    );
 
-  // Mobile: Use bottom sheet for date selection (Requirement 6.4)
   if (isMobile) {
     return (
-      <div className={cn("space-y-4", className)}>
-        <div className="grid grid-cols-1 gap-3">
-          {/* Start Date - Mobile */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+      <div className={cn("space-y-3", className)}>
+        <div className="grid grid-cols-1 gap-2">
+
+          {/* Data início — mobile */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
               <CalendarIcon className="h-3 w-3" />
-              Data de Início
+              Data de início
             </label>
             <Button
               variant="outline"
               onClick={() => setIsStartOpen(true)}
-              className={cn(
-                "w-full justify-start text-left font-normal h-12 touch-target",
-                !startDate && "text-gray-500",
-                startDate && "border-purple-300 bg-purple-50 text-purple-700"
-              )}
+              className={cn(triggerClass(!!startDate), "h-10")}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
@@ -65,17 +58,14 @@ export function DateRangePicker({
             <ResponsiveModal
               open={isStartOpen}
               onOpenChange={setIsStartOpen}
-              title="Data de Início"
+              title="Data de início"
               description="Selecione a data inicial do período"
             >
               <div className="flex justify-center py-2">
                 <Calendar
                   mode="single"
                   selected={startDate}
-                  onSelect={(date) => {
-                    onStartDateChange(date);
-                    setIsStartOpen(false);
-                  }}
+                  onSelect={(date) => { onStartDateChange(date); setIsStartOpen(false); }}
                   initialFocus
                   className="rounded-md border-0"
                 />
@@ -83,20 +73,16 @@ export function DateRangePicker({
             </ResponsiveModal>
           </div>
 
-          {/* End Date - Mobile */}
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+          {/* Data fim — mobile */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
               <CalendarIcon className="h-3 w-3" />
-              Data de Fim
+              Data de fim
             </label>
             <Button
               variant="outline"
               onClick={() => setIsEndOpen(true)}
-              className={cn(
-                "w-full justify-start text-left font-normal h-12 touch-target",
-                !endDate && "text-gray-500",
-                endDate && "border-purple-300 bg-purple-50 text-purple-700"
-              )}
+              className={cn(triggerClass(!!endDate), "h-10")}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
@@ -104,18 +90,15 @@ export function DateRangePicker({
             <ResponsiveModal
               open={isEndOpen}
               onOpenChange={setIsEndOpen}
-              title="Data de Fim"
+              title="Data de fim"
               description="Selecione a data final do período"
             >
               <div className="flex justify-center py-2">
                 <Calendar
                   mode="single"
                   selected={endDate}
-                  onSelect={(date) => {
-                    onEndDateChange(date);
-                    setIsEndOpen(false);
-                  }}
-                  disabled={(date) => startDate ? date < startDate : false}
+                  onSelect={(date) => { onEndDateChange(date); setIsEndOpen(false); }}
+                  disabled={(date) => (startDate ? date < startDate : false)}
                   initialFocus
                   className="rounded-md border-0"
                 />
@@ -123,64 +106,33 @@ export function DateRangePicker({
             </ResponsiveModal>
           </div>
         </div>
-
-        {/* Validation visual - Mobile */}
-        {startDate && endDate && (
-          <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-            <CheckCircle className="h-4 w-4" />
-            <span>
-              Período válido: {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias
-            </span>
-          </div>
-        )}
-        
-        {startDate && !endDate && (
-          <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-            <Clock className="h-4 w-4" />
-            <span>Selecione a data de fim para completar o período</span>
-          </div>
-        )}
       </div>
     );
   }
 
-  // Desktop: Use Popover for date selection
+  // Desktop: popovers
   return (
-    <div className={cn("space-y-4", className)}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+    <div className={cn("space-y-3", className)}>
+      <div className="grid grid-cols-2 gap-3">
+
+        {/* Data início — desktop */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
             <CalendarIcon className="h-3 w-3" />
-            Data de Início
+            Data de início
           </label>
           <Popover open={isStartOpen} onOpenChange={setIsStartOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal h-10",
-                  !startDate && "text-gray-500",
-                  startDate && "border-purple-300 bg-purple-50 text-purple-700"
-                )}
-              >
+              <Button variant="outline" className={cn(triggerClass(!!startDate), "h-9")}>
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+                {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-xl rounded-xl" align="start">
-              <div className="p-3 border-b border-gray-100 bg-gray-50/50">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-purple-600" />
-                  <span className="font-medium text-gray-900">Data de Início</span>
-                </div>
-              </div>
+            <PopoverContent className="w-auto p-0 bg-popover border-border shadow-lg rounded-xl" align="start">
               <Calendar
                 mode="single"
                 selected={startDate}
-                onSelect={(date) => {
-                  onStartDateChange(date);
-                  setIsStartOpen(false);
-                }}
+                onSelect={(date) => { onStartDateChange(date); setIsStartOpen(false); }}
                 initialFocus
                 className="pointer-events-auto"
               />
@@ -188,40 +140,25 @@ export function DateRangePicker({
           </Popover>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+        {/* Data fim — desktop */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
             <CalendarIcon className="h-3 w-3" />
-            Data de Fim
+            Data de fim
           </label>
           <Popover open={isEndOpen} onOpenChange={setIsEndOpen}>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal h-10",
-                  !endDate && "text-gray-500",
-                  endDate && "border-purple-300 bg-purple-50 text-purple-700"
-                )}
-              >
+              <Button variant="outline" className={cn(triggerClass(!!endDate), "h-9")}>
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar data"}
+                {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : "Selecionar"}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 bg-white border border-gray-200 shadow-xl rounded-xl" align="start">
-              <div className="p-3 border-b border-gray-100 bg-gray-50/50">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-purple-600" />
-                  <span className="font-medium text-gray-900">Data de Fim</span>
-                </div>
-              </div>
+            <PopoverContent className="w-auto p-0 bg-popover border-border shadow-lg rounded-xl" align="start">
               <Calendar
                 mode="single"
                 selected={endDate}
-                onSelect={(date) => {
-                  onEndDateChange(date);
-                  setIsEndOpen(false);
-                }}
-                disabled={(date) => startDate ? date < startDate : false}
+                onSelect={(date) => { onEndDateChange(date); setIsEndOpen(false); }}
+                disabled={(date) => (startDate ? date < startDate : false)}
                 initialFocus
                 className="pointer-events-auto"
               />
@@ -229,23 +166,6 @@ export function DateRangePicker({
           </Popover>
         </div>
       </div>
-
-      {/* Validação visual */}
-      {startDate && endDate && (
-        <div className="flex items-center gap-2 text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-          <CheckCircle className="h-4 w-4" />
-          <span>
-            Período válido: {Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))} dias
-          </span>
-        </div>
-      )}
-      
-      {startDate && !endDate && (
-        <div className="flex items-center gap-2 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg border border-amber-200">
-          <Clock className="h-4 w-4" />
-          <span>Selecione a data de fim para completar o período</span>
-        </div>
-      )}
     </div>
   );
 }
