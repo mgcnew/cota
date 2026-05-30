@@ -209,10 +209,18 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
     { id: "detalhes", label: "Resumo", icon: FileText }
   ], []);
 
-  // Mobile uses 3 steps — "detalhes" is replaced by a confirmation bottom sheet
-  const mobileTabs = useMemo(() => tabs.filter(t => t.id !== "detalhes"), [tabs]);
-  const mobileCurrentTabIndex = mobileTabs.findIndex(t => t.id === activeTab);
-  const isMobileLastStep = mobileCurrentTabIndex === mobileTabs.length - 1;
+  // Mobile uses 2 visible steps; "personalizar" is an optional sub-page
+  // and "detalhes" is replaced by a confirmation bottom sheet.
+  const mobileTabs = useMemo(
+    () => tabs.filter(t => t.id !== "detalhes" && t.id !== "personalizar"),
+    [tabs]
+  );
+  const isPersonalizingMobile = activeTab === "personalizar";
+  const mobileCurrentTabIndex = isPersonalizingMobile
+    ? mobileTabs.length - 1
+    : mobileTabs.findIndex(t => t.id === activeTab);
+  const isMobileLastStep =
+    !isPersonalizingMobile && mobileCurrentTabIndex === mobileTabs.length - 1;
 
   const [supplierItemAssignments, setSupplierItemAssignments] = useState<Record<string, string[]>>({});
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
@@ -883,20 +891,26 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
           )}
           <div className="flex items-center gap-2">
             {(() => {
-              const CurrentIcon = mobileTabs[mobileCurrentTabIndex]?.icon;
+              const CurrentIcon = isPersonalizingMobile
+                ? MousePointerClick
+                : mobileTabs[mobileCurrentTabIndex]?.icon;
               return CurrentIcon ? <CurrentIcon className="h-4 w-4 text-brand flex-shrink-0" /> : null;
             })()}
             <div>
               <h2 className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
-                {mobileTabs[mobileCurrentTabIndex]?.label || "Produtos"}
+                {isPersonalizingMobile
+                  ? "Personalizar"
+                  : mobileTabs[mobileCurrentTabIndex]?.label || "Produtos"}
               </h2>
               <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-                Passo {mobileCurrentTabIndex + 1} de {mobileTabs.length}
+                {isPersonalizingMobile
+                  ? "Configuração opcional"
+                  : `Passo ${mobileCurrentTabIndex + 1} de ${mobileTabs.length}`}
               </p>
             </div>
           </div>
         </div>
-        {mobileCurrentTabIndex === 0 && fields.length > 0 && (
+        {!isPersonalizingMobile && mobileCurrentTabIndex === 0 && fields.length > 0 && (
           <button
             type="button"
             onClick={() => setShowMobileCart(true)}
@@ -913,18 +927,20 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
         )}
       </div>
 
-      {/* Progress bar â€" thin, clean */}
-      <div className="flex gap-1.5 px-4 pb-3">
-        {mobileTabs.map((_, idx) => (
-          <div
-            key={idx}
-            className={cn(
-              "h-1 rounded-full flex-1 transition-all duration-300",
-              idx < mobileCurrentTabIndex ? "bg-brand" : idx === mobileCurrentTabIndex ? "bg-brand/50" : "bg-muted"
-            )}
-          />
-        ))}
-      </div>
+      {/* Progress bar â€" hidden during optional personalization */}
+      {!isPersonalizingMobile && (
+        <div className="flex gap-1.5 px-4 pb-3">
+          {mobileTabs.map((_, idx) => (
+            <div
+              key={idx}
+              className={cn(
+                "h-1 rounded-full flex-1 transition-all duration-300",
+                idx < mobileCurrentTabIndex ? "bg-brand" : idx === mobileCurrentTabIndex ? "bg-brand/50" : "bg-muted"
+              )}
+            />
+          ))}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex-1 flex items-center justify-center">
@@ -1399,6 +1415,43 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                       </div>
                     )}
                   </div>
+
+                  {/* Optional: personalize products per supplier (mobile only) */}
+                  {selectedSuppliers.length > 0 && fields.length > 0 && (() => {
+                    const hasCustomAssignments = Object.values(supplierItemAssignments).some(
+                      ids => ids.length > 0 && ids.length < fields.length
+                    );
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => changeTab("personalizar")}
+                        className={cn(
+                          "w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-colors active:scale-[0.99]",
+                          ds.colors.surface.card,
+                          hasCustomAssignments ? "border-brand/40" : ds.colors.border.subtle
+                        )}
+                      >
+                        <div className={cn(
+                          "w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0",
+                          hasCustomAssignments ? "bg-brand/15 text-brand" : "bg-muted text-muted-foreground"
+                        )}>
+                          <MousePointerClick className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary, "flex items-center gap-2")}>
+                            Personalizar por fornecedor
+                            <span className={cn(ds.typography.size.xs, "font-normal", ds.colors.text.muted)}>· opcional</span>
+                          </div>
+                          <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "mt-0.5")}>
+                            {hasCustomAssignments
+                              ? "Configuração personalizada ativa"
+                              : "Por padrão, todos cotam todos os produtos"}
+                          </p>
+                        </div>
+                        <ChevronRight className={cn("h-4 w-4", ds.colors.text.muted)} />
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             )}
@@ -1752,7 +1805,16 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
 
       {/* Sticky Bottom CTA â€" thumb-reachable primary action */}
       <div className="flex-shrink-0 px-4 py-3 border-t border-border dark:border-white/5 bg-background/95 backdrop-blur-sm">
-        {isMobileLastStep ? (
+        {isPersonalizingMobile ? (
+          <Button
+            type="button"
+            onClick={() => changeTab("periodo_fornecedores")}
+            className={cn(ds.components.button.primary, "w-full h-12 text-sm font-bold shadow-sm")}
+          >
+            <Check className="mr-2 h-4 w-4" />
+            Salvar Configuração
+          </Button>
+        ) : isMobileLastStep ? (
           <Button
             type="button"
             onClick={() => setShowConfirmDrawer(true)}
