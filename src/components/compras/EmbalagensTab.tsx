@@ -20,9 +20,10 @@ import {
   Package, Plus, Trash2, DollarSign,
   Building2, MoreVertical, Eye, CheckCircle2,
   PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown, Calculator,
-  CircleCheck, PiggyBank
+  CircleCheck, PiggyBank, SlidersHorizontal
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger
@@ -231,165 +232,132 @@ function EmbalagensTab() {
 
       {/* Cotações Content */}
       {activeSubTab === "cotacoes" && (
-        <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
-          {/* Métricas */}
-          {isMobile ? (
-            <MobileMetricRibbon>
-              <MobileMetricCard
-                title="Cotações Ativas"
-                value={stats.ativas.toString()}
-                icon={PackageOpen}
-                variant="info"
-              />
-              <MobileMetricCard
-                title="Prontas p/ Decisão"
-                value={stats.prontasParaDecisao.toString()}
-                icon={CheckCircle2}
-                variant="success"
-                onClick={() => setStatusFilter("prontas")}
-              />
-              <MobileMetricCard
-                title="Concluídas"
-                value={stats.concluidas.toString()}
-                icon={CircleCheck}
-                variant="warning"
-                onClick={() => setStatusFilter("concluida")}
-              />
-              <MobileMetricCard
-                title="Economia Acumulada"
-                value={formatCurrency(stats.economiaTotal)}
-                icon={TrendingDown}
-                variant="success"
-              />
-            </MobileMetricRibbon>
-          ) : (
+        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+          {/* Métricas — desktop only */}
+          {!isMobile && (
             <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
               <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
-              <MetricCard
-                title="Prontas p/ Decisão"
-                value={stats.prontasParaDecisao.toString()}
-                icon={CheckCircle2}
-                variant="success"
-                onClick={() => setStatusFilter("prontas")}
-              />
-              <MetricCard
-                title="Concluídas"
-                value={stats.concluidas.toString()}
-                icon={CircleCheck}
-                variant="warning"
-                onClick={() => setStatusFilter("concluida")}
-              />
-              <MetricCard
-                title="Economia Acumulada"
-                value={formatCurrency(stats.economiaTotal)}
-                icon={TrendingDown}
-                variant="success"
-              />
+              <MetricCard title="Prontas p/ Decisão" value={stats.prontasParaDecisao.toString()} icon={CheckCircle2} variant="success" onClick={() => setStatusFilter("prontas")} />
+              <MetricCard title="Concluídas" value={stats.concluidas.toString()} icon={CircleCheck} variant="warning" onClick={() => setStatusFilter("concluida")} />
+              <MetricCard title="Economia Acumulada" value={formatCurrency(stats.economiaTotal)} icon={TrendingDown} variant="success" />
             </ResponsiveGrid>
           )}
 
-          {/* Unified Container for Filters + Table + Pagination */}
-          <div className={cn(
-            "flex flex-col w-full transition-all duration-300",
-            !isMobile && "bg-white dark:bg-zinc-950/40 border border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm p-6"
-          )}>
-            {/* Filters Section */}
-            <div className={cn("mb-6", isMobile && "px-1")}>
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-                {/* Search Field */}
-                <div className="flex-1 max-w-xl">
-                  <SearchInput
-                    value={searchTerm}
-                    onChange={setSearchTerm}
-                    placeholder="Buscar em embalagens..."
-                  />
-                </div>
-
-                <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={"all"}>Todos os Status</SelectItem>
-                      <SelectItem value={"ativa"}>🟢 Ativas</SelectItem>
-                      <SelectItem value={"prontas"}>✅ Prontas p/ Decisão</SelectItem>
-                      <SelectItem value={"concluida"}>🔵 Concluídas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+          {/* Unified Container — matches CotacoesTab pattern */}
+          <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm">
+            {/* Action bar */}
+            <div className="flex flex-wrap items-center gap-2.5 px-3.5 py-2.5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Pesquisar..." />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-9 shrink-0 gap-1.5 text-sm">
+                      <SlidersHorizontal className="h-3.5 w-3.5" />
+                      <span className="hidden sm:inline">Status</span>
+                      {statusFilter !== "all" && (
+                        <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 text-[10px] font-bold bg-brand text-white rounded-full">1</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-52 p-1.5" align="start">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">Filtrar por status</p>
+                    {[
+                      { value: "all",      label: "Todos os Status" },
+                      { value: "ativa",    label: "Ativas" },
+                      { value: "prontas",  label: "Prontas p/ Decisão" },
+                      { value: "concluida",label: "Concluídas" },
+                    ].map(item => (
+                      <button
+                        key={item.value}
+                        onClick={() => setStatusFilter(item.value)}
+                        className={cn(
+                          "w-full text-left px-2.5 py-1.5 text-sm rounded-md transition-colors",
+                          statusFilter === item.value ? "bg-brand text-white font-medium" : "text-foreground hover:bg-muted"
+                        )}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex items-center gap-2 ml-auto">
+                <Button onClick={() => setAddDialogOpen(true)} className={cn(designSystem.components.button.primary, "h-9 px-4")}>
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  <span className="hidden sm:inline">Nova Cotação</span>
+                  <span className="sm:hidden">Nova</span>
+                </Button>
               </div>
             </div>
 
-            {/* Alerta de prontas */}
-            {stats.prontasParaDecisao > 0 && (
-              <div className={cn("mb-6 animate-in zoom-in-95 duration-500", isMobile && "px-1")}>
-                <div className="bg-brand/5 border border-brand/20 rounded-2xl p-4 flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="h-5 w-5 text-brand" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
-                      {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
-                    </p>
-                    <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores selecionados já enviaram suas propostas</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="rounded-xl border-brand/30 text-brand hover:bg-brand/10"
-                    onClick={() => setStatusFilter("prontas")}
-                  >
-                    Analisar agora
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Content Section */}
-            <div className="flex-1 min-h-0">
+            {/* Content */}
+            <div className="w-full">
               {paginatedData.items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-border dark:border-white/5">
+                <div className="flex flex-col items-center justify-center py-24 text-center">
                   <Package className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
                   <p className="text-zinc-500 font-medium">Nenhuma cotação de embalagem encontrada</p>
                   <Button variant="outline" className="mt-6 rounded-xl" onClick={() => setAddDialogOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />Criar Primeira Cotação
                   </Button>
                 </div>
-              ) : isMobile ? (
-                <div className="space-y-3 px-1">
-                  {paginatedData.items.map((quote, index) => {
-                    const numero = paginatedData.pagination.startIndex + index + 1;
-                    return (
-                      <MobilePackagingQuoteCard
-                        key={quote.id}
-                        quote={quote}
-                        quoteNumber={numero}
-                        onManage={handleManageQuote}
-                        onViewSummary={handleViewSummary}
-                        onDelete={handleDeleteQuote}
-                        onConvertToOrder={handleConvertToOrder}
-                      />
-                    );
-                  })}
-                </div>
               ) : (
-                <div className="bg-transparent overflow-hidden">
-                  <PackagingQuotesTable
-                    quotes={paginatedData.items}
-                    startIndex={paginatedData.pagination.startIndex}
-                    onManage={handleManageQuote}
-                    onViewSummary={handleViewSummary}
-                    onDelete={handleDeleteQuote}
-                    onConvertToOrder={handleConvertToOrder}
-                  />
-                </div>
+                <>
+                  {/* Mobile cards */}
+                  <div className="md:hidden">
+                    <div className="space-y-3 p-2 pb-24">
+                      {paginatedData.items.map((quote, index) => {
+                        const numero = paginatedData.pagination.startIndex + index + 1;
+                        return (
+                          <MobilePackagingQuoteCard
+                            key={quote.id}
+                            quote={quote}
+                            quoteNumber={numero}
+                            onManage={handleManageQuote}
+                            onViewSummary={handleViewSummary}
+                            onDelete={handleDeleteQuote}
+                            onConvertToOrder={handleConvertToOrder}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Desktop table */}
+                  <div className="hidden md:block p-6">
+                    {stats.prontasParaDecisao > 0 && (
+                      <div className="mb-6 animate-in zoom-in-95 duration-500">
+                        <div className="bg-brand/5 border border-brand/20 rounded-2xl p-4 flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-brand/10 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle2 className="h-5 w-5 text-brand" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn("text-sm font-bold", designSystem.colors.text.primary)}>
+                              {stats.prontasParaDecisao} cotação(ões) pronta(s) para decisão
+                            </p>
+                            <p className={cn("text-xs", designSystem.colors.text.secondary)}>Todos os fornecedores já enviaram suas propostas</p>
+                          </div>
+                          <Button size="sm" variant="outline" className="rounded-xl border-brand/30 text-brand hover:bg-brand/10" onClick={() => setStatusFilter("prontas")}>
+                            Analisar agora
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    <PackagingQuotesTable
+                      quotes={paginatedData.items}
+                      startIndex={paginatedData.pagination.startIndex}
+                      onManage={handleManageQuote}
+                      onViewSummary={handleViewSummary}
+                      onDelete={handleDeleteQuote}
+                      onConvertToOrder={handleConvertToOrder}
+                    />
+                  </div>
+                </>
               )}
             </div>
 
             {/* Paginação */}
             {paginatedData.pagination.totalPages > 1 && (
-              <div className={cn("mt-2", !isMobile && "pt-6 border-t border-border dark:border-white/5")}>
+              <div className="px-4 py-3 border-t border-border dark:border-white/5">
                 <DataPagination
                   currentPage={paginatedData.pagination.currentPage}
                   totalPages={paginatedData.pagination.totalPages}

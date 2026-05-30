@@ -1,14 +1,16 @@
-﻿import { memo, useCallback } from "react";
+import { memo, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { 
-  Package, Building2, Eye, CheckCircle2, ShoppingCart, Trash2, 
-  DollarSign, FileText, ChevronRight, Calendar
+import { CapitalizedText } from "@/components/ui/capitalized-text";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  ClipboardList, Eye, Trash2, MoreVertical,
+  Building2, Calendar, ShoppingCart, FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
 
 interface MobilePackagingQuoteCardProps {
@@ -20,227 +22,159 @@ interface MobilePackagingQuoteCardProps {
   onConvertToOrder: (quote: PackagingQuoteDisplay) => void;
 }
 
-/**
- * MobilePackagingQuoteCard - Redesigned Premium Floating Card for Packaging Quotes
- * Aligned with the application's modern design system.
- */
+const STATUS_ACCENT: Record<string, string> = {
+  pronta:   "bg-emerald-500",
+  concluida:"bg-zinc-400",
+  ativa:    "bg-brand",
+  cancelada:"bg-red-400",
+};
+
 export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
   quote,
   quoteNumber,
   onManage,
   onViewSummary,
   onDelete,
-  onConvertToOrder
+  onConvertToOrder,
 }: MobilePackagingQuoteCardProps) {
 
-  const getQuoteStatusInfo = (quote: PackagingQuoteDisplay) => {
+  const { respondidos, total, isPronta, isClosed } = useMemo(() => {
     const respondidos = quote.fornecedores.filter(f => f.status === "respondido").length;
     const total = quote.fornecedores.length;
     const isPronta = quote.status === "ativa" && respondidos === total && total > 0;
-    return { respondidos, total, isPronta };
+    const isClosed = quote.status === "concluida" || quote.status === "cancelada";
+    return { respondidos, total, isPronta, isClosed };
+  }, [quote]);
+
+  const accentKey = isPronta ? "pronta" : isClosed ? "concluida" : "ativa";
+  const accent = STATUS_ACCENT[accentKey];
+
+  const itemsLabel = quote.itens.length > 0
+    ? quote.itens.slice(0, 2).map(i => i.packagingName).join(", ") + (quote.itens.length > 2 ? ` +${quote.itens.length - 2}` : "")
+    : "Sem itens";
+
+  const ctaLabel = isClosed
+    ? "Resumo da Cotação"
+    : isPronta
+      ? "Fechar Cotação"
+      : "Negociar Cotação";
+
+  const ctaIcon = isClosed
+    ? <FileText className="h-3.5 w-3.5" />
+    : isPronta
+      ? <ShoppingCart className="h-3.5 w-3.5" />
+      : <ClipboardList className="h-3.5 w-3.5" />;
+
+  const handleCTA = () => {
+    if (isClosed) onViewSummary?.(quote);
+    else if (isPronta) onConvertToOrder(quote);
+    else onManage(quote);
   };
 
-  const { respondidos, total, isPronta } = getQuoteStatusInfo(quote);
-
-  const handleManage = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onManage(quote);
-  }, [onManage, quote]);
-
-  const handleViewSummary = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onViewSummary?.(quote);
-  }, [onViewSummary, quote]);
-
-  const handleConvertToOrder = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onConvertToOrder(quote);
-  }, [onConvertToOrder, quote]);
-
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(quote);
-  }, [onDelete, quote]);
-
   return (
-    <div 
-      onClick={() => onManage(quote)}
-      className={cn(
-        ds.components.card.root,
-        ds.components.card.interactive,
-        "group relative overflow-hidden",
-        isPronta && "border-emerald-500/30 bg-emerald-50/10 dark:bg-emerald-500/5 shadow-md shadow-emerald-500/5"
+    <div className="relative bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
+      {/* Left accent */}
+      <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-xl", accent)} />
+
+      {/* Pulse dot for pronta */}
+      {isPronta && (
+        <div className="absolute top-3 right-10 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
       )}
-    >
-      <div className="p-4">
-        {/* Header Section */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border transition-colors",
-              isPronta 
-                ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700/50 text-emerald-600 dark:text-emerald-400"
-                : "bg-brand/10 dark:bg-brand/20 border-brand/10 text-brand"
+
+      <div className="pl-4 pr-3 py-3">
+        {/* Top row: item names + price + menu */}
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-foreground truncate leading-tight">
+              <CapitalizedText>{itemsLabel}</CapitalizedText>
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              #{quoteNumber.toString().padStart(4, "0")}
+            </p>
+          </div>
+
+          <div className="text-right shrink-0 mr-1">
+            <p className={cn(
+              "text-[13px] font-bold tabular-nums",
+              quote.melhorPreco && quote.melhorPreco !== "-"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-muted-foreground"
             )}>
-              {isPronta ? (
-                <CheckCircle2 className="h-5 w-5" />
+              {quote.melhorPreco && quote.melhorPreco !== "-" ? quote.melhorPreco : "—"}
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">melhor preço</p>
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all shrink-0 touch-manipulation">
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              {isClosed ? (
+                onViewSummary && (
+                  <DropdownMenuItem onClick={() => onViewSummary(quote)} className="gap-2">
+                    <Eye className="h-4 w-4" /> Ver Resumo
+                  </DropdownMenuItem>
+                )
               ) : (
-                <Package className="h-5 w-5" />
+                <>
+                  <DropdownMenuItem onClick={() => onManage(quote)} className="gap-2">
+                    <ClipboardList className="h-4 w-4" /> Negociar
+                  </DropdownMenuItem>
+                  {isPronta && (
+                    <DropdownMenuItem onClick={() => onConvertToOrder(quote)} className="gap-2 text-emerald-600">
+                      <ShoppingCart className="h-4 w-4" /> Converter em Pedido
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => onDelete(quote)} className="gap-2 text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/30">
+                    <Trash2 className="h-4 w-4" /> Excluir
+                  </DropdownMenuItem>
+                </>
               )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate flex items-center gap-2">
-                Cotação #{quoteNumber.toString().padStart(4, '0')}
-                {isPronta && (
-                  <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none text-[9px] h-4 px-1.5 font-black uppercase tracking-tighter">
-                    Pronta
-                  </Badge>
-                )}
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5 flex items-center gap-1.5">
-                <Calendar className="h-3 w-3 opacity-50" />
-                Criada em {quote.dataInicio}
-              </p>
-            </div>
-          </div>
-          
-          <div className="text-right flex-shrink-0">
-            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
-              Melhor Preço
-            </span>
-            <span className={cn(
-              "text-sm font-black transition-colors",
-              quote.melhorPreco !== '-' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400 dark:text-zinc-600"
-            )}>
-              {quote.melhorPreco}
-            </span>
-          </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
-        {/* Items Pills Row */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {quote.itens.slice(0, 3).map((item, idx) => (
-            <Badge 
-              key={item.id || idx} 
-              variant="secondary" 
-              className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-[10px] font-bold px-2.5 py-1 rounded-full border-none"
-            >
-              <Package className="h-2.5 w-2.5 mr-1.5 opacity-50" />
-              <CapitalizedText>{item.packagingName}</CapitalizedText>
-            </Badge>
-          ))}
-          {quote.itens.length > 3 && (
-            <Badge variant="outline" className="text-[10px] rounded-full border-border dark:border-white/5 px-2 py-0.5 text-zinc-500">
-              +{quote.itens.length - 3} itens
-            </Badge>
-          )}
-          {quote.itens.length === 0 && (
-            <span className="text-xs text-zinc-400 italic">Nenhum item adicionado</span>
-          )}
-        </div>
-
-        {/* Status and Progress Row */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <StatusBadge 
-              status={quote.status === 'ativa' && !isPronta ? 'aberta' : quote.status} 
-              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider h-auto"
-            />
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-full border",
-              respondidos === total && total > 0 
-                ? "bg-brand/5 border-brand/20 text-brand" 
-                : "bg-zinc-50 dark:bg-zinc-800/50 border-border dark:border-white/5 text-zinc-500"
-            )}>
-              <Building2 className="h-3.5 w-3.5 opacity-70" />
-              <span className="text-[11px] font-bold">
-                {respondidos}/{total} fornecedores
+        {/* Info row */}
+        <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border dark:border-white/5">
+          <StatusBadge
+            status={isPronta ? "pronta" : quote.status}
+            className="text-[10px] h-5 px-2 shrink-0"
+          />
+          <div className="flex items-center gap-3 ml-auto text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Building2 className="h-3 w-3" />
+              <span className="font-medium">{respondidos}/{total}</span>
+            </span>
+            {quote.dataFim && quote.dataFim !== "-" && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>{quote.dataFim}</span>
               </span>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-border dark:border-white/5/50">
-          <div className="flex-1 flex gap-2">
-            <Button
-              onClick={handleManage}
-              variant="outline"
-              className={cn(
-                ds.components.button.base,
-                ds.components.button.variants.secondary,
-                "flex-1 h-11 rounded-xl",
-                "font-bold text-xs"
-              )}
-            >
-              <Eye className="h-4 w-4 mr-1.5 opacity-70" />
-              Negociar
-            </Button>
-
-            {isPronta && quote.status !== 'concluida' && (
-              <Button
-                onClick={handleConvertToOrder}
-                className={cn(
-                  ds.components.button.base,
-                  ds.components.button.variants.primary,
-                  "flex-1 h-11 rounded-xl font-bold text-xs shadow-md shadow-brand/20"
-                )}
-              >
-                <ShoppingCart className="h-4 w-4 mr-1.5" />
-                Converter
-              </Button>
-            )}
-
-            {quote.status === 'concluida' && onViewSummary && (
-              <Button
-                onClick={handleViewSummary}
-                className={cn(
-                  ds.components.button.base,
-                  ds.components.button.variants.primary,
-                  "flex-1 h-11 rounded-xl font-bold text-xs shadow-md shadow-brand/20"
-                )}
-              >
-                <FileText className="h-4 w-4 mr-1.5" />
-                Resumo
-              </Button>
-            )}
-          </div>
-          
-          <Button
-            onClick={handleDelete}
-            variant="outline"
-            size="icon"
-            className={cn(
-              ds.components.button.base,
-              ds.components.button.variants.secondary,
-              "h-11 w-11 rounded-xl",
-              "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20"
-            )}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* CTA */}
+        <Button
+          size="sm"
+          onClick={handleCTA}
+          className={cn(
+            "w-full mt-2.5 h-9 rounded-lg font-semibold text-xs gap-1.5",
+            isPronta
+              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+              : isClosed
+                ? "bg-muted text-foreground hover:bg-muted/80"
+                : "bg-brand hover:bg-brand/90 text-white dark:text-zinc-950"
+          )}
+        >
+          {ctaIcon}
+          {ctaLabel}
+        </Button>
       </div>
     </div>
   );
 });
-
-const CircleCheck = ({ className }: { className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="16" height="16" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="3" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-);
-
