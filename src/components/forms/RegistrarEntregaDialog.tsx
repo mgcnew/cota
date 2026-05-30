@@ -164,7 +164,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   if (!pedido) return null;
 
   const modalContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col flex-1 min-h-0">
         {/* Header */}
         <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border dark:border-white/5 bg-muted/30 flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
