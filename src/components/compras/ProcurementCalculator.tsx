@@ -1,17 +1,12 @@
-﻿import { useState, useEffect, useRef, useCallback } from "react";
-import { Calculator, RotateCcw, Copy, Check, History, Percent, Keyboard as KeyboardIcon, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useEffect, useCallback } from "react";
+import { Calculator, RotateCcw, Copy, Check, History, Percent, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 import { useToast } from "@/hooks/use-toast";
 
 interface CalculationStep {
   formula: string;
   result: string;
-  timestamp: Date;
 }
 
 export default function ProcurementCalculator() {
@@ -19,32 +14,24 @@ export default function ProcurementCalculator() {
   const [formula, setFormula] = useState("");
   const [history, setHistory] = useState<CalculationStep[]>([]);
   const [copied, setCopied] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const { toast } = useToast();
-  
-  const displayRef = useRef<HTMLDivElement>(null);
 
   const calculate = useCallback((expression: string) => {
     try {
-      // Basic safety: only allow numbers and operators
-      // Replace % logic: X + 10% -> X * 1.10
       let processedExpr = expression
         .replace(/(\d+(?:\.\d+)?)\s*\+\s*(\d+(?:\.\d+)?)%/g, '($1 * (1 + $2/100))')
         .replace(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)%/g, '($1 * (1 - $2/100))')
         .replace(/(\d+(?:\.\d+)?)\s*x\s*(\d+(?:\.\d+)?)%/g, '($1 * ($2/100))')
         .replace(/(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)%/g, '($1 / ($2/100))')
         .replace(/x/g, '*')
-        .replace(/Ã·/g, '/');
+        .replace(/÷/g, '/');
 
-      // Use Function instead of eval for a bit more control, though still careful with inputs
-      // In a production app, a math library like mathjs would be better
       const result = new Function(`return ${processedExpr}`)();
-      
-      const formattedResult = Number.isInteger(result) 
-        ? result.toString() 
+      return Number.isInteger(result)
+        ? result.toString()
         : parseFloat(result.toFixed(4)).toString();
-
-      return formattedResult;
-    } catch (e) {
+    } catch {
       return "Erro";
     }
   }, []);
@@ -55,39 +42,25 @@ export default function ProcurementCalculator() {
       setFormula("");
     } else if (value === "=") {
       if (formula === "" && display === "0") return;
-      
       const fullExpression = formula + display;
       const result = calculate(fullExpression);
-      
       if (result !== "Erro") {
-        setHistory(prev => [{
-          formula: fullExpression,
-          result: result,
-          timestamp: new Date()
-        }, ...prev].slice(0, 10));
+        setHistory(prev => [{ formula: fullExpression, result }, ...prev].slice(0, 10));
         setDisplay(result);
         setFormula("");
       } else {
-        toast({
-          title: "Erro no cálculo",
-          description: "Verifique a expressão informada.",
-          variant: "destructive"
-        });
+        toast({ title: "Erro no cálculo", variant: "destructive" });
       }
-    } else if (["+", "-", "x", "Ã·"].includes(value)) {
+    } else if (["+", "-", "x", "÷"].includes(value)) {
       if (display === "Erro") return;
       setFormula(display + " " + value + " ");
       setDisplay("0");
     } else if (value === "%") {
       if (display === "0" || display === "Erro") return;
       setDisplay(prev => prev + "%");
-    } else if (value === "backspace") {
-      setDisplay(prev => {
-        if (prev.length <= 1 || prev === "Erro") return "0";
-        return prev.slice(0, -1);
-      });
+    } else if (value === "⌫") {
+      setDisplay(prev => (prev.length <= 1 || prev === "Erro") ? "0" : prev.slice(0, -1));
     } else {
-      // Numbers and dot
       setDisplay(prev => {
         if (prev === "0" && value !== ".") return value;
         if (prev === "Erro") return value;
@@ -97,32 +70,19 @@ export default function ProcurementCalculator() {
     }
   }, [calculate, display, formula, toast]);
 
-  // Keyboard support
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key >= "0" && e.key <= "9") {
-        handleAction(e.key);
-      } else if (e.key === "+" || e.key === "-") {
-        handleAction(e.key);
-      } else if (e.key === "*") {
-        handleAction("x");
-      } else if (e.key === "/") {
-        e.preventDefault();
-        handleAction("Ã·");
-      } else if (e.key === "Enter" || e.key === "=") {
-        e.preventDefault();
-        handleAction("=");
-      } else if (e.key === "Escape" || e.key === "c" || e.key === "C") {
-        handleAction("C");
-      } else if (e.key === "Backspace") {
-        handleAction("backspace");
-      } else if (e.key === "." || e.key === ",") {
-        handleAction(".");
-      } else if (e.key === "%") {
-        handleAction("%");
-      }
+      if (e.key >= "0" && e.key <= "9") handleAction(e.key);
+      else if (e.key === "+") handleAction("+");
+      else if (e.key === "-") handleAction("-");
+      else if (e.key === "*") handleAction("x");
+      else if (e.key === "/") { e.preventDefault(); handleAction("÷"); }
+      else if (e.key === "Enter" || e.key === "=") { e.preventDefault(); handleAction("="); }
+      else if (e.key === "Escape" || e.key === "c" || e.key === "C") handleAction("C");
+      else if (e.key === "Backspace") handleAction("⌫");
+      else if (e.key === "." || e.key === ",") handleAction(".");
+      else if (e.key === "%") handleAction("%");
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleAction]);
@@ -131,230 +91,157 @@ export default function ProcurementCalculator() {
     navigator.clipboard.writeText(display);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({
-      description: "Valor copiado para a área de transferência",
-    });
+    toast({ description: "Valor copiado" });
   };
 
   const applyQuickPercentage = (pct: number, type: 'add' | 'sub' | 'margin') => {
     const base = parseFloat(display);
     if (isNaN(base)) return;
-
     let result = 0;
     if (type === 'add') result = base * (1 + pct / 100);
     else if (type === 'sub') result = base * (1 - pct / 100);
-    else if (type === 'margin') result = base / (1 - pct / 100);
-
-    const formattedResult = parseFloat(result.toFixed(4)).toString();
-    
+    else result = base / (1 - pct / 100);
+    const formatted = parseFloat(result.toFixed(4)).toString();
     setHistory(prev => [{
-      formula: `${base} ${type === 'add' ? '+' : type === 'sub' ? '-' : 'markup'} ${pct}%`,
-      result: formattedResult,
-      timestamp: new Date()
+      formula: `${base} ${type === 'add' ? '+' : type === 'sub' ? '-' : 'margem'} ${pct}%`,
+      result: formatted
     }, ...prev].slice(0, 10));
-    
-    setDisplay(formattedResult);
+    setDisplay(formatted);
   };
 
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Calculadora Principal */}
-      <Card className={cn("lg:col-span-2 overflow-hidden border-none shadow-xl bg-white dark:bg-[#1A1C20]")}>
-        <CardHeader className="pb-4 bg-muted/50 dark:bg-zinc-900/50 border-b border-border dark:border-white/5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-brand/10 rounded-lg">
-                <Calculator className="h-5 w-5 text-brand" />
-              </div>
-              <div>
-                <CardTitle className="text-lg">Calculadora de Compras</CardTitle>
-                <CardDescription>Otimizada para cálculos de margem e impostos</CardDescription>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleAction("C")}
-                className="h-8 gap-2 text-xs font-bold uppercase tracking-wider"
-              >
-                <RotateCcw className="h-3 w-3" />
-                Limpar (Esc)
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
+  const KEYPAD = ["7","8","9","÷","4","5","6","x","1","2","3","-","0",".","⌫","+"];
+  const OPERATORS = ["÷","x","-","+"];
 
-        <CardContent className="p-6 space-y-6">
-          {/* Display */}
-          <div className="relative group">
-            <div className="absolute top-2 left-3 text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
-              {formula || "Expressão"}
-            </div>
-            <div 
+  return (
+    <div className="flex flex-col bg-background">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-white/5">
+        <div className="flex items-center gap-2">
+          <Calculator className="h-4 w-4 text-brand" />
+          <span className="text-sm font-bold">Calculadora</span>
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => handleAction("C")} className="h-7 gap-1.5 text-xs text-muted-foreground">
+          <RotateCcw className="h-3 w-3" />
+          Limpar
+        </Button>
+      </div>
+
+      <div className="p-3 space-y-3">
+        {/* Display */}
+        <div className="relative group bg-zinc-50 dark:bg-zinc-900/60 rounded-xl border border-border dark:border-white/5 px-4 py-3 min-h-[72px] flex flex-col justify-between">
+          <span className="text-[10px] font-mono text-muted-foreground truncate">{formula || " "}</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className={cn(
+              "text-2xl font-mono font-bold tracking-tight truncate flex-1 text-right",
+              display === "Erro" ? "text-red-500" : "text-foreground"
+            )}>
+              {display}
+            </span>
+            <button
+              onClick={copyToClipboard}
+              className="shrink-0 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 opacity-0 group-hover:opacity-100 transition-all"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Keypad */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {KEYPAD.map((btn) => (
+            <button
+              key={btn}
+              onClick={() => handleAction(btn)}
               className={cn(
-                "w-full h-24 flex items-end justify-end p-4 text-4xl font-mono tracking-tighter bg-zinc-50 dark:bg-zinc-900/50 rounded-2xl border border-border dark:border-white/5 transition-all group-hover:border-brand/30",
-                display === "Erro" ? "text-red-500" : "text-foreground"
+                "h-11 rounded-xl text-sm font-bold transition-all active:scale-95 touch-manipulation",
+                OPERATORS.includes(btn)
+                  ? "bg-brand/8 hover:bg-brand/15 text-brand border border-brand/20"
+                  : btn === "⌫"
+                  ? "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-muted-foreground"
+                  : "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-foreground"
               )}
             >
-              {display}
-            </div>
-            <div className="absolute bottom-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={copyToClipboard}>
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-              </Button>
-            </div>
+              {btn}
+            </button>
+          ))}
+          {/* % button */}
+          <button
+            onClick={() => handleAction("%")}
+            className="h-11 rounded-xl text-sm font-bold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-muted-foreground transition-all active:scale-95 touch-manipulation"
+          >
+            %
+          </button>
+          {/* = button (3 cols) */}
+          <button
+            onClick={() => handleAction("=")}
+            className="col-span-3 h-11 rounded-xl text-base font-bold bg-brand hover:bg-brand/90 text-white transition-all active:scale-95 shadow-md shadow-brand/20 touch-manipulation"
+          >
+            =
+          </button>
+        </div>
+
+        {/* Quick percentages */}
+        <div className="space-y-2 pt-1 border-t border-border dark:border-white/5">
+          <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest flex items-center gap-1">
+            <Percent className="h-3 w-3" /> Atalhos
+          </p>
+          <div className="grid grid-cols-3 gap-1">
+            {[5,10,20].map(p => (
+              <button key={`a${p}`} onClick={() => applyQuickPercentage(p, 'add')}
+                className="h-8 rounded-lg text-[11px] font-bold border border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 text-muted-foreground transition-all active:scale-95">
+                +{p}%
+              </button>
+            ))}
+            {[5,10,20].map(p => (
+              <button key={`s${p}`} onClick={() => applyQuickPercentage(p, 'sub')}
+                className="h-8 rounded-lg text-[11px] font-bold border border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 text-muted-foreground transition-all active:scale-95">
+                -{p}%
+              </button>
+            ))}
+            {[20,30,40].map(p => (
+              <button key={`m${p}`} onClick={() => applyQuickPercentage(p, 'margin')}
+                className="h-8 rounded-lg text-[11px] font-bold bg-zinc-100 dark:bg-zinc-800 hover:bg-brand/10 hover:text-brand text-muted-foreground transition-all active:scale-95">
+                {p}% mg
+              </button>
+            ))}
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Teclado Numérico e Operadores */}
-            <div className="grid grid-cols-4 gap-2">
-              {[ "7", "8", "9", "Ã·", "4", "5", "6", "x", "1", "2", "3", "-", "0", ".", "%", "+" ].map((btn) => (
-                <Button
-                  key={btn}
-                  variant={["Ã·", "x", "-", "+"].includes(btn) ? "secondary" : "outline"}
-                  className={cn(
-                    "h-14 text-lg font-bold rounded-xl transition-all active:scale-95",
-                    ["Ã·", "x", "-", "+"].includes(btn) ? "bg-brand/5 hover:bg-brand/10 text-brand border-brand/20" : "hover:border-brand/30"
-                  )}
-                  onClick={() => handleAction(btn)}
-                >
-                  {btn}
-                </Button>
-              ))}
-              <Button
-                className="col-span-4 h-14 text-xl font-bold rounded-xl shadow-lg shadow-brand/20 bg-brand hover:bg-brand/90 text-white"
-                onClick={() => handleAction("=")}
-              >
-                =
-              </Button>
-            </div>
-
-            {/* Atalhos de Porcentagem e Margem */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                  <Percent className="h-3 w-3" /> Acréscimos (+%)
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {[5, 10, 15, 20, 30, 50].map(p => (
-                    <Button 
-                      key={p} 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => applyQuickPercentage(p, 'add')}
-                      className="h-10 text-xs font-bold border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400"
-                    >
-                      +{p}%
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
-                  <Percent className="h-3 w-3" /> Descontos (-%)
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  {[5, 10, 15, 20, 30, 50].map(p => (
-                    <Button 
-                      key={p} 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => applyQuickPercentage(p, 'sub')}
-                      className="h-10 text-xs font-bold border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400"
-                    >
-                      -{p}%
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-border dark:border-white/5">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                    Cálculo de Margem (Divisão por 1-%)
-                  </p>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="p-1 cursor-help"><KeyboardIcon className="h-3 w-3 text-muted-foreground" /></div>
-                      </TooltipTrigger>
-                      <TooltipContent className="max-w-[200px] text-[10px]">
-                        Calcula o preço de venda para atingir a margem desejada. Fórmula: Custo / (1 - Margem/100)
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {[10, 20, 30, 35, 40, 50].map(p => (
-                    <Button 
-                      key={p} 
-                      variant="secondary" 
-                      size="sm" 
-                      onClick={() => applyQuickPercentage(p, 'margin')}
-                      className="h-10 text-xs font-bold bg-zinc-100 dark:bg-zinc-800 hover:bg-brand/10 hover:text-brand"
-                    >
-                      {p}% Margem
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Histórico */}
-      <Card className="border-none shadow-xl bg-white dark:bg-[#1A1C20] flex flex-col">
-        <CardHeader className="pb-4 border-b border-border dark:border-white/5">
-          <div className="flex items-center gap-2">
-            <History className="h-5 w-5 text-brand" />
-            <CardTitle className="text-lg">Histórico de Cálculos</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1 p-0 overflow-y-auto max-h-[600px]">
-          {history.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 px-6 text-center text-muted-foreground">
-              <RotateCcw className="h-8 w-8 mb-4 opacity-20" />
-              <p className="text-sm">Nenhum cálculo recente</p>
-              <p className="text-[10px] uppercase font-bold tracking-tighter mt-1 opacity-50">Os resultados aparecerão aqui</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-border dark:divide-white/5">
-              {history.map((item, idx) => (
-                <div 
-                  key={idx} 
-                  className="p-4 hover:bg-muted/30 transition-colors group cursor-pointer"
-                  onClick={() => setDisplay(item.result)}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-[10px] font-mono text-muted-foreground uppercase">{item.formula}</span>
-                    <span className="text-[9px] text-zinc-400">{item.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xl font-mono font-bold tracking-tighter text-foreground">= {item.result}</span>
-                    <ChevronRight className="h-4 w-4 text-brand opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
+        {/* History toggle */}
         {history.length > 0 && (
-          <div className="p-4 border-t border-border dark:border-white/5">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="w-full text-[10px] font-black uppercase tracking-widest h-8"
-              onClick={() => setHistory([])}
+          <div className="border-t border-border dark:border-white/5 pt-2">
+            <button
+              onClick={() => setShowHistory(v => !v)}
+              className="w-full flex items-center justify-between text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors py-1"
             >
-              Apagar Histórico
-            </Button>
+              <span className="flex items-center gap-1.5">
+                <History className="h-3 w-3" /> Histórico ({history.length})
+              </span>
+              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", showHistory && "rotate-180")} />
+            </button>
+            {showHistory && (
+              <div className="mt-1 space-y-0.5 max-h-36 overflow-y-auto">
+                {history.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setDisplay(item.result)}
+                    className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                  >
+                    <span className="text-[10px] font-mono text-muted-foreground truncate">{item.formula}</span>
+                    <span className="text-sm font-mono font-bold text-foreground ml-2 shrink-0">= {item.result}</span>
+                  </button>
+                ))}
+                <button
+                  onClick={() => setHistory([])}
+                  className="w-full text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-500 transition-colors py-1 text-center"
+                >
+                  Apagar histórico
+                </button>
+              </div>
+            )}
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }
-

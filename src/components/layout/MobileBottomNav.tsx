@@ -13,7 +13,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Keyboard,
   PackageOpen,
   TrendingUp,
   User,
@@ -30,9 +29,8 @@ const MORE_NAV_ITEMS = [
   { label: "Fornecedores", icon: Building2, href: "/dashboard/fornecedores" },
   { label: "Anotações",   icon: StickyNote,  href: "/dashboard/anotacoes"   },
   { label: "Relatórios",  icon: BarChart3,   href: "/dashboard/relatorios"  },
-  { label: "Embalagens",  icon: PackageOpen, href: "/dashboard/compras?tab=embalagens" },
-  { label: "Análise",     icon: TrendingUp,  href: "/dashboard/compras?tab=analise"    },
-  { label: "Calculadora", icon: Keyboard,    href: "/dashboard/compras?tab=calculadora" },
+  { label: "Embalagens",  icon: PackageOpen, href: "/dashboard/embalagens" },
+  { label: "Análise",     icon: TrendingUp,  href: "/dashboard/analise-compras" },
 ];
 
 const MORE_ROUTES = MORE_NAV_ITEMS.map(i => i.href.split("?")[0]);

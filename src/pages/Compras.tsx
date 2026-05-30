@@ -1,12 +1,11 @@
-import { useState, useEffect, lazy, Suspense, memo, useMemo, Component } from "react";
+import { useState, lazy, Suspense, memo, Component } from "react";
 import type { ReactNode } from "react";
-import { useSearchParams } from "react-router-dom";
-import { ShoppingBag, LayoutList, Loader2, Keyboard, BarChart3 } from "lucide-react";
+import { ShoppingBag, Calculator, Loader2 } from "lucide-react";
 import { PageWrapper } from "@/components/layout/PageWrapper";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 class ChunkErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -33,17 +32,8 @@ class ChunkErrorBoundary extends Component<{ children: ReactNode }, { hasError: 
   }
 }
 
-// Lazy load tab contents for better performance
 const ProdutosTab = lazy(() => import("@/components/compras/ProdutosTab"));
-const AnaliseTab = lazy(() => import("@/components/compras/AnaliseTab"));
-const ListaComprasTab = lazy(() => import("@/components/compras/ListaComprasTab"));
 const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
-
-const TABS = [
-  { value: "produtos", icon: LayoutList, label: "Produtos" },
-  { value: "analise", icon: BarChart3, label: "Análise" },
-  { value: "calculadora", icon: Keyboard, label: "Calculadora" },
-];
 
 const TabLoader = () => (
   <div className="flex items-center justify-center py-24">
@@ -52,47 +42,7 @@ const TabLoader = () => (
 );
 
 function Compras() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState(() => {
-    const tab = searchParams.get("tab");
-    // redirect legacy tab values
-    if (tab === "cotacoes" || tab === "pedidos") return "produtos";
-    return tab || "produtos";
-  });
-
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    if (!tab) return;
-    if (tab === "cotacoes" || tab === "pedidos") {
-      setActiveTab("produtos");
-      setSearchParams({ tab: "produtos" }, { replace: true });
-    } else if (TABS.some(t => t.value === tab)) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
-
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    setSearchParams({ tab: value }, { replace: true });
-  };
-
-  const shortcuts = useMemo(() => [
-    { key: '1', action: () => activeTab !== 'calculadora' && handleTabChange('produtos'), description: 'Ir para Produtos' },
-    { key: '2', action: () => activeTab !== 'calculadora' && handleTabChange('analise'), description: 'Ir para Análise' },
-    { key: '3', action: () => handleTabChange('calculadora'), description: 'Ir para Calculadora' },
-    {
-      key: 'n', ctrl: true,
-      action: () => window.dispatchEvent(new CustomEvent('compras:nova', { detail: { tab: activeTab } })),
-      description: 'Nova cotação/pedido'
-    },
-    {
-      key: 'f', ctrl: true,
-      action: () => (document.querySelector('[data-search-input]') as HTMLInputElement)?.focus(),
-      description: 'Buscar'
-    },
-  ], [activeTab]);
-
-  useKeyboardShortcuts({ shortcuts });
+  const [calcOpen, setCalcOpen] = useState(false);
 
   return (
     <PageWrapper>
@@ -106,37 +56,40 @@ function Compras() {
             <h1 className="text-[18px] font-bold text-foreground leading-tight">Compras</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Gerencie cotações e pedidos de compra</p>
           </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCalcOpen(true)}
+            className="ml-auto h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            title="Calculadora"
+          >
+            <Calculator className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Desktop Tab Bar */}
-        <div className="hidden md:block mb-8">
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <TabsList variant="line" className="overflow-x-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
-              {TABS.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} variant="line" className="gap-2 px-5 py-3">
-                  <tab.icon className={cn(
-                    "h-3.5 w-3.5 transition-colors duration-150",
-                    activeTab === tab.value ? "text-brand" : "opacity-40"
-                  )} />
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-        </div>
-
-        {/* Tab Content */}
+        {/* Content */}
         <ChunkErrorBoundary>
           <Suspense fallback={<TabLoader />}>
-            <div key={activeTab} className="animate-page-enter">
-              {activeTab === "produtos" && <ProdutosTab />}
-              {activeTab === "analise" && <AnaliseTab />}
-              {activeTab === "lista" && <ListaComprasTab />}
-              {activeTab === "calculadora" && <ProcurementCalculator />}
+            <div className="animate-page-enter">
+              <ProdutosTab />
             </div>
           </Suspense>
         </ChunkErrorBoundary>
       </div>
+
+      {/* Calculator Modal */}
+      <Dialog open={calcOpen} onOpenChange={setCalcOpen}>
+        <DialogContent className="max-w-[360px] p-0 overflow-hidden rounded-2xl" hideClose>
+          <DialogHeader className="sr-only">
+            <DialogTitle>Calculadora</DialogTitle>
+          </DialogHeader>
+          <ChunkErrorBoundary>
+            <Suspense fallback={<TabLoader />}>
+              <ProcurementCalculator />
+            </Suspense>
+          </ChunkErrorBoundary>
+        </DialogContent>
+      </Dialog>
     </PageWrapper>
   );
 }

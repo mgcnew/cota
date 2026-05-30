@@ -382,6 +382,11 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
               <CompanySelector />
             </div>
 
+            <DropdownMenuItem onClick={() => navigate('/dashboard/analise-compras')} className="cursor-pointer rounded-md py-2 text-sm">
+              <BarChart3 className="mr-3 h-4 w-4 opacity-70" />
+              <span className="font-medium text-sm">Análise de Compras</span>
+            </DropdownMenuItem>
+
             <DropdownMenuItem onClick={() => navigate('/dashboard/anotacoes')} className="cursor-pointer rounded-md py-2 text-sm">
               <StickyNote className="mr-3 h-4 w-4 opacity-70" />
               <span className="font-medium text-sm">Anotações</span>
