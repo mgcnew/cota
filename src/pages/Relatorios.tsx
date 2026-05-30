@@ -222,15 +222,15 @@ export default function Relatorios() {
               </CardHeader>
               <CardContent className="pt-0">
                 {isLoading ? (
-                  <Skeleton className="h-[170px] w-full rounded-lg" />
+                  <Skeleton className="h-[250px] w-full rounded-lg" />
                 ) : economiaPorMes.every(m => m.economia === 0) ? (
-                  <div className="h-[170px] flex flex-col items-center justify-center text-muted-foreground gap-2">
+                  <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground gap-2">
                     <TrendingUp className="h-8 w-8 opacity-30" />
                     <p className="text-sm">Nenhuma economia registrada</p>
                     <p className="text-xs opacity-70">Cote com 2+ fornecedores por produto</p>
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={170}>
+                  <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={economiaPorMes} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.3} vertical={false} />
                       <XAxis dataKey="mes" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
@@ -264,14 +264,14 @@ export default function Relatorios() {
               </CardHeader>
               <CardContent className="pt-0 flex-1">
                 {isLoading ? (
-                  <Skeleton className="h-[190px] w-full rounded-lg" />
+                  <Skeleton className="h-[270px] w-full rounded-lg" />
                 ) : rankingFornecedores.filter(f => f.economiaGerada > 0).length === 0 ? (
-                  <div className="h-[190px] flex flex-col items-center justify-center text-muted-foreground gap-2">
+                  <div className="h-[270px] flex flex-col items-center justify-center text-muted-foreground gap-2">
                     <Users className="h-8 w-8 opacity-30" />
                     <p className="text-sm">Sem dados de economia por fornecedor</p>
                   </div>
                 ) : (
-                  <ResponsiveContainer width="100%" height={190}>
+                  <ResponsiveContainer width="100%" height={270}>
                     <BarChart
                       data={rankingFornecedores
                         .filter(f => f.economiaGerada > 0)
