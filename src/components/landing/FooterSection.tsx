@@ -1,22 +1,20 @@
-﻿import { memo } from "react";
-import { Link } from "react-router-dom";
+import { memo } from "react";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 
-const FooterSection = memo(function FooterSection() {
+interface FooterSectionProps {
+  onLogin?: () => void;
+}
+
+const FooterSection = memo(function FooterSection({ onLogin }: FooterSectionProps) {
   return (
     <footer className="border-t border-border dark:border-white/5 bg-white dark:bg-zinc-950">
       <div className="max-w-6xl mx-auto px-6 py-10">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           {/* Left: Brand */}
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <img
-                src="/logo-cotapro.png"
-                alt="CotaPro"
-                className="h-40 -my-[52px] translate-y-1 w-auto object-contain hover:scale-105 transition-transform duration-300"
-              />
-            </div>
+          <div className="space-y-3">
+            <BrandLogo className="h-8" />
             <p className={cn("text-xs max-w-xs leading-relaxed", ds.typography.weight.medium, ds.colors.text.muted)}>
               Plataforma interna de gestão de cotações e compras.
             </p>
@@ -24,13 +22,13 @@ const FooterSection = memo(function FooterSection() {
 
           {/* Right: Links */}
           <div className="flex items-center gap-6">
-            <Link
-              to="/auth?mode=login"
+            <button
+              onClick={onLogin}
               className={cn("text-xs hover:text-brand transition-colors", ds.typography.weight.bold, ds.colors.text.secondary)}
             >
-              Entrar no Sistema
-            </Link>
-            <span className={cn("text-xs", ds.colors.text.muted)}>Â·</span>
+              Entrar
+            </button>
+            <span className={cn("text-xs", ds.colors.text.muted)}>·</span>
             <span className={cn("text-xs", ds.typography.weight.bold, "text-brand")}>
               v2.0.0
             </span>
@@ -38,9 +36,9 @@ const FooterSection = memo(function FooterSection() {
         </div>
 
         {/* Bottom line */}
-        <div className="mt-8 pt-6 border-t border-border dark:border-white/5/60">
+        <div className="mt-8 pt-6 border-t border-border dark:border-white/5">
           <p className={cn("text-[11px]", ds.colors.text.muted)}>
-            Â© {new Date().getFullYear()} CotaJá Â· Sistema de Uso Restrito
+            © {new Date().getFullYear()} CotaPro · Sistema de Uso Restrito
           </p>
         </div>
       </div>
@@ -49,4 +47,3 @@ const FooterSection = memo(function FooterSection() {
 });
 
 export default FooterSection;
-
