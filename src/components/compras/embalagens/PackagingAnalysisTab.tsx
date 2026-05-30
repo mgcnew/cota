@@ -44,20 +44,15 @@ function MetricCard({ icon, label, value, subtitle, color, tooltip }: any) {
     gray: "text-gray-600 bg-gray-50/50 dark:bg-gray-900/20 border-gray-200/50 dark:border-gray-800/50",
   };
   return (
-    <div className={cn(ds.components.card.root, "p-5 relative overflow-hidden group hover:scale-[1.02] transition-all", colorMap[color])}>
-      <div className="flex items-center gap-3 mb-3 relative z-10">
-        <div className={cn("p-2 rounded-xl bg-white/50 dark:bg-white/10 backdrop-blur-sm shadow-sm transition-transform group-hover:rotate-12", colorMap[color])}>
+    <div className={cn(ds.components.card.root, "p-4 overflow-hidden", colorMap[color])}>
+      <div className="flex items-center gap-2.5 mb-2.5">
+        <div className={cn("p-1.5 rounded-lg", colorMap[color])}>
           {icon}
         </div>
-        <span className={cn(ds.typography.size.xs, ds.typography.weight.extrabold, "uppercase tracking-widest opacity-70")}>{label}</span>
+        <span className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider opacity-60")}>{label}</span>
       </div>
-      <p className={cn(ds.typography.size.xl, ds.typography.weight.extrabold, ds.colors.text.primary, "relative z-10 tracking-tight")}>{value}</p>
-      {subtitle && <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-50 mt-1 relative z-10")}>{subtitle}</p>}
-      
-      {/* Decoration */}
-      <div className="absolute -right-2 -bottom-2 opacity-[0.03] transition-opacity group-hover:opacity-[0.08]">
-        {icon && typeof icon !== 'string' ? <div className="scale-[4]">{icon}</div> : null}
-      </div>
+      <p className={cn(ds.typography.size.xl, ds.typography.weight.extrabold, ds.colors.text.primary, "tracking-tight tabular-nums")}>{value}</p>
+      {subtitle && <p className={cn("text-[11px] font-medium opacity-50 mt-0.5", ds.colors.text.secondary)}>{subtitle}</p>}
     </div>
   );
 }
@@ -70,14 +65,14 @@ function InsightCard({ icon, title, value, subtitle, color }: any) {
     red: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
   };
   return (
-    <div className={cn(ds.components.card.flat, "p-5 relative overflow-hidden group hover:shadow-md transition-all", colorMap[color])}>
-      <div className="flex items-start justify-between relative z-10">
-        <div className="space-y-1">
-          <p className={cn(ds.typography.size.xs, ds.typography.weight.extrabold, "uppercase tracking-widest opacity-60")}>{title}</p>
+    <div className={cn(ds.components.card.flat, "p-4 overflow-hidden", colorMap[color])}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1 min-w-0">
+          <p className={cn(ds.typography.size.xs, ds.typography.weight.bold, "uppercase tracking-wider opacity-60")}>{title}</p>
           <p className={cn(ds.typography.size.lg, ds.typography.weight.extrabold, ds.colors.text.primary, "tracking-tight")}>{value}</p>
-          <p className={cn("text-[11px] font-bold opacity-60", ds.colors.text.secondary)}>{subtitle}</p>
+          <p className={cn("text-[11px] font-medium opacity-60", ds.colors.text.secondary)}>{subtitle}</p>
         </div>
-        <div className={cn("p-3 rounded-2xl bg-white/50 dark:bg-white/10 backdrop-blur-sm shadow-sm transition-all group-hover:scale-110 group-hover:rotate-6", colorMap[color])}>
+        <div className={cn("p-2.5 rounded-xl flex-shrink-0", colorMap[color])}>
           {icon}
         </div>
       </div>
@@ -115,27 +110,23 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
   }
 
   return (
-    <div className={cn("p-6 rounded-2xl border shadow-xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-700", ds.colors.surface.card)}>
-      <div className="absolute top-0 right-0 w-64 h-64 bg-brand/5 blur-[80px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 blur-[60px] rounded-full pointer-events-none" />
-      
-      <div className="flex flex-col gap-5 relative z-10">
+    <div className={cn(ds.components.card.root, "p-4 animate-in fade-in duration-500")}>
+      <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 text-brand font-semibold text-sm">
           <Sparkles className={cn("h-4 w-4", isLoading && "animate-pulse")} />
-          {isLoading ? "A Inteligência Artificial está analisando os dados..." : "Insights Executivos da IA"}
+          {isLoading ? "Analisando os dados com IA..." : "Insights Executivos da IA"}
         </div>
-        
         {isLoading ? (
-          <div className="space-y-3">
-            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse w-3/4" />
-            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse w-full" />
-            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse w-5/6" />
+          <div className="space-y-2">
+            <div className="h-3.5 bg-muted rounded animate-pulse w-3/4" />
+            <div className="h-3.5 bg-muted rounded animate-pulse w-full" />
+            <div className="h-3.5 bg-muted rounded animate-pulse w-5/6" />
           </div>
         ) : (
-          <div className="space-y-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+          <div className="space-y-2 text-sm leading-relaxed text-foreground">
             {summary?.split('\n').filter(Boolean).map((line, i) => (
               <p key={i} className="flex gap-2 items-start">
-                <span className="text-brand mt-1">â€¢</span>
+                <span className="text-brand mt-1 flex-shrink-0">·</span>
                 <span>{line.replace(/^-\s*/, '')}</span>
               </p>
             ))}
@@ -147,81 +138,134 @@ function AiExecutiveSummaryCard({ data }: { data: any }) {
 }
 
 function PriceHistoryList({ history }: { history: any[] }) {
+  if (history.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="p-3 rounded-xl bg-muted/40 mb-3">
+          <AlertCircle className="h-5 w-5 text-muted-foreground/40" />
+        </div>
+        <span className="text-sm font-medium text-foreground">Sem histórico disponível</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-hidden custom-scrollbar max-h-[400px]">
-      <Table className={ds.components.table.root}>
-        <TableHeader className={ds.components.table.header}>
-          <TableRow className="hover:bg-transparent border-none">
-            <TableCell colSpan={4} className="px-1 pb-3 pt-0 border-none">
-              <div className={ds.components.table.headerContainer}>
-                <div className="w-[15%] flex items-center gap-3">
-                  <div className={ds.components.table.headerIcon}>
-                    <FileText className="h-4 w-4" />
-                  </div>
-                  <span className={ds.components.table.headerLabel}>Tipo</span>
-                </div>
-                <div className="w-[45%] pl-2 flex items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Fornecedor</span>
-                </div>
-                <div className="w-[20%] pl-2 flex items-center gap-2">
-                  <span className={ds.components.table.headerLabel}>Data</span>
-                </div>
-                <div className="w-[20%] text-right flex justify-end items-center px-2">
-                  <span className={ds.components.table.headerLabel}>Preço</span>
-                </div>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {history.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic gap-3 border-none">
-                <div className="flex flex-col items-center justify-center">
-                  <div className="p-3 rounded-full bg-muted/30"><AlertCircle className="h-6 w-6 opacity-30" /></div>
-                  <span className="text-sm font-medium mt-2">Sem histórico disponível</span>
-                </div>
-              </TableCell>
-            </TableRow>
-          ) : (
-            history.map((item, idx) => (
-              <TableRow key={idx} className="group border-none hover:bg-transparent">
-                <TableCell colSpan={4} className={ds.components.table.cell}>
-                  <div className={cn("flex items-center px-4 py-3 mb-1", ds.components.table.row)}>
-                    <div className="w-[15%] flex items-center gap-3">
-                      <div className={cn(
-                        "p-2 rounded-lg transition-colors",
-                        item.type === "order" ? "bg-brand/10 text-brand" : "bg-muted text-muted-foreground"
-                      )}>
-                        {item.type === "order" ? <ShoppingCart className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-                      </div>
-                      <span className={cn("text-[10px] font-black uppercase tracking-widest", ds.colors.text.secondary, "opacity-50")}>
-                        {item.type === 'order' ? 'Pedido' : 'Cotação'}
-                      </span>
-                    </div>
-                    <div className="w-[45%] pl-2">
-                      <p className={cn("font-bold text-sm", ds.colors.text.primary)}>{item.supplier}</p>
-                    </div>
-                    <div className="w-[20%] pl-2">
-                      <p className={cn("text-xs font-medium", ds.colors.text.secondary)}>
-                        {(() => {
-                          const [y, m, d] = item.date.split('T')[0].split('-').map(Number);
-                          return new Date(y, m - 1, d).toLocaleDateString("pt-BR");
-                        })()}
-                      </p>
-                    </div>
-                    <div className="w-[20%] text-right px-2">
-                      <span className={cn("font-black italic text-base", ds.colors.text.primary)}>
-                        {formatCurrency(item.price)}
-                      </span>
-                    </div>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
+    <div className="space-y-1.5 max-h-[400px] overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+      {history.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/40 transition-colors">
+          {/* Ícone + tipo */}
+          <div className={cn(
+            "p-1.5 rounded-md flex-shrink-0",
+            item.type === "order" ? "bg-brand/10 text-brand" : "bg-muted text-muted-foreground"
+          )}>
+            {item.type === "order" ? <ShoppingCart className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+          </div>
+
+          {/* Fornecedor + tipo badge */}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-foreground truncate">{item.supplier}</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                {item.type === "order" ? "Pedido" : "Cotação"}
+              </span>
+              <span className="text-muted-foreground/40 text-[10px]">·</span>
+              <span className="text-[11px] text-muted-foreground">
+                {(() => {
+                  const [y, m, d] = item.date.split('T')[0].split('-').map(Number);
+                  return new Date(y, m - 1, d).toLocaleDateString("pt-BR");
+                })()}
+              </span>
+            </div>
+          </div>
+
+          {/* Preços */}
+          <div className="text-right flex-shrink-0">
+            <p className="font-bold text-sm tabular-nums text-foreground">
+              {formatCurrency(item.price)}<span className="text-muted-foreground font-normal text-[10px]">/un</span>
+            </p>
+            {item.packagePrice > 0 && (
+              <p className="text-[11px] text-muted-foreground tabular-nums mt-0.5">
+                {formatCurrency(item.packagePrice)} pacote
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SimplePriceList({ history, packagingName }: { history: any[]; packagingName: string }) {
+  const formatDate = (dateStr: string) => {
+    const [y, m, d] = dateStr.split('T')[0].split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('pt-BR');
+  };
+
+  if (history.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="p-3 rounded-xl bg-muted/40 mb-3">
+          <AlertCircle className="h-5 w-5 text-muted-foreground/40" />
+        </div>
+        <span className="text-sm font-medium text-foreground">Sem preços registrados</span>
+      </div>
+    );
+  }
+
+  const latest = history[0];
+
+  return (
+    <div className="space-y-4">
+      {/* Último preço em destaque */}
+      <div className="rounded-xl border border-brand/20 bg-brand/5 p-4 flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold text-brand uppercase tracking-widest mb-1">Último Preço Pago</p>
+          <p className="font-bold text-sm text-foreground truncate">{packagingName}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {formatDate(latest.date)} · {latest.supplier}
+          </p>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-xl font-extrabold text-brand tabular-nums">
+            {formatCurrency(latest.price)}<span className="text-xs font-normal text-muted-foreground">/un</span>
+          </p>
+          {latest.packagePrice > 0 && (
+            <p className="text-[11px] text-muted-foreground tabular-nums mt-0.5">
+              {formatCurrency(latest.packagePrice)} pacote
+            </p>
           )}
-        </TableBody>
-      </Table>
+        </div>
+      </div>
+
+      {/* Lista completa newest → oldest */}
+      <div className="space-y-0.5 max-h-[320px] overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+        {history.map((item, idx) => (
+          <div
+            key={idx}
+            className={cn(
+              "flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors",
+              idx === 0 ? "bg-brand/5" : "hover:bg-muted/40"
+            )}
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-foreground">
+                {formatDate(item.date)}
+              </p>
+              <p className="text-[11px] text-muted-foreground truncate">{item.supplier}</p>
+            </div>
+            <div className="text-right flex-shrink-0 ml-4">
+              <p className="font-bold text-sm tabular-nums text-foreground">
+                {formatCurrency(item.price)}<span className="text-[10px] font-normal text-muted-foreground">/un</span>
+              </p>
+              {item.packagePrice > 0 && (
+                <p className="text-[11px] text-muted-foreground tabular-nums">
+                  {formatCurrency(item.packagePrice)} pct
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -333,7 +377,7 @@ function SupplierComparison({ orders, quotes }: { orders: any[]; quotes: any[] }
                       <p className={cn("text-[10px] font-black uppercase tracking-widest opacity-50", ds.colors.text.secondary)}>{supplier.count} registro(s)</p>
                     </div>
                     <div className="w-[25%] text-right px-2 flex flex-col items-end">
-                      <span className={cn("font-black text-base italic", ds.colors.text.primary)}>{formatCurrency(supplier.avgPrice)}</span>
+                      <span className={cn("font-bold text-sm tabular-nums", ds.colors.text.primary)}>{formatCurrency(supplier.avgPrice)}</span>
                       {index > 0 && <span className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-0.5">+{((supplier.avgPrice - minPrice) / minPrice * 100).toFixed(0)}% gap</span>}
                     </div>
                   </div>
@@ -409,7 +453,7 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
                       </div>
                     </div>
                     <div className="w-[25%] text-right px-2">
-                      <p className={cn("text-base font-black tracking-tight italic", ds.colors.text.primary)}>
+                      <p className={cn("font-bold text-sm tabular-nums", ds.colors.text.primary)}>
                         {formatCurrency(Number(order.total_value))}
                       </p>
                     </div>
@@ -472,11 +516,11 @@ function TopPackagingList({ packaging }: { packaging: Array<{ name: string; quan
                   </div>
                   <div className="w-[20%] pl-2">
                     <p className={cn("font-medium text-[10px] uppercase tracking-widest opacity-70", ds.colors.text.secondary)}>
-                      {item.count} vez(es) â€¢ {item.quantity} un
+                      {item.count} vez(es) · {item.quantity} un
                     </p>
                   </div>
                   <div className="w-[25%] text-right px-2">
-                    <p className={cn("font-black text-base italic text-emerald-600 dark:text-emerald-400")}>
+                    <p className="font-bold text-sm tabular-nums text-emerald-600 dark:text-emerald-400">
                       {formatCurrency(item.totalSpent)}
                     </p>
                   </div>
@@ -494,23 +538,13 @@ function TopPackagingList({ packaging }: { packaging: Array<{ name: string; quan
 
 function EmptyState() {
   return (
-    <div className={cn(
-      "flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed",
-      ds.colors.border.subtle,
-      "bg-muted/20"
-    )}>
-      <div className={cn(
-        "w-24 h-24 rounded-full flex items-center justify-center mb-8 animate-pulse",
-        ds.colors.surface.card,
-        "shadow-xl"
-      )}>
-        <Target className="h-12 w-12 text-brand" />
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mb-4">
+        <Target className="h-6 w-6 text-muted-foreground/40" />
       </div>
-      <h3 className={cn(ds.typography.size.xl, ds.typography.weight.bold, ds.colors.text.primary, "mb-3")}>
-        Pronto para analisar?
-      </h3>
-      <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "max-w-sm mx-auto opacity-70 mb-8")}>
-        Selecione uma embalagem ou fornecedor para visualizar métricas detalhadas e histórico de preços.
+      <p className="font-semibold text-foreground">Pronto para analisar?</p>
+      <p className="text-sm text-muted-foreground mt-1 max-w-sm">
+        Selecione uma embalagem ou fornecedor para ver métricas e histórico de preços.
       </p>
     </div>
   );
@@ -519,7 +553,7 @@ function EmptyState() {
 // --- TELAS DE ANÃLISE ---
 
 function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingId: string; packagingName: string; onClear: () => void }) {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("prices");
   const [timeFilter, setTimeFilter] = useState("30"); // dias
 
   const { data: quotes = [], isLoading: quotesLoading } = useQuery({
@@ -621,9 +655,9 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
   }, [quotes, orders]);
 
   const priceHistory = useMemo(() => {
-    const history: Array<{ date: string; price: number; supplier: string; type: "quote" | "order" }> = [];
-    quotes.forEach((q: any) => { history.push({ date: q.created_at, price: q.custo_por_unidade || 0, supplier: q.supplier?.name || "Desconhecido", type: "quote" }); });
-    orders.forEach((o: any) => { history.push({ date: o.packaging_orders?.order_date || o.created_at, price: o.valor_unitario || 0, supplier: o.packaging_orders?.supplier_name || "Desconhecido", type: "order" }); });
+    const history: Array<{ date: string; price: number; packagePrice: number; supplier: string; type: "quote" | "order" }> = [];
+    quotes.forEach((q: any) => { history.push({ date: q.created_at, price: q.custo_por_unidade || 0, packagePrice: q.valor_total || 0, supplier: q.supplier?.name || "Desconhecido", type: "quote" }); });
+    orders.forEach((o: any) => { history.push({ date: o.packaging_orders?.order_date || o.created_at, price: o.valor_unitario || 0, packagePrice: o.valor_total || 0, supplier: o.packaging_orders?.supplier_name || "Desconhecido", type: "order" }); });
     return history.filter(h => h.price > 0).sort((a, b) => {
       const [ay, am, ad] = a.date.split('T')[0].split('-').map(Number);
       const [by, bm, bd] = b.date.split('T')[0].split('-').map(Number);
@@ -635,40 +669,34 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
   if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-      <div className={cn(
-        "flex flex-col md:flex-row md:items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative gap-4 border border-brand/10",
-        ds.colors.surface.card
-      )}>
-        <div className="absolute right-0 top-0 w-32 h-full bg-brand/5 skew-x-[-20deg] translate-x-16 pointer-events-none" />
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="p-3 rounded-2xl bg-brand/5 backdrop-blur-md border border-brand/10">
-            <Package className="h-8 w-8 text-brand" />
+    <div className="space-y-5 animate-in fade-in duration-300">
+      <div className={cn(ds.components.card.root, "flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4")}>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0">
+            <Package className="h-[18px] w-[18px] text-brand" />
           </div>
-          <div>
-            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
+          <div className="min-w-0">
+            <h2 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight truncate")}>
               {packagingName}
             </h2>
-            <p className="text-zinc-500 text-sm font-medium">Análise detalhada de embalagem</p>
+            <p className="text-xs text-muted-foreground">Análise detalhada de embalagem</p>
           </div>
         </div>
-        <div className="flex items-center gap-3 relative z-10 self-end md:self-auto">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Select value={timeFilter} onValueChange={setTimeFilter}>
-            <SelectTrigger className="w-40 bg-zinc-50 dark:bg-zinc-900 border-border dark:border-white/5 h-10 rounded-xl">
-              <Calendar className="h-4 w-4 mr-2 text-zinc-500" />
+            <SelectTrigger className="w-40 bg-background border-border h-9">
+              <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
               <SelectValue placeholder="Período" />
             </SelectTrigger>
-            <SelectContent className={ds.colors.surface.card}>
-              <SelectItem value="7">Ãšltimos 7 dias</SelectItem>
-              <SelectItem value="30">Ãšltimos 30 dias</SelectItem>
-              <SelectItem value="90">Ãšltimos 90 dias</SelectItem>
-              <SelectItem value="180">Ãšltimos 6 meses</SelectItem>
+            <SelectContent>
+              <SelectItem value="7">Últimos 7 dias</SelectItem>
+              <SelectItem value="30">Últimos 30 dias</SelectItem>
+              <SelectItem value="90">Últimos 90 dias</SelectItem>
+              <SelectItem value="180">Últimos 6 meses</SelectItem>
               <SelectItem value="all">Todo o período</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={onClear} className={cn(ds.components.button.base, ds.components.button.variants.secondary, "font-bold h-10")}>
-            Fechar
-          </Button>
+          <Button variant="outline" size="sm" onClick={onClear}>Fechar</Button>
         </div>
       </div>
 
@@ -695,10 +723,14 @@ function PackagingAnalysis({ packagingId, packagingName, onClear }: { packagingI
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="px-4 pt-4">
             <TabsList className={ds.components.tabs.clean.list}>
-              <TabsTrigger value="overview" className={ds.components.tabs.clean.trigger}>Histórico de Preços</TabsTrigger>
+              <TabsTrigger value="prices" className={ds.components.tabs.clean.trigger}>Preços</TabsTrigger>
+              <TabsTrigger value="overview" className={ds.components.tabs.clean.trigger}>Histórico</TabsTrigger>
               <TabsTrigger value="suppliers" className={ds.components.tabs.clean.trigger}>Por Fornecedor</TabsTrigger>
             </TabsList>
           </div>
+          <TabsContent value="prices" className="mt-0 p-4">
+            <SimplePriceList history={priceHistory.filter(h => h.type === "order")} packagingName={packagingName} />
+          </TabsContent>
           <TabsContent value="overview" className="mt-0 p-4">
             <PriceHistoryList history={priceHistory} />
           </TabsContent>
@@ -753,26 +785,20 @@ function SupplierPackagingAnalysis({ supplierId, supplierName, onClear }: { supp
   if (isLoading) return <div className="flex items-center justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-brand" /></div>;
 
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-      <div className={cn(
-        "flex items-center justify-between p-6 rounded-2xl shadow-xl overflow-hidden relative border border-brand/10",
-        ds.colors.surface.card
-      )}>
-        <div className="absolute right-0 top-0 w-32 h-full bg-brand/5 skew-x-[-20deg] translate-x-16 pointer-events-none" />
-        <div className="flex items-center gap-4 relative z-10">
-          <div className="p-3 rounded-2xl bg-brand/5 backdrop-blur-md border border-brand/10">
-            <Building2 className="h-8 w-8 text-brand" />
+    <div className="space-y-5 animate-in fade-in duration-300">
+      <div className={cn(ds.components.card.root, "flex items-center justify-between gap-3 p-4")}>
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 rounded-lg bg-brand/10 flex items-center justify-center flex-shrink-0">
+            <Building2 className="h-[18px] w-[18px] text-brand" />
           </div>
-          <div>
-            <h2 className={cn(ds.typography.size["2xl"], ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight")}>
+          <div className="min-w-0">
+            <h2 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary, "tracking-tight truncate")}>
               {supplierName}
             </h2>
-            <p className="text-zinc-500 text-sm font-medium">Histórico do parceiro comercial (Embalagens)</p>
+            <p className="text-xs text-muted-foreground">Histórico do parceiro comercial · Embalagens</p>
           </div>
         </div>
-        <Button onClick={onClear} className={cn(ds.components.button.base, ds.components.button.variants.secondary, "relative z-10 font-bold")}>
-          Fechar Análise
-        </Button>
+        <Button variant="outline" size="sm" onClick={onClear} className="flex-shrink-0">Fechar</Button>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -861,59 +887,48 @@ export default function PackagingAnalysisTab() {
   const selectItem = (item: SelectedItem) => { setSelectedItem(item); setSearchTerm(""); setHighlightedIndex(-1); };
 
   return (
-    <div className="space-y-6">
-      <div className="relative">
-        <div className={cn(ds.components.card.root, "p-6 bg-brand/5 border-brand/10")}>
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-xl bg-brand/10 border border-brand/20">
-              <BarChart3 className="h-6 w-6 text-brand" />
-            </div>
-            <div className="flex-1">
-              <h3 className={cn(ds.typography.size.lg, ds.typography.weight.bold, ds.colors.text.primary)}>Análise de Embalagens</h3>
-              <p className={cn(ds.typography.size.sm, ds.colors.text.secondary, "opacity-70")}>Busque por embalagem ou fornecedor para insights detalhados</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400 group-focus-within:text-brand transition-colors" />
+    <div className="space-y-5">
+      <div className="relative group">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-brand transition-colors pointer-events-none" />
           <Input
-            placeholder="Digite o nome da embalagem ou fornecedor..."
+            placeholder="Buscar embalagem ou fornecedor…"
             value={searchTerm}
             onChange={(e) => { setSearchTerm(e.target.value); setHighlightedIndex(-1); }}
             onKeyDown={handleSearchKeyDown}
-            className={cn(ds.components.input.root, "pl-12 h-14 text-base rounded-2xl focus:border-brand focus:ring-4 focus:ring-brand/10 outline-none")}
+            className={cn(ds.components.input.root, "pl-10 h-10")}
           />
           {searchResults.length > 0 && (
-            <div className={cn("absolute z-50 w-full mt-3 border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200", ds.colors.surface.card, ds.colors.border.subtle)}>
-              <div className="px-5 py-3 bg-muted/30 border-b border-border dark:border-white/5">
-                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-70">Sugestões encontradas</span>
+            <div className={cn("absolute z-50 w-full mt-1.5 border rounded-xl shadow-lg overflow-hidden animate-in fade-in duration-150", ds.colors.surface.card, ds.colors.border.default)}>
+              <div className="px-3 py-2 bg-muted/30 border-b border-border dark:border-white/5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Sugestões</span>
               </div>
-              <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+              <div className="max-h-[260px] overflow-y-auto">
                 {searchResults.map((item, index) => (
-                  <button key={`${item.type}-${item.id}`} onClick={() => selectItem(item)} onMouseEnter={() => setHighlightedIndex(index)} className={cn("w-full px-5 py-4 flex items-center gap-4 text-left transition-all relative group", highlightedIndex === index ? "bg-brand/5" : "hover:bg-muted/30")}>
-                    {highlightedIndex === index && <div className="absolute left-0 top-0 w-1 h-full bg-brand" />}
-                    <div className={cn("p-2.5 rounded-xl flex-shrink-0 transition-colors", item.type === "packaging" ? (highlightedIndex === index ? "bg-brand text-white" : "bg-brand/10 text-brand") : (highlightedIndex === index ? "bg-blue-500 text-white" : "bg-blue-500/10 text-blue-500"))}>
-                      {item.type === "packaging" ? <Package className="h-5 w-5" /> : <Building2 className="h-5 w-5" />}
+                  <button key={`${item.type}-${item.id}`} onClick={() => selectItem(item)} onMouseEnter={() => setHighlightedIndex(index)} className={cn("w-full px-3 py-3 flex items-center gap-3 text-left transition-colors relative", highlightedIndex === index ? "bg-brand/5" : "hover:bg-muted/30")}>
+                    {highlightedIndex === index && <div className="absolute left-0 top-0 w-0.5 h-full bg-brand" />}
+                    <div className={cn("p-2 rounded-lg flex-shrink-0 transition-colors", item.type === "packaging" ? (highlightedIndex === index ? "bg-brand text-white" : "bg-brand/10 text-brand") : (highlightedIndex === index ? "bg-muted text-foreground" : "bg-muted text-muted-foreground"))}>
+                      {item.type === "packaging" ? <Package className="h-4 w-4" /> : <Building2 className="h-4 w-4" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn("font-bold text-sm truncate", ds.colors.text.primary)}>{item.name}</p>
-                      <p className={cn("text-xs flex items-center gap-2", ds.colors.text.secondary, "opacity-60")}>
-                        {item.type === "packaging" ? <span className="flex items-center gap-1"><Package className="h-3 w-3" /> Embalagem</span> : <span className="flex items-center gap-1"><Building2 className="h-3 w-3" /> Fornecedor</span>}
+                      <p className={cn("font-semibold text-sm truncate", ds.colors.text.primary)}>{item.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.type === "packaging" ? "Embalagem" : "Fornecedor"}
                       </p>
                     </div>
-                    <ArrowRight className={cn("h-4 w-4 transition-all", highlightedIndex === index ? "translate-x-1 text-brand opacity-100" : "text-muted-foreground opacity-0")} />
+                    <ArrowRight className={cn("h-4 w-4 transition-all flex-shrink-0", highlightedIndex === index ? "text-brand opacity-100" : "text-muted-foreground opacity-0")} />
                   </button>
                 ))}
               </div>
-              <div className="px-5 py-3 text-[10px] font-black text-muted-foreground/50 bg-muted/30 border-t border-border dark:border-white/5 flex justify-between uppercase tracking-widest">
-                <div>DICA: Use as setas para navegar</div>
-                <div className="flex gap-4"><span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-background rounded border border-border dark:border-white/5 shadow-sm">â†‘â†“</kbd> Mudar</span><span className="flex items-center gap-1.5"><kbd className="px-1.5 py-0.5 bg-background rounded border border-border dark:border-white/5 shadow-sm">Enter</kbd> Abrir</span></div>
+              <div className="px-3 py-2 bg-muted/30 border-t border-border dark:border-white/5 flex items-center justify-between text-[10px] text-muted-foreground/60">
+                <span>Setas para navegar</span>
+                <div className="flex gap-3">
+                  <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 bg-background rounded border border-border text-[9px]">↑↓</kbd> mover</span>
+                  <span className="flex items-center gap-1"><kbd className="px-1 py-0.5 bg-background rounded border border-border text-[9px]">Enter</kbd> abrir</span>
+                </div>
               </div>
             </div>
           )}
         </div>
-      </div>
       {selectedItem ? (
         selectedItem.type === "packaging" ? <PackagingAnalysis packagingId={selectedItem.id} packagingName={selectedItem.name} onClear={() => setSelectedItem(null)} /> : <SupplierPackagingAnalysis supplierId={selectedItem.id} supplierName={selectedItem.name} onClear={() => setSelectedItem(null)} />
       ) : (
