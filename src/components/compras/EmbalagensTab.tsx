@@ -232,7 +232,7 @@ function EmbalagensTab() {
 
       {/* Cotações Content */}
       {activeSubTab === "cotacoes" && (
-        <div className="space-y-4 animate-in slide-in-from-right-4 duration-500">
+        <div className="space-y-4">
           {/* Métricas — desktop only */}
           {!isMobile && (
             <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
@@ -375,15 +375,15 @@ function EmbalagensTab() {
       )}
 
       {/* Other Pages Content - Persistent Display toggled via CSS */}
-      <div className={activeSubTab !== "pedidos" ? "hidden" : "animate-in slide-in-from-right-4 duration-500"}>
+      <div className={activeSubTab !== "pedidos" ? "hidden" : ""}>
         <PackagingOrdersTab onCreateOrder={() => setAddDialogOpen(true)} />
       </div>
 
-      <div className={activeSubTab !== "analise" ? "hidden" : "animate-in slide-in-from-right-4 duration-500"}>
+      <div className={activeSubTab !== "analise" ? "hidden" : ""}>
         <PackagingAnalysisTab />
       </div>
 
-      <div className={activeSubTab !== "economia" ? "hidden" : "animate-in slide-in-from-right-4 duration-500"}>
+      <div className={activeSubTab !== "economia" ? "hidden" : ""}>
         <PackagingEconomyTab />
       </div>
 
