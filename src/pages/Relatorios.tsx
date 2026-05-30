@@ -186,31 +186,21 @@ export default function Relatorios() {
     <PageWrapper>
       <div className={cn(ds.layout.container.page, "")}>
         {/* Page Header - Standardized with Dashboard Style */}
-        <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-                <FileText className="h-6 w-6 text-brand" />
-              </div>
-              <div>
-                <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                  Relatórios
-                </h1>
-                <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                  Geração e análise estratégica de performance e economia do sistema
-                </p>
-              </div>
+        <div className="flex items-center justify-between gap-4 pb-5 border-b border-border dark:border-zinc-800 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
+              <FileText className="h-5 w-5 text-brand" />
             </div>
-
-            <ReportsHeader
-              dateRangeText={dateRangeText}
-              onOpenPeriodDialog={handleOpenPeriodDialog}
-              onRefresh={refresh}
-              onExportAll={handleExportAll}
-              isRefreshing={refreshing}
-              isExporting={isGenerating}
-            />
+            <h1 className="text-[18px] font-bold text-foreground leading-tight">Relatórios</h1>
           </div>
+          <ReportsHeader
+            dateRangeText={dateRangeText}
+            onOpenPeriodDialog={handleOpenPeriodDialog}
+            onRefresh={refresh}
+            onExportAll={handleExportAll}
+            isRefreshing={refreshing}
+            isExporting={isGenerating}
+          />
         </div>
 
         {/* Progress Bar */}

@@ -61,18 +61,11 @@ export default function Anotacoes() {
     <PageWrapper>
       <div className={cn(ds.layout.container.page, "")}>
         {/* Page Header */}
-        <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
-          <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-            <StickyNote className="h-6 w-6 text-brand" />
+        <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800 mb-6">
+          <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
+            <StickyNote className="h-5 w-5 text-brand" />
           </div>
-          <div>
-            <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-              Anotações
-            </h1>
-            <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-              Gerencie suas tarefas e lembretes de forma simples
-            </p>
-          </div>
+          <h1 className="text-[18px] font-bold text-foreground leading-tight">Anotações</h1>
         </div>
 
         {/* Compact Actions Bar */}

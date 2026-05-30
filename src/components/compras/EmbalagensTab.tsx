@@ -20,7 +20,7 @@ import {
   Package, Plus, Trash2, DollarSign,
   Building2, MoreVertical, Eye, CheckCircle2,
   PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown, Calculator,
-  CircleCheck, PiggyBank, SlidersHorizontal
+  CircleCheck, PiggyBank, SlidersHorizontal, Archive
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -183,21 +183,19 @@ function EmbalagensTab() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className={cn("text-base font-bold truncate", designSystem.colors.text.primary)}>
-            Portal de Embalagens
-          </h2>
-          <p className={cn("text-xs mt-0.5 hidden sm:block", designSystem.colors.text.secondary)}>
-            Gerencie fluxos e acompanhe o balanço de compras deste setor.
-          </p>
+      <div className="flex items-center justify-between gap-4 pb-5 border-b border-border dark:border-zinc-800">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border flex-shrink-0">
+            <Archive className="h-5 w-5 text-brand" />
+          </div>
+          <h1 className="text-[18px] font-bold text-foreground leading-tight truncate">Embalagens</h1>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             variant="outline"
             size={isMobile ? "icon" : "default"}
             onClick={() => setItemsDialogOpen(true)}
-            className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "h-9 rounded-xl shadow-none text-sm")}
+            className="h-9 text-sm"
             title="Gestão de Itens"
           >
             <Package className={cn("h-4 w-4", !isMobile && "mr-2")} />
@@ -206,7 +204,7 @@ function EmbalagensTab() {
           {activeSubTab === "cotacoes" && (
             <Button
               onClick={() => setAddDialogOpen(true)}
-              className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "h-9 rounded-xl shadow-none text-sm")}
+              className="h-9 bg-brand hover:bg-brand/90 text-white text-sm"
             >
               <Plus className="h-4 w-4 mr-1.5" />
               Nova Cotação

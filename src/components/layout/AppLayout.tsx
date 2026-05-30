@@ -26,7 +26,7 @@ export function AppLayout() {
   // Removed unused handleLogout since it will be in Sidebar
 
   return (
-    <div className="h-screen w-full bg-background overflow-hidden flex flex-col">
+    <div className="app-bg h-screen w-full overflow-hidden flex flex-col">
       {/* Desktop Sidebar Flutuante */}
       <AppSidebar onOpenAI={() => setAiSearchOpen(true)} />
 

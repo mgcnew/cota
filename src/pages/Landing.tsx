@@ -43,7 +43,7 @@ export default function Landing() {
           </Link>
 
           {/* Entrar — visível em todas as telas */}
-          <Button onClick={openLogin} className={cn(ds.components.button.variants.primary, "h-9 px-5 text-sm gap-2")}>
+          <Button onClick={openLogin} className="bg-brand hover:bg-brand/90 text-white h-9 px-5 text-sm gap-2">
             Entrar
             <ArrowRight className="h-3.5 w-3.5" />
           </Button>
@@ -87,12 +87,8 @@ export default function Landing() {
             {/* CTA */}
             <div className="pt-2">
               <Button
-                size="lg"
                 onClick={openLogin}
-                className={cn(
-                  ds.components.button.variants.primary,
-                  "h-12 px-8 text-base font-bold gap-2 rounded-xl transition-all hover:-translate-y-0.5"
-                )}
+                className="bg-brand hover:bg-brand/90 text-white h-12 px-8 text-base font-bold gap-2 rounded-xl transition-all hover:-translate-y-0.5"
               >
                 Entrar
                 <ArrowRight className="h-4 w-4" />

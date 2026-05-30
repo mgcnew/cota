@@ -315,20 +315,11 @@ function Produtos() {
       <PageWrapper>
         <div className={cn(designSystem.layout.container.page, "")}>
           {/* Page Header - Standardized with Dashboard Style */}
-          <div className="flex flex-col gap-4 md:gap-6 mb-4 md:mb-8">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="hidden sm:flex p-3 rounded-xl bg-brand/10 dark:bg-brand/20 border border-brand/20">
-                <Package className="h-6 w-6 text-brand" />
-              </div>
-              <div>
-                <h1 className={cn(designSystem.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                  Produtos
-                </h1>
-                <p className={cn(designSystem.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
-                  Gerencie seu catálogo de itens e categorias
-                </p>
-              </div>
+          <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800 mb-6">
+            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
+              <Package className="h-5 w-5 text-brand" />
             </div>
+            <h1 className="text-[18px] font-bold text-foreground leading-tight">Produtos</h1>
           </div>
 
           {/* Métricas essenciais */}

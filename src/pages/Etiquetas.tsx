@@ -243,17 +243,14 @@ export default function Etiquetas() {
             <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
               <Scan className="h-5 w-5 text-brand" />
             </div>
-            <div>
-              <h1 className="text-[18px] font-bold text-foreground leading-tight">Gerador de Etiquetas</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">Crie e imprima etiquetas com código de barras</p>
-            </div>
+            <h1 className="text-[18px] font-bold text-foreground leading-tight">Gerador de Etiquetas</h1>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Button onClick={handleExportPDF} variant="outline" size="sm" className="flex-1 sm:flex-none h-9" disabled={productsToExport.length === 0}>
+            <Button onClick={handleExportPDF} variant="outline" className="flex-1 sm:flex-none h-9" disabled={productsToExport.length === 0}>
               <Printer className="mr-2 h-4 w-4" />
               Exportar PDF ({productsToExport.length})
             </Button>
-            <Button onClick={() => setQuickModalOpen(true)} size="sm" className="flex-1 sm:flex-none h-9 bg-brand hover:bg-brand/90 text-white">
+            <Button onClick={() => setQuickModalOpen(true)} className="flex-1 sm:flex-none h-9 bg-brand hover:bg-brand/90 text-white">
               <Plus className="mr-2 h-4 w-4" />
               {isMobile ? "Escanear" : "Novo Produto"}
             </Button>
@@ -314,7 +311,7 @@ export default function Etiquetas() {
                 >
                   <Trash2 className="h-3.5 w-3.5 mr-1" /> Excluir
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())} className="h-8 w-8 p-0 text-muted-foreground">
+                <Button variant="ghost" size="icon" onClick={() => setSelectedIds(new Set())} className="h-8 w-8 text-muted-foreground">
                   <X className="h-3.5 w-3.5" />
                 </Button>
               </div>
@@ -365,7 +362,7 @@ export default function Etiquetas() {
               </p>
             </div>
             {products.length === 0 && (
-              <Button onClick={() => setQuickModalOpen(true)} size="sm" className="bg-brand hover:bg-brand/90 text-white">
+              <Button onClick={() => setQuickModalOpen(true)} className="h-9 bg-brand hover:bg-brand/90 text-white">
                 <Plus className="h-4 w-4 mr-2" /> Cadastrar primeiro produto
               </Button>
             )}

@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ShoppingCart } from 'lucide-react';
+import { Plus, ShoppingCart, LayoutDashboard } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -117,29 +117,33 @@ function Dashboard() {
         
         {/* Header */}
         <div className="flex items-center justify-between gap-3 mb-4 md:mb-6 pb-3 md:pb-5 md:border-b border-zinc-200/70 dark:border-zinc-800">
-          <div>
-            <h1 className={cn(ds.typography.size.lg, "font-bold text-foreground")}>
-              Resumo de Hoje
-            </h1>
-            <p className={cn(ds.colors.text.muted, "text-xs mt-0.5")}>
-              Centro de operações
-            </p>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
+              <LayoutDashboard className="h-5 w-5 text-brand" />
+            </div>
+            <div>
+              <h1 className="text-[18px] font-bold text-foreground leading-tight">
+                Resumo de Hoje
+              </h1>
+              <p className={cn(ds.colors.text.muted, "text-xs mt-0.5")}>
+                Centro de operações
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Button
               onClick={() => navigate('/dashboard/compras?tab=cotacoes&open=new')}
-              className={cn(ds.components.button.primary, "font-semibold text-white dark:text-zinc-950")}
               size="sm"
+              className="bg-brand hover:bg-brand/90 text-white"
             >
               <Plus className="w-3.5 h-3.5 mr-1" />
               Nova Cotação
             </Button>
             <Button
               onClick={() => navigate('/dashboard/compras?tab=pedidos&open=new')}
-              variant="outline"
               size="sm"
-              className="border-border hidden sm:flex"
+              className="hidden sm:flex bg-brand hover:bg-brand/90 text-white"
             >
               <ShoppingCart className="w-3.5 h-3.5 mr-1" />
               Novo Pedido

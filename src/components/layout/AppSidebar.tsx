@@ -55,6 +55,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CompanySelector } from "./CompanySelector";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { WhatsAppNotificationBell } from "@/components/whatsapp/WhatsAppNotificationBell";
 
 interface AppSidebarProps {
@@ -182,17 +183,10 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
       >
         <div
           onClick={() => setProfileDialogOpen(true)}
-          className="relative shrink-0 cursor-pointer overflow-hidden rounded-lg ring-1 ring-border/20 w-9 h-9 hover:opacity-80 transition-opacity bg-white flex items-center justify-center p-0.5"
+          className="relative shrink-0 cursor-pointer w-9 h-9 hover:opacity-80 transition-opacity flex items-center justify-center"
           title="Abrir Perfil"
         >
-          <img 
-            src="/logo.png" 
-            alt="Logo Empresa" 
-            className="w-full h-full object-contain drop-shadow-sm scale-[1.05]"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
-          />
+          <BrandLogo iconOnly className="h-9" />
         </div>
         {expanded && (
           <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-300">

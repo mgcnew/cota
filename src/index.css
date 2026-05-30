@@ -28,7 +28,7 @@
        ============================================ */
     
     /* Background Colors */
-    --background: 220 14% 96%; /* Slate 50-ish, slightly darker/cooler to pop white cards */
+    --background: 220 13% 93%; /* Aluminum — cards brancos flutuam visivelmente */
     --foreground: 216 8.2% 12%; /* #1C1E21 */
     
     /* Card System */
@@ -154,6 +154,17 @@
     scrollbar-width: none !important;
     /* Mobile performance: prevent layout thrashing */
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* App root background — light mode: solid, dark mode: gradient */
+  .app-bg {
+    background: hsl(var(--background));
+  }
+
+  .dark .app-bg {
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.07) 0%, transparent 65%),
+      hsl(0 0% 4%);
   }
   
   html {

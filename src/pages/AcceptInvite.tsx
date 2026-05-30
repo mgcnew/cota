@@ -200,7 +200,7 @@ export default function AcceptInvite() {
             <CardDescription className="text-center">{error}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/auth")} className="w-full">
+            <Button variant="default" onClick={() => navigate("/auth")} className="w-full">
               Ir para Login
             </Button>
           </CardContent>
@@ -245,8 +245,9 @@ export default function AcceptInvite() {
               <p className="text-sm text-muted-foreground text-center">
                 Você já está autenticado como {user.email}
               </p>
-              <Button 
-                onClick={() => handleAcceptInvite({ email: user.email || "", password: "", confirmPassword: "" })} 
+              <Button
+                variant="default"
+                onClick={() => handleAcceptInvite({ email: user.email || "", password: "", confirmPassword: "" })}
                 className="w-full"
                 disabled={accepting}
               >
@@ -306,7 +307,7 @@ export default function AcceptInvite() {
                 )}
               </div>
 
-              <Button type="submit" className="w-full" disabled={accepting}>
+              <Button type="submit" variant="default" className="w-full" disabled={accepting}>
                 {accepting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
