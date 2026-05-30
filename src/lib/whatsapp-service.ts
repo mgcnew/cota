@@ -303,18 +303,19 @@ export function generateQuoteReportHTML(opts: {
 
       productRows += `
         <div class="offer-row">
-          <div class="offer-left">
+          <div class="offer-top">
             <span class="offer-name">${i.productName || i.product_name}</span>
             <span class="offer-unit-pill">${i.quantidade} ${unit}</span>
           </div>
-          <div class="offer-right">
+          <div class="offer-bottom">
             <div class="offer-price">
               ${econItem > 0 ? `<span class="old-price">${fmt(vi)}</span>` : ""}
               <strong>${fmt(i.bestPrice)}</strong>
               <span class="offer-unit">/ ${unit}</span>
             </div>
+            <span class="offer-sep">·</span>
             <div class="offer-total">${fmt(i.totalItem)}</div>
-            ${econItem > 0 ? `<div class="offer-econ">-${fmt(econItem)}</div>` : ""}
+            ${econItem > 0 ? `<span class="offer-sep">·</span><div class="offer-econ">-${fmt(econItem)}</div>` : ""}
           </div>
         </div>`;
     });
@@ -354,20 +355,21 @@ export function generateQuoteReportHTML(opts: {
 
       offerRows += `
         <div class="offer-row ${o.isWinner ? "offer-winner" : ""}">
-          <div class="offer-left">
+          <div class="offer-top">
             ${o.isWinner
               ? `<span class="badge-best">✓</span>`
               : `<span class="badge-rank">${oIdx + 1}</span>`}
             <span class="offer-name">${o.supplierName}</span>
           </div>
-          <div class="offer-right">
+          <div class="offer-bottom">
             <div class="offer-price">
               ${neg ? `<span class="old-price">${fmt(o.initialPrice)}</span>` : ""}
               <strong>${fmt(o.price)}</strong>
               <span class="offer-unit">/ ${unit}</span>
             </div>
+            <span class="offer-sep">·</span>
             <div class="offer-total">${fmt(o.total)}</div>
-            ${econTotal > 0 ? `<div class="offer-econ">-${fmt(econTotal)}</div>` : ""}
+            ${econTotal > 0 ? `<span class="offer-sep">·</span><div class="offer-econ">-${fmt(econTotal)}</div>` : ""}
           </div>
         </div>`;
     });
@@ -450,19 +452,20 @@ export function generateQuoteReportHTML(opts: {
 
   /* ── Offer rows ── */
   .offers{display:flex;flex-direction:column}
-  .offer-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 16px;border-bottom:1px solid #f8fafc}
+  .offer-row{display:flex;flex-direction:column;gap:4px;padding:10px 16px;border-bottom:1px solid #f8fafc}
   .offer-row:last-child{border-bottom:none}
   .offer-winner{background:#f0fdf9}
   .offer-winner .offer-name{font-weight:700;color:#065f46}
-  .offer-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
-  .offer-name{font-size:12px;font-weight:500;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .offer-top{display:flex;align-items:center;gap:8px}
+  .offer-bottom{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .offer-name{font-size:12px;font-weight:600;color:#334155;flex:1;min-width:0}
   .offer-unit-pill{font-size:10px;font-weight:600;color:#94a3b8;background:#f1f5f9;padding:1px 6px;border-radius:20px;white-space:nowrap;flex-shrink:0}
-  .offer-right{display:flex;align-items:center;gap:10px;flex-shrink:0;text-align:right}
   .offer-price{display:flex;align-items:baseline;gap:3px;font-size:13px;color:#0f172a;white-space:nowrap}
   .offer-price strong{font-weight:800}
   .offer-unit{font-size:10px;color:#94a3b8;font-weight:500}
-  .offer-total{font-size:12px;font-weight:700;color:#334155;white-space:nowrap;min-width:80px;text-align:right}
-  .offer-econ{font-size:11px;font-weight:700;color:#059669;white-space:nowrap;min-width:72px;text-align:right}
+  .offer-sep{font-size:10px;color:#cbd5e1}
+  .offer-total{font-size:12px;font-weight:700;color:#334155;white-space:nowrap}
+  .offer-econ{font-size:11px;font-weight:700;color:#059669;white-space:nowrap}
   .offer-winner .offer-price strong{color:#059669}
   .offer-winner .offer-total{color:#065f46;font-weight:800}
   .badge-best{display:inline-flex;align-items:center;background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:800;flex-shrink:0}
@@ -480,8 +483,6 @@ export function generateQuoteReportHTML(opts: {
     .hero-value{font-size:26px}
     .hero-pct{font-size:20px}
     .doc-title{font-size:17px}
-    .offer-right{gap:6px}
-    .offer-total,.offer-econ{min-width:60px}
     .tab-btn{font-size:11px;padding:8px 8px;gap:4px}
   }
   @media print{
