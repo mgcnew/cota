@@ -1,300 +1,387 @@
-﻿/**
- * Relatorios Page - Página principal de Relatórios
- * 
- * Página refatorada que orquestra os componentes modulares de relatórios.
- * Utiliza componentes extraídos para melhor manutenibilidade.
- * 
- * @module pages/Relatorios
- * Requirements: 1.1, 1.2
- */
-
-import React, { useState, useCallback, useMemo, lazy, Suspense } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import React, { useState, useCallback } from "react";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from "recharts";
+import {
+  FileText, TrendingUp, Users, ShoppingCart, AlertTriangle, RefreshCw, Calendar,
+  ArrowUpDown, Clock,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BarChart3, FileText, History, Loader2 } from "lucide-react";
-
-import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { useReports } from "@/hooks/useReports";
-import { useDatePeriod } from "@/hooks/useDatePeriod";
-
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { PageWrapper } from "@/components/layout/PageWrapper";
+import { PeriodDialog } from "@/components/reports/layout";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
+import { useRelatorioData } from "@/hooks/useRelatorioData";
+import { useDatePeriod } from "@/hooks/useDatePeriod";
 
-// Layout components
-import { ReportsHeader, PeriodDialog, FiltersDialog } from "@/components/reports/layout";
+// ── Formatadores ────────────────────────────────────────────────────────────────
 
-// Tab components - Lazy loaded for better performance (Requirement 6.2)
-const AnalyticsTab = lazy(() => 
-  import("@/components/reports/analytics/AnalyticsTab").then(mod => ({ default: mod.AnalyticsTab }))
-);
-const HistoryTab = lazy(() => 
-  import("@/components/reports/tabs/HistoryTab").then(mod => ({ default: mod.HistoryTab }))
-);
+function formatCurrency(value: number) {
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+}
 
-/**
- * Loading skeleton for tabs
- */
-function TabSkeleton() {
+function formatPercent(value: number) {
+  return `${value.toFixed(1)}%`;
+}
+
+// ── Tooltip customizado do gráfico ──────────────────────────────────────────────
+
+function ChartTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Skeleton className="h-10 w-48 rounded-xl" />
-        <Skeleton className="h-10 w-48 rounded-xl" />
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Skeleton className="h-[400px] w-full rounded-2xl" />
-        <Skeleton className="h-[400px] w-full rounded-2xl" />
-      </div>
+    <div className="bg-card border border-border rounded-xl px-4 py-3 shadow-lg text-sm">
+      <p className="font-semibold text-foreground mb-1">{label}</p>
+      <p className="text-brand font-bold">{formatCurrency(payload[0]?.value || 0)}</p>
+      {payload[1] && (
+        <p className="text-muted-foreground">{payload[1].value} cotações</p>
+      )}
     </div>
   );
 }
 
-/**
- * Loading skeleton for the entire page
- */
-function PageSkeleton() {
+// ── Skeleton de linha de tabela ─────────────────────────────────────────────────
+
+function TableRowSkeleton({ cols }: { cols: number }) {
   return (
-    <div className={cn("p-6 space-y-8 animate-pulse", ds.layout.container.page)}>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-12 w-12 rounded-xl" />
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-48 rounded-lg" />
-            <Skeleton className="h-4 w-64 rounded-lg" />
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <Skeleton className="h-10 w-40 rounded-xl" />
-          <Skeleton className="h-10 w-32 rounded-xl" />
-        </div>
-      </div>
-      <div className="space-y-6">
-        <div className="flex justify-center">
-          <Skeleton className="h-12 w-64 rounded-2xl" />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Skeleton className="h-80 w-full rounded-2xl" />
-          <Skeleton className="h-80 w-full rounded-2xl" />
-        </div>
-      </div>
-    </div>
+    <tr>
+      {Array.from({ length: cols }).map((_, i) => (
+        <td key={i} className="px-4 py-3">
+          <Skeleton className="h-4 w-full" />
+        </td>
+      ))}
+    </tr>
   );
 }
+
+// ── Componente principal ────────────────────────────────────────────────────────
 
 export default function Relatorios() {
-  const { toast } = useToast();
-  const { user } = useAuth();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { isGenerating, progress, generateAllReports } = useReports();
+  const [isPeriodOpen, setIsPeriodOpen] = useState(false);
 
-  // Custom hook for date period management (Requirement 1.3, 7.5)
   const {
-    startDate,
-    endDate,
-    setStartDate,
-    setEndDate,
-    applyPreset,
-    dateRangeText,
-    loading,
-    refreshing,
-    refresh
+    startDate, endDate,
+    setStartDate, setEndDate,
+    applyPreset, dateRangeText,
+    loading: loadingPeriod, refreshing,
+    refresh,
   } = useDatePeriod();
 
-  // Filter states
-  const [selectedFornecedores, setSelectedFornecedores] = useState<string[]>([]);
-  const [selectedProdutos, setSelectedProdutos] = useState<string[]>([]);
-  
-  // Dialog states
-  const [isPeriodDialogOpen, setIsPeriodDialogOpen] = useState(false);
-  const [isFiltersDialogOpen, setIsFiltersDialogOpen] = useState(false);
+  const {
+    isLoading,
+    economiaTotal,
+    cotacoesComComparacao,
+    cotacoesSemComparacao,
+    fornecedoresAtivos,
+    totalCotacoes,
+    economiaPorMes,
+    variacaoProdutos,
+    rankingFornecedores,
+  } = useRelatorioData({ startDate, endDate });
 
-  // Active tab state - reads from query string
-  const [activeTab, setActiveTab] = useState(() => {
-    const tabFromQuery = searchParams.get('tab');
-    return tabFromQuery && ['analytics', 'historico'].includes(tabFromQuery) 
-      ? tabFromQuery 
-      : 'analytics';
-  });
-
-  // Tab change handler - updates query string
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-    setSearchParams({ tab: value }, { replace: true });
-  }, [setSearchParams]);
-
-  // Reset filters handler
-  const handleResetFilters = useCallback(() => {
-    setSelectedFornecedores([]);
-    setSelectedProdutos([]);
-  }, []);
-
-  // Export all reports handler
-  const handleExportAll = useCallback(async () => {
-    if (!startDate || !endDate) {
-      toast({
-        title: "Período obrigatório",
-        description: "Por favor, selecione um período válido.",
-        variant: "destructive"
-      });
-      return;
-    }
-    try {
-      await generateAllReports({
-        startDate,
-        endDate,
-        fornecedores: selectedFornecedores,
-        produtos: selectedProdutos,
-        categorias: []
-      });
-      toast({
-        title: "Exportação iniciada",
-        description: "Todos os relatórios serão gerados"
-      });
-    } catch (error) {
-      toast({
-        title: "Erro na exportação",
-        description: "Não foi possível gerar todos os relatórios",
-        variant: "destructive"
-      });
-    }
-  }, [startDate, endDate, selectedFornecedores, selectedProdutos, generateAllReports, toast]);
-
-  // Apply date preset handler
   const handleApplyPreset = useCallback((days: number) => {
     applyPreset(days);
-    setIsPeriodDialogOpen(false);
+    setIsPeriodOpen(false);
   }, [applyPreset]);
 
-  // Memoized callback for opening period dialog
-  const handleOpenPeriodDialog = useCallback(() => {
-    setIsPeriodDialogOpen(true);
-  }, []);
+  const loading = isLoading || loadingPeriod;
 
-  // Memoized check for history tab active state
-  const isHistoryTabActive = useMemo(() => activeTab === "historico", [activeTab]);
-
-  if (loading) {
-    return <PageWrapper><PageSkeleton /></PageWrapper>;
-  }
+  // Cor das barras: verde se tem economia, cinza se não tem
+  const BAR_COLORS = ["#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#dbeafe", "#eff6ff"];
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "")}>
-        {/* Page Header - Standardized with Dashboard Style */}
-        <div className="flex items-center justify-between gap-4 pb-5 border-b border-border dark:border-zinc-800 mb-6">
+      <div className={cn(ds.layout.container.page)}>
+
+        {/* ── Cabeçalho ─────────────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between gap-4 pb-5 border-b border-border mb-6">
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
+            <div className="hidden sm:flex p-2.5 rounded-xl border bg-card border-border">
               <FileText className="h-5 w-5 text-brand" />
             </div>
             <h1 className="text-[18px] font-bold text-foreground leading-tight">Relatórios</h1>
           </div>
-          <ReportsHeader
-            dateRangeText={dateRangeText}
-            onOpenPeriodDialog={handleOpenPeriodDialog}
-            onRefresh={refresh}
-            onExportAll={handleExportAll}
-            isRefreshing={refreshing}
-            isExporting={isGenerating}
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsPeriodOpen(true)}
+              className="gap-2 text-xs font-medium h-9"
+            >
+              <Calendar className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">{dateRangeText}</span>
+              <span className="sm:hidden">Período</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={refresh}
+              disabled={refreshing}
+              className="h-9 w-9"
+              title="Atualizar dados"
+            >
+              <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            </Button>
+          </div>
         </div>
 
-        {/* Progress Bar */}
-        {isGenerating && (
-          <Card className="overflow-hidden border-brand/20 bg-brand/[0.02] shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-brand/10 text-brand">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                </div>
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className={cn("text-sm font-black uppercase tracking-widest", ds.colors.text.primary)}>
-                      Processando Inteligência de Dados
-                    </span>
-                    <span className="text-brand font-black text-sm italic">{Math.round(progress)}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2 bg-brand/10" />
+        {/* ── Hero — economia total ──────────────────────────────────────────── */}
+        <Card className="mb-6 border-brand/20 bg-gradient-to-br from-brand/5 to-transparent">
+          <CardContent className="p-6">
+            {loading ? (
+              <div className="space-y-3">
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-10 w-56" />
+                <div className="flex gap-6 pt-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-28" />
                 </div>
               </div>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground mb-1">Economia gerada cotando no período</p>
+                <div className="flex items-baseline gap-3 mb-4">
+                  <span className="text-4xl font-black text-foreground tracking-tight">
+                    {formatCurrency(economiaTotal)}
+                  </span>
+                  {economiaTotal > 0 && (
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-semibold">
+                      <TrendingUp className="h-3 w-3 mr-1" />
+                      ao comparar fornecedores
+                    </Badge>
+                  )}
+                </div>
+
+                {/* Sub-métricas */}
+                <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                    <span><strong className="text-foreground">{totalCotacoes}</strong> cotações</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <ArrowUpDown className="h-3.5 w-3.5" />
+                    <span><strong className="text-foreground">{cotacoesComComparacao}</strong> com comparação de preços</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    <span><strong className="text-foreground">{fornecedoresAtivos}</strong> fornecedores ativos</span>
+                  </div>
+                </div>
+
+                {/* Alerta de oportunidade perdida */}
+                {cotacoesSemComparacao > 0 && (
+                  <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/30 text-amber-800 dark:text-amber-400 text-sm">
+                    <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                    <span>
+                      <strong>{cotacoesSemComparacao}</strong> {cotacoesSemComparacao === 1 ? "cotação foi feita" : "cotações foram feitas"} com apenas 1 fornecedor respondendo — sem comparação de preços possível.
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── Grid: gráfico + tabela de produtos ────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+          {/* Economia por mês */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-foreground">Economia por mês (R$)</CardTitle>
+              <p className="text-xs text-muted-foreground">Últimos 6 meses — quanto você economizou comparando fornecedores</p>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {isLoading ? (
+                <div className="h-[220px] flex items-center justify-center">
+                  <Skeleton className="h-full w-full rounded-lg" />
+                </div>
+              ) : economiaPorMes.every(m => m.economia === 0) ? (
+                <div className="h-[220px] flex flex-col items-center justify-center text-muted-foreground gap-2">
+                  <TrendingUp className="h-8 w-8 opacity-30" />
+                  <p className="text-sm">Nenhuma economia registrada no período</p>
+                  <p className="text-xs opacity-70">Cote com 2+ fornecedores por produto para gerar comparação</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={economiaPorMes} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-border" opacity={0.3} vertical={false} />
+                    <XAxis dataKey="mes" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
+                    <YAxis
+                      tick={{ fontSize: 10 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v}`}
+                    />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Bar dataKey="economia" radius={[6, 6, 0, 0]} name="Economia">
+                      {economiaPorMes.map((entry, index) => (
+                        <Cell
+                          key={index}
+                          fill={entry.economia > 0 ? "#3b82f6" : "#e4e4e7"}
+                          className={entry.economia > 0 ? "" : "dark:fill-zinc-700"}
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {/* Tabs Premium */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full space-y-8">
-          <div className="flex items-center justify-center">
-            <TabsList className={cn(ds.components.tabs.list, "h-14 p-1.5 bg-muted/50 backdrop-blur-md border-border/40")}>
-              <TabsTrigger 
-                value="analytics" 
-                className={cn(
-                  ds.components.tabs.trigger,
-                  "h-11 px-8 gap-2.5 rounded-lg transition-all duration-300",
-                  "data-[state=active]:bg-background data-[state=active]:text-brand data-[state=active]:shadow-xl"
-                )}
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span className="font-black uppercase tracking-widest text-[11px]">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger 
-                value="historico" 
-                className={cn(
-                  ds.components.tabs.trigger,
-                  "h-11 px-8 gap-2.5 rounded-lg transition-all duration-300",
-                  "data-[state=active]:bg-background data-[state=active]:text-brand data-[state=active]:shadow-xl"
-                )}
-              >
-                <History className="h-4 w-4" />
-                <span className="font-black uppercase tracking-widest text-[11px]">Histórico</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          {/* Produtos com maior variação de preço */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold text-foreground">Produtos com maior variação de preço</CardTitle>
+              <p className="text-xs text-muted-foreground">Onde cotar com vários fornecedores mais vale a pena</p>
+            </CardHeader>
+            <CardContent className="pt-0 px-0">
+              {isLoading ? (
+                <table className="w-full">
+                  <tbody>
+                    {Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={4} />)}
+                  </tbody>
+                </table>
+              ) : variacaoProdutos.length === 0 ? (
+                <div className="h-[220px] flex flex-col items-center justify-center text-muted-foreground gap-2 px-6">
+                  <ArrowUpDown className="h-8 w-8 opacity-30" />
+                  <p className="text-sm text-center">Não há dados suficientes para calcular variação</p>
+                  <p className="text-xs opacity-70 text-center">Necessário pelo menos 2 fornecedores respondendo ao mesmo produto</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Produto</th>
+                        <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Mín</th>
+                        <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Máx</th>
+                        <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Variação</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {variacaoProdutos.map((p, i) => (
+                        <tr key={i} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-foreground truncate max-w-[160px]" title={p.produto}>{p.produto}</div>
+                            <div className="text-xs text-muted-foreground">{p.numFornecedores} fornecedores · {p.cotacoes} {p.cotacoes === 1 ? "cotação" : "cotações"}</div>
+                          </td>
+                          <td className="px-4 py-3 text-right text-muted-foreground text-xs whitespace-nowrap">{formatCurrency(p.precoMin)}</td>
+                          <td className="px-4 py-3 text-right text-muted-foreground text-xs whitespace-nowrap">{formatCurrency(p.precoMax)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <Badge
+                              className={cn(
+                                "text-xs font-bold",
+                                p.variacaoPercent >= 20
+                                  ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                  : p.variacaoPercent >= 10
+                                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                                  : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
+                              )}
+                            >
+                              {formatPercent(p.variacaoPercent)}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <TabsContent value="analytics" className="m-0 outline-none">
-              <Suspense fallback={<TabSkeleton />}>
-                <AnalyticsTab
-                  startDate={startDate}
-                  endDate={endDate}
-                  selectedFornecedores={selectedFornecedores}
-                  selectedProdutos={selectedProdutos}
-                />
-              </Suspense>
-            </TabsContent>
+        {/* ── Ranking de fornecedores ────────────────────────────────────────── */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-semibold text-foreground">Ranking de fornecedores</CardTitle>
+            <p className="text-xs text-muted-foreground">Ordenado por economia gerada — quem oferece os menores preços</p>
+          </CardHeader>
+          <CardContent className="pt-0 px-0">
+            {isLoading ? (
+              <table className="w-full">
+                <tbody>
+                  {Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} cols={5} />)}
+                </tbody>
+              </table>
+            ) : rankingFornecedores.length === 0 ? (
+              <div className="py-12 flex flex-col items-center justify-center text-muted-foreground gap-2">
+                <Users className="h-8 w-8 opacity-30" />
+                <p className="text-sm">Nenhum fornecedor encontrado no período</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">#</th>
+                      <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fornecedor</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cotações</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Taxa resposta</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Economia gerada</th>
+                      <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Tempo médio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rankingFornecedores.map((f, i) => (
+                      <tr key={i} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                        <td className="px-4 py-3 text-muted-foreground font-medium text-xs">{i + 1}</td>
+                        <td className="px-4 py-3">
+                          <span className="font-medium text-foreground">{f.nome}</span>
+                        </td>
+                        <td className="px-4 py-3 text-right text-muted-foreground">{f.cotacoes}</td>
+                        <td className="px-4 py-3 text-right">
+                          <span className={cn(
+                            "font-semibold",
+                            f.taxaResposta >= 80 ? "text-green-600 dark:text-green-400"
+                              : f.taxaResposta >= 50 ? "text-amber-600 dark:text-amber-400"
+                              : "text-red-600 dark:text-red-400"
+                          )}>
+                            {formatPercent(f.taxaResposta)}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {f.economiaGerada > 0 ? (
+                            <span className="font-semibold text-green-600 dark:text-green-400">
+                              {formatCurrency(f.economiaGerada)}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right hidden sm:table-cell">
+                          {f.tempoMedio !== null ? (
+                            <span className="flex items-center justify-end gap-1 text-muted-foreground text-xs">
+                              <Clock className="h-3 w-3" />
+                              {f.tempoMedio.toFixed(1)}d
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-xs">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-            <TabsContent value="historico" className="m-0 outline-none">
-              <Suspense fallback={<TabSkeleton />}>
-                <HistoryTab isActive={isHistoryTabActive} />
-              </Suspense>
-            </TabsContent>
-          </div>
-        </Tabs>
       </div>
 
-      {/* Period Dialog */}
       <PeriodDialog
-        isOpen={isPeriodDialogOpen}
-        onOpenChange={setIsPeriodDialogOpen}
+        isOpen={isPeriodOpen}
+        onOpenChange={setIsPeriodOpen}
         startDate={startDate}
         endDate={endDate}
         onStartDateChange={setStartDate}
         onEndDateChange={setEndDate}
         onApplyPreset={handleApplyPreset}
-      />
-
-      {/* Filters Dialog */}
-      <FiltersDialog
-        isOpen={isFiltersDialogOpen}
-        onOpenChange={setIsFiltersDialogOpen}
-        selectedFornecedores={selectedFornecedores}
-        selectedProdutos={selectedProdutos}
-        onFornecedoresChange={setSelectedFornecedores}
-        onProdutosChange={setSelectedProdutos}
-        onReset={handleResetFilters}
       />
     </PageWrapper>
   );
