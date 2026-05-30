@@ -188,6 +188,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
   const [personalizeViewMode, setPersonalizeViewMode] = useState<"by-supplier" | "by-product">("by-supplier");
   const [personalizeSearch, setPersonalizeSearch] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmDrawer, setShowConfirmDrawer] = useState(false);
   const productsContainerRef = useRef<HTMLDivElement>(null);
   const productListRef = useRef<HTMLDivElement>(null);
   const prevTabIndexRef = useRef(0);
@@ -207,6 +208,11 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
     { id: "personalizar", label: "Configurar Itens", icon: MousePointerClick },
     { id: "detalhes", label: "Resumo", icon: FileText }
   ], []);
+
+  // Mobile uses 3 steps — "detalhes" is replaced by a confirmation bottom sheet
+  const mobileTabs = useMemo(() => tabs.filter(t => t.id !== "detalhes"), [tabs]);
+  const mobileCurrentTabIndex = mobileTabs.findIndex(t => t.id === activeTab);
+  const isMobileLastStep = mobileCurrentTabIndex === mobileTabs.length - 1;
 
   const [supplierItemAssignments, setSupplierItemAssignments] = useState<Record<string, string[]>>({});
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
@@ -513,6 +519,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
       setShowQuickCreateProduct(false);
       setShowQuickCreateSupplier(false);
       setShowMobileCart(false);
+      setShowConfirmDrawer(false);
     }
   }, [open, activeTab]);
 
@@ -857,7 +864,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
       {/* Mobile Header â€" minimal, sticky */}
       <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
         <div className="flex items-center gap-3">
-          {currentTabIndex > 0 ? (
+          {mobileCurrentTabIndex > 0 ? (
             <button
               type="button"
               onClick={handlePrevious}
@@ -874,70 +881,46 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
               <X className="h-4 w-4" />
             </button>
           )}
-          <div>
-            <h2 className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
-              {currentTabIndex === 0 ? "Produtos" :
-               currentTabIndex === 1 ? "Período & Fornecedores" :
-               currentTabIndex === 2 ? "Configurar Itens" :
-               "Resumo"}
-            </h2>
-            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
-              Passo {currentTabIndex + 1} de {tabs.length}
-            </p>
+          <div className="flex items-center gap-2">
+            {(() => {
+              const CurrentIcon = mobileTabs[mobileCurrentTabIndex]?.icon;
+              return CurrentIcon ? <CurrentIcon className="h-4 w-4 text-brand flex-shrink-0" /> : null;
+            })()}
+            <div>
+              <h2 className={cn(ds.typography.size.base, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                {mobileTabs[mobileCurrentTabIndex]?.label || "Produtos"}
+              </h2>
+              <p className={cn(ds.typography.size.xs, ds.colors.text.secondary)}>
+                Passo {mobileCurrentTabIndex + 1} de {mobileTabs.length}
+              </p>
+            </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {currentTabIndex === 0 && fields.length > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowMobileCart(true)}
-              className={cn(
-                "relative w-9 h-9 rounded-full flex items-center justify-center",
-                "bg-brand/10 text-brand"
-              )}
-            >
-              <Package className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 bg-brand text-zinc-950 text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center font-bold">
-                {fields.length}
-              </span>
-            </button>
-          )}
-
-          {currentTabIndex === tabs.length - 1 ? (
-            <Button
-              type="submit"
-              form="quote-form-mobile"
-              disabled={isSubmitting}
-              className={cn(ds.components.button.primary, "h-9 text-xs px-3 font-bold shadow-sm")}
-            >
-              {isSubmitting ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                "Finalizar"
-              )}
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              onClick={handleNext}
-              disabled={!canProceedToNext()}
-              className={cn(ds.components.button.primary, "h-9 text-xs px-3 shadow-sm")}
-            >
-              Próximo
-              <ChevronRight className="ml-1 h-3.5 w-3.5" />
-            </Button>
-          )}
-        </div>
+        {mobileCurrentTabIndex === 0 && fields.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowMobileCart(true)}
+            className={cn(
+              "relative w-9 h-9 rounded-full flex items-center justify-center",
+              "bg-brand/10 text-brand"
+            )}
+          >
+            <Package className="h-4 w-4" />
+            <span className="absolute -top-1 -right-1 bg-brand text-zinc-950 text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center font-bold">
+              {fields.length}
+            </span>
+          </button>
+        )}
       </div>
 
       {/* Progress bar â€" thin, clean */}
       <div className="flex gap-1.5 px-4 pb-3">
-        {tabs.map((_, idx) => (
+        {mobileTabs.map((_, idx) => (
           <div
             key={idx}
             className={cn(
               "h-1 rounded-full flex-1 transition-all duration-300",
-              idx < currentTabIndex ? "bg-brand" : idx === currentTabIndex ? "bg-brand/50" : "bg-muted"
+              idx < mobileCurrentTabIndex ? "bg-brand" : idx === mobileCurrentTabIndex ? "bg-brand/50" : "bg-muted"
             )}
           />
         ))}
@@ -1767,6 +1750,31 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
         </div>
       )}
 
+      {/* Sticky Bottom CTA â€" thumb-reachable primary action */}
+      <div className="flex-shrink-0 px-4 py-3 border-t border-border dark:border-white/5 bg-background/95 backdrop-blur-sm">
+        {isMobileLastStep ? (
+          <Button
+            type="button"
+            onClick={() => setShowConfirmDrawer(true)}
+            disabled={!canProceedToNext() || isSubmitting}
+            className={cn(ds.components.button.primary, "w-full h-12 text-sm font-bold shadow-sm")}
+          >
+            Revisar e Finalizar
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={handleNext}
+            disabled={!canProceedToNext()}
+            className={cn(ds.components.button.primary, "w-full h-12 text-sm font-bold shadow-sm")}
+          >
+            Próximo
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
       {/* Mobile Cart Drawer â€" reused from desktop */}
       <Drawer open={showMobileCart} onOpenChange={setShowMobileCart}>
         <DrawerContent className="max-h-[85vh]">
@@ -1822,6 +1830,126 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
             <DrawerClose asChild>
               <Button variant="outline" className={cn(ds.components.button.secondary, "w-full")}>Fechar Lista</Button>
             </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Confirmation Drawer â€" replaces the old "Resumo" step on mobile */}
+      <Drawer open={showConfirmDrawer} onOpenChange={setShowConfirmDrawer}>
+        <DrawerContent className="max-h-[90vh] flex flex-col">
+          <DrawerHeader className="border-b border-border dark:border-white/5/50 pb-4 flex-shrink-0">
+            <DrawerTitle className="text-left flex items-center gap-2">
+              <FileText className="h-5 w-5 text-brand" />
+              Revisão Final
+            </DrawerTitle>
+            <DrawerDescription className="text-left">
+              Confira os detalhes antes de criar a cotação.
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Products summary */}
+            <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
+              <div className="flex items-center gap-2 mb-3">
+                <Package className="h-4 w-4 text-brand" />
+                <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                  Produtos ({fields.length})
+                </h3>
+              </div>
+              <div className="space-y-2">
+                {fields.map((field) => (
+                  <div key={field.id} className="flex justify-between items-center text-sm">
+                    <span className={cn(ds.colors.text.secondary, "truncate pr-3")}>
+                      {field.produtoNome}
+                    </span>
+                    <span className={cn(ds.typography.weight.medium, ds.colors.text.primary, "flex-shrink-0")}>
+                      {field.quantidade} {field.unidade}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Period summary */}
+            <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
+              <div className="flex items-center gap-2 mb-3">
+                <Clock className="h-4 w-4 text-brand" />
+                <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>Prazos</h3>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className={ds.colors.text.secondary}>Duração:</span>
+                  <span className={cn(ds.typography.weight.medium, ds.colors.text.primary)}>
+                    {form.watch("dataInicio") && form.watch("dataFim")
+                      ? `${format(form.watch("dataInicio"), "dd/MM", { locale: ptBR })} até ${format(form.watch("dataFim"), "dd/MM", { locale: ptBR })}`
+                      : "Não definida"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className={ds.colors.text.secondary}>Agendamento:</span>
+                  <span className={cn(ds.typography.weight.medium, isScheduled ? "text-brand" : ds.colors.text.primary)}>
+                    {isScheduled ? "Planejado" : "Imediato"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Suppliers summary */}
+            <div className={cn("p-4 rounded-xl border", ds.colors.surface.card, ds.colors.border.subtle)}>
+              <div className="flex items-center gap-2 mb-3">
+                <Building2 className="h-4 w-4 text-brand" />
+                <h3 className={cn(ds.typography.size.sm, ds.typography.weight.semibold, ds.colors.text.primary)}>
+                  Fornecedores ({selectedSuppliers.length})
+                </h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedSuppliers.map(s => (
+                  <span key={s.id} className={cn(
+                    "px-2 py-1 rounded-md text-[10px] uppercase tracking-wider font-bold border",
+                    ds.colors.surface.section, ds.colors.border.subtle, ds.colors.text.secondary
+                  )}>
+                    {s.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Observations */}
+            <div className="space-y-2">
+              <label className={ds.components.input.label}>Observações (opcional)</label>
+              <Textarea
+                placeholder="Alguma observação para os fornecedores?"
+                value={form.watch("observacoes") || ""}
+                onChange={(e) => form.setValue("observacoes", e.target.value)}
+                className={cn(ds.components.input.root, "min-h-[80px] text-sm")}
+              />
+            </div>
+          </div>
+
+          <DrawerFooter className="border-t border-border dark:border-white/5/50 pt-3 pb-4 flex-shrink-0 flex-row gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowConfirmDrawer(false)}
+              className={cn(ds.components.button.secondary, "flex-1 h-11")}
+            >
+              Voltar
+            </Button>
+            <Button
+              type="submit"
+              form="quote-form-mobile"
+              disabled={isSubmitting}
+              className={cn(ds.components.button.primary, "flex-1 h-11 font-bold")}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Criando...
+                </>
+              ) : (
+                "Confirmar e Criar"
+              )}
+            </Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
