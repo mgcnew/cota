@@ -20,8 +20,9 @@ import {
   Package, Plus, Trash2, DollarSign,
   Building2, MoreVertical, Eye, CheckCircle2,
   PackageOpen, Loader2, ClipboardList, ShoppingCart, BarChart3, TrendingDown, Calculator,
-  CircleCheck
+  CircleCheck, PiggyBank
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger
@@ -47,10 +48,17 @@ import {
   ResumoPackagingQuoteDialog
 } from "./embalagens";
 
+const SUBTABS = [
+  { value: "cotacoes", icon: ClipboardList, label: "Cotações" },
+  { value: "pedidos",  icon: ShoppingCart,  label: "Pedidos"  },
+  { value: "analise",  icon: BarChart3,     label: "Análise"  },
+  { value: "economia", icon: PiggyBank,     label: "Poupança" },
+];
+
 function EmbalagensTab() {
   const { isMobile } = useBreakpoint();
   const { paginate } = usePagination<PackagingQuoteDisplay>({ initialItemsPerPage: isMobile ? 8 : 10 });
-  const [activeSubTab, setActiveSubTab] = useState("hub");
+  const [activeSubTab, setActiveSubTab] = useState("cotacoes");
   const [searchTerm, setSearchTerm] = useState("");
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -172,111 +180,54 @@ function EmbalagensTab() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Hub Central Navigation */}
-      {activeSubTab === "hub" && (
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-            <div className="text-center md:text-left">
-              <h2 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">Portal de Embalagens</h2>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Gerencie fluxos e acompanhe o balanço de compras deste setor.</p>
-            </div>
-            
-            <div className="flex w-full md:w-auto items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setItemsDialogOpen(true)}
-                className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
-              >
-                <Package className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Gestão de Itens</span>
-              </Button>
-              <Button
-                onClick={() => setAddDialogOpen(true)}
-                className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 md:flex-auto h-11 md:h-10 rounded-xl shadow-sm transition-colors")}
-              >
-                <Plus className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Nova Cotação</span>
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { id: "cotacoes", icon: ClipboardList, label: "Cotações", desc: "Gerencie orçamentos e compare preços", badge: stats.prontasParaDecisao },
-              { id: "pedidos", icon: ShoppingCart, label: "Pedidos", desc: "Acompanhe reposições geradas" },
-              { id: "analise", icon: BarChart3, label: "Análise", desc: "Métricas gerenciais gerais" },
-              { id: "economia", icon: Calculator, label: "Poupança", desc: "Monitoramento de saving" }
-            ].map(card => (
-              <button 
-                key={card.id}
-                onClick={() => setActiveSubTab(card.id)}
-                className="group relative flex flex-col items-start p-6 bg-white dark:bg-zinc-950/60 border border-border dark:border-white/5/80 rounded-2xl text-left transition-all hover:bg-zinc-50/80 dark:hover:bg-zinc-900/60 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)]"
-              >
-                <div className="p-3 bg-zinc-100 dark:bg-zinc-800/80 rounded-xl mb-5 text-zinc-600 dark:text-zinc-400 group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors">
-                  <card.icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100 mb-1.5">{card.label}</h3>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 leading-relaxed max-w-[90%]">{card.desc}</p>
-                
-                {card.badge ? (
-                  <span className="absolute top-6 right-6 px-2.5 py-0.5 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-[10px] uppercase font-bold tracking-wider rounded-full shadow-sm animate-in zoom-in-50">
-                    {card.badge}
-                  </span>
-                ) : null}
-              </button>
-            ))}
-          </div>
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className={cn("text-base font-bold truncate", designSystem.colors.text.primary)}>
+            Portal de Embalagens
+          </h2>
+          <p className={cn("text-xs mt-0.5 hidden sm:block", designSystem.colors.text.secondary)}>
+            Gerencie fluxos e acompanhe o balanço de compras deste setor.
+          </p>
         </div>
-      )}
-
-      {/* Internal Navigation Header (When deeply navigated) */}
-      {activeSubTab !== "hub" && (
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-b border-border dark:border-white/5/80 pb-4 mb-4 animate-in slide-in-from-top-4 duration-300">
-          <div className="flex items-center justify-between w-full sm:w-auto">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" onClick={() => setActiveSubTab("hub")} className="rounded-full shadow-none bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 h-9 w-9">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              </Button>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 capitalize">
-                {activeSubTab === "cotacoes" ? "Cotações de Embalagem" : activeSubTab} 
-              </h2>
-            </div>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            {!isMobile && (
-              <Button
-                variant="outline"
-                onClick={() => setItemsDialogOpen(true)}
-                className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm")}
-              >
-                <Package className="h-4 w-4 mr-2" />
-                Gestão de Itens
-              </Button>
-            )}
-            {activeSubTab === "cotacoes" && (
-              <Button
-                onClick={() => setAddDialogOpen(true)}
-                className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "flex-1 sm:flex-auto h-9 rounded-xl shadow-none text-sm transition-colors")}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Cotação
-              </Button>
-            )}
-          </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button
+            variant="outline"
+            size={isMobile ? "icon" : "default"}
+            onClick={() => setItemsDialogOpen(true)}
+            className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "h-9 rounded-xl shadow-none text-sm")}
+            title="Gestão de Itens"
+          >
+            <Package className={cn("h-4 w-4", !isMobile && "mr-2")} />
+            {!isMobile && "Gestão de Itens"}
+          </Button>
+          {activeSubTab === "cotacoes" && (
+            <Button
+              onClick={() => setAddDialogOpen(true)}
+              className={cn(designSystem.components.button.base, designSystem.components.button.variants.primary, "h-9 rounded-xl shadow-none text-sm")}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Nova Cotação
+            </Button>
+          )}
         </div>
-      )}
+      </div>
 
-      {isMobile && activeSubTab !== "hub" && (
-        <Button
-          variant="outline"
-          onClick={() => setItemsDialogOpen(true)}
-          className={cn(designSystem.components.button.base, designSystem.components.button.variants.secondary, "w-full h-11 rounded-2xl shadow-sm my-4")}
-        >
-          <Package className="h-4 w-4 mr-2" />
-          Gerenciar Itens de Embalagem
-        </Button>
-      )}
+      {/* Tab Bar */}
+      <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
+        <TabsList variant="line" className="overflow-x-auto [&::-webkit-scrollbar]:hidden w-full">
+          {SUBTABS.map(t => (
+            <TabsTrigger key={t.value} value={t.value} variant="line" className="gap-1.5 whitespace-nowrap relative">
+              <t.icon className={cn("h-3.5 w-3.5 transition-colors", activeSubTab === t.value ? "text-brand" : "opacity-40")} />
+              {t.label}
+              {t.value === "cotacoes" && stats.prontasParaDecisao > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-brand" />
+              )}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {/* Cotações Content */}
       {activeSubTab === "cotacoes" && (
