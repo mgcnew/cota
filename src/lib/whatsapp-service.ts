@@ -431,7 +431,7 @@ export function generateQuoteReportHTML(opts: {
   /* ── Tabs ── */
   .tab-bar{display:flex;gap:0;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:4px;margin-bottom:16px}
   .tab-btn{flex:1;padding:9px 12px;border:none;background:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-  .tab-btn.active{background:#0f172a;color:#f8fafc;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .tab-btn.active{background:#1d4ed8;color:#fff;box-shadow:0 1px 3px rgba(29,78,216,.3)}
   .tab-btn:not(.active):hover{background:#f1f5f9;color:#0f172a}
   .tab-icon{font-size:13px;line-height:1}
 
