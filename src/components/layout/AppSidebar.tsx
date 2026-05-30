@@ -16,6 +16,7 @@ import {
   Flag,
   StickyNote,
   ScanLine,
+  Archive,
   ChevronDown,
   ChevronRight,
   PanelLeftClose,
@@ -86,7 +87,8 @@ const menuCategories: MenuCategory[] = [
   {
     title: "Operações",
     items: [
-      { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart }
+      { title: "Compras", url: "/dashboard/compras", icon: ShoppingCart },
+      { title: "Embalagens", url: "/dashboard/embalagens", icon: Archive }
     ]
   },
   // { title: "Estoque", items: [{ title: "Contagem de Estoque", url: "/dashboard/contagem-estoque", icon: ClipboardList }] },
