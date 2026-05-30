@@ -1023,14 +1023,10 @@ export function ManagePackagingQuoteDialog({
                   <DropdownMenuItem onClick={() => setActiveTab("exportar")} className="gap-2 py-2 cursor-pointer">
                     <FileDown className="h-4 w-4 text-muted-foreground" />Exportar PDF/HTML
                   </DropdownMenuItem>
-                  {isPronta && (
-                    <>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => setActiveTab("converter")} className="gap-2 py-2 cursor-pointer text-brand focus:text-brand focus:bg-brand/10">
-                        <ShoppingCart className="h-4 w-4" />Converter em Pedido
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setActiveTab("converter")} className="gap-2 py-2 cursor-pointer text-brand focus:text-brand focus:bg-brand/10">
+                    <ShoppingCart className="h-4 w-4" />Converter em Pedido
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
