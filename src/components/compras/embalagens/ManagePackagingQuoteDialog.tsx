@@ -25,11 +25,12 @@ import { Card } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePackagingQuotes } from "@/hooks/usePackagingQuotes";
 import { usePackagingOrders } from "@/hooks/usePackagingOrders";
-import { 
-  Package, Building2, DollarSign, CheckCircle2, Clock, 
+import {
+  Package, Building2, DollarSign, CheckCircle2, Clock,
   TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info,
-  Copy, Check, MessageCircle, ShoppingCart
+  Copy, Check, MessageCircle, ShoppingCart, MoreHorizontal, Send
 } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -43,12 +44,25 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { ResumoTab } from "./quote-tabs/ResumoTab";
 import { TabSkeleton, ValoresTabSkeleton } from "./quote-tabs/TabSkeleton";
+import { generateWhatsAppMessage } from "@/lib/gemini";
+import { sendWhatsApp } from "@/lib/whatsapp-service";
 
 // Lazy load heavy tabs
 const ComparativoTab = lazy(() => import("./quote-tabs/ComparativoTab").then(m => ({ default: m.ComparativoTab })));
 const ExportarTab = lazy(() => import("./quote-tabs/ExportarTab").then(m => ({ default: m.ExportarTab })));
-const WhatsappTab = lazy(() => import("./quote-tabs/WhatsappTab").then(m => ({ default: m.WhatsappTab })));
 const ConvertTab = lazy(() => import("./quote-tabs/ConvertTab").then(m => ({ default: m.ConvertTab })));
+
+async function getShortLink(tokens: string): Promise<string | null> {
+  try {
+    const { data: existing } = await supabase
+      .from('short_links').select('id').eq('original_tokens', tokens).maybeSingle();
+    if (existing) return existing.id;
+    const slug = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const { error } = await supabase.from('short_links').insert([{ id: slug, original_tokens: tokens }]);
+    if (error) throw error;
+    return slug;
+  } catch { return null; }
+}
 
 
 interface Props {
@@ -237,6 +251,56 @@ export function ManagePackagingQuoteDialog({
   }, [quote, bestPricesData, toast]);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sentIds, setSentIds] = useState<Set<string>>(new Set());
+  const [sendingId, setSendingId] = useState<string | null>(null);
+
+  const isPronta = useMemo(() => {
+    if (!quote) return false;
+    const resp = quote.fornecedores.filter(f => f.status === "respondido").length;
+    return quote.status === "ativa" && resp === quote.fornecedores.length && quote.fornecedores.length > 0;
+  }, [quote]);
+
+  const handleSendWhatsApp = useCallback(async (supplierId: string) => {
+    if (!quote) return;
+    const fornecedor = quote.fornecedores.find(f => f.supplierId === supplierId);
+    const fullData = availableSuppliers.find(s => s.id === supplierId);
+    if (!fornecedor) return;
+    setSendingId(supplierId);
+    try {
+      const phone = fullData?.phone;
+      const contact = fullData?.contact || fornecedor.supplierName;
+      const accessToken = (fornecedor as any).access_token;
+      let msg = await generateWhatsAppMessage(contact, quote.itens, !!accessToken, true);
+      if (accessToken) {
+        const baseUrl = "https://cotaja.vercel.app";
+        const shortId = await getShortLink(accessToken);
+        msg += shortId ? `\n${baseUrl}/r/${shortId}\n\n` : `\n${baseUrl}/responder/${accessToken}\n\n`;
+      }
+      if (phone) {
+        const result = await sendWhatsApp(phone, msg) as any;
+        if (!result?.success) {
+          window.open(`https://wa.me/55${phone.replace(/\D/g, "")}?text=${encodeURIComponent(msg)}`, "_blank");
+        } else {
+          toast({ title: "Enviado!", description: `WhatsApp enviado para ${fornecedor.supplierName}.` });
+        }
+      } else {
+        navigator.clipboard.writeText(msg);
+        toast({ title: "Sem telefone cadastrado", description: "Mensagem copiada para a área de transferência." });
+      }
+      setSentIds(prev => new Set(prev).add(supplierId));
+    } catch {
+      toast({ title: "Erro ao enviar", variant: "destructive" });
+    } finally {
+      setSendingId(null);
+    }
+  }, [quote, availableSuppliers, toast]);
+
+  const handleSendWhatsAppAll = useCallback(async () => {
+    if (!quote) return;
+    for (const f of quote.fornecedores) {
+      if (!sentIds.has(f.supplierId)) await handleSendWhatsApp(f.supplierId);
+    }
+  }, [quote, sentIds, handleSendWhatsApp]);
 
   const handleCopySupplierSummary = useCallback((group: any) => {
     try {
@@ -916,45 +980,88 @@ export function ManagePackagingQuoteDialog({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border dark:border-white/5/50 bg-muted/30">
-            <TabsList className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-background rounded-lg border border-border dark:border-white/5/50 shadow-sm justify-start sm:justify-center w-full sm:w-auto h-auto">
-              <TabsTrigger value="resumo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <Trophy className="h-3 w-3" />Resumo
-              </TabsTrigger>
-              {quote?.status !== "concluida" && (
-                <>
-                  <TabsTrigger value="editar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                    <Settings className="h-3 w-3" />Editar
-                  </TabsTrigger>
-                  <TabsTrigger value="valores" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                    <DollarSign className="h-3 w-3" />Valores
-                  </TabsTrigger>
-                </>
-              )}
-              <TabsTrigger value="comparativo" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <TrendingDown className="h-3 w-3" />Comparativo
-              </TabsTrigger>
-              <TabsTrigger value="exportar" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <FileDown className="h-3 w-3" />Exportar
-              </TabsTrigger>
-              <TabsTrigger value="whatsapp" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <MessageCircle className="h-3 w-3" />WhatsApp
-              </TabsTrigger>
-              <TabsTrigger value="converter" className="flex-1 sm:flex-none items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap data-[state=active]:bg-brand/10 data-[state=active]:text-brand data-[state=active]:shadow-sm data-[state=active]:border data-[state=active]:border-brand/30 text-muted-foreground hover:text-foreground hover:bg-muted">
-                <ShoppingCart className="h-3 w-3" />Pedido
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <div className="flex-shrink-0 border-b border-border dark:border-white/5 bg-muted/20">
 
-          {/* Tab WhatsApp */}
-          <TabsContent value="whatsapp" className="flex-1 overflow-hidden m-0 p-0">
-            <Suspense fallback={<TabSkeleton />}>
-              <WhatsappTab
-                quote={quote}
-                availableSuppliers={availableSuppliers}
-              />
-            </Suspense>
-          </TabsContent>
+            {/* Mobile: 3 tabs + "Mais" dropdown */}
+            <div className="flex md:hidden">
+              <TabsList className="flex-1 grid grid-cols-3 h-auto p-0 bg-transparent rounded-none border-none shadow-none gap-0">
+                {[
+                  { value: "resumo",      icon: <Trophy className="h-4 w-4" />,      label: "Resumo"  },
+                  { value: "valores",     icon: <DollarSign className="h-4 w-4" />,  label: "Valores" },
+                  { value: "comparativo", icon: <TrendingDown className="h-4 w-4" />, label: "Comparar" },
+                ].map(tab => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="flex flex-col items-center gap-1 py-2.5 h-auto rounded-none bg-transparent data-[state=active]:bg-transparent data-[state=active]:text-brand data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-brand text-muted-foreground border-b-2 border-transparent transition-colors"
+                  >
+                    {tab.icon}
+                    <span className="text-[9px] font-bold uppercase tracking-wider">{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {/* "Mais" — navigates to hidden tabs */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className={cn(
+                    "flex flex-col items-center gap-1 py-2.5 px-4 transition-colors min-w-[64px] border-b-2",
+                    ["editar","exportar","converter"].includes(activeTab)
+                      ? "text-brand border-brand"
+                      : "text-muted-foreground border-transparent hover:text-foreground"
+                  )}>
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="text-[9px] font-bold uppercase tracking-wider">Mais</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52 rounded-xl">
+                  {quote?.status !== "concluida" && (
+                    <DropdownMenuItem onClick={() => setActiveTab("editar")} className="gap-2 py-2 cursor-pointer">
+                      <Settings className="h-4 w-4 text-muted-foreground" />Editar Cotação
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => setActiveTab("exportar")} className="gap-2 py-2 cursor-pointer">
+                    <FileDown className="h-4 w-4 text-muted-foreground" />Exportar PDF/HTML
+                  </DropdownMenuItem>
+                  {isPronta && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setActiveTab("converter")} className="gap-2 py-2 cursor-pointer text-brand focus:text-brand focus:bg-brand/10">
+                        <ShoppingCart className="h-4 w-4" />Converter em Pedido
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Desktop: scrollable pill bar */}
+            <div className="hidden md:flex px-4 py-2.5">
+              <TabsList className="flex gap-0.5 p-1 bg-background rounded-lg border border-border dark:border-white/5 shadow-sm h-auto">
+                {[
+                  { value: "resumo",      icon: <Trophy className="h-3 w-3" />,      label: "Resumo",      show: true },
+                  { value: "editar",      icon: <Settings className="h-3 w-3" />,    label: "Editar",      show: quote?.status !== "concluida" },
+                  { value: "valores",     icon: <DollarSign className="h-3 w-3" />,  label: "Valores",     show: quote?.status !== "concluida" },
+                  { value: "comparativo", icon: <TrendingDown className="h-3 w-3" />, label: "Comparativo", show: true },
+                  { value: "exportar",    icon: <FileDown className="h-3 w-3" />,    label: "Exportar",    show: true },
+                  { value: "converter",   icon: <ShoppingCart className="h-3 w-3" />, label: "Pedido",     show: true },
+                ].filter(t => t.show).map(tab => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap text-muted-foreground hover:text-foreground hover:bg-muted",
+                      tab.value === "converter"
+                        ? "data-[state=active]:bg-brand/10 data-[state=active]:text-brand data-[state=active]:shadow-sm"
+                        : "data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+                    )}
+                  >
+                    {tab.icon}{tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
+          </div>
 
           {/* Tab Resumo */}
           <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0">
@@ -1098,8 +1205,8 @@ export function ManagePackagingQuoteDialog({
             <div className="h-full flex flex-col md:flex-row">
               <div className="w-full md:w-60 lg:w-64 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/10 flex flex-col">
                 {isMobile ? (
-                  <div className="p-3">
-                    <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1.5 block">Selecionar Fornecedor</Label>
+                  <div className="p-3 space-y-2">
+                    <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Selecionar Fornecedor</Label>
                     <Select value={selectedSupplier} onValueChange={setSelectedSupplier}>
                       <SelectTrigger className="w-full h-10 bg-background border-input">
                         <SelectValue placeholder="Selecione um fornecedor..." />
@@ -1110,33 +1217,95 @@ export function ManagePackagingQuoteDialog({
                             <div className="flex items-center gap-2">
                               <span>{fornecedor.supplierName}</span>
                               {fornecedor.status === "respondido" && <CheckCircle2 className="h-3 w-3 text-emerald-500" />}
+                              {sentIds.has(fornecedor.supplierId) && <MessageCircle className="h-3 w-3 text-emerald-500" />}
                             </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => selectedSupplier && handleSendWhatsApp(selectedSupplier)}
+                        disabled={!selectedSupplier || sendingId === selectedSupplier}
+                        className={cn(
+                          "flex-1 h-9 text-xs font-bold gap-1.5",
+                          selectedSupplier && sentIds.has(selectedSupplier)
+                            ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            : "bg-[#25D366] hover:bg-[#20BA5A] text-white"
+                        )}
+                      >
+                        {sendingId === selectedSupplier
+                          ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          : selectedSupplier && sentIds.has(selectedSupplier)
+                            ? <><CheckCircle2 className="h-3.5 w-3.5" />Reenviar</>
+                            : <><MessageCircle className="h-3.5 w-3.5" />WhatsApp</>
+                        }
+                      </Button>
+                      {sentIds.size < quote.fornecedores.length && (
+                        <Button
+                          size="sm" variant="outline"
+                          onClick={handleSendWhatsAppAll}
+                          className="h-9 px-3 text-xs font-bold gap-1.5 border-border"
+                          title="Enviar para todos"
+                        >
+                          <Send className="h-3.5 w-3.5" />Todos
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <>
-                    <div className="px-4 py-3 border-b border-border dark:border-white/5 flex-shrink-0"><h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</h4></div>
+                    <div className="px-3 py-2.5 border-b border-border dark:border-white/5 flex-shrink-0 flex items-center justify-between gap-2">
+                      <h4 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</h4>
+                      {quote.fornecedores.length > 0 && sentIds.size < quote.fornecedores.length && (
+                        <button
+                          onClick={handleSendWhatsAppAll}
+                          className="text-[10px] font-bold text-muted-foreground/50 hover:text-[#25D366] transition-colors flex items-center gap-1"
+                          title="Enviar WhatsApp para todos"
+                        >
+                          <Send className="h-3 w-3" />Todos
+                        </button>
+                      )}
+                    </div>
                     <ScrollArea className="flex-1">
                       <div className="p-2 space-y-1 pb-6">
                         {quote.fornecedores.map((fornecedor) => (
-                          <button key={fornecedor.supplierId} onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                            className={cn("w-full p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background border",
-                              selectedSupplier === fornecedor.supplierId 
-                                ? "bg-card text-foreground shadow-sm border-border/50 font-bold" 
-                                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent")}
-                            title={fornecedor.supplierName}>
-                            <div className="flex items-center gap-2.5">
-                              <Building2 className={cn("h-4 w-4 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-brand" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
-                              <span className="truncate text-xs tracking-tight">{fornecedor.supplierName}</span>
-                              {fornecedor.status === "respondido" 
-                                ? <CheckCircle2 className={cn("h-4 w-4 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-brand" : "text-brand")} />
-                                : <Clock className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-muted-foreground" : "text-muted-foreground/40")} />
+                          <div key={fornecedor.supplierId} className="flex items-center gap-1">
+                            <button onClick={() => setSelectedSupplier(fornecedor.supplierId)}
+                              className={cn("flex-1 p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background border",
+                                selectedSupplier === fornecedor.supplierId
+                                  ? "bg-card text-foreground shadow-sm border-border/50 font-bold"
+                                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent")}
+                              title={fornecedor.supplierName}>
+                              <div className="flex items-center gap-2.5">
+                                <Building2 className={cn("h-4 w-4 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-brand" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
+                                <span className="truncate text-xs tracking-tight">{fornecedor.supplierName}</span>
+                                {fornecedor.status === "respondido"
+                                  ? <CheckCircle2 className="h-4 w-4 ml-auto flex-shrink-0 text-brand" />
+                                  : <Clock className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-muted-foreground" : "text-muted-foreground/40")} />
+                                }
+                              </div>
+                            </button>
+                            <button
+                              onClick={() => handleSendWhatsApp(fornecedor.supplierId)}
+                              disabled={sendingId === fornecedor.supplierId}
+                              title="Enviar WhatsApp"
+                              className={cn(
+                                "p-2 rounded-lg transition-colors flex-shrink-0",
+                                sentIds.has(fornecedor.supplierId)
+                                  ? "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20"
+                                  : "text-muted-foreground/30 hover:text-[#25D366] hover:bg-[#25D366]/10"
+                              )}
+                            >
+                              {sendingId === fornecedor.supplierId
+                                ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                : sentIds.has(fornecedor.supplierId)
+                                  ? <CheckCircle2 className="h-3.5 w-3.5" />
+                                  : <MessageCircle className="h-3.5 w-3.5" />
                               }
-                            </div>
-                          </button>
+                            </button>
+                          </div>
                         ))}
                       </div>
                     </ScrollArea>

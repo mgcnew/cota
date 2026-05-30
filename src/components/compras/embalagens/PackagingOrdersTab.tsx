@@ -20,12 +20,13 @@ import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 import {
   ShoppingCart, Plus, Trash2, Calendar, DollarSign,
   Building2, MoreVertical, CheckCircle2, Clock,
-  Loader2, Package, Truck, Eye, CircleDot
+  Loader2, Package, Truck, Eye, CircleDot, SlidersHorizontal
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 import { PACKAGING_ORDER_STATUS } from "@/types/packaging";
 import { cn } from "@/lib/utils";
@@ -116,15 +117,9 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      {isMobile ? (
-        <MobileMetricRibbon>
-          <MobileMetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
-          <MobileMetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
-          <MobileMetricCard title="Confirmados" value={stats.confirmados.toString()} icon={CheckCircle2} variant="info" />
-          <MobileMetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
-        </MobileMetricRibbon>
-      ) : (
+    <div className="space-y-4">
+      {/* Métricas — desktop only */}
+      {!isMobile && (
         <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
           <MetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
           <MetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
@@ -133,73 +128,82 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
         </ResponsiveGrid>
       )}
 
-      {/* Unified Container for Filters + Table + Pagination */}
-      <div className={cn(
-        "flex flex-col w-full transition-all duration-300",
-        !isMobile && "bg-white dark:bg-zinc-950/40 border border-border dark:border-white/5 rounded-3xl overflow-hidden shadow-sm p-6"
-      )}>
-        {/* Filters Section */}
-        <div className={cn("mb-6", isMobile && "px-1")}>
-          <div className="flex flex-col lg:flex-row lg:items-center gap-4 w-full">
-            {/* Search Field */}
-            <div className="flex-1 max-w-xl">
-              <SearchInput
-                value={searchTerm}
-                onChange={setSearchTerm}
-                placeholder="Buscar pedidos..."
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 lg:ml-auto">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px] h-11 bg-white dark:bg-background border border-border dark:border-white/5 focus:ring-2 focus:ring-brand/20 dark:focus:ring-brand/10 rounded-lg shadow-sm text-zinc-900 dark:text-zinc-100 transition-all">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos os Status</SelectItem>
-                  {PACKAGING_ORDER_STATUS.map(s => (
-                    <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button 
-                onClick={onCreateOrder} 
-                className={cn(ds.components.button.base, ds.components.button.variants.primary, "h-11 px-6 w-full sm:w-auto")}
-              >
-                <Plus className="h-4 w-4 mr-2" />Novo Pedido
-              </Button>
-            </div>
+      {/* Unified Container */}
+      <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm">
+        {/* Action bar */}
+        <div className="flex flex-wrap items-center gap-2.5 px-3.5 py-2.5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <SearchInput value={searchTerm} onChange={setSearchTerm} placeholder="Pesquisar..." />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 shrink-0 gap-1.5 text-sm">
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Status</span>
+                  {statusFilter !== "all" && (
+                    <span className="inline-flex items-center justify-center h-4 min-w-4 px-1 text-[10px] font-bold bg-brand text-white rounded-full">1</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-52 p-1.5" align="start">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground px-2 py-1.5">Filtrar por status</p>
+                {[{ value: "all", label: "Todos os Status" }, ...PACKAGING_ORDER_STATUS].map(item => (
+                  <button
+                    key={item.value}
+                    onClick={() => setStatusFilter(item.value)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-1.5 text-sm rounded-md transition-colors",
+                      statusFilter === item.value ? "bg-brand text-white font-medium" : "text-foreground hover:bg-muted"
+                    )}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button onClick={onCreateOrder} className={cn(ds.components.button.primary, "h-9 px-4")}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              <span className="hidden sm:inline">Novo Pedido</span>
+              <span className="sm:hidden">Novo</span>
+            </Button>
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="flex-1 min-h-0">
+        {/* Content */}
+        <div className="w-full">
           {paginatedData.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-24 text-center rounded-3xl border-2 border-dashed border-border dark:border-white/5">
+            <div className="flex flex-col items-center justify-center py-24 text-center">
               <ShoppingCart className="h-16 w-16 text-zinc-300 dark:text-zinc-700 mb-6" />
               <p className="text-zinc-500 font-medium">Nenhum pedido de embalagem encontrado</p>
-              <Button className={cn(ds.components.button.base, ds.components.button.variants.secondary, "mt-6")} onClick={onCreateOrder}>
+              <Button variant="outline" className="mt-6 rounded-xl" onClick={onCreateOrder}>
                 <Plus className="h-4 w-4 mr-2" />Criar Primeiro Pedido
               </Button>
             </div>
-          ) : isMobile ? (
-            <div className="space-y-3 px-1">
-              {paginatedData.items.map((order, index) => {
-                const numero = paginatedData.pagination.startIndex + index + 1;
-                return (
-                  <MobilePackagingOrderCard
-                    key={order.id}
-                    order={order}
-                    orderNumber={numero}
-                    onViewDetails={handleViewDetails}
-                    onUpdateStatus={handleUpdateStatus}
-                    onConfirmDelivery={handleConfirmDelivery}
-                    onDelete={handleDelete}
-                  />
-                );
-              })}
-            </div>
           ) : (
+            <>
+              {/* Mobile cards */}
+              <div className="md:hidden">
+                <div className="space-y-3 p-2 pb-24">
+                  {paginatedData.items.map((order, index) => {
+                    const numero = paginatedData.pagination.startIndex + index + 1;
+                    return (
+                      <MobilePackagingOrderCard
+                        key={order.id}
+                        order={order}
+                        orderNumber={numero}
+                        onViewDetails={handleViewDetails}
+                        onUpdateStatus={handleUpdateStatus}
+                        onConfirmDelivery={handleConfirmDelivery}
+                        onDelete={handleDelete}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Desktop table */}
+              <div className="hidden md:block p-6">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -311,6 +315,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                 })}
               </TableBody>
             </Table>
+              </div>
+            </>
           )}
         </div>
 

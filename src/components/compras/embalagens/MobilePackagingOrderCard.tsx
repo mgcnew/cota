@@ -1,14 +1,15 @@
-﻿import { memo, useCallback } from "react";
+import { memo } from "react";
 import { Button } from "@/components/ui/button";
-import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { Badge } from "@/components/ui/badge";
-import { 
-  ShoppingCart, Eye, CheckCircle2, Truck, Trash2, 
-  DollarSign, Calendar, TrendingDown, Package
+import { CapitalizedText } from "@/components/ui/capitalized-text";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Eye, Trash2, MoreVertical, CheckCircle2, Truck, Calendar, Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingOrderDisplay } from "@/types/packaging";
 
@@ -21,193 +22,139 @@ interface MobilePackagingOrderCardProps {
   onDelete: (orderId: string) => void;
 }
 
-/**
- * MobilePackagingOrderCard - Redesigned Premium Floating Card for Packaging Orders
- * Aligned with the application's modern floating-card design system.
- */
+const STATUS_ACCENT: Record<string, string> = {
+  entregue:   "bg-emerald-500",
+  confirmado: "bg-blue-500",
+  pendente:   "bg-amber-400",
+  cancelado:  "bg-red-400",
+};
+
 export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
   order,
   orderNumber,
   onViewDetails,
   onUpdateStatus,
   onConfirmDelivery,
-  onDelete
+  onDelete,
 }: MobilePackagingOrderCardProps) {
 
-  const handleViewDetails = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onViewDetails(order);
-  }, [onViewDetails, order]);
+  const isEntregue = order.status === "entregue";
+  const isConfirmado = order.status === "confirmado";
+  const isPendente = order.status === "pendente";
 
-  const handleConfirm = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onUpdateStatus(order.id, 'confirmado');
-  }, [onUpdateStatus, order.id]);
+  const accent = STATUS_ACCENT[order.status] ?? "bg-zinc-400";
 
-  const handleConfirmDelivery = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onConfirmDelivery(order);
-  }, [onConfirmDelivery, order]);
+  const supplierLabel = order.supplierName;
+  const itemsLabel = order.itens.length > 0
+    ? order.itens.slice(0, 2).map(i => i.packagingName).join(", ") + (order.itens.length > 2 ? ` +${order.itens.length - 2}` : "")
+    : "Sem itens";
 
-  const handleDelete = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(order.id);
-  }, [onDelete, order.id]);
+  const ctaLabel = isEntregue
+    ? "Ver Detalhes"
+    : isConfirmado
+      ? "Marcar Entregue"
+      : "Confirmar Pedido";
 
-  const isDelivered = order.status === 'entregue';
-  const isConfirmed = order.status === 'confirmado';
-  const isPending = order.status === 'pendente';
+  const ctaIcon = isEntregue
+    ? <Eye className="h-3.5 w-3.5" />
+    : isConfirmado
+      ? <Truck className="h-3.5 w-3.5" />
+      : <CheckCircle2 className="h-3.5 w-3.5" />;
+
+  const handleCTA = () => {
+    if (isEntregue) onViewDetails(order);
+    else if (isConfirmado) onConfirmDelivery(order);
+    else onUpdateStatus(order.id, "confirmado");
+  };
 
   return (
-    <div 
-      onClick={() => onViewDetails(order)}
-      className={cn(
-        ds.components.card.root,
-        ds.components.card.interactive,
-        "group relative overflow-hidden"
-      )}
-    >
-      <div className="p-4">
-        {/* Header Section */}
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border transition-colors",
-              isDelivered 
-                ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700/50 text-emerald-600 dark:text-emerald-400"
-                : isConfirmed
-                ? "bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700/50 text-blue-600 dark:text-blue-400"
-                : "bg-brand/10 dark:bg-brand/20 border-brand/10 text-brand"
-            )}>
-              {isDelivered ? (
-                <CheckCircle2 className="h-5 w-5" />
-              ) : isConfirmed ? (
-                <Package className="h-5 w-5" />
-              ) : (
-                <ShoppingCart className="h-5 w-5" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-[15px] text-zinc-900 dark:text-zinc-100 truncate leading-tight">
-                <CapitalizedText>{order.supplierName}</CapitalizedText>
-              </h3>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">
-                #{orderNumber.toString().padStart(4, '0')} â€¢ {order.orderDate}
-              </p>
-            </div>
+    <div className="relative bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
+      {/* Left accent */}
+      <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-xl", accent)} />
+
+      <div className="pl-4 pr-3 py-3">
+        {/* Top row: supplier name + total value + menu */}
+        <div className="flex items-start gap-3">
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] font-semibold text-foreground truncate leading-tight">
+              <CapitalizedText>{supplierLabel}</CapitalizedText>
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              #{orderNumber.toString().padStart(4, "0")} · <CapitalizedText as="span">{itemsLabel}</CapitalizedText>
+            </p>
           </div>
-          
-          <div className="text-right flex-shrink-0">
-            <span className="text-[10px] font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-0.5">
-              Valor Total
-            </span>
-            <span className="text-sm font-black text-zinc-900 dark:text-zinc-100">
+
+          <div className="text-right shrink-0 mr-1">
+            <p className="text-[13px] font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
               {formatCurrency(order.totalValue)}
-            </span>
+            </p>
+            <p className="text-[10px] text-muted-foreground/60">valor total</p>
           </div>
-        </div>
 
-        {/* Items Pills Row */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {order.itens.slice(0, 3).map(item => (
-            <Badge 
-              key={item.id} 
-              variant="secondary" 
-              className="bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold px-2 py-0.5 rounded-full border-none"
-            >
-              <Package className="h-2.5 w-2.5 mr-1 opacity-50" />
-              {item.quantidade} {item.packagingName}
-            </Badge>
-          ))}
-          {order.itens.length > 3 && (
-            <Badge variant="outline" className="text-[10px] rounded-full border-border dark:border-white/5 px-2 py-0.5">
-              +{order.itens.length - 3} itens
-            </Badge>
-          )}
-        </div>
-
-        {/* Status and Metrics Row */}
-        <div className="flex items-center justify-between mb-5">
-          <div className="flex items-center gap-2">
-            <StatusBadge 
-              status={order.status} 
-              className="px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider h-auto"
-            />
-            {order.deliveryDate && !isDelivered && (
-              <span className="flex items-center gap-1 px-2 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                <Calendar className="h-3 w-3" />
-                {order.deliveryDate}
-              </span>
-            )}
-          </div>
-          
-          {order.economiaEstimada > 0 && (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400">
-              <TrendingDown className="h-3.5 w-3.5" />
-              <span className="text-xs font-bold">
-                -{formatCurrency(order.economiaEstimada)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Actions */}
-        <div className="flex items-center gap-2 pt-4 border-t border-border dark:border-white/5/50">
-          <div className="flex-1 flex gap-2">
-            <Button
-              onClick={handleViewDetails}
-              variant="outline"
-              className={cn(
-                ds.components.button.base,
-                ds.components.button.variants.secondary,
-                "flex-1 h-11 rounded-xl font-bold text-xs"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-95 transition-all shrink-0 touch-manipulation">
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem onClick={() => onViewDetails(order)} className="gap-2">
+                <Eye className="h-4 w-4" /> Ver Detalhes
+              </DropdownMenuItem>
+              {isPendente && (
+                <DropdownMenuItem onClick={() => onUpdateStatus(order.id, "confirmado")} className="gap-2 text-blue-600">
+                  <CheckCircle2 className="h-4 w-4" /> Confirmar Pedido
+                </DropdownMenuItem>
               )}
-            >
-              <Eye className="h-4 w-4 mr-1.5 opacity-70" />
-              Detalhes
-            </Button>
+              {(isPendente || isConfirmado) && (
+                <DropdownMenuItem onClick={() => onConfirmDelivery(order)} className="gap-2 text-emerald-600">
+                  <Truck className="h-4 w-4" /> Marcar Entregue
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onDelete(order.id)} className="gap-2 text-red-500 focus:text-red-500 focus:bg-red-50 dark:focus:bg-red-950/30">
+                <Trash2 className="h-4 w-4" /> Excluir
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-            {isPending && (
-              <Button
-                onClick={handleConfirm}
-                className={cn(
-                  ds.components.button.base,
-                  "flex-1 h-11 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/20"
-                )}
-              >
-                <CheckCircle2 className="h-4 w-4 mr-1.5" />
-                Confirmar
-              </Button>
-            )}
-
-            {isConfirmed && (
-              <Button
-                onClick={handleConfirmDelivery}
-                className={cn(
-                  ds.components.button.base,
-                  "flex-1 h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20"
-                )}
-              >
-                <Truck className="h-4 w-4 mr-1.5" />
-                Entregue
-              </Button>
+        {/* Info row */}
+        <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border dark:border-white/5">
+          <StatusBadge
+            status={order.status}
+            className="text-[10px] h-5 px-2 shrink-0"
+          />
+          <div className="flex items-center gap-3 ml-auto text-[11px] text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Package className="h-3 w-3" />
+              <span className="font-medium">{order.itens.length} item(ns)</span>
+            </span>
+            {order.deliveryDate && (
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span>{order.deliveryDate}</span>
+              </span>
             )}
           </div>
-          
-          <Button
-            onClick={handleDelete}
-            variant="outline"
-            size="icon"
-            className={cn(
-              ds.components.button.base,
-              ds.components.button.variants.secondary,
-              "h-11 w-11 rounded-xl",
-              "text-red-500 hover:text-red-600 hover:border-red-500/30 hover:bg-red-50 dark:hover:bg-red-900/20"
-            )}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
         </div>
+
+        {/* CTA */}
+        <Button
+          size="sm"
+          onClick={handleCTA}
+          className={cn(
+            "w-full mt-2.5 h-9 rounded-lg font-semibold text-xs gap-1.5",
+            isEntregue
+              ? "bg-muted text-foreground hover:bg-muted/80"
+              : isConfirmado
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                : "bg-brand hover:bg-brand/90 text-white dark:text-zinc-950"
+          )}
+        >
+          {ctaIcon}
+          {ctaLabel}
+        </Button>
       </div>
     </div>
   );
