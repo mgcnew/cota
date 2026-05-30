@@ -925,55 +925,30 @@ export function ManagePackagingQuoteDialog({
 
   const content = (
     <div className="flex flex-col h-full bg-background">
-        {/* Header Premium */}
-        <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border dark:border-white/5/50 bg-card relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand border border-brand/20 flex-shrink-0">
-                <Package className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex flex-col justify-center">
-                <DialogTitleComponent className="text-base sm:text-lg font-black text-foreground tracking-tight leading-tight truncate">
-                  Gerenciar Cotação
-                </DialogTitleComponent>
-                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <Badge 
-                    className={cn(
-                      "text-[9px] font-black uppercase tracking-wider h-5 px-2 rounded-full border shadow-none",
-                      quote.status === "ativa" 
-                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
-                        : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-zinc-200/50"
-                    )}
-                  >
-                    <span className={cn(
-                      "w-1.5 h-1.5 rounded-full mr-1.5",
-                      quote.status === "ativa" ? "bg-emerald-500 animate-pulse" : "bg-zinc-400"
-                    )} />
-                    {quote.status}
-                  </Badge>
-                  <span className="text-[9px] font-bold text-muted-foreground uppercase opacity-60">
-                    {quote.dataInicio} - {quote.dataFim}
-                  </span>
-                  <span className="text-[9px] font-bold text-muted-foreground hidden lg:inline uppercase opacity-40">
-                    â€¢ {stats.totalEmbalagens} itens â€¢ {stats.totalFornecedores} fornec. â€¢ {stats.fornecedoresRespondidos} respostas
-                  </span>
-                </div>
+        {/* Header */}
+        <div className="flex-shrink-0 px-4 sm:px-6 py-3.5 border-b border-border dark:border-white/5 bg-card">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand border border-brand/20 flex-shrink-0">
+              <Package className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <DialogTitleComponent className="text-sm font-black text-foreground tracking-tight leading-tight">
+                Gerenciar Cotação
+              </DialogTitleComponent>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="text-[10px] text-muted-foreground">
+                  {quote.dataInicio} – {quote.dataFim}
+                </span>
+                <span className="text-[10px] text-muted-foreground opacity-50 hidden sm:inline">
+                  · {stats.totalEmbalagens} itens · {stats.totalFornecedores} fornec. · {stats.fornecedoresRespondidos} respostas
+                </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
-              <Select value={quote.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-28 h-9 text-xs font-bold bg-background border-border text-foreground"><SelectValue /></SelectTrigger>
-                <SelectContent className="bg-background border-border">
-                  <SelectItem value="ativa" className="text-xs font-bold">Ativa</SelectItem>
-                  <SelectItem value="concluida" className="text-xs font-bold">Concluída</SelectItem>
-                  <SelectItem value="cancelada" className="text-xs font-bold">Cancelada</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} 
-                className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors ml-1">
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* X only on desktop — drawer closes by swipe on mobile */}
+            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}
+              className="hidden sm:flex h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors flex-shrink-0">
+              <X className="h-4 w-4" />
+            </Button>
           </div>
           <DialogDescriptionComponent className="sr-only">Gerenciar cotação de embalagens</DialogDescriptionComponent>
         </div>
