@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Truck, Package, TrendingDown,
-  Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon,
+  Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon, Scale,
 } from "lucide-react";
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,8 @@ interface ItemEntrega {
   maiorValor: number;
   fatorEmbalagem: number;
   isBoxUnit: boolean;
+  isMetadeUnit: boolean;
+  pesoKg: number;
   quantidadePorEmbalagemOriginal: number | null;
 }
 
@@ -43,13 +45,17 @@ function isBoxLikeUnit(unit: string): boolean {
   return normalized === "cx" || normalized === "caixa" || normalized === "caixas" || normalized.startsWith("cx");
 }
 
+function isMetadeLikeUnit(unit: string): boolean {
+  const normalized = unit.toLowerCase().trim();
+  return normalized === "metade" || normalized === "meia" || normalized === "1/2";
+}
+
 export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const { updateQuantidadeEntregue, isUpdating } = usePedidos();
   const [itensEntrega, setItensEntrega] = useState<ItemEntrega[]>([]);
-  // Estado de string bruta para o campo Un/Cx — evita que o campo
-  // seja apagado enquanto o usuário ainda está digitando (ex: "1" → "10")
   const [fatorRaw, setFatorRaw] = useState<string[]>([]);
   const [precoRaw, setPrecoRaw] = useState<string[]>([]);
+  const [pesoKgRaw, setPesoKgRaw] = useState<string[]>([]);
 
   useEffect(() => {
     if (pedido?.items) {
@@ -65,6 +71,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
         const fatorEmbalagem = qtdEmbalagem || fallbackFator;
         const unitStr = item.unidade_pedida || item.unidade_entregue || "un";
         const isBox = isBoxLikeUnit(unitStr);
+        const isMetade = isMetadeLikeUnit(unitStr);
 
         return {
           itemId: item.id || "",
@@ -78,6 +85,9 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           maiorValor: item.maior_valor_cotado || item.unit_price,
           fatorEmbalagem,
           isBoxUnit: isBox,
+          isMetadeUnit: isMetade,
+          // Se já foi entregue antes e o fator foi salvo como peso, recupera; caso contrário 0
+          pesoKg: isMetade && fatorEmbalagem > 1 ? fatorEmbalagem : 0,
           quantidadePorEmbalagemOriginal: qtdEmbalagem,
         };
       });
@@ -85,32 +95,42 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
       setFatorRaw(itens.map(item =>
         item.quantidadePorEmbalagemOriginal ? String(item.fatorEmbalagem) : ""
       ));
-      // Inicializa o preço como string formatada (o valor já vem preenchido)
       setPrecoRaw(itens.map(item =>
         item.valorFaturado ? item.valorFaturado.toFixed(2) : ""
+      ));
+      setPesoKgRaw(itens.map(item =>
+        item.pesoKg > 0 ? item.pesoKg.toFixed(2) : ""
       ));
     }
   }, [pedido]);
 
+  // Economia esperada — exclui itens de metade (peso desconhecido no pedido)
   const economiaEsperada = useMemo(() =>
-    itensEntrega.reduce((sum, item) =>
-      item.maiorValor > item.valorUnitario
+    itensEntrega.reduce((sum, item) => {
+      if (item.isMetadeUnit) return sum;
+      return item.maiorValor > item.valorUnitario
         ? sum + (item.maiorValor - item.valorUnitario) * item.quantidadePedida * item.fatorEmbalagem
-        : sum, 0),
+        : sum;
+    }, 0),
     [itensEntrega]
   );
 
   const economiaRealPreview = useMemo(() =>
-    itensEntrega.reduce((sum, item) =>
-      item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado
-        ? sum + (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * item.fatorEmbalagem
-        : sum, 0),
+    itensEntrega.reduce((sum, item) => {
+      if (item.quantidadeEntregue <= 0 || item.maiorValor <= item.valorFaturado) return sum;
+      // Metade: fator é o peso em kg
+      const fator = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
+      if (fator <= 0) return sum;
+      return sum + (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * fator;
+    }, 0),
     [itensEntrega]
   );
 
   const valorTotalEntregue = useMemo(() =>
-    itensEntrega.reduce((sum, item) =>
-      sum + item.quantidadeEntregue * item.valorFaturado * item.fatorEmbalagem, 0),
+    itensEntrega.reduce((sum, item) => {
+      const fator = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
+      return sum + item.quantidadeEntregue * item.valorFaturado * (item.isMetadeUnit && fator === 0 ? 1 : fator);
+    }, 0),
     [itensEntrega]
   );
 
@@ -123,7 +143,6 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   };
 
   const handlePrecoChange = (index: number, value: string) => {
-    // Mantém a string bruta — não interrompe a digitação
     setPrecoRaw(prev => { const u = [...prev]; u[index] = value; return u; });
     const num = parseFloat(value.replace(",", "."));
     if (!isNaN(num) && num >= 0) {
@@ -136,7 +155,6 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   };
 
   const handlePrecoBlur = (index: number) => {
-    // Normaliza a exibição ao sair do campo
     setPrecoRaw(prev => {
       const u = [...prev];
       const num = parseFloat((u[index] ?? "").replace(",", "."));
@@ -146,7 +164,6 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   };
 
   const handleFatorEmbalagemChange = (index: number, value: string) => {
-    // Mantém a string bruta para o campo não apagar enquanto o usuário digita
     setFatorRaw(prev => { const u = [...prev]; u[index] = value; return u; });
     const fator = parseFloat(value);
     if (!isNaN(fator) && fator >= 1) {
@@ -156,6 +173,27 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
         return updated;
       });
     }
+  };
+
+  const handlePesoKgChange = (index: number, value: string) => {
+    setPesoKgRaw(prev => { const u = [...prev]; u[index] = value; return u; });
+    const num = parseFloat(value.replace(",", "."));
+    if (!isNaN(num) && num >= 0) {
+      setItensEntrega(prev => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], pesoKg: num };
+        return updated;
+      });
+    }
+  };
+
+  const handlePesoKgBlur = (index: number) => {
+    setPesoKgRaw(prev => {
+      const u = [...prev];
+      const num = parseFloat((u[index] ?? "").replace(",", "."));
+      u[index] = isNaN(num) || num === 0 ? "" : num.toFixed(2);
+      return u;
+    });
   };
 
   const handleMarcarFalta = (index: number) => {
@@ -173,7 +211,8 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
       quantidadeEntregue: item.quantidadeEntregue,
       unidadeEntregue: item.unidadeEntregue,
       valorFaturado: item.valorFaturado,
-      fatorEmbalagem: item.fatorEmbalagem,
+      // Para metade: salva o peso real como fatorEmbalagem (mesma matemática)
+      fatorEmbalagem: item.isMetadeUnit ? item.pesoKg || 1 : item.fatorEmbalagem,
     }));
     if (itensParaAtualizar.length === 0) return;
     try {
@@ -188,6 +227,8 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const veioDeCotacao = pedido?.quote_id != null;
   const todosPreenchidos = itensEntrega.every(item => item.quantidadeEntregue >= 0);
   const hasBoxItems = itensEntrega.some(item => item.isBoxUnit);
+  const hasMetadeItems = itensEntrega.some(item => item.isMetadeUnit);
+  const hasExtraColumn = hasBoxItems || hasMetadeItems;
   const fugaEconomia = veioDeCotacao && (economiaEsperada - economiaRealPreview) > 0.05 && todosPreenchidos;
 
   if (!pedido) return null;
@@ -259,12 +300,16 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           <div className="border border-border dark:border-white/5 rounded-xl overflow-hidden">
             {/* Cabeçalho da tabela (desktop) */}
             <div className="hidden sm:grid gap-2.5 px-4 py-2.5 bg-muted/50 border-b border-border dark:border-white/5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider"
-              style={{ gridTemplateColumns: hasBoxItems ? "1fr 100px 120px 1fr 90px" : "1fr 100px 120px 1fr" }}>
+              style={{ gridTemplateColumns: hasExtraColumn ? "1fr 100px 120px 1fr 90px" : "1fr 100px 120px 1fr" }}>
               <div>Produto</div>
               <div className="text-right">Custo NFe</div>
               <div className="text-right">Qtd Recebida</div>
               <div className="text-right">Economia</div>
-              {hasBoxItems && <div className="text-right">Un/Cx</div>}
+              {hasExtraColumn && (
+                <div className="text-right">
+                  {hasBoxItems && hasMetadeItems ? "Fator" : hasBoxItems ? "Un/Cx" : "Peso kg"}
+                </div>
+              )}
             </div>
 
             <div className="divide-y divide-border dark:divide-white/5">
@@ -272,9 +317,16 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                 const diff = item.quantidadeEntregue - item.quantidadePedida;
                 const isDifferent = item.quantidadeEntregue > 0 && Math.abs(diff) > 0.001;
                 const isFalta = item.quantidadeEntregue === 0;
-                const economiaItem = veioDeCotacao && item.quantidadeEntregue > 0 && item.maiorValor > item.valorFaturado
-                  ? (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * item.fatorEmbalagem
+
+                // Economia: metade usa pesoKg como fator, caixa usa fatorEmbalagem
+                const fatorEcon = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
+                const economiaItem = veioDeCotacao && item.quantidadeEntregue > 0
+                  && item.maiorValor > item.valorFaturado && fatorEcon > 0
+                  ? (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * fatorEcon
                   : null;
+
+                // Aviso: metade sem peso informado
+                const metadeSemPeso = item.isMetadeUnit && item.quantidadeEntregue > 0 && item.pesoKg === 0;
 
                 return (
                   <div key={item.itemId || index} className="px-4 py-3.5 hover:bg-muted/20 transition-colors space-y-3">
@@ -282,10 +334,14 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={cn(
                         "w-8 h-8 rounded-lg border flex items-center justify-center shrink-0",
-                        item.isBoxUnit ? "bg-amber-500/5 border-amber-500/10" : "bg-brand/5 border-brand/10"
+                        item.isBoxUnit    ? "bg-amber-500/5 border-amber-500/10"
+                        : item.isMetadeUnit ? "bg-purple-500/5 border-purple-500/10"
+                        : "bg-brand/5 border-brand/10"
                       )}>
                         {item.isBoxUnit
                           ? <BoxIcon className="h-4 w-4 text-amber-600/70" />
+                          : item.isMetadeUnit
+                          ? <Scale className="h-4 w-4 text-purple-600/70" />
                           : <Package className="h-4 w-4 text-brand/70" />
                         }
                       </div>
@@ -300,17 +356,24 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                               Caixa
                             </Badge>
                           )}
+                          {item.isMetadeUnit && (
+                            <Badge variant="outline" className="h-4 px-1 text-[8px] bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 font-bold uppercase">
+                              Peso na entrega
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Inputs row: Custo NFe | Qtd Recebida | Economia | Un/Caixa? */}
+                    {/* Inputs row */}
                     <div className="grid gap-2.5 items-start"
-                      style={{ gridTemplateColumns: hasBoxItems ? "100px 120px 1fr 90px" : "100px 120px 1fr" }}>
+                      style={{ gridTemplateColumns: hasExtraColumn ? "100px 120px 1fr 90px" : "100px 120px 1fr" }}>
 
                       {/* Custo NFe */}
                       <div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Custo NFe</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">
+                          {item.isMetadeUnit ? "R$/kg" : "Custo NFe"}
+                        </p>
                         <div className="relative">
                           <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground pointer-events-none">R$</span>
                           <Input
@@ -340,7 +403,9 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                       {/* Qtd Recebida */}
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Recebida</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                            {item.isMetadeUnit ? "Metades" : "Recebida"}
+                          </p>
                           {!isFalta ? (
                             <button
                               onClick={() => handleMarcarFalta(index)}
@@ -396,6 +461,8 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                           "h-9 rounded-md border px-3 flex items-center justify-between gap-2",
                           economiaItem !== null
                             ? "bg-emerald-500/5 border-emerald-500/20"
+                            : metadeSemPeso
+                            ? "bg-purple-500/5 border-purple-500/20"
                             : "bg-muted/30 border-border dark:border-white/5"
                         )}>
                           {economiaItem !== null ? (
@@ -407,6 +474,10 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                                 R$ {economiaItem.toFixed(2)}
                               </span>
                             </>
+                          ) : metadeSemPeso ? (
+                            <span className="text-[9px] font-bold text-purple-600 dark:text-purple-400 mx-auto">
+                              Informe o peso →
+                            </span>
                           ) : (
                             <span className="text-xs text-muted-foreground mx-auto">—</span>
                           )}
@@ -414,8 +485,8 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                         <div className="mt-1 h-[14px]" />
                       </div>
 
-                      {/* Un/Caixa (condicional) */}
-                      {hasBoxItems && (
+                      {/* Coluna extra: Un/Cx para caixas | Peso kg para metade */}
+                      {hasExtraColumn && (
                         <div>
                           {item.isBoxUnit ? (
                             <>
@@ -440,6 +511,35 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                               {item.quantidadePorEmbalagemOriginal ? (
                                 <p className="text-[10px] font-medium mt-1 text-emerald-600 dark:text-emerald-500 text-right leading-none">
                                   Cot.: {item.quantidadePorEmbalagemOriginal}
+                                </p>
+                              ) : (
+                                <div className="mt-1 h-[14px]" />
+                              )}
+                            </>
+                          ) : item.isMetadeUnit ? (
+                            <>
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Peso kg</p>
+                              <div className="relative">
+                                <Input
+                                  type="text" inputMode="decimal"
+                                  value={pesoKgRaw[index] ?? ""}
+                                  onChange={e => handlePesoKgChange(index, e.target.value)}
+                                  onFocus={e => e.target.select()}
+                                  onBlur={() => handlePesoKgBlur(index)}
+                                  placeholder="0,00"
+                                  className={cn(
+                                    "h-9 pr-1.5 text-right font-black text-sm",
+                                    item.pesoKg > 0
+                                      ? "bg-purple-500/5 border-purple-500/30 text-purple-700 dark:text-purple-400"
+                                      : item.quantidadeEntregue > 0
+                                        ? "border-amber-500/40 bg-amber-500/5"
+                                        : ""
+                                  )}
+                                />
+                              </div>
+                              {item.pesoKg > 0 ? (
+                                <p className="text-[10px] font-medium mt-1 text-purple-600 dark:text-purple-400 text-right leading-none">
+                                  {(item.pesoKg * item.quantidadeEntregue).toFixed(1)} kg total
                                 </p>
                               ) : (
                                 <div className="mt-1 h-[14px]" />
