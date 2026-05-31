@@ -404,7 +404,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                            {item.isMetadeUnit ? "Metades" : "Recebida"}
+                            {item.isMetadeUnit ? "Met." : "Recebida"}
                           </p>
                           {!isFalta ? (
                             <button
