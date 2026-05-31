@@ -436,7 +436,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                             )}
                           />
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase pointer-events-none">
-                            {item.unidadeEntregue}
+                            {item.isMetadeUnit ? "met." : item.unidadeEntregue}
                           </span>
                         </div>
                         {isFalta ? (
