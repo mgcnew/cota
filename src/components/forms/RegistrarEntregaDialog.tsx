@@ -72,7 +72,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           quantidadePedida: item.quantidade_pedida || item.quantity,
           unidadePedida: unitStr,
           quantidadeEntregue: item.quantidade_entregue || 0,
-          unidadeEntregue: item.unidade_entregue || "kg",
+          unidadeEntregue: item.unidade_entregue || unitStr,
           valorUnitario: item.valor_unitario_cotado || item.unit_price,
           valorFaturado: item.unit_price,
           maiorValor: item.maior_valor_cotado || item.unit_price,
