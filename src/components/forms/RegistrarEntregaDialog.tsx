@@ -43,6 +43,8 @@ interface ItemEntrega {
   isMetadeUnit: boolean;
   pesoKg: number;
   quantidadePorEmbalagemOriginal: number | null;
+  pesoMode: 'unit' | 'total';
+  totalKg: number;
 }
 
 function isBoxLikeUnit(unit: string): boolean {
@@ -61,6 +63,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
   const [fatorRaw, setFatorRaw] = useState<string[]>([]);
   const [precoRaw, setPrecoRaw] = useState<string[]>([]);
   const [pesoKgRaw, setPesoKgRaw] = useState<string[]>([]);
+  const [totalKgRaw, setTotalKgRaw] = useState<string[]>([]);
   const [showQueue, setShowQueue] = useState(false);
   const [queuePage, setQueuePage] = useState(0);
 
@@ -95,9 +98,10 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
           fatorEmbalagem,
           isBoxUnit: isBox,
           isMetadeUnit: isMetade,
-          // Se já foi entregue antes e o fator foi salvo como peso, recupera; caso contrário 0
           pesoKg: isMetade && fatorEmbalagem > 1 ? fatorEmbalagem : 0,
           quantidadePorEmbalagemOriginal: qtdEmbalagem,
+          pesoMode: 'unit' as const,
+          totalKg: 0,
         };
       });
       setItensEntrega(itens);
@@ -110,15 +114,23 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
       setPesoKgRaw(itens.map(item =>
         item.pesoKg > 0 ? item.pesoKg.toFixed(2) : ""
       ));
+      setTotalKgRaw(itens.map(() => ""));
     }
   }, [pedido]);
 
-  // Economia real = fornecedor cobrou MENOS que o cotado (desconto na entrega)
-  // Interpretação: valorUnitario (cotado) − valorFaturado (NFe)
+  // Fator efetivo por item: considera modo unit vs total
+  const getFatorEfetivo = (item: ItemEntrega): number => {
+    if ((item.isBoxUnit || item.isMetadeUnit) && item.pesoMode === 'total') {
+      return item.quantidadeEntregue > 0 ? item.totalKg / item.quantidadeEntregue : 0;
+    }
+    if (item.isMetadeUnit) return item.pesoKg;
+    return item.fatorEmbalagem;
+  };
+
   const economiaRealPreview = useMemo(() =>
     itensEntrega.reduce((sum, item) => {
       if (item.quantidadeEntregue <= 0 || item.valorUnitario <= item.valorFaturado) return sum;
-      const fator = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
+      const fator = getFatorEfetivo(item);
       if (fator <= 0) return sum;
       return sum + (item.valorUnitario - item.valorFaturado) * item.quantidadeEntregue * fator;
     }, 0),
@@ -127,8 +139,9 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
 
   const valorTotalEntregue = useMemo(() =>
     itensEntrega.reduce((sum, item) => {
-      const fator = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
-      return sum + item.quantidadeEntregue * item.valorFaturado * (item.isMetadeUnit && fator === 0 ? 1 : fator);
+      const fator = getFatorEfetivo(item);
+      const f = fator === 0 ? 1 : fator;
+      return sum + item.quantidadeEntregue * item.valorFaturado * f;
     }, 0),
     [itensEntrega]
   );
@@ -158,6 +171,51 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
       const u = [...prev];
       const num = parseFloat((u[index] ?? "").replace(",", "."));
       u[index] = isNaN(num) || num === 0 ? "" : num.toFixed(2);
+      return u;
+    });
+  };
+
+  const handleTogglePesoMode = (index: number) => {
+    setItensEntrega(prev => {
+      const updated = [...prev];
+      const item = updated[index];
+      const newMode: 'unit' | 'total' = item.pesoMode === 'unit' ? 'total' : 'unit';
+      // Pré-calcula o total estimado ao mudar para 'total'
+      const estimado = newMode === 'total' && item.quantidadeEntregue > 0
+        ? (item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem) * item.quantidadeEntregue
+        : 0;
+      updated[index] = { ...item, pesoMode: newMode, totalKg: estimado };
+      return updated;
+    });
+    setTotalKgRaw(prev => {
+      const u = [...prev];
+      const item = itensEntrega[index];
+      const newMode = item.pesoMode === 'unit' ? 'total' : 'unit';
+      const estimado = newMode === 'total' && item.quantidadeEntregue > 0
+        ? (item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem) * item.quantidadeEntregue
+        : 0;
+      u[index] = estimado > 0 ? estimado.toFixed(2) : '';
+      return u;
+    });
+  };
+
+  const handleTotalKgChange = (index: number, value: string) => {
+    setTotalKgRaw(prev => { const u = [...prev]; u[index] = value; return u; });
+    const num = parseFloat(value.replace(',', '.'));
+    if (!isNaN(num) && num >= 0) {
+      setItensEntrega(prev => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], totalKg: num };
+        return updated;
+      });
+    }
+  };
+
+  const handleTotalKgBlur = (index: number) => {
+    setTotalKgRaw(prev => {
+      const u = [...prev];
+      const num = parseFloat((u[index] ?? '').replace(',', '.'));
+      u[index] = isNaN(num) || num === 0 ? '' : num.toFixed(2);
       return u;
     });
   };
@@ -215,7 +273,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
     quantidadeEntregue: item.quantidadeEntregue,
     unidadeEntregue: item.unidadeEntregue,
     valorFaturado: item.valorFaturado,
-    fatorEmbalagem: item.isMetadeUnit ? item.pesoKg || 1 : item.fatorEmbalagem,
+    fatorEmbalagem: Math.max(getFatorEfetivo(item), 1),
   }));
 
   const handleSubmit = async () => {
@@ -339,16 +397,16 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
                 const isDifferent = item.quantidadeEntregue > 0 && Math.abs(diff) > 0.001;
                 const isFalta = item.quantidadeEntregue === 0;
 
-                // Economia: metade usa pesoKg como fator, caixa usa fatorEmbalagem
-                const fatorEcon = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
-                // Economia = fornecedor cobrou menos que o cotado (desconto na entrega)
+                const fatorEcon = getFatorEfetivo(item);
                 const economiaItem = veioDeCotacao && item.quantidadeEntregue > 0
                   && item.valorUnitario > item.valorFaturado && fatorEcon > 0
                   ? (item.valorUnitario - item.valorFaturado) * item.quantidadeEntregue * fatorEcon
                   : null;
 
-                // Aviso: metade sem peso informado
-                const metadeSemPeso = item.isMetadeUnit && item.quantidadeEntregue > 0 && item.pesoKg === 0;
+                // Aviso: peso não informado (metade ou caixa em modo total sem valor)
+                const metadeSemPeso = (item.isMetadeUnit || item.isBoxUnit)
+                  && item.quantidadeEntregue > 0
+                  && fatorEcon === 0;
 
                 return (
                   <div key={item.itemId || index} className="px-4 py-3.5 hover:bg-muted/20 transition-colors space-y-3">
@@ -507,64 +565,102 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
                         <div className="mt-1 h-[14px]" />
                       </div>
 
-                      {/* Coluna extra: Un/Cx para caixas | Peso kg para metade */}
+                      {/* Coluna extra com toggle por item */}
                       {hasExtraColumn && (
                         <div>
-                          {item.isBoxUnit ? (
+                          {(item.isBoxUnit || item.isMetadeUnit) ? (
                             <>
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Un/Cx</p>
-                              <div className="relative">
-                                <Input
-                                  type="number" step="0.01" min="1"
-                                  value={fatorRaw[index] ?? ""}
-                                  onChange={e => handleFatorEmbalagemChange(index, e.target.value)}
-                                  onFocus={e => e.target.select()}
-                                  placeholder="—"
-                                  className={cn(
-                                    "h-9 pr-1.5 text-right font-black text-sm",
-                                    item.quantidadePorEmbalagemOriginal
-                                      ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
-                                      : item.fatorEmbalagem > 1
-                                        ? "bg-amber-500/5 border-amber-500/30 text-amber-700 dark:text-amber-400"
-                                        : ""
-                                  )}
-                                />
-                              </div>
-                              {item.quantidadePorEmbalagemOriginal ? (
-                                <p className="text-[10px] font-medium mt-1 text-emerald-600 dark:text-emerald-500 text-right leading-none">
-                                  Cot.: {item.quantidadePorEmbalagemOriginal}
+                              {/* Label + toggle */}
+                              <div className="flex items-center justify-between mb-1.5">
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                  {item.pesoMode === 'total'
+                                    ? 'Total kg'
+                                    : item.isMetadeUnit ? 'Kg/met.' : 'Un/Cx'}
                                 </p>
-                              ) : (
-                                <div className="mt-1 h-[14px]" />
+                                <button
+                                  onClick={() => handleTogglePesoMode(index)}
+                                  title={item.pesoMode === 'unit' ? 'Usar peso total' : 'Usar por unidade'}
+                                  className="text-[9px] font-bold text-brand hover:bg-brand/10 px-1 py-0.5 rounded transition-colors leading-none"
+                                >
+                                  ↔
+                                </button>
+                              </div>
+
+                              {/* Campo: modo 'unit' */}
+                              {item.pesoMode === 'unit' && (
+                                <>
+                                  <div className="relative">
+                                    {item.isMetadeUnit ? (
+                                      <Input
+                                        type="text" inputMode="decimal"
+                                        value={pesoKgRaw[index] ?? ""}
+                                        onChange={e => handlePesoKgChange(index, e.target.value)}
+                                        onFocus={e => e.target.select()}
+                                        onBlur={() => handlePesoKgBlur(index)}
+                                        placeholder="0,00"
+                                        className={cn(
+                                          "h-9 pr-1.5 text-right font-black text-sm",
+                                          item.pesoKg > 0
+                                            ? "bg-purple-500/5 border-purple-500/30 text-purple-700 dark:text-purple-400"
+                                            : item.quantidadeEntregue > 0 ? "border-amber-500/40 bg-amber-500/5" : ""
+                                        )}
+                                      />
+                                    ) : (
+                                      <Input
+                                        type="number" step="0.01" min="1"
+                                        value={fatorRaw[index] ?? ""}
+                                        onChange={e => handleFatorEmbalagemChange(index, e.target.value)}
+                                        onFocus={e => e.target.select()}
+                                        placeholder="—"
+                                        className={cn(
+                                          "h-9 pr-1.5 text-right font-black text-sm",
+                                          item.quantidadePorEmbalagemOriginal
+                                            ? "bg-emerald-500/5 border-emerald-500/30 text-emerald-700 dark:text-emerald-400"
+                                            : item.fatorEmbalagem > 1
+                                              ? "bg-amber-500/5 border-amber-500/30 text-amber-700 dark:text-amber-400"
+                                              : ""
+                                        )}
+                                      />
+                                    )}
+                                  </div>
+                                  {/* Hint: total derivado */}
+                                  {(() => {
+                                    const fator = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
+                                    const total = fator > 0 && item.quantidadeEntregue > 0
+                                      ? fator * item.quantidadeEntregue : 0;
+                                    return total > 0 ? (
+                                      <p className="text-[10px] font-medium mt-1 text-muted-foreground text-right leading-none">
+                                        = {total.toFixed(1)} kg
+                                      </p>
+                                    ) : <div className="mt-1 h-[14px]" />;
+                                  })()}
+                                </>
                               )}
-                            </>
-                          ) : item.isMetadeUnit ? (
-                            <>
-                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Peso kg</p>
-                              <div className="relative">
-                                <Input
-                                  type="text" inputMode="decimal"
-                                  value={pesoKgRaw[index] ?? ""}
-                                  onChange={e => handlePesoKgChange(index, e.target.value)}
-                                  onFocus={e => e.target.select()}
-                                  onBlur={() => handlePesoKgBlur(index)}
-                                  placeholder="0,00"
-                                  className={cn(
-                                    "h-9 pr-1.5 text-right font-black text-sm",
-                                    item.pesoKg > 0
-                                      ? "bg-purple-500/5 border-purple-500/30 text-purple-700 dark:text-purple-400"
-                                      : item.quantidadeEntregue > 0
-                                        ? "border-amber-500/40 bg-amber-500/5"
-                                        : ""
-                                  )}
-                                />
-                              </div>
-                              {item.pesoKg > 0 ? (
-                                <p className="text-[10px] font-medium mt-1 text-purple-600 dark:text-purple-400 text-right leading-none">
-                                  {(item.pesoKg * item.quantidadeEntregue).toFixed(1)} kg total
-                                </p>
-                              ) : (
-                                <div className="mt-1 h-[14px]" />
+
+                              {/* Campo: modo 'total' */}
+                              {item.pesoMode === 'total' && (
+                                <>
+                                  <Input
+                                    type="text" inputMode="decimal"
+                                    value={totalKgRaw[index] ?? ""}
+                                    onChange={e => handleTotalKgChange(index, e.target.value)}
+                                    onFocus={e => e.target.select()}
+                                    onBlur={() => handleTotalKgBlur(index)}
+                                    placeholder="0,00"
+                                    className={cn(
+                                      "h-9 pr-1.5 text-right font-black text-sm",
+                                      item.totalKg > 0
+                                        ? "bg-brand/5 border-brand/30 text-brand dark:text-brand"
+                                        : item.quantidadeEntregue > 0 ? "border-amber-500/40 bg-amber-500/5" : ""
+                                    )}
+                                  />
+                                  {/* Hint: fator derivado */}
+                                  {item.totalKg > 0 && item.quantidadeEntregue > 0 ? (
+                                    <p className="text-[10px] font-medium mt-1 text-brand text-right leading-none">
+                                      {(item.totalKg / item.quantidadeEntregue).toFixed(2)} kg/un.
+                                    </p>
+                                  ) : <div className="mt-1 h-[14px]" />}
+                                </>
                               )}
                             </>
                           ) : (
