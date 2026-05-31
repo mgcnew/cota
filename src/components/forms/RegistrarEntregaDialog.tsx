@@ -104,24 +104,14 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     }
   }, [pedido]);
 
-  // Economia esperada — exclui itens de metade (peso desconhecido no pedido)
-  const economiaEsperada = useMemo(() =>
-    itensEntrega.reduce((sum, item) => {
-      if (item.isMetadeUnit) return sum;
-      return item.maiorValor > item.valorUnitario
-        ? sum + (item.maiorValor - item.valorUnitario) * item.quantidadePedida * item.fatorEmbalagem
-        : sum;
-    }, 0),
-    [itensEntrega]
-  );
-
+  // Economia real = fornecedor cobrou MENOS que o cotado (desconto na entrega)
+  // Interpretação: valorUnitario (cotado) − valorFaturado (NFe)
   const economiaRealPreview = useMemo(() =>
     itensEntrega.reduce((sum, item) => {
-      if (item.quantidadeEntregue <= 0 || item.maiorValor <= item.valorFaturado) return sum;
-      // Metade: fator é o peso em kg
+      if (item.quantidadeEntregue <= 0 || item.valorUnitario <= item.valorFaturado) return sum;
       const fator = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
       if (fator <= 0) return sum;
-      return sum + (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * fator;
+      return sum + (item.valorUnitario - item.valorFaturado) * item.quantidadeEntregue * fator;
     }, 0),
     [itensEntrega]
   );
@@ -229,7 +219,9 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   const hasBoxItems = itensEntrega.some(item => item.isBoxUnit);
   const hasMetadeItems = itensEntrega.some(item => item.isMetadeUnit);
   const hasExtraColumn = hasBoxItems || hasMetadeItems;
-  const fugaEconomia = veioDeCotacao && (economiaEsperada - economiaRealPreview) > 0.05 && todosPreenchidos;
+  // Alerta quando fornecedor cobra MAIS que o cotado
+  const fugaEconomia = veioDeCotacao && todosPreenchidos &&
+    itensEntrega.some(item => item.quantidadeEntregue > 0 && item.valorFaturado > item.valorUnitario);
 
   if (!pedido) return null;
 
@@ -286,11 +278,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
               <div className="text-sm space-y-1">
                 <p className="font-bold text-amber-600 text-[13px]">Alerta Cota Aki AI</p>
                 <p className="text-foreground/80 leading-relaxed text-xs">
-                  Alterações de preço ou quebra de volume detectadas. Fuga de economia de{" "}
-                  <strong className="text-amber-500">
-                    R$ {(economiaEsperada - economiaRealPreview).toFixed(2).replace(".", ",")}
-                  </strong>{" "}
-                  em relação à expectativa base.
+                  Um ou mais itens estão sendo cobrados acima do valor cotado. Verifique o Custo NFe antes de confirmar.
                 </p>
               </div>
             </div>
@@ -320,9 +308,10 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
 
                 // Economia: metade usa pesoKg como fator, caixa usa fatorEmbalagem
                 const fatorEcon = item.isMetadeUnit ? item.pesoKg : item.fatorEmbalagem;
+                // Economia = fornecedor cobrou menos que o cotado (desconto na entrega)
                 const economiaItem = veioDeCotacao && item.quantidadeEntregue > 0
-                  && item.maiorValor > item.valorFaturado && fatorEcon > 0
-                  ? (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * fatorEcon
+                  && item.valorUnitario > item.valorFaturado && fatorEcon > 0
+                  ? (item.valorUnitario - item.valorFaturado) * item.quantidadeEntregue * fatorEcon
                   : null;
 
                 // Aviso: metade sem peso informado

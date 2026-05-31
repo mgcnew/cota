@@ -316,10 +316,12 @@ export function usePedidos() {
         const passedItem = itens.find(i => i.itemId === item.id);
         const fator = passedItem?.fatorEmbalagem || 1;
 
-        if (item.quantidade_entregue && item.unit_price && item.maior_valor_cotado) {
-          // A Economia da NFe é a diferença do "melhor valor que ele ia pagar" pelo valor REAL que a NFe cobrou
-          const diferenca = Number(item.maior_valor_cotado) - Number(item.unit_price);
-          economiaReal += diferenca * Number(item.quantidade_entregue) * fator;
+        if (item.quantidade_entregue && item.unit_price && item.valor_unitario_cotado) {
+          // Economia = fornecedor cobrou menos que o cotado (desconto na entrega)
+          const diferenca = Number(item.valor_unitario_cotado) - Number(item.unit_price);
+          if (diferenca > 0) {
+            economiaReal += diferenca * Number(item.quantidade_entregue) * fator;
+          }
         }
         if (item.quantidade_entregue && item.unit_price) {
           totalValueAtualizado += Number(item.quantidade_entregue) * Number(item.unit_price) * fator;
