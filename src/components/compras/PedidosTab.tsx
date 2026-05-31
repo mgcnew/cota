@@ -210,13 +210,13 @@ function PedidosTab() {
             <MobileMetricCard title="Aguardando" value={stats.pedidosAguardando} icon={PackageCheck} variant="info" />
             <MobileMetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
             <MobileMetricCard
-              title="Economia Negociada"
-              value={stats.economiaNegociadaFormatada}
+              title="Economia Real"
+              value={stats.economiaRealFormatada}
               icon={TrendingDown}
               variant="success"
               trend={{
-                value: `Confirmada: ${stats.economiaRealFormatada}`,
-                label: "nas entregas",
+                value: `Estimativa: ${stats.economiaNegociadaFormatada}`,
+                label: "nos pedidos a entregar",
                 type: "positive"
               }}
             />
@@ -255,13 +255,13 @@ function PedidosTab() {
           />
           <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
           <MetricCard
-            title="Economia Negociada"
-            value={stats.economiaNegociadaFormatada}
+            title="Economia Real"
+            value={stats.economiaRealFormatada}
             icon={TrendingDown}
             variant="success"
             trend={{
-              value: `Confirmada: ${stats.economiaRealFormatada}`,
-              label: "nas entregas registradas",
+              value: `Estimativa pendentes: ${stats.economiaNegociadaFormatada}`,
+              label: "nos pedidos a entregar",
               type: "positive"
             }}
             popoverContent={

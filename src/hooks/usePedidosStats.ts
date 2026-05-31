@@ -33,10 +33,9 @@ export function usePedidosStats(pedidos: OrderData[]) {
       return acc + (parseFloat(cleanValue) || 0);
     }, 0);
     
-    // Economia Negociada = desconto obtido na negociação (primeira oferta - preço final) × qtd pedida
-    // Soma todos os pedidos com origem em cotação, exceto cancelados
+    // Estimativa de economia nos pedidos ainda pendentes de entrega
     const economiaNegociadaTotal = pedidos
-      .filter(p => p.status !== "cancelado" && p.quote_id)
+      .filter(p => ['pendente', 'confirmado', 'enviado'].includes(p.status) && p.quote_id)
       .reduce((sum, p) => sum + (p.economia_estimada || 0), 0);
 
     // Economia REAL = confirmada na entrega (mesmo baseline, mas com qtd e preço da NFe)
