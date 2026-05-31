@@ -112,6 +112,11 @@ function PedidosTab() {
     }));
   }, [pedidosDataArray]);
 
+  const pedidosPendentesEntrega = useMemo(() =>
+    pedidosDataArray.filter(p => p.status === 'confirmado' || p.status === 'enviado'),
+    [pedidosDataArray]
+  );
+
   const filteredPedidos = useMemo(() => {
     const filtered = pedidos.filter(pedido => {
       const term = debouncedSearchTerm.toLowerCase();
@@ -446,6 +451,8 @@ function PedidosTab() {
         open={entregaDialogOpen}
         onOpenChange={setEntregaDialogOpen}
         pedido={selectedPedidoRaw}
+        pedidosPendentes={pedidosPendentesEntrega}
+        onSelectNext={(pedido) => setSelectedPedidoRaw(pedido)}
       />
       <ConfirmWhatsAppOrderDialog
         open={whatsAppDialogOpen}

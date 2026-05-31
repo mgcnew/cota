@@ -13,14 +13,19 @@ import { Badge } from "@/components/ui/badge";
 import {
   Truck, Package, TrendingDown,
   Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon, Scale,
+  ChevronRight, ChevronLeft, ListChecks,
 } from "lucide-react";
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { cn } from "@/lib/utils";
+
+const QUEUE_PAGE_SIZE = 8;
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pedido: Pedido | null;
+  pedidosPendentes?: Pedido[];
+  onSelectNext?: (pedido: Pedido) => void;
 }
 
 interface ItemEntrega {
@@ -50,14 +55,18 @@ function isMetadeLikeUnit(unit: string): boolean {
   return normalized === "metade" || normalized === "meia" || normalized === "1/2";
 }
 
-export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
+export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPendentes = [], onSelectNext }: Props) {
   const { updateQuantidadeEntregue, isUpdating } = usePedidos();
   const [itensEntrega, setItensEntrega] = useState<ItemEntrega[]>([]);
   const [fatorRaw, setFatorRaw] = useState<string[]>([]);
   const [precoRaw, setPrecoRaw] = useState<string[]>([]);
   const [pesoKgRaw, setPesoKgRaw] = useState<string[]>([]);
+  const [showQueue, setShowQueue] = useState(false);
+  const [queuePage, setQueuePage] = useState(0);
 
   useEffect(() => {
+    setShowQueue(false);
+    setQueuePage(0);
     if (pedido?.items) {
       const itens = pedido.items.map(item => {
         const quantidadePedida = item.quantidade_pedida || item.quantity || 1;
@@ -194,20 +203,44 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
     });
   };
 
+  const pendentesFiltered = useMemo(() =>
+    pedidosPendentes.filter(p => p.id !== pedido?.id),
+    [pedidosPendentes, pedido]
+  );
+  const queueTotalPages = Math.ceil(pendentesFiltered.length / QUEUE_PAGE_SIZE);
+  const queueItems = pendentesFiltered.slice(queuePage * QUEUE_PAGE_SIZE, (queuePage + 1) * QUEUE_PAGE_SIZE);
+
+  const buildItens = () => itensEntrega.map(item => ({
+    itemId: item.itemId,
+    quantidadeEntregue: item.quantidadeEntregue,
+    unidadeEntregue: item.unidadeEntregue,
+    valorFaturado: item.valorFaturado,
+    fatorEmbalagem: item.isMetadeUnit ? item.pesoKg || 1 : item.fatorEmbalagem,
+  }));
+
   const handleSubmit = async () => {
     if (!pedido) return;
-    const itensParaAtualizar = itensEntrega.map(item => ({
-      itemId: item.itemId,
-      quantidadeEntregue: item.quantidadeEntregue,
-      unidadeEntregue: item.unidadeEntregue,
-      valorFaturado: item.valorFaturado,
-      // Para metade: salva o peso real como fatorEmbalagem (mesma matemática)
-      fatorEmbalagem: item.isMetadeUnit ? item.pesoKg || 1 : item.fatorEmbalagem,
-    }));
-    if (itensParaAtualizar.length === 0) return;
+    const itens = buildItens();
+    if (itens.length === 0) return;
     try {
-      await updateQuantidadeEntregue({ pedidoId: pedido.id, itens: itensParaAtualizar });
+      await updateQuantidadeEntregue({ pedidoId: pedido.id, itens });
       onOpenChange(false);
+    } catch (error) {
+      console.error("Erro ao registrar entrega:", error);
+    }
+  };
+
+  const handleSubmitAndNext = async () => {
+    if (!pedido) return;
+    const itens = buildItens();
+    if (itens.length === 0) return;
+    try {
+      await updateQuantidadeEntregue({ pedidoId: pedido.id, itens });
+      if (pendentesFiltered.length > 0) {
+        setShowQueue(true);
+      } else {
+        onOpenChange(false);
+      }
     } catch (error) {
       console.error("Erro ao registrar entrega:", error);
     }
@@ -547,7 +580,71 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
           </div>
         </div>
 
+        {/* Fila de próximos recebimentos */}
+        {showQueue && (
+          <div className="flex-1 overflow-y-auto flex flex-col">
+            <div className="px-5 py-4 border-b border-border bg-muted/20 flex items-center gap-3">
+              <ListChecks className="h-4 w-4 text-brand shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">Selecionar próximo recebimento</p>
+                <p className="text-xs text-muted-foreground">{pendentesFiltered.length} {pendentesFiltered.length === 1 ? "pedido pendente" : "pedidos pendentes"}</p>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="text-xs text-muted-foreground h-8">
+                Fechar
+              </Button>
+            </div>
+
+            <div className="flex-1 divide-y divide-border/50">
+              {queueItems.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => { onSelectNext?.(p); }}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center shrink-0">
+                    <Truck className="h-4 w-4 text-brand/70" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{p.supplier_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.order_date ? new Date(p.order_date + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}
+                      {" · "}
+                      {p.items?.length || 0} {(p.items?.length || 0) === 1 ? "item" : "itens"}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </button>
+              ))}
+            </div>
+
+            {queueTotalPages > 1 && (
+              <div className="flex items-center justify-between px-5 py-3 border-t border-border bg-muted/10">
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={() => setQueuePage(p => Math.max(0, p - 1))}
+                  disabled={queuePage === 0}
+                  className="h-8 gap-1 text-xs"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />Anterior
+                </Button>
+                <span className="text-xs text-muted-foreground">
+                  {queuePage + 1} / {queueTotalPages}
+                </span>
+                <Button
+                  variant="ghost" size="sm"
+                  onClick={() => setQueuePage(p => Math.min(queueTotalPages - 1, p + 1))}
+                  disabled={queuePage >= queueTotalPages - 1}
+                  className="h-8 gap-1 text-xs"
+                >
+                  Próximo<ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Footer */}
+        {!showQueue && (
         <div className="flex-shrink-0 px-5 py-4 bg-muted/30 border-t border-border dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-8">
             <div>
@@ -577,6 +674,19 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
             >
               Cancelar
             </Button>
+            {pendentesFiltered.length > 0 && (
+              <Button
+                onClick={handleSubmitAndNext}
+                disabled={!todosPreenchidos || isUpdating}
+                variant="outline"
+                className="flex-1 sm:flex-none h-9 px-4 text-xs font-semibold border-emerald-600/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600/5 gap-1.5"
+              >
+                {isUpdating
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <><CheckCircle2 className="h-4 w-4" />Confirmar e Próximo</>
+                }
+              </Button>
+            )}
             <Button
               onClick={handleSubmit}
               disabled={!todosPreenchidos || isUpdating}
@@ -589,6 +699,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
             </Button>
           </div>
         </div>
+        )}
     </div>
   );
 
