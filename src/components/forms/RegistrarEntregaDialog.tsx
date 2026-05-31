@@ -49,6 +49,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   // Estado de string bruta para o campo Un/Cx — evita que o campo
   // seja apagado enquanto o usuário ainda está digitando (ex: "1" → "10")
   const [fatorRaw, setFatorRaw] = useState<string[]>([]);
+  const [precoRaw, setPrecoRaw] = useState<string[]>([]);
 
   useEffect(() => {
     if (pedido?.items) {
@@ -81,9 +82,12 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
         };
       });
       setItensEntrega(itens);
-      // Inicializa a string bruta: mostra o valor se veio da cotação, vazio caso contrário
       setFatorRaw(itens.map(item =>
         item.quantidadePorEmbalagemOriginal ? String(item.fatorEmbalagem) : ""
+      ));
+      // Inicializa o preço como string formatada (o valor já vem preenchido)
+      setPrecoRaw(itens.map(item =>
+        item.valorFaturado ? item.valorFaturado.toFixed(2) : ""
       ));
     }
   }, [pedido]);
@@ -119,10 +123,25 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
   };
 
   const handlePrecoChange = (index: number, value: string) => {
-    setItensEntrega(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], valorFaturado: parseFloat(value.replace(",", ".")) || 0 };
-      return updated;
+    // Mantém a string bruta — não interrompe a digitação
+    setPrecoRaw(prev => { const u = [...prev]; u[index] = value; return u; });
+    const num = parseFloat(value.replace(",", "."));
+    if (!isNaN(num) && num >= 0) {
+      setItensEntrega(prev => {
+        const updated = [...prev];
+        updated[index] = { ...updated[index], valorFaturado: num };
+        return updated;
+      });
+    }
+  };
+
+  const handlePrecoBlur = (index: number) => {
+    // Normaliza a exibição ao sair do campo
+    setPrecoRaw(prev => {
+      const u = [...prev];
+      const num = parseFloat((u[index] ?? "").replace(",", "."));
+      u[index] = isNaN(num) || num === 0 ? "" : num.toFixed(2);
+      return u;
     });
   };
 
@@ -296,9 +315,10 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido }: Props) {
                           <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-black text-muted-foreground pointer-events-none">R$</span>
                           <Input
                             type="text" inputMode="decimal"
-                            value={item.valorFaturado === 0 ? "" : item.valorFaturado.toFixed(2)}
+                            value={precoRaw[index] ?? ""}
                             onChange={e => handlePrecoChange(index, e.target.value)}
                             onFocus={e => e.target.select()}
+                            onBlur={() => handlePrecoBlur(index)}
                             placeholder="0,00"
                             className={cn(
                               "h-9 pl-7 pr-1.5 text-right font-black text-sm",
