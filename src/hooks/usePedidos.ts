@@ -316,11 +316,15 @@ export function usePedidos() {
         const passedItem = itens.find(i => i.itemId === item.id);
         const fator = passedItem?.fatorEmbalagem || 1;
 
-        if (item.quantidade_entregue && item.unit_price && item.maior_valor_cotado) {
-          // Economia = preço inicial do fornecedor − NFe (captura negociação + desconto extra)
-          const diferenca = Number(item.maior_valor_cotado) - Number(item.unit_price);
-          if (diferenca > 0) {
-            economiaReal += diferenca * Number(item.quantidade_entregue) * fator;
+        if (item.quantidade_entregue && item.unit_price) {
+          // Base: preço inicial (captura negociação + desconto extra)
+          // Fallback: preço negociado (captura pelo menos o desconto da entrega)
+          const basePreco = Number(item.maior_valor_cotado) || Number(item.valor_unitario_cotado) || 0;
+          if (basePreco > 0) {
+            const diferenca = basePreco - Number(item.unit_price);
+            if (diferenca > 0) {
+              economiaReal += diferenca * Number(item.quantidade_entregue) * fator;
+            }
           }
         }
         if (item.quantidade_entregue && item.unit_price) {

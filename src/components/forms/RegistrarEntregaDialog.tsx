@@ -94,7 +94,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
           unidadeEntregue: item.unidade_entregue || unitStr,
           valorUnitario: item.valor_unitario_cotado || item.unit_price,
           valorFaturado: item.unit_price,
-          maiorValor: item.maior_valor_cotado || item.unit_price,
+          maiorValor: item.maior_valor_cotado || item.valor_unitario_cotado || item.unit_price,
           fatorEmbalagem,
           isBoxUnit: isBox,
           isMetadeUnit: isMetade,
