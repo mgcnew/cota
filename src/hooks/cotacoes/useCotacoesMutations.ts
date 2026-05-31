@@ -411,7 +411,15 @@ export function useCotacoesMutations() {
               it.unidade || "un"
             );
 
-            economiaEstimada += normalizedInicial.valorTotal - normalizedEscolhido.valorTotal;
+            // Itens de peso variável (metade, cx) não somam à estimativa —
+            // o peso real só é conhecido na entrega, evitando número enganoso.
+            const unidadeItem = (it.unidade || "un").toLowerCase().trim();
+            const isPesoVariavel =
+              unidadeItem === "metade" || unidadeItem === "meia" || unidadeItem === "1/2" ||
+              unidadeItem === "cx" || unidadeItem === "caixa" || unidadeItem === "caixas" || unidadeItem.startsWith("cx");
+            if (!isPesoVariavel) {
+              economiaEstimada += normalizedInicial.valorTotal - normalizedEscolhido.valorTotal;
+            }
             totalValue += normalizedEscolhido.valorTotal;
 
             return {
