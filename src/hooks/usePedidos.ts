@@ -303,7 +303,7 @@ export function usePedidos() {
       // Buscar os itens atualizados para calcular economia real global da NFe
       const { data: orderItems, error: itemsError } = await supabase
         .from('order_items')
-        .select('quantidade_entregue, unit_price, valor_unitario_cotado, maior_valor_cotado')
+        .select('id, quantidade_entregue, unit_price, valor_unitario_cotado, maior_valor_cotado')
         .eq('order_id', pedidoId);
 
       if (itemsError) throw itemsError;
