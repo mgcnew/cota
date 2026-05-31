@@ -316,9 +316,9 @@ export function usePedidos() {
         const passedItem = itens.find(i => i.itemId === item.id);
         const fator = passedItem?.fatorEmbalagem || 1;
 
-        if (item.quantidade_entregue && item.unit_price && item.valor_unitario_cotado) {
-          // Economia = fornecedor cobrou menos que o cotado (desconto na entrega)
-          const diferenca = Number(item.valor_unitario_cotado) - Number(item.unit_price);
+        if (item.quantidade_entregue && item.unit_price && item.maior_valor_cotado) {
+          // Economia = preço inicial do fornecedor − NFe (captura negociação + desconto extra)
+          const diferenca = Number(item.maior_valor_cotado) - Number(item.unit_price);
           if (diferenca > 0) {
             economiaReal += diferenca * Number(item.quantidade_entregue) * fator;
           }

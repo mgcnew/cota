@@ -127,12 +127,13 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
     return item.fatorEmbalagem;
   };
 
+  // Economia Real = preço inicial do fornecedor − NFe (captura negociação + eventual desconto extra)
   const economiaRealPreview = useMemo(() =>
     itensEntrega.reduce((sum, item) => {
-      if (item.quantidadeEntregue <= 0 || item.valorUnitario <= item.valorFaturado) return sum;
+      if (item.quantidadeEntregue <= 0 || item.maiorValor <= item.valorFaturado) return sum;
       const fator = getFatorEfetivo(item);
       if (fator <= 0) return sum;
-      return sum + (item.valorUnitario - item.valorFaturado) * item.quantidadeEntregue * fator;
+      return sum + (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * fator;
     }, 0),
     [itensEntrega]
   );
@@ -398,9 +399,10 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
                 const isFalta = item.quantidadeEntregue === 0;
 
                 const fatorEcon = getFatorEfetivo(item);
+                // Compara NFe com preço inicial do fornecedor (inclui ganho da negociação)
                 const economiaItem = veioDeCotacao && item.quantidadeEntregue > 0
-                  && item.valorUnitario > item.valorFaturado && fatorEcon > 0
-                  ? (item.valorUnitario - item.valorFaturado) * item.quantidadeEntregue * fatorEcon
+                  && item.maiorValor > item.valorFaturado && fatorEcon > 0
+                  ? (item.maiorValor - item.valorFaturado) * item.quantidadeEntregue * fatorEcon
                   : null;
 
                 // Aviso: peso não informado (metade ou caixa em modo total sem valor)
