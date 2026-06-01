@@ -17,7 +17,6 @@ import {
   ChevronDown, ChevronUp, Scale, Hash, Info, RefreshCw, Package
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { sendWhatsApp } from "@/lib/whatsapp-service";
 
 interface HistoryVariant {
   quantidade_venda: number;
@@ -567,10 +566,9 @@ export default function VendorPortal() {
         }
       }));
 
-      if (data?.supplier_name) {
-        const notifyMsg = `🔔 *Nova Resposta de Cotação!*\n\nO fornecedor *${data.supplier_name}* acaba de preencher uma cotação no portal.\n\nOs preços já estão disponíveis no sistema para conferência.`;
-        await sendWhatsApp("11966670314", notifyMsg, data.company_id);
-      }
+      // A notificação de WhatsApp ao comprador agora é disparada server-side
+      // por um trigger no banco (notify_quote_response → edge function), pois o
+      // portal é público e não consegue autenticar na whatsapp-proxy (dava 401).
 
       setSaving(false);
       requestAnimationFrame(() => {
