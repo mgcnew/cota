@@ -515,7 +515,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="max-w-[1000px] h-[85vh] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
+        <DialogContent hideClose className="max-w-[1000px] h-[85vh] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-card rounded-2xl shadow-2xl">
           <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
           <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
           {modalContent}

@@ -287,7 +287,7 @@ export function QuoteConversionTab({
   return (
     <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 pb-16">
-        <div className="flex flex-col gap-2 px-3 py-2.5 rounded-xl bg-muted/30 border border-border dark:border-white/5/50">
+        <div className="flex flex-col gap-2 px-3 py-2.5 rounded-xl bg-muted/30 border border-border dark:border-white/5">
           <div className="flex items-center justify-between gap-2">
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
@@ -401,7 +401,7 @@ export function QuoteConversionTab({
                           const unitPrice = totalVal / (totalQuoteQty || 1);
                           const qty = allocs[f.id] || 0;
                           return (
-                            <div key={f.id} className="flex items-center justify-between gap-2 bg-muted/30 p-2 rounded-lg border border-border dark:border-white/5/50">
+                            <div key={f.id} className="flex items-center justify-between gap-2 bg-muted/30 p-2 rounded-lg border border-border dark:border-white/5">
                               <div className="min-w-0 flex-1">
                                 <p className="text-[10px] font-bold uppercase truncate">{safeStr(f.nome)}</p>
                                 <p className="text-[9px] text-muted-foreground">R$ {unitPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} / {safeStr(product.unidade)}</p>
@@ -477,7 +477,7 @@ export function QuoteConversionTab({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border dark:border-white/5/50 shadow-sm relative overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border dark:border-white/5 shadow-sm relative overflow-hidden">
           <div className="space-y-1.5">
             <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Entrega *</label>
             <Popover open={dateOpen} onOpenChange={setDateOpen}>

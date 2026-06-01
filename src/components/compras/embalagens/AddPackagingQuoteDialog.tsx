@@ -242,7 +242,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
   const content = (
     <>
       {/* Header otimizado */}
-      <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border dark:border-white/5/50 bg-card relative overflow-hidden">
+      <div className="flex-shrink-0 px-4 sm:px-6 py-4 border-b border-border dark:border-white/5 bg-card relative overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand border border-brand/20 flex-shrink-0">
@@ -298,8 +298,8 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border dark:border-white/5/50 bg-muted/30">
-        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-background rounded-lg border border-border dark:border-white/5/50 shadow-sm">
+      <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border dark:border-white/5 bg-muted/30">
+        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-background rounded-lg border border-border dark:border-white/5 shadow-sm">
           {STEPS.map((step) => {
             const Icon = step.icon;
             const status = getStepStatus(step.id);
@@ -307,7 +307,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
               <button key={step.id} type="button" onClick={() => setActiveStep(step.id)}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 flex-1 justify-center",
-                  status === "current" && "bg-card text-foreground shadow-sm border border-border dark:border-white/5/50",
+                  status === "current" && "bg-card text-foreground shadow-sm border border-border dark:border-white/5",
                   status === "completed" && "bg-muted text-foreground hover:bg-muted/80 cursor-pointer shadow-sm",
                   status === "pending" && "text-muted-foreground hover:bg-muted cursor-pointer"
                 )}>
@@ -329,7 +329,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start items-stretch">
               {/* Formulário de Seleção */}
               <Card className={cn("border-border bg-card shadow-sm h-full flex flex-col rounded-xl relative", isMobile ? "overflow-visible z-20" : "overflow-hidden")}>
-                <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20">
+                <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20">
                   <CardTitle className="flex items-center gap-2 text-foreground text-sm font-black uppercase tracking-wide">
                     <Plus className="h-4 w-4 text-brand" />
                     <span className="truncate">Selecionar Embalagens</span>
@@ -389,7 +389,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                           className={cn(
                             "w-full p-2.5 rounded-lg text-left transition-all flex items-center gap-3 group cursor-pointer",
                             isSelected
-                              ? "bg-muted border border-border dark:border-white/5/50"
+                              ? "bg-muted border border-border dark:border-white/5"
                               : "hover:bg-gray-50 dark:hover:bg-muted/50 border border-transparent"
                           )}>
                           <Checkbox checked={isSelected}
@@ -416,7 +416,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
 
               {/* Lista de Selecionados */}
               <Card className={cn("border-border bg-card shadow-sm rounded-xl overflow-hidden h-full flex flex-col relative", isMobile ? "z-10" : "")}>
-                <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20">
+                <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20">
                   <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
                     <span className="flex items-center gap-2 text-foreground">
                       <Package className="h-4 w-4 text-brand" />
@@ -431,7 +431,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                   {renderList(
                     selectedItems,
                     (item) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 bg-card hover:bg-muted/30 border border-border dark:border-white/5/50 rounded-xl shadow-sm group transition-all">
+                      <div key={item.id} className="flex items-center gap-3 p-3 bg-card hover:bg-muted/30 border border-border dark:border-white/5 rounded-xl shadow-sm group transition-all">
                         <div className="w-8 h-8 rounded-lg bg-brand/5 flex items-center justify-center flex-shrink-0 border border-brand/10">
                           <Package className="h-4 w-4 text-brand" />
                         </div>
@@ -459,7 +459,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
               {/* Coluna Esquerda: Configurações Gerais */}
               <div className="h-full">
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-visible relative z-30 h-full flex flex-col">
-                  <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20 rounded-t-xl flex-shrink-0">
+                  <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20 rounded-t-xl flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-foreground text-sm font-black uppercase tracking-wide">
                       <Clock className="h-4 w-4 text-brand flex-shrink-0" />
                       <span>Período & Detalhes</span>
@@ -509,7 +509,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
               {/* Coluna Direita: Fornecedores */}
               <div className="relative overflow-visible z-40 h-full">
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-visible h-full flex flex-col">
-                  <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20 rounded-t-xl flex-shrink-0">
+                  <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20 rounded-t-xl flex-shrink-0">
                     <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
                       <span className="flex items-center gap-2 text-foreground">
                         <Building2 className="h-4 w-4 text-brand" />
@@ -559,7 +559,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                       ) : (
                         <div className="flex flex-col gap-2.5">
                           {selectedSuppliersData.map(supplier => (
-                            <div key={supplier.id} className="flex items-center justify-between p-3 bg-card border border-border dark:border-white/5/50 rounded-xl group hover:border-brand/30 transition-all">
+                            <div key={supplier.id} className="flex items-center justify-between p-3 bg-card border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-all">
                               <div className="flex items-center gap-3 min-w-0">
                                 <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center flex-shrink-0">
                                   <Building2 className="h-4 w-4 text-brand" />
@@ -589,7 +589,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         <DrawerContent
-          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-border dark:border-white/5/50 bg-background transition-all duration-200"
+          className="flex flex-col p-0 gap-0 overflow-hidden border-t border-border dark:border-white/5 bg-background transition-all duration-200"
           style={{
             height: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',
             maxHeight: keyboardOffset > 0 ? `calc(100vh - ${keyboardOffset}px)` : '90vh',

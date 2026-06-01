@@ -686,7 +686,7 @@ function OrderHistoryList({ orders }: { orders: any[] }) {
                       </p>
                     </div>
                     <div className="w-[15%] flex justify-center items-center pl-2">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border dark:border-white/5/50">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 border border-border dark:border-white/5">
                         <Package className="h-3 w-3 text-muted-foreground" />
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wider">{order.order_items?.length}</span>
                       </div>

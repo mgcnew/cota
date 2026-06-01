@@ -932,16 +932,24 @@ export function ManagePackagingQuoteDialog({
               <Package className="h-4 w-4" />
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitleComponent className="text-sm font-black text-foreground tracking-tight leading-tight">
+              <DialogTitleComponent className="text-sm font-bold text-foreground tracking-tight leading-tight">
                 Gerenciar Cotação
               </DialogTitleComponent>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                <span className="text-[11px] text-muted-foreground">
                   {quote.dataInicio} – {quote.dataFim}
                 </span>
-                <span className="text-[10px] text-muted-foreground opacity-50 hidden sm:inline">
-                  · {stats.totalEmbalagens} itens · {stats.totalFornecedores} fornec. · {stats.fornecedoresRespondidos} respostas
-                </span>
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground">
+                    <Package className="h-3 w-3" />{stats.totalEmbalagens}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-muted text-[10px] font-medium text-muted-foreground">
+                    <Building2 className="h-3 w-3" />{stats.totalFornecedores}
+                  </span>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-500/10 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                    <CheckCircle2 className="h-3 w-3" />{stats.fornecedoresRespondidos}/{stats.totalFornecedores}
+                  </span>
+                </div>
               </div>
             </div>
             {/* X only on desktop — drawer closes by swipe on mobile */}
@@ -1347,16 +1355,19 @@ export function ManagePackagingQuoteDialog({
                                   <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Preço (R$)" : "Preço Pacote/Fardo (R$) *"}
                                   </Label>
-                                  <Input 
-                                    ref={valorTotalInputRef} 
-                                    type="text" 
-                                    inputMode="decimal" 
-                                    value={formData.valorTotal} 
-                                    onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} 
-                                    onFocus={handleInputFocus} 
-                                    placeholder="0.00" 
-                                    className="h-10 sm:h-11 rounded-xl bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
-                                  />
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground pointer-events-none select-none">R$</span>
+                                    <Input
+                                      ref={valorTotalInputRef}
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={formData.valorTotal}
+                                      onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))}
+                                      onFocus={handleInputFocus}
+                                      placeholder="0,00"
+                                      className="h-10 sm:h-11 pl-9 rounded-xl bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
+                                    />
+                                  </div>
                                 </div>
 
                                 {/* Unidade */}
@@ -1464,8 +1475,8 @@ export function ManagePackagingQuoteDialog({
                               <div className="flex items-center justify-between pt-2 border-t border-border dark:border-white/5">
                                 <p className="text-[10px] text-muted-foreground font-medium"><kbd className="px-1 py-0.5 rounded bg-background border border-border dark:border-white/5 font-sans">Enter</kbd> salvar</p>
                                 <div className="flex gap-2">
-                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)} className="h-8 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">Cancelar</Button>
-                                  <Button size="sm" onClick={handleSaveItem} disabled={updateSupplierItem.isPending || !formData.valorTotal} className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold uppercase tracking-wider rounded-lg shadow-lg shadow-primary/20">{updateSupplierItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Save className="h-3 w-3 mr-1.5" />}Salvar</Button>
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)} className="h-9 px-3 text-xs font-bold text-muted-foreground hover:text-foreground">Cancelar</Button>
+                                  <Button size="sm" onClick={handleSaveItem} disabled={updateSupplierItem.isPending || !formData.valorTotal} className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-lg shadow-lg shadow-primary/20">{updateSupplierItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Save className="h-3 w-3 mr-1.5" />}Salvar</Button>
                                 </div>
                               </div>
                             </div>

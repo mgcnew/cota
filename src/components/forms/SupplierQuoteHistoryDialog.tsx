@@ -313,7 +313,7 @@ export function SupplierQuoteHistoryDialog({ supplierName, supplierId, trigger, 
                 <div className="space-y-4">
                   {ordersWithTrend.map((order) => (
                     <div key={order.id} className={cn("border rounded-2xl overflow-hidden", designSystem.colors.border.subtle, designSystem.colors.surface.card)}>
-                      <div className="p-4 sm:p-5 border-b border-border dark:border-white/5/50 bg-muted/20">
+                      <div className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">

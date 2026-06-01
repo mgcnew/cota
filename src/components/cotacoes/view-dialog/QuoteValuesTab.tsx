@@ -535,7 +535,7 @@ export function QuoteValuesTab({
       <div className={cn(
         "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10 h-full",
       )}>
-        <div className="p-3 border-b border-border dark:border-white/5/50 bg-card/50">
+        <div className="p-3 border-b border-border dark:border-white/5 bg-card/50">
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-zinc-400" />
@@ -678,7 +678,7 @@ export function QuoteValuesTab({
 
         {selectedSupplier ? (
           <>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border dark:border-white/5/50 bg-card/50 flex-shrink-0">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border dark:border-white/5 bg-card/50 flex-shrink-0">
               <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
                 <div className="p-2 rounded-xl bg-brand/10 flex-shrink-0">
                   <Building2 className="h-5 w-5 text-brand" />
@@ -813,7 +813,7 @@ export function QuoteValuesTab({
             )}
 
             {!isMobile && (
-              <div className="px-6 py-2 border-b border-border dark:border-white/5/50 bg-muted/30 flex-shrink-0">
+              <div className="px-6 py-2 border-b border-border dark:border-white/5 bg-muted/30 flex-shrink-0">
                   <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
                     <div className="w-10" />
                     <div className="relative group">

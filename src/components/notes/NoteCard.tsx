@@ -125,7 +125,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
         </div>
 
         {/* Action Tray */}
-        <div className="pl-8 pr-4 py-3 flex items-center justify-between mt-auto bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-border dark:border-white/5/50">
+        <div className="pl-8 pr-4 py-3 flex items-center justify-between mt-auto bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-border dark:border-white/5">
           <div className="flex items-center text-[10px] font-bold text-muted-foreground/60 tracking-wider">
             <Clock className="h-3 w-3 mr-1.5 text-brand/60" />
             {new Date(note.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}

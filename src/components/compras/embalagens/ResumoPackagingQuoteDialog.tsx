@@ -212,7 +212,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
               "overflow-hidden"
             )}>
               {/* Melhor Fornecedor */}
-              <div className="px-3 py-2.5 flex items-center gap-3 border-b border-border dark:border-white/5/50">
+              <div className="px-3 py-2.5 flex items-center gap-3 border-b border-border dark:border-white/5">
                 <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 bg-brand/10 border border-brand/20">
                   <Award className="h-4 w-4 text-brand" />
                 </div>
@@ -253,7 +253,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
 
           {/* â”€â”€ EMBALAGENS: Lista compacta â”€â”€ */}
           <div className={cn(ds.components.card.root, "overflow-hidden")}>
-            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 flex items-center justify-between">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Package className="h-3.5 w-3.5 text-brand" />
                 <span className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>
@@ -301,7 +301,7 @@ export function ResumoPackagingQuoteDialog({ open, onOpenChange, quote }: Resumo
 
           {/* â”€â”€ RANKING FORNECEDORES â”€â”€ */}
           <div className={cn(ds.components.card.root, "overflow-hidden")}>
-            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 flex items-center justify-between">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Building2 className="h-3.5 w-3.5 text-brand" />
                 <span className={cn("text-[10px] uppercase tracking-widest", ds.typography.weight.bold, ds.colors.text.muted)}>

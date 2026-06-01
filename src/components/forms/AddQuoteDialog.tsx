@@ -1461,7 +1461,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                 {/* Header controls */}
                 <div className="px-4 pb-3 space-y-3 flex-shrink-0">
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex p-1 rounded-xl bg-muted/50 border border-border dark:border-white/5/50 flex-1">
+                    <div className="flex p-1 rounded-xl bg-muted/50 border border-border dark:border-white/5 flex-1">
                       <button
                         type="button"
                         onClick={() => setPersonalizeViewMode("by-supplier")}
@@ -1839,7 +1839,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
       {/* Mobile Cart Drawer â€" reused from desktop */}
       <Drawer open={showMobileCart} onOpenChange={setShowMobileCart}>
         <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="border-b border-border dark:border-white/5/50 pb-4">
+          <DrawerHeader className="border-b border-border dark:border-white/5 pb-4">
             <DrawerTitle className="text-left flex items-center gap-2">
               <Package className="h-5 w-5 text-brand" />
               Produtos Adicionados ({fields.length})
@@ -1887,7 +1887,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
               </div>
             )}
           </div>
-          <DrawerFooter className="border-t border-border dark:border-white/5/50 pt-4">
+          <DrawerFooter className="border-t border-border dark:border-white/5 pt-4">
             <DrawerClose asChild>
               <Button variant="outline" className={cn(ds.components.button.secondary, "w-full")}>Fechar Lista</Button>
             </DrawerClose>
@@ -1898,7 +1898,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
       {/* Confirmation Drawer â€" replaces the old "Resumo" step on mobile */}
       <Drawer open={showConfirmDrawer} onOpenChange={setShowConfirmDrawer}>
         <DrawerContent className="max-h-[90vh] flex flex-col">
-          <DrawerHeader className="border-b border-border dark:border-white/5/50 pb-4 flex-shrink-0">
+          <DrawerHeader className="border-b border-border dark:border-white/5 pb-4 flex-shrink-0">
             <DrawerTitle className="text-left flex items-center gap-2">
               <FileText className="h-5 w-5 text-brand" />
               Revisão Final
@@ -1987,7 +1987,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
             </div>
           </div>
 
-          <DrawerFooter className="border-t border-border dark:border-white/5/50 pt-3 pb-4 flex-shrink-0 flex-row gap-2">
+          <DrawerFooter className="border-t border-border dark:border-white/5 pt-3 pb-4 flex-shrink-0 flex-row gap-2">
             <Button
               type="button"
               variant="outline"
@@ -2134,7 +2134,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                             "flex flex-col space-y-4 h-full min-h-0 pr-2 select-none flex-shrink-0 lg:flex-shrink relative z-[20]",
                             "pb-20 sm:pb-0" // Espaço extra para o botão no mobile
                           )}>
-                            <div className="pb-1 border-b border-border dark:border-white/5/50">
+                            <div className="pb-1 border-b border-border dark:border-white/5">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Plus className="h-5 w-5 text-brand flex-shrink-0" />
                                 <span className="truncate">Adicionar Produto</span>
@@ -2366,7 +2366,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
 
                           {/* Lista de Produtos - Lado Direito */}
                           <div className="hidden lg:flex flex-col space-y-4 h-full min-h-0 overflow-hidden relative z-[10]">
-                            <div className="pb-1 border-b border-border dark:border-white/5/50 flex-shrink-0">
+                            <div className="pb-1 border-b border-border dark:border-white/5 flex-shrink-0">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
                                 <span className="truncate">Produtos Adicionados ({fields.length})</span>
@@ -2849,7 +2849,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border dark:border-white/5/50">
+                            <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-xl border border-border dark:border-white/5">
                               <Button
                                 type="button"
                                 variant="ghost"

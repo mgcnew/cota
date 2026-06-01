@@ -403,7 +403,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         <div className="flex items-center gap-1 md:gap-1.5 flex-shrink-0">
           {/* View Toggle */}
           {!isCapturing && (
-            <div className="flex p-0.5 bg-muted rounded-lg border border-border dark:border-white/5/50 mr-1 md:mr-2">
+            <div className="flex p-0.5 bg-muted rounded-lg border border-border dark:border-white/5 mr-1 md:mr-2">
               <button
                 onClick={() => setViewMode("winners")}
                 className={cn(
@@ -697,7 +697,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1100px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border dark:border-white/5/50 bg-card rounded-2xl shadow-2xl">
+      <DialogContent className="max-w-[1100px] h-[85vh] p-0 overflow-hidden [&>button]:hidden flex flex-col border border-border dark:border-white/5 bg-card rounded-2xl shadow-2xl">
         <DialogTitle className="sr-only">Resumo da Negociação</DialogTitle>
         <DialogDescription className="sr-only">Relatório de negociação da cotação</DialogDescription>
         {modalContent}
