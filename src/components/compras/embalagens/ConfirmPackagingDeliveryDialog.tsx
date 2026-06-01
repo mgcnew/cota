@@ -1,4 +1,5 @@
 ﻿import { useState, useMemo, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,7 @@ interface Props {
 export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Props) {
   const { confirmDelivery } = usePackagingOrders();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // States para armazenar as edições do usuário para cada item
@@ -57,7 +59,8 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
       const q: Record<string, string> = {};
       const t: Record<string, string> = {};
       order.itens.forEach(item => {
-        q[item.id] = String(item.quantidade);
+        // Exibe com vírgula (padrão brasileiro) para permitir editar decimais
+        q[item.id] = String(item.quantidade).replace(".", ",");
         t[item.id] = item.valorTotal.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       });
       setItemQuantities(q);
@@ -66,7 +69,9 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
   }, [order, open]);
 
   const handleQuantityChange = (itemId: string, value: string) => {
-    setItemQuantities(prev => ({ ...prev, [itemId]: value }));
+    // Aceita dígitos e um separador decimal (vírgula ou ponto) — ex: 59,5 kg
+    const sanitized = value.replace(/[^\d.,]/g, "");
+    setItemQuantities(prev => ({ ...prev, [itemId]: sanitized }));
   };
 
   const handleTotalChange = (itemId: string, value: string) => {
@@ -106,7 +111,7 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
     try {
       // Prepara os itens atualizados
       const updatedItens = order.itens.map(item => {
-        const qtd = parseFloat(itemQuantities[item.id]) || item.quantidade;
+        const qtd = parseFloat(String(itemQuantities[item.id] ?? "").replace(",", ".")) || item.quantidade;
         const vTotalVal = itemTotals[item.id] ? parseBRLToNumber(itemTotals[item.id]) : item.valorTotal;
         const vTotal = vTotalVal || item.valorTotal;
         // O valor unitário é sempre o total/quantidade
@@ -126,6 +131,9 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
         economiaEstimada: summary.newEconomy,
         itens: updatedItens
       });
+
+      // Força a atualização imediata da lista (garante refresh sem reload)
+      await queryClient.refetchQueries({ queryKey: ['packaging-orders'], type: 'all' });
 
       onOpenChange(false);
       resetForm();
@@ -184,9 +192,8 @@ export function ConfirmPackagingDeliveryDialog({ open, onOpenChange, order }: Pr
                               Qtd ({item.unidadeCompra})
                             </label>
                             <Input
-                              type="number"
-                              min="0"
-                              step="any"
+                              type="text"
+                              inputMode="decimal"
                               value={itemQuantities[item.id] || ""}
                               onChange={(e) => handleQuantityChange(item.id, e.target.value)}
                               className={cn("h-8 text-sm", isWeight ? "border-amber-300 dark:border-amber-700 focus-visible:ring-amber-500" : "")}

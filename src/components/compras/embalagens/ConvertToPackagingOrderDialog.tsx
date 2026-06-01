@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,7 @@ interface OrderItem {
 export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Props) {
   const { createOrderFromQuote } = usePackagingOrders();
   const { updateQuoteStatus } = usePackagingQuotes();
+  const queryClient = useQueryClient();
   const [conversionMode, setConversionMode] = useState<ConversionMode>("auto");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [observations, setObservations] = useState("");
@@ -244,6 +246,13 @@ export function ConvertToPackagingOrderDialog({ open, onOpenChange, quote }: Pro
         });
       }
       await updateQuoteStatus.mutateAsync({ quoteId: quote.id, status: 'concluida' });
+
+      // Força a atualização imediata das listas (garante refresh sem reload)
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['packaging-orders'], type: 'all' }),
+        queryClient.refetchQueries({ queryKey: ['packaging-quotes'], type: 'all' }),
+      ]);
+
       onOpenChange(false);
       resetForm();
     } catch (error) {
