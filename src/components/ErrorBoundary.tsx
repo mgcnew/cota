@@ -49,10 +49,9 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private handleRetry = () => {
     this.setState({ isRetrying: true });
-    // Small delay to show loading state
-    setTimeout(() => {
-      this.setState({ hasError: false, error: null, isRetrying: false });
-    }, 300);
+    // Recarrega a página de fato: resetar só o estado não resolve erros de
+    // chunk (arquivo removido após deploy) — o reload busca a versão nova.
+    window.location.reload();
   };
 
   private handleGoHome = () => {

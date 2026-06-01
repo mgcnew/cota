@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useEffect, lazy, Suspense, ReactNode } from "react";
+import { useEffect, Suspense, ReactNode } from "react";
 import { AppLayout } from "./components/layout/AppLayout";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -12,40 +12,46 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { initScrollbarFix } from "./utils/scrollbar-fix";
 import { queryClient } from "./lib/queryClient";
+import { lazyWithReload } from "./lib/lazyWithReload";
 
 /**
  * All pages are lazy loaded for code splitting (Requirements 12.1, 12.2)
- * Each page is loaded in a separate chunk to minimize initial bundle size
+ * Each page is loaded in a separate chunk to minimize initial bundle size.
+ *
+ * lazyWithReload: ao publicar uma versão nova, chunks antigos somem do servidor.
+ * Se o usuário tenta carregar um chunk antigo (página aberta/cacheada), a página
+ * recarrega sozinha em vez de mostrar "Algo deu errado" — essencial no portal
+ * público do fornecedor.
  */
 
 // Páginas públicas - lazy load para reduzir bundle inicial
-const Landing = lazy(() => import("./pages/Landing"));
-const Auth = lazy(() => import("./pages/Auth"));
-const AcceptInvite = lazy(() => import("./pages/AcceptInvite"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const VendorPortal = lazy(() => import("@/pages/VendorPortal"));
-const ShortLinkRedirect = lazy(() => import("@/pages/ShortLinkRedirect"));
-const OrderPortal = lazy(() => import("./pages/OrderPortal"));
-const PackagingOrderPortal = lazy(() => import("./pages/PackagingOrderPortal"));
+const Landing = lazyWithReload(() => import("./pages/Landing"), "Landing");
+const Auth = lazyWithReload(() => import("./pages/Auth"), "Auth");
+const AcceptInvite = lazyWithReload(() => import("./pages/AcceptInvite"), "AcceptInvite");
+const NotFound = lazyWithReload(() => import("./pages/NotFound"), "NotFound");
+const VendorPortal = lazyWithReload(() => import("@/pages/VendorPortal"), "VendorPortal");
+const ShortLinkRedirect = lazyWithReload(() => import("@/pages/ShortLinkRedirect"), "ShortLinkRedirect");
+const OrderPortal = lazyWithReload(() => import("./pages/OrderPortal"), "OrderPortal");
+const PackagingOrderPortal = lazyWithReload(() => import("./pages/PackagingOrderPortal"), "PackagingOrderPortal");
 
 // Prefetch function for probable next pages (Requirements 16.5)
 const prefetchDashboard = () => import("./pages/Dashboard");
 
 // Páginas principais - lazy load
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Produtos = lazy(() => import("./pages/Produtos"));
-const Fornecedores = lazy(() => import("./pages/Fornecedores"));
-const Compras = lazy(() => import("./pages/Compras"));
-const ContagemEstoque = lazy(() => import("./pages/ContagemEstoque"));
-const Anotacoes = lazy(() => import("./pages/Anotacoes"));
-const Etiquetas = lazy(() => import("./pages/Etiquetas"));
-const Relatorios = lazy(() => import("./pages/Relatorios"));
-const Faixas = lazy(() => import("./pages/Faixas"));
-const Embalagens = lazy(() => import("./pages/Embalagens"));
-const AnaliseCompras = lazy(() => import("./pages/AnaliseCompras"));
+const Dashboard = lazyWithReload(() => import("./pages/Dashboard"), "Dashboard");
+const Produtos = lazyWithReload(() => import("./pages/Produtos"), "Produtos");
+const Fornecedores = lazyWithReload(() => import("./pages/Fornecedores"), "Fornecedores");
+const Compras = lazyWithReload(() => import("./pages/Compras"), "Compras");
+const ContagemEstoque = lazyWithReload(() => import("./pages/ContagemEstoque"), "ContagemEstoque");
+const Anotacoes = lazyWithReload(() => import("./pages/Anotacoes"), "Anotacoes");
+const Etiquetas = lazyWithReload(() => import("./pages/Etiquetas"), "Etiquetas");
+const Relatorios = lazyWithReload(() => import("./pages/Relatorios"), "Relatorios");
+const Faixas = lazyWithReload(() => import("./pages/Faixas"), "Faixas");
+const Embalagens = lazyWithReload(() => import("./pages/Embalagens"), "Embalagens");
+const AnaliseCompras = lazyWithReload(() => import("./pages/AnaliseCompras"), "AnaliseCompras");
 
 // Páginas secundárias - lazy load com prioridade baixa
-const Configuracoes = lazy(() => import("./pages/Configuracoes"));
+const Configuracoes = lazyWithReload(() => import("./pages/Configuracoes"), "Configuracoes");
 
 // Loading fallback minimalista - rápido e leve
 const PageLoader = () => (
