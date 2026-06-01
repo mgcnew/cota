@@ -2590,7 +2590,6 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                             selected={field.value}
                                             onSelect={field.onChange}
                                             locale={ptBR}
-                                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
                                             classNames={{
                                               day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
                                               day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",

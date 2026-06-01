@@ -92,6 +92,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   // Form states
   const [activeStep, setActiveStep] = useState("produtos");
   const [fornecedor, setFornecedor] = useState("");
+  const [dataPedido, setDataPedido] = useState<Date>(new Date());
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined);
   const [observacoes, setObservacoes] = useState("");
   const [itens, setItens] = useState<PedidoItem[]>([]);
@@ -219,6 +220,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
   const handleReset = () => {
     setActiveStep("produtos");
     setFornecedor("");
+    setDataPedido(new Date());
     setDataEntrega(undefined);
     setObservacoes("");
     setItens([]);
@@ -378,7 +380,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         supplier_name: selectedSupplier?.name || '',
         total_value: total,
         status: 'pendente',
-        order_date: format(new Date(), 'yyyy-MM-dd'),
+        order_date: format(dataPedido, 'yyyy-MM-dd'),
         delivery_date: format(dataEntrega, 'yyyy-MM-dd'),
         observations: observacoes
       }).select().single();
@@ -1348,37 +1350,65 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   </CardTitle>
                 </CardHeader>
                 <CardContent className={cn(ds.components.card.body, "space-y-4")}>
-                  <div className={ds.components.input.group}>
-                    <Label className={ds.components.input.label}>Data de Entrega *</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button 
-                          variant="outline" 
-                          className={cn(
-                            ds.components.button.secondary,
-                            "w-full justify-start",
-                            !dataEntrega && ds.colors.text.secondary
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "Selecione a data..."}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className={cn(
-                        "w-auto p-0",
-                        ds.colors.surface.card,
-                        ds.colors.border.default,
-                        "border"
-                      )} align="start">
-                        <Calendar 
-                          mode="single" 
-                          selected={dataEntrega}
-                          onSelect={setDataEntrega} 
-                          locale={ptBR}
-                          disabled={(date) => date < new Date(format(new Date(), 'yyyy-MM-dd'))} 
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Data do Pedido *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(ds.components.button.secondary, "w-full justify-start")}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {format(dataPedido, "dd/MM/yyyy", { locale: ptBR })}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className={cn(
+                          "w-auto p-0",
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "border"
+                        )} align="start">
+                          <Calendar
+                            mode="single"
+                            selected={dataPedido}
+                            onSelect={(d) => d && setDataPedido(d)}
+                            locale={ptBR}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className={ds.components.input.group}>
+                      <Label className={ds.components.input.label}>Data de Entrega *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              ds.components.button.secondary,
+                              "w-full justify-start",
+                              !dataEntrega && ds.colors.text.secondary
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "Selecione..."}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className={cn(
+                          "w-auto p-0",
+                          ds.colors.surface.card,
+                          ds.colors.border.default,
+                          "border"
+                        )} align="start">
+                          <Calendar
+                            mode="single"
+                            selected={dataEntrega}
+                            onSelect={setDataEntrega}
+                            locale={ptBR}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </div>
 
                   <div className={ds.components.input.group}>
@@ -2047,6 +2077,30 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   <ChevronRight className="h-4 w-4 text-zinc-300 flex-shrink-0" />
                 </button>
               )}
+            </div>
+
+            {/* Data do Pedido */}
+            <div className={ds.components.input.group}>
+              <Label className={ds.components.input.label}>Data do Pedido *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(ds.components.button.secondary, "w-full justify-start h-12")}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {format(dataPedido, "dd/MM/yyyy", { locale: ptBR })}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className={cn("w-auto p-0", ds.colors.surface.card, ds.colors.border.default, "border")} align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dataPedido}
+                    onSelect={(d) => d && setDataPedido(d)}
+                    locale={ptBR}
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Date Quick Chips */}
