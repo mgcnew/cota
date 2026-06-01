@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -86,12 +86,15 @@ interface VendorItemProps {
   onToggleSpec: (productId: string, token: string | undefined) => void;
   onConfirmSpec: (productId: string, token: string | undefined, confirmed: boolean) => void;
   onApplyVariant: (productId: string, token: string | undefined, variant: HistoryVariant) => void;
+  registerPriceRef: (index: number, el: HTMLInputElement | null) => void;
+  onPriceNext: (index: number) => void;
 }
 
 const VendorItem = memo(function VendorItem({
   item, index,
   onPriceChange, onObsChange, onBoxQtyChange, onUpdateField,
   onToggleSpec, onConfirmSpec, onApplyVariant,
+  registerPriceRef, onPriceNext,
 }: VendorItemProps) {
   const isPkg = !!item.is_packaging;
   const hasHistory = isPkg && !!item.last_spec;
@@ -153,12 +156,20 @@ const VendorItem = memo(function VendorItem({
           <div className="relative">
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-black text-zinc-300 dark:text-zinc-600 pointer-events-none select-none">R$</span>
             <input
+              ref={(el) => registerPriceRef(index, el)}
               type="text"
               inputMode="decimal"
+              enterKeyHint="next"
               placeholder={isPkg ? "Preço do fardo/pacote" : item.unidade?.toUpperCase().startsWith('CX') ? "Preço do kg ou unidade" : "Preço unitário"}
               className="w-full pl-10 pr-4 h-12 rounded-xl text-[15px] font-bold bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 outline-none text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-300 dark:placeholder:text-zinc-600 transition-all"
               value={item.valor_oferecido || ""}
               onChange={(e) => onPriceChange(item.product_id, item._token, e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onPriceNext(index);
+                }
+              }}
             />
           </div>
 
@@ -334,6 +345,34 @@ export default function VendorPortal() {
   const [data, setData] = useState<QuoteData | null>(null);
   const [items, setItems] = useState<QuoteItem[]>([]);
   const [isDark, setIsDark] = useState(false);
+  const [inputFocused, setInputFocused] = useState(false);
+  const priceRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const registerPriceRef = useCallback((index: number, el: HTMLInputElement | null) => {
+    priceRefs.current[index] = el;
+  }, []);
+
+  // Edição rápida: ao confirmar um preço, foca o próximo item; se for o último, fecha o teclado
+  const focusNextPrice = useCallback((index: number) => {
+    const next = priceRefs.current[index + 1];
+    if (next) {
+      next.focus();
+      next.select();
+    } else {
+      priceRefs.current[index]?.blur();
+    }
+  }, []);
+
+  // Oculta o cartão "Faturar para" enquanto um campo está focado (mais espaço no celular)
+  const handleListFocus = useCallback(() => setInputFocused(true), []);
+  const handleListBlur = useCallback(() => {
+    setTimeout(() => {
+      const active = document.activeElement;
+      const stillEditing = active instanceof HTMLElement &&
+        (active.tagName === "INPUT" || active.tagName === "SELECT" || active.tagName === "TEXTAREA");
+      if (!stillEditing) setInputFocused(false);
+    }, 80);
+  }, []);
 
   const updateItemField = useCallback((productId: string, itemToken: string | undefined, field: string, value: any) => {
     setItems(prev => prev.map(item =>
@@ -748,8 +787,11 @@ export default function VendorPortal() {
           </div>
         </header>
 
-        {/* INFO FATURAMENTO */}
-        <div className="max-w-xl mx-auto px-4 pt-5">
+        {/* INFO FATURAMENTO — oculta ao focar um item para liberar espaço */}
+        <div className={cn(
+          "max-w-xl mx-auto px-4 overflow-hidden transition-all duration-300",
+          inputFocused ? "max-h-0 pt-0 opacity-0" : "max-h-40 pt-5 opacity-100"
+        )}>
           <div className="relative bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-white/5 rounded-2xl overflow-hidden">
             <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-l-2xl" />
             <div className="flex items-center justify-between pl-5 pr-4 py-3">
@@ -771,7 +813,11 @@ export default function VendorPortal() {
         </div>
 
         {/* LISTA DE ITENS */}
-        <main className="flex-1 overflow-y-auto max-w-xl w-full mx-auto px-4 py-5 pb-6 space-y-3">
+        <main
+          className="flex-1 overflow-y-auto max-w-xl w-full mx-auto px-4 py-5 pb-6 space-y-3"
+          onFocus={handleListFocus}
+          onBlur={handleListBlur}
+        >
           <div className="flex items-center justify-between mb-1">
             <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">{items.length} {items.length === 1 ? 'item' : 'itens'}</p>
             {itemsFilled > 0 && (
@@ -791,6 +837,8 @@ export default function VendorPortal() {
               onToggleSpec={toggleSpecExpanded}
               onConfirmSpec={confirmSpec}
               onApplyVariant={applyVariant}
+              registerPriceRef={registerPriceRef}
+              onPriceNext={focusNextPrice}
             />
           ))}
 
