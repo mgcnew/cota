@@ -139,7 +139,7 @@ export function PackagingEconomyBreakdown({
         {sortedEconomies.map((item) => (
           <Card
             key={item.productId}
-            className="border border-border dark:border-white/5/50 bg-card shadow-sm"
+            className="border border-border dark:border-white/5 bg-card shadow-sm"
           >
             <div className="p-4 space-y-3">
               {/* Product Header */}
@@ -197,7 +197,7 @@ export function PackagingEconomyBreakdown({
                   </div>
                 </div>
               ) : (
-                <div className="bg-muted/20 rounded-lg p-3 border border-border dark:border-white/5/50">
+                <div className="bg-muted/20 rounded-lg p-3 border border-border dark:border-white/5">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
                     Ãšnica Oferta
                   </p>

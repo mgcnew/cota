@@ -53,12 +53,12 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
     <ScrollArea className="flex-1 h-full">
       <div className="p-4 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h3 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2 shrink-0">
-            <Star className="h-3 w-3 text-brand" />
+          <h3 className="text-[13px] font-semibold text-foreground flex items-center gap-2 shrink-0">
+            <Star className="h-3.5 w-3.5 text-brand" />
             <span>Resumo de Vencedores</span>
           </h3>
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mb-1">
-            <div className="flex bg-muted/20 border border-border dark:border-white/5/50 rounded-lg p-0.5 shrink-0">
+            <div className="flex bg-muted/20 border border-border dark:border-white/5 rounded-lg p-0.5 shrink-0">
               <Button 
                 variant={view === "item" ? "secondary" : "ghost"} 
                 size="sm" 
@@ -106,7 +106,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                         <div className="mt-1.5 flex flex-wrap gap-1">
                           {item.allPrices.map((price, idx) => (
                             <Badge key={price.supplierId} variant="outline"
-                              className={cn("text-[9px] font-bold cursor-pointer border transition-colors", 
+                              className={cn("text-[10px] font-bold cursor-pointer border transition-colors", 
                                 idx === 0 
                                   ? "bg-muted text-foreground border-border hover:bg-muted/80" 
                                   : "bg-background text-muted-foreground border-border hover:bg-muted")}
@@ -126,13 +126,13 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                           </div>
                           <p className="text-[10px] font-bold text-brand uppercase tracking-wide mt-0.5">{item.bestSupplierName}</p>
                           {item.savings > 0 && (
-                            <Badge className="mt-1 bg-brand/10 text-brand border border-brand/20 text-[9px] font-bold">
+                            <Badge className="mt-1 bg-brand/10 text-brand border border-brand/20 text-[10px] font-bold">
                               <TrendingDown className="h-2.5 w-2.5 mr-0.5" />
                               -{formatCurrency(item.savings)}/un
                             </Badge>
                           )}
                         </>
-                      ) : <Badge variant="outline" className="text-muted-foreground bg-muted text-[9px] font-bold border-border">Sem preço</Badge>}
+                      ) : <Badge variant="outline" className="text-muted-foreground bg-muted text-[10px] font-bold border-border">Sem preço</Badge>}
                     </div>
                   </div>
                 </div>
@@ -148,7 +148,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
             ) : (
               bestPricesBySupplier.map((group) => (
                 <Card key={group.supplierId} className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-                  <div className="bg-muted/20 px-4 py-3 border-b border-border dark:border-white/5/50 flex items-center justify-between">
+                  <div className="bg-muted/20 px-4 py-3 border-b border-border dark:border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand flex-shrink-0">
                         <Building2 className="h-4 w-4" />
@@ -190,7 +190,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                             </PopoverTrigger>
                             <PopoverContent className="w-auto min-w-[200px] p-3 shadow-lg" align="end" onClick={(e) => e.stopPropagation()}>
                               <div className="space-y-2">
-                                <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border dark:border-white/5/50 pb-1.5 mb-1.5">Outros Fornecedores</h4>
+                                <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border dark:border-white/5 pb-1.5 mb-1.5">Outros Fornecedores</h4>
                                 <div className="flex flex-col gap-1.5">
                                   {item.allPrices.filter(p => p.supplierId !== group.supplierId).length > 0 ? (
                                     item.allPrices
@@ -198,7 +198,7 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                                       .map((price) => (
                                         <div key={price.supplierId} className="flex justify-between items-center gap-4 text-xs">
                                           <span className="text-muted-foreground truncate max-w-[150px]" title={price.supplierName}>{price.supplierName}</span>
-                                          <span className="font-bold text-foreground">{formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[9px] text-muted-foreground ml-0.5">/un</span></span>
+                                          <span className="font-bold text-foreground">{formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[10px] text-muted-foreground ml-0.5">/un</span></span>
                                         </div>
                                       ))
                                   ) : (

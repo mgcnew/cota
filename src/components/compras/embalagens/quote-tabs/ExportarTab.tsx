@@ -46,7 +46,7 @@ export function ExportarTab({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 bg-muted/20">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5 bg-muted/20">
               <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <FileText className="h-3 w-3" />Conteúdo
               </h4>
@@ -69,7 +69,7 @@ export function ExportarTab({
           </Card>
 
           <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-            <div className="px-3 py-2 border-b border-border dark:border-white/5/50 bg-muted/20">
+            <div className="px-3 py-2 border-b border-border dark:border-white/5 bg-muted/20">
               <h4 className="text-[10px] font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <Trophy className="h-3 w-3 text-muted-foreground" />Vencedores
               </h4>
@@ -123,7 +123,7 @@ export function ExportarTab({
 
         {showHtmlPreview && (
           <div className="mt-4 border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-muted/30 px-3 py-1.5 border-b border-border dark:border-white/5/50">
+            <div className="bg-muted/30 px-3 py-1.5 border-b border-border dark:border-white/5">
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider">Preview</p>
             </div>
             <iframe srcDoc={generateHtmlComparative()} className="w-full h-[400px] sm:h-[500px] border-0" title="HTML Preview" />

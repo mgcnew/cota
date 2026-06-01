@@ -255,7 +255,7 @@ function SupplierRow({ supplier, fullSupplierData, items, isSent, onMarkSent }: 
 
       {/* Expanded preview */}
       {expanded && (
-        <div className="border-t border-border dark:border-white/5/50 px-4 pb-4 pt-3 bg-muted/20 space-y-3">
+        <div className="border-t border-border dark:border-white/5 px-4 pb-4 pt-3 bg-muted/20 space-y-3">
           <div className="flex items-center gap-2">
             <Package className="h-3 w-3 text-muted-foreground" />
             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
