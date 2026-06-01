@@ -462,8 +462,8 @@ export function ManagePackagingQuoteDialog({
   }, [quote, updateQuoteStatus]);
 
   const custoPorUnidadePreview = useMemo(() => {
-    const valor = parseFloat(formData.valorTotal) || 0;
-    const unidades = parseFloat(formData.quantidadeUnidadesEstimada) || 0;
+    const valor = parseFloat(formData.valorTotal.replace(',', '.')) || 0;
+    const unidades = parseFloat(formData.quantidadeUnidadesEstimada.replace(',', '.')) || 0;
     return valor > 0 && unidades > 0 ? valor / unidades : null;
   }, [formData.valorTotal, formData.quantidadeUnidadesEstimada]);
 
@@ -486,8 +486,8 @@ export function ManagePackagingQuoteDialog({
     await updateSupplierItem.mutateAsync({
       quoteId: quote.id, supplierId: editingItem.supplierId, packagingId: editingItem.packagingId,
       valorTotal: parseFloat(formData.valorTotal.replace(',', '.')) || 0, unidadeVenda: formData.unidadeVenda,
-      quantidadeVenda: parseFloat(formData.quantidadeVenda.replace(',', '.')) || 1, quantidadeUnidadesEstimada: parseInt(formData.quantidadeUnidadesEstimada) || 1,
-      gramatura: formData.gramatura ? parseFloat(formData.gramatura) : undefined, dimensoes: formData.dimensoes || undefined,
+      quantidadeVenda: parseFloat(formData.quantidadeVenda.replace(',', '.')) || 1, quantidadeUnidadesEstimada: parseInt(formData.quantidadeUnidadesEstimada.replace(',', '.')) || 1,
+      gramatura: formData.gramatura ? parseFloat(formData.gramatura.replace(',', '.')) : undefined, dimensoes: formData.dimensoes || undefined,
     });
     setEditingItem(null);
   }, [editingItem, quote, formData, updateSupplierItem]);
@@ -1057,7 +1057,7 @@ export function ManagePackagingQuoteDialog({
                     </h3>
                   </div>
                   {packagingNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-border dark:border-white/5/50 bg-muted/10">
+                    <div className="p-4 border-b border-border dark:border-white/5 bg-muted/10">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
                           <SelectTrigger className="flex-1 h-10 text-xs font-bold bg-background text-foreground border-border shadow-sm hover:bg-muted/40 transition-colors">
@@ -1080,7 +1080,7 @@ export function ManagePackagingQuoteDialog({
                     ) : (
                       <div className="flex flex-col gap-2.5">
                         {quote.itens.map((item, index) => (
-                          <div key={item.packagingId} className="group relative p-3 flex items-center justify-between bg-card hover:bg-muted/20 hover:border-brand/30 border border-border dark:border-white/5/50 rounded-xl transition-all shadow-sm">
+                          <div key={item.packagingId} className="group relative p-3 flex items-center justify-between bg-card hover:bg-muted/20 hover:border-brand/30 border border-border dark:border-white/5 rounded-xl transition-all shadow-sm">
                             <div className="flex items-center gap-3">
                               <span className="text-[10px] font-black text-muted-foreground w-5 opacity-40">#{index + 1}</span>
                               <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center flex-shrink-0">
@@ -1106,7 +1106,7 @@ export function ManagePackagingQuoteDialog({
                     </h3>
                   </div>
                   {suppliersNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-border dark:border-white/5/50 bg-muted/10">
+                    <div className="p-4 border-b border-border dark:border-white/5 bg-muted/10">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
                           <SelectTrigger className="flex-1 h-10 text-xs font-bold bg-background text-foreground border-border shadow-sm hover:bg-muted/40 transition-colors">
@@ -1129,26 +1129,26 @@ export function ManagePackagingQuoteDialog({
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {quote.fornecedores.map((fornecedor) => (
-                          <div 
-                            key={fornecedor.supplierId} 
-                            className="group relative flex items-center p-3 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 hover:border-slate-300 dark:hover:border-zinc-700 transition-all duration-300 shadow-sm"
+                          <div
+                            key={fornecedor.supplierId}
+                            className="group relative flex items-center p-3 rounded-xl border border-border bg-card hover:border-brand/30 transition-all duration-300 shadow-sm"
                           >
-                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center mr-3">
-                              <Building2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
+                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-muted flex items-center justify-center mr-3">
+                              <Building2 className="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div className="flex-1 min-w-0 mr-2">
-                              <p className="text-[13px] font-bold text-zinc-900 dark:text-zinc-100 truncate leading-tight mb-1">
+                              <p className="text-[13px] font-bold text-foreground truncate leading-tight mb-1">
                                 {fornecedor.supplierName}
                               </p>
                               {fornecedor.status === "respondido" ? (
-                                <Badge className="bg-emerald-500/10 text-emerald-600 border-none px-2 py-0 h-4.5 rounded-full ring-1 ring-emerald-500/20">
+                                <Badge className="bg-emerald-500/10 text-emerald-600 border-none px-2 py-0.5 h-5 rounded-full ring-1 ring-emerald-500/20">
                                   <div className="w-1 h-1 rounded-full bg-emerald-500 mr-1.5" />
-                                  <span className="text-[9px] font-black uppercase tracking-widest">Respondido</span>
+                                  <span className="text-[10px] font-semibold tracking-wide">Respondido</span>
                                 </Badge>
                               ) : (
-                                <Badge className="bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-none px-2 py-0 h-4.5 rounded-full ring-1 ring-zinc-200 dark:ring-zinc-700">
-                                  <div className="w-1 h-1 rounded-full bg-zinc-400 mr-1.5" />
-                                  <span className="text-[9px] font-black uppercase tracking-widest">Pendente</span>
+                                <Badge className="bg-muted text-muted-foreground border-none px-2 py-0.5 h-5 rounded-full ring-1 ring-border">
+                                  <div className="w-1 h-1 rounded-full bg-muted-foreground/50 mr-1.5" />
+                                  <span className="text-[10px] font-semibold tracking-wide">Pendente</span>
                                 </Badge>
                               )}
                             </div>
@@ -1157,7 +1157,7 @@ export function ManagePackagingQuoteDialog({
                               size="icon"
                               onClick={() => handleRemoveSupplier(fornecedor.supplierId)}
                               disabled={removeQuoteSupplier.isPending}
-                              className="h-8 w-8 rounded-lg border-border dark:border-white/5 text-zinc-400 hover:text-red-500 hover:bg-red-50 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
+                              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
@@ -1344,13 +1344,13 @@ export function ManagePackagingQuoteDialog({
                               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-4">
                                 {/* Preço */}
                                 <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Preço (R$)" : "Preço Pacote/Fardo (R$) *"}
                                   </Label>
                                   <Input 
                                     ref={valorTotalInputRef} 
-                                    type="number" 
-                                    step="0.01" 
+                                    type="text" 
+                                    inputMode="decimal" 
                                     value={formData.valorTotal} 
                                     onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))} 
                                     onFocus={handleInputFocus} 
@@ -1361,7 +1361,7 @@ export function ManagePackagingQuoteDialog({
 
                                 {/* Unidade */}
                                 <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Venda" : "Vendido como *"}
                                   </Label>
                                   <Select 
@@ -1383,12 +1383,12 @@ export function ManagePackagingQuoteDialog({
 
                                 {/* Qtd Compra */}
                                 <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Qtd Compra" : "Qtd. Comprada *"}
                                   </Label>
                                   <Input 
-                                    type="number" 
-                                    step="0.01" 
+                                    type="text" 
+                                    inputMode="decimal" 
                                     value={formData.quantidadeVenda} 
                                     onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} 
                                     onFocus={handleInputFocus} 
@@ -1399,12 +1399,12 @@ export function ManagePackagingQuoteDialog({
 
                                 {/* Peças no Pack */}
                                 <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Peças/Pack" : "Total Peças no Pack *"}
                                   </Label>
                                   <Input 
-                                    type="number" 
-                                    step="0.01" 
+                                    type="text" 
+                                    inputMode="decimal" 
                                     value={formData.quantidadeUnidadesEstimada} 
                                     onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} 
                                     onFocus={handleInputFocus} 
@@ -1415,12 +1415,12 @@ export function ManagePackagingQuoteDialog({
 
                                 {/* Gramatura */}
                                 <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Espessura" : "Espessura (mm)"}
                                   </Label>
                                   <Input 
-                                    type="number" 
-                                    step="0.01" 
+                                    type="text" 
+                                    inputMode="decimal" 
                                     value={formData.gramatura} 
                                     onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} 
                                     onFocus={handleInputFocus} 
@@ -1431,7 +1431,7 @@ export function ManagePackagingQuoteDialog({
 
                                 {/* Tamanho */}
                                 <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
+                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
                                     {isMobile ? "Tamanho" : "Tamanho (LxA)"}
                                   </Label>
                                   <Input 
