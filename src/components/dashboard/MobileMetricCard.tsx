@@ -18,12 +18,19 @@ interface MobileMetricCardProps {
   };
 }
 
-const VARIANTS: Record<string, { border: string; icon: string; iconBg: string }> = {
-  default: { border: "border-l-indigo-500", icon: "text-indigo-500", iconBg: "bg-indigo-500/10" },
-  success:  { border: "border-l-emerald-500", icon: "text-emerald-500", iconBg: "bg-emerald-500/10" },
-  warning:  { border: "border-l-amber-500",   icon: "text-amber-500",   iconBg: "bg-amber-500/10"   },
-  error:    { border: "border-l-red-500",     icon: "text-red-500",     iconBg: "bg-red-500/10"     },
-  info:     { border: "border-l-blue-500",    icon: "text-blue-500",    iconBg: "bg-blue-500/10"    },
+interface VariantStyle {
+  wash: string;
+  iconBg: string;
+  iconRing: string;
+  icon: string;
+}
+
+const VARIANTS: Record<string, VariantStyle> = {
+  default: { wash: "from-indigo-500/[0.07]",  iconBg: "bg-indigo-500/10",  iconRing: "ring-indigo-500/20",  icon: "text-indigo-500" },
+  success: { wash: "from-emerald-500/[0.07]", iconBg: "bg-emerald-500/10", iconRing: "ring-emerald-500/20", icon: "text-emerald-500" },
+  warning: { wash: "from-amber-500/[0.09]",   iconBg: "bg-amber-500/10",   iconRing: "ring-amber-500/20",   icon: "text-amber-500" },
+  error:   { wash: "from-red-500/[0.07]",     iconBg: "bg-red-500/10",     iconRing: "ring-red-500/20",     icon: "text-red-500" },
+  info:    { wash: "from-blue-500/[0.07]",    iconBg: "bg-blue-500/10",    iconRing: "ring-blue-500/20",    icon: "text-blue-500" },
 };
 
 export const MobileMetricCard = memo(function MobileMetricCard({
@@ -42,10 +49,8 @@ export const MobileMetricCard = memo(function MobileMetricCard({
   return (
     <div
       className={cn(
-        "relative bg-card border border-border dark:border-white/5 rounded-lg",
-        "border-l-[3px]", v.border,
-        "w-[152px] flex-shrink-0",
-        "p-3 flex flex-col justify-between min-h-[100px]",
+        "group relative overflow-hidden rounded-2xl border border-border dark:border-white/[0.06] bg-card",
+        "w-[156px] flex-shrink-0 p-3.5 flex flex-col justify-between min-h-[104px]",
         "transition-all duration-150",
         onClick && !isEmpty && "cursor-pointer active:scale-[0.98]",
         isEmpty && "opacity-50 cursor-default"
@@ -54,27 +59,32 @@ export const MobileMetricCard = memo(function MobileMetricCard({
       role={onClick && !isEmpty ? "button" : undefined}
       aria-label={`${title}: ${value}`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className={cn("p-1.5 rounded-md", v.iconBg)}>
-          <Icon className={cn("w-3.5 h-3.5", v.icon)} />
+      {/* Lavada de cor da variante */}
+      {!isEmpty && (
+        <div className={cn("pointer-events-none absolute inset-0 bg-gradient-to-br to-transparent", v.wash)} />
+      )}
+
+      <div className="relative flex items-start justify-between mb-2">
+        <div className={cn("flex items-center justify-center h-9 w-9 rounded-xl ring-1", v.iconBg, v.iconRing)}>
+          <Icon className={cn("h-[17px] w-[17px]", v.icon)} strokeWidth={2.25} />
         </div>
         {pulse && !isEmpty && (
-          <span className="relative flex h-2 w-2 mt-0.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-current opacity-50" />
-            <span className={cn("relative inline-flex rounded-full h-2 w-2", v.icon, "bg-current")} />
+          <span className={cn("relative flex h-2 w-2 mt-0.5", v.icon)}>
+            <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-current opacity-50" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-current" />
           </span>
         )}
       </div>
 
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-none mb-1.5">
-          {title}
-        </p>
-        <p className="text-xl font-bold leading-none text-foreground">
+      <div className="relative">
+        <p className="text-2xl font-extrabold leading-none tracking-tight tabular-nums text-foreground truncate">
           {value}
         </p>
+        <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground leading-none">
+          {title}
+        </p>
         {(subtitle || trend?.label) && (
-          <p className="text-[11px] text-muted-foreground mt-1 leading-tight">
+          <p className="text-[11px] text-muted-foreground mt-1 leading-tight line-clamp-2">
             {subtitle || trend?.label}
           </p>
         )}
