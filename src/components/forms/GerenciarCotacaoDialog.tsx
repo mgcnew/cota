@@ -14,9 +14,9 @@ import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { useCompany } from "@/hooks/useCompany";
 import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 import ResumoCotacaoDialog from "./ResumoCotacaoDialog";
-import { sendWhatsAppReportFile, generateWhatsAppGreeting, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
+import { sendWhatsAppReportFile, generateQuoteReportHTML, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
 import { toast as sonnerToast } from "sonner";
-import { generateQuoteReportFromData, downloadQuoteReport } from "@/lib/quote-report";
+import { buildQuoteReportOpts, buildQuoteReportCaption, downloadQuoteReport } from "@/lib/quote-report";
 
 interface GerenciarCotacaoDialogProps {
   quote: any;
@@ -270,22 +270,25 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
 
   // Monta o mesmo relatório profissional usado no Resumo (fonte única)
-  const buildReportHtml = useCallback(() => generateQuoteReportFromData({
-    quoteId: safeStr(quote.id),
-    dateLabel: safeStr(quote.dataInicio),
-    companyName: company?.name || "MERCADÃO NOVO BOI JOÃO DIAS",
-    products,
-    fornecedores,
-    supplierItems,
-    viewMode: "winners",
-  }), [quote, products, fornecedores, supplierItems, company?.name, safeStr]);
+  const buildReport = useCallback(() => {
+    const opts = buildQuoteReportOpts({
+      quoteId: safeStr(quote.id),
+      dateLabel: safeStr(quote.dataInicio),
+      companyName: company?.name || "MERCADÃO NOVO BOI JOÃO DIAS",
+      products,
+      fornecedores,
+      supplierItems,
+      viewMode: "winners",
+    });
+    return { html: generateQuoteReportHTML(opts), caption: buildQuoteReportCaption(opts) };
+  }, [quote, products, fornecedores, supplierItems, company?.name, safeStr]);
 
   const handleDownloadReport = useCallback(() => {
-    const html = buildReportHtml();
+    const { html } = buildReport();
     if (!html) { sonnerToast.error("Não há dados para exportar."); return; }
     downloadQuoteReport(html, safeStr(quote.id));
     sonnerToast.success("Relatório HTML baixado com sucesso!");
-  }, [buildReportHtml, quote, safeStr]);
+  }, [buildReport, quote, safeStr]);
 
   const handleWhatsAppExport = useCallback(async () => {
     if (isExportingWhatsApp) return;
@@ -294,17 +297,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     const toastId = sonnerToast.loading('Enviando relatório para WhatsApp...');
 
     try {
-      const html = buildReportHtml();
+      const { html, caption } = buildReport();
       if (!html) throw new Error("Não há dados para exportar.");
 
       const quoteId = safeStr(quote.id);
-      const greeting = generateWhatsAppGreeting(quoteId, products.length, company?.name);
 
       const res = await sendWhatsAppReportFile(
         (window as any).DEFAULT_PHONE_NUMBER || DEFAULT_PHONE_NUMBER,
         html,
         quoteId,
-        greeting,
+        caption,
         company?.id
       );
 
@@ -319,7 +321,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     } finally {
       setIsExportingWhatsApp(false);
     }
-  }, [buildReportHtml, quote, products.length, company?.name, company?.id, isExportingWhatsApp, safeStr]);
+  }, [buildReport, quote, company?.id, isExportingWhatsApp, safeStr]);
 
   if (!initialQuote || !quote) return null;
 

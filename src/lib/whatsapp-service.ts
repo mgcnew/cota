@@ -449,12 +449,17 @@ export function generateQuoteReportHTML(opts: {
   .stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#94a3b8;margin-bottom:4px}
   .stat-value{font-size:17px;font-weight:800;color:#0f172a}
 
-  /* ── Tabs ── */
+  /* ── Tabs (CSS puro, funcionam sem JavaScript) ── */
+  .tab-radio{position:absolute;width:0;height:0;opacity:0;pointer-events:none}
   .tab-bar{display:flex;gap:0;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:4px;margin-bottom:16px}
   .tab-btn{flex:1;padding:9px 12px;border:none;background:none;border-radius:9px;font-family:inherit;font-size:12px;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-  .tab-btn.active{background:#1d4ed8;color:#fff;box-shadow:0 1px 3px rgba(29,78,216,.3)}
-  .tab-btn:not(.active):hover{background:#f1f5f9;color:#0f172a}
+  .tab-btn:hover{background:#f1f5f9;color:#0f172a}
   .tab-icon{font-size:13px;line-height:1}
+  .tab-panel{display:none}
+  #tab-r-winners:checked~#panel-winners{display:block}
+  #tab-r-comparative:checked~#panel-comparative{display:block}
+  #tab-r-winners:checked~.tab-bar label[for="tab-r-winners"],
+  #tab-r-comparative:checked~.tab-bar label[for="tab-r-comparative"]{background:#1d4ed8;color:#fff;box-shadow:0 1px 3px rgba(29,78,216,.3)}
 
   /* ── Section title ── */
   .section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.14em;color:#64748b;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid #e2e8f0}
@@ -560,13 +565,16 @@ export function generateQuoteReportHTML(opts: {
     <div class="stat"><div class="stat-label">Gerado em</div><div class="stat-value" style="font-size:12px;padding-top:3px">${new Date().toLocaleDateString("pt-BR")}</div></div>
   </div>
 
+  <input type="radio" name="report-tab" id="tab-r-winners" class="tab-radio" checked>
+  <input type="radio" name="report-tab" id="tab-r-comparative" class="tab-radio">
+
   <div class="tab-bar">
-    <button class="tab-btn active" id="btn-winners" onclick="switchTab('winners')">
+    <label class="tab-btn" for="tab-r-winners">
       <span class="tab-icon">🏆</span> Melhores Preços
-    </button>
-    <button class="tab-btn" id="btn-comparative" onclick="switchTab('comparative')">
+    </label>
+    <label class="tab-btn" for="tab-r-comparative">
       <span class="tab-icon">📊</span> Comparativo por Produto
-    </button>
+    </label>
   </div>
 
   <div id="panel-winners" class="tab-panel">
@@ -574,21 +582,13 @@ export function generateQuoteReportHTML(opts: {
     ${winnersSection}
   </div>
 
-  <div id="panel-comparative" class="tab-panel" style="display:none">
+  <div id="panel-comparative" class="tab-panel">
     <div class="section-title">Comparativo por Produto — todos os fornecedores</div>
     ${comparativeSection}
   </div>
 
   <div class="footer">CotaJá · Relatório gerado automaticamente · #${opts.quoteId.slice(0, 8).toUpperCase()}</div>
 </div>
-<script>
-function switchTab(tab) {
-  document.getElementById('panel-winners').style.display = tab === 'winners' ? 'block' : 'none';
-  document.getElementById('panel-comparative').style.display = tab === 'comparative' ? 'block' : 'none';
-  document.getElementById('btn-winners').classList.toggle('active', tab === 'winners');
-  document.getElementById('btn-comparative').classList.toggle('active', tab === 'comparative');
-}
-</script>
 </body>
 </html>`;
 }

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatCurrency } from "@/utils/formatters";
 import { generateQuoteExportMessage, generateComparativeQuoteExportMessage, sendWhatsAppMedia, generateWhatsAppGreeting, generateQuoteReportHTML, sendWhatsAppReportFile, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
-import { buildQuoteReportOpts } from "@/lib/quote-report";
+import { buildQuoteReportOpts, buildQuoteReportCaption } from "@/lib/quote-report";
 import type { Quote } from "@/hooks/useCotacoes";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
@@ -244,21 +244,18 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     setIsCapturing(true);
     try {
       // Gera o MESMO relatório do botão Baixar e envia como arquivo HTML (sem print)
-      const htmlContent = generateQuoteReportHTML(getReportHTMLOpts());
+      const opts = getReportHTMLOpts();
+      const htmlContent = generateQuoteReportHTML(opts);
       if (!htmlContent) throw new Error("Não há dados para exportar.");
 
-      const greeting = generateWhatsAppGreeting(
-        safeStr(quote.id),
-        products.length,
-        company?.name
-      );
+      const caption = buildQuoteReportCaption(opts);
 
       toast.promise(
         sendWhatsAppReportFile(
           DEFAULT_PHONE_NUMBER,
           htmlContent,
           safeStr(quote.id),
-          greeting,
+          caption,
           company?.id
         ),
         {
