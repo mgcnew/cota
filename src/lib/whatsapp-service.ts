@@ -101,6 +101,27 @@ export async function sendWhatsAppReport(
   }
 }
 
+/**
+ * Envia o relatório da cotação como ARQUIVO HTML (documento), sem imagem/print.
+ * O destinatário recebe um único anexo .html que abre o relatório completo.
+ */
+export async function sendWhatsAppReportFile(
+  phone: string,
+  htmlContent: string,
+  quoteId: string,
+  caption?: string,
+  company_id?: string
+) {
+  try {
+    const base64Html = `data:text/html;base64,${btoa(unescape(encodeURIComponent(htmlContent)))}`;
+    const fileName = `relatorio_cotacao_${quoteId.slice(0, 8)}.html`;
+    const res = await sendWhatsAppDocument(phone, base64Html, fileName, caption || "Relatório da Cotação");
+    return { success: true, messageId: res?.data?.messageId || "sent" };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function generateQuoteMessage(quoteId: string): Promise<string> {
   const { data: quote } = await supabase
     .from("quotes")

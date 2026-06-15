@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, X, Loader2, Sparkles, MessageCircle, LayoutList, DollarSign, ShoppingCart, Pencil } from "lucide-react";
+import { ClipboardList, X, Loader2, Sparkles, MessageCircle, LayoutList, DollarSign, ShoppingCart, Pencil, Download } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -14,10 +14,9 @@ import { useKeyboardOffset } from "@/hooks/useKeyboardOffset";
 import { useCompany } from "@/hooks/useCompany";
 import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
 import ResumoCotacaoDialog from "./ResumoCotacaoDialog";
-import html2canvas from "html2canvas";
-import { sendWhatsAppReport, generateWhatsAppGreeting, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
+import { sendWhatsAppReportFile, generateWhatsAppGreeting, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
 import { toast as sonnerToast } from "sonner";
-import { generateHtmlComparative } from "@/lib/generate-comparative-html";
+import { generateQuoteReportFromData, downloadQuoteReport } from "@/lib/quote-report";
 
 interface GerenciarCotacaoDialogProps {
   quote: any;
@@ -270,46 +269,39 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
 
 
+  // Monta o mesmo relatório profissional usado no Resumo (fonte única)
+  const buildReportHtml = useCallback(() => generateQuoteReportFromData({
+    quoteId: safeStr(quote.id),
+    dateLabel: safeStr(quote.dataInicio),
+    companyName: company?.name || "MERCADÃO NOVO BOI JOÃO DIAS",
+    products,
+    fornecedores,
+    supplierItems,
+    viewMode: "winners",
+  }), [quote, products, fornecedores, supplierItems, company?.name, safeStr]);
+
+  const handleDownloadReport = useCallback(() => {
+    const html = buildReportHtml();
+    if (!html) { sonnerToast.error("Não há dados para exportar."); return; }
+    downloadQuoteReport(html, safeStr(quote.id));
+    sonnerToast.success("Relatório HTML baixado com sucesso!");
+  }, [buildReportHtml, quote, safeStr]);
+
   const handleWhatsAppExport = useCallback(async () => {
     if (isExportingWhatsApp) return;
-    
+
     setIsExportingWhatsApp(true);
-    const toastId = sonnerToast.loading('Preparando relatório para WhatsApp...');
+    const toastId = sonnerToast.loading('Enviando relatório para WhatsApp...');
 
     try {
-      const html = generateHtmlComparative(quote, products, supplierItems);
+      const html = buildReportHtml();
       if (!html) throw new Error("Não há dados para exportar.");
 
-      // Capturar imagem do que está visível no momento
-      let base64Image = "";
-      if (captureRef.current) {
-        await new Promise(resolve => setTimeout(resolve, 400));
-        const canvas = await html2canvas(captureRef.current, {
-          useCORS: true,
-          scale: 1.5,
-          backgroundColor: '#ffffff',
-          logging: false,
-          onclone: (clonedDoc) => {
-            const el = clonedDoc.querySelector('[data-capture-container="true"]') as HTMLElement;
-            if (el) {
-              el.classList.remove('dark');
-              el.style.backgroundColor = '#ffffff';
-            }
-          }
-        });
-        base64Image = canvas.toDataURL("image/jpeg", 0.8);
-      }
-
       const quoteId = safeStr(quote.id);
-      const greeting = generateWhatsAppGreeting(
-        quoteId,
-        products.length,
-        company?.name
-      );
+      const greeting = generateWhatsAppGreeting(quoteId, products.length, company?.name);
 
-      const res = await sendWhatsAppReport(
+      const res = await sendWhatsAppReportFile(
         (window as any).DEFAULT_PHONE_NUMBER || DEFAULT_PHONE_NUMBER,
-        base64Image,
         html,
         quoteId,
         greeting,
@@ -327,7 +319,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
     } finally {
       setIsExportingWhatsApp(false);
     }
-  }, [quote, products, supplierItems, company?.name, company?.id, isExportingWhatsApp, safeStr]);
+  }, [buildReportHtml, quote, products.length, company?.name, company?.id, isExportingWhatsApp, safeStr]);
 
   if (!initialQuote || !quote) return null;
 
@@ -357,6 +349,15 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
             <div className="flex items-center gap-1.5">
               <div className="flex items-center gap-1 border-r border-border pr-2 mr-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleDownloadReport}
+                  className="text-brand hover:bg-brand/5 h-8 w-8 rounded-lg transition-all"
+                  title="Baixar relatório (HTML)"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

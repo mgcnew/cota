@@ -11,7 +11,8 @@ import {
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatCurrency } from "@/utils/formatters";
-import { generateQuoteExportMessage, generateComparativeQuoteExportMessage, sendWhatsAppMedia, generateWhatsAppGreeting, generateQuoteReportHTML } from "@/lib/whatsapp-service";
+import { generateQuoteExportMessage, generateComparativeQuoteExportMessage, sendWhatsAppMedia, generateWhatsAppGreeting, generateQuoteReportHTML, sendWhatsAppReportFile, DEFAULT_PHONE_NUMBER } from "@/lib/whatsapp-service";
+import { buildQuoteReportOpts } from "@/lib/quote-report";
 import type { Quote } from "@/hooks/useCotacoes";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
@@ -228,85 +229,40 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
     });
   }, [produtosComVencedor]);
 
-  const getReportHTMLOpts = () => ({
+  // Fonte única do relatório (mesma usada no Gerenciar Cotação)
+  const getReportHTMLOpts = () => buildQuoteReportOpts({
     quoteId: safeStr(quote.id),
     dateLabel: safeStr(quote.dataInicio),
-    companyName: company?.name || "MERCADÃƒO NOVO BOI JOÃƒO DIAS",
-    totalProdutos: products.length,
-    totalFornecedores: fornecedores.length,
-    fornecedoresRespondidos,
-    totalMelhorPreco,
-    totalEconomiaReal: totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial,
-    productsData: produtosComVencedor,
+    companyName: company?.name || "MERCADÃO NOVO BOI JOÃO DIAS",
+    products,
+    fornecedores,
+    supplierItems: (quote as any)._supplierItems || (quote as any)._raw?.quote_supplier_items || [],
     viewMode,
-    groupedData: Object.values(
-      produtosComVencedor.reduce((acc: Record<string, any>, p: any) => {
-        const name = p.bestSupplier || "Pendente / Sem Vencedor";
-        if (!acc[name]) acc[name] = { name, items: [], total: 0 };
-        acc[name].items.push(p);
-        acc[name].total += p.totalItem;
-        return acc;
-      }, {})
-    ).sort((a: any, b: any) => {
-      if (a.name === "Pendente / Sem Vencedor") return 1;
-      if (b.name === "Pendente / Sem Vencedor") return -1;
-      return a.name.localeCompare(b.name);
-    })
   });
 
   const handleWhatsAppExport = async () => {
-    if (!contentRef.current) return;
     setIsCapturing(true);
-
     try {
-      // 1. Capture the visible report as image
-      await new Promise(resolve => setTimeout(resolve, 400));
-      const canvas = await html2canvas(contentRef.current, {
-        useCORS: true,
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        width: contentRef.current.scrollWidth,
-        height: contentRef.current.scrollHeight,
-        onclone: (clonedDoc) => {
-          const el = clonedDoc.querySelector('[data-capture-container="true"]') as HTMLElement;
-          if (el) {
-            el.classList.remove('dark');
-            el.classList.add('light');
-            el.style.backgroundColor = '#ffffff';
-            el.style.color = '#000000';
-            clonedDoc.documentElement.classList.remove('dark');
-            clonedDoc.body.classList.remove('dark');
-          }
-        }
-      });
+      // Gera o MESMO relatório do botão Baixar e envia como arquivo HTML (sem print)
+      const htmlContent = generateQuoteReportHTML(getReportHTMLOpts());
+      if (!htmlContent) throw new Error("Não há dados para exportar.");
 
-      const base64Image = canvas.toDataURL("image/jpeg", 0.9);
-
-      // 2. Short greeting caption
       const greeting = generateWhatsAppGreeting(
         safeStr(quote.id),
         products.length,
         company?.name
       );
 
-      // 3. Generate HTML report content
-      const opts = getReportHTMLOpts();
-      const { generateQuoteReportHTML, sendWhatsAppReport, DEFAULT_PHONE_NUMBER } = await import("@/lib/whatsapp-service");
-      const htmlContent = generateQuoteReportHTML(opts);
-
-      // 4. Send via API (image + document + greeting)
       toast.promise(
-        sendWhatsAppReport(
+        sendWhatsAppReportFile(
           DEFAULT_PHONE_NUMBER,
-          base64Image,
           htmlContent,
           safeStr(quote.id),
           greeting,
           company?.id
         ),
         {
-          loading: 'Enviando relatório completo para WhatsApp...',
+          loading: 'Enviando relatório para WhatsApp...',
           success: (res: any) => {
             if (res?.success === false) throw new Error(res.error || "Erro desconhecido");
             return 'Relatório enviado com sucesso via WhatsApp!';
@@ -315,7 +271,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
         }
       );
     } catch (error: any) {
-      toast.error("Erro ao capturar relatório: " + error.message);
+      toast.error("Erro ao gerar relatório: " + error.message);
     } finally {
       setIsCapturing(false);
     }
