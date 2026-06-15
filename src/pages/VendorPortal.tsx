@@ -341,6 +341,8 @@ export default function VendorPortal() {
   const [saving, setSaving] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [closed, setClosed] = useState(false);
+  const [closedAt, setClosedAt] = useState<Date | null>(null);
   const [success, setSuccess] = useState(false);
   const [data, setData] = useState<QuoteData | null>(null);
   const [items, setItems] = useState<QuoteItem[]>([]);
@@ -500,7 +502,8 @@ export default function VendorPortal() {
 
         if (!mainQuoteData && hasErrors) throw new Error("Erro no Banco: " + (lastError ? JSON.stringify(lastError) : "Nenhum dado retornado"));
         if (!anyOpen) {
-          setError("Todas as cotações deste link já foram encerradas e não aceitam mais propostas.");
+          setClosed(true);
+          setClosedAt(mainQuoteData?.deadline ? new Date(mainQuoteData.deadline) : null);
         } else {
           setData(mainQuoteData);
           setItems(allItems);
@@ -520,7 +523,8 @@ export default function VendorPortal() {
         supabase.channel(`vendor-portal-${tk}`)
           .on('postgres_changes' as any, { event: 'UPDATE', table: 'quotes' }, (payload: any) => {
             if (payload.new?.status === 'concluida') {
-              setError("Esta cotação foi encerrada e não aceita mais propostas.");
+              setClosed(true);
+              setClosedAt(new Date(payload.new?.updated_at || Date.now()));
             }
           })
           .subscribe()
@@ -641,6 +645,39 @@ export default function VendorPortal() {
             <div className="flex items-center gap-2.5">
               <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
               <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Carregando sua cotação</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── COTAÇÃO ENCERRADA (mensagem amigável) ─────────────────────────────────
+  if (closed) {
+    const closedLabel = closedAt
+      ? closedAt.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })
+      : null;
+    return (
+      <div className={rootClasses}>
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-3xl p-10 text-center shadow-xl space-y-6">
+            <div className="mx-auto w-14 h-14 bg-emerald-50 dark:bg-emerald-950/30 rounded-2xl flex items-center justify-center">
+              <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-xl font-black text-zinc-900 dark:text-zinc-50">Cotação Encerrada</h2>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
+                Agradecemos a sua participação! Em nome do <strong className="text-zinc-700 dark:text-zinc-200">Setor de Compras do Novo Boi João Dias</strong>, obrigado pelo interesse e pelo tempo dedicado a esta cotação.
+              </p>
+              <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed">
+                {closedLabel
+                  ? <>Ela foi encerrada em <strong className="text-zinc-700 dark:text-zinc-200">{closedLabel}</strong> e não recebe mais propostas.</>
+                  : <>Ela já foi encerrada e não recebe mais propostas.</>}
+                {" "}Esperamos contar com você na próxima oportunidade para fecharmos bons negócios juntos.
+              </p>
+            </div>
+            <div className="border-t border-zinc-100 dark:border-white/5 pt-4">
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">Setor de Compras · Novo Boi João Dias</p>
             </div>
           </div>
         </div>
