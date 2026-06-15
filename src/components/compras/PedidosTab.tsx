@@ -101,7 +101,10 @@ function PedidosTab() {
       detalhesItens: order.items?.map((item: any) => ({
         produto: item.product_name,
         quantidade: item.quantity,
-        valorUnitario: Number(item.unit_price)
+        valorUnitario: Number(item.unit_price),
+        unidade: item.unit || undefined,
+        valorUnitarioCotado: item.valor_unitario_cotado != null ? Number(item.valor_unitario_cotado) : null,
+        maiorValorCotado: item.maior_valor_cotado != null ? Number(item.maior_valor_cotado) : null,
       })) || [],
       supplier_id: order.supplier_id || null,
       delivery_date: order.delivery_date,

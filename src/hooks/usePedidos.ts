@@ -7,6 +7,7 @@ export interface PedidoItem {
   id?: string;
   product_name: string;
   quantity: number;
+  unit?: string | null;
   unit_price: number;
   total_price: number;
   quantidade_pedida?: number | null;
@@ -105,6 +106,7 @@ export function usePedidos() {
             id,
             product_name,
             quantity,
+            unit,
             unit_price,
             total_price,
             quantidade_pedida,
@@ -138,6 +140,7 @@ export function usePedidos() {
           id: item.id,
           product_name: item.product_name,
           quantity: item.quantity,
+          unit: item.unit || null,
           unit_price: Number(item.unit_price),
           total_price: Number(item.total_price),
           quantidade_pedida: item.quantidade_pedida ? Number(item.quantidade_pedida) : null,
