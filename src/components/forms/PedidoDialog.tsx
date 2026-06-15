@@ -352,11 +352,11 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
         const descItem = descUnit * item.quantidade;
         const descPct = ini > 0 ? (descUnit / ini) * 100 : 0;
         const descCell = descItem > 0
-          ? `<span class="desc">- R$ ${fmt(descItem)}</span><small>${descPct.toFixed(1)}%</small>`
+          ? `<span class="desc">- R$ ${fmt(descItem)} <small>(${descPct.toFixed(1)}%)</small></span>`
           : `<span class="muted">—</span>`;
-        return `<tr><td>${nome}</td><td style="text-align:center">${qtd}</td><td style="text-align:right">R$ ${fmt(ini)}</td><td style="text-align:right">R$ ${fmt(neg)}</td><td style="text-align:right">${descCell}</td><td style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
+        return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Pç. Inicial" style="text-align:right">R$ ${fmt(ini)}</td><td data-label="Pç. Negoc." style="text-align:right">R$ ${fmt(neg)}</td><td data-label="Desconto" style="text-align:right">${descCell}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
       }
-      return `<tr><td>${nome}</td><td style="text-align:center">${qtd}</td><td style="text-align:right">R$ ${fmt(item.valorUnitario)}</td><td style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
+      return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Valor Unit." style="text-align:right">R$ ${fmt(item.valorUnitario)}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
     }).join("");
     const economiaPct = totalInicial > 0 ? (economiaNeg / totalInicial) * 100 : 0;
 
@@ -402,6 +402,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
   td small { display: block; color: #9ca3af; font-size: 11px; margin-top: 2px; }
   td .desc { color: #b91c1c; font-weight: 700; }
+  td .desc small { display: inline; color: #9ca3af; font-weight: 600; }
   td .muted { color: #d1d5db; }
   .total-row { background: #dcfce7 !important; font-weight: 800; }
   .total-row td { color: #166534; font-size: 16px; }
@@ -417,12 +418,26 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   .footer { text-align: center; color: #9ca3af; font-size: 11px; margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; }
   @media (max-width: 640px) {
     body { padding: 0; }
-    .container { padding: 20px; border-radius: 0; }
+    .container { padding: 16px; border-radius: 0; }
     .header { padding: 20px; margin-bottom: 20px; }
     .header h1 { font-size: 20px; }
     .info-grid { grid-template-columns: 1fr; gap: 10px; }
     .economia { flex-direction: column; align-items: flex-start; }
     .economia-value { text-align: left; }
+    /* Tabela vira cards: cada item empilhado com rótulo + valor (sem scroll lateral) */
+    .table-wrap { overflow: visible; }
+    table { min-width: 0; }
+    thead { display: none; }
+    tbody, tr, td { display: block; }
+    tr { border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px 14px; margin-bottom: 10px; background: #fff; }
+    td { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 8px 0; border: none; border-bottom: 1px solid #f3f4f6; text-align: right; }
+    td:last-child { border-bottom: none; }
+    td[data-label]::before { content: attr(data-label); font-size: 10px; text-transform: uppercase; font-weight: 800; letter-spacing: .3px; color: #6b7280; text-align: left; white-space: nowrap; }
+    td:first-child { display: block; text-align: left; font-weight: 700; font-size: 15px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 2px; }
+    td small { display: inline; margin: 0; }
+    .total-row { display: flex; justify-content: space-between; align-items: center; background: #dcfce7; border: none; border-radius: 10px; padding: 14px; }
+    .total-row td { display: inline; border: none; padding: 0; }
+    .total-row td::before { content: none; }
   }
   @media print {
     body { background: #fff; padding: 0; }
