@@ -219,23 +219,24 @@ export function useProducts() {
         };
       });
 
-      // Sort products: those with recent orders first, then by created_at
-      /* formattedProducts.sort((a, b) => { // Removed based on new UI preference
+      // Ordena: produtos pedidos recentemente primeiro; os nunca pedidos
+      // vão ao fim mantendo a ordem original (created_at desc).
+      formattedProducts.sort((a, b) => {
         const aTimestamp = (a as any)._lastOrderTimestamp;
         const bTimestamp = (b as any)._lastOrderTimestamp;
-        
-        // Products with orders come first
+
+        // Produtos com pedido vêm primeiro
         if (aTimestamp && !bTimestamp) return -1;
         if (!aTimestamp && bTimestamp) return 1;
-        
-        // Both have orders: sort by most recent order
+
+        // Ambos com pedido: do mais recente para o mais antigo
         if (aTimestamp && bTimestamp) {
           return bTimestamp - aTimestamp;
         }
-        
-        // Neither has orders: maintain original order (by created_at)
+
+        // Nenhum tem pedido: mantém a ordem original (created_at)
         return 0;
-      }); */
+      });
 
       // Remove internal sorting field before returning
       const cleanedProducts = formattedProducts.map(({ _lastOrderTimestamp, ...rest }: any) => rest as Product);

@@ -244,23 +244,24 @@ export function useSuppliers() {
         }
       });
 
-      // Sort suppliers: those with recent completed orders first
-      /* formattedSuppliers.sort((a, b) => {
+      // Ordena: fornecedores com pedido recente primeiro; os sem pedido
+      // vão ao fim mantendo a ordem original.
+      formattedSuppliers.sort((a, b) => {
         const aTimestamp = (a as any)._lastCompletedOrderTimestamp;
         const bTimestamp = (b as any)._lastCompletedOrderTimestamp;
-        
-        // Suppliers with completed orders come first
+
+        // Fornecedores com pedido vêm primeiro
         if (aTimestamp && !bTimestamp) return -1;
         if (!aTimestamp && bTimestamp) return 1;
-        
-        // Both have completed orders: sort by most recent
+
+        // Ambos com pedido: do mais recente para o mais antigo
         if (aTimestamp && bTimestamp) {
           return bTimestamp - aTimestamp;
         }
-        
-        // Neither has completed orders: maintain original order
+
+        // Nenhum tem pedido: mantém a ordem original
         return 0;
-      }); */
+      });
 
       // Remove internal sorting field before returning
       const cleanedSuppliers = formattedSuppliers.map(({ _lastCompletedOrderTimestamp, ...rest }: any) => rest as Supplier);
