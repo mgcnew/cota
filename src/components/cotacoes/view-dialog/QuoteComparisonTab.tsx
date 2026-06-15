@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Package, Star, ShoppingCart, BarChart3, Building2, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Quote } from "./types";
-import { normalizePrice, PriceMetadata } from "@/utils/priceNormalization";
+import { normalizePrice, getBaseUnit, PriceMetadata } from "@/utils/priceNormalization";
 
 interface QuoteComparisonTabProps {
     products: any[];
@@ -221,7 +221,7 @@ export function QuoteComparisonTab({
                                                                         </TooltipTrigger>
                                                                         <TooltipContent>
                                                                             <div className="text-xs space-y-1">
-                                                                                <p><strong>Preço normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/un</p>
+                                                                                <p><strong>Preço normalizado:</strong> R$ {normalizedUnitPrice.toFixed(2)}/{getBaseUnit(product.unidade)}</p>
                                                                                 {showOriginalUnit && (
                                                                                     <p><strong>Preço original:</strong> R$ {originalValue.toFixed(2)}/{metadata.unidadePreco}</p>
                                                                                 )}

@@ -7,6 +7,7 @@ export interface PriceHistoryEntry {
   supplier: string;
   supplierId: string;
   price: number;
+  unit?: string;
   quotationId?: string;
   orderId?: string;
   status: string;
@@ -23,7 +24,7 @@ export function useProductPriceHistory(productId: string) {
       // 1. Find all quotes that include this product via quote_items
       const { data: quoteItems, error: qiError } = await supabase
         .from('quote_items')
-        .select('quote_id, product_id, product_name')
+        .select('quote_id, product_id, product_name, unidade')
         .eq('product_id', productId);
 
       if (qiError) {
@@ -34,6 +35,9 @@ export function useProductPriceHistory(productId: string) {
       console.log(`📊 Found ${quoteItems?.length || 0} quote_items for product`);
 
       const quoteIds = [...new Set(quoteItems?.map(qi => qi.quote_id) || [])];
+      const quoteUnitMap = new Map<string, string>(
+        (quoteItems || []).map(qi => [qi.quote_id, (qi as any).unidade]).filter(([, u]) => !!u) as [string, string][]
+      );
       
       // 2. Fetch quote details
       let quotesMap = new Map<string, { id: string; status: string; created_at: string }>();
@@ -115,6 +119,7 @@ export function useProductPriceHistory(productId: string) {
             supplier: supplierMap.get(bestOffer.supplier_id) || 'Fornecedor Desconhecido',
             supplierId: bestOffer.supplier_id,
             price: bestOffer.valor_oferecido,
+            unit: quoteUnitMap.get(quoteId),
             quotationId: quote.id,
             status: quote.status,
             type: 'quote'
@@ -138,7 +143,7 @@ export function useProductPriceHistory(productId: string) {
       // 6. Fetch order items for this product
       const { data: orderItems, error: oiError } = await supabase
         .from('order_items')
-        .select('id, product_id, order_id, unit_price, created_at')
+        .select('id, product_id, order_id, unit_price, unit, created_at')
         .eq('product_id', productId)
         .gt('unit_price', 0);
 
@@ -178,6 +183,7 @@ export function useProductPriceHistory(productId: string) {
           supplier: order.supplier_name || 'Fornecedor Desconhecido',
           supplierId: order.supplier_id || '',
           price: Number(item.unit_price),
+          unit: (item as any).unit || undefined,
           orderId: item.order_id,
           quotationId: order.quote_id || undefined,
           status: order.status || 'concluido',

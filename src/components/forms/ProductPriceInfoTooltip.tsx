@@ -81,6 +81,9 @@ export function ProductPriceInfoTooltip({ productId, productName }: ProductPrice
                 <div className="text-center">
                   <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">
                     {formatCurrency(bestOrderEntry.price)}
+                    {bestOrderEntry.unit && (
+                      <span className="text-sm font-bold text-emerald-600/60 dark:text-emerald-400/60">/{bestOrderEntry.unit}</span>
+                    )}
                   </p>
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                     Menor valor validado

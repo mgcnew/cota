@@ -47,7 +47,7 @@ export interface EconomyResult {
  */
 export function getBaseUnit(purchaseUnit: string): BaseUnit {
   const weightUnits = ['kg', 'g', 'mg', 'ton', 'tonelada'];
-  const normalizedUnit = purchaseUnit.toLowerCase().trim();
+  const normalizedUnit = (purchaseUnit || 'un').toLowerCase().trim();
   return weightUnits.includes(normalizedUnit) ? 'kg' : 'un';
 }
 

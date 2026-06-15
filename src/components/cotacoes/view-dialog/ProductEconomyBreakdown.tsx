@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TrendingDown, Package, ArrowUpDown, AlertCircle, CheckCircle2 } from "lucide-react";
-import { normalizePrice, calculateEconomy, PriceMetadata } from "@/utils/priceNormalization";
+import { normalizePrice, calculateEconomy, getBaseUnit, PriceMetadata } from "@/utils/priceNormalization";
 import { Quote } from "./types";
 import { useState } from "react";
 
@@ -419,7 +419,7 @@ export function ProductEconomyBreakdown({
                         Melhor Preço
                       </p>
                       <p className="text-sm font-bold text-green-600 dark:text-green-400">
-                        R$ {item.bestPrice.valorUnitario.toFixed(2)}/un
+                        R$ {item.bestPrice.valorUnitario.toFixed(2)}/{getBaseUnit(item.purchaseUnit)}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {item.bestPrice.supplierName}
@@ -435,7 +435,7 @@ export function ProductEconomyBreakdown({
                         Pior Preço
                       </p>
                       <p className="text-sm font-bold text-red-600 dark:text-red-400">
-                        R$ {item.worstPrice.valorUnitario.toFixed(2)}/un
+                        R$ {item.worstPrice.valorUnitario.toFixed(2)}/{getBaseUnit(item.purchaseUnit)}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {item.worstPrice.supplierName}
@@ -455,7 +455,7 @@ export function ProductEconomyBreakdown({
                     Preço Ãšnico
                   </p>
                   <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    R$ {item.bestPrice.valorUnitario.toFixed(2)}/un
+                    R$ {item.bestPrice.valorUnitario.toFixed(2)}/{getBaseUnit(item.purchaseUnit)}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {item.bestPrice.supplierName}

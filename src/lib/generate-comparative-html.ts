@@ -1,3 +1,5 @@
+import { getBaseUnit } from "@/utils/priceNormalization";
+
 const fmt = (value: number) =>
   value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -419,7 +421,7 @@ export function generateHtmlComparative(
                     return `
                   <tr class="${f.isMelhorPreco ? 'row-winner' : ''}">
                     <td>${f.supplierName}</td>
-                    <td><span class="price-strong">R$ ${fmt(f.valorNormalizado)}</span></td>
+                    <td><span class="price-strong">R$ ${fmt(f.valorNormalizado)}</span><span style="color:#94a3b8;font-weight:500"> /${getBaseUnit(comp.unidade || 'un')}</span></td>
                     <td>${f.isMelhorPreco ? '—' : `<span class="badge-diff ${diffClass}">+${diff.toFixed(1)}%</span>`}</td>
                     <td>${f.isMelhorPreco ? '<span class="badge-best">✓ Melhor opção</span>' : ''}</td>
                   </tr>`;

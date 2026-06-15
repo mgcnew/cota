@@ -347,16 +347,18 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       totalInicial += ini * item.quantidade;
       economiaNeg += descUnit * item.quantidade;
       const nome = `${idx + 1}. ${esc(item.produto)}${item.marca ? `<small>Marca: ${esc(item.marca)}</small>` : ""}`;
-      const qtd = `${item.quantidade} ${esc(item.unidade)}`;
+      const un = esc(item.unidade);
+      const qtd = `${item.quantidade} ${un}`;
+      const perUnit = `<span class="u">/${un}</span>`;
       if (isFromQuote) {
         const descItem = descUnit * item.quantidade;
         const descPct = ini > 0 ? (descUnit / ini) * 100 : 0;
         const descCell = descItem > 0
           ? `<span class="desc">- R$ ${fmt(descItem)} <small>(${descPct.toFixed(1)}%)</small></span>`
           : `<span class="muted">—</span>`;
-        return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Pç. Inicial" style="text-align:right">R$ ${fmt(ini)}</td><td data-label="Pç. Negoc." style="text-align:right">R$ ${fmt(neg)}</td><td data-label="Desconto" style="text-align:right">${descCell}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
+        return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Pç. Inicial" style="text-align:right">R$ ${fmt(ini)}${perUnit}</td><td data-label="Pç. Negoc." style="text-align:right">R$ ${fmt(neg)}${perUnit}</td><td data-label="Desconto" style="text-align:right">${descCell}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
       }
-      return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Valor Unit." style="text-align:right">R$ ${fmt(item.valorUnitario)}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
+      return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Valor Unit." style="text-align:right">R$ ${fmt(item.valorUnitario)}${perUnit}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
     }).join("");
     const economiaPct = totalInicial > 0 ? (economiaNeg / totalInicial) * 100 : 0;
 
@@ -403,6 +405,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   td small { display: block; color: #9ca3af; font-size: 11px; margin-top: 2px; }
   td .desc { color: #b91c1c; font-weight: 700; }
   td .desc small { display: inline; color: #9ca3af; font-weight: 600; }
+  td .u { color: #9ca3af; font-weight: 500; font-size: 12px; }
   td .muted { color: #d1d5db; }
   .total-row { background: #dcfce7 !important; font-weight: 800; }
   .total-row td { color: #166534; font-size: 16px; }
