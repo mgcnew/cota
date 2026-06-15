@@ -133,6 +133,9 @@ export function buildQuoteReportOpts(input: QuoteReportInput) {
     return economia;
   }, 0);
 
+  // Economia da NEGOCIAÇÃO: preço inicial ofertado pelo vencedor − preço final negociado.
+  // Quando não houve negociação (inicial == final), é 0 — não usamos o spread
+  // entre fornecedores (mais caro vs mais barato), que NÃO é economia negociada.
   const totalEconomiaCalculada = produtosComVencedor.reduce((sum: number, p: any) => {
     const winnerOffer = (p.allOffers || []).find((o: any) => o.isWinner);
     if (!winnerOffer) return sum;
@@ -140,18 +143,6 @@ export function buildQuoteReportOpts(input: QuoteReportInput) {
     const final_ = winnerOffer.price || 0;
     if (inicial > final_ && final_ > 0) return sum + (inicial - final_) * (p.quantidade || 1);
     return sum;
-  }, 0);
-
-  const totalEconomiaPotencial = products.reduce((economia: number, p: any) => {
-    const qtd = Number(p.quantidade) || 1;
-    const prices = fornecedores
-      .map((f: any) => getSupplierProductValue(f.id, p.product_id))
-      .filter((val: number) => val > 0)
-      .sort((a: number, b: number) => b - a);
-    if (prices.length > 1 && prices[0] > prices[prices.length - 1]) {
-      economia += (prices[0] - prices[prices.length - 1]) * qtd;
-    }
-    return economia;
   }, 0);
 
   const groupedData = Object.values(
@@ -176,7 +167,7 @@ export function buildQuoteReportOpts(input: QuoteReportInput) {
     totalFornecedores: fornecedores.length,
     fornecedoresRespondidos: fornecedores.filter((f: any) => f.status === "respondido").length,
     totalMelhorPreco,
-    totalEconomiaReal: totalEconomiaReal || totalEconomiaCalculada || totalEconomiaPotencial,
+    totalEconomiaReal: totalEconomiaReal || totalEconomiaCalculada,
     productsData: produtosComVencedor,
     viewMode: input.viewMode || "winners",
     groupedData,
