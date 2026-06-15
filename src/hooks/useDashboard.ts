@@ -708,76 +708,67 @@ export function useDashboard() {
     );
     
     cotacoesFinalizadas.forEach((quote: any) => {
-      if (!quote.quote_supplier_items || quote.quote_supplier_items.length < 2) return;
-      
-      // Calcular valor total de cada fornecedor nesta cotação
-      const fornecedoresMap = new Map();
-      
+      if (!quote.quote_supplier_items || quote.quote_supplier_items.length === 0) return;
+
+      // Agrupar as ofertas válidas (valor > 0) por produto
+      const ofertasPorProduto = new Map<string, Array<{ supplierId: string; valor: number }>>();
       quote.quote_supplier_items.forEach((item: any) => {
-        const supplierId = item.supplier_id;
-        const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === item.product_id);
-        const quantidade = parseInt(quoteItem?.quantidade || "1") || 1;
-        const valorTotal = (item.valor_oferecido || 0) * quantidade;
-        
-        if (!fornecedoresMap.has(supplierId)) {
-          const supplier = quote.quote_suppliers?.find((qs: any) => qs.supplier_id === supplierId);
-          fornecedoresMap.set(supplierId, {
-            name: supplier?.supplier_name || "Fornecedor",
-            valorTotal: 0
-          });
-        }
-        
-        const fornecedor = fornecedoresMap.get(supplierId);
-        fornecedor.valorTotal += valorTotal;
+        const valor = item.valor_oferecido || 0;
+        if (valor <= 0) return;
+        const lista = ofertasPorProduto.get(item.product_id) || [];
+        lista.push({ supplierId: item.supplier_id, valor });
+        ofertasPorProduto.set(item.product_id, lista);
       });
-      
-      // Identificar o fornecedor vencedor (menor valor total)
-      const fornecedoresArray = Array.from(fornecedoresMap.entries());
-      if (fornecedoresArray.length >= 2) {
-        const valoresFornecedores = fornecedoresArray.map(([_, data]) => data.valorTotal).filter(v => v > 0);
-        
-        if (valoresFornecedores.length >= 2) {
-          const menorValor = Math.min(...valoresFornecedores);
-          const maiorValor = Math.max(...valoresFornecedores);
-          const economiaGerada = maiorValor - menorValor;
-          
-          // Encontrar o fornecedor vencedor
-          fornecedoresArray.forEach(([supplierId, fornecedorData]) => {
-            if (fornecedorData.valorTotal === menorValor && fornecedorData.valorTotal > 0) {
-              if (!supplierStats.has(supplierId)) {
-                supplierStats.set(supplierId, {
-                  name: fornecedorData.name,
-                  vitoriasEmCotacoes: 0,
-                  pedidosDiretos: 0,
-                  economiaTotal: 0,
-                  valorTotalCotacoes: 0
-                });
-              }
-              
-              const stats = supplierStats.get(supplierId);
-              stats.vitoriasEmCotacoes += 1;
-              stats.economiaTotal += economiaGerada;
-              stats.valorTotalCotacoes += maiorValor;
-            }
+
+      // Vitória é POR ITEM: vence quem tem o menor preço de cada produto.
+      // Só conta itens disputados (≥2 ofertas), preservando a ideia de concorrência.
+      ofertasPorProduto.forEach((ofertas, productId) => {
+        if (ofertas.length < 2) return;
+
+        const quoteItem = quote.quote_items?.find((qi: any) => qi.product_id === productId);
+        const quantidade = parseInt(quoteItem?.quantidade || "1") || 1;
+
+        // Vencedor = menor preço (primeiro em caso de empate, evita contar duas vezes)
+        let vencedor = ofertas[0];
+        ofertas.forEach((o) => { if (o.valor < vencedor.valor) vencedor = o; });
+        const menor = vencedor.valor;
+        const maior = Math.max(...ofertas.map((o) => o.valor));
+        const economiaItem = (maior - menor) * quantidade;
+        const baseComparacaoItem = maior * quantidade;
+
+        if (!supplierStats.has(vencedor.supplierId)) {
+          const supplier = quote.quote_suppliers?.find((qs: any) => qs.supplier_id === vencedor.supplierId);
+          supplierStats.set(vencedor.supplierId, {
+            name: supplier?.supplier_name || data.suppliers?.find((s: any) => s.id === vencedor.supplierId)?.name || "Fornecedor",
+            vitoriasEmCotacoes: 0,
+            pedidosDiretos: 0,
+            economiaTotal: 0,
+            baseComparacao: 0,
           });
         }
-      }
+
+        const stats = supplierStats.get(vencedor.supplierId);
+        stats.vitoriasEmCotacoes += 1;
+        stats.economiaTotal += economiaItem;
+        stats.baseComparacao += baseComparacaoItem;
+      });
     });
 
     // 2. Contar pedidos diretos (pedidos que não vieram de cotações)
     if (data.orders && Array.isArray(data.orders)) {
       data.orders.forEach((order: any) => {
-        if (order.supplier_id) {
+        // Só conta como "pedido direto" quem NÃO veio de uma cotação
+        if (order.supplier_id && !order.quote_id) {
           // Buscar nome do fornecedor
           const supplier = data.suppliers?.find((s: any) => s.id === order.supplier_id);
-          
+
           if (!supplierStats.has(order.supplier_id)) {
             supplierStats.set(order.supplier_id, {
               name: supplier?.name || "Fornecedor",
               vitoriasEmCotacoes: 0,
               pedidosDiretos: 0,
               economiaTotal: 0,
-              valorTotalCotacoes: 0
+              baseComparacao: 0
             });
           }
           
@@ -796,14 +787,8 @@ export function useDashboard() {
           quotes: totalVitorias,
           vitoriasEmCotacoes: supplier.vitoriasEmCotacoes,
           pedidosDiretos: supplier.pedidosDiretos,
-          avgPrice: supplier.valorTotalCotacoes > 0 
-            ? `R$ ${(supplier.valorTotalCotacoes / supplier.vitoriasEmCotacoes).toFixed(2)}` 
-            : "R$ 0.00",
-          savings: supplier.valorTotalCotacoes > 0 
-            ? `${((supplier.economiaTotal / supplier.valorTotalCotacoes) * 100).toFixed(1)}%`
-            : "0%",
-          economiaPercentual: supplier.valorTotalCotacoes > 0 
-            ? (supplier.economiaTotal / supplier.valorTotalCotacoes) * 100
+          economiaPercentual: supplier.baseComparacao > 0
+            ? (supplier.economiaTotal / supplier.baseComparacao) * 100
             : 0
         };
       })
