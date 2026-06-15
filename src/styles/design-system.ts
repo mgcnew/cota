@@ -101,7 +101,7 @@ export const designSystem = {
         },
         container: {
             glass: "bg-card/80 backdrop-blur-xl border border-white/5 shadow-sm",
-            page: "container mx-auto px-4 md:px-2 pt-4 pb-6 md:pt-4 md:pb-8 max-w-7xl space-y-4",
+            page: "w-full mx-auto px-4 md:px-3 pt-4 pb-6 md:pt-4 md:pb-8 max-w-[1600px] space-y-4",
             section: "space-y-4",
             grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         },
