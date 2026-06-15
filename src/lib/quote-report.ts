@@ -24,6 +24,10 @@ export interface QuoteReportInput {
 
 const safeStr = (val: any): string => (typeof val === "string" ? val : String(val || ""));
 
+// Identificação fixa exibida no relatório e na legenda do WhatsApp
+const EMPRESA_NOME = "NOVO BOI JOÃO DIAS";
+const COMPRADOR_NOME = "Marcelo";
+
 /**
  * Monta o objeto de opções consumido por generateQuoteReportHTML a partir dos
  * dados crus da cotação (produtos, fornecedores e ofertas).
@@ -162,7 +166,7 @@ export function buildQuoteReportOpts(input: QuoteReportInput) {
   return {
     quoteId: input.quoteId,
     dateLabel: input.dateLabel,
-    companyName: input.companyName,
+    companyName: EMPRESA_NOME,
     totalProdutos: products.length,
     totalFornecedores: fornecedores.length,
     fornecedoresRespondidos: fornecedores.filter((f: any) => f.status === "respondido").length,
@@ -181,12 +185,12 @@ export function generateQuoteReportFromData(input: QuoteReportInput): string {
 
 /**
  * Legenda curta que acompanha o relatório no WhatsApp:
- * empresa, economia total e data.
+ * empresa, comprador, economia total e data.
  */
 export function buildQuoteReportCaption(opts: { companyName: string; totalEconomiaReal: number }): string {
   const economia = (opts.totalEconomiaReal || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   const data = new Date().toLocaleDateString("pt-BR");
-  return `*Relatório de Negociação*\n${opts.companyName}\n\nEconomia total: *${economia}*\nData: ${data}`;
+  return `*Relatório de Negociação*\n${EMPRESA_NOME}\nComprador: ${COMPRADOR_NOME}\n\nEconomia total: *${economia}*\nData: ${data}`;
 }
 
 /** Dispara o download do relatório HTML no navegador. */
