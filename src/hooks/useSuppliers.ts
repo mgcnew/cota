@@ -211,7 +211,9 @@ export function useSuppliers() {
           limit: new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(declaredLimitNumber || 0),
           activeQuotes,
           totalQuotes,
-          avgPrice: avgPrice > 0 ? `R$ ${avgPrice.toFixed(2)}` : "R$ 0,00",
+          avgPrice: avgPrice > 0
+            ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(avgPrice)
+            : "R$ 0,00",
           lastOrder: lastOrderDate,
           rating: rating || 0,
           status: "active" as const,

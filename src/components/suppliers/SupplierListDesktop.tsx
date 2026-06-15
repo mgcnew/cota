@@ -61,7 +61,8 @@ type SortKey = 'name' | 'status' | 'limit' | 'avgPrice' | 'quotes' | 'rating';
 type SortDir = 'asc' | 'desc';
 
 const extractPrice = (priceStr: string): number => {
-  const cleaned = priceStr.replace(/[^\d,.-]/g, '').replace(',', '.');
+  // Formato pt-BR: "R$ 48.639,08" → remove '.' de milhar e usa ',' como decimal
+  const cleaned = priceStr.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.');
   return parseFloat(cleaned) || 0;
 };
 
