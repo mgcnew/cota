@@ -34,6 +34,10 @@ interface PedidoItem {
   // Preços de negociação (só preenchidos quando o pedido veio de cotação)
   valorUnitarioCotado?: number | null; // preço final negociado
   maiorValorCotado?: number | null;    // preço inicial do fornecedor (antes da negociação)
+  // Dados reais da entrega (preenchidos ao registrar o recebimento)
+  totalItem?: number | null;            // total real do item (total_price)
+  quantidadeEntregue?: number | null;   // quantidade recebida
+  unidadeEntregue?: string | null;      // unidade recebida
 }
 
 interface PedidoDialogProps {
@@ -148,6 +152,9 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             marca: item.brand_name || item.marca || "",
             valorUnitarioCotado: item.valorUnitarioCotado ?? item.valor_unitario_cotado ?? null,
             maiorValorCotado: item.maiorValorCotado ?? item.maior_valor_cotado ?? null,
+            totalItem: item.totalItem ?? item.total_price ?? null,
+            quantidadeEntregue: item.quantidadeEntregue ?? item.quantidade_entregue ?? null,
+            unidadeEntregue: item.unidadeEntregue ?? item.unidade_entregue ?? null,
           }))
         );
       } else {
@@ -320,7 +327,6 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
 
   const handleDownloadHtml = useCallback(() => {
     if (!pedido || itens.length === 0) return;
-    const total = calculateTotal();
     const selectedSupplier = suppliers.find(s => s.id === fornecedor);
     const statusLabel = statusOptions.find(o => o.value === (status || pedido?.status))?.label || "-";
     const now = new Date();
@@ -333,42 +339,95 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
     const brand = ds.colors.brand.primary;
     const brandHover = ds.colors.brand.hover;
 
-    // Origem: pedido criado a partir de uma cotação tem desconto negociado
-    // (diferença entre o preço inicial ofertado e o valor final negociado).
-    // Pedido direto não passou por negociação.
+    // Origem: pedido criado a partir de uma cotação tem desconto negociado.
     const isFromQuote = !!pedido?.quote_id;
+    // Entregue: o relatório usa os valores REAIS da entrega (total_price/total_value,
+    // qtd/unidade recebida e economia_real), em vez da estimativa da cotação.
+    const isDelivered = (status || pedido?.status) === "entregue";
+    const economiaReal = Number(pedido?.economia_real) || 0;
+
+    const normU = (u: string) => (u || "").toLowerCase().trim();
+    const isMetadeU = (u: string) => ["metade", "meia", "1/2"].includes(normU(u));
+    const isCaixaU = (u: string) => { const n = normU(u); return n === "cx" || n === "caixa" || n === "caixas" || n.startsWith("cx"); };
+    const isVarU = (u: string) => isMetadeU(u) || isCaixaU(u);
+    // Coluna "Recebido" (peso/qtd total que veio) só quando entregue e há item por caixa/metade
+    const showRecebido = isDelivered && itens.some(i => isVarU(i.unidade));
+    const fmtQtd = (n: number) => n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+
     let totalInicial = 0;
     let economiaNeg = 0;
+    let totalEntregue = 0;
+
     const itemRows = itens.map((item, idx) => {
       const neg = item.valorUnitarioCotado ?? item.valorUnitario;       // valor negociado/unit.
       const ini = item.maiorValorCotado ?? neg;                          // valor inicial ofertado
       const descUnit = Math.max(0, ini - neg);
-      const sub = item.quantidade * item.valorUnitario;
       totalInicial += ini * item.quantidade;
       economiaNeg += descUnit * item.quantidade;
+      const totalItem = item.totalItem ?? (item.quantidade * item.valorUnitario);
+      totalEntregue += totalItem;
+
       const nome = `${idx + 1}. ${esc(item.produto)}${item.marca ? `<small>Marca: ${esc(item.marca)}</small>` : ""}`;
       const un = esc(item.unidade);
-      const qtd = `${item.quantidade} ${un}`;
-      const perUnit = `<span class="u">/${un}</span>`;
+      const cells: string[] = [`<td>${nome}</td>`];
+      cells.push(`<td data-label="Qtd" style="text-align:center">${fmtQtd(item.quantidade)} ${un}</td>`);
+
       if (isFromQuote) {
-        const descItem = descUnit * item.quantidade;
+        // Desconto exibido POR UNIDADE (não multiplicado pela quantidade)
         const descPct = ini > 0 ? (descUnit / ini) * 100 : 0;
-        const descCell = descItem > 0
-          ? `<span class="desc">- R$ ${fmt(descItem)} <small>(${descPct.toFixed(1)}%)</small></span>`
+        const descCell = descUnit > 0
+          ? `<span class="desc">- R$ ${fmt(descUnit)}<span class="u">/${un}</span> <small>(${descPct.toFixed(1)}%)</small></span>`
           : `<span class="muted">—</span>`;
-        return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Pç. Inicial" style="text-align:right">R$ ${fmt(ini)}${perUnit}</td><td data-label="Pç. Negoc." style="text-align:right">R$ ${fmt(neg)}${perUnit}</td><td data-label="Desconto" style="text-align:right">${descCell}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
+        cells.push(`<td data-label="Pç. Inicial" style="text-align:right">R$ ${fmt(ini)}<span class="u">/${un}</span></td>`);
+        cells.push(`<td data-label="Pç. Negoc." style="text-align:right">R$ ${fmt(neg)}<span class="u">/${un}</span></td>`);
+        cells.push(`<td data-label="Desconto" style="text-align:right">${descCell}</td>`);
+      } else {
+        cells.push(`<td data-label="Valor Unit." style="text-align:right">R$ ${fmt(item.valorUnitario)}<span class="u">/${un}</span></td>`);
       }
-      return `<tr><td>${nome}</td><td data-label="Qtd" style="text-align:center">${qtd}</td><td data-label="Valor Unit." style="text-align:right">R$ ${fmt(item.valorUnitario)}${perUnit}</td><td data-label="Subtotal" style="text-align:right"><strong>R$ ${fmt(sub)}</strong></td></tr>`;
+
+      if (showRecebido) {
+        // Base recebida derivada do total real ÷ custo unitário (kg p/ metade, un p/ caixa)
+        const baseQty = item.valorUnitario > 0 ? totalItem / item.valorUnitario : (item.quantidadeEntregue ?? item.quantidade);
+        const recUnit = isMetadeU(item.unidade) ? "kg" : isCaixaU(item.unidade) ? "un" : un;
+        cells.push(`<td data-label="Recebido" style="text-align:right">${fmtQtd(baseQty)} <span class="u">${recUnit}</span></td>`);
+      }
+      if (isDelivered) {
+        cells.push(`<td data-label="Total" style="text-align:right"><strong>R$ ${fmt(totalItem)}</strong></td>`);
+      }
+      return `<tr>${cells.join("")}</tr>`;
     }).join("");
     const economiaPct = totalInicial > 0 ? (economiaNeg / totalInicial) * 100 : 0;
 
-    const tableHead = isFromQuote
-      ? `<th>Produto</th><th style="text-align:center">Qtd</th><th style="text-align:right">Pç. Inicial</th><th style="text-align:right">Pç. Negoc.</th><th style="text-align:right">Desconto</th><th style="text-align:right">Subtotal</th>`
-      : `<th>Produto</th><th style="text-align:center">Qtd</th><th style="text-align:right">Valor Unit.</th><th style="text-align:right">Subtotal</th>`;
-    const totalColspan = isFromQuote ? 5 : 3;
-    const totalRow = `<tr class="total-row"><td colspan="${totalColspan}" style="text-align:right">TOTAL DO PEDIDO</td><td style="text-align:right">R$ ${fmt(total)}</td></tr>`;
+    const headCells: string[] = [`<th>Produto</th>`, `<th style="text-align:center">Qtd</th>`];
+    if (isFromQuote) {
+      headCells.push(`<th style="text-align:right">Pç. Inicial</th>`, `<th style="text-align:right">Pç. Negoc.</th>`, `<th style="text-align:right">Desconto</th>`);
+    } else {
+      headCells.push(`<th style="text-align:right">Valor Unit.</th>`);
+    }
+    if (showRecebido) headCells.push(`<th style="text-align:right">Recebido</th>`);
+    if (isDelivered) headCells.push(`<th style="text-align:right">Total</th>`);
+    const tableHead = headCells.join("");
+    const colCount = headCells.length;
+    const tableMinWidth = 360 + (isFromQuote ? 240 : 120) + (showRecebido ? 90 : 0) + (isDelivered ? 110 : 0);
 
-    const economiaBlock = isFromQuote ? `
+    // "TOTAL DO PEDIDO" só aparece quando entregue (com o valor real)
+    const totalRow = isDelivered
+      ? `<tr class="total-row"><td colspan="${colCount - 1}" style="text-align:right">TOTAL DO PEDIDO</td><td style="text-align:right">R$ ${fmt(totalEntregue)}</td></tr>`
+      : "";
+
+    // Economia: real (sobre a entrega) quando entregue; negociada quando ainda em aberto
+    const economiaBlock = isDelivered
+      ? (economiaReal > 0 ? `
+  <div class="economia">
+    <div>
+      <strong>Economia real</strong>
+      <p>Calculada sobre o que foi efetivamente entregue.</p>
+    </div>
+    <div class="economia-value">
+      <span>R$ ${fmt(economiaReal)}</span>
+    </div>
+  </div>` : "")
+      : (isFromQuote ? `
   <div class="economia">
     <div>
       <strong>Economia na negociação</strong>
@@ -378,7 +437,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
       <span>R$ ${fmt(economiaNeg)}</span>
       <small>${economiaPct.toFixed(1)}% sobre R$ ${fmt(totalInicial)}</small>
     </div>
-  </div>` : "";
+  </div>` : "");
 
     const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -399,7 +458,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   .info-card strong { display: block; color: ${brand}; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: .5px; margin-bottom: 4px; }
   .info-card span { font-size: 15px; font-weight: 600; word-break: break-word; }
   .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; }
-  table { width: 100%; border-collapse: collapse; min-width: ${isFromQuote ? "640px" : "520px"}; }
+  table { width: 100%; border-collapse: collapse; min-width: ${tableMinWidth}px; }
   th { background: #f9fafb; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; font-weight: 800; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
   td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
   td small { display: block; color: #9ca3af; font-size: 11px; margin-top: 2px; }
