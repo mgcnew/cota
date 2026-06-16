@@ -2236,6 +2236,13 @@
   .dark .table-modern tbody tr:not(.border-none):hover {
     background-color: hsl(var(--accent));
   }
+
+  /* Calendário (react-day-picker) usa <table> real: o hover deve ficar
+     somente no dia, nunca na semana (linha) inteira. */
+  .rdp tbody tr:hover,
+  .dark .rdp tbody tr:hover {
+    background-color: transparent;
+  }
   
   /* Header customizado das tabelas (card flutuante) - MESMO tom das linhas */
   .dark .bg-card\/95 {
