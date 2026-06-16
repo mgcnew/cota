@@ -62,6 +62,12 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const [dateOpen, setDateOpen] = useState(false);
 
   const isReadOnly = pedido?.status === "entregue";
+  const isDelivered = (status || pedido?.status) === "entregue";
+
+  // Quando entregue, o total do item reflete o valor REAL da entrega (total_price),
+  // não a estimativa quantidade × preço (que não vale p/ metade/caixa pesados na chegada).
+  const itemTotal = (item: PedidoItem) =>
+    isDelivered && item.totalItem != null ? item.totalItem : item.quantidade * item.valorUnitario;
 
   const selectedDate = dataEntrega
     ? (() => { try { const d = parseISO(dataEntrega); return isValid(d) ? d : undefined; } catch { return undefined; } })()
@@ -108,7 +114,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
   const swipeStartRef = useRef<number | null>(null);
 
   const calculateTotal = () =>
-    itens.reduce((acc, item) => acc + item.quantidade * item.valorUnitario, 0);
+    itens.reduce((acc, item) => acc + itemTotal(item), 0);
 
   const handleTouchStart = (e: React.TouchEvent, index: number) => {
     swipeStartRef.current = e.touches[0].clientX;
@@ -841,11 +847,21 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground truncate">{item.produto}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.quantidade} {item.unidade} × R$ {item.valorUnitario.toFixed(2)}
+                    {(() => {
+                      const u = (item.unidade || "").toLowerCase().trim();
+                      const isVar = ["metade", "meia", "1/2"].includes(u) || u === "cx" || u === "caixa" || u === "caixas" || u.startsWith("cx");
+                      // Entregue + item por metade/caixa: mostra a base recebida real (peso/qtd)
+                      if (isDelivered && isVar && item.totalItem != null && item.valorUnitario > 0) {
+                        const baseQty = item.totalItem / item.valorUnitario;
+                        const recUnit = ["metade", "meia", "1/2"].includes(u) ? "kg" : "un";
+                        return `${item.quantidade} ${item.unidade} · ${baseQty.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${recUnit} × R$ ${item.valorUnitario.toFixed(2)}`;
+                      }
+                      return `${item.quantidade} ${item.unidade} × R$ ${item.valorUnitario.toFixed(2)}`;
+                    })()}
                   </p>
                 </div>
                 <p className="text-sm font-bold text-foreground whitespace-nowrap">
-                  R$ {(item.quantidade * item.valorUnitario).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                  R$ {itemTotal(item).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </p>
                 {!isReadOnly && (
                   <Button variant="ghost" size="icon"
