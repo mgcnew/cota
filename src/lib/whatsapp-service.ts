@@ -678,16 +678,15 @@ export async function generateOrderMessage(orderId: string): Promise<{ message: 
       const unitLabel = (item.unit || item.unidade || 'un').toUpperCase();
       const quantity = item.quantity || 1;
       const unitPrice = item.unit_price || 0;
-      const total = quantity * unitPrice;
 
       msg += `• *${(item.product_name || "Produto").toUpperCase()}*\n`;
       msg += `  Qtd: ${quantity} ${unitLabel}\n`;
-      
+
       if (isBox) {
         msg += `  💰 Valor: *${fmtCurrency(unitPrice)}* (Preço por KG/UN)\n`;
         msg += `  ⚠️ _Favor confirmar o peso e valor total do item._\n`;
       } else {
-        msg += `  💰 Valor: ${fmtCurrency(unitPrice)} | Total: *${fmtCurrency(total)}*\n`;
+        msg += `  💰 Valor: *${fmtCurrency(unitPrice)}*\n`;
       }
       msg += `\n`;
     });
