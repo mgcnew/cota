@@ -31,6 +31,16 @@ import {
   Monitor
 } from "lucide-react";
 import {
+  SquaresFour,
+  Package as PhPackage,
+  Storefront,
+  ShoppingCart as PhShoppingCart,
+  Archive as PhArchive,
+  Barcode,
+  ChartBar,
+  type Icon as PhosphorIcon,
+} from "@phosphor-icons/react";
+import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -106,6 +116,18 @@ const menuCategories: MenuCategory[] = [
 ];
 
 const allMenuItems = menuCategories.flatMap((c) => c.items);
+
+// Ícones Phosphor usados APENAS no trilho recolhido do desktop (mobile/dropdowns
+// seguem com lucide). Chaveados por url; weight muda entre regular/fill no ativo.
+const desktopRailIcons: Record<string, PhosphorIcon> = {
+  "/dashboard": SquaresFour,
+  "/dashboard/produtos": PhPackage,
+  "/dashboard/fornecedores": Storefront,
+  "/dashboard/compras": PhShoppingCart,
+  "/dashboard/embalagens": PhArchive,
+  "/dashboard/etiquetas": Barcode,
+  "/dashboard/relatorios": ChartBar,
+};
 
 export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
   const { user, signOut } = useAuth();
@@ -265,6 +287,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                     <div className="w-7 border-t border-border/40 my-1.5" />
                   )}
                   {category.items.map((item) => {
+                    const PhIcon = desktopRailIcons[item.url];
                     const Icon = item.icon;
                     const isActive = item.url === "/dashboard"
                       ? location.pathname === "/dashboard"
@@ -282,9 +305,17 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                                 : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             )}
                           >
-                            <Icon
-                              className={cn("w-[18px] h-[18px] transition-transform group-hover:scale-110", isActive && "text-brand")}
-                            />
+                            {PhIcon ? (
+                              <PhIcon
+                                size={20}
+                                weight={isActive ? "fill" : "regular"}
+                                className={cn("transition-transform group-hover:scale-110", isActive && "text-brand")}
+                              />
+                            ) : (
+                              <Icon
+                                className={cn("w-[18px] h-[18px] transition-transform group-hover:scale-110", isActive && "text-brand")}
+                              />
+                            )}
                           </NavLink>
                         </TooltipTrigger>
                         <TooltipContent
