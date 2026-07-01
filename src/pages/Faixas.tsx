@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { BannerCanvas, type BannerElement, type BannerProject } from "@/components/faixas/BannerCanvas";
 import { PropertiesPanel } from "@/components/faixas/PropertiesPanel";
+import { loadFaixasProjects, saveFaixasProjects } from "@/lib/faixas-storage";
+import { compressImageFile } from "@/lib/image-compress";
 
 const BANNER_PRESETS = [
   { id: "loja", label: "Faixa Loja", width: 8.65, height: 0.70, description: "Frente da loja" },
@@ -37,12 +39,8 @@ export default function Faixas() {
   const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   // Projects
-  const [projects, setProjects] = useState<BannerProject[]>(() => {
-    try {
-      const s = localStorage.getItem("faixas_projects_v2");
-      return s ? JSON.parse(s) : [];
-    } catch { return []; }
-  });
+  const [projects, setProjects] = useState<BannerProject[]>([]);
+  const [projectsLoaded, setProjectsLoaded] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [selectedElId, setSelectedElId] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
@@ -53,9 +51,25 @@ export default function Faixas() {
   const [history, setHistory] = useState<BannerProject[][]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
 
+  // Carrega os projetos salvos (IndexedDB, com migração automática do localStorage antigo)
   useEffect(() => {
-    localStorage.setItem("faixas_projects_v2", JSON.stringify(projects));
-  }, [projects]);
+    loadFaixasProjects().then((loaded) => {
+      setProjects(loaded);
+      setProjectsLoaded(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!projectsLoaded) return; // evita sobrescrever o que está salvo com o estado inicial vazio
+    saveFaixasProjects(projects).catch((err) => {
+      console.error("Erro ao salvar faixas:", err);
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as alterações. Tente reduzir o tamanho das imagens.",
+        variant: "destructive",
+      });
+    });
+  }, [projects, projectsLoaded, toast]);
 
   const project = projects.find((p) => p.id === activeId) || null;
   const selectedEl = project?.elements.find((e) => e.id === selectedElId) || null;
@@ -239,24 +253,25 @@ export default function Faixas() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file || !project) return;
-      pushHistory();
-      const reader = new FileReader();
-      reader.onload = (ev) => {
+      try {
+        const dataUrl = await compressImageFile(file);
+        pushHistory();
         const el: BannerElement = {
           id: genId(), type: "image",
           x: 20, y: 5,
           width: 120, height: project.heightM * CANVAS_SCALE - 10,
           rotation: 0, opacity: 1, locked: false,
-          src: ev.target?.result as string,
+          src: dataUrl,
           objectFit: "contain",
         };
-        updateProject(project!.id, (p) => ({ ...p, elements: [...p.elements, el] }));
+        updateProject(project.id, (p) => ({ ...p, elements: [...p.elements, el] }));
         setSelectedElId(el.id);
-      };
-      reader.readAsDataURL(file);
+      } catch {
+        toast({ title: "Erro ao carregar imagem", variant: "destructive" });
+      }
     };
     input.click();
   };
@@ -265,15 +280,16 @@ export default function Faixas() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file || !project) return;
-      pushHistory();
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        updateProjectPartial({ bgImage: ev.target?.result as string });
-      };
-      reader.readAsDataURL(file);
+      try {
+        const dataUrl = await compressImageFile(file);
+        pushHistory();
+        updateProjectPartial({ bgImage: dataUrl });
+      } catch {
+        toast({ title: "Erro ao carregar imagem", variant: "destructive" });
+      }
     };
     input.click();
   };
@@ -408,7 +424,9 @@ export default function Faixas() {
               </DropdownMenu>
           </div>
 
-          {projects.length === 0 ? (
+          {!projectsLoaded ? (
+            <div className="text-center py-20 text-sm text-muted-foreground">Carregando faixas...</div>
+          ) : projects.length === 0 ? (
             <div className="text-center py-20 space-y-4">
               <div className="w-16 h-16 mx-auto rounded-2xl bg-brand/10 flex items-center justify-center">
                 <Flag className="h-8 w-8 text-brand" />
