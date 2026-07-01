@@ -12,15 +12,22 @@ interface Body {
   kind: Kind;
   phone: string;
   message?: string;       // for text
-  image?: string;         // base64 for image
+  image?: string;         // base64 (data URI) for image
   caption?: string;       // for image/document
-  document?: string;      // base64 for document
+  document?: string;      // base64 (data URI) for document
   fileName?: string;      // for document
 }
 
 function formatPhone(raw: string): string {
   const cleaned = (raw ?? "").replace(/\D/g, "");
   return cleaned.length <= 11 ? `55${cleaned}` : cleaned;
+}
+
+// Whapi.cloud requires the media as a data URI (data:<mime>;base64,<data>).
+// Callers already send data URIs, but wrap raw base64 as a safety net.
+function ensureDataUri(value: string, fallbackMime: string): string {
+  if (!value) return value;
+  return value.startsWith("data:") ? value : `data:${fallbackMime};base64,${value}`;
 }
 
 serve(async (req) => {
@@ -69,37 +76,37 @@ serve(async (req) => {
     });
   }
 
-  const W_API_INSTANCE = Deno.env.get("W_API_INSTANCE");
-  const W_API_TOKEN = Deno.env.get("W_API_TOKEN");
-  if (!W_API_TOKEN) {
-    return new Response(JSON.stringify({ error: "W_API_TOKEN not configured" }), {
+  // Whapi.cloud channel token. Fallback to the legacy var name for smooth migration.
+  const WHAPI_TOKEN = Deno.env.get("WHAPI_TOKEN") ?? Deno.env.get("W_API_TOKEN");
+  if (!WHAPI_TOKEN) {
+    return new Response(JSON.stringify({ error: "WHAPI_TOKEN not configured" }), {
       status: 500,
       headers: { ...headers, "Content-Type": "application/json" },
     });
   }
 
-  const phone = formatPhone(body.phone);
-  const baseUrl = "https://api.w-api.app";
-  const qs = W_API_INSTANCE ? `?instanceId=${W_API_INSTANCE}` : "";
+  const to = formatPhone(body.phone);
+  const baseUrl = "https://gate.whapi.cloud";
 
   let endpoint: string;
   let payload: Record<string, unknown>;
   if (body.kind === "text") {
-    endpoint = `${baseUrl}/v1/message/send-text${qs}`;
-    payload = { phone, message: body.message ?? "" };
+    endpoint = `${baseUrl}/messages/text`;
+    payload = { to, body: body.message ?? "" };
   } else if (body.kind === "image") {
-    endpoint = `${baseUrl}/v1/message/send-image${qs}`;
-    payload = { phone, image: body.image, caption: body.caption, delayMessage: 10 };
-  } else if (body.kind === "document") {
-    endpoint = `${baseUrl}/v1/message/send-document${qs}`;
-    const extension = body.fileName?.includes(".") ? body.fileName.split(".").pop() : "html";
+    endpoint = `${baseUrl}/messages/image`;
     payload = {
-      phone,
-      document: body.document,
-      fileName: body.fileName,
-      extension,
+      to,
+      media: ensureDataUri(body.image ?? "", "image/jpeg"),
       caption: body.caption,
-      delayMessage: 10,
+    };
+  } else if (body.kind === "document") {
+    endpoint = `${baseUrl}/messages/document`;
+    payload = {
+      to,
+      media: ensureDataUri(body.document ?? "", "application/octet-stream"),
+      filename: body.fileName,
+      caption: body.caption,
     };
   } else {
     return new Response(JSON.stringify({ error: "Invalid kind" }), {
@@ -108,13 +115,14 @@ serve(async (req) => {
     });
   }
 
-  console.log("whatsapp-proxy sending", { endpoint, phone, kind: body.kind });
+  console.log("whatsapp-proxy sending", { endpoint, to, kind: body.kind });
   try {
     const upstream = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${W_API_TOKEN}`,
+        "Accept": "application/json",
+        "Authorization": `Bearer ${WHAPI_TOKEN}`,
       },
       body: JSON.stringify(payload),
     });

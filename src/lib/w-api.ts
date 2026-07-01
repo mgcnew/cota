@@ -1,6 +1,6 @@
 /**
- * Cliente W-API — agora roteia tudo pela edge function `whatsapp-proxy`,
- * para que o token nunca seja embutido no bundle do front.
+ * Cliente de envio de WhatsApp — roteia tudo pela edge function `whatsapp-proxy`
+ * (hoje integrada à Whapi.cloud), para que o token nunca seja embutido no bundle do front.
  */
 import { supabase } from "@/integrations/supabase/client";
 
