@@ -305,18 +305,56 @@ export default function Faixas() {
   const exportPNG = async () => {
     if (!project) return;
     setSelectedElId(null);
+    // Espera as fontes carregarem de verdade antes de capturar — se o html2canvas
+    // captura com uma fonte ainda não pronta, a métrica muda e o texto pode ficar
+    // maior que a caixa, sendo cortado só na imagem exportada.
+    await document.fonts.ready;
     await new Promise((r) => setTimeout(r, 150));
 
     const canvas = canvasContainerRef.current?.querySelector("[data-banner-canvas]") as HTMLElement | null;
     if (!canvas) return;
 
     try {
-      const result = await html2canvas(canvas, { scale: 4, backgroundColor: project.bgColor, useCORS: true });
+      const rendered = await html2canvas(canvas, { scale: 4, backgroundColor: project.bgColor, useCORS: true });
+
+      // Adiciona uma faixa abaixo da arte com as medidas reais e o aviso de arte
+      // ilustrativa — só no arquivo exportado, não faz parte do design em si.
+      const footerHeight = Math.max(90, Math.min(200, Math.round(rendered.width * 0.02)));
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = rendered.width;
+      finalCanvas.height = rendered.height + footerHeight;
+      const ctx = finalCanvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas 2D não suportado");
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+      ctx.drawImage(rendered, 0, 0);
+
+      ctx.strokeStyle = "#00000022";
+      ctx.lineWidth = Math.max(2, rendered.width * 0.0006);
+      ctx.beginPath();
+      ctx.moveTo(0, rendered.height);
+      ctx.lineTo(rendered.width, rendered.height);
+      ctx.stroke();
+
+      const dimsText = `Medidas reais da faixa: ${project.widthM.toFixed(2)}m × ${project.heightM.toFixed(2)}m`;
+      const noticeText = "Arte ilustrativa — conferir cores, sangria e proporções na gráfica antes da impressão.";
+
+      ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#111111";
+      ctx.font = `bold ${Math.round(footerHeight * 0.32)}px Arial`;
+      ctx.fillText(dimsText, rendered.width * 0.015, rendered.height + footerHeight * 0.38);
+
+      ctx.fillStyle = "#666666";
+      ctx.font = `${Math.round(footerHeight * 0.22)}px Arial`;
+      ctx.fillText(noticeText, rendered.width * 0.015, rendered.height + footerHeight * 0.74);
+
       const link = document.createElement("a");
       link.download = `${project.name.replace(/\s+/g, "_")}.png`;
-      link.href = result.toDataURL("image/png");
+      link.href = finalCanvas.toDataURL("image/png");
       link.click();
-      toast({ title: "Exportado!", description: "Imagem PNG gerada em alta resolução." });
+      toast({ title: "Exportado!", description: "Imagem PNG gerada com medidas reais e aviso para a gráfica." });
     } catch {
       toast({ title: "Erro", description: "Falha ao exportar.", variant: "destructive" });
     }

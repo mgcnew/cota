@@ -229,7 +229,7 @@ export function BannerCanvas({
         {/* Content */}
         {el.type === "text" && (
           <div
-            className="w-full h-full flex items-center overflow-hidden select-none"
+            className="w-full h-full flex items-center overflow-visible select-none"
             style={{
               fontSize: (el.fontSize || 32) * zoom,
               fontFamily: el.fontFamily || "Arial",
@@ -254,7 +254,7 @@ export function BannerCanvas({
 
         {el.type === "price" && (
           <div
-            className="w-full h-full flex items-center justify-center overflow-hidden select-none"
+            className="w-full h-full flex items-center justify-center overflow-visible select-none"
             style={{
               fontFamily: el.fontFamily || "Impact",
               fontWeight: el.fontWeight || "bold",
