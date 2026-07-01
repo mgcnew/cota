@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useLayoutEffect } from "react";
 import { cn } from "@/lib/utils";
 
 export interface BannerElement {
@@ -63,6 +63,61 @@ type HandleType = "tl" | "tr" | "bl" | "br" | "t" | "b" | "l" | "r" | "rotate";
 
 const HANDLE_SIZE = 8;
 const ROTATE_OFFSET = 24;
+
+// Renderiza o bloco "R$ 14,99 UNIDADE" e o reduz automaticamente (transform: scale)
+// até caber dentro da caixa do elemento. Sem isso, o número e a unidade podiam se
+// sobrepor ou ultrapassar a caixa — e tudo que passa da caixa é cortado na exportação.
+function PriceFit({ el, zoom }: { el: BannerElement; zoom: number }) {
+  const outerRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const fontSize = el.fontSize || 80;
+
+  useLayoutEffect(() => {
+    const outer = outerRef.current;
+    const inner = innerRef.current;
+    if (!outer || !inner) return;
+    inner.style.transform = "scale(1)";
+    const outerW = outer.clientWidth;
+    const outerH = outer.clientHeight;
+    const innerW = inner.scrollWidth;
+    const innerH = inner.scrollHeight;
+    if (!outerW || !outerH || !innerW || !innerH) return;
+    const s = Math.min(outerW / innerW, outerH / innerH, 1);
+    setScale(Number.isFinite(s) && s > 0 ? s : 1);
+  }, [el.content, el.unitLabel, el.fontSize, el.fontFamily, el.fontWeight, el.width, el.height, zoom]);
+
+  return (
+    <div ref={outerRef} className="w-full h-full flex items-center justify-center overflow-visible select-none">
+      <div
+        ref={innerRef}
+        style={{
+          display: "inline-flex",
+          alignItems: "baseline",
+          lineHeight: 1,
+          whiteSpace: "nowrap",
+          transform: `scale(${scale})`,
+          transformOrigin: "center center",
+          fontFamily: el.fontFamily || "Impact",
+          fontWeight: el.fontWeight || "bold",
+          color: el.color || "#000",
+          textShadow: el.textShadow || "2px 2px 0px rgba(0,0,0,0.1)",
+        }}
+      >
+        <span style={{ fontSize: fontSize * 0.35 * zoom, fontWeight: 900, marginRight: 4 * zoom, transform: "translateY(-10%)" }}>R$</span>
+        <span style={{ fontSize: fontSize * zoom }}>{el.content?.split(",")[0] || "0"}</span>
+        <div className="flex flex-col items-start leading-none" style={{ marginLeft: 6 * zoom }}>
+          <span style={{ fontSize: fontSize * 0.55 * zoom, borderBottom: `${2 * zoom}px solid ${el.color || "#000"}`, paddingBottom: 2 * zoom }}>
+            {el.content?.split(",")[1] || "00"}
+          </span>
+          <span style={{ fontSize: fontSize * 0.17 * zoom, marginTop: 4 * zoom, opacity: 0.75, letterSpacing: 0.5 * zoom }}>
+            {el.unitLabel || "CADA"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function BannerCanvas({
   project, zoom, selectedId, onSelectElement,
@@ -252,29 +307,7 @@ export function BannerCanvas({
           </div>
         )}
 
-        {el.type === "price" && (
-          <div
-            className="w-full h-full flex items-center justify-center overflow-visible select-none"
-            style={{
-              fontFamily: el.fontFamily || "Impact",
-              fontWeight: el.fontWeight || "bold",
-              color: el.color || "#000",
-              textShadow: el.textShadow || "2px 2px 0px rgba(0,0,0,0.1)",
-              lineHeight: 1,
-            }}
-          >
-            <div className="flex items-baseline leading-none">
-              <span style={{ fontSize: (el.fontSize || 80) * 0.35 * zoom, fontWeight: 900, marginRight: 4 * zoom, transform: "translateY(-10%)" }}>R$</span>
-              <span style={{ fontSize: (el.fontSize || 80) * zoom }}>{el.content?.split(",")[0] || "0"}</span>
-              <div className="flex flex-col items-start leading-none ml-1">
-                <span style={{ fontSize: (el.fontSize || 80) * 0.55 * zoom, borderBottom: `${2 * zoom}px solid ${el.color || "#000"}`, paddingBottom: 1 * zoom }}>
-                  {el.content?.split(",")[1] || "00"}
-                </span>
-                <span style={{ fontSize: (el.fontSize || 80) * 0.15 * zoom, marginTop: 2 * zoom, opacity: 0.7 }}>{el.unitLabel || "CADA"}</span>
-              </div>
-            </div>
-          </div>
-        )}
+        {el.type === "price" && <PriceFit el={el} zoom={zoom} />}
 
         {el.type === "image" && el.src && (
           <img
