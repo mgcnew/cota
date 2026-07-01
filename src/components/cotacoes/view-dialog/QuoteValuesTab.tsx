@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo, useEffect, useCallback } from "react";
-import { Package, Building2, Search, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { Package, Building2, Search, Edit2, Check, X, Inbox, MessageCircle, History, Smartphone, User, Trophy, Link as LinkIcon, Trash2, Send, CheckCircle2, Loader2, Zap, Hand } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
@@ -86,6 +86,21 @@ export function QuoteValuesTab({
   const [isSendingAll, setIsSendingAll] = useState(false);
   const [showGroupConfirm, setShowGroupConfirm] = useState(false);
   const [pendingBulkSend, setPendingBulkSend] = useState(false);
+
+  // Modo de envio do WhatsApp: 'api' (envio automático) ou 'manual' (abre o WhatsApp com a mensagem pronta)
+  const [sendMode, setSendMode] = useState<'api' | 'manual'>(() => {
+    try {
+      const saved = localStorage.getItem('whatsapp_send_mode');
+      if (saved === 'api' || saved === 'manual') return saved;
+    } catch { /* ignore */ }
+    // Padrão: usa API se estiver configurada, senão manual
+    return isWhatsAppConfigured() ? 'api' : 'manual';
+  });
+
+  const changeSendMode = useCallback((mode: 'api' | 'manual') => {
+    setSendMode(mode);
+    try { localStorage.setItem('whatsapp_send_mode', mode); } catch { /* ignore */ }
+  }, []);
 
   // Helper para formatar string de digitação para Real (ex: "1250" -> "12,50")
   const formatInputToBRL = (value: string) => {
@@ -323,9 +338,11 @@ export function QuoteValuesTab({
     
     // Busca o fornecedor correto pelo ID passado (não depende do state selectedSupplier)
     const targetSupplier = fornecedores.find((f: any) => f.id === supplierId);
-    const configured = isWhatsAppConfigured();
-    
-    if (configured && phone) {
+    // Envio via API só quando o usuário escolheu esse modo, a API está configurada e há telefone.
+    // Caso contrário, cai no envio manual (abre o WhatsApp com a mensagem pronta).
+    const useApi = sendMode === 'api' && isWhatsAppConfigured() && !!phone;
+
+    if (useApi) {
       try {
         toast({ title: "Enviando cotação para o WhatsApp...", description: `Para: ${contactPerson || supplierName}` });
         // Prioritize the salesperson's name for the message greeting
@@ -566,6 +583,49 @@ export function QuoteValuesTab({
               </button>
             )}
           </div>
+
+          {/* Toggle de modo de envio: API (automático) x Manual (abre o WhatsApp) */}
+          {linkSuppliers.length > 0 && (
+            <div className="mt-2">
+              <div className="flex items-center gap-0.5 p-0.5 bg-muted/50 rounded-lg border border-border/50">
+                <button
+                  type="button"
+                  onClick={() => changeSendMode('api')}
+                  disabled={!isWhatsAppConfigured()}
+                  title={isWhatsAppConfigured() ? "Envio automático pela API" : "API do WhatsApp não configurada"}
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-tight transition-all",
+                    !isWhatsAppConfigured() && "opacity-40 cursor-not-allowed",
+                    sendMode === 'api'
+                      ? "bg-brand text-black shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Zap className="h-3 w-3" />
+                  API
+                </button>
+                <button
+                  type="button"
+                  onClick={() => changeSendMode('manual')}
+                  title="Abre o WhatsApp com a mensagem pronta para você enviar"
+                  className={cn(
+                    "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-tight transition-all",
+                    sendMode === 'manual'
+                      ? "bg-brand text-black shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Hand className="h-3 w-3" />
+                  Manual
+                </button>
+              </div>
+              <p className="text-[8px] text-muted-foreground/70 mt-1 leading-tight px-0.5">
+                {sendMode === 'api'
+                  ? "Envio automático pela API do WhatsApp."
+                  : "Abre o WhatsApp com a mensagem pronta — você confere e envia."}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1.5">
