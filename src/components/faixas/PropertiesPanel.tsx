@@ -232,6 +232,33 @@ export function PropertiesPanel({
             <p className="text-[9px] text-muted-foreground mt-2 px-1">Use vírgula para os centavos (ex: 10,90)</p>
           </Section>
 
+          <Section title="Unidade">
+            <div className="grid grid-cols-4 gap-1">
+              {["CADA", "KG", "UN", "PACOTE"].map((opt) => (
+                <Button
+                  key={opt}
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "h-6 text-[10px] px-1",
+                    (el.unitLabel || "CADA") === opt && "bg-brand/10 border-brand text-brand"
+                  )}
+                  onClick={() => u({ unitLabel: opt })}
+                >
+                  {opt}
+                </Button>
+              ))}
+            </div>
+            <Input
+              value={el.unitLabel || ""}
+              onChange={(e) => u({ unitLabel: e.target.value.toUpperCase() })}
+              placeholder="CADA"
+              className="h-8 text-xs mt-2"
+              maxLength={12}
+            />
+            <p className="text-[9px] text-muted-foreground mt-1 px-1">Texto abaixo do preço (ex: KG, PACOTE, CADA)</p>
+          </Section>
+
           <Section title="Aparência">
             <div className="grid grid-cols-2 gap-2">
               <Select value={el.fontFamily || "Impact"} onValueChange={(v) => u({ fontFamily: v })}>

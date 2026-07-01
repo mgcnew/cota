@@ -24,6 +24,8 @@ export interface BannerElement {
   letterSpacing?: number;
   lineHeight?: number;
   textShadow?: string;
+  // Price
+  unitLabel?: string;
   // Image
   src?: string;
   objectFit?: "contain" | "cover" | "fill";
@@ -268,7 +270,7 @@ export function BannerCanvas({
                 <span style={{ fontSize: (el.fontSize || 80) * 0.55 * zoom, borderBottom: `${2 * zoom}px solid ${el.color || "#000"}`, paddingBottom: 1 * zoom }}>
                   {el.content?.split(",")[1] || "00"}
                 </span>
-                <span style={{ fontSize: (el.fontSize || 80) * 0.15 * zoom, marginTop: 2 * zoom, opacity: 0.7 }}>CADA</span>
+                <span style={{ fontSize: (el.fontSize || 80) * 0.15 * zoom, marginTop: 2 * zoom, opacity: 0.7 }}>{el.unitLabel || "CADA"}</span>
               </div>
             </div>
           </div>
