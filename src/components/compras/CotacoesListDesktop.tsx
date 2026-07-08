@@ -91,7 +91,7 @@ export const CotacoesListDesktop = memo(({
               const cotacaoNumero = startIndex + originalIndex + 1;
 
               return (
-                <TableRow key={cotacao.id} className="group">
+                <TableRow key={cotacao.id} className="group border-b border-border/60 dark:border-white/5">
                   {/* Cotação # */}
                   <TableCell>
                     <div className="flex items-center gap-2.5">

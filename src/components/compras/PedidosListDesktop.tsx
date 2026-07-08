@@ -132,7 +132,7 @@ export const PedidosListDesktop = memo(({
               const deliveryUrgency = getDeliveryUrgency(pedido.dataEntrega || '', pedido.status);
 
               return (
-                <TableRow key={pedido.id} className="group">
+                <TableRow key={pedido.id} className="group border-b border-border/60 dark:border-white/5">
                   {/* Fornecedor */}
                   <TableCell>
                     <div className="flex items-center gap-2.5 min-w-0">

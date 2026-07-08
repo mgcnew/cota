@@ -119,7 +119,7 @@ export const ProductListDesktop = memo(({ products, onEdit, onDelete, onHistory 
 
           <TableBody>
             {sortedProducts.map((product) => (
-              <TableRow key={product.id} className="group">
+              <TableRow key={product.id} className="group border-b border-border/60 dark:border-white/5">
                 {/* Produto */}
                 <TableCell className="pl-6 pr-4">
                   <div className="flex items-center gap-3 min-w-0">

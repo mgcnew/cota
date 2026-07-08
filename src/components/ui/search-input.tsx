@@ -1,6 +1,6 @@
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { memo, useCallback, useRef } from "react";
+import { memo, forwardRef, useCallback, useRef } from "react";
 
 interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   value: string;
@@ -9,7 +9,7 @@ interface SearchInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEleme
   containerClassName?: string;
 }
 
-export const SearchInput = memo(function SearchInput({
+export const SearchInput = memo(forwardRef<HTMLInputElement, SearchInputProps>(function SearchInput({
   value,
   onChange,
   onClear,
@@ -17,13 +17,19 @@ export const SearchInput = memo(function SearchInput({
   containerClassName,
   className,
   ...props
-}: SearchInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+}, forwardedRef) {
+  const innerRef = useRef<HTMLInputElement>(null);
+
+  const setRefs = useCallback((node: HTMLInputElement | null) => {
+    innerRef.current = node;
+    if (typeof forwardedRef === "function") forwardedRef(node);
+    else if (forwardedRef) (forwardedRef as React.MutableRefObject<HTMLInputElement | null>).current = node;
+  }, [forwardedRef]);
 
   const handleClear = useCallback(() => {
     onChange("");
     onClear?.();
-    inputRef.current?.focus();
+    innerRef.current?.focus();
   }, [onChange, onClear]);
 
   return (
@@ -31,7 +37,7 @@ export const SearchInput = memo(function SearchInput({
       <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 group-focus-within:text-brand transition-colors duration-200 pointer-events-none z-10" />
 
       <input
-        ref={inputRef}
+        ref={setRefs}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -67,4 +73,6 @@ export const SearchInput = memo(function SearchInput({
       )}
     </div>
   );
-});
+}));
+
+SearchInput.displayName = "SearchInput";

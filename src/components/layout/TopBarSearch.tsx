@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Package, Building2, FileText, ShoppingCart } from "lucide-react";
+import { Package, Building2, FileText, ShoppingCart } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
+import { SearchInput } from "@/components/ui/search-input";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -94,30 +94,18 @@ export function TopBarSearch() {
 
   return (
     <div ref={containerRef} className="relative w-full max-w-md">
-      <div
-        className={cn(
-          "flex items-center gap-2 h-9 px-3 rounded-lg border bg-background/60 transition-colors",
-          open ? "border-brand ring-1 ring-brand/30" : "border-input"
-        )}
-      >
-        <Search className="h-4 w-4 text-muted-foreground shrink-0" />
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => setOpen(true)}
-          placeholder="Buscar cotações, produtos, fornecedores..."
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground min-w-0"
-        />
-        {!query && (
-          <kbd className="hidden lg:inline-flex h-5 px-1.5 shrink-0 select-none items-center justify-center rounded border border-input bg-muted font-mono text-[10px] font-medium text-muted-foreground">
-            ⌘K
-          </kbd>
-        )}
-      </div>
+      <SearchInput
+        ref={inputRef}
+        value={query}
+        onChange={setQuery}
+        onFocus={() => setOpen(true)}
+        placeholder="Buscar cotações, produtos, fornecedores..."
+        containerClassName="w-full"
+        className="h-9"
+      />
 
       {showDropdown && (
-        <div className="absolute left-0 right-0 top-full mt-2 rounded-lg border border-border bg-popover shadow-lg overflow-hidden z-50">
+        <div className="absolute left-0 right-0 top-full mt-2 rounded-xl border border-border/60 dark:border-white/8 bg-popover shadow-lg overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
           <Command shouldFilter={false} className="bg-transparent">
             <CommandList className="max-h-[360px]">
               {query.trim().length < 2 && (

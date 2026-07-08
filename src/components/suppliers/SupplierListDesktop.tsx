@@ -140,7 +140,7 @@ export const SupplierListDesktop = memo(({ suppliers, onEdit, onDelete, onHistor
 
           <TableBody>
             {sortedSuppliers.map((supplier) => (
-              <TableRow key={supplier.id} className="group">
+              <TableRow key={supplier.id} className="group border-b border-border/60 dark:border-white/5">
                 {/* Fornecedor */}
                 <TableCell className="pl-6 pr-4">
                   <div className="flex items-center gap-3 min-w-0">
