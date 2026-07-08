@@ -93,8 +93,8 @@
     --background: 0 0% 4%;
     --foreground: 0 0% 98%;
 
-    /* Cards — elevated above background */
-    --card: 0 0% 8%;
+    /* Cards — elevated above background (menos acinzentado, mais próximo do preto) */
+    --card: 0 0% 6%;
     --card-foreground: 0 0% 98%;
 
     /* Popovers/Dropdowns */

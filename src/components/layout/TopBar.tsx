@@ -36,7 +36,7 @@ export function TopBar({ sidebarExpanded = false }: TopBarProps) {
     <header
       className={cn(
         "hidden md:flex fixed top-0 right-0 h-14 z-40 items-center gap-4 px-4 lg:px-6",
-        "bg-card/80 backdrop-blur-xl border-b border-border dark:border-white/5",
+        "bg-card border-b border-border dark:border-white/5",
         "transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
         sidebarExpanded ? "left-64" : "left-14"
       )}
