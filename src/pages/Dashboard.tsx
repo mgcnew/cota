@@ -121,8 +121,8 @@ function Dashboard() {
 
   return (
     <PageWrapper>
-      <div className={cn(ds.layout.container.page, "")}>
-        
+      <div className={cn(ds.layout.container.page, "lg:flex lg:flex-col lg:min-h-[calc(100vh-3.5rem)]")}>
+
         {/* Header */}
         <div className="flex items-center justify-between gap-3 mb-4 md:mb-6 pb-3 md:pb-5 md:border-b border-zinc-200/70 dark:border-zinc-800">
           <div className="flex items-center gap-3">
@@ -166,10 +166,12 @@ function Dashboard() {
           economiaSparkline={economiaSparkline}
         />
 
-        {/* Linha 2: Visão Geral (gráfico) + Inteligência; Pátio de Operações abaixo do gráfico */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-[400px]">
+        {/* Linha 2: Visão Geral (gráfico) + Inteligência; Pátio de Operações abaixo do gráfico.
+            flex-1 faz essa linha esticar até o fim do espaço disponível na viewport (como a
+            sidebar), sem deixar vão vazio abaixo dos cards quando o conteúdo é curto. */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:flex-1 lg:min-h-0 lg:items-stretch">
           {/* Lado Esquerdo 65%: Gráfico + Pátio */}
-          <div className="lg:col-span-2 flex flex-col gap-4 h-full">
+          <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
             <DashboardOverviewChart data={dashboardData.monthlyData} />
             <DashboardOperationsBoard
               activeQuotes={activeQuotesList}
@@ -178,7 +180,7 @@ function Dashboard() {
           </div>
 
           {/* Lado Direito 35%: Inteligência Rápida */}
-          <div className="lg:col-span-1 flex flex-col h-full">
+          <div className="lg:col-span-1 flex flex-col min-h-0">
             <DashboardIntelligenceBoard
                topSuppliers={topSuppliers.length ? topSuppliers.slice(0,3) : []}
                recentQuotes={recentQuotes}
