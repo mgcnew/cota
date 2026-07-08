@@ -25,6 +25,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { UserAvatar } from "@/components/profile/UserAvatar";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
 import { useToast } from "@/hooks/use-toast";
+import homeIcon from "@/assets/icons/icons8-home.svg";
 
 const MORE_NAV_ITEMS = [
   { label: "Fornecedores", icon: Building2, href: "/dashboard/fornecedores" },
@@ -80,11 +81,13 @@ export function MobileBottomNav() {
   const PrimaryTab = ({
     label,
     icon: Icon,
+    iconSrc,
     active,
     onClick,
   }: {
     label: string;
     icon: React.ElementType;
+    iconSrc?: string;
     active: boolean;
     onClick: () => void;
   }) => (
@@ -95,7 +98,11 @@ export function MobileBottomNav() {
         active ? "text-brand" : "text-zinc-400 dark:text-zinc-500"
       )}
     >
-      <Icon className={cn("w-5 h-5 transition-transform", active && "scale-110")} />
+      {iconSrc ? (
+        <img src={iconSrc} alt="" className={cn("w-6 h-6 transition-transform", active && "scale-110")} />
+      ) : (
+        <Icon className={cn("w-5 h-5 transition-transform", active && "scale-110")} />
+      )}
       <span className={cn("text-[10px] font-semibold tracking-tight", active ? "text-brand" : "text-zinc-400 dark:text-zinc-500")}>
         {label}
       </span>
@@ -107,7 +114,7 @@ export function MobileBottomNav() {
       {/* Bottom Nav Bar */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 dark:bg-[#16181C]/95 backdrop-blur-xl border-t border-border dark:border-white/5 shadow-[0_-4px_24px_-8px_rgba(0,0,0,0.12)]" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
         <div className="flex items-stretch h-16">
-          <PrimaryTab label="Dashboard" icon={LayoutDashboard} active={isDashboard} onClick={() => go("/dashboard")} />
+          <PrimaryTab label="Dashboard" icon={LayoutDashboard} iconSrc={homeIcon} active={isDashboard} onClick={() => go("/dashboard")} />
           <PrimaryTab label="Produtos"  icon={Package}         active={isProdutos}  onClick={() => go("/dashboard/produtos")} />
           <PrimaryTab label="Compras"   icon={ShoppingCart}    active={isCompras}   onClick={() => go("/dashboard/compras")} />
           <button

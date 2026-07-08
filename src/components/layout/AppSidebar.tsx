@@ -67,6 +67,7 @@ import {
 import { CompanySelector } from "./CompanySelector";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { WhatsAppNotificationBell } from "@/components/whatsapp/WhatsAppNotificationBell";
+import homeIcon from "@/assets/icons/icons8-home.svg";
 
 interface AppSidebarProps {
   onOpenAI?: () => void;
@@ -305,7 +306,13 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                                 : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             )}
                           >
-                            {PhIcon ? (
+                            {item.url === "/dashboard" ? (
+                              <img
+                                src={homeIcon}
+                                alt=""
+                                className="w-6 h-6 transition-transform group-hover:scale-110"
+                              />
+                            ) : PhIcon ? (
                               <PhIcon
                                 size={20}
                                 weight={isActive ? "fill" : "regular"}
