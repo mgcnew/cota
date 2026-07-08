@@ -23,6 +23,7 @@ const normalizeStatus = (s: string) =>
 // texto branco, sem borda).
 const SOLID = {
   green: "bg-emerald-600 text-white",
+  lime: "bg-lime-600 text-white", // verde distinto do "green", para não confundir com Entregue
   amber: "bg-amber-500 text-white",
   orange: "bg-orange-500 text-white",
   red: "bg-red-600 text-white",
@@ -40,7 +41,7 @@ export const QUOTE_STATUS_OPTIONS: StatusOption[] = [
 // Status para pedidos
 export const ORDER_STATUS_OPTIONS: StatusOption[] = [
   { value: "pendente", label: "Pendente", className: SOLID.amber },
-  { value: "confirmado", label: "Confirmado", className: SOLID.orange },
+  { value: "confirmado", label: "Confirmado", className: SOLID.lime },
   { value: "enviado", label: "Enviado", className: SOLID.blue },
   { value: "entregue", label: "Entregue", className: SOLID.green },
   { value: "cancelado", label: "Cancelada", className: SOLID.red },
