@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Bell } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { CommunicationHubDrawer } from "./CommunicationHubDrawer";
 import { useNotificationHub } from "@/hooks/useNotificationHub";
+import bellIcon from "@/assets/icons/bell.svg";
 
 export function WhatsAppNotificationBell() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -30,10 +30,14 @@ export function WhatsAppNotificationBell() {
                   : "bg-muted/50 text-muted-foreground hover:bg-accent"
               )}
             >
-              <Bell className={cn(
-                "w-5 h-5 transition-transform group-hover:scale-110",
-                totalCount > 0 && "animate-pulse"
-              )} />
+              <img
+                src={bellIcon}
+                alt=""
+                className={cn(
+                  "w-5 h-5 transition-transform group-hover:scale-110",
+                  totalCount > 0 && "animate-pulse"
+                )}
+              />
 
               {totalCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand text-[8px] font-bold text-white ring-2 ring-white animate-in zoom-in">

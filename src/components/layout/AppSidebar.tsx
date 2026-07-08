@@ -68,6 +68,14 @@ import { CompanySelector } from "./CompanySelector";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { WhatsAppNotificationBell } from "@/components/whatsapp/WhatsAppNotificationBell";
 import homeIcon from "@/assets/icons/icons8-home.svg";
+import produtosIcon from "@/assets/icons/produtos.svg";
+import fornecedoresIcon from "@/assets/icons/fornecedores.svg";
+import comprasIcon from "@/assets/icons/compras.svg";
+import embalagensIcon from "@/assets/icons/embalagens.svg";
+import etiquetasIcon from "@/assets/icons/etiquetas.svg";
+import relatoriosIcon from "@/assets/icons/relatorios.svg";
+import aiAssistantIcon from "@/assets/icons/ai-assistant.svg";
+import userMenuIcon from "@/assets/icons/more-four.svg";
 
 interface AppSidebarProps {
   onOpenAI?: () => void;
@@ -128,6 +136,18 @@ const desktopRailIcons: Record<string, PhosphorIcon> = {
   "/dashboard/embalagens": PhArchive,
   "/dashboard/etiquetas": Barcode,
   "/dashboard/relatorios": ChartBar,
+};
+
+// Ícones customizados coloridos (fornecidos pelo usuário), com cores fixas
+// próprias — usados no lugar dos ícones de linha para essas rotas específicas.
+const customColorIcons: Record<string, string> = {
+  "/dashboard": homeIcon,
+  "/dashboard/produtos": produtosIcon,
+  "/dashboard/fornecedores": fornecedoresIcon,
+  "/dashboard/compras": comprasIcon,
+  "/dashboard/embalagens": embalagensIcon,
+  "/dashboard/etiquetas": etiquetasIcon,
+  "/dashboard/relatorios": relatoriosIcon,
 };
 
 export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
@@ -306,9 +326,9 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                                 : "text-muted-foreground hover:text-foreground hover:bg-accent"
                             )}
                           >
-                            {item.url === "/dashboard" ? (
+                            {customColorIcons[item.url] ? (
                               <img
-                                src={homeIcon}
+                                src={customColorIcons[item.url]}
                                 alt=""
                                 className="w-6 h-6 transition-transform group-hover:scale-110"
                               />
@@ -358,15 +378,11 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                   "active:scale-95 mx-auto"
                 )}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
+                <img
+                  src={aiAssistantIcon}
+                  alt=""
                   className="w-6 h-6 relative z-10 group-hover:scale-110 transition-transform duration-300"
-                >
-                  <path d="M10.5 0C10.5 5.8 15.2 10.5 21 10.5C15.2 10.5 10.5 15.2 10.5 21C10.5 15.2 5.8 10.5 0 10.5C5.8 10.5 10.5 5.8 10.5 0Z" />
-                  <path d="M20.5 3C20.5 4.933 22.067 6.5 24 6.5C22.067 6.5 20.5 8.067 20.5 10C20.5 8.067 18.933 6.5 17 6.5C18.933 6.5 20.5 4.933 20.5 3Z" />
-                </svg>
+                />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={16} className="font-semibold text-xs border border-brand/20 shadow-lg shadow-brand/10">Assistente IA</TooltipContent>
@@ -385,13 +401,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
                       "transition-all duration-200 active:scale-95 group relative border border-border dark:border-white/5 mx-auto text-muted-foreground hover:text-foreground"
                     )}
                   >
-                    {profile?.avatar_url ? (
-                      <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="font-semibold text-sm transition-colors uppercase">
-                        {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || "U"}
-                      </span>
-                    )}
+                    <img src={userMenuIcon} alt="Menu do usuário" className="w-5 h-5" />
                   </div>
                 </DropdownMenuTrigger>
               </TooltipTrigger>

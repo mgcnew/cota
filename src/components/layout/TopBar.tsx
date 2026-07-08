@@ -1,4 +1,6 @@
 import { useLocation } from "react-router-dom";
+import { useTheme } from "next-themes";
+import { Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TopBarSearch } from "./TopBarSearch";
 
@@ -30,6 +32,7 @@ interface TopBarProps {
 
 export function TopBar({ sidebarExpanded = false }: TopBarProps) {
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const title = getPageTitle(location.pathname);
 
   return (
@@ -49,8 +52,18 @@ export function TopBar({ sidebarExpanded = false }: TopBarProps) {
         <TopBarSearch />
       </div>
 
-      {/* Espaço reservado para próximas funcionalidades da topbar */}
-      <div className="flex items-center gap-2 shrink-0" />
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-primary/50"
+          title={theme === "dark" ? "Modo claro" : "Modo escuro"}
+        >
+          {theme === "dark"
+            ? <Sun className="w-4 h-4 text-amber-400" />
+            : <Moon className="w-4 h-4 text-indigo-400" />
+          }
+        </button>
+      </div>
     </header>
   );
 }
