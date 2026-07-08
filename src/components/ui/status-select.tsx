@@ -19,21 +19,31 @@ export interface StatusOption {
 const normalizeStatus = (s: string) => 
   (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+// Paleta sólida padronizada — mesmo padrão do StatusBadge (pills com fundo cheio,
+// texto branco, sem borda).
+const SOLID = {
+  green: "bg-emerald-600 text-white",
+  amber: "bg-amber-500 text-white",
+  orange: "bg-orange-500 text-white",
+  red: "bg-red-600 text-white",
+  blue: "bg-blue-600 text-white",
+} as const;
+
 // Status para cotações
 export const QUOTE_STATUS_OPTIONS: StatusOption[] = [
-  { value: "planejada", label: "Planejada", className: "bg-yellow-400/20 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400 border-yellow-300 dark:border-yellow-500/40" },
-  { value: "ativa", label: "Ativa", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:bg-emerald-500/20 dark:border-emerald-500/40" },
-  { value: "concluida", label: "Concluída", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 dark:bg-blue-500/20 dark:border-blue-500/40" },
-  { value: "cancelada", label: "Cancelada", className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 dark:bg-red-500/20 dark:border-red-500/40" },
+  { value: "planejada", label: "Planejada", className: SOLID.amber },
+  { value: "ativa", label: "Ativa", className: SOLID.orange },
+  { value: "concluida", label: "Concluída", className: SOLID.green },
+  { value: "cancelada", label: "Cancelada", className: SOLID.red },
 ];
 
 // Status para pedidos
 export const ORDER_STATUS_OPTIONS: StatusOption[] = [
-  { value: "pendente", label: "Pendente", className: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20 dark:bg-orange-500/20 dark:border-orange-500/40" },
-  { value: "confirmado", label: "Confirmado", className: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 dark:bg-blue-500/20 dark:border-blue-500/40" },
-  { value: "enviado", label: "Enviado", className: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 dark:bg-indigo-500/20 dark:border-indigo-500/40" },
-  { value: "entregue", label: "Entregue", className: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 dark:bg-emerald-500/20 dark:border-emerald-500/40" },
-  { value: "cancelado", label: "Cancelada", className: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 dark:bg-red-500/20 dark:border-red-500/40" },
+  { value: "pendente", label: "Pendente", className: SOLID.amber },
+  { value: "confirmado", label: "Confirmado", className: SOLID.orange },
+  { value: "enviado", label: "Enviado", className: SOLID.blue },
+  { value: "entregue", label: "Entregue", className: SOLID.green },
+  { value: "cancelado", label: "Cancelada", className: SOLID.red },
 ];
 
 interface StatusSelectProps {
@@ -69,8 +79,8 @@ export const StatusSelect = memo(function StatusSelect({
       <DropdownMenuTrigger asChild disabled={disabled || isLoading}>
         <button
           className={cn(
-            "inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border transition-all",
-            "hover:ring-2 hover:ring-offset-1 hover:ring-gray-300 dark:hover:ring-gray-600",
+            "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border-transparent transition-all",
+            "hover:brightness-110",
             "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary/50",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             currentOption.className,
@@ -81,13 +91,8 @@ export const StatusSelect = memo(function StatusSelect({
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
             <>
-              <div className={cn(
-                "w-2 h-2 rounded-full flex-shrink-0",
-                currentOption.className.split(" ").find(c => c.startsWith("text-")),
-                "bg-current"
-              )} />
               {currentOption.label}
-              <ChevronDown className="h-3 w-3 opacity-60 ml-auto" />
+              <ChevronDown className="h-3 w-3 opacity-80 ml-auto" />
             </>
           )}
         </button>
@@ -101,7 +106,7 @@ export const StatusSelect = memo(function StatusSelect({
           >
             <Badge
               variant="outline"
-              className={cn("font-medium text-xs", option.className)}
+              className={cn("font-bold text-xs border-transparent px-3 py-1", option.className)}
             >
               {option.label}
             </Badge>
