@@ -53,7 +53,7 @@ export const CotacoesListDesktop = memo(({
     const isActive = sortKey === sortId;
     return (
       <TableHead
-        className={cn("cursor-pointer select-none group/th", isActive && "text-foreground font-semibold", className)}
+        className={cn("cursor-pointer select-none group/th", isActive && "text-foreground font-medium", className)}
         onClick={() => handleSort(sortId)}
       >
         <div className="flex items-center gap-1.5">
@@ -96,7 +96,7 @@ export const CotacoesListDesktop = memo(({
                   <TableCell>
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-lg bg-brand/10 dark:bg-brand/10 flex items-center justify-center flex-shrink-0 border border-brand/20">
-                        <span className="font-bold text-[11px] text-brand tabular-nums leading-none">
+                        <span className="font-semibold text-[11px] text-brand tabular-nums leading-none">
                           {cotacaoNumero.toString().padStart(4, '0')}
                         </span>
                       </div>
@@ -106,7 +106,7 @@ export const CotacoesListDesktop = memo(({
                   {/* Resumo do Produto */}
                   <TableCell>
                     <span className="truncate block max-w-[180px]" title={cotacao.produtoResumo || cotacao.produto}>
-                      <CapitalizedText className="font-medium text-foreground">
+                      <CapitalizedText className="font-normal text-foreground">
                         {cotacao.produtoResumo || cotacao.produto}
                       </CapitalizedText>
                     </span>
@@ -128,7 +128,7 @@ export const CotacoesListDesktop = memo(({
                   {/* Melhor Preço */}
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium text-emerald-600 dark:text-emerald-400 tracking-tight">
+                      <span className="font-normal text-emerald-600 dark:text-emerald-400 tracking-tight">
                         {cotacao.melhorPreco || 'R$ 0,00'}
                       </span>
                       <span className="text-[11px] text-muted-foreground truncate max-w-[120px]" title={cotacao.melhorFornecedor || '-'}>
@@ -155,7 +155,7 @@ export const CotacoesListDesktop = memo(({
                   {/* Itens */}
                   <TableCell>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-medium text-foreground">{cotacao.produtosLista?.length || 0}</span>
+                      <span className="font-normal text-foreground">{cotacao.produtosLista?.length || 0}</span>
                       {cotacao.produtosLista && cotacao.produtosLista.length > 0 && (
                         <TooltipProvider>
                           <Tooltip>
@@ -185,7 +185,7 @@ export const CotacoesListDesktop = memo(({
                       }
                       if (urgency === 'expired') {
                         return (
-                          <span className="inline-flex items-center gap-1 text-[12px] font-medium whitespace-nowrap text-red-500 dark:text-red-400">
+                          <span className="inline-flex items-center gap-1 text-[12px] font-normal whitespace-nowrap text-red-500 dark:text-red-400">
                             <Calendar className="h-3 w-3" />
                             {cotacao.dataFim}
                           </span>
@@ -193,7 +193,7 @@ export const CotacoesListDesktop = memo(({
                       }
                       if (urgency === 'urgent') {
                         return (
-                          <span className="inline-flex items-center gap-1 text-[12px] font-medium whitespace-nowrap text-amber-500 dark:text-amber-400">
+                          <span className="inline-flex items-center gap-1 text-[12px] font-normal whitespace-nowrap text-amber-500 dark:text-amber-400">
                             <Calendar className="h-3 w-3" />
                             {cotacao.dataFim}
                           </span>
