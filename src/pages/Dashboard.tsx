@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { designSystem as ds } from '@/styles/design-system';
 
 import { DashboardActionRow } from '@/components/dashboard/DashboardActionRow';
+import { DashboardOverviewChart } from '@/components/dashboard/DashboardOverviewChart';
 import { DashboardOperationsBoard } from '@/components/dashboard/DashboardOperationsBoard';
 import { DashboardIntelligenceBoard } from '@/components/dashboard/DashboardIntelligenceBoard';
 
@@ -61,6 +62,13 @@ function Dashboard() {
 
     return { prontasParaDecisao, vencendo };
   }, [cotacoes]);
+
+  // Série real dos últimos 3 meses de economia (2 meses atrás → mês anterior → mês atual)
+  const economiaSparkline = useMemo(() => {
+    const periodos = metrics?.economiaPorPeriodo;
+    if (!periodos || periodos.length === 0) return undefined;
+    return [...periodos].reverse().map((p: any) => p.economiaRealizada);
+  }, [metrics?.economiaPorPeriodo]);
 
   // 2. Pedidos pendentes/em trânsito
   const pendingOrdersList = useMemo(() => {
@@ -154,21 +162,24 @@ function Dashboard() {
           vencendo={quotesStats.vencendo}
           pedidosEmTransito={pendingOrdersList.length}
           economiaGerada={metrics.economiaGerada}
+          economiaCrescimento={metrics.crescimentoEconomia}
+          economiaSparkline={economiaSparkline}
         />
 
-        {/* Linha 2: Pátio de Operações e Inteligência */}
+        {/* Linha 2: Visão Geral (gráfico) + Inteligência; Pátio de Operações abaixo do gráfico */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-[400px]">
-          {/* Lado Esquerdo 65%: O Pátio */}
-          <div className="lg:col-span-2 flex flex-col h-full">
-            <DashboardOperationsBoard 
+          {/* Lado Esquerdo 65%: Gráfico + Pátio */}
+          <div className="lg:col-span-2 flex flex-col gap-4 h-full">
+            <DashboardOverviewChart data={dashboardData.monthlyData} />
+            <DashboardOperationsBoard
               activeQuotes={activeQuotesList}
               pendingOrders={pendingOrdersList}
             />
           </div>
-          
+
           {/* Lado Direito 35%: Inteligência Rápida */}
           <div className="lg:col-span-1 flex flex-col h-full">
-            <DashboardIntelligenceBoard 
+            <DashboardIntelligenceBoard
                topSuppliers={topSuppliers.length ? topSuppliers.slice(0,3) : []}
                recentQuotes={recentQuotes}
                onViewAllActivities={() => setActivityOpen(true)}

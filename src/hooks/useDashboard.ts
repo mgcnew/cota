@@ -850,9 +850,18 @@ export function useDashboard() {
         }
       });
 
+      // Valor comprado no mês (pedidos não cancelados)
+      const comprasDoMes = (data.orders || [])
+        .filter((o: any) => {
+          const dataPedido = new Date(o.order_date || o.created_at);
+          return dataPedido >= mesInicio && dataPedido <= mesFim && o.status !== 'cancelado';
+        })
+        .reduce((sum: number, o: any) => sum + (Number(o.total_value) || 0), 0);
+
       monthlyDataArray.push({
         month: mesNome,
         economia: economiaDoMes,
+        compras: comprasDoMes,
         cotacoes: quotesDoMes.length
       });
     }
