@@ -1,7 +1,6 @@
 import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { designSystem as ds } from "@/styles/design-system";
 
 export type StatusType = 
   | "active" | "inactive" | "pending" | "completed" | "expired" | "cancelled"
@@ -16,56 +15,66 @@ interface StatusBadgeProps {
   customLabel?: string;
 }
 
+// Paleta sólida padronizada — pills com fundo cheio e texto branco, sem borda.
+const SOLID = {
+  green: "bg-emerald-600 text-white hover:bg-emerald-600",
+  amber: "bg-amber-500 text-white hover:bg-amber-500",
+  orange: "bg-orange-500 text-white hover:bg-orange-500",
+  red: "bg-red-600 text-white hover:bg-red-600",
+  blue: "bg-blue-600 text-white hover:bg-blue-600",
+  gray: "bg-zinc-500 text-white hover:bg-zinc-500",
+} as const;
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   // Ativos
-  active: { label: "Ativo", className: ds.components.badge.success },
-  ativo: { label: "Ativo", className: ds.components.badge.success },
-  ativa: { label: "Ativa", className: ds.components.badge.success },
-  
+  active: { label: "Ativo", className: SOLID.green },
+  ativo: { label: "Ativo", className: SOLID.green },
+  ativa: { label: "Ativa", className: SOLID.green },
+
   // Inativos
-  inactive: { label: "Inativo", className: ds.components.badge.outline },
-  inativo: { label: "Inativo", className: ds.components.badge.outline },
-  
+  inactive: { label: "Inativo", className: SOLID.gray },
+  inativo: { label: "Inativo", className: SOLID.gray },
+
   // Pendentes
-  pending: { label: "Pendente", className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50" },
-  pendente: { label: "Pendente", className: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50" },
-  planejada: { label: "Planejada", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
-  
+  pending: { label: "Pendente", className: SOLID.amber },
+  pendente: { label: "Pendente", className: SOLID.amber },
+  planejada: { label: "Planejada", className: SOLID.blue },
+
   // Concluídos
-  completed: { label: "Concluído", className: ds.components.badge.active },
-  concluido: { label: "Concluído", className: ds.components.badge.active },
-  concluida: { label: "Concluída", className: ds.components.badge.active },
-  finalizada: { label: "Finalizada", className: ds.components.badge.active },
-  
+  completed: { label: "Concluído", className: SOLID.green },
+  concluido: { label: "Concluído", className: SOLID.green },
+  concluida: { label: "Concluída", className: SOLID.green },
+  finalizada: { label: "Finalizada", className: SOLID.green },
+
   // Expirados/Cancelados
-  expired: { label: "Expirado", className: ds.components.badge.destructive },
-  expirado: { label: "Expirado", className: ds.components.badge.destructive },
-  expirada: { label: "Expirada", className: ds.components.badge.destructive },
-  cancelled: { label: "Cancelado", className: ds.components.badge.destructive },
-  cancelado: { label: "Cancelado", className: ds.components.badge.destructive },
-  cancelada: { label: "Cancelada", className: ds.components.badge.destructive },
-  
+  expired: { label: "Expirado", className: SOLID.red },
+  expirado: { label: "Expirado", className: SOLID.red },
+  expirada: { label: "Expirada", className: SOLID.red },
+  cancelled: { label: "Cancelado", className: SOLID.red },
+  cancelado: { label: "Cancelado", className: SOLID.red },
+  cancelada: { label: "Cancelada", className: SOLID.red },
+
   // Em andamento
-  em_andamento: { label: "Em Andamento", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
-  
+  em_andamento: { label: "Em Andamento", className: SOLID.blue },
+
   // Estoque
-  baixo_estoque: { label: "Baixo Estoque", className: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200" },
-  sem_estoque: { label: "Sem Estoque", className: ds.components.badge.destructive },
-  
+  baixo_estoque: { label: "Baixo Estoque", className: SOLID.orange },
+  sem_estoque: { label: "Sem Estoque", className: SOLID.red },
+
   // Pedidos
-  entregue: { label: "Entregue", className: ds.components.badge.success },
-  enviado: { label: "Enviado", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
-  confirmado: { label: "Confirmado", className: ds.components.badge.success },
-  
+  entregue: { label: "Entregue", className: SOLID.green },
+  enviado: { label: "Enviado", className: SOLID.blue },
+  confirmado: { label: "Confirmado", className: SOLID.green },
+
   // Produtos
-  cotado: { label: "Cotado", className: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50" },
-  sem_cotacao: { label: "Sem Cotação", className: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-950/30 dark:text-orange-400 dark:border-orange-900/50" },
-  
+  cotado: { label: "Cotado", className: SOLID.blue },
+  sem_cotacao: { label: "Sem Cotação", className: SOLID.orange },
+
   // Pedidos
-  processando: { label: "Processando", className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200" },
+  processando: { label: "Processando", className: SOLID.orange },
 };
 
-const defaultConfig = { label: "Desconhecido", className: "bg-muted text-muted-foreground" };
+const defaultConfig = { label: "Desconhecido", className: SOLID.gray };
 
 // Memoizado para evitar re-renders desnecessários
 export const StatusBadge = memo(function StatusBadge({ status, className, customLabel }: StatusBadgeProps) {
@@ -73,9 +82,9 @@ export const StatusBadge = memo(function StatusBadge({ status, className, custom
   const config = statusConfig[normalizedStatus] || defaultConfig;
 
   return (
-    <Badge 
+    <Badge
       variant="outline"
-      className={cn("font-medium text-xs", config.className, className)}
+      className={cn("font-bold text-xs border-transparent px-3 py-1", config.className, className)}
     >
       {customLabel || config.label}
     </Badge>
