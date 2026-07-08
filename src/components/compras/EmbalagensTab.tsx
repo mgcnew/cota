@@ -182,14 +182,8 @@ function EmbalagensTab() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-4 pb-5 border-b border-border dark:border-zinc-800">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border flex-shrink-0">
-            <Archive className="h-5 w-5 text-brand" />
-          </div>
-          <h1 className="text-[18px] font-bold text-foreground leading-tight truncate">Embalagens</h1>
-        </div>
+      {/* Header (título já exibido na topbar) */}
+      <div className="flex items-center justify-end gap-4 pb-5 border-b border-border dark:border-zinc-800">
         <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             variant="outline"

@@ -397,13 +397,7 @@ export default function Faixas() {
     return (
       <PageWrapper>
         <div className={cn(ds.layout.container.page)}>
-          <div className="flex items-center justify-between gap-4 pb-5 border-b border-border dark:border-zinc-800 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
-                <Flag className="h-5 w-5 text-brand" />
-              </div>
-              <h1 className="text-[18px] font-bold text-foreground leading-tight">Faixas Promocionais</h1>
-            </div>
+          <div className="flex items-center justify-end gap-4 pb-5 border-b border-border dark:border-zinc-800 mb-6">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button size="sm" className="h-9 bg-brand hover:bg-brand/90 text-white">

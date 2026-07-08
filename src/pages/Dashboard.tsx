@@ -122,10 +122,7 @@ function Dashboard() {
               <LayoutDashboard className="h-5 w-5 text-brand" />
             </div>
             <div>
-              <h1 className="text-[18px] font-bold text-foreground leading-tight">
-                Resumo de Hoje
-              </h1>
-              <p className={cn(ds.colors.text.muted, "text-xs mt-0.5")}>
+              <p className={cn(ds.colors.text.muted, "text-xs")}>
                 Centro de operações
               </p>
             </div>

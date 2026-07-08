@@ -52,7 +52,6 @@ function Compras() {
           <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
             <ShoppingBag className="h-5 w-5 text-brand" />
           </div>
-          <h1 className="text-[18px] font-bold text-foreground leading-tight">Compras</h1>
           <Button
             variant="ghost"
             size="icon"

@@ -294,13 +294,7 @@ function Fornecedores() {
       <PageWrapper>
         <PullToRefresh onRefresh={invalidateCache} className="h-screen w-full">
           <div className={cn(designSystem.layout.container.page, "")}>
-          {/* Page Header - Standardized with Dashboard Style */}
-          <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800 mb-6">
-            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
-              <Building2 className="h-5 w-5 text-brand" />
-            </div>
-            <h1 className="text-[18px] font-bold text-foreground leading-tight">Fornecedores</h1>
-          </div>
+          {/* Título já exibido na topbar */}
 
           {/* Metrics Grid */}
           {isMobile ? (

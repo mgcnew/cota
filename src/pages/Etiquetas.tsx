@@ -237,14 +237,8 @@ export default function Etiquetas() {
   return (
     <PageWrapper>
       <div className={cn(designSystem.layout.container.page)}>
-        {/* Page Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-border dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
-              <Scan className="h-5 w-5 text-brand" />
-            </div>
-            <h1 className="text-[18px] font-bold text-foreground leading-tight">Gerador de Etiquetas</h1>
-          </div>
+        {/* Page Header (título já exibido na topbar) */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-end gap-4 pb-5 border-b border-border dark:border-zinc-800">
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button onClick={handleExportPDF} variant="outline" className="flex-1 sm:flex-none h-9" disabled={productsToExport.length === 0}>
               <Printer className="mr-2 h-4 w-4" />

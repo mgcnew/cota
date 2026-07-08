@@ -451,10 +451,10 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
 
   return (
     <>
-      {/* Desktop Sidebar (Floating) */}
+      {/* Desktop Sidebar (docada, colada na borda esquerda) */}
       <div
         className={cn(
-          "hidden md:flex fixed z-50 left-3 top-3 bottom-3 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+          "hidden md:flex fixed z-50 left-0 top-0 bottom-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
           isSidebarExpanded ? "w-64" : "w-14"
         )}
       >

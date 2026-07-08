@@ -148,13 +148,7 @@ export default function ContagemEstoque() {
   return (
     <PageWrapper>
       <div className={cn(ds.layout.container.page, "")}>
-        {/* Page Header - Standardized with Dashboard Style */}
-        <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800 mb-6">
-          <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
-            <ClipboardList className="h-5 w-5 text-brand" />
-          </div>
-          <h1 className="text-[18px] font-bold text-foreground leading-tight">Contagem de Estoque</h1>
-        </div>
+        {/* Título já exibido na topbar */}
 
         {/* Stats Cards */}
         <ResponsiveGrid gap="sm" config={{ mobile: 1, tablet: 2, desktop: 4 }} className="mb-4">

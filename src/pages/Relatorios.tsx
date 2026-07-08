@@ -118,14 +118,8 @@ export default function Relatorios() {
     <PageWrapper>
       <div className={cn(ds.layout.container.page)}>
 
-        {/* ── Cabeçalho ─────────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-between gap-4 pb-5 border-b border-border mb-6">
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex p-2.5 rounded-xl border bg-card border-border">
-              <FileText className="h-5 w-5 text-brand" />
-            </div>
-            <h1 className="text-[18px] font-bold text-foreground leading-tight">Relatórios</h1>
-          </div>
+        {/* ── Cabeçalho (título já exibido na topbar) ──────────────────────────── */}
+        <div className="flex items-center justify-end gap-4 pb-5 border-b border-border mb-6">
           <div className="flex items-center gap-2">
             <Button
               variant="outline"

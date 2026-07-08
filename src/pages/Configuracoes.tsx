@@ -562,10 +562,7 @@ export default function Configuracoes() {
                 <Settings className="h-6 w-6 text-brand" />
               </div>
               <div>
-                <h1 className={cn(ds.typography.size.xl, "md:text-[22px] font-bold text-foreground")}>
-                  Configurações
-                </h1>
-                <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm mt-0.5")}>
+                <p className={cn(ds.colors.text.secondary, "text-xs md:text-sm")}>
                   Gerencie as preferências e configurações do sistema
                 </p>
               </div>

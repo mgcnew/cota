@@ -10,13 +10,6 @@ export default function AnaliseCompras() {
   return (
     <PageWrapper>
       <div className={ds.layout.container.page}>
-        <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800">
-          <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
-            <BarChart3 className="h-5 w-5 text-brand" />
-          </div>
-          <h1 className="text-[18px] font-bold text-foreground leading-tight">Análise de Compras</h1>
-        </div>
-
         <Suspense fallback={
           <div className="flex items-center justify-center py-24">
             <Loader2 className="h-8 w-8 animate-spin text-brand" />

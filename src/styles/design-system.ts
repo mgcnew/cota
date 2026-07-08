@@ -106,7 +106,7 @@ export const designSystem = {
             grid: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         },
         sidebar: {
-            wrapper: "h-full w-full bg-card/80 backdrop-blur-xl border border-white/5 rounded-lg shadow-sm transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden flex flex-col",
+            wrapper: "h-full w-full bg-card border-r border-border dark:border-white/5 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden flex flex-col",
             header: "flex items-center h-16 px-4 border-b border-white/5 transition-all duration-300",
             body: "flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1 custom-scrollbar",
             footer: "p-2 border-t border-white/5",
