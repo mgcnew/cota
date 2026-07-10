@@ -204,16 +204,6 @@
       animation: none !important;
     }
 
-    /* content-visibility: cards fora da tela não são pintados. Mantém a camada
-       composta do tamanho da viewport — em GPUs Mali/MediaTek (Moto G24) isso
-       evita o "ladrilhamento" de uma camada muito alta, que é o que corrompia
-       (bandas de lixo visual) em páginas longas como Compras. Também deixa o
-       scroll mais leve. `auto` guarda a altura real após a 1ª medição. */
-    .cv-list > * {
-      content-visibility: auto;
-      contain-intrinsic-size: auto 160px;
-    }
-
     /* backdrop-filter é um dos efeitos mais caros em GPU mobile. Desligamos de
        vez no celular — os elementos que usam blur (bottom nav, sheets, headers)
        já têm fundo ~95% opaco, então o resultado visual é praticamente idêntico
