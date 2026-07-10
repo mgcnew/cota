@@ -24,8 +24,6 @@ import { usePedidosStats, OrderData } from "@/hooks/usePedidosStats";
 import { PedidosListDesktop } from "./PedidosListDesktop";
 import { MobileOrderCard } from "@/components/pedidos/MobileOrderCard";
 import { ConfirmWhatsAppOrderDialog } from "@/components/forms/ConfirmWhatsAppOrderDialog";
-import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
-import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 
 function PedidosTab() {
   const { isMobile } = useBreakpoint();
@@ -208,27 +206,8 @@ function PedidosTab() {
 
   return (
     <div className="space-y-6">
-      {/* Metrics */}
-      {isMobile ? (
-        <div className="mb-4 -mx-1">
-          <MobileMetricRibbon>
-            <MobileMetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
-            <MobileMetricCard title="Aguardando" value={stats.pedidosAguardando} icon={PackageCheck} variant="info" />
-            <MobileMetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
-            <MobileMetricCard
-              title="Economia Real"
-              value={stats.economiaRealFormatada}
-              icon={TrendingDown}
-              variant="success"
-              trend={{
-                value: `Estimativa: ${stats.economiaNegociadaFormatada}`,
-                label: "nos pedidos a entregar",
-                type: "positive"
-              }}
-            />
-          </MobileMetricRibbon>
-        </div>
-      ) : (
+      {/* Metrics — ocultas no mobile por performance */}
+      {!isMobile && (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
           <StatCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
           <StatCard

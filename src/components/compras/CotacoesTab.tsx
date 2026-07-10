@@ -18,8 +18,6 @@ import { useCotacoesStats } from "@/hooks/useCotacoesStats";
 import { CotacoesListDesktop } from "./CotacoesListDesktop";
 import { MobileQuoteCard } from "./MobileQuoteCard";
 import { RelatorioEconomiaDialog } from "./RelatorioEconomiaDialog";
-import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
-import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 
 import {
   AddQuoteDialogLazy,
@@ -95,36 +93,8 @@ function CotacoesTab() {
 
   return (
     <div className="space-y-6">
-      {/* Metrics */}
-      {isMobile ? (
-        <div className="mb-4 -mx-1">
-          <MobileMetricRibbon>
-            <MobileMetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
-            <MobileMetricCard
-              title="Adesão Fornecedores"
-              value={stats.adesaoFormatada}
-              icon={Users}
-              variant="success"
-              trend={{ value: `${stats.pendentes} pendentes`, label: "aguardando", type: "neutral" }}
-            />
-            <MobileMetricCard
-              title="Ações Urgentes"
-              value={stats.vencendo}
-              icon={Zap}
-              variant="warning"
-              trend={{ value: "Vencendo", label: "em 48h", type: "neutral" }}
-              onClick={() => handleStatusFilterChange("vencendo")}
-            />
-            <MobileMetricCard
-              title="Prontas p/ Fechar"
-              value={stats.prontasParaDecisao}
-              icon={CheckCircle2}
-              variant="success"
-              onClick={() => handleStatusFilterChange("prontas")}
-            />
-          </MobileMetricRibbon>
-        </div>
-      ) : (
+      {/* Metrics — ocultas no mobile por performance */}
+      {!isMobile && (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
           <StatCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
 

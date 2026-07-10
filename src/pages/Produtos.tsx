@@ -20,8 +20,6 @@ import type { Product } from "@/hooks/useProducts";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
 import { StatCard } from "@/components/ui/stat-card";
-import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
-import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { MobileProductCard } from "@/components/products/MobileProductCard";
 import ProductsSkeleton from "@/components/products/ProductsSkeleton";
@@ -316,35 +314,8 @@ function Produtos() {
         <div className={cn(designSystem.layout.container.page, "")}>
           {/* Título já exibido na topbar */}
 
-          {/* Métricas essenciais */}
-          {isMobile ? (
-            <MobileMetricRibbon className="mb-4 mt-2">
-              <MobileMetricCard
-                title="Produtos"
-                value={stats.totalProducts}
-                icon={Package}
-                variant="warning"
-              />
-              <MobileMetricCard
-                title="Categorias"
-                value={stats.totalCategories}
-                icon={Tags}
-                variant="info"
-              />
-              <MobileMetricCard
-                title="Cotações"
-                value={stats.activeQuotes}
-                icon={ClipboardList}
-                variant="success"
-              />
-              <MobileMetricCard
-                title="Valor Médio"
-                value={stats.averageValue}
-                icon={DollarSign}
-                variant="default"
-              />
-            </MobileMetricRibbon>
-          ) : (
+          {/* Métricas essenciais — ocultas no mobile por performance */}
+          {!isMobile && (
             <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
               <StatCard
                 title="Produtos"

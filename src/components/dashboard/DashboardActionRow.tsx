@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertTriangle, Truck, DollarSign, BarChart3 } from 'lucide-react';
 
 import { StatCard } from '@/components/ui/stat-card';
-import { MobileMetricCard } from '@/components/dashboard/MobileMetricCard';
-import { MobileMetricRibbon } from '@/components/dashboard/MobileMetricRibbon';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
 import { formatCurrency } from '@/utils/formatters';
 
@@ -43,69 +41,9 @@ export const DashboardActionRow = memo(({
       }
     : undefined;
 
-  // ── MOBILE: Horizontal scrolling ribbon ────────────────────────────
+  // Cards removidos no mobile por performance — não renderiza nada nessa faixa.
   if (isMobile) {
-    return (
-      <div className="mb-6">
-        <MobileMetricRibbon>
-          {/* 1. Ação Necessária */}
-          <MobileMetricCard
-            title="Ação Necessária"
-            value={prontasParaDecisao.length}
-            subtitle="Cotações prontas p/ decisão"
-            icon={CheckCircle2}
-            variant="default"
-            pulse={prontasParaDecisao.length > 0}
-            isEmpty={prontasParaDecisao.length === 0}
-            onClick={
-              prontasParaDecisao.length > 0
-                ? () => navigate('/dashboard/compras?tab=cotacoes&filter=prontas')
-                : undefined
-            }
-          />
-
-          {/* 2. Vencendo */}
-          <MobileMetricCard
-            title="Vencendo Hoje"
-            value={vencendo.length}
-            subtitle="Cotações expirando em breve"
-            icon={AlertTriangle}
-            variant="warning"
-            pulse={vencendo.length > 0}
-            isEmpty={vencendo.length === 0}
-            onClick={
-              vencendo.length > 0
-                ? () => navigate('/dashboard/compras?tab=cotacoes&filter=vencendo')
-                : undefined
-            }
-          />
-
-          {/* 3. Pedidos em Trânsito */}
-          <MobileMetricCard
-            title="Em Trânsito"
-            value={pedidosEmTransito}
-            subtitle="Pedidos aguardando entrega"
-            icon={Truck}
-            variant="info"
-            isEmpty={pedidosEmTransito === 0}
-            onClick={
-              pedidosEmTransito > 0
-                ? () => navigate('/dashboard/compras?tab=pedidos')
-                : undefined
-            }
-          />
-
-          {/* 4. Economia do Mês */}
-          <MobileMetricCard
-            title="Economia do Mês"
-            value={formatCurrency(economiaGerada)}
-            subtitle="Nas cotações fechadas"
-            icon={DollarSign}
-            variant="success"
-          />
-        </MobileMetricRibbon>
-      </div>
-    );
+    return null;
   }
 
 // ── DESKTOP: Grid 4 colunas (layout original) ───────────────────────
