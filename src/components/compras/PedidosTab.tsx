@@ -278,7 +278,7 @@ function PedidosTab() {
       )}
 
       {/* Unified Container for Search, Table and Mobile Cards */}
-      <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 sm:rounded-xl overflow-hidden shadow-sm mb-8">
+      <div className="w-full bg-white dark:bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm mb-8">
         {/* Header / Actions Bar */}
         <div className="flex flex-wrap items-center gap-2.5 px-3.5 py-2.5 border-b border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
           <div className="flex items-center gap-2 flex-1 min-w-0">

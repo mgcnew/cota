@@ -47,8 +47,9 @@ function Compras() {
   return (
     <PageWrapper>
       <div className={ds.layout.container.page}>
-        {/* Page Header */}
-        <div className="flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800">
+        {/* Page Header — oculto no mobile (a calculadora fica só no desktop),
+            liberando espaço pra lista subir. */}
+        <div className="hidden md:flex items-center gap-3 pb-5 border-b border-border dark:border-zinc-800">
           <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
             <ShoppingBag className="h-5 w-5 text-brand" />
           </div>
