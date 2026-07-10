@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/profile/UserAvatar";
 import { UserProfileDialog } from "@/components/profile/UserProfileDialog";
 import { useState, useEffect, useCallback, memo, useMemo } from "react";
 import { useTheme } from "next-themes";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   LayoutDashboard,
   Package,
@@ -154,6 +155,7 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
   const { user, signOut } = useAuth();
   const { profile } = useUserProfile();
   const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -465,6 +467,11 @@ export function AppSidebar({ onOpenAI }: AppSidebarProps = {}) {
     </div>
   );
 
+
+  // No mobile a navegação é 100% via MobileBottomNav. O trilho desktop e o
+  // Sheet abaixo (trigger oculto, nunca aberto) só pesariam no DOM — inclusive
+  // uma assinatura realtime invisível do sino. Não montamos nada no celular.
+  if (isMobile) return null;
 
   return (
     <>

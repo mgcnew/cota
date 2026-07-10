@@ -222,13 +222,12 @@
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
     }
-    
-    /* GPU layer for sidebar/sheet */
-    [data-state="open"],
-    [data-state="closed"] {
-      will-change: transform, opacity;
-      transform: translateZ(0);
-    }
+
+    /* NOTA: removido o antigo `[data-state]{will-change;translateZ}` global.
+       Ele forçava uma camada de composição PERMANENTE em todo componente Radix
+       (dropdown, select, abas, tooltip, accordion...), estourando a GPU em
+       aparelhos fracos. Os painéis que realmente deslizam (Sheet/Drawer) já
+       declaram `will-change-transform` neles mesmos. */
   }
   
   /* Touch target minimum size (44px) */

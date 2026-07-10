@@ -351,8 +351,8 @@ function PedidosTab() {
             </div>
           ) : (
             <>
-              {/* Mobile Cards View */}
-              <div className="md:hidden">
+              {/* Só monta uma das views (evita cards + tabela no DOM ao mesmo tempo) */}
+              {isMobile ? (
                 <div className="space-y-2 p-3 pb-4">
                   {paginatedData.items.map((pedido) => (
                     <MobileOrderCard
@@ -364,10 +364,7 @@ function PedidosTab() {
                     />
                   ))}
                 </div>
-              </div>
-
-              {/* Desktop Table View */}
-              <div className="hidden md:block">
+              ) : (
                 <PedidosListDesktop
                   pedidos={paginatedData.items}
                   onUpdateStatus={handleUpdateStatus}
@@ -376,7 +373,7 @@ function PedidosTab() {
                   onDelete={handleDeletePedidoClick}
                   isUpdating={isUpdating}
                 />
-              </div>
+              )}
 
               {/* Pagination */}
               <div className="px-3.5 py-2 border-t border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">

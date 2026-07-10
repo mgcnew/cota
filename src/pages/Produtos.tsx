@@ -439,29 +439,27 @@ function Produtos() {
                 </div>
               ) : (
                 <>
-                  {/* Mobile Cards View */}
-                  <div className="md:hidden space-y-2 p-3 pb-4">
-                    {paginatedData.items.map((product) => (
-                      <MobileProductCard
-                        key={product.id}
-                        product={product}
-                        onEdit={handleEditProduct}
-                        onDelete={handleDeleteProduct}
-                        onHistory={handleHistoryProduct}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Desktop Table View */}
-                  <div className="hidden md:block">
+                  {/* Só monta uma das views (evita renderizar cards + tabela no DOM ao mesmo tempo) */}
+                  {isMobile ? (
+                    <div className="space-y-2 p-3 pb-4">
+                      {paginatedData.items.map((product) => (
+                        <MobileProductCard
+                          key={product.id}
+                          product={product}
+                          onEdit={handleEditProduct}
+                          onDelete={handleDeleteProduct}
+                          onHistory={handleHistoryProduct}
+                        />
+                      ))}
+                    </div>
+                  ) : (
                     <ProductListDesktop
                       products={paginatedData.items}
                       onEdit={handleEditProduct}
                       onDelete={handleDeleteProduct}
                       onHistory={handleHistoryProduct}
-
                     />
-                  </div>
+                  )}
 
                   {/* Pagination */}
                   <div className="px-3.5 py-2 border-t border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">

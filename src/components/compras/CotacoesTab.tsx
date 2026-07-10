@@ -221,8 +221,8 @@ function CotacoesTab() {
             </div>
           ) : (
             <>
-              {/* Mobile Cards View */}
-              <div className="md:hidden">
+              {/* Só monta uma das views (evita cards + tabela no DOM ao mesmo tempo) */}
+              {isMobile ? (
                 <div className="space-y-3 p-2 pb-24">
                   {paginatedData.items.map((cotacao, index) => {
                     const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
@@ -240,10 +240,7 @@ function CotacoesTab() {
                     );
                   })}
                 </div>
-              </div>
-
-              {/* Desktop Table View */}
-              <div className="hidden md:block">
+              ) : (
                 <CotacoesListDesktop
                   cotacoes={paginatedData.items}
                   startIndex={paginatedData.pagination.startIndex}
@@ -253,7 +250,7 @@ function CotacoesTab() {
                   onDelete={handleDeleteQuote}
                   isUpdating={isUpdating}
                 />
-              </div>
+              )}
 
               {/* Pagination */}
               <div className="px-3.5 py-2 border-t border-border dark:border-white/5 bg-zinc-50/50 dark:bg-muted/30">
