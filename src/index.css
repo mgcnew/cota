@@ -152,8 +152,10 @@
     overflow-x: hidden !important;
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
-    /* Mobile performance: prevent layout thrashing */
-    -webkit-overflow-scrolling: touch;
+    /* NOTA: `-webkit-overflow-scrolling: touch` foi REMOVIDO. Em GPUs Mali/
+       MediaTek (ex: Moto G24) ele força o container de scroll numa camada de
+       composição com backing store que corrompe em bandas horizontais. O
+       Chrome atual já faz scroll com inércia por padrão, então é obsoleto. */
   }
 
   /* App root background — light mode: solid, dark mode: gradient */
@@ -165,6 +167,14 @@
     background:
       radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.07) 0%, transparent 65%),
       hsl(0 0% 4%);
+  }
+
+  /* Mobile: fundo escuro sólido (sem o gradiente radial de tela cheia), pra
+     aliviar o compositor em aparelhos fracos e evitar corrupção de camada. */
+  @media (max-width: 767px) {
+    .dark .app-bg {
+      background: hsl(0 0% 4%);
+    }
   }
   
   html {
@@ -217,10 +227,11 @@
       }
     }
     
-    /* Optimize scroll containers - CRITICAL for mobile scroll */
+    /* Optimize scroll containers - CRITICAL for mobile scroll.
+       Sem `-webkit-overflow-scrolling: touch` (gatilho de corrupção de camada
+       em GPU Mali/MediaTek e obsoleto no Chrome atual). */
     .overflow-y-auto,
     .overflow-auto {
-      -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
     }
 

@@ -35,7 +35,7 @@ export function AppLayout() {
       {/* Main Content Area */}
       <main
         className={cn(
-          "flex-1 w-full overflow-y-auto overflow-x-hidden transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+          "flex-1 w-full overflow-y-auto overflow-x-hidden md:transition-all md:duration-300 md:ease-[cubic-bezier(0.25,0.1,0.25,1)]",
           "pb-20 md:pb-0 md:pt-14",
           isSidebarExpanded ? "md:pl-64" : "md:pl-14"
         )}
