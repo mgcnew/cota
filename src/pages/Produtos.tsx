@@ -19,7 +19,7 @@ import { usePagination } from "@/hooks/usePagination";
 import type { Product } from "@/hooks/useProducts";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { useToast } from "@/hooks/use-toast";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
 import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
@@ -346,33 +346,33 @@ function Produtos() {
             </MobileMetricRibbon>
           ) : (
             <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 4, desktop: 4 }} className="mb-4">
-              <MetricCard
+              <StatCard
                 title="Produtos"
                 value={stats.totalProducts}
+                subtitle="Cadastrados no catálogo"
                 icon={Package}
                 variant="warning"
-                className="hover:scale-[1.02] transition-transform"
               />
-              <MetricCard
+              <StatCard
                 title="Categorias"
                 value={stats.totalCategories}
+                subtitle="Categorias distintas"
                 icon={Tags}
                 variant="info"
-                className="hover:scale-[1.02] transition-transform"
               />
-              <MetricCard
+              <StatCard
                 title="Cotações"
                 value={stats.activeQuotes}
+                subtitle="Cotações realizadas"
                 icon={ClipboardList}
                 variant="success"
-                className="hover:scale-[1.02] transition-transform"
               />
-              <MetricCard
+              <StatCard
                 title="Valor Médio"
                 value={stats.averageValue}
+                subtitle="Preço médio dos produtos"
                 icon={DollarSign}
                 variant="default"
-                className="hover:scale-[1.02] transition-transform"
               />
             </ResponsiveGrid>
           )}

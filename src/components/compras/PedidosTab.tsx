@@ -18,7 +18,7 @@ import { RegistrarEntregaDialog } from "@/components/forms/RegistrarEntregaDialo
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useBreakpoint } from "@/hooks/useBreakpoint";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { usePedidosStats, OrderData } from "@/hooks/usePedidosStats";
 import { PedidosListDesktop } from "./PedidosListDesktop";
@@ -230,8 +230,8 @@ function PedidosTab() {
         </div>
       ) : (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-          <MetricCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
-          <MetricCard
+          <StatCard title="Pendentes" value={stats.pedidosAtivos} icon={Clock} variant="warning" />
+          <StatCard
             title="Aguardando Entrega"
             value={stats.pedidosAguardando}
             icon={PackageCheck}
@@ -259,8 +259,8 @@ function PedidosTab() {
               )
             }
           />
-          <MetricCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
-          <MetricCard
+          <StatCard title="Total Pedidos" value={stats.totalValueFormatado} icon={DollarSign} variant="info" />
+          <StatCard
             title="Economia Real"
             value={stats.economiaRealFormatada}
             icon={TrendingDown}

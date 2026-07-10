@@ -1,6 +1,5 @@
 ﻿import { useState, useMemo, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, ShoppingCart, LayoutDashboard } from 'lucide-react';
+import { LayoutDashboard } from 'lucide-react';
 
 import { PageWrapper } from '@/components/layout/PageWrapper';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -8,7 +7,6 @@ import { usePedidos } from '@/hooks/usePedidos';
 import { useCotacoes } from '@/hooks/useCotacoes';
 import { cn } from '@/lib/utils';
 import { ResponsiveModal } from '@/components/responsive/ResponsiveModal';
-import { Button } from '@/components/ui/button';
 import { designSystem as ds } from '@/styles/design-system';
 
 import { DashboardActionRow } from '@/components/dashboard/DashboardActionRow';
@@ -27,7 +25,6 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function Dashboard() {
-  const navigate = useNavigate();
   const [activityOpen, setActivityOpen] = useState(false);
 
   const dashboardData = useDashboard();
@@ -124,35 +121,14 @@ function Dashboard() {
       <div className={cn(ds.layout.container.page, "lg:flex lg:flex-col lg:min-h-[calc(100vh-3.5rem)]")}>
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-3 mb-4 md:mb-6 pb-3 md:pb-5 md:border-b border-zinc-200/70 dark:border-zinc-800">
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
-              <LayoutDashboard className="h-5 w-5 text-brand" />
-            </div>
-            <div>
-              <p className={cn(ds.colors.text.muted, "text-xs")}>
-                Centro de operações
-              </p>
-            </div>
+        <div className="flex items-center gap-3 mb-4 md:mb-6 pb-3 md:pb-5 md:border-b border-zinc-200/70 dark:border-zinc-800">
+          <div className="hidden sm:flex p-2.5 rounded-xl border transition-all bg-card border-border">
+            <LayoutDashboard className="h-5 w-5 text-brand" />
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => navigate('/dashboard/compras?tab=cotacoes&open=new')}
-              size="sm"
-              className="bg-brand hover:bg-brand/90 text-white"
-            >
-              <Plus className="w-3.5 h-3.5 mr-1" />
-              Nova Cotação
-            </Button>
-            <Button
-              onClick={() => navigate('/dashboard/compras?tab=pedidos&open=new')}
-              size="sm"
-              className="hidden sm:flex bg-brand hover:bg-brand/90 text-white"
-            >
-              <ShoppingCart className="w-3.5 h-3.5 mr-1" />
-              Novo Pedido
-            </Button>
+          <div>
+            <p className={cn(ds.colors.text.muted, "text-xs")}>
+              Centro de operações
+            </p>
           </div>
         </div>
 

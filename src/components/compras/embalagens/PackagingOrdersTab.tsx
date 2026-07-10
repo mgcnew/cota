@@ -9,7 +9,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/ui/data-pagination";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { PackagingOrderDetailsDialog } from "./PackagingOrderDetailsDialog";
@@ -123,10 +123,10 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
       {/* Métricas — desktop only */}
       {!isMobile && (
         <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-          <MetricCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
-          <MetricCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
-          <MetricCard title="Confirmados" value={stats.confirmados.toString()} icon={CheckCircle2} variant="info" />
-          <MetricCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
+          <StatCard title="Total" value={stats.total.toString()} icon={ShoppingCart} variant="default" />
+          <StatCard title="Pendentes" value={stats.pendentes.toString()} icon={Clock} variant="warning" />
+          <StatCard title="Confirmados" value={stats.confirmados.toString()} icon={CheckCircle2} variant="info" />
+          <StatCard title="Valor Total" value={stats.totalValue} icon={DollarSign} variant="success" />
         </ResponsiveGrid>
       )}
 

@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle2, AlertTriangle, Truck, DollarSign, BarChart3 } from 'lucide-react';
 
-import { DashboardStatCard } from '@/components/dashboard/DashboardStatCard';
+import { StatCard } from '@/components/ui/stat-card';
 import { MobileMetricCard } from '@/components/dashboard/MobileMetricCard';
 import { MobileMetricRibbon } from '@/components/dashboard/MobileMetricRibbon';
 import { useIsMobileDevice } from '@/hooks/use-mobile-device';
@@ -111,7 +111,7 @@ export const DashboardActionRow = memo(({
 // ── DESKTOP: Grid 4 colunas (layout original) ───────────────────────
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
-      <DashboardStatCard
+      <StatCard
         title="Ação Necessária"
         value={prontasParaDecisao.length}
         subtitle="Cotações prontas para decisão"
@@ -121,7 +121,7 @@ export const DashboardActionRow = memo(({
         onClick={prontasParaDecisao.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=prontas') : undefined}
       />
 
-      <DashboardStatCard
+      <StatCard
         title="Vencendo Hoje"
         value={vencendo.length}
         subtitle="Cotações expirando em breve"
@@ -131,7 +131,7 @@ export const DashboardActionRow = memo(({
         onClick={vencendo.length > 0 ? () => navigate('/dashboard/compras?tab=cotacoes&filter=vencendo') : undefined}
       />
 
-      <DashboardStatCard
+      <StatCard
         title="Pedidos em Trânsito"
         value={pedidosEmTransito}
         subtitle="Aguardando entrega"
@@ -141,7 +141,7 @@ export const DashboardActionRow = memo(({
         onClick={pedidosEmTransito > 0 ? () => navigate('/dashboard/compras?tab=pedidos') : undefined}
       />
 
-      <DashboardStatCard
+      <StatCard
         title="Economia do Mês"
         value={formatCurrency(economiaGerada)}
         subtitle={economiaTrend ? undefined : "Nas cotações fechadas"}

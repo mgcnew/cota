@@ -11,7 +11,7 @@ import { usePagination } from "@/hooks/usePagination";
 import { SearchInput } from "@/components/ui/search-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DataPagination } from "@/components/ui/data-pagination";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { CapitalizedText } from "@/components/ui/capitalized-text";
 import { cn } from "@/lib/utils";
@@ -228,10 +228,10 @@ function EmbalagensTab() {
           {/* Métricas — desktop only */}
           {!isMobile && (
             <ResponsiveGrid config={{ mobile: 2, tablet: 2, desktop: 4 }} gap="sm">
-              <MetricCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
-              <MetricCard title="Prontas p/ Decisão" value={stats.prontasParaDecisao.toString()} icon={CheckCircle2} variant="success" onClick={() => setStatusFilter("prontas")} />
-              <MetricCard title="Concluídas" value={stats.concluidas.toString()} icon={CircleCheck} variant="warning" onClick={() => setStatusFilter("concluida")} />
-              <MetricCard title="Economia Acumulada" value={formatCurrency(stats.economiaTotal)} icon={TrendingDown} variant="success" />
+              <StatCard title="Cotações Ativas" value={stats.ativas.toString()} icon={PackageOpen} variant="info" />
+              <StatCard title="Prontas p/ Decisão" value={stats.prontasParaDecisao.toString()} icon={CheckCircle2} variant="success" onClick={() => setStatusFilter("prontas")} />
+              <StatCard title="Concluídas" value={stats.concluidas.toString()} icon={CircleCheck} variant="warning" onClick={() => setStatusFilter("concluida")} />
+              <StatCard title="Economia Acumulada" value={formatCurrency(stats.economiaTotal)} icon={TrendingDown} variant="success" />
             </ResponsiveGrid>
           )}
 

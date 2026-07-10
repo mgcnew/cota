@@ -1,9 +1,10 @@
 import { memo, useId } from "react";
-import { LucideIcon, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { LucideIcon, ArrowUpRight, ArrowDownRight, Info } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-interface DashboardStatCardProps {
+interface StatCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;
@@ -19,6 +20,8 @@ interface DashboardStatCardProps {
   pulse?: boolean;
   /** Série curta (3–12 pontos) para o mini-gráfico de tendência no rodapé do card. */
   sparklineData?: number[];
+  /** Conteúdo exibido num popover ao clicar no ícone de info, ao lado do badge. */
+  popoverContent?: React.ReactNode;
 }
 
 interface VariantStyle {
@@ -38,12 +41,11 @@ const VARIANTS: Record<string, VariantStyle> = {
 };
 
 /**
- * Card de estatística do Dashboard: rótulo + ícone no topo, valor grande,
+ * Card de estatística padrão: rótulo + ícone no topo, valor grande,
  * variação real (quando houver) e uma sparkline decorativa no rodapé.
- * Componente próprio do Dashboard — não é o MetricCard genérico usado no
- * resto do app, para não afetar outras telas.
+ * Reutilizado em Dashboard, Produtos e demais páginas com métricas de topo.
  */
-export const DashboardStatCard = memo(function DashboardStatCard({
+export const StatCard = memo(function StatCard({
   title,
   value,
   icon: Icon,
@@ -54,9 +56,10 @@ export const DashboardStatCard = memo(function DashboardStatCard({
   subtitle,
   pulse,
   sparklineData,
-}: DashboardStatCardProps) {
+  popoverContent,
+}: StatCardProps) {
   const v = VARIANTS[variant];
-  const gradientId = `dash-stat-spark-${useId()}`;
+  const gradientId = `stat-spark-${useId()}`;
   const chartData = sparklineData?.map((val, i) => ({ i, val }));
 
   return (
@@ -76,20 +79,37 @@ export const DashboardStatCard = memo(function DashboardStatCard({
           <p className="text-xs text-muted-foreground leading-none truncate">
             {title}
           </p>
-          <div
-            className={cn(
-              "relative flex items-center justify-center h-9 w-9 rounded-xl ring-1 transition-transform duration-200 group-hover:scale-105 shrink-0",
-              v.iconBg,
-              v.iconRing
+          <div className="flex items-center gap-1.5 shrink-0">
+            {popoverContent && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  >
+                    <Info className="w-3.5 h-3.5" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-0" align="end">
+                  {popoverContent}
+                </PopoverContent>
+              </Popover>
             )}
-          >
-            <Icon className={cn("h-4 w-4", v.icon)} strokeWidth={2.25} />
-            {pulse && (
-              <span className={cn("absolute -top-1 -right-1 flex h-2.5 w-2.5", v.dot)}>
-                <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full opacity-60 bg-current" />
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-current ring-2 ring-card" />
-              </span>
-            )}
+            <div
+              className={cn(
+                "relative flex items-center justify-center h-9 w-9 rounded-xl ring-1 transition-transform duration-200 group-hover:scale-105 shrink-0",
+                v.iconBg,
+                v.iconRing
+              )}
+            >
+              <Icon className={cn("h-4 w-4", v.icon)} strokeWidth={2.25} />
+              {pulse && (
+                <span className={cn("absolute -top-1 -right-1 flex h-2.5 w-2.5", v.dot)}>
+                  <span className="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full opacity-60 bg-current" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-current ring-2 ring-card" />
+                </span>
+              )}
+            </div>
           </div>
         </div>
 

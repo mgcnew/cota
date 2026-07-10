@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
 import { designSystem as ds } from "@/styles/design-system";
 import { cn } from "@/lib/utils";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { ResponsiveGrid } from "@/components/responsive/ResponsiveGrid";
 import { usePagination } from "@/hooks/usePagination";
 import { useCotacoesStats } from "@/hooks/useCotacoesStats";
@@ -126,9 +126,9 @@ function CotacoesTab() {
         </div>
       ) : (
         <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }}>
-          <MetricCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
-          
-          <MetricCard
+          <StatCard title="Cotações Ativas" value={stats.ativas} icon={FileText} variant="info" />
+
+          <StatCard
             title="Adesão de Fornecedores"
             value={stats.adesaoFormatada}
             icon={Users}
@@ -140,7 +140,7 @@ function CotacoesTab() {
             }}
           />
 
-          <MetricCard
+          <StatCard
             title="Ações Urgentes"
             value={stats.vencendo}
             icon={Zap}
@@ -153,7 +153,7 @@ function CotacoesTab() {
             onClick={() => handleStatusFilterChange("vencendo")}
           />
 
-          <MetricCard
+          <StatCard
             title="Prontas p/ Fechar"
             value={stats.prontasParaDecisao}
             icon={CheckCircle2}

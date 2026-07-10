@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
 import { toast } from "@/hooks/use-toast";
-import { MetricCard } from "@/components/ui/metric-card";
+import { StatCard } from "@/components/ui/stat-card";
 import { MobileMetricRibbon } from "@/components/dashboard/MobileMetricRibbon";
 import { MobileMetricCard } from "@/components/dashboard/MobileMetricCard";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -330,37 +330,33 @@ function Fornecedores() {
             </MobileMetricRibbon>
           ) : (
             <ResponsiveGrid gap="sm" config={{ mobile: 2, tablet: 2, desktop: 4 }} className="mb-6">
-              <MetricCard
+              <StatCard
                 title="Fornecedores"
                 value={stats.total}
+                subtitle="Cadastrados na base"
                 icon={Building2}
-                trend={{ value: "+15", label: "novos este mês", type: "positive" }}
                 variant="info"
-                className="hover:scale-[1.02] transition-transform"
               />
-              <MetricCard
+              <StatCard
                 title="Ativos"
                 value={stats.active}
+                subtitle={`${stats.percentualAtivos}% da base`}
                 icon={TrendingUp}
-                trend={{ value: `${stats.percentualAtivos}%`, label: "da base", type: "positive" }}
                 variant="success"
-                className="hover:scale-[1.02] transition-transform"
               />
-              <MetricCard
+              <StatCard
                 title="Limite Total"
                 value={stats.totalLimit}
+                subtitle={`Média de ${stats.limiteMedioPorAtivo} por ativo`}
                 icon={DollarSign}
-                trend={{ value: stats.limiteMedioPorAtivo, label: "média por ativo", type: "neutral" }}
                 variant="default"
-                className="hover:scale-[1.02] transition-transform"
               />
-              <MetricCard
+              <StatCard
                 title="Cotações"
                 value={stats.activeQuotes}
+                subtitle={`${stats.mediaCotacoesPorFornecedor} por fornecedor`}
                 icon={FileText}
-                trend={{ value: stats.mediaCotacoesPorFornecedor, label: "por fornecedor", type: "neutral" }}
                 variant="warning"
-                className="hover:scale-[1.02] transition-transform"
               />
             </ResponsiveGrid>
           )}
