@@ -36,6 +36,11 @@ export function AppLayout() {
       <main
         className={cn(
           "flex-1 w-full overflow-y-auto overflow-x-hidden md:transition-all md:duration-300 md:ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+          // Fundo opaco no mobile: o <main> persiste entre navegações; ter uma
+          // cor sólida evita que, no instante da troca de página, o Mali mostre
+          // o buffer antigo/corrompido por um frame. No desktop fica transparente
+          // para preservar o gradiente radial do app-bg.
+          "bg-background md:bg-transparent",
           "pb-20 md:pb-0 md:pt-14",
           isSidebarExpanded ? "md:pl-64" : "md:pl-14"
         )}
