@@ -223,7 +223,7 @@ function CotacoesTab() {
             <>
               {/* Só monta uma das views (evita cards + tabela no DOM ao mesmo tempo) */}
               {isMobile ? (
-                <div className="space-y-3 p-2 pb-24">
+                <div className="cv-list space-y-3 p-2 pb-24">
                   {paginatedData.items.map((cotacao, index) => {
                     const cotacaoNumero = paginatedData.pagination.startIndex + index + 1;
                     return (

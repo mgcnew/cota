@@ -353,7 +353,7 @@ function PedidosTab() {
             <>
               {/* Só monta uma das views (evita cards + tabela no DOM ao mesmo tempo) */}
               {isMobile ? (
-                <div className="space-y-2 p-3 pb-4">
+                <div className="cv-list space-y-2 p-3 pb-4">
                   {paginatedData.items.map((pedido) => (
                     <MobileOrderCard
                       key={pedido.id}
