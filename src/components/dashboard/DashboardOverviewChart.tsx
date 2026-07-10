@@ -48,7 +48,7 @@ export const DashboardOverviewChart = memo(function DashboardOverviewChart({ dat
   const isPercent = serie === "variacao";
 
   return (
-    <div className="rounded-2xl border border-border dark:border-white/[0.06] bg-card overflow-hidden">
+    <div className="rounded-2xl border border-border dark:border-white/[0.06] bg-card">
       {/* Cabeçalho: título + filtros */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 pb-2">
         <div>

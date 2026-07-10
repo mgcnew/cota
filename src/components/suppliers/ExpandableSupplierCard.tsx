@@ -48,10 +48,12 @@ interface ExpandableSupplierCardProps {
   renderRating: (rating: number) => React.ReactNode;
 }
 
-const STATUS_ACCENT: Record<string, string> = {
-  active:   "bg-emerald-500",
-  inactive: "bg-zinc-400",
-  pending:  "bg-amber-500",
+// Acento como BORDA-esquerda do card (sem elemento absoluto + overflow-hidden,
+// que criava camada de máscara e corrompia em GPU Mali).
+const ACCENT_BORDER: Record<string, string> = {
+  active:   "border-l-emerald-500",
+  inactive: "border-l-zinc-300 dark:border-l-zinc-700",
+  pending:  "border-l-amber-500",
 };
 
 const formatLimitBRL = (input: string) => {
@@ -71,7 +73,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   onViewHistory,
   renderRating,
 }: ExpandableSupplierCardProps): JSX.Element {
-  const accent = STATUS_ACCENT[supplier.status] ?? "bg-zinc-400";
+  const accentBorder = ACCENT_BORDER[supplier.status] ?? "border-l-zinc-300 dark:border-l-zinc-700";
 
   const handleEdit      = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onEdit?.(supplier);       }, [onEdit,       supplier]);
   const handleDelete    = useCallback((e: React.MouseEvent) => { e.stopPropagation(); onDelete(supplier);       }, [onDelete,     supplier]);
@@ -81,12 +83,11 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
   return (
     <div
       onClick={() => onViewHistory?.(supplier)}
-      className="relative bg-card border border-border dark:border-white/5 rounded-xl overflow-hidden shadow-sm active:scale-[0.99] transition-transform cursor-pointer"
+      className={cn(
+        "rounded-xl border border-border dark:border-white/10 border-l-[3px] bg-card p-3.5 active:scale-[0.99] transition-transform cursor-pointer",
+        accentBorder
+      )}
     >
-      {/* Left accent border by status */}
-      <div className={cn("absolute left-0 top-0 bottom-0 w-1 rounded-l-xl", accent)} />
-
-      <div className="pl-4 pr-3 py-3">
         {/* Top row: icon + name + limit + menu */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-muted/50 flex items-center justify-center flex-shrink-0 border border-border dark:border-white/5">
@@ -170,7 +171,6 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
             Nova Cotação
           </Button>
         </div>
-      </div>
     </div>
   );
 });
