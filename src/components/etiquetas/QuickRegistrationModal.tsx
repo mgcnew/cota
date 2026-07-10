@@ -261,6 +261,18 @@ export function QuickRegistrationModal({ open, onOpenChange, onSave }: QuickRegi
     try {
       const success = await onSave(productName, barcode);
       if (success) {
+        // Popula o cache global com o nome confirmado. Assim, códigos que só
+        // foram resolvidos manualmente (nenhuma API achou) não disparam a
+        // cascata — nem gastam cota da Bluesoft — na próxima vez. Best-effort,
+        // sem bloquear o salvar; conflito (código já em cache) é ignorado.
+        const cleanCode = barcode.replace(/\D/g, "");
+        if (cleanCode) {
+          (supabase as any)
+            .from("barcode_cache")
+            .insert({ code: cleanCode, name: productName.trim(), source: "manual" })
+            .then(undefined, () => { /* já existe/indisponível: ok */ });
+        }
+
         setLastSavedName(productName);
         setSavedCount(prev => prev + 1);
         toast({
