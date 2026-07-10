@@ -294,8 +294,8 @@ function EmbalagensTab() {
                 </div>
               ) : (
                 <>
-                  {/* Mobile cards */}
-                  <div className="md:hidden">
+                  {/* Só monta a view do dispositivo atual (evita cards + tabela juntos no DOM) */}
+                  {isMobile ? (
                     <div className="space-y-3 p-2 pb-24">
                       {paginatedData.items.map((quote, index) => {
                         const numero = paginatedData.pagination.startIndex + index + 1;
@@ -312,10 +312,8 @@ function EmbalagensTab() {
                         );
                       })}
                     </div>
-                  </div>
-
-                  {/* Desktop table */}
-                  <div className="hidden md:block p-6">
+                  ) : (
+                    <div className="p-6">
                     {stats.prontasParaDecisao > 0 && (
                       <div className="mb-6 animate-in zoom-in-95 duration-500">
                         <div className="bg-brand/5 border border-brand/20 rounded-2xl p-4 flex items-center gap-4">
@@ -343,6 +341,7 @@ function EmbalagensTab() {
                       onConvertToOrder={handleConvertToOrder}
                     />
                   </div>
+                  )}
                 </>
               )}
             </div>

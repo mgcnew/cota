@@ -184,8 +184,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
             </div>
           ) : (
             <>
-              {/* Mobile cards */}
-              <div className="md:hidden">
+              {/* Só monta a view do dispositivo atual (evita cards + tabela juntos no DOM) */}
+              {isMobile ? (
                 <div className="space-y-3 p-2 pb-24">
                   {paginatedData.items.map((order, index) => {
                     const numero = paginatedData.pagination.startIndex + index + 1;
@@ -202,10 +202,8 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
                     );
                   })}
                 </div>
-              </div>
-
-              {/* Desktop table */}
-              <div className="hidden md:block p-6">
+              ) : (
+                <div className="p-6">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -318,6 +316,7 @@ function PackagingOrdersTab({ onCreateOrder }: Props) {
               </TableBody>
             </Table>
               </div>
+              )}
             </>
           )}
         </div>
