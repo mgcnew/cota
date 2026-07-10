@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { designSystem as ds } from "@/styles/design-system";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuickRegistrationModalProps {
   open: boolean;
@@ -59,42 +60,94 @@ export function QuickRegistrationModal({ open, onOpenChange, onSave }: QuickRegi
     }
   }, [open, isMobile]);
 
-  // API Lookup
+  // Consulta de código de barras — cascata em cascata, com cache compartilhado.
+  // Ordem pensada pra preservar a cota diária da Bluesoft (25/dia):
+  //   1. Cache (Supabase, global)  → não gasta cota
+  //   2. Open Food Facts BR        → gratuito/ilimitado (bom p/ alimentos)
+  //   3. Open Food Facts mundial   → gratuito/ilimitado
+  //   4. Bluesoft Cosmos (proxy)   → só quando as gratuitas falham
+  //   5. UPCitemdb (trial)         → último recurso
+  //   → nada encontrado: digitação manual (nunca trava).
   const fetchProductInfo = useCallback(async (code: string) => {
     setIsSearching(true);
-    try {
-      let name = "";
+    const cleanCode = code.replace(/\D/g, "");
+    const toastFound = (name: string) => toast({
+      title: "Produto encontrado!",
+      description: name,
+      className: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200",
+    });
 
-      let response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${code}.json`);
+    try {
+      // 1. Cache compartilhado (não consome cota de nenhuma API)
+      try {
+        const { data: cached } = await (supabase as any)
+          .from("barcode_cache")
+          .select("name")
+          .eq("code", cleanCode)
+          .maybeSingle();
+        if (cached?.name) {
+          setProductName(cached.name);
+          toastFound(cached.name);
+          return;
+        }
+      } catch { /* cache indisponível: segue a cascata */ }
+
+      let name = "";
+      let source = "";
+
+      // 2. Open Food Facts BR
+      let response = await fetch(`https://br.openfoodfacts.org/api/v0/product/${cleanCode}.json`);
       let data = await response.json();
       if (data.status === 1 && data.product) {
         name = data.product.product_name_pt || data.product.product_name ||
                data.product.generic_name_pt || data.product.generic_name || "";
+        if (name) source = "openfoodfacts_br";
       }
 
+      // 3. Open Food Facts mundial
       if (!name) {
-        response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+        response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${cleanCode}.json`);
         data = await response.json();
         if (data.status === 1 && data.product) {
           name = data.product.product_name_pt || data.product.product_name || "";
+          if (name) source = "openfoodfacts_world";
         }
       }
 
+      // 4. Bluesoft Cosmos (via edge function — token fica no servidor)
       if (!name) {
         try {
-          const upc = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${code}`);
+          const { data: bs } = await supabase.functions.invoke("barcode-lookup", {
+            body: { code: cleanCode },
+          });
+          if (bs?.found && bs.name) {
+            name = bs.name;
+            source = "bluesoft";
+          }
+        } catch { /* falha/limite: segue */ }
+      }
+
+      // 5. UPCitemdb (trial)
+      if (!name) {
+        try {
+          const upc = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${cleanCode}`);
           const upcData = await upc.json();
-          if (upcData.code === 'OK' && upcData.items?.length > 0) name = upcData.items[0].title;
+          if (upcData.code === 'OK' && upcData.items?.length > 0) {
+            name = upcData.items[0].title;
+            source = "upcitemdb";
+          }
         } catch { /* ignore */ }
       }
 
       if (name) {
         setProductName(name);
-        toast({
-          title: "Produto encontrado!",
-          description: name,
-          className: "bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-200"
-        });
+        // Grava no cache compartilhado (best-effort — se já existir, ignora)
+        try {
+          await (supabase as any)
+            .from("barcode_cache")
+            .insert({ code: cleanCode, name, source });
+        } catch { /* conflito/indisponível: sem problema */ }
+        toastFound(name);
       } else {
         toast({ title: "Produto não localizado", description: "Digite o nome manualmente." });
         setTimeout(() => nameInputRef.current?.focus(), 300);
