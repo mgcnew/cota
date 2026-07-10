@@ -195,6 +195,15 @@
   
   /* GPU acceleration for animated elements */
   @media (max-width: 767px) {
+    /* Animações INFINITAS (pulse/ping) dentro de listas roláveis forçam a GPU a
+       manter a camada composta e repintá-la a cada frame — em drivers Mali/
+       MediaTek isso corrompe o backing store (bandas de lixo visual) e pesa.
+       No mobile os pontos/badges ficam estáticos (visíveis, só não piscam). */
+    .animate-pulse,
+    .animate-ping {
+      animation: none !important;
+    }
+
     /* backdrop-filter é um dos efeitos mais caros em GPU mobile. Desligamos de
        vez no celular — os elementos que usam blur (bottom nav, sheets, headers)
        já têm fundo ~95% opaco, então o resultado visual é praticamente idêntico
