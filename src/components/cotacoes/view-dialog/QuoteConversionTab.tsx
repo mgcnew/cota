@@ -15,6 +15,7 @@ import { useCompany } from "@/hooks/useCompany";
 import { designSystem } from "@/styles/design-system";
 import { generateQuoteExportMessage } from "@/lib/whatsapp-service";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 
 interface QuoteConversionTabProps {
   products: any[];
@@ -286,9 +287,12 @@ export function QuoteConversionTab({
 
   return (
     <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4 pb-16">
-        <div className="flex flex-col gap-2 px-3 py-2.5 rounded-xl bg-muted/30 border border-border dark:border-white/5">
-          <div className="flex items-center justify-between gap-2">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 items-start">
+
+        {/* COLUNA ESQUERDA — Estratégia + Produtos */}
+        <div className="space-y-4 min-w-0">
+        <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-muted/30 border border-border dark:border-white/5">
             <div className="flex flex-col gap-0.5 min-w-0">
               <span className="text-[9px] font-black uppercase tracking-widest text-brand leading-none">Estratégia</span>
               <span className="text-xs font-bold text-foreground leading-none">Montagem do pedido</span>
@@ -333,28 +337,6 @@ export function QuoteConversionTab({
                 <TabsTrigger value="dividido" className="rounded-md px-2.5 h-6 text-[10px] font-bold uppercase transition-all">Dividido</TabsTrigger>
               </TabsList>
             </Tabs>
-          </div>
-          <div className="flex items-center justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onShowResumo}
-              className="h-7 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
-            >
-              <Sparkles className="h-3 w-3 mr-1" />
-              <span className="hidden xs:inline">Relatório</span> Visual
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleWhatsAppExport}
-              disabled={Object.keys(productSelections).length === 0}
-              className="h-7 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
-            >
-              <MessageCircle className="h-3 w-3 mr-1" />
-              <span className="hidden xs:inline">Relatório</span> Texto
-            </Button>
-          </div>
         </div>
 
         <div className="space-y-3">
@@ -477,54 +459,91 @@ export function QuoteConversionTab({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-muted/20 border border-border dark:border-white/5 shadow-sm relative overflow-hidden">
-          <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Entrega *</label>
-            <Popover open={dateOpen} onOpenChange={setDateOpen}>
-              <PopoverTrigger asChild>
-                <button className={cn(
-                  "w-full h-9 rounded-lg border px-3 flex items-center justify-between gap-2 text-xs font-bold bg-background transition-colors",
-                  deliveryDate ? "text-foreground border-border" : "text-muted-foreground border-border/50",
-                  "hover:border-brand/50 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
-                )}>
-                  <span>
-                    {deliveryDate
-                      ? format(parseISO(deliveryDate), "dd/MM/yyyy", { locale: ptBR })
-                      : "Selecionar data"}
-                  </span>
-                  <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={deliveryDate ? parseISO(deliveryDate) : undefined}
-                  onSelect={(date) => {
-                    if (date) {
-                      setDeliveryDate(format(date, "yyyy-MM-dd"));
-                    }
-                    setDateOpen(false);
-                  }}
-                  disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                  locale={ptBR}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+        </div>{/* fim COLUNA ESQUERDA */}
+
+        {/* COLUNA DIREITA — Entrega, observações, resumo e relatórios */}
+        <div className="space-y-3 lg:sticky lg:top-0">
+          <div className="p-3 rounded-xl bg-muted/20 border border-border dark:border-white/5 shadow-sm space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Entrega *</label>
+              <Popover open={dateOpen} onOpenChange={setDateOpen}>
+                <PopoverTrigger asChild>
+                  <button className={cn(
+                    "w-full h-9 rounded-lg border px-3 flex items-center justify-between gap-2 text-xs font-bold bg-background transition-colors",
+                    deliveryDate ? "text-foreground border-border" : "text-muted-foreground border-border/50",
+                    "hover:border-brand/50 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand/20"
+                  )}>
+                    <span>
+                      {deliveryDate
+                        ? format(parseISO(deliveryDate), "dd/MM/yyyy", { locale: ptBR })
+                        : "Selecionar data"}
+                    </span>
+                    <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={deliveryDate ? parseISO(deliveryDate) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        setDeliveryDate(format(date, "yyyy-MM-dd"));
+                      }
+                      setDateOpen(false);
+                    }}
+                    disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                    locale={ptBR}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Observações do Pedido</label>
+              <Textarea
+                value={observations}
+                onChange={(e) => setObservations(e.target.value)}
+                placeholder="Ex: Entregar após as 14h..."
+                className="min-h-[64px] rounded-lg font-bold text-xs bg-background resize-none"
+              />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[9px] font-black text-muted-foreground uppercase tracking-widest pl-1 block">Observações do Pedido</label>
-            <Input
-              value={observations}
-              onChange={(e) => setObservations(e.target.value)}
-              placeholder="Ex: Entregar após as 14h..."
-              className="h-9 rounded-lg font-bold text-xs bg-background"
-            />
+
+          {/* Resumo do total */}
+          <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-brand/5 border border-brand/20">
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Total do pedido</span>
+            <span className="text-sm font-black text-brand tabular-nums">R$ {totalDisplay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          </div>
+
+          {/* Relatórios */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShowResumo}
+              className="h-8 border-emerald-500/30 text-emerald-600 font-black text-[9px] uppercase hover:bg-emerald-50 transition-all active:scale-95 shadow-sm"
+            >
+              <Sparkles className="h-3 w-3 mr-1" />
+              Visual
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleWhatsAppExport}
+              disabled={Object.keys(productSelections).length === 0}
+              className="h-8 border-brand/20 text-brand font-bold text-[9px] uppercase hover:bg-brand/10 transition-all active:scale-95 shadow-sm"
+            >
+              <MessageCircle className="h-3 w-3 mr-1" />
+              Texto
+            </Button>
           </div>
         </div>
-        
-        <div className="pt-2">
-          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="w-full h-9 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
+
+        </div>{/* fim grid duas colunas */}
+
+        {/* Botão converter — largura total, abaixo */}
+        <div className="pt-1">
+          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="w-full h-10 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
             <ShoppingCart className="h-3.5 w-3.5 mr-2" />
             Converter em Pedidos (R$ {totalDisplay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
           </Button>

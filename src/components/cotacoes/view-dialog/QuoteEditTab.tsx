@@ -1,12 +1,11 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { Plus, Trash2, Package, Building2, Search, Star, Trophy, X, Loader2 } from "lucide-react";
+import { Trash2, Package, Building2, Search, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { PricingUnit } from "@/utils/priceNormalization";
 import { useDebounce } from "@/hooks/useDebounce";
 import { designSystem } from "@/styles/design-system";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +24,18 @@ interface QuoteEditTabProps {
   safeStr: (val: any) => string;
 }
 
+type Result =
+  | { type: "supplier"; id: string; item: any }
+  | { type: "product"; id: string; item: any };
+
+const UNIT_OPTIONS = [
+  { value: "un", label: "UN" },
+  { value: "kg", label: "KG" },
+  { value: "cx", label: "CX" },
+  { value: "pct", label: "PCT" },
+  { value: "metade", label: "MT" },
+];
+
 export function QuoteEditTab({
   products,
   fornecedores,
@@ -39,464 +50,287 @@ export function QuoteEditTab({
   safeStr
 }: QuoteEditTabProps) {
   const { toast } = useToast();
-  const [selectedProductToAdd, setSelectedProductToAdd] = useState("");
-  const [productQuantity, setProductQuantity] = useState(1);
-  const [productUnit, setProductUnit] = useState<PricingUnit>("un");
-  const [selectedSupplierToAdd, setSelectedSupplierToAdd] = useState("");
 
-  const [productSearch, setProductSearch] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [highlightedProductIndex, setHighlightedProductIndex] = useState(-1);
-  const debouncedProductSearch = useDebounce(productSearch, 150);
-  const productSearchRef = useRef<HTMLInputElement>(null);
-  const productListRef = useRef<HTMLDivElement>(null);
-
-  const [supplierSearch, setSupplierSearch] = useState("");
-  const [selectedSupplier, setSelectedSupplier] = useState<any>(null);
-  const [highlightedSupplierIndex, setHighlightedSupplierIndex] = useState(-1);
-  const debouncedSupplierSearch = useDebounce(supplierSearch, 150);
-  const supplierSearchRef = useRef<HTMLInputElement>(null);
-  const supplierListRef = useRef<HTMLDivElement>(null);
+  // Busca única: rota o resultado (produto -> produtos, fornecedor -> fornecedores)
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 150);
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const [dynamicProducts, setDynamicProducts] = useState<any[]>([]);
-  const [isSearchingProducts, setIsSearchingProducts] = useState(false);
-  const [isSearchingSuppliers, setIsSearchingSuppliers] = useState(false);
-  const [isAddingProduct, setIsAddingProduct] = useState(false);
-  const [isAddingSupplier, setIsAddingSupplier] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [isAdding, setIsAdding] = useState(false);
+
   const [savingQuantity, setSavingQuantity] = useState<string | null>(null);
   const [editQuantities, setEditQuantities] = useState<Record<string, string>>({});
 
-  // Busca reativa de produtos via Supabase
+  // Busca de produtos no catálogo completo (Supabase) além dos locais
   useEffect(() => {
-    const searchProducts = async () => {
-      if (!debouncedProductSearch || debouncedProductSearch.trim().length < 1) {
+    const run = async () => {
+      if (!debouncedSearch || debouncedSearch.trim().length < 1) {
         setDynamicProducts([]);
         return;
       }
-
-      setIsSearchingProducts(true);
+      setIsSearching(true);
       try {
         const { data, error } = await supabase
-          .from('products')
-          .select('id, name, brand_name, brand_rating, brand_score, unit, barcode')
-          .or(`name.ilike.%${debouncedProductSearch}%,barcode.ilike.%${debouncedProductSearch}%`)
+          .from("products")
+          .select("id, name, brand_name, unit, barcode")
+          .or(`name.ilike.%${debouncedSearch}%,barcode.ilike.%${debouncedSearch}%`)
           .limit(30);
-
         if (error) throw error;
-        
-        // Mantemos a lista original para feedback visual, similar ao modal de nova cotação
         setDynamicProducts(data || []);
-      } catch (error) {
-        console.error("Erro na busca de produtos:", error);
+      } catch (e) {
+        console.error("Erro na busca de produtos:", e);
       } finally {
-        setIsSearchingProducts(false);
+        setIsSearching(false);
       }
     };
+    run();
+  }, [debouncedSearch]);
 
-    searchProducts();
-  }, [debouncedProductSearch, products]);
+  useEffect(() => { setHighlightedIndex(-1); }, [debouncedSearch]);
 
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const target = e.target;
-    setTimeout(() => {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 300);
-  };
+  const productsNotInQuote = useMemo(
+    () => availableProducts.filter(p => !products.some(pi => pi.product_id === p.id)),
+    [availableProducts, products]
+  );
 
-  const productsNotInQuote = useMemo(() => {
-    return availableProducts.filter(p => !products.some(pi => pi.product_id === p.id));
-  }, [availableProducts, products]);
+  const suppliersNotInQuote = useMemo(
+    () => availableSuppliers.filter(s => !fornecedores.some(f => f.id === s.id)),
+    [availableSuppliers, fornecedores]
+  );
 
-  const suppliersNotInQuote = useMemo(() => {
-    return availableSuppliers.filter(s => !fornecedores.some(f => f.id === s.id));
-  }, [availableSuppliers, fornecedores]);
-
-  const filteredProductsLocal = useMemo(() => {
-    if (!productSearch || productSearch.trim().length < 1) return [];
-    return productsNotInQuote
-      .filter((p: any) => {
-        const nameMatch = safeStr(p.name).toLowerCase().includes(productSearch.toLowerCase());
-        const barcodeMatch = p.barcode && p.barcode.toLowerCase().includes(productSearch.toLowerCase());
-        return nameMatch || barcodeMatch;
-      })
-      .slice(0, 30);
-  }, [productsNotInQuote, productSearch, safeStr]);
-
-  const filteredSuppliers = useMemo(() => {
-    if (!supplierSearch || supplierSearch.trim().length < 1) return [];
-    return suppliersNotInQuote
-      .filter((s: any) => safeStr(s.name).toLowerCase().includes(supplierSearch.toLowerCase()))
-      .slice(0, 30);
-  }, [suppliersNotInQuote, supplierSearch, safeStr]);
-
-  // Combinar produtos locais e dinâmicos (evitando duplicatas)
-  const allProducts = useMemo(() => {
+  const productMatches = useMemo(() => {
+    if (!search.trim()) return [];
+    const q = search.toLowerCase();
+    const local = productsNotInQuote.filter(p =>
+      safeStr(p.name).toLowerCase().includes(q) ||
+      (p.barcode && String(p.barcode).toLowerCase().includes(q))
+    );
     const combined = [...dynamicProducts];
-    filteredProductsLocal.forEach(p => {
-      if (!combined.some(cp => cp.id === p.id)) {
-        combined.push(p);
-      }
-    });
+    local.forEach(p => { if (!combined.some(c => c.id === p.id)) combined.push(p); });
+    return combined.filter(p => !products.some(pi => pi.product_id === p.id)).slice(0, 20);
+  }, [dynamicProducts, productsNotInQuote, search, products, safeStr]);
 
-    // Filtro final rigoroso para evitar que produtos já na cotação apareçam (inclusive do Supabase)
-    return combined.filter(p => !products.some(pi => pi.product_id === p.id));
-  }, [dynamicProducts, filteredProductsLocal, products]);
+  const supplierMatches = useMemo(() => {
+    if (!search.trim()) return [];
+    const q = search.toLowerCase();
+    return suppliersNotInQuote.filter(s => safeStr(s.name).toLowerCase().includes(q)).slice(0, 10);
+  }, [suppliersNotInQuote, search, safeStr]);
 
+  // Fornecedores primeiro (poucos, match exato), depois produtos
+  const results: Result[] = useMemo(() => [
+    ...supplierMatches.map(s => ({ type: "supplier" as const, id: s.id, item: s })),
+    ...productMatches.map(p => ({ type: "product" as const, id: p.id, item: p })),
+  ], [supplierMatches, productMatches]);
 
-  useEffect(() => {
-    setHighlightedProductIndex(-1);
-  }, [debouncedProductSearch]);
-
-  useEffect(() => {
-    setHighlightedSupplierIndex(-1);
-  }, [debouncedSupplierSearch]);
-
-  const selectProductFromList = (product: any) => {
-    setSelectedProduct(product);
-    setSelectedProductToAdd(product.id);
-    setProductSearch(safeStr(product.name));
-    setProductUnit(product.unit || "un");
-    setDynamicProducts([]);
-    setHighlightedProductIndex(-1);
-  };
-
-  const selectSupplierFromList = (supplier: any) => {
-    setSelectedSupplier(supplier);
-    setSelectedSupplierToAdd(supplier.id);
-    setSupplierSearch(safeStr(supplier.name));
-    setHighlightedSupplierIndex(-1);
-  };
-
-  const handleProductKeyDown = (e: React.KeyboardEvent) => {
-    if (dynamicProducts.length > 0 && !selectedProduct) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setHighlightedProductIndex(prev => prev < dynamicProducts.length - 1 ? prev + 1 : 0);
-        return;
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setHighlightedProductIndex(prev => prev > 0 ? prev - 1 : dynamicProducts.length - 1);
-        return;
-      }
-      if (e.key === 'Enter' && highlightedProductIndex >= 0) {
-        e.preventDefault();
-        selectProductFromList(dynamicProducts[highlightedProductIndex]);
-        return;
-      }
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setProductSearch("");
-        setHighlightedProductIndex(-1);
-        return;
-      }
-    }
-  };
-
-  const handleSupplierKeyDown = (e: React.KeyboardEvent) => {
-    if (filteredSuppliers.length > 0 && !selectedSupplier) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setHighlightedSupplierIndex(prev => prev < filteredSuppliers.length - 1 ? prev + 1 : 0);
-        return;
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setHighlightedSupplierIndex(prev => prev > 0 ? prev - 1 : filteredSuppliers.length - 1);
-        return;
-      }
-      if (e.key === 'Enter' && highlightedSupplierIndex >= 0) {
-        e.preventDefault();
-        selectSupplierFromList(filteredSuppliers[highlightedSupplierIndex]);
-        return;
-      }
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        setSupplierSearch("");
-        setHighlightedSupplierIndex(-1);
-        return;
-      }
-    }
-  };
-
-  const handleAddProduct = async () => {
-    if (!selectedProductToAdd) return;
-    setIsAddingProduct(true);
+  const addProduct = async (product: any) => {
+    setIsAdding(true);
     try {
-      await onAddQuoteItem({
-        quoteId,
-        productId: selectedProductToAdd,
-        productName: selectedProduct?.name || "Produto",
-        quantidade: productQuantity,
-        unidade: productUnit
-      });
-      setSelectedProductToAdd("");
-      setSelectedProduct(null);
-      setProductSearch("");
-      setProductQuantity(1);
-      toast({ title: "Produto adicionado!" });
+      // Adiciona com qtd 1 + unidade padrão; ajuste fino é feito inline na lista
+      await onAddQuoteItem({ quoteId, productId: product.id, productName: product.name, quantidade: 1, unidade: product.unit || "un" });
+      toast({ title: "Produto adicionado", description: safeStr(product.name) });
+      setSearch(""); setHighlightedIndex(-1);
+      searchRef.current?.focus();
     } catch {
       toast({ title: "Erro ao adicionar produto", variant: "destructive" });
     } finally {
-      setIsAddingProduct(false);
+      setIsAdding(false);
     }
   };
 
-  const handleAddSupplier = async () => {
-    if (!selectedSupplierToAdd) return;
-    setIsAddingSupplier(true);
+  const addSupplier = async (supplier: any) => {
+    setIsAdding(true);
     try {
-      await onAddQuoteSupplier(selectedSupplierToAdd);
-      setSelectedSupplierToAdd("");
-      setSelectedSupplier(null);
-      setSupplierSearch("");
-      toast({ title: "Fornecedor adicionado!" });
+      await onAddQuoteSupplier(supplier.id);
+      toast({ title: "Fornecedor adicionado", description: safeStr(supplier.name) });
+      setSearch(""); setHighlightedIndex(-1);
+      searchRef.current?.focus();
     } catch {
       toast({ title: "Erro ao adicionar fornecedor", variant: "destructive" });
     } finally {
-      setIsAddingSupplier(false);
+      setIsAdding(false);
     }
   };
 
+  const handleSelect = (r: Result) => (r.type === "supplier" ? addSupplier(r.item) : addProduct(r.item));
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (results.length === 0) return;
+    if (e.key === "ArrowDown") { e.preventDefault(); setHighlightedIndex(i => (i < results.length - 1 ? i + 1 : 0)); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setHighlightedIndex(i => (i > 0 ? i - 1 : results.length - 1)); }
+    else if (e.key === "Enter" && highlightedIndex >= 0) { e.preventDefault(); handleSelect(results[highlightedIndex]); }
+    else if (e.key === "Escape") { e.preventDefault(); setSearch(""); setHighlightedIndex(-1); }
+  };
+
   return (
-    <div className="bg-background">
-      <div className={cn(
-        "p-4 space-y-4 transition-all duration-300",
-        ((productSearch.length > 0 && !selectedProduct) || (supplierSearch.length > 0 && !selectedSupplier)) ? "pb-80" : "pb-10"
-      )}>
-        {/* Gestão de Produtos */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-2">
-              <div className="p-1 rounded-lg bg-brand/10">
-                <Package className="h-3.5 w-3.5 text-brand" />
-              </div>
-              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Produtos</span>
-            </div>
-          </div>
+    <div className="bg-background w-full">
+      <div className="p-4 space-y-4">
+        {/* Busca unificada */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            ref={searchRef}
+            placeholder="Buscar produto ou fornecedor para adicionar..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className={cn(designSystem.components.input.root, "pl-9 h-10 rounded-xl text-sm bg-muted/30")}
+          />
+          {isSearching && (
+            <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground/40" />
+          )}
 
-          <div className="p-3 bg-muted/30 border border-border dark:border-white/5 rounded-xl shadow-sm space-y-3">
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="flex-1 relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                <Input
-                  ref={productSearchRef}
-                  placeholder="Adicionar produto..."
-                  value={selectedProduct ? safeStr(selectedProduct.name) : productSearch}
-                  onChange={(e) => {
-                    setProductSearch(e.target.value);
-                    setSelectedProduct(null);
-                    setSelectedProductToAdd("");
-                  }}
-                  onFocus={handleInputFocus}
-                  onKeyDown={handleProductKeyDown}
-                  className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
-                />
-
-                {isSearchingProducts && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  </div>
-                )}
-
-              {productSearch.length > 0 && !selectedProduct && (
-                <div ref={productListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border dark:border-white/5 shadow-2xl rounded-xl max-h-[300px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
-                  {allProducts.length > 0 ? (
-                    allProducts.map((p: any, index: number) => (
-                        <button
-                          key={p.id}
-                          onClick={() => selectProductFromList(p)}
-                          onMouseEnter={() => setHighlightedProductIndex(index)}
-                          className={cn(
-                            "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
-                            highlightedProductIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
-                          )}
-                        >
-                          <span className="font-black tracking-tight truncate uppercase">{safeStr(p.name)}</span>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="p-3 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                        Nenhum produto encontrado
-                      </div>
+          {search.trim().length > 0 && (
+            <div className="absolute left-0 right-0 top-full z-[1000] mt-1.5 bg-popover border border-border dark:border-white/5 shadow-2xl rounded-xl max-h-[340px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-150">
+              {results.length > 0 ? (
+                results.map((r, index) => (
+                  <button
+                    key={`${r.type}-${r.id}`}
+                    onClick={() => handleSelect(r)}
+                    onMouseEnter={() => setHighlightedIndex(index)}
+                    disabled={isAdding}
+                    className={cn(
+                      "w-full px-2.5 py-2 text-left flex items-center gap-2.5 rounded-lg transition-colors disabled:opacity-50",
+                      highlightedIndex === index ? "bg-brand/10" : "hover:bg-accent"
                     )}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-2 min-w-fit">
-                <Input type="number" min="1" value={productQuantity} onChange={(e) => setProductQuantity(Number(e.target.value))} className={cn(designSystem.components.input.root, "w-16 h-9 text-center font-black text-xs bg-background")} />
-                <Select value={productUnit} onValueChange={(val: PricingUnit) => setProductUnit(val)}>
-                  <SelectTrigger className={cn(designSystem.components.input.root, "w-24 h-9 rounded-lg font-bold text-[10px] uppercase bg-background")}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl border-border">
-                    <SelectItem value="un" className="text-xs font-bold">UNIDADE</SelectItem>
-                    <SelectItem value="kg" className="text-xs font-bold">KG</SelectItem>
-                    <SelectItem value="cx" className="text-xs font-bold">CAIXA</SelectItem>
-                    <SelectItem value="pct" className="text-xs font-bold">PACOTE</SelectItem>
-                    <SelectItem value="metade" className="text-xs font-bold">METADE</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleAddProduct} disabled={!selectedProductToAdd || isAddingProduct} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
-                  {isAddingProduct ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            {products.length > 0 ? (
-              products.map((p: any) => (
-                <div key={p.product_id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-all">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-background flex items-center justify-center text-muted-foreground border border-border dark:border-white/5 shadow-sm group-hover:text-brand transition-colors">
-                      <Package className="h-3.5 w-3.5" />
+                  >
+                    <div className={cn(
+                      "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border",
+                      r.type === "supplier"
+                        ? "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                        : "bg-brand/10 text-brand border-brand/20"
+                    )}>
+                      {r.type === "supplier" ? <Building2 className="h-3.5 w-3.5" /> : <Package className="h-3.5 w-3.5" />}
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-black text-foreground uppercase tracking-tight truncate">{safeStr(p.product_name)}</span>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <div className="relative">
-                          <Input
-                            type="number"
-                            value={editQuantities[p.product_id] ?? String(p.quantidade)}
-                            onChange={(e) => setEditQuantities(prev => ({ ...prev, [p.product_id]: e.target.value }))}
-                            className={cn("w-14 h-6 text-[10px] p-1 font-black bg-background border-border/50 focus:border-brand/50 focus:ring-0 rounded-md transition-all", savingQuantity === p.product_id && "opacity-50 pointer-events-none")}
-                            onClick={(e) => e.stopPropagation()}
-                            onBlur={async (e) => {
-                              const val = Number(e.target.value);
-                              if (val > 0 && val !== Number(p.quantidade)) {
-                                setSavingQuantity(p.product_id);
-                                try {
-                                  await onUpdateQuoteItemQuantity(p.product_id, val, p.unidade);
-                                  toast({ title: "Quantidade atualizada!" });
-                                } catch {
-                                  toast({ title: "Erro ao atualizar quantidade", variant: "destructive" });
-                                  setEditQuantities(prev => ({ ...prev, [p.product_id]: String(p.quantidade) }));
-                                } finally {
-                                  setSavingQuantity(null);
-                                }
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                (e.target as HTMLInputElement).blur();
-                              }
-                            }}
-                          />
-                          {savingQuantity === p.product_id && (
-                            <Loader2 className="absolute right-1 top-1/2 -translate-y-1/2 h-3 w-3 animate-spin text-brand" />
-                          )}
-                        </div>
-                        <Select 
-                          defaultValue={p.unidade || "un"} 
-                          onValueChange={(val) => onUpdateQuoteItemQuantity(p.product_id, Number(p.quantidade), val)}
-                        >
-                          <SelectTrigger className="w-16 h-6 text-[9px] font-black uppercase p-1 bg-background border-border/50 focus:border-brand/50 rounded-md transition-all h-auto">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-xl border-border">
-                            <SelectItem value="un" className="text-[10px] font-bold">UN</SelectItem>
-                            <SelectItem value="kg" className="text-[10px] font-bold">KG</SelectItem>
-                            <SelectItem value="cx" className="text-[10px] font-bold">CX</SelectItem>
-                            <SelectItem value="pct" className="text-[10px] font-bold">PCT</SelectItem>
-                            <SelectItem value="metade" className="text-[10px] font-bold">MT</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteItem(p.product_id)} className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all">
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                    <span className="flex-1 min-w-0 truncate text-xs font-semibold text-foreground">
+                      {safeStr(r.item.name)}
+                    </span>
+                    <Badge className={cn(
+                      "text-[9px] font-bold uppercase tracking-wide shrink-0 border-none",
+                      r.type === "supplier" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" : "bg-brand/10 text-brand"
+                    )}>
+                      {r.type === "supplier" ? "Fornecedor" : "Produto"}
+                    </Badge>
+                  </button>
+                ))
+              ) : (
+                <div className="p-4 text-center text-[11px] text-muted-foreground">
+                  {isSearching ? "Buscando..." : "Nada encontrado. Tente outro termo."}
                 </div>
-              ))
-            ) : (
-              <div className="py-12 text-center rounded-xl border border-dashed border-border">
-                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Nenhum produto</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Gestão de Fornecedores */}
-        <div className="space-y-3 pt-5 border-t border-border dark:border-white/5">
-          <div className="flex items-center gap-2 px-1">
-            <div className="p-1 rounded-lg bg-brand/10">
-              <Building2 className="h-3.5 w-3.5 text-brand" />
+        {/* Duas colunas: Produtos | Fornecedores */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Produtos */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <div className="p-1 rounded-lg bg-brand/10"><Package className="h-3.5 w-3.5 text-brand" /></div>
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Produtos</span>
+              <span className="text-[10px] font-bold text-muted-foreground/60 tabular-nums">{products.length}</span>
             </div>
-            <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</span>
-          </div>
 
-          <div className="p-2.5 bg-muted/30 border border-border dark:border-white/5 rounded-xl shadow-sm flex gap-2 relative">
-            <div className="flex-1 relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                ref={supplierSearchRef}
-                placeholder="Busque e convide um fornecedor..."
-                value={selectedSupplier ? safeStr(selectedSupplier.name) : supplierSearch}
-                onChange={(e) => {
-                  setSupplierSearch(e.target.value);
-                  setSelectedSupplier(null);
-                  setSelectedSupplierToAdd("");
-                }}
-                onFocus={handleInputFocus}
-                onKeyDown={handleSupplierKeyDown}
-                className={cn(designSystem.components.input.root, "pl-9 h-9 rounded-lg text-xs font-bold bg-background")}
-              />
-
-              {isSearchingSuppliers && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/30">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                </div>
-              )}
-
-              {supplierSearch.length > 0 && !selectedSupplier && (
-                <div ref={supplierListRef} className="absolute left-0 right-0 top-full z-[1000] mt-1 bg-popover border border-border dark:border-white/5 shadow-2xl rounded-xl max-h-[250px] overflow-y-auto overflow-x-hidden custom-scrollbar p-1 animate-in fade-in zoom-in-95 duration-200">
-                  {filteredSuppliers.length > 0 ? (
-                    filteredSuppliers.map((supplier: any, index: number) => (
-                      <button
-                        key={supplier.id}
-                        onClick={() => selectSupplierFromList(supplier)}
-                        onMouseEnter={() => setHighlightedSupplierIndex(index)}
-                        className={cn(
-                          "w-full px-3 py-2 text-left text-xs flex items-center justify-between gap-3 transition-all rounded-lg",
-                          highlightedSupplierIndex === index ? "bg-brand/10 text-foreground" : "hover:bg-accent text-muted-foreground"
-                        )}
-                      >
-                        <span className="font-black tracking-tight truncate uppercase">{safeStr(supplier.name)}</span>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="p-3 text-center text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                      Nenhum fornecedor encontrado
+            <div className="space-y-1.5">
+              {products.length > 0 ? (
+                products.map((p: any) => (
+                  <div key={p.product_id} className="flex items-center gap-2 p-2 bg-muted/20 border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-colors">
+                    <div className="w-6 h-6 rounded-md bg-background flex items-center justify-center border border-border dark:border-white/5 text-muted-foreground group-hover:text-brand transition-colors shrink-0">
+                      <Package className="h-3 w-3" />
                     </div>
-                  )}
+                    <span className="flex-1 min-w-0 truncate text-[11px] font-bold text-foreground uppercase" title={safeStr(p.product_name)}>
+                      {safeStr(p.product_name)}
+                    </span>
+                    <div className="relative shrink-0">
+                      <Input
+                        type="number"
+                        value={editQuantities[p.product_id] ?? String(p.quantidade)}
+                        onChange={(e) => setEditQuantities(prev => ({ ...prev, [p.product_id]: e.target.value }))}
+                        className={cn(
+                          "w-12 h-7 text-[10px] p-1 text-center font-black bg-background border-border/50 focus:border-brand/50 focus:ring-0 rounded-md",
+                          savingQuantity === p.product_id && "opacity-50 pointer-events-none"
+                        )}
+                        onBlur={async (e) => {
+                          const val = Number(e.target.value);
+                          if (val > 0 && val !== Number(p.quantidade)) {
+                            setSavingQuantity(p.product_id);
+                            try {
+                              await onUpdateQuoteItemQuantity(p.product_id, val, p.unidade);
+                              toast({ title: "Quantidade atualizada!" });
+                            } catch {
+                              toast({ title: "Erro ao atualizar quantidade", variant: "destructive" });
+                              setEditQuantities(prev => ({ ...prev, [p.product_id]: String(p.quantidade) }));
+                            } finally {
+                              setSavingQuantity(null);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                      />
+                      {savingQuantity === p.product_id && (
+                        <Loader2 className="absolute right-0.5 top-1/2 -translate-y-1/2 h-3 w-3 animate-spin text-brand" />
+                      )}
+                    </div>
+                    <Select defaultValue={p.unidade || "un"} onValueChange={(val) => onUpdateQuoteItemQuantity(p.product_id, Number(p.quantidade), val)}>
+                      <SelectTrigger className="w-14 h-7 text-[9px] font-black uppercase p-1 bg-background border-border/50 focus:border-brand/50 rounded-md shrink-0">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-border">
+                        {UNIT_OPTIONS.map(u => (
+                          <SelectItem key={u.value} value={u.value} className="text-[10px] font-bold">{u.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteItem(p.product_id)} className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 text-center rounded-xl border border-dashed border-border">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Nenhum produto</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">Use a busca acima</p>
                 </div>
               )}
             </div>
-            
-            <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || isAddingSupplier} className="h-9 w-9 rounded-lg bg-brand hover:bg-brand/80 text-black">
-              {isAddingSupplier ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {fornecedores.map((f: any) => (
-              <div key={f.id} className="flex items-center justify-between p-2.5 bg-muted/20 border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-all">
-                <div className="flex items-center gap-2 min-w-0">
-                  <Building2 className="h-3.5 w-3.5 text-muted-foreground group-hover:text-brand" />
-                  <span className="text-[10px] font-black text-foreground uppercase truncate">{safeStr(f.nome)}</span>
+          {/* Fornecedores */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <div className="p-1 rounded-lg bg-brand/10"><Building2 className="h-3.5 w-3.5 text-brand" /></div>
+              <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</span>
+              <span className="text-[10px] font-bold text-muted-foreground/60 tabular-nums">{fornecedores.length}</span>
+            </div>
+
+            <div className="space-y-1.5">
+              {fornecedores.length > 0 ? (
+                fornecedores.map((f: any) => (
+                  <div key={f.id} className="flex items-center gap-2 p-2 bg-muted/20 border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-colors">
+                    <div className="w-6 h-6 rounded-md bg-background flex items-center justify-center border border-border dark:border-white/5 text-muted-foreground group-hover:text-brand transition-colors shrink-0">
+                      <Building2 className="h-3 w-3" />
+                    </div>
+                    <span className="flex-1 min-w-0 truncate text-[11px] font-bold text-foreground uppercase" title={safeStr(f.nome)}>
+                      {safeStr(f.nome)}
+                    </span>
+                    <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteSupplier(f.id)} className="h-7 w-7 shrink-0 text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10">
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <div className="py-10 text-center rounded-xl border border-dashed border-border">
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Nenhum fornecedor</p>
+                  <p className="text-[10px] text-muted-foreground/60 mt-1">Use a busca acima</p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => onRemoveQuoteSupplier(f.id)} className="h-7 w-7 text-muted-foreground hover:text-red-500 hover:bg-red-500/5 opacity-0 group-hover:opacity-100 transition-all">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
+              )}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

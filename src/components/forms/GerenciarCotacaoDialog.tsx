@@ -535,10 +535,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           hideClose
           className={cn(
             "max-w-[1000px] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-card rounded-2xl shadow-2xl",
-            // A aba Comparar tem conteúdo curto e variável (poucos itens/fornecedores);
-            // altura fixa deixava sobra de espaço vazio. Demais abas mantêm h-[85vh]
-            // fixo, pois dependem dele para o scroll interno de listas longas.
-            activeTab === 'comparar' ? "max-h-[85vh] h-auto" : "h-[85vh]"
+            // Altura por tipo de aba:
+            //  • Valores e Pedido usam scroll interno (h-full + flex-1 overflow),
+            //    então precisam de altura FIXA (85vh) senão a área rolável colapsa.
+            //  • Resumo, Comparar e Editar fluem e rolam pelo próprio TabsContent,
+            //    então usam uma FAIXA: cresce com o conteúdo, com piso de 62vh
+            //    (evita modal curto demais / "pulos" entre abas) e teto de 85vh
+            //    (evita o espaço vazio da altura fixa).
+            activeTab === 'valores' || activeTab === 'converter'
+              ? "h-[72vh]"
+              : "h-auto min-h-[62vh] max-h-[78vh]"
           )}
         >
           <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
