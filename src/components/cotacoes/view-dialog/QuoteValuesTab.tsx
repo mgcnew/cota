@@ -646,10 +646,10 @@ export function QuoteValuesTab({
                     if (isMobile) setShowMobileValues(true);
                   }}
                   className={cn(
-                    "w-full p-3 rounded-xl transition-all duration-300 flex flex-col gap-1.5 text-left border relative overflow-hidden",
-                    isSelected 
-                      ? "bg-brand/10 border-brand/40 shadow-sm" 
-                      : "bg-card hover:bg-muted/50 border-border/50 hover:border-brand/30"
+                    "w-full p-3 rounded-lg transition-all duration-300 flex flex-col gap-1.5 text-left border relative overflow-hidden",
+                    isSelected
+                      ? "bg-brand/10 border-brand/40 shadow-sm"
+                      : "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
                   )}
                 >
                   <div className="flex items-center justify-between gap-2 relative z-10">
@@ -900,12 +900,12 @@ export function QuoteValuesTab({
                   <div
                     key={product.product_id}
                     className={cn(
-                      "group py-1 px-4 rounded-xl border transition-all duration-200",
+                      "group py-1 px-4 rounded-lg border transition-all duration-200",
                       isBest
                         ? "bg-brand/5 border-brand/20 shadow-sm"
                         : currentValue === 0
-                        ? "bg-muted/20 border-border/50 opacity-60 hover:opacity-100 grayscale-[0.5]"
-                        : "bg-card border-border hover:border-brand/30"
+                        ? "bg-muted/20 border-border dark:border-white/5 opacity-60 hover:opacity-100 grayscale-[0.5]"
+                        : "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
                     )}
                   >
                     {isEditing ? (

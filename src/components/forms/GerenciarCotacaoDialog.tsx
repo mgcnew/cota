@@ -330,7 +330,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
 
   const modalContent = (
-    <div ref={captureRef} data-capture-container="true" className="h-full flex flex-col bg-background">
+    <div ref={captureRef} data-capture-container="true" className="flex-1 min-h-0 h-full flex flex-col bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col min-h-0 bg-transparent overflow-hidden">
         {/* Header */}
         <div className="flex flex-col">
@@ -535,16 +535,11 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
           hideClose
           className={cn(
             "max-w-[1000px] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-background rounded-2xl shadow-2xl",
-            // Altura por tipo de aba:
-            //  • Valores e Pedido usam scroll interno (h-full + flex-1 overflow),
-            //    então precisam de altura FIXA (85vh) senão a área rolável colapsa.
-            //  • Resumo, Comparar e Editar fluem e rolam pelo próprio TabsContent,
-            //    então usam uma FAIXA: cresce com o conteúdo, com piso de 62vh
-            //    (evita modal curto demais / "pulos" entre abas) e teto de 85vh
-            //    (evita o espaço vazio da altura fixa).
-            activeTab === 'valores' || activeTab === 'converter'
-              ? "h-[72vh]"
-              : "h-auto min-h-[62vh] max-h-[78vh]"
+            // Altura FIXA e única para todas as abas (mesmo padrão da aba Valores):
+            // com altura definida, o wrapper interno preenche por completo e o fundo
+            // fica uniforme (bg-background) em qualquer aba, sem expor a moldura.
+            // O scroll de cada aba fica por conta do próprio TabsContent/área interna.
+            "h-[72vh]"
           )}
         >
           <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>

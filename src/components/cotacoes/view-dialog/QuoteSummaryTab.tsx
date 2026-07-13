@@ -88,10 +88,10 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     <div
       key={item.productId}
       className={cn(
-        "grid grid-cols-[1fr_auto] md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-x-2 gap-y-1 md:gap-4 items-start md:items-center px-3 py-2.5 md:py-2 rounded-xl border transition-all duration-200",
+        "grid grid-cols-[1fr_auto] md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-x-2 gap-y-1 md:gap-4 items-start md:items-center px-3 py-2.5 md:py-2 rounded-lg border transition-all duration-200",
         item.bestPrice > 0
-          ? "bg-card border-border hover:border-brand/30 hover:shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] dark:hover:shadow-none"
-          : "bg-muted/30 border-border/50 opacity-60 grayscale-[0.5]"
+          ? "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
+          : "bg-muted/20 border-border dark:border-white/5 opacity-60 grayscale-[0.5]"
       )}
     >
       {/* Product name — col 1 */}
