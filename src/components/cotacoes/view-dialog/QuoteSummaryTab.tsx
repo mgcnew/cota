@@ -1,10 +1,11 @@
 import { useState, useMemo, useRef } from "react";
-import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, EyeOff, Eye } from "lucide-react";
+import { Package, Building2, Trophy, Search, ArrowUpDown, Inbox, DollarSign, ListFilter, EyeOff, Eye, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
@@ -88,75 +89,102 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     <div
       key={item.productId}
       className={cn(
-        "grid grid-cols-[1fr_auto] md:grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-x-2 gap-y-1 md:gap-4 items-start md:items-center px-3 py-2.5 md:py-2 rounded-lg border transition-all duration-200",
+        "grid grid-cols-[1fr_auto] md:grid-cols-[minmax(0,1.6fr)_52px_52px_112px_104px_minmax(0,1.3fr)] gap-x-2 md:gap-3 items-center px-3 py-1.5 rounded-lg border transition-all duration-200",
         item.bestPrice > 0
           ? "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
           : "bg-muted/20 border-border dark:border-white/5 opacity-60 grayscale-[0.5]"
       )}
     >
-      {/* Product name — col 1 */}
-      <div className="min-w-0 pr-2 self-center">
-        <p className="font-bold text-xs text-zinc-900 dark:text-zinc-50 truncate leading-tight uppercase tracking-tight" title={item.productName}>
-          {safeStr(item.productName)}
-        </p>
-        <p className="md:hidden text-[10px] text-muted-foreground mt-0.5">
-          {safeStr(item.quantidade)} {safeStr(item.unidade)}
-        </p>
+      {/* Produto — col 1 */}
+      <div className="min-w-0 pr-2">
+        <div className="flex items-baseline gap-2 min-w-0">
+          <p className="font-bold text-xs text-zinc-900 dark:text-zinc-50 truncate leading-tight uppercase tracking-tight" title={item.productName}>
+            {safeStr(item.productName)}
+          </p>
+          {/* qtd/unid inline no mobile (no desktop há colunas próprias) */}
+          <span className="md:hidden shrink-0 text-[10px] font-semibold text-muted-foreground uppercase tabular-nums">
+            {safeStr(item.quantidade)} {safeStr(item.unidade)}
+          </span>
+        </div>
       </div>
 
+      {/* Unid. — col 2 (desktop) */}
       <div className="hidden md:flex justify-center">
         <div className="px-1.5 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-[8px] font-black text-zinc-500 uppercase">
           {safeStr(item.unidade)}
         </div>
       </div>
 
+      {/* Quant. — col 3 (desktop) */}
       <div className="hidden md:flex justify-center">
-        <span className="text-[11px] font-bold text-zinc-500">
+        <span className="text-[11px] font-bold text-zinc-500 tabular-nums">
           {safeStr(item.quantidade)}
         </span>
       </div>
 
-      {/* Price — col 2 on mobile (row 1) */}
-      <div className="flex items-center justify-end gap-2 self-center">
+      {/* Preço unitário — col 4 (linha única) */}
+      <div className="flex items-center justify-end gap-1.5">
         {item.bestPrice > 0 ? (
-          <div className="flex flex-col items-end gap-0.5">
-            <div className="flex items-center gap-1.5">
-              {item.savings > 0 && (
-                <span className="hidden sm:inline px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20">
-                  -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
-                </span>
-              )}
-              <span className="text-sm font-black text-brand tracking-tight">
-                R$ {(item.bestUnitPrice ?? item.bestPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          <>
+            {item.savings > 0 && (
+              <span className="hidden sm:inline px-1 py-0.5 bg-brand/10 text-brand text-[8px] font-black rounded border border-brand/20 shrink-0">
+                -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
               </span>
-              <span className="text-[9px] font-bold text-muted-foreground">/{safeStr(item.unidade)}</span>
-              <span className="hidden md:inline"><CurrentPricesTooltip prices={item.allPrices} /></span>
-            </div>
-            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
-              Subtotal: R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            )}
+            <span className="text-[13px] font-black text-brand tracking-tight tabular-nums">
+              R$ {(item.bestUnitPrice ?? item.bestPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </span>
-          </div>
+            <span className="text-[9px] font-bold text-muted-foreground shrink-0">/{safeStr(item.unidade)}</span>
+            {/* Subtotal só aparece aqui no mobile (no desktop tem coluna própria) */}
+            <span className="md:hidden shrink-0 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 tabular-nums">
+              · R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </span>
+          </>
         ) : (
           <span className="text-[9px] font-bold text-zinc-400 uppercase italic">Pendente</span>
         )}
       </div>
 
-      {/* Supplier — spans both cols on mobile (row 2), col 5 on desktop */}
-      <div className="col-span-2 md:col-span-1 flex flex-col items-start md:items-end md:pr-2 min-w-0 gap-0.5">
+      {/* Subtotal — col 5 (desktop) */}
+      <div className="hidden md:flex items-center justify-end gap-1.5">
+        {item.bestPrice > 0 ? (
+          <>
+            <span className="text-[13px] font-black text-zinc-700 dark:text-zinc-200 tabular-nums">
+              R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            </span>
+            <CurrentPricesTooltip prices={item.allPrices} />
+          </>
+        ) : (
+          <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
+        )}
+      </div>
+
+      {/* Fornecedor — col-span no mobile (linha 2), col 6 no desktop — linha única com "i" p/ obs */}
+      <div className="col-span-2 md:col-span-1 flex items-center justify-start md:justify-end md:pr-2 min-w-0 gap-1.5">
         {item.bestSupplierName ? (
           <>
-            <div className="flex items-center gap-1.5 max-w-full">
-              <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-zinc-400" />
-              </div>
-              <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate" title={item.bestSupplierName}>
-                {safeStr(item.bestSupplierName)}
-              </span>
+            <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+              <Building2 className="h-2.5 w-2.5 md:h-3 md:w-3 text-zinc-400" />
             </div>
+            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase truncate min-w-0" title={item.bestSupplierName}>
+              {safeStr(item.bestSupplierName)}
+            </span>
             {item.bestObservacoes && (
-              <p className="text-[9px] text-amber-600 dark:text-amber-400 italic truncate max-w-full md:text-right" title={item.bestObservacoes}>
-                "{item.bestObservacoes}"
-              </p>
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      aria-label="Ver observação do fornecedor"
+                      className="shrink-0 text-amber-500/70 hover:text-amber-500 transition-colors cursor-help"
+                    >
+                      <Info className="h-3 w-3" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" align="end" className="max-w-[220px] bg-zinc-900 border-zinc-800 text-white shadow-xl px-2.5 py-1.5">
+                    <p className="text-[11px] italic leading-snug">"{item.bestObservacoes}"</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             )}
           </>
         ) : (
@@ -256,12 +284,13 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
       {/* 3. TABELA (Corpo sem scroll interno) */}
       <div className="flex flex-col bg-transparent">
-        <div className="hidden md:grid grid-cols-[1.5fr_80px_80px_140px_1.5fr] gap-4 px-6 py-2 bg-muted/30 border-b border-border dark:border-white/5/40">
+        <div className="hidden md:grid grid-cols-[minmax(0,1.6fr)_52px_52px_112px_104px_minmax(0,1.3fr)] gap-3 px-6 py-2 bg-muted/30 border-b border-border dark:border-white/5/40">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Item Adquirido</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Unid.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Quant.</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Preço Unit. / Subtotal</span>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right pr-4">Melhor Fornecedor</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Preço Unit.</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right">Subtotal</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-right pr-2">Melhor Fornecedor</span>
         </div>
 
         <div className="p-4 space-y-2 pb-4">

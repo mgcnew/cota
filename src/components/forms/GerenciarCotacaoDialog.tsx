@@ -539,7 +539,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
             // com altura definida, o wrapper interno preenche por completo e o fundo
             // fica uniforme (bg-background) em qualquer aba, sem expor a moldura.
             // O scroll de cada aba fica por conta do próprio TabsContent/área interna.
-            "h-[72vh]"
+            "h-[64vh]"
           )}
         >
           <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>

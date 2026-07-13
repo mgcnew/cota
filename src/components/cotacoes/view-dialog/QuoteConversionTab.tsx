@@ -543,7 +543,7 @@ export function QuoteConversionTab({
 
         {/* Botão converter — largura total, abaixo */}
         <div className="pt-1">
-          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="w-full h-10 rounded-lg bg-brand hover:bg-brand/80 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
+          <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="w-full h-10 rounded-lg bg-brand hover:bg-brand/90 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
             <ShoppingCart className="h-3.5 w-3.5 mr-2" />
             Converter em Pedidos (R$ {totalDisplay.toLocaleString('pt-BR', { minimumFractionDigits: 2 })})
           </Button>
