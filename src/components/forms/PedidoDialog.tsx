@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import {
   Plus, Trash2, Loader2, Package, Save, ShoppingCart, X, Search,
-  Download, DollarSign, Calculator, ArrowLeftRight, ChevronDown, CalendarIcon,
+  Download, DollarSign, Calculator, ArrowLeftRight, CalendarIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -676,7 +676,7 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                 )}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                 <Input ref={newQuantityInputRef} type="number" placeholder="Qtd" value={newQuantity}
                   onChange={e => setNewQuantity(e.target.value)} onKeyDown={e => handleNewItemKeyDown(e, "quantity")}
                   className={cn(ds.components.input.root, "h-9 text-center w-20 shrink-0")} />
@@ -696,137 +696,105 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                   <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-400">R$</span>
                   <Input ref={newPriceInputRef} placeholder="Preço" value={newPrice}
                     onChange={e => setNewPrice(e.target.value)} onKeyDown={e => handleNewItemKeyDown(e, "price")}
-                    className={cn(ds.components.input.root, "h-9 pl-7 text-center w-28 font-bold")} />
+                    className={cn(ds.components.input.root, "h-9 pl-7 pr-8 text-center w-28 font-bold")} />
+                  <Popover open={showCalc} onOpenChange={setShowCalc}>
+                    <PopoverTrigger asChild>
+                      <button type="button" title="Calculadora"
+                        className={cn(
+                          "absolute right-1 top-1/2 -translate-y-1/2 h-7 w-6 flex items-center justify-center rounded-md transition-colors",
+                          showCalc ? "text-brand bg-brand/10" : "text-zinc-400 hover:text-brand hover:bg-brand/10"
+                        )}>
+                        <Calculator className="h-3.5 w-3.5" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className={cn("w-[260px] p-3 space-y-3 select-none rounded-xl", ds.colors.surface.card, ds.colors.border.default)}>
+                      <div className="rounded-xl bg-zinc-950 px-4 py-3 text-right min-h-[56px] flex flex-col justify-center shadow-inner">
+                        {calcExpr && <p className="text-[10px] text-zinc-500 font-mono">{calcExpr}</p>}
+                        <p className="text-2xl font-black text-brand font-mono">{calcDisplay}</p>
+                      </div>
+                      <div className="grid gap-2">
+                        {([["C","⌫","÷","×"],["7","8","9","-"],["4","5","6","+"],["1","2","3","="],["0",".","Aplicar"]] as string[][]).map((row, ri) => (
+                          <div key={ri} className="grid gap-2" style={{ gridTemplateColumns: ri === 4 ? "1fr 1fr 2fr" : "repeat(4, 1fr)" }}>
+                            {row.map(k => {
+                              const isOp = ["+","-","×","÷"].includes(k);
+                              const isEq = k === "=";
+                              const isAct = k === "C" || k === "⌫";
+                              const isApply = k === "Aplicar";
+                              return (
+                                <button key={k} type="button"
+                                  onClick={() => { if (isApply) { setNewPrice(calcDisplay); setShowCalc(false); } else handleCalcKey(k); }}
+                                  className={cn(
+                                    "rounded-lg py-2.5 text-sm font-bold transition-all active:scale-90",
+                                    isEq && "bg-brand text-zinc-950 shadow-lg shadow-brand/20",
+                                    isOp && !isEq && "bg-zinc-800 text-brand hover:bg-brand hover:text-zinc-950",
+                                    isAct && "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white",
+                                    isApply && "bg-emerald-500/10 text-emerald-600 font-black text-xs hover:bg-emerald-500 hover:text-white",
+                                    !isOp && !isEq && !isAct && !isApply && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-brand/20 hover:text-brand"
+                                  )}>
+                                  {k}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
+
+                {/* Conversão de embalagem — popover (não empurra o layout) */}
+                <Popover open={showConversion} onOpenChange={setShowConversion}>
+                  <PopoverTrigger asChild>
+                    <button type="button" title="Conversão de embalagem"
+                      className={cn(
+                        "h-9 w-9 flex items-center justify-center rounded-lg border shrink-0 transition-all",
+                        showConversion ? "bg-brand/10 text-brand border-brand/30" : "bg-background/50 text-zinc-500 border-border hover:text-brand"
+                      )}>
+                      <ArrowLeftRight className="h-3.5 w-3.5" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className={cn("w-[260px] p-3 space-y-3 rounded-xl", ds.colors.surface.card, ds.colors.border.default)}>
+                    <div className="flex p-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
+                      {(["box_to_unit", "unit_to_box"] as const).map(mode => (
+                        <button key={mode} type="button" onClick={() => setConversionMode(mode)}
+                          className={cn(
+                            "flex-1 py-1.5 rounded-md text-[10px] font-black uppercase tracking-tight transition-all",
+                            conversionMode === mode ? "bg-white dark:bg-zinc-700 shadow text-brand" : "text-zinc-400"
+                          )}>
+                          {mode === "box_to_unit" ? "Cx → Un" : "Un → Cx"}
+                        </button>
+                      ))}
+                    </div>
+                    <div>
+                      <Label className="text-[10px] font-black uppercase text-zinc-400 mb-1 block">Unidades por Caixa</Label>
+                      <Input type="number" placeholder="Ex: 12" value={unPerBox} onChange={e => setUnPerBox(e.target.value)}
+                        className={cn(ds.components.input.root, "h-9 text-center font-bold")} />
+                    </div>
+                    {conversionResult && (
+                      <div className="text-center">
+                        <p className="text-[10px] font-black uppercase text-zinc-400">{conversionResult.label}</p>
+                        <p className="text-lg font-black text-brand">R$ {conversionResult.value.toFixed(2)}</p>
+                      </div>
+                    )}
+                    <Button onClick={handleApplyConversion} disabled={!conversionResult}
+                      className={cn(ds.components.button.primary, "w-full h-9 text-xs")}>
+                      Aplicar Conversão
+                    </Button>
+                  </PopoverContent>
+                </Popover>
 
                 <Button onClick={handleAddNewItem} className={cn(ds.components.button.primary, "h-9 px-3 shrink-0")}>
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-
-            {/* Tool toggles */}
-            <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setShowConversion(v => !v)}
-                className={cn(
-                  "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg border transition-all",
-                  showConversion
-                    ? "bg-brand/10 text-brand border-brand/30"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-transparent hover:text-brand"
-                )}>
-                <ArrowLeftRight className="h-3 w-3" />Conversão
-                <ChevronDown className={cn("h-2.5 w-2.5 transition-transform", showConversion && "rotate-180")} />
-              </button>
-              <button type="button" onClick={() => setShowCalc(v => !v)}
-                className={cn(
-                  "flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider px-2.5 py-1.5 rounded-lg border transition-all",
-                  showCalc
-                    ? "bg-brand text-zinc-950 border-brand"
-                    : "bg-zinc-100 dark:bg-zinc-800 text-zinc-500 border-transparent hover:text-brand"
-                )}>
-                <Calculator className="h-3 w-3" />Calculadora
-              </button>
-            </div>
-
-            {/* Conversion panel */}
-            {showConversion && (
-              <div className="p-3 rounded-xl border border-dashed border-brand/40 bg-white/40 dark:bg-black/20 space-y-3 animate-in fade-in slide-in-from-top-2">
-                <div className="flex p-0.5 bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                  {(["box_to_unit", "unit_to_box"] as const).map(mode => (
-                    <button key={mode} type="button" onClick={() => setConversionMode(mode)}
-                      className={cn(
-                        "flex-1 py-1.5 rounded-md text-[10px] font-black uppercase tracking-tight transition-all",
-                        conversionMode === mode ? "bg-white dark:bg-zinc-700 shadow text-brand" : "text-zinc-400"
-                      )}>
-                      {mode === "box_to_unit" ? "Cx → Un" : "Un → Cx"}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <Label className="text-[10px] font-black uppercase text-zinc-400 mb-1 block">Unidades por Caixa</Label>
-                    <Input type="number" placeholder="Ex: 12" value={unPerBox} onChange={e => setUnPerBox(e.target.value)}
-                      className={cn(ds.components.input.root, "h-9 text-center font-bold")} />
-                  </div>
-                  {conversionResult && (
-                    <div className="flex-1 text-right">
-                      <p className="text-[10px] font-black uppercase text-zinc-400 mb-1">{conversionResult.label}</p>
-                      <p className="text-lg font-black text-brand">R$ {conversionResult.value.toFixed(2)}</p>
-                    </div>
-                  )}
-                </div>
-                <Button onClick={handleApplyConversion} disabled={!conversionResult}
-                  className={cn(ds.components.button.primary, "w-full h-9 text-xs")}>
-                  Aplicar Conversão
-                </Button>
-              </div>
-            )}
-
-            {/* Calculator panel */}
-            {showCalc && (
-              <div className={cn(
-                "rounded-xl border shadow-xl p-4 space-y-3 select-none animate-in fade-in zoom-in-95",
-                ds.colors.surface.card, ds.colors.border.default
-              )}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-brand animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Calculadora Ativa</span>
-                  </div>
-                  <button onClick={() => setShowCalc(false)} className="text-zinc-400 hover:text-red-500 transition-colors">
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div className="rounded-xl bg-zinc-950 px-4 py-3 text-right min-h-[60px] flex flex-col justify-center shadow-inner">
-                  {calcExpr && <p className="text-[10px] text-zinc-500 font-mono">{calcExpr}</p>}
-                  <p className="text-2xl font-black text-brand font-mono">{calcDisplay}</p>
-                </div>
-                <div className="grid gap-2">
-                  {(
-                    [["C","⌫","÷","×"],["7","8","9","-"],["4","5","6","+"],["1","2","3","="],["0",".","Aplicar"]] as string[][]
-                  ).map((row, ri) => (
-                    <div key={ri} className="grid gap-2"
-                      style={{ gridTemplateColumns: ri === 4 ? "1fr 1fr 2fr" : "repeat(4, 1fr)" }}>
-                      {row.map(k => {
-                        const isOp = ["+","-","×","÷"].includes(k);
-                        const isEq = k === "=";
-                        const isAct = k === "C" || k === "⌫";
-                        const isApply = k === "Aplicar";
-                        return (
-                          <button key={k} type="button"
-                            onClick={() => { if (isApply) { setNewPrice(calcDisplay); setShowCalc(false); } else handleCalcKey(k); }}
-                            className={cn(
-                              "rounded-lg py-2.5 text-sm font-bold transition-all active:scale-90",
-                              isEq && "bg-brand text-zinc-950 shadow-lg shadow-brand/20",
-                              isOp && !isEq && "bg-zinc-800 text-brand hover:bg-brand hover:text-zinc-950",
-                              isAct && "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white",
-                              isApply && "bg-emerald-500/10 text-emerald-600 font-black text-xs hover:bg-emerald-500 hover:text-white",
-                              !isOp && !isEq && !isAct && !isApply && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-brand/20 hover:text-brand"
-                            )}>
-                            {k}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex items-center justify-center gap-3 pt-1">
-                  <span className="flex items-center gap-1 text-[10px] text-zinc-400">
-                    <kbd className="px-1.5 py-0.5 rounded border bg-zinc-50 dark:bg-zinc-800">Esc</kbd> fechar
-                  </span>
-                  <span className="flex items-center gap-1 text-[10px] text-zinc-400">
-                    <kbd className="px-1.5 py-0.5 rounded border bg-zinc-50 dark:bg-zinc-800">Enter</kbd> calcular
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
         {/* Items list */}
         <div className="space-y-2">
           {itens.map((item, index) => (
-            <div key={index} className="relative rounded-xl overflow-hidden"
+            <div key={index} className="relative rounded-lg overflow-hidden"
               onTouchStart={e => handleTouchStart(e, index)}
               onTouchMove={handleTouchMove}
               onTouchEnd={() => handleTouchEnd(index)}>
@@ -835,39 +803,37 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
               </div>
               <div
                 className={cn(
-                  "relative flex items-center gap-3 px-4 py-3 border rounded-xl group transition-colors",
+                  "relative flex items-center gap-2.5 px-3 py-1.5 border rounded-lg group transition-colors",
                   ds.colors.surface.card, ds.colors.border.default,
                   "border-l-2", item.valorUnitario > 0 ? "border-l-brand" : "border-l-zinc-300 dark:border-l-zinc-700",
                   swipableItemId === index ? "" : "duration-200"
                 )}
                 style={{ transform: swipableItemId === index ? `translateX(${swipeOffset}px)` : "translateX(0)" }}>
-                <span className="w-6 h-6 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-500 shrink-0">
-                  {index + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-foreground truncate">{item.produto}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {(() => {
-                      const u = (item.unidade || "").toLowerCase().trim();
-                      const isVar = ["metade", "meia", "1/2"].includes(u) || u === "cx" || u === "caixa" || u === "caixas" || u.startsWith("cx");
-                      // Entregue + item por metade/caixa: mostra a base recebida real (peso/qtd)
-                      if (isDelivered && isVar && item.totalItem != null && item.valorUnitario > 0) {
-                        const baseQty = item.totalItem / item.valorUnitario;
-                        const recUnit = ["metade", "meia", "1/2"].includes(u) ? "kg" : "un";
-                        return `${item.quantidade} ${item.unidade} · ${baseQty.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${recUnit} × R$ ${item.valorUnitario.toFixed(2)}`;
-                      }
-                      return `${item.quantidade} ${item.unidade} × R$ ${item.valorUnitario.toFixed(2)}`;
-                    })()}
-                  </p>
+                <div className="flex items-baseline justify-center gap-0.5 min-w-[38px] px-1.5 py-1 rounded flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
+                  <span className="text-[12px] font-bold text-zinc-700 dark:text-zinc-300 tabular-nums leading-none">{item.quantidade.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}</span>
+                  <span className="text-[9px] font-semibold text-zinc-500 uppercase leading-none">{item.unidade}</span>
                 </div>
-                <p className="text-sm font-bold text-foreground whitespace-nowrap">
+                <p className="flex-1 min-w-0 text-sm font-bold text-foreground truncate" title={item.produto}>{item.produto}</p>
+                <span className="shrink-0 hidden sm:inline text-[11px] text-muted-foreground tabular-nums">
+                  {(() => {
+                    const u = (item.unidade || "").toLowerCase().trim();
+                    const isVar = ["metade", "meia", "1/2"].includes(u) || u === "cx" || u === "caixa" || u === "caixas" || u.startsWith("cx");
+                    if (isDelivered && isVar && item.totalItem != null && item.valorUnitario > 0) {
+                      const baseQty = item.totalItem / item.valorUnitario;
+                      const recUnit = ["metade", "meia", "1/2"].includes(u) ? "kg" : "un";
+                      return `${baseQty.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} ${recUnit} × R$ ${item.valorUnitario.toFixed(2)}`;
+                    }
+                    return `× R$ ${item.valorUnitario.toFixed(2)}`;
+                  })()}
+                </span>
+                <p className="text-sm font-bold text-foreground whitespace-nowrap shrink-0">
                   R$ {itemTotal(item).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
                 </p>
                 {!isReadOnly && (
                   <Button variant="ghost" size="icon"
                     onClick={() => setItens(itens.filter((_, i) => i !== index))}
-                    className={cn(ds.components.button.danger, "h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity shrink-0")}>
-                    <Trash2 className="h-3.5 w-3.5" />
+                    className="h-6 w-6 shrink-0 text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10">
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 )}
               </div>
@@ -972,18 +938,18 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
             className={cn(ds.components.button.ghost, "h-8 w-8 text-brand hover:bg-brand/10")}>
             <Download className="h-4 w-4" />
           </Button>
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} title="Fechar"
+            className={cn(ds.components.button.ghost, "h-8 w-8")}>
+            <X className="h-4 w-4 text-muted-foreground" />
+          </Button>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-5 custom-scrollbar">{formBody}</div>
 
         <div className={cn(
-          "flex-shrink-0 px-6 py-4 border-t flex items-center justify-between",
+          "flex-shrink-0 px-6 py-4 border-t flex items-center justify-end",
           ds.colors.surface.section, ds.colors.border.default
         )}>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}
-            className={cn(ds.components.button.secondary, "gap-2")}>
-            <X className="h-4 w-4" />Fechar
-          </Button>
           <Button onClick={handleSubmit} disabled={loading || isReadOnly}
             className={cn(ds.components.button.primary, "gap-2")}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
