@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, X, Loader2, Sparkles, MessageCircle, LayoutList, DollarSign, ShoppingCart, Pencil, Download } from "lucide-react";
+import { ClipboardList, X, Loader2, Sparkles, MessageCircle, LayoutList, DollarSign, ShoppingCart, Pencil, Download, Scale } from "lucide-react";
 import { useCotacoes } from "@/hooks/useCotacoes";
 import { useProducts } from "@/hooks/useProducts";
 import { useSuppliers } from "@/hooks/useSuppliers";
@@ -26,6 +26,7 @@ interface GerenciarCotacaoDialogProps {
 
 import { QuoteSummaryTab } from "@/components/cotacoes/view-dialog/QuoteSummaryTab";
 import { QuoteValuesTab } from "@/components/cotacoes/view-dialog/QuoteValuesTab";
+import { QuoteCompareTab } from "@/components/cotacoes/view-dialog/QuoteCompareTab";
 import { QuoteConversionTab } from "@/components/cotacoes/view-dialog/QuoteConversionTab";
 import { QuoteEditTab } from "@/components/cotacoes/view-dialog/QuoteEditTab";
 
@@ -394,10 +395,11 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
 
           {/* Tab bar */}
           <div className="border-b border-border dark:border-white/5 px-2">
-            <div className={cn("grid gap-0", isFinalizada ? "grid-cols-2" : "grid-cols-4")}>
+            <div className={cn("grid gap-0", isFinalizada ? "grid-cols-3" : "grid-cols-5")}>
               {[
                 { id: 'resumo',    label: 'Resumo',   icon: LayoutList },
                 { id: 'valores',   label: 'Valores',  icon: DollarSign },
+                { id: 'comparar',  label: 'Comparar', icon: Scale },
                 { id: 'converter', label: 'Pedido',   icon: ShoppingCart, hide: isFinalizada },
                 { id: 'editar',    label: 'Editar',   icon: Pencil,       hide: isFinalizada },
               ].filter(tab => !tab.hide).map((tab) => (
@@ -445,6 +447,17 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   getNormalizedTotalPrice={getNormalizedTotalPrice}
                   getSupplierProductValue={getSupplierProductValue}
                   isReadOnly={isFinalizada}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="comparar" className="flex-1 min-h-0 m-0 p-0 overflow-y-auto custom-scrollbar data-[state=active]:flex flex-col">
+              {activeTab === 'comparar' && (
+                <QuoteCompareTab
+                  products={products}
+                  fornecedores={fornecedores}
+                  supplierItems={supplierItems}
+                  safeStr={safeStr}
                 />
               )}
             </TabsContent>

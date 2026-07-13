@@ -21,6 +21,7 @@ import {
   DrawerTitle 
 } from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -594,7 +595,7 @@ export function QuoteValuesTab({
                   disabled={!isWhatsAppConfigured()}
                   title={isWhatsAppConfigured() ? "Envio automático pela API" : "API do WhatsApp não configurada"}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-tight transition-all",
+                    "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight transition-all",
                     !isWhatsAppConfigured() && "opacity-40 cursor-not-allowed",
                     sendMode === 'api'
                       ? "bg-brand text-black shadow-sm"
@@ -609,7 +610,7 @@ export function QuoteValuesTab({
                   onClick={() => changeSendMode('manual')}
                   title="Abre o WhatsApp com a mensagem pronta para você enviar"
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-tight transition-all",
+                    "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight transition-all",
                     sendMode === 'manual'
                       ? "bg-brand text-black shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
@@ -619,7 +620,7 @@ export function QuoteValuesTab({
                   Manual
                 </button>
               </div>
-              <p className="text-[8px] text-muted-foreground/70 mt-1 leading-tight px-0.5">
+              <p className="text-[10px] text-muted-foreground/80 mt-1 leading-tight px-0.5">
                 {sendMode === 'api'
                   ? "Envio automático pela API do WhatsApp."
                   : "Abre o WhatsApp com a mensagem pronta — você confere e envia."}
@@ -659,7 +660,7 @@ export function QuoteValuesTab({
                       {fornecedor.nome}
                     </span>
                     <Badge variant={isSelected ? "default" : "outline"} className={cn(
-                      "h-4 px-1 text-[8px] font-black uppercase tracking-tighter",
+                      "h-5 px-1.5 text-[10px] font-bold tabular-nums",
                       isSelected ? "bg-brand text-black" : "text-muted-foreground"
                     )}>
                       {total > 0 ? formatCurrency(total) : "Pendente"}
@@ -667,9 +668,9 @@ export function QuoteValuesTab({
                   </div>
                   
                   {economiaTotal > 0 && (
-                    <div className="flex items-center gap-1.5 opacity-80 z-10">
+                    <div className="flex items-center gap-1.5 z-10">
                       <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                      <span className="text-[8px] font-black text-emerald-600 dark:text-emerald-400 tracking-widest uppercase">
+                      <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">
                         Economia: {formatCurrency(economiaTotal)}
                       </span>
                     </div>
@@ -682,7 +683,7 @@ export function QuoteValuesTab({
                         fornecedor.status === 'respondido' ? "bg-brand shadow-[0_0_8px_hsl(var(--brand))]" : "bg-zinc-300 dark:bg-zinc-700"
                       )} />
                       <span className={cn(
-                        "text-[8px] font-black uppercase tracking-tighter",
+                        "text-[10px] font-semibold uppercase",
                         fornecedor.status === 'respondido' ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-400"
                       )}>
                         {fornecedor.status === 'respondido' ? "Via Portal" : "Pendente"}
@@ -1031,9 +1032,9 @@ export function QuoteValuesTab({
                                 }}
                                 className="scale-75 data-[state=checked]:bg-brand"
                               />
-                              <p className="text-[10px] font-bold text-zinc-500 uppercase">
+                              <p className="text-[10px] font-bold text-zinc-500 uppercase inline-flex items-center gap-1">
                                 {product.quantidade} {product.unidade}
-                                {isBest && <span className="ml-2 text-brand font-black">🏆</span>}
+                                {isBest && <Trophy className="h-3 w-3 text-brand" />}
                               </p>
                             </div>
                           )}
@@ -1057,11 +1058,11 @@ export function QuoteValuesTab({
                                   <TooltipProvider delayDuration={100}>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <div className="flex items-center justify-center h-5 w-5 bg-brand/10 text-brand rounded-full animate-pulse">
+                                        <div className="flex items-center justify-center h-5 w-5 bg-brand/10 text-brand rounded-full">
                                           <Trophy className="h-3 w-3" />
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent className="bg-brand text-black font-black text-[10px] uppercase border-none shadow-xl"> Melhor Preço Garantido </TooltipContent>
+                                      <TooltipContent className="bg-brand text-black font-bold text-[11px] uppercase border-none shadow-xl"> Melhor Preço </TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 )}
@@ -1111,14 +1112,17 @@ export function QuoteValuesTab({
                                   if (historyArray.length === 0) return <div className="w-6" />;
                                   
                                   return (
-                                    <TooltipProvider delayDuration={100}>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <div className="cursor-help flex items-center justify-center h-6 w-6 rounded-md text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors">
+                                    <Popover modal={false}>
+                                        <PopoverTrigger asChild>
+                                          <button
+                                            type="button"
+                                            aria-label="Histórico da negociação"
+                                            className="cursor-pointer flex items-center justify-center h-6 w-6 rounded-md text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors"
+                                          >
                                             <History className="h-3.5 w-3.5" />
-                                          </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="left" className="p-0 border-none shadow-2xl rounded-2xl overflow-hidden min-w-[220px]">
+                                          </button>
+                                        </PopoverTrigger>
+                                        <PopoverContent side="left" className="p-0 border-none shadow-2xl rounded-2xl overflow-hidden min-w-[220px] w-auto z-[100]">
                                           <div className="bg-zinc-900 text-white p-3 border-b border-white/10 flex items-center justify-between">
                                             <div className="flex items-center gap-2">
                                               <History className="h-4 w-4 text-brand" />
@@ -1161,9 +1165,8 @@ export function QuoteValuesTab({
                                               );
                                             })}
                                           </div>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
+                                        </PopoverContent>
+                                    </Popover>
                                   );
                                 })()}
                               </div>
@@ -1175,19 +1178,21 @@ export function QuoteValuesTab({
                                   const obs = itemData?.observacoes;
                                   if (!obs) return <div className="w-6" />;
                                   return (
-                                    <TooltipProvider delayDuration={100}>
-                                      <Tooltip>
-                                        <TooltipTrigger asChild>
-                                          <div className="cursor-help flex items-center justify-center h-6 w-6 rounded-md text-amber-500 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors">
+                                    <Popover modal={false}>
+                                        <PopoverTrigger asChild>
+                                          <button
+                                            type="button"
+                                            aria-label="Observação do fornecedor"
+                                            className="cursor-pointer flex items-center justify-center h-6 w-6 rounded-md text-amber-500 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                                          >
                                             <MessageCircle className="h-3.5 w-3.5" />
-                                          </div>
-                                        </TooltipTrigger>
-                                        <TooltipContent side="left" className="max-w-[240px] bg-zinc-900 border-zinc-800 text-white shadow-xl p-3">
-                                          <p className="text-[10px] font-black uppercase tracking-widest text-amber-400 mb-1">Obs. Fornecedor</p>
-                                          <p className="text-xs text-white/80 leading-relaxed">{obs}</p>
-                                        </TooltipContent>
-                                      </Tooltip>
-                                    </TooltipProvider>
+                                          </button>
+                                        </PopoverTrigger>
+                                        <PopoverContent side="left" className="max-w-[260px] w-auto bg-popover border border-border shadow-xl p-3 z-[100]">
+                                          <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 mb-1">Obs. do Fornecedor</p>
+                                          <p className="text-xs text-foreground/90 leading-relaxed">{obs}</p>
+                                        </PopoverContent>
+                                    </Popover>
                                   );
                                 })()}
                               </div>
@@ -1218,7 +1223,7 @@ export function QuoteValuesTab({
                               </Badge>
                             </div>
                           )}
-                          <LastPaidPricesTooltip productId={product.product_id} />
+                          <LastPaidPricesTooltip productId={product.product_id} currentPrice={currentValue} />
                         </div>
 
                         <div className="flex items-center justify-end gap-1 pr-1">
@@ -1359,8 +1364,8 @@ export function QuoteValuesTab({
                            </div>
                         </div>
                         {isBest && (
-                          <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full text-[10px] font-black shadow-lg shadow-brand/20">
-                            🏆
+                          <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full shadow-lg shadow-brand/20" title="Melhor preço deste item">
+                            <Trophy className="h-3.5 w-3.5" />
                           </div>
                         )}
                       </div>
@@ -1396,18 +1401,21 @@ export function QuoteValuesTab({
                           </Button>
                         </div>
                       ) : (
-                        <div 
+                        <div
                           className="flex items-center justify-between bg-background/50 border border-border dark:border-white/5/30 rounded-xl p-3 cursor-pointer hover:border-brand/30 transition-colors"
                           onClick={() => handleStartEdit(product.product_id, currentValue)}
                         >
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Valor Unitário</span>
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide leading-none mb-1">Valor Unitário</span>
                             <span className={cn(
                               "text-lg font-black tracking-tight",
                               currentValue > 0 ? (isBest ? "text-brand" : "text-foreground") : "text-zinc-300"
                             )}>
                               {currentValue > 0 ? formatCurrency(currentValue) : "Definir Valor"}
                             </span>
+                            <div className="mt-1.5">
+                              <LastPaidPricesTooltip productId={product.product_id} currentPrice={currentValue} />
+                            </div>
                           </div>
                           <div className="flex items-center gap-2">
                              {(() => {
@@ -1426,25 +1434,29 @@ export function QuoteValuesTab({
                              })()}
                              
                              <div className="flex gap-1.5">
-                               <div 
-                                 className="p-1.5 rounded-lg bg-brand/10 text-brand border border-brand/20"
+                               <button
+                                 type="button"
+                                 aria-label="Editar valor"
+                                 className="flex items-center justify-center h-10 w-10 rounded-lg bg-brand/10 text-brand border border-brand/20 active:scale-95 transition-transform touch-manipulation"
                                  onClick={(e) => {
                                    e.stopPropagation();
                                    handleStartEdit(product.product_id, currentValue);
                                  }}
                                >
-                                 <Edit2 className="h-3.5 w-3.5" />
-                               </div>
-                               
-                               <div 
-                                 className="p-1.5 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20"
+                                 <Edit2 className="h-4 w-4" />
+                               </button>
+
+                               <button
+                                 type="button"
+                                 aria-label="Remover produto deste fornecedor"
+                                 className="flex items-center justify-center h-10 w-10 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 active:scale-95 transition-transform touch-manipulation"
                                  onClick={(e) => {
                                    e.stopPropagation();
                                    handleRemoveItem(product.product_id);
                                  }}
                                >
-                                 <Trash2 className="h-3.5 w-3.5" />
-                               </div>
+                                 <Trash2 className="h-4 w-4" />
+                               </button>
                              </div>
                           </div>
                         </div>
@@ -1470,6 +1482,19 @@ export function QuoteValuesTab({
                            </div>
                         </div>
                       )}
+
+                      {/* Observação do fornecedor — visível direto no touch (não escondida em hover) */}
+                      {(() => {
+                        const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                        const obs = itemData?.observacoes;
+                        if (!obs) return null;
+                        return (
+                          <div className="mt-2 flex items-start gap-1.5 px-2.5 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30">
+                            <MessageCircle className="h-3 w-3 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+                            <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-snug">{obs}</p>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}
