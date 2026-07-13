@@ -534,7 +534,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
         <DialogContent
           hideClose
           className={cn(
-            "max-w-[1000px] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-card rounded-2xl shadow-2xl",
+            "max-w-[1000px] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-background rounded-2xl shadow-2xl",
             // Altura por tipo de aba:
             //  • Valores e Pedido usam scroll interno (h-full + flex-1 overflow),
             //    então precisam de altura FIXA (85vh) senão a área rolável colapsa.
