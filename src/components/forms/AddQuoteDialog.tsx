@@ -99,7 +99,6 @@ import {
   History,
   Star,
   Info,
-  LayoutList,
   MousePointerClick,
   ArrowLeft
 } from "lucide-react";
@@ -2381,41 +2380,27 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                 </div>
                               ) : (
                                 <div className="max-h-[calc(100vh-320px)] overflow-y-auto custom-scrollbar pr-2">
-                                  <div className="space-y-3">
+                                  <div className="space-y-1.5">
                                     {fields.map((field, index) => (
-                                      <div key={field.id} className={cn(
-                                        ds.colors.surface.card,
-                                        ds.colors.border.subtle,
-                                        "border rounded-xl transition-all hover:border-brand/30"
-                                      )}>
-
-                                        <div className="p-2 sm:p-2.5">
-                                          <div className="flex items-start justify-between gap-2">
-                                            <div className="flex-1 min-w-0">
-                                              <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-xs sm:text-sm break-words")}>
-                                                {field.produtoNome || `Produto ${index + 1}`}
-                                              </h4>
-                                              <div className={cn("text-[11px] sm:text-xs text-muted-foreground mt-0.5 flex items-center gap-2")}>
-                                                <span className={cn(
-                                                  ds.typography.fontFamily.mono,
-                                                  ds.colors.surface.card,
-                                                  "px-1.5 rounded border"
-                                                )}>
-                                                  {field.quantidade} {field.unidade}
-                                                </span>
-                                              </div>
-                                            </div>
-                                            <Button
-                                              type="button"
-                                              variant="ghost"
-                                              size="sm"
-                                              onClick={() => remove(index)}
-                                              className={cn(ds.components.button.danger, "h-7 w-7 sm:h-8 sm:w-8 p-0 flex-shrink-0")}
-                                            >
-                                              <Trash2 className="h-3.5 w-3.5" />
-                                            </Button>
-                                          </div>
-                                        </div>
+                                      <div key={field.id} className="flex items-center gap-2 px-2.5 py-1 bg-muted/20 border border-border dark:border-white/5 rounded-lg transition-all hover:border-brand/30">
+                                        <h4 className={cn(ds.typography.weight.semibold, ds.colors.text.primary, "text-xs sm:text-sm truncate flex-1 min-w-0")} title={field.produtoNome}>
+                                          {field.produtoNome || `Produto ${index + 1}`}
+                                        </h4>
+                                        <span className={cn(
+                                          ds.typography.fontFamily.mono,
+                                          "shrink-0 text-[11px] text-muted-foreground bg-background px-1.5 py-0.5 rounded border border-border dark:border-white/5 tabular-nums"
+                                        )}>
+                                          {field.quantidade} {field.unidade}
+                                        </span>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="icon"
+                                          onClick={() => remove(index)}
+                                          className="h-5 w-5 p-0 flex-shrink-0 text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10"
+                                        >
+                                          <Trash2 className="h-3 w-3" />
+                                        </Button>
                                       </div>
                                     ))}
                                   </div>
@@ -2742,12 +2727,12 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                           if (supplierSearch.length > 0) setHighlightedSupplierIndex(index);
                                         }}
                                         className={cn(
-                                          "w-full flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all text-left",
+                                          "w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg cursor-pointer border transition-all text-left",
                                           isSelected
                                             ? "border-brand/30 bg-brand/10 dark:bg-brand/20"
-                                            : isHighlighted 
+                                            : isHighlighted
                                               ? "border-brand bg-brand/5 dark:bg-brand/10 shadow-md ring-1 ring-brand/30"
-                                              : cn(ds.colors.surface.card, "border-transparent hover:border-brand/20")
+                                              : "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
                                         )}
                                       >
                                         <div className={cn(
@@ -2756,35 +2741,20 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                         )}>
                                           {isSelected && <Check className="h-3 w-3" />}
                                         </div>
-                                        <div className="flex-1 min-w-0">
+                                        <div className="flex-1 min-w-0 flex items-baseline gap-2">
                                           <p className={cn(ds.typography.size.sm, ds.typography.weight.medium, ds.colors.text.primary, "truncate")}>
                                             {supplier.name}
                                           </p>
                                           {supplier.contact && (
-                                            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "truncate")}>
+                                            <p className={cn(ds.typography.size.xs, ds.colors.text.secondary, "truncate shrink-0 max-w-[45%]")}>
                                               {supplier.contact}
                                             </p>
                                           )}
                                         </div>
                                         {isSelected && (
-                                          <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-bold bg-brand/5 border-brand/20 text-brand">
-                                              {(supplierItemAssignments[supplier.id] || []).length}/{fields.length} itens
-                                            </Badge>
-                                            <Button
-                                              type="button"
-                                              variant="ghost"
-                                              size="icon"
-                                              className="h-7 w-7 text-brand hover:bg-brand/10"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                changeTab("personalizar");
-                                                setPersonalizeViewMode("by-supplier");
-                                              }}
-                                            >
-                                              <LayoutList className="h-3.5 w-3.5" />
-                                            </Button>
-                                          </div>
+                                          <Badge variant="outline" className="h-5 px-1.5 text-[10px] font-bold bg-brand/5 border-brand/20 text-brand shrink-0">
+                                            {(supplierItemAssignments[supplier.id] || []).length}/{fields.length} itens
+                                          </Badge>
                                         )}
                                       </button>
                                     );
@@ -2968,9 +2938,8 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                     const assignedCount = (supplierItemAssignments[supplier.id] || []).length;
                                     return (
                                     <div key={supplier.id} className={cn(
-                                      ds.colors.surface.card,
-                                      "border shadow-sm overflow-hidden rounded-2xl transition-all",
-                                      isExpanded ? "border-brand/30" : "border-border/60 hover:border-brand/20"
+                                      "bg-muted/20 border shadow-sm overflow-hidden rounded-xl transition-all",
+                                      isExpanded ? "border-brand/30" : "border-border dark:border-white/5 hover:border-brand/30"
                                     )}>
                                       {/* Collapsed Card Header â€" always visible */}
                                       <button
@@ -3120,8 +3089,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                   .filter(f => f.produtoNome.toLowerCase().includes(personalizeSearch.toLowerCase()))
                                   .map((field) => (
                                   <div key={field.id} className={cn(
-                                    ds.colors.surface.card,
-                                    "border border-border dark:border-white/5/60 shadow-sm overflow-hidden rounded-2xl transition-all hover:border-brand/30"
+                                    "bg-muted/20 border border-border dark:border-white/5 shadow-sm overflow-hidden rounded-xl transition-all hover:border-brand/30"
                                   )}>
                                     <div className="py-3 px-4 bg-muted/40 border-b flex items-center justify-between">
                                       <div className="flex items-center gap-2">
@@ -3243,8 +3211,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                 
                                 {/* Resumo de Produtos */}
                                 <div className={cn(
-                                  "p-5 rounded-2xl border bg-card/50",
-                                  ds.colors.border.subtle
+                                  "p-5 rounded-xl border bg-muted/20 border-border dark:border-white/5"
                                 )}>
                                   <div className="flex items-center gap-2 mb-4">
                                     <Package className="h-4 w-4 text-brand" />
@@ -3276,8 +3243,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                   
                                   {/* Prazos */}
                                   <div className={cn(
-                                    "p-5 rounded-2xl border bg-card/50",
-                                    ds.colors.border.subtle
+                                    "p-5 rounded-xl border bg-muted/20 border-border dark:border-white/5"
                                   )}>
                                     <div className="flex items-center gap-2 mb-4">
                                       <Clock className="h-4 w-4 text-brand" />
@@ -3305,8 +3271,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
 
                                   {/* Fornecedores */}
                                   <div className={cn(
-                                    "p-5 rounded-2xl border bg-card/50",
-                                    ds.colors.border.subtle
+                                    "p-5 rounded-xl border bg-muted/20 border-border dark:border-white/5"
                                   )}>
                                     <div className="flex items-center gap-2 mb-4">
                                       <Building2 className="h-4 w-4 text-brand" />
@@ -3403,7 +3368,10 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
           "p-0 flex flex-col",
           ds.components.modal.content,
           "border backdrop-blur-xl",
-          "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[800px] h-[88vh] sm:h-[85vh] max-h-[750px] rounded-xl sm:rounded-2xl"
+          // Metodologia do modal de gestão: base única bg-background (a moldura era
+          // bg-card, mais clara que o conteúdo, gerando salto de tom no cabeçalho).
+          "bg-background",
+          "w-[96vw] sm:w-[92vw] md:w-[85vw] max-w-[820px] h-[70vh] max-h-[600px] rounded-xl sm:rounded-2xl"
         )}
         onKeyDown={handleModalKeyDown}
       >
