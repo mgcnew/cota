@@ -69,7 +69,6 @@ interface AddPedidoDialogProps {
 const STEPS = [
   { id: "produtos", title: "Produtos", icon: Package },
   { id: "fornecedor", title: "Fornecedor", icon: Building2 },
-  { id: "confirmar", title: "Confirmar", icon: Check },
 ];
 
 import { usePackagingItems } from "@/hooks/usePackagingItems";
@@ -552,7 +551,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
       e.preventDefault();
       handlePrevious();
     }
-    if (e.ctrlKey && e.key === 'Enter' && activeStep === "confirmar") {
+    if (e.ctrlKey && e.key === 'Enter' && activeStep === "fornecedor") {
       e.preventDefault();
       handleSubmit();
     }
@@ -725,11 +724,11 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         
         {/* Step: Produtos */}
         {activeStep === "produtos" && (
-          <div className="h-full p-6">
-            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 pb-60 lg:pb-0">
+          <div className="h-full p-6 lg:flex lg:flex-col lg:min-h-0">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-6 pb-60 lg:pb-0 lg:flex-1 lg:min-h-0">
               
               {/* Adicionar Produto */}
-              <Card className={cn(ds.components.card.root, "overflow-visible")}>
+              <Card className={cn(ds.components.card.root, "overflow-visible lg:self-start")}>
                 <CardHeader className={ds.components.card.header}>
                   <CardTitle className={cn(ds.components.card.title, "flex items-center gap-2")}>
                     <Plus className="h-4 w-4 text-brand flex-shrink-0" />
@@ -782,7 +781,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           ds.colors.border.default,
                           "border"
                         )}>
-                          <div className="max-h-[250px] w-full overflow-y-auto custom-scrollbar">
+                          <div className="max-h-[220px] w-full overflow-y-auto custom-scrollbar">
                             <div className="p-1">
                               {searchedProducts.map((p, i) => renderProductItem(p, i))}
                             </div>
@@ -1082,17 +1081,16 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                       ) : (
                         itens.map((item, index) => (
                           <div key={index} className={cn(
-                            "flex items-center gap-2 p-2.5 rounded-lg border shadow-sm group",
+                            "flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg border group",
                             ds.colors.surface.card,
                             ds.colors.border.default
                           )}>
                             <div className={cn(
-                              "w-6 h-6 rounded flex items-center justify-center flex-shrink-0",
-                              ds.typography.size.xs,
-                              ds.typography.weight.bold,
-                              "bg-zinc-100 dark:bg-zinc-800 text-zinc-500"
+                              "flex items-baseline justify-center gap-0.5 min-w-[34px] px-1.5 py-1 rounded flex-shrink-0",
+                              "bg-zinc-100 dark:bg-zinc-800"
                             )}>
-                              {index + 1}
+                              <span className="text-[12px] font-bold text-zinc-700 dark:text-zinc-300 tabular-nums leading-none">{item.quantidade}</span>
+                              <span className="text-[9px] font-semibold text-zinc-500 uppercase leading-none">{item.unidade}</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className={cn(
@@ -1101,32 +1099,27 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                                 ds.colors.text.primary,
                                 "truncate leading-tight"
                               )}>{item.produto}</p>
-                              <div className={cn(
-                                "flex items-center gap-1.5 mt-0.5",
-                                "text-[11px]",
+                              <p className={cn(
+                                "text-[11px] mt-0.5 tabular-nums",
                                 ds.colors.text.secondary
                               )}>
-                                <span>{item.quantidade} {item.unidade}</span>
-                                <span>Ã—</span>
-                                <span className={cn(item.valorUnitario <= 0 && "text-zinc-500 italic")}>
-                                  {item.valorUnitario > 0 ? `R$ ${item.valorUnitario.toFixed(2)}` : 'Sem preço'}
-                                </span>
-                              </div>
+                                R$ {item.valorUnitario.toFixed(2)} <span className="opacity-60">/ {item.unidade}</span>
+                              </p>
                             </div>
                             <div className="text-right ml-auto px-1">
                               <p className={cn(
-                                "text-[13px]",
+                                "text-[13px] tabular-nums",
                                 ds.typography.weight.bold,
                                 ds.colors.text.primary
                               )}>R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
                             </div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => setItens(itens.filter((_, i) => i !== index))}
-                              className={cn(ds.components.button.danger, "h-8 w-8")}
+                              className="h-5 w-5 p-0 flex-shrink-0 text-muted-foreground/60 hover:text-red-500 hover:bg-red-500/10"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           </div>
                         )).reverse()
@@ -1162,7 +1155,8 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
         {/* Step: Fornecedor */}
         {activeStep === "fornecedor" && (
           <div className="h-full p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 content-start pb-60 lg:pb-0">
+            <div className="space-y-5 pb-60 lg:pb-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 content-start">
               
               {/* Selecionar Fornecedor */}
               <Card className={cn(ds.components.card.root, "overflow-visible")}>
@@ -1193,7 +1187,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                           ds.colors.surface.card,
                           ds.colors.border.default
                         )}>
-                          <ScrollArea className="max-h-[280px] w-full">
+                          <ScrollArea className="max-h-[240px] w-full">
                             <div className="p-2 space-y-1.5">
                               {filteredSuppliers.map(s => (
                                 <button
@@ -1298,44 +1292,26 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
                   
                   {/* Mostrar fornecedor selecionado */}
                   {fornecedor && !supplierSearch && (
-                    <div className={cn(
-                      "p-4 rounded-xl border",
-                      "bg-brand/5 border-brand/20"
-                    )}>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-brand/20 flex items-center justify-center flex-shrink-0">
-                            <Building2 className="h-4 w-4 text-brand" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className={cn(
-                              ds.typography.size.xs,
-                              ds.typography.weight.bold,
-                              "text-brand",
-                              "uppercase tracking-wider mb-1"
-                            )}>Fornecedor Selecionado</p>
-                            <p className={cn(
-                              ds.typography.size.sm,
-                              ds.typography.weight.bold,
-                              ds.colors.text.primary,
-                              "truncate"
-                            )}>{suppliers.find(s => s.id === fornecedor)?.name}</p>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setFornecedor("");
-                            setSupplierSearch("");
-                            setTimeout(() => supplierSearchRef.current?.focus(), 50);
-                          }}
-                          className={cn(ds.components.button.ghost, "h-8 w-8 text-brand hover:text-brand hover:bg-brand/10")}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
+                    <div className="flex items-center gap-2.5 px-3 py-2 rounded-lg border bg-brand/5 border-brand/20">
+                      <div className="w-6 h-6 rounded-md bg-brand/20 flex items-center justify-center flex-shrink-0">
+                        <Building2 className="h-3.5 w-3.5 text-brand" />
                       </div>
+                      <p className={cn("flex-1 min-w-0 truncate", ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.primary)}>
+                        {suppliers.find(s => s.id === fornecedor)?.name}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setFornecedor("");
+                          setSupplierSearch("");
+                          setTimeout(() => supplierSearchRef.current?.focus(), 50);
+                        }}
+                        className="h-6 w-6 flex-shrink-0 text-brand/70 hover:text-brand hover:bg-brand/10"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   )}
                 </CardContent>
@@ -1413,179 +1389,56 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
 
                   <div className={ds.components.input.group}>
                     <Label className={ds.components.input.label}>Observações</Label>
-                    <Textarea 
-                      placeholder="Instruções de entrega, pagamento..." 
+                    <Textarea
+                      placeholder="Instruções de entrega, pagamento..."
                       value={observacoes}
                       onChange={(e) => setObservacoes(e.target.value)}
                       onFocus={handleInputFocus}
-                      className={cn(ds.components.input.root, "min-h-[120px] resize-none")} 
+                      className={cn(ds.components.input.root, "min-h-[88px] resize-none")}
                     />
                   </div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Itens do Pedido — resumo + total (movido da antiga aba Confirmar) */}
+            <Card className={cn(ds.components.card.root, "overflow-hidden")}>
+              <CardHeader className={cn(ds.components.card.header, "flex-shrink-0")}>
+                <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
+                  <span className="flex items-center gap-2">
+                    <ShoppingCart className="h-4 w-4 text-brand" />
+                    Itens do Pedido
+                  </span>
+                  <Badge className={cn(ds.components.badge.base, "bg-brand/10 text-brand border-brand/20")}>{itens.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className={cn("max-h-[170px] overflow-y-auto custom-scrollbar divide-y", ds.colors.border.default)}>
+                  {itens.length === 0 ? (
+                    <p className={cn("px-4 py-6 text-center", ds.typography.size.sm, ds.colors.text.secondary)}>Nenhum item adicionado</p>
+                  ) : itens.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2.5 px-4 py-1.5">
+                      <div className="flex items-baseline justify-center gap-0.5 min-w-[34px] px-1.5 py-1 rounded flex-shrink-0 bg-zinc-100 dark:bg-zinc-800">
+                        <span className="text-[12px] font-bold text-zinc-700 dark:text-zinc-300 tabular-nums leading-none">{item.quantidade}</span>
+                        <span className="text-[9px] font-semibold text-zinc-500 uppercase leading-none">{item.unidade}</span>
+                      </div>
+                      <p className={cn("flex-1 min-w-0 text-[13px] font-bold truncate", ds.colors.text.primary)}>{item.produto}</p>
+                      <p className={cn("text-[13px] font-bold tabular-nums", ds.colors.text.primary)}>R$ {(item.quantidade * item.valorUnitario).toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className={cn("p-3 border-t flex justify-between items-center", ds.colors.surface.section, ds.colors.border.default)}>
+                  <span className={cn(ds.typography.size.sm, ds.typography.weight.bold, ds.colors.text.secondary, "uppercase tracking-wider")}>Valor Total</span>
+                  <span className={cn(ds.typography.size.lg, ds.typography.weight.bold, "text-brand")}>
+                    R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+            </div>
           </div>
         )}
 
-        {/* Step: Confirmar */}
-        {activeStep === "confirmar" && (
-          <div className="h-full p-6">
-             <div className="max-w-2xl mx-auto space-y-6">
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Resumo Fornecedor */}
-                <Card className={ds.components.card.root}>
-                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center",
-                        "bg-brand/10"
-                      )}>
-                        <Building2 className="h-4 w-4 text-brand" />
-                      </div>
-                      <span className={cn(
-                        ds.typography.size.xs,
-                        ds.typography.weight.bold,
-                        ds.colors.text.secondary,
-                        "uppercase tracking-wider"
-                      )}>Fornecedor</span>
-                    </div>
-                    <p className={cn(
-                      ds.typography.size.sm,
-                      ds.typography.weight.bold,
-                      ds.colors.text.primary,
-                      "pl-10"
-                    )}>
-                      {suppliers.find(s => s.id === fornecedor)?.name}
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* Resumo Entrega */}
-                <Card className={ds.components.card.root}>
-                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center",
-                        "bg-brand/10"
-                      )}>
-                        <CalendarIcon className="h-4 w-4 text-brand" />
-                      </div>
-                      <span className={cn(
-                        ds.typography.size.xs,
-                        ds.typography.weight.bold,
-                        ds.colors.text.secondary,
-                        "uppercase tracking-wider"
-                      )}>Entrega</span>
-                    </div>
-                    <p className={cn(
-                      ds.typography.size.sm,
-                      ds.typography.weight.bold,
-                      ds.colors.text.primary,
-                      "pl-10"
-                    )}>
-                      {dataEntrega ? format(dataEntrega, "dd/MM/yyyy", { locale: ptBR }) : "-"}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Resumo Itens */}
-              <Card className={ds.components.card.root}>
-                <CardHeader className={ds.components.card.header}>
-                  <CardTitle className={cn(ds.components.card.title, "flex items-center justify-between")}>
-                    <span className="flex items-center gap-2">
-                      <ShoppingCart className="h-4 w-4 text-brand" />
-                      Itens do Pedido
-                    </span>
-                    <Badge className={cn(
-                      ds.components.badge.base,
-                      "bg-brand/10 text-brand border-brand/20"
-                    )}>{itens.length}</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className={cn("divide-y", ds.colors.border.default)}>
-                    {itens.map((item, index) => (
-                      <div key={index} className={cn(
-                        "flex items-center justify-between p-4 transition-colors",
-                        ds.colors.surface.hover
-                      )}>
-                        <div className="flex-1 min-w-0">
-                          <p className={cn(
-                            ds.typography.size.sm,
-                            ds.typography.weight.bold,
-                            ds.colors.text.primary,
-                            "truncate"
-                          )}>{item.produto}</p>
-                          <p className={cn(
-                            ds.typography.size.xs,
-                            ds.colors.text.secondary,
-                            "mt-1"
-                          )}>{item.quantidade} {item.unidade} Ã— R$ {item.valorUnitario.toFixed(2)}</p>
-                        </div>
-                        <p className={cn(
-                          ds.typography.size.sm,
-                          ds.typography.weight.bold,
-                          ds.colors.text.primary,
-                          "ml-4"
-                        )}>
-                          R$ {(item.quantidade * item.valorUnitario).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className={cn(
-                    "p-4 border-t flex justify-between items-center",
-                    ds.colors.surface.section,
-                    ds.colors.border.default
-                  )}>
-                    <span className={cn(
-                      ds.typography.size.sm,
-                      ds.typography.weight.bold,
-                      ds.colors.text.secondary,
-                      "uppercase tracking-wider"
-                    )}>Valor Total</span>
-                    <span className={cn(
-                      ds.typography.size.xl,
-                      ds.typography.weight.bold,
-                      "text-brand"
-                    )}>
-                      R$ {itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0).toFixed(2)}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Resumo Observações */}
-              {observacoes && (
-                <Card className={ds.components.card.root}>
-                  <CardContent className={cn(ds.components.card.body, "space-y-3")}>
-                    <div className="flex items-center gap-2">
-                      <div className={cn(
-                        "w-8 h-8 rounded-lg flex items-center justify-center",
-                        "bg-brand/10"
-                      )}>
-                        <FileText className="h-4 w-4 text-brand" />
-                      </div>
-                      <span className={cn(
-                        ds.typography.size.xs,
-                        ds.typography.weight.bold,
-                        ds.colors.text.secondary,
-                        "uppercase tracking-wider"
-                      )}>Observações</span>
-                    </div>
-                    <p className={cn(
-                      ds.typography.size.sm,
-                      ds.colors.text.primary,
-                      "pl-10"
-                    )}>{observacoes}</p>
-                  </CardContent>
-                </Card>
-              )}
-             </div>
-          </div>
-        )}
 
       </div>
 
@@ -2546,7 +2399,7 @@ export default function AddPedidoDialog({ open, onOpenChange, onAdd, preSelected
           "p-0 gap-0 overflow-hidden border shadow-xl flex flex-col",
           ds.colors.surface.page,
           ds.colors.border.default,
-          "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[90vh] sm:h-[88vh] max-h-[750px] rounded-2xl"
+          "w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[900px] h-[72vh] max-h-[620px] rounded-2xl"
         )}
         onKeyDown={handleKeyDown}
       >
