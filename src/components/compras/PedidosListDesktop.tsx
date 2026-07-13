@@ -123,7 +123,7 @@ export const PedidosListDesktop = memo(({
               <SortHeader label="Valor Total" sortId="valorTotal" className="w-[18%]" />
               <SortHeader label="Itens" sortId="itens" className="w-[12%]" />
               <SortHeader label="Previsão Entrega" sortId="dataEntrega" className="w-[17%]" />
-              <TableHead className="text-right w-[10%]">Ações</TableHead>
+              <TableHead className="text-right w-[10%] pr-4">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
@@ -208,10 +208,11 @@ export const PedidosListDesktop = memo(({
                   </TableCell>
 
                   {/* Ações */}
-                  <TableCell className="text-right">
+                  <TableCell className="pr-4">
+                    <div className="flex justify-end">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-accent transition-colors">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-accent data-[state=open]:bg-accent transition-colors">
                           <MoreVertical className="h-4 w-4 text-muted-foreground" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -233,6 +234,7 @@ export const PedidosListDesktop = memo(({
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
