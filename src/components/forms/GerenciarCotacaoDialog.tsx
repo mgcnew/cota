@@ -531,7 +531,16 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent hideClose className="max-w-[1000px] h-[85vh] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-card rounded-2xl shadow-2xl">
+        <DialogContent
+          hideClose
+          className={cn(
+            "max-w-[1000px] p-0 overflow-hidden flex flex-col border border-border dark:border-white/5 bg-card rounded-2xl shadow-2xl",
+            // A aba Comparar tem conteúdo curto e variável (poucos itens/fornecedores);
+            // altura fixa deixava sobra de espaço vazio. Demais abas mantêm h-[85vh]
+            // fixo, pois dependem dele para o scroll interno de listas longas.
+            activeTab === 'comparar' ? "max-h-[85vh] h-auto" : "h-[85vh]"
+          )}
+        >
           <DialogTitle className="sr-only">Gerenciar Cotação</DialogTitle>
           <DialogDescription className="sr-only">Detalhes e ações da cotação</DialogDescription>
           {modalContent}

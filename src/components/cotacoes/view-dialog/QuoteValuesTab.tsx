@@ -875,22 +875,20 @@ export function QuoteValuesTab({
 
             {!isMobile && (
               <div className="px-6 py-2 border-b border-border dark:border-white/5 bg-muted/30 flex-shrink-0">
-                  <div className="grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center px-4">
-                    <div className="w-10" />
+                  <div className="grid grid-cols-[36px_minmax(0,1fr)_minmax(220px,1.9fr)_40px] gap-3 items-center px-4">
+                    <div />
                     <div className="relative group">
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within:text-brand transition-colors pointer-events-none" />
                       <input
                         type="text"
-                        placeholder="Filtrar..."
+                        placeholder="Filtrar produto..."
                         value={productSearch}
                         onChange={e => setProductSearch(e.target.value)}
                         className="w-full pl-7 pr-2 h-7 rounded-lg text-[11px] bg-background/80 border border-border/40 focus:border-brand/50 focus:ring-1 focus:ring-brand/20 focus:outline-none text-foreground placeholder:text-zinc-400"
                       />
                     </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Un.</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Qtde.</span>
                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">Negociação e Valor</span>
-                    <div className="w-10" />
+                    <div />
                   </div>
               </div>
             )}
@@ -985,7 +983,7 @@ export function QuoteValuesTab({
                         </div>
                       </div>
                     ) : (
-                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[40px_3fr_60px_60px_280px_auto] gap-4 items-center h-11")}>
+                      <div className={cn(isMobile ? "flex items-center justify-between" : "grid grid-cols-[36px_minmax(0,1fr)_minmax(220px,1.9fr)_40px] gap-3 items-center min-h-[52px]")}>
                         {!isMobile && (
                           <div className="flex justify-center">
                             <TooltipProvider delayDuration={100}>
@@ -1018,6 +1016,12 @@ export function QuoteValuesTab({
                           )} title={product.product_name}>
                             {safeStr(product.product_name)}
                           </p>
+                          {!isMobile && (
+                            <p className="text-[11px] font-semibold text-zinc-500 mt-0.5 inline-flex items-center gap-1 tabular-nums">
+                              {safeStr(product.quantidade)} {String(safeStr(product.unidade)).toUpperCase()}
+                              {isBest && <Trophy className="h-3 w-3 text-brand" />}
+                            </p>
+                          )}
                           {isMobile && (
                             <div className="flex items-center gap-2 mt-0.5">
                               <Switch
@@ -1039,57 +1043,60 @@ export function QuoteValuesTab({
                             </div>
                           )}
                         </div>
-                        {!isMobile && (
-                          <>
-                            <div className="text-center">
-                              <Badge variant="outline" className="h-5 px-2 text-[9px] font-black uppercase text-muted-foreground border-border/50 bg-background">{safeStr(product.unidade)}</Badge>
-                            </div>
-                            <div className="text-center">
-                              <span className="text-xs font-black text-foreground">{safeStr(product.quantidade)}</span>
-                            </div>
-                          </>
-                        )}
-                        <div className="flex items-center justify-end gap-2 pr-2">
+                        <div className="flex flex-col items-end justify-center gap-1 min-w-0">
                           {currentValue > 0 ? (
-                            <div className="flex items-center gap-3">
-                              {/* Melhor Preço Indicator */}
-                              <div className="w-5 flex justify-center">
+                            <>
+                              {/* Linha 1: troféu + preço + economia */}
+                              <div className="flex items-center gap-2">
                                 {isBest && (
                                   <TooltipProvider delayDuration={100}>
                                     <Tooltip>
                                       <TooltipTrigger asChild>
-                                        <div className="flex items-center justify-center h-5 w-5 bg-brand/10 text-brand rounded-full">
+                                        <div className="flex items-center justify-center h-5 w-5 bg-brand/10 text-brand rounded-full shrink-0">
                                           <Trophy className="h-3 w-3" />
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent className="bg-brand text-black font-bold text-[11px] uppercase border-none shadow-xl"> Melhor Preço </TooltipContent>
+                                      <TooltipContent className="bg-brand text-black font-bold text-[11px] uppercase border-none shadow-xl">Melhor Preço</TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 )}
+                                <p className={cn(
+                                  "text-[15px] font-black tracking-tight tabular-nums text-right",
+                                  isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100"
+                                )}>
+                                  {formatCurrency(currentValue)}
+                                </p>
+                                {(() => {
+                                  const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
+                                  const initialValue = Number(itemData?.valor_inicial) || 0;
+                                  const savings = (initialValue > currentValue && currentValue > 0) ? (initialValue - currentValue) : 0;
+                                  if (savings > 0) {
+                                    return (
+                                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none h-5 px-1.5 text-[10px] font-black shrink-0">
+                                        -{((savings / initialValue) * 100).toFixed(0)}%
+                                      </Badge>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                               </div>
 
-                              {/* Preço Principal */}
-                              <p className={cn(
-                                "text-[14px] font-black tracking-tight w-[75px] text-right",
-                                isBest ? "text-brand" : "text-zinc-900 dark:text-zinc-100"
-                              )}>
-                                {formatCurrency(currentValue)}
-                              </p>
+                              {/* Linha 2: referência histórica (último pago) + metadados */}
+                              <div className="flex items-center gap-1.5">
+                                <LastPaidPricesTooltip productId={product.product_id} currentPrice={currentValue} />
 
-                              {/* Ícone de Origem */}
-                              <div className="w-6 flex justify-center">
+                                {/* Origem */}
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
                                   const isFromSupplier = itemData?.updated_by_type === 'fornecedor';
-                                  
                                   return (
                                     <TooltipProvider delayDuration={100}>
                                       <Tooltip>
                                         <TooltipTrigger asChild>
                                           <div className={cn(
-                                            "flex items-center justify-center h-6 w-6 rounded-md border shadow-sm transition-all shrink-0",
-                                            isFromSupplier 
-                                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20" 
+                                            "flex items-center justify-center h-6 w-6 rounded-md border shadow-sm shrink-0",
+                                            isFromSupplier
+                                              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
                                               : "bg-blue-500/10 text-blue-600 border-blue-500/20"
                                           )}>
                                             {isFromSupplier ? <Smartphone className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
@@ -1102,22 +1109,19 @@ export function QuoteValuesTab({
                                     </TooltipProvider>
                                   );
                                 })()}
-                              </div>
 
-                              {/* Histórico */}
-                              <div className="w-6 flex justify-center">
+                                {/* Histórico */}
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
                                   const historyArray = Array.isArray(itemData?.price_history) ? itemData.price_history : [];
-                                  if (historyArray.length === 0) return <div className="w-6" />;
-                                  
+                                  if (historyArray.length === 0) return null;
                                   return (
                                     <Popover modal={false}>
                                         <PopoverTrigger asChild>
                                           <button
                                             type="button"
                                             aria-label="Histórico da negociação"
-                                            className="cursor-pointer flex items-center justify-center h-6 w-6 rounded-md text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors"
+                                            className="cursor-pointer flex items-center justify-center h-6 w-6 rounded-md text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:text-brand hover:bg-brand/10 transition-colors shrink-0"
                                           >
                                             <History className="h-3.5 w-3.5" />
                                           </button>
@@ -1169,21 +1173,19 @@ export function QuoteValuesTab({
                                     </Popover>
                                   );
                                 })()}
-                              </div>
 
-                              {/* Observação do fornecedor */}
-                              <div className="w-6 flex justify-center">
+                                {/* Observação do fornecedor */}
                                 {(() => {
                                   const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
                                   const obs = itemData?.observacoes;
-                                  if (!obs) return <div className="w-6" />;
+                                  if (!obs) return null;
                                   return (
                                     <Popover modal={false}>
                                         <PopoverTrigger asChild>
                                           <button
                                             type="button"
                                             aria-label="Observação do fornecedor"
-                                            className="cursor-pointer flex items-center justify-center h-6 w-6 rounded-md text-amber-500 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                                            className="cursor-pointer flex items-center justify-center h-6 w-6 rounded-md text-amber-500 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors shrink-0"
                                           >
                                             <MessageCircle className="h-3.5 w-3.5" />
                                           </button>
@@ -1196,34 +1198,15 @@ export function QuoteValuesTab({
                                   );
                                 })()}
                               </div>
-
-                              {/* Savings % */}
-                              <div className="w-[45px] flex justify-end">
-                                {(() => {
-                                  const itemData = supplierItems.find((i: any) => i?.supplier_id === selectedSupplier && i?.product_id === product.product_id);
-                                  const initialValue = Number(itemData?.valor_inicial) || 0;
-                                  const currentPriceValue = currentValue;
-                                  const savings = (initialValue > currentPriceValue && currentPriceValue > 0) ? (initialValue - currentPriceValue) : 0;
-                                  
-                                  if (savings > 0) {
-                                    return (
-                                      <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-none h-5 px-1.5 text-[10px] font-black">
-                                        -{((savings / initialValue) * 100).toFixed(0)}%
-                                      </Badge>
-                                    );
-                                  }
-                                  return null;
-                                })()}
-                              </div>
-                            </div>
+                            </>
                           ) : (
-                            <div className="text-right w-[150px]">
+                            <>
                               <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest text-zinc-400 border-border dark:border-white/5 bg-zinc-50 dark:bg-zinc-900">
                                 Não Cotado
                               </Badge>
-                            </div>
+                              <LastPaidPricesTooltip productId={product.product_id} currentPrice={0} />
+                            </>
                           )}
-                          <LastPaidPricesTooltip productId={product.product_id} currentPrice={currentValue} />
                         </div>
 
                         <div className="flex items-center justify-end gap-1 pr-1">
