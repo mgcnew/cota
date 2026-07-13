@@ -286,7 +286,7 @@ export function QuoteConversionTab({
   }
 
   return (
-    <div className="flex flex-col w-full h-full bg-background overflow-hidden relative">
+    <div className="flex flex-col w-full h-full bg-transparent overflow-hidden relative">
       <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 space-y-4">
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-4 items-start">
 

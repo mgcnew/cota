@@ -741,16 +741,30 @@ export function QuoteValuesTab({
 
         {selectedSupplier ? (
           <>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-border dark:border-white/5 bg-card/50 flex-shrink-0">
-              <div className="flex items-center gap-3 flex-1 min-w-0 pr-4">
-                <div className="p-2 rounded-xl bg-brand/10 flex-shrink-0">
-                  <Building2 className="h-5 w-5 text-brand" />
+            <div className="flex items-center gap-3 px-5 py-2.5 border-b border-border dark:border-white/5 bg-card/50 flex-shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0 shrink-0 max-w-[190px]">
+                <div className="p-1.5 rounded-lg bg-brand/10 flex-shrink-0">
+                  <Building2 className="h-4 w-4 text-brand" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-0.5">Gerenciando Valores:</p>
-                  <p className="text-lg font-black text-foreground tracking-tight truncate" title={currentSupplier?.nome}>{currentSupplier?.nome}</p>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-0.5">Gerenciando</p>
+                  <p className="text-base font-black text-foreground tracking-tight truncate leading-none" title={currentSupplier?.nome}>{currentSupplier?.nome}</p>
                 </div>
               </div>
+
+              {/* Filtro de produto (inline no cabeçalho, antes ocupava uma linha própria) */}
+              <div className="relative group flex-1 min-w-0 max-w-[220px]">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within:text-brand transition-colors pointer-events-none" />
+                <input
+                  type="text"
+                  placeholder="Filtrar produto..."
+                  value={productSearch}
+                  onChange={e => setProductSearch(e.target.value)}
+                  className="w-full pl-7 pr-2 h-8 rounded-lg text-[11px] bg-background/80 border border-border/40 focus:border-brand/50 focus:ring-1 focus:ring-brand/20 focus:outline-none text-foreground placeholder:text-zinc-400"
+                />
+              </div>
+
+              <div className="flex-1" />
 
               {/* Botão "Enviar Todos" via Link */}
               {linkSuppliers.length > 1 && (
@@ -872,26 +886,6 @@ export function QuoteValuesTab({
                 >
                   {useGroupedLink ? "Agrupado" : "Agrupar"}
                 </button>
-              </div>
-            )}
-
-            {!isMobile && (
-              <div className="px-6 py-2 border-b border-border dark:border-white/5 bg-muted/30 flex-shrink-0">
-                  <div className="grid grid-cols-[36px_minmax(0,1fr)_minmax(220px,1.9fr)_40px] gap-3 items-center px-4">
-                    <div />
-                    <div className="relative group">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-zinc-400 group-focus-within:text-brand transition-colors pointer-events-none" />
-                      <input
-                        type="text"
-                        placeholder="Filtrar produto..."
-                        value={productSearch}
-                        onChange={e => setProductSearch(e.target.value)}
-                        className="w-full pl-7 pr-2 h-7 rounded-lg text-[11px] bg-background/80 border border-border/40 focus:border-brand/50 focus:ring-1 focus:ring-brand/20 focus:outline-none text-foreground placeholder:text-zinc-400"
-                      />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 text-right pr-2">Negociação e Valor</span>
-                    <div />
-                  </div>
               </div>
             )}
 
