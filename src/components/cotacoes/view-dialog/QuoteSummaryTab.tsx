@@ -92,8 +92,8 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       className={cn(
         "grid grid-cols-[1fr_auto] md:grid-cols-[minmax(0,1.5fr)_44px_48px_120px_150px_minmax(0,1.1fr)] gap-x-2 md:gap-2 items-center px-3 py-1.5 rounded-lg border transition-all duration-200",
         item.bestPrice > 0
-          ? "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
-          : "bg-muted/20 border-border dark:border-white/5 opacity-60 grayscale-[0.5]"
+          ? "bg-muted/20 border-border/80 dark:border-white/10 hover:border-brand/40"
+          : "bg-muted/20 border-border/80 dark:border-white/10 opacity-60 grayscale-[0.5]"
       )}
     >
       {/* Produto — col 1 */}

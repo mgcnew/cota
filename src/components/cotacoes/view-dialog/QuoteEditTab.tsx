@@ -165,8 +165,8 @@ export function QuoteEditTab({
   };
 
   return (
-    <div className="bg-transparent w-full">
-      <div className="p-4 space-y-4">
+    <div className="bg-transparent w-full h-full min-h-0 flex flex-col">
+      <div className="p-4 space-y-4 flex-1 min-h-0 flex flex-col">
         {/* Busca unificada */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
@@ -225,16 +225,16 @@ export function QuoteEditTab({
         </div>
 
         {/* Duas colunas: Produtos | Fornecedores */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 min-h-0 overflow-y-auto md:overflow-visible">
           {/* Produtos */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2 rounded-xl border border-border dark:border-white/5 bg-card/30 p-3 min-h-0">
             <div className="flex items-center gap-2 px-1">
               <div className="p-1 rounded-lg bg-brand/10"><Package className="h-3.5 w-3.5 text-brand" /></div>
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Produtos</span>
               <span className="text-[10px] font-bold text-muted-foreground/60 tabular-nums">{products.length}</span>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 flex-1 min-h-0 overflow-y-auto -mr-1 pr-1">
               {products.length > 0 ? (
                 products.map((p: any) => (
                   <div key={p.product_id} className="flex items-center gap-2 px-2 py-1 bg-muted/20 border border-border dark:border-white/5 rounded-lg group hover:border-brand/30 transition-colors">
@@ -299,14 +299,14 @@ export function QuoteEditTab({
           </div>
 
           {/* Fornecedores */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2 rounded-xl border border-border dark:border-white/5 bg-card/30 p-3 min-h-0">
             <div className="flex items-center gap-2 px-1">
               <div className="p-1 rounded-lg bg-brand/10"><Building2 className="h-3.5 w-3.5 text-brand" /></div>
               <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Fornecedores</span>
               <span className="text-[10px] font-bold text-muted-foreground/60 tabular-nums">{fornecedores.length}</span>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 flex-1 min-h-0 overflow-y-auto -mr-1 pr-1">
               {fornecedores.length > 0 ? (
                 fornecedores.map((f: any) => (
                   <div key={f.id} className="flex items-center gap-2 px-2 py-1 bg-muted/20 border border-border dark:border-white/5 rounded-lg group hover:border-brand/30 transition-colors">

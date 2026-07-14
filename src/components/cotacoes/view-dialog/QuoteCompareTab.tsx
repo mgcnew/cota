@@ -156,7 +156,8 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
   }
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="p-2 sm:p-3 w-full h-full min-h-0 flex flex-col">
+      <div className="flex flex-col w-full flex-1 min-h-0 rounded-xl border border-border dark:border-white/5 overflow-hidden bg-card/30">
       {/* Barra de contexto: cesta ótima + navegação de colunas */}
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-border dark:border-white/5 bg-card/50">
         <div className="flex items-center gap-2">
@@ -224,7 +225,7 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
       </div>
 
       {/* Matriz — scroll horizontal próprio, 1ª coluna fixa, fades nas bordas */}
-      <div className="relative">
+      <div className="relative flex-1 min-h-0 flex flex-col">
         {canScroll.left && (
           <div className="pointer-events-none absolute left-[140px] top-0 bottom-0 w-6 bg-gradient-to-r from-background/90 to-transparent z-20" />
         )}
@@ -232,7 +233,7 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
           <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-background/90 to-transparent z-20" />
         )}
 
-        <div ref={scrollRef} onScroll={updateScrollHints} className="overflow-x-auto custom-scrollbar">
+        <div ref={scrollRef} onScroll={updateScrollHints} className="flex-1 min-h-0 overflow-auto custom-scrollbar">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border dark:border-white/5 bg-muted/30">
@@ -242,8 +243,8 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
                 {visibleSuppliers.map((f: any) => {
                   const wins = matrix.supplierWins[f.id];
                   return (
-                    <th key={f.id} className="px-2 py-2 min-w-[104px] text-right">
-                      <div className="flex flex-col items-end gap-0.5">
+                    <th key={f.id} className="px-2 py-2 min-w-[104px] text-center">
+                      <div className="flex flex-col items-center gap-0.5">
                         <span
                           className="text-[11px] font-semibold text-foreground truncate max-w-[96px]"
                           title={f.nome}
@@ -280,7 +281,7 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
                       const cell = matrix.cells[p.product_id][f.id];
                       if (!cell) {
                         return (
-                          <td key={f.id} className="px-2 py-2 text-right">
+                          <td key={f.id} className="px-2 py-2 text-center">
                             <span className="text-xs text-muted-foreground/40">—</span>
                           </td>
                         );
@@ -294,11 +295,11 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
                         <td
                           key={f.id}
                           className={cn(
-                            "px-2 py-2 text-right align-middle",
+                            "px-2 py-2 text-center align-middle",
                             isBest && "bg-emerald-500/[0.07]"
                           )}
                         >
-                          <div className="flex items-center justify-end gap-1">
+                          <div className="flex items-center justify-center gap-1">
                             {isBest && <Trophy className="h-2.5 w-2.5 text-emerald-500 shrink-0" />}
                             <span className={cn(
                               "text-xs tabular-nums whitespace-nowrap",
@@ -328,7 +329,7 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
                 {visibleSuppliers.map((f: any) => {
                   const total = matrix.supplierTotals[f.id];
                   return (
-                    <td key={f.id} className="px-2 py-2 text-right">
+                    <td key={f.id} className="px-2 py-2 text-center">
                       <span className={cn(
                         "text-xs font-bold tabular-nums whitespace-nowrap",
                         total > 0 ? "text-foreground" : "text-muted-foreground/40"
@@ -345,7 +346,7 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
                   <span className="text-[10px] text-muted-foreground">Itens cotados</span>
                 </td>
                 {visibleSuppliers.map((f: any) => (
-                  <td key={f.id} className="px-2 pb-2.5 pt-0.5 text-right">
+                  <td key={f.id} className="px-2 pb-2.5 pt-0.5 text-center">
                     <span className="text-[10px] text-muted-foreground tabular-nums">
                       {matrix.supplierCoverage[f.id]}/{products.length}
                     </span>
@@ -355,6 +356,7 @@ export function QuoteCompareTab({ products, fornecedores, supplierItems, safeStr
             </tfoot>
           </table>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -2130,8 +2130,8 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0">
                           {/* Formulário de Adição - Lado Esquerdo */}
                           <div className={cn(
-                            "flex flex-col space-y-4 h-full min-h-0 pr-2 select-none flex-shrink-0 lg:flex-shrink relative z-[20]",
-                            "pb-20 sm:pb-0" // Espaço extra para o botão no mobile
+                            "flex flex-col space-y-4 h-full min-h-0 select-none flex-shrink-0 lg:flex-shrink relative z-[20] rounded-xl border border-border dark:border-white/5 bg-card/30 p-4",
+                            "pb-20 sm:pb-4" // Espaço extra para o botão no mobile
                           )}>
                             <div className="pb-1 border-b border-border dark:border-white/5">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
@@ -2364,7 +2364,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                           </div>
 
                           {/* Lista de Produtos - Lado Direito */}
-                          <div className="hidden lg:flex flex-col space-y-4 h-full min-h-0 overflow-hidden relative z-[10]">
+                          <div className="hidden lg:flex flex-col space-y-4 h-full min-h-0 overflow-hidden relative z-[10] rounded-xl border border-border dark:border-white/5 bg-card/30 p-4">
                             <div className="pb-1 border-b border-border dark:border-white/5 flex-shrink-0">
                               <h3 className={cn(ds.typography.size.base, ds.typography.weight.medium, ds.colors.text.primary, "flex items-center gap-2")}>
                                 <Package className={cn("h-5 w-5 flex-shrink-0", ds.colors.text.secondary)} />
@@ -2414,12 +2414,12 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
 
                     {/* Periodo & Fornecedores - Tab Unificada */}
                     <TabsContent value="periodo_fornecedores" className="flex-1 h-full min-h-0 overflow-y-auto custom-scrollbar m-0 p-0">
-                      <div className="flex flex-col lg:flex-row h-full">
+                      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 h-full p-3 sm:p-4 md:p-6">
 
                         {/* Esquerda: Periodo */}
                         <div className={cn(
-                          "flex flex-col gap-5 p-5 sm:p-6 lg:w-[320px] xl:w-[360px] flex-shrink-0 overflow-y-auto pb-24 scrollbar-hide",
-                          "lg:border-r border-border/50 bg-card rounded-l-2xl"
+                          "flex flex-col gap-5 p-4 sm:p-5 lg:w-[320px] xl:w-[360px] flex-shrink-0 overflow-y-auto scrollbar-hide",
+                          "rounded-xl border border-border dark:border-white/5 bg-card/30"
                         )}>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-brand flex-shrink-0" />
@@ -2655,7 +2655,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                         {/* Direita: Fornecedores */}
                         <div className={cn(
                           "flex flex-col flex-1 min-h-0 overflow-hidden",
-                          ds.colors.surface.page
+                          "rounded-xl border border-border dark:border-white/5 bg-card/30"
                         )}>
                           <div className={cn("p-4 sm:p-5 border-b flex-shrink-0", ds.colors.border.default)}>
                             <div className="flex items-center justify-between mb-3">

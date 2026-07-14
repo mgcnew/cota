@@ -548,10 +548,10 @@ export function QuoteValuesTab({
       </AlertDialogContent>
     </AlertDialog>
 
-    <div className="flex flex-col md:flex-row w-full h-full bg-transparent overflow-hidden">
-      {/* Sidebar - Lista de Fornecedores */}
+    <div className="flex flex-col md:flex-row gap-3 w-full h-full min-h-0 bg-transparent overflow-hidden p-2 sm:p-3">
+      {/* Sidebar - Lista de Fornecedores (Participantes) */}
       <div className={cn(
-        "w-full md:w-60 flex-shrink-0 border-b md:border-b-0 md:border-r border-border/50 flex flex-col bg-muted/10 h-full",
+        "w-full md:w-60 flex-shrink-0 flex flex-col bg-muted/10 rounded-xl border border-border dark:border-white/5 overflow-hidden min-h-0",
       )}>
         <div className="p-3 border-b border-border dark:border-white/5 bg-card/50">
           <div className="flex items-center justify-between gap-2">
@@ -737,7 +737,7 @@ export function QuoteValuesTab({
       </div>
       {/* Ãrea Principal - Valores (Desktop) */}
       {!isMobile && (
-        <div className="flex-1 flex flex-col bg-background overflow-hidden">
+        <div className="flex-1 flex flex-col bg-background rounded-xl border border-border dark:border-white/5 overflow-hidden min-h-0">
 
         {selectedSupplier ? (
           <>
