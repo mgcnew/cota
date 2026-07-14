@@ -748,20 +748,31 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
                 </p>
               </div>
             )}
-            <div className="flex gap-2 w-full max-w-[320px] mt-1">
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="flex-1 h-10 text-xs font-semibold"
-              >
-                Agora não
-              </Button>
+            <div className="flex flex-col gap-2 w-full max-w-[320px] mt-1">
               <Button
                 onClick={handleDownloadReport}
-                className="flex-1 h-10 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                className="w-full h-10 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
               >
                 <Download className="h-4 w-4" />Baixar relatório
               </Button>
+              <div className="flex gap-2">
+                {pendentesFiltered.length > 0 && (
+                  <Button
+                    variant="outline"
+                    onClick={() => { setShowReportPrompt(false); setShowQueue(true); }}
+                    className="flex-1 h-9 text-xs font-semibold border-emerald-600/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-600/5 gap-1.5"
+                  >
+                    <ListChecks className="h-4 w-4" />Próximo recebimento
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  onClick={() => onOpenChange(false)}
+                  className="flex-1 h-9 text-xs font-semibold text-muted-foreground"
+                >
+                  Fechar
+                </Button>
+              </div>
             </div>
           </div>
         )}
