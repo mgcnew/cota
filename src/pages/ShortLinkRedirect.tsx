@@ -55,7 +55,7 @@ export default function ShortLinkRedirect() {
         <p className="text-muted-foreground mb-6">Não conseguimos localizar esta cotação. Por favor, peça um novo link ao comprador.</p>
         <button 
           onClick={() => navigate("/")}
-          className="px-6 py-2 bg-brand text-black font-bold rounded-lg"
+          className="px-6 py-2 bg-brand text-white font-bold rounded-lg"
         >
           Ir para o Início
         </button>

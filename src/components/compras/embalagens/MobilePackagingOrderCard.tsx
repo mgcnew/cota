@@ -149,7 +149,7 @@ export const MobilePackagingOrderCard = memo(function MobilePackagingOrderCard({
               ? "bg-muted text-foreground hover:bg-muted/80"
               : isConfirmado
                 ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                : "bg-brand hover:bg-brand/90 text-white dark:text-zinc-950"
+                : "bg-brand hover:bg-brand/90 text-white"
           )}
         >
           {ctaIcon}

@@ -469,7 +469,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                   <div className="flex items-center justify-between mb-3">
                     <span className={cn(
                       "text-[9px] font-black uppercase px-2 py-0.5 rounded-md",
-                      idx === 0 ? "bg-brand text-black" : "bg-muted text-muted-foreground"
+                      idx === 0 ? "bg-brand text-white" : "bg-muted text-muted-foreground"
                     )}>
                       #{idx + 1}
                     </span>
@@ -581,7 +581,7 @@ export default function ResumoCotacaoDialog({ open, onOpenChange, quote }: Resum
                             <div className={cn(
                               "w-5 h-5 rounded flex items-center justify-center text-[9px] font-black border transition-all",
                               offer.isWinner 
-                                ? "bg-brand border-brand text-black shadow-sm" 
+                                ? "bg-brand border-brand text-white shadow-sm"
                                 : "bg-muted border-border text-muted-foreground"
                             )}>
                               {offer.isWinner ? <Check className="h-3 w-3" strokeWidth={4} /> : oIdx + 1}

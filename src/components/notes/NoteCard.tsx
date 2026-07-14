@@ -74,7 +74,7 @@ export const NoteCard = memo(({ note, index, onEdit, onResolve, onDelete, onTogg
           className={cn(
             "absolute top-3 right-3 p-1.5 rounded-lg transition-all z-10",
             note.pinned 
-              ? "bg-brand text-zinc-950 dark:text-white opacity-100" 
+              ? "bg-brand text-white opacity-100"
               : "text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-zinc-100 dark:hover:bg-zinc-800"
           )}
           title={note.pinned ? "Desafixar" : "Fixar"}

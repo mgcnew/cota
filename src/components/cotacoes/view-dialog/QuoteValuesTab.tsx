@@ -569,7 +569,7 @@ export function QuoteValuesTab({
                     ? "bg-brand/10 text-brand border-brand/20 cursor-wait"
                     : unsentLinkCount === 0
                       ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default"
-                      : "bg-brand text-black border-brand hover:bg-brand/90"
+                      : "bg-brand text-white border-brand hover:bg-brand/90"
                 )}
                 title={unsentLinkCount === 0 ? "Todos já enviados" : `Enviar para ${unsentLinkCount} fornecedor${unsentLinkCount > 1 ? 'es' : ''}`}
               >
@@ -598,7 +598,7 @@ export function QuoteValuesTab({
                     "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight transition-all",
                     !isWhatsAppConfigured() && "opacity-40 cursor-not-allowed",
                     sendMode === 'api'
-                      ? "bg-brand text-black shadow-sm"
+                      ? "bg-brand text-white shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -612,7 +612,7 @@ export function QuoteValuesTab({
                   className={cn(
                     "flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight transition-all",
                     sendMode === 'manual'
-                      ? "bg-brand text-black shadow-sm"
+                      ? "bg-brand text-white shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -691,7 +691,7 @@ export function QuoteValuesTab({
                       ) : (
                         <Badge variant={isSelected ? "default" : "outline"} className={cn(
                           "h-5 px-1.5 text-[10px] font-bold tabular-nums",
-                          isSelected ? "bg-brand text-black" : "text-muted-foreground"
+                          isSelected ? "bg-brand text-white" : "text-muted-foreground"
                         )}>
                           {total > 0 ? formatCurrency(total) : "Pendente"}
                         </Badge>
@@ -708,8 +708,8 @@ export function QuoteValuesTab({
                           sentSuppliers[fornecedor.id]
                             ? "bg-emerald-500/15 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/25"
                             : isSelected
-                              ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-black"
-                              : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-black"
+                              ? "bg-brand/10 text-brand border-brand/20 hover:bg-brand hover:text-white"
+                              : "bg-muted/50 text-muted-foreground border-transparent hover:bg-brand hover:text-white"
                         )}
                         title={sentSuppliers[fornecedor.id] ? "Cotação já enviada" : "Enviar Cotação via WhatsApp"}
                       >
@@ -781,7 +781,7 @@ export function QuoteValuesTab({
                               ? "bg-brand/10 text-brand border-brand/20 cursor-wait"
                               : unsentLinkCount === 0
                                 ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 cursor-default"
-                                : "bg-brand text-black border-brand hover:bg-brand/90 hover:shadow-md shadow-brand/20"
+                                : "bg-brand text-white border-brand hover:bg-brand/90 hover:shadow-md shadow-brand/20"
                           )}
                         >
                           {isSendingAll ? (
@@ -969,7 +969,7 @@ export function QuoteValuesTab({
                             )}
                           </div>
                           <div className="flex gap-1">
-                            <Button size="icon" className="h-10 w-10 rounded-xl bg-brand hover:bg-brand/90 text-black shadow-lg shadow-brand/10" onClick={() => handleSaveEdit(product.product_id)}>
+                            <Button size="icon" className="h-10 w-10 rounded-xl bg-brand hover:bg-brand/90 text-white shadow-lg shadow-brand/10" onClick={() => handleSaveEdit(product.product_id)}>
                               <Check className="h-5 w-5 stroke-[3px]" />
                             </Button>
                             <Button size="icon" variant="ghost" className="h-10 w-10 rounded-xl text-zinc-400 hover:text-red-500 hover:bg-red-500/10" onClick={handleCancelEdit}>
@@ -1059,7 +1059,7 @@ export function QuoteValuesTab({
                                           <Trophy className="h-3 w-3" />
                                         </div>
                                       </TooltipTrigger>
-                                      <TooltipContent className="bg-brand text-black font-bold text-[11px] uppercase border-none shadow-xl">Melhor Preço</TooltipContent>
+                                      <TooltipContent className="bg-brand text-white font-bold text-[11px] uppercase border-none shadow-xl">Melhor Preço</TooltipContent>
                                     </Tooltip>
                                   </TooltipProvider>
                                 )}
@@ -1321,7 +1321,7 @@ export function QuoteValuesTab({
                            </div>
                         </div>
                         {isBest && (
-                          <div className="flex items-center justify-center h-6 w-6 bg-brand text-black rounded-full shadow-lg shadow-brand/20" title="Melhor preço deste item">
+                          <div className="flex items-center justify-center h-6 w-6 bg-brand text-white rounded-full shadow-lg shadow-brand/20" title="Melhor preço deste item">
                             <Trophy className="h-3.5 w-3.5" />
                           </div>
                         )}
@@ -1351,7 +1351,7 @@ export function QuoteValuesTab({
                           </div>
                           <Button 
                             size="icon" 
-                            className="h-11 w-11 rounded-xl bg-brand text-black shadow-lg shadow-brand/20 active:scale-95 transition-transform" 
+                            className="h-11 w-11 rounded-xl bg-brand text-white shadow-lg shadow-brand/20 active:scale-95 transition-transform" 
                             onClick={() => handleSaveEdit(product.product_id)}
                           >
                             <Check className="h-6 w-6 stroke-[3.5px]" />
@@ -1475,7 +1475,7 @@ export function QuoteValuesTab({
                     "flex-1 h-12 rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg transition-all duration-300",
                     sentSuppliers[selectedSupplier || '']
                       ? "bg-emerald-500 text-white shadow-emerald-500/20"
-                      : "bg-brand text-black shadow-brand/20"
+                      : "bg-brand text-white shadow-brand/20"
                   )}
                   onClick={(e) => handleWhatsApp(e, selectedSupplier || '', currentSupplier?.nome || '', currentSupplier?.contact || currentSupplier?.contato, currentSupplier?.phone, currentSupplier?.accessToken)}
                 >

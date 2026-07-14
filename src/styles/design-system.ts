@@ -7,7 +7,7 @@
  * sem tocar em nenhum componente.
  */
 
-const BRAND_COLOR = "#3B82F6"; // Azul Principal
+const BRAND_COLOR = "#19398d"; // Azul-marinho (Trust Blue)
 
 export const designSystem = {
     // ============================================
@@ -15,7 +15,7 @@ export const designSystem = {
     // ============================================
     primitives: {
         brand: BRAND_COLOR,
-        brandHover: "#2563EB",
+        brandHover: "#1f4299",
         white: "#FFFFFF",
         black: "#09090b",
         zinc: {
@@ -39,8 +39,8 @@ export const designSystem = {
     colors: {
         brand: {
             primary: BRAND_COLOR,
-            hover: "#2563EB",
-            light: "rgba(59, 130, 246, 0.1)"
+            hover: "#1f4299",
+            light: "rgba(25, 57, 141, 0.1)"
         },
         text: {
             primary: "text-foreground",

@@ -918,7 +918,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
             )}
           >
             <Package className="h-4 w-4" />
-            <span className="absolute -top-1 -right-1 bg-brand text-zinc-950 text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center font-bold">
+            <span className="absolute -top-1 -right-1 bg-brand text-white text-[10px] w-[16px] h-[16px] rounded-full flex items-center justify-center font-bold">
               {fields.length}
             </span>
           </button>
@@ -1263,7 +1263,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                   return date < today;
                                 }}
                                 classNames={{
-                                  day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                  day_selected: "bg-brand text-white hover:bg-brand hover:text-white focus:bg-brand focus:text-white font-black rounded-xl",
                                   day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
                                   day: cn(
                                     buttonVariants({ variant: "ghost" }),
@@ -1289,7 +1289,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                         <Building2 className="h-3.5 w-3.5 text-brand" />
                         Fornecedores
                         {selectedSuppliers.length > 0 && (
-                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-brand text-zinc-950">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-brand text-white">
                             {selectedSuppliers.length}
                           </span>
                         )}
@@ -1362,7 +1362,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                               >
                                 <div className={cn(
                                   "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
-                                  isSelected ? "bg-brand border-brand text-zinc-950" : ds.colors.border.default
+                                  isSelected ? "bg-brand border-brand text-white" : ds.colors.border.default
                                 )}>
                                   {isSelected && <Check className="h-3 w-3" />}
                                 </div>
@@ -1594,7 +1594,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                     >
                                       <div className={cn(
                                         "w-5 h-5 rounded border flex items-center justify-center transition-all",
-                                        isChecked ? "bg-brand border-brand text-zinc-950" : "border-zinc-300 dark:border-zinc-700"
+                                        isChecked ? "bg-brand border-brand text-white" : "border-zinc-300 dark:border-zinc-700"
                                       )}>
                                         {isChecked && <Check className="h-3 w-3" />}
                                       </div>
@@ -1680,7 +1680,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                     >
                                       <div className={cn(
                                         "w-5 h-5 rounded border flex items-center justify-center transition-all",
-                                        isChecked ? "bg-brand border-brand text-zinc-950" : "border-zinc-300 dark:border-zinc-700"
+                                        isChecked ? "bg-brand border-brand text-white" : "border-zinc-300 dark:border-zinc-700"
                                       )}>
                                         {isChecked && <Check className="h-3 w-3" />}
                                       </div>
@@ -2491,7 +2491,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                           return date < today;
                                         }}
                                         classNames={{
-                                          day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                          day_selected: "bg-brand text-white hover:bg-brand hover:text-white focus:bg-brand focus:text-white font-black rounded-xl",
                                           day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
                                           day: cn(
                                             buttonVariants({ variant: "ghost" }),
@@ -2576,7 +2576,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                             onSelect={field.onChange}
                                             locale={ptBR}
                                             classNames={{
-                                              day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                              day_selected: "bg-brand text-white hover:bg-brand hover:text-white focus:bg-brand focus:text-white font-black rounded-xl",
                                               day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
                                               day: cn(
                                                 buttonVariants({ variant: "ghost" }),
@@ -2630,7 +2630,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                               return date < d;
                                             }}
                                             classNames={{
-                                              day_selected: "bg-brand text-zinc-950 hover:bg-brand hover:text-zinc-950 focus:bg-brand focus:text-zinc-950 font-black rounded-xl",
+                                              day_selected: "bg-brand text-white hover:bg-brand hover:text-white focus:bg-brand focus:text-white font-black rounded-xl",
                                               day_today: "bg-muted/50 text-accent-foreground border-2 border-brand/20 rounded-xl",
                                               day: cn(
                                                 buttonVariants({ variant: "ghost" }),
@@ -2665,7 +2665,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                   Fornecedores
                                 </span>
                                 {selectedSuppliers.length > 0 && (
-                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand text-zinc-950">
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-brand text-white">
                                     {selectedSuppliers.length}
                                   </span>
                                 )}
@@ -2737,7 +2737,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                       >
                                         <div className={cn(
                                           "w-5 h-5 rounded-md border flex items-center justify-center flex-shrink-0 transition-colors",
-                                          isSelected ? "bg-brand border-brand text-zinc-950" : cn(ds.colors.border.default, "bg-transparent")
+                                          isSelected ? "bg-brand border-brand text-white" : cn(ds.colors.border.default, "bg-transparent")
                                         )}>
                                           {isSelected && <Check className="h-3 w-3" />}
                                         </div>
@@ -2950,7 +2950,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                         <div className="flex items-center gap-3">
                                           <div className={cn(
                                             "w-9 h-9 rounded-xl flex items-center justify-center transition-colors",
-                                            isExpanded ? "bg-brand text-zinc-950" : "bg-brand/10 text-brand"
+                                            isExpanded ? "bg-brand text-white" : "bg-brand/10 text-brand"
                                           )}>
                                             <Building2 className="h-4 w-4" />
                                           </div>
@@ -3062,7 +3062,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                                   >
                                                     <div className={cn(
                                                       "absolute top-2 right-2 w-4 h-4 rounded-full border flex items-center justify-center transition-all",
-                                                      isAssigned ? "bg-brand border-brand text-zinc-950 scale-100" : "bg-transparent border-border scale-90"
+                                                      isAssigned ? "bg-brand border-brand text-white scale-100" : "bg-transparent border-border scale-90"
                                                     )}>
                                                       {isAssigned && <Check className="h-2.5 w-2.5 stroke-[4]" />}
                                                     </div>
@@ -3169,7 +3169,7 @@ function AddQuoteDialog({ onAdd, trigger, open: externalOpen, onOpenChange: exte
                                             >
                                               <div className={cn(
                                                 "w-4 h-4 rounded-full border flex items-center justify-center transition-all flex-shrink-0",
-                                                isAssigned ? "bg-brand border-brand text-zinc-950" : "bg-transparent border-border"
+                                                isAssigned ? "bg-brand border-brand text-white" : "bg-transparent border-border"
                                               )}>
                                                 {isAssigned && <Check className="h-2.5 w-2.5 stroke-[4]" />}
                                               </div>

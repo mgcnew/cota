@@ -544,7 +544,7 @@ export function QuoteConversionTab({
 
       {/* Rodapé fixo — Converter em Pedido (abaixo de tudo, com padding lateral) */}
       <div className="flex-shrink-0 border-t border-border dark:border-white/5 bg-background px-4 py-3 flex justify-end">
-        <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="h-9 px-4 rounded-lg bg-brand hover:bg-brand/90 text-black font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
+        <Button onClick={handleConvertToOrder} disabled={!deliveryDate || (pedidoSubTab === 'dividido' ? Object.keys(productAllocations).length === 0 : Object.keys(productSelections).length === 0)} className="h-9 px-4 rounded-lg bg-brand hover:bg-brand/90 text-white font-black text-[11px] shadow-sm shadow-brand/20 transition-all">
           <ShoppingCart className="h-3.5 w-3.5 mr-2" />
           Converter em Pedido
         </Button>

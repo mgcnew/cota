@@ -725,8 +725,8 @@ export default function PedidoDialog({ open, onOpenChange, pedido, onEdit }: Ped
                                   onClick={() => { if (isApply) { setNewPrice(calcDisplay); setShowCalc(false); } else handleCalcKey(k); }}
                                   className={cn(
                                     "rounded-lg py-2.5 text-sm font-bold transition-all active:scale-90",
-                                    isEq && "bg-brand text-zinc-950 shadow-lg shadow-brand/20",
-                                    isOp && !isEq && "bg-zinc-800 text-brand hover:bg-brand hover:text-zinc-950",
+                                    isEq && "bg-brand text-white shadow-lg shadow-brand/20",
+                                    isOp && !isEq && "bg-zinc-800 text-brand hover:bg-brand hover:text-white",
                                     isAct && "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white",
                                     isApply && "bg-emerald-500/10 text-emerald-600 font-black text-xs hover:bg-emerald-500 hover:text-white",
                                     !isOp && !isEq && !isAct && !isApply && "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-brand/20 hover:text-brand"

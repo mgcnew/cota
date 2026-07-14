@@ -27,25 +27,25 @@
        PREMIUM MINIMALIST LIGHT MODE
        ============================================ */
     
-    /* Background Colors */
-    --background: 220 13% 93%; /* Aluminum — cards brancos flutuam visivelmente */
-    --foreground: 216 8.2% 12%; /* #1C1E21 */
-    
+    /* Background Colors — Trust Blue Navy (hex convertido p/ canais HSL) */
+    --background: 224 48% 97%; /* #f3f5fb — off-white azulado */
+    --foreground: 0 0% 4%; /* #010101 */
+
     /* Card System */
     --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 216 8.2% 12%;
-    
-    /* Cor Primária: Azul Principal (#3B82F6) */
-    --primary: 217 91% 60%; 
-    --primary-foreground: 0 0% 100%; /* Texto branco no azul para contraste */
-    --primary-light: 217 91% 75%;
-    --primary-lighter: 217 91% 90%;
-    
-    /* Secondary Colors */
+    --card-foreground: 0 0% 4%;
+
+    /* Cor Primária: Azul-marinho (#19398d) */
+    --primary: 223 70% 33%;
+    --primary-foreground: 210 30% 96%; /* #f3f5f9 */
+    --primary-light: 223 62% 52%;
+    --primary-lighter: 223 55% 85%;
+
+    /* Secondary Colors — mantido cinza-claro (escolha do usuário) */
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
-    
-    /* Utility Colors */
+
+    /* Utility Colors (mantidos — o sistema novo não traz status) */
     --success: 142 76% 36%;
     --success-light: 142 76% 46%;
     --warning: 38 92% 50%;
@@ -53,24 +53,41 @@
     --error: 0 84% 60%;
     --error-light: 0 84% 70%;
     --info: 199 89% 48%;
-    
-    /* Neutral Palette */
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+
+    /* Neutral Palette — accent mantido como superfície de hover (não vira navy) */
+    --muted: 0 0% 96%; /* #f5f5f5 */
+    --muted-foreground: 0 0% 27%; /* #454545 */
     --accent: 240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
-    
+
     /* Interactive Elements */
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 217 91% 60%;
-    
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    
+    --border: 0 0% 89%; /* #e3e3e3 */
+    --input: 0 0% 100%; /* #ffffff */
+    --ring: 223 51% 40%; /* #324f9a */
+
+    --destructive: 340 100% 30%; /* #9b0033 */
+    --destructive-foreground: 0 0% 100%;
+
     /* Popover/Tooltips - Branco no modo claro */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 0 0% 4%;
+
+    /* Sidebar (navy profundo — #001B3C) */
+    --sidebar-background: 213 100% 12%; /* #001B3C */
+    --sidebar-foreground: 220 40% 97%; /* #f4f5fc */
+    --sidebar-primary: 223 70% 33%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 223 70% 33%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 83%; /* #d4d4d4 */
+    --sidebar-ring: 223 70% 33%;
+
+    /* Charts */
+    --chart-1: 211 98% 36%; /* #0159b7 */
+    --chart-2: 170 83% 43%; /* #13c9aa */
+    --chart-3: 296 67% 55%; /* #cf3fd9 */
+    --chart-4: 16 65% 34%;  /* #8f3c1e */
+    --chart-5: 168 76% 38%; /* #17ab92 */
     
     --radius: 0.75rem;
     
@@ -89,48 +106,67 @@
        Pure neutrals, zero hue, maximum contrast
        ============================================ */
 
-    /* Background — near-black, pure neutral */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
+    /* Background — near-black (#050505) */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%; /* #fafafa */
 
-    /* Cards — elevated above background (menos acinzentado, mais próximo do preto) */
-    --card: 0 0% 6%;
+    /* Cards — elevated above background (#0a0a0a) */
+    --card: 0 0% 4%;
     --card-foreground: 0 0% 98%;
 
-    /* Popovers/Dropdowns */
-    --popover: 0 0% 10%;
+    /* Popovers/Dropdowns (#171717) */
+    --popover: 0 0% 9%;
     --popover-foreground: 0 0% 98%;
 
-    /* Cor Primária - Azul Principal */
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
+    /* Cor Primária - Azul dessaturado p/ dark (#6a8dd8) */
+    --primary: 221 58% 63%;
+    --primary-foreground: 0 0% 4%; /* #0a0a0a */
+    --primary-light: 221 58% 70%;
+    --primary-lighter: 221 50% 80%;
 
-    /* Secondary */
-    --secondary: 0 0% 13%;
+    /* Secondary (#171717) */
+    --secondary: 0 0% 9%;
     --secondary-foreground: 0 0% 98%;
 
-    /* Muted */
-    --muted: 0 0% 13%;
-    --muted-foreground: 0 0% 65%;
+    /* Muted (#262626 / #a1a1a1) */
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63%;
 
-    /* Accent — clearly above card for visible hover states */
-    --accent: 0 0% 16%;
+    /* Accent — clearly above card for visible hover states (#404040) */
+    --accent: 0 0% 25%;
     --accent-foreground: 0 0% 98%;
 
-    /* Borders — clearly visible against card surface */
-    --border: 0 0% 20%;
-    --input: 0 0% 13%;
-    --ring: 217 91% 60%;
+    /* Borders (#282828 / input #121212) */
+    --border: 0 0% 16%;
+    --input: 0 0% 7%;
+    --ring: 221 58% 63%; /* #6a8dd8 */
 
-    /* Destructive */
-    --destructive: 0 72% 51%;
+    /* Destructive (#cd6e7b) */
+    --destructive: 352 49% 62%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Cores de Status */
+    /* Cores de Status (mantidas) */
     --success: 142 70% 48%;
     --warning: 48 96% 53%;
     --error: 0 84% 60%;
     --info: 199 89% 48%;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 4%; /* #0a0a0a */
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 221 58% 63%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 221 58% 63%;
+
+    /* Charts */
+    --chart-1: 221 58% 63%; /* #6a8dd8 */
+    --chart-2: 217 73% 47%; /* #2062ce */
+    --chart-3: 72 100% 19%; /* #4c5f00 */
+    --chart-4: 16 54% 57%;  /* #cc7455 */
+    --chart-5: 170 41% 50%; /* #4bb3a1 */
 
     /* Box Shadows (Custom for Dark Mode) */
     --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.6);
@@ -165,15 +201,15 @@
 
   .dark .app-bg {
     background:
-      radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.07) 0%, transparent 65%),
-      hsl(0 0% 4%);
+      radial-gradient(ellipse at 50% 50%, rgba(106, 141, 216, 0.07) 0%, transparent 65%),
+      hsl(0 0% 2%);
   }
 
   /* Mobile: fundo escuro sólido (sem o gradiente radial de tela cheia), pra
      aliviar o compositor em aparelhos fracos e evitar corrupção de camada. */
   @media (max-width: 767px) {
     .dark .app-bg {
-      background: hsl(0 0% 4%);
+      background: hsl(0 0% 2%);
     }
   }
   

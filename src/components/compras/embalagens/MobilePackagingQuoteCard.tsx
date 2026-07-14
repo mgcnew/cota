@@ -168,7 +168,7 @@ export const MobilePackagingQuoteCard = memo(function MobilePackagingQuoteCard({
               ? "bg-emerald-600 hover:bg-emerald-700 text-white"
               : isClosed
                 ? "bg-muted text-foreground hover:bg-muted/80"
-                : "bg-brand hover:bg-brand/90 text-white dark:text-zinc-950"
+                : "bg-brand hover:bg-brand/90 text-white"
           )}
         >
           {ctaIcon}

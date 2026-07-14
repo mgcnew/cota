@@ -165,7 +165,7 @@ export const ExpandableSupplierCard = memo(function ExpandableSupplierCard({
           <Button
             onClick={handleAddQuote}
             size="sm"
-            className="flex-1 h-9 rounded-lg bg-brand hover:bg-brand/90 text-white dark:text-zinc-950 font-semibold text-xs gap-1.5"
+            className="flex-1 h-9 rounded-lg bg-brand hover:bg-brand/90 text-white font-semibold text-xs gap-1.5"
           >
             <Plus className="h-3.5 w-3.5" />
             Nova Cotação
