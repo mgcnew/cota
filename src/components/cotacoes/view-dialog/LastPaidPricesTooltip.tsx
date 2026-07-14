@@ -1,4 +1,4 @@
-import { Info, History, ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { History, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useProductPriceHistory } from "@/hooks/useProductPriceHistory";
 import { cn } from "@/lib/utils";
@@ -64,15 +64,16 @@ export function LastPaidPricesTooltip({ productId, currentPrice, variant = "inli
     <button
       type="button"
       className={cn(
-        "relative flex items-center justify-center -m-2 p-2 rounded-full focus:outline-none",
+        "relative flex items-center justify-center rounded-full focus:outline-none shrink-0",
         "text-muted-foreground hover:text-foreground transition-colors",
         className
       )}
       onClick={(e) => e.stopPropagation()}
-      aria-label="Últimos valores pagos"
+      aria-label="Histórico de valores pagos em outros pedidos"
+      title="Preço pago em outros pedidos"
     >
-      <div className="w-4 h-4 rounded-full bg-muted flex items-center justify-center ring-1 ring-zinc-200 dark:ring-zinc-800">
-        <Info className="h-3 w-3" />
+      <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-1 ring-zinc-200 dark:ring-zinc-700">
+        <History className="h-3 w-3" />
       </div>
     </button>
   );

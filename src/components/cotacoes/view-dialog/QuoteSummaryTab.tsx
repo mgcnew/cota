@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { designSystem } from "@/styles/design-system";
 import { MetricCard } from "@/components/ui/metric-card";
 import { CurrentPricesTooltip } from "./CurrentPricesTooltip";
+import { LastPaidPricesTooltip } from "./LastPaidPricesTooltip";
 
 interface QuoteSummaryTabProps {
   stats: {
@@ -89,7 +90,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
     <div
       key={item.productId}
       className={cn(
-        "grid grid-cols-[1fr_auto] md:grid-cols-[minmax(0,1.6fr)_52px_52px_112px_104px_minmax(0,1.3fr)] gap-x-2 md:gap-3 items-center px-3 py-1.5 rounded-lg border transition-all duration-200",
+        "grid grid-cols-[1fr_auto] md:grid-cols-[minmax(0,1.5fr)_44px_48px_120px_150px_minmax(0,1.1fr)] gap-x-2 md:gap-2 items-center px-3 py-1.5 rounded-lg border transition-all duration-200",
         item.bestPrice > 0
           ? "bg-muted/20 border-border dark:border-white/5 hover:border-brand/30"
           : "bg-muted/20 border-border dark:border-white/5 opacity-60 grayscale-[0.5]"
@@ -131,10 +132,11 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
                 -{((item.savings / (item.bestPrice + item.savings)) * 100).toFixed(0)}%
               </span>
             )}
-            <span className="text-[13px] font-black text-brand tracking-tight tabular-nums">
+            <span className="text-[13px] font-black text-brand tracking-tight tabular-nums whitespace-nowrap shrink-0">
               R$ {(item.bestUnitPrice ?? item.bestPrice).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </span>
-            <span className="text-[9px] font-bold text-muted-foreground shrink-0">/{safeStr(item.unidade)}</span>
+            {/* /unidade só no mobile (no desktop há coluna Unid. própria) */}
+            <span className="md:hidden text-[9px] font-bold text-muted-foreground shrink-0">/{safeStr(item.unidade)}</span>
             {/* Subtotal só aparece aqui no mobile (no desktop tem coluna própria) */}
             <span className="md:hidden shrink-0 text-[10px] font-bold text-zinc-400 dark:text-zinc-500 tabular-nums">
               · R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -146,13 +148,16 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
       </div>
 
       {/* Subtotal — col 5 (desktop) */}
-      <div className="hidden md:flex items-center justify-end gap-1.5">
+      <div className="hidden md:flex items-center justify-end gap-2.5">
         {item.bestPrice > 0 ? (
           <>
-            <span className="text-[13px] font-black text-zinc-700 dark:text-zinc-200 tabular-nums">
+            <span className="text-[13px] font-black text-zinc-700 dark:text-zinc-200 tabular-nums whitespace-nowrap shrink-0">
               R$ {item.bestPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </span>
-            <CurrentPricesTooltip prices={item.allPrices} />
+            <div className="flex items-center justify-start gap-2 w-[48px] shrink-0">
+              <CurrentPricesTooltip prices={item.allPrices} />
+              <LastPaidPricesTooltip productId={item.productId} currentPrice={item.bestUnitPrice ?? item.bestPrice} variant="icon" />
+            </div>
           </>
         ) : (
           <span className="text-[10px] font-bold text-zinc-300 dark:text-zinc-700">—</span>
@@ -284,7 +289,7 @@ export function QuoteSummaryTab({ stats, melhorTotal, productPricesData, safeStr
 
       {/* 3. TABELA (Corpo sem scroll interno) */}
       <div className="flex flex-col bg-transparent">
-        <div className="hidden md:grid grid-cols-[minmax(0,1.6fr)_52px_52px_112px_104px_minmax(0,1.3fr)] gap-3 px-6 py-2 bg-muted/30 border-b border-border dark:border-white/5/40">
+        <div className="hidden md:grid grid-cols-[minmax(0,1.5fr)_44px_48px_120px_150px_minmax(0,1.1fr)] gap-2 px-6 py-2 bg-muted/30 border-b border-border dark:border-white/5/40">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Item Adquirido</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Unid.</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground text-center">Quant.</span>

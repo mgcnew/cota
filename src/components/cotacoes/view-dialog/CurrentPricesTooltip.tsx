@@ -22,15 +22,15 @@ export function CurrentPricesTooltip({ prices }: CurrentPricesTooltipProps) {
   return (
     <Popover modal={false}>
       <PopoverTrigger asChild>
-        <button 
+        <button
           type="button"
           className={cn(
-            "relative flex items-center justify-center -m-2 p-2 rounded-full focus:outline-none",
+            "relative flex items-center justify-center rounded-full focus:outline-none shrink-0",
             "text-zinc-400 hover:text-brand transition-colors"
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="w-4 h-4 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-1 ring-zinc-200 dark:ring-zinc-700">
+          <div className="w-5 h-5 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center ring-1 ring-zinc-200 dark:ring-zinc-700">
             <Info className="h-3 w-3" />
           </div>
         </button>
