@@ -1,8 +1,12 @@
+import { lazy, Suspense, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, Calculator, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { TopBarSearch } from "./TopBarSearch";
+
+const ProcurementCalculator = lazy(() => import("@/components/compras/ProcurementCalculator"));
 
 // Mapeamento rota → título exibido na topbar. Do mais específico para o mais
 // genérico, pois o match é por startsWith (ex: "/dashboard/produtos" precisa
@@ -34,6 +38,8 @@ export function TopBar({ sidebarExpanded = false }: TopBarProps) {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
   const title = getPageTitle(location.pathname);
+  const [calcOpen, setCalcOpen] = useState(false);
+  const showCalc = location.pathname.startsWith("/dashboard/compras");
 
   return (
     <header
@@ -53,6 +59,15 @@ export function TopBar({ sidebarExpanded = false }: TopBarProps) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
+        {showCalc && (
+          <button
+            onClick={() => setCalcOpen(true)}
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-primary/50"
+            title="Calculadora"
+          >
+            <Calculator className="w-4 h-4" />
+          </button>
+        )}
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="flex items-center justify-center w-9 h-9 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-primary/50"
@@ -64,6 +79,19 @@ export function TopBar({ sidebarExpanded = false }: TopBarProps) {
           }
         </button>
       </div>
+
+      {showCalc && (
+        <Dialog open={calcOpen} onOpenChange={setCalcOpen}>
+          <DialogContent className="max-w-[360px] p-0 overflow-hidden rounded-2xl" hideClose>
+            <DialogHeader className="sr-only">
+              <DialogTitle>Calculadora</DialogTitle>
+            </DialogHeader>
+            <Suspense fallback={<div className="flex items-center justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-foreground" /></div>}>
+              <ProcurementCalculator />
+            </Suspense>
+          </DialogContent>
+        </Dialog>
+      )}
     </header>
   );
 }
