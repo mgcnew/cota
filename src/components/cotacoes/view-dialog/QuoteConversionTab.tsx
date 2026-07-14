@@ -24,6 +24,7 @@ interface QuoteConversionTabProps {
   onConvertToOrder?: (quoteId: string, orders: any[]) => void;
   onOpenChange: (open: boolean) => void;
   getSupplierProductValue: (supplierId: string, productId: string) => number;
+  getNormalizedTotalPrice: (supplierId: string, productId: string) => number;
   getBestPriceInfoForProduct: (productId: string) => { bestPrice: number; bestSupplierId: string | null };
   supplierItems?: any[];
   safeStr: (val: any) => string;
@@ -37,6 +38,7 @@ export function QuoteConversionTab({
   onConvertToOrder,
   onOpenChange,
   getSupplierProductValue,
+  getNormalizedTotalPrice,
   getBestPriceInfoForProduct,
   supplierItems = [],
   safeStr,
@@ -97,7 +99,7 @@ export function QuoteConversionTab({
       return Object.entries(productAllocations).reduce((total, [productId, allocs]) => {
         const totalQuoteQty = parseFloat(products.find(p => p.product_id === productId)?.quantidade?.toString().replace(',', '.') || '1') || 1;
         return total + Object.entries(allocs).reduce((sum, [supplierId, qty]) => {
-          const unitPrice = getSupplierProductValue(supplierId, productId) / totalQuoteQty;
+          const unitPrice = getNormalizedTotalPrice(supplierId, productId) / totalQuoteQty;
           return sum + (unitPrice * qty);
         }, 0);
       }, 0);
@@ -105,11 +107,11 @@ export function QuoteConversionTab({
     return products.reduce((total: number, product: any) => {
       const supplierId = productSelections[product.product_id];
       if (supplierId) {
-        return total + getSupplierProductValue(supplierId, product.product_id);
+        return total + getNormalizedTotalPrice(supplierId, product.product_id);
       }
       return total;
     }, 0);
-  }, [products, productSelections, productAllocations, pedidoSubTab, getSupplierProductValue]);
+  }, [products, productSelections, productAllocations, pedidoSubTab, getNormalizedTotalPrice]);
 
   const melhorTotal = useMemo(() => {
     return products.reduce((total: number, product: any) => {
@@ -136,7 +138,7 @@ export function QuoteConversionTab({
               const g = groups.get(supplierId)!;
               
               const totalQuoteQty = parseFloat(product.quantidade?.toString().replace(',', '.') || '1') || 1;
-              const unitPrice = getSupplierProductValue(supplierId, productId) / totalQuoteQty;
+              const unitPrice = getNormalizedTotalPrice(supplierId, productId) / totalQuoteQty;
 
               g.products.push({
                 ...product,
@@ -159,14 +161,14 @@ export function QuoteConversionTab({
           const g = groups.get(supplierId)!;
           g.products.push({
             ...product,
-            value: getSupplierProductValue(supplierId, productId)
+            value: getNormalizedTotalPrice(supplierId, productId)
           });
           g.productQuantities[productId] = parseFloat(product.quantidade?.toString().replace(',', '.') || '0');
         }
       });
     }
     return Array.from(groups.values());
-  }, [productSelections, productAllocations, pedidoSubTab, products, fornecedores, getSupplierProductValue, safeStr]);
+  }, [productSelections, productAllocations, pedidoSubTab, products, fornecedores, getNormalizedTotalPrice, safeStr]);
 
   // Total da seleção para exibição no botão/header
   const totalDisplay = totalSelecao;
@@ -225,7 +227,7 @@ export function QuoteConversionTab({
         const supplierItem = supplierItems.find(si => si.product_id === p.product_id && si.supplier_id === group.supplierId);
         
         const totalQuoteQty = parseFloat(products.find(prod => prod.product_id === p.product_id)?.quantidade?.toString().replace(',', '.') || '1') || 1;
-        const unitPrice = getSupplierProductValue(group.supplierId, p.product_id) / totalQuoteQty;
+        const unitPrice = getNormalizedTotalPrice(group.supplierId, p.product_id) / totalQuoteQty;
         const unitBestPrice = mktBestPrice / totalQuoteQty;
         const unitInitialOffer = Number(supplierItem?.valor_inicial) || unitPrice;
 
@@ -308,7 +310,7 @@ export function QuoteConversionTab({
                 setProductSelections(bestSelections);
               } else if (val === "unico") {
                 const supplierTotals = fornecedores.map((f: any) => {
-                  const total = products.reduce((sum: number, p: any) => sum + getSupplierProductValue(f.id, p.product_id), 0);
+                  const total = products.reduce((sum: number, p: any) => sum + getNormalizedTotalPrice(f.id, p.product_id), 0);
                   const hasAll = allowItemsWithoutPrice || !products.some((p: any) => getSupplierProductValue(f.id, p.product_id) === 0);
                   return { id: f.id, total, hasAll };
                 }).filter(s => s.hasAll).sort((a, b) => a.total - b.total);
@@ -379,7 +381,7 @@ export function QuoteConversionTab({
                       
                       <div className="space-y-2">
                         {fornecedores.filter((f: any) => allowItemsWithoutPrice || getSupplierProductValue(f.id, product.product_id) > 0).map((f: any) => {
-                          const totalVal = getSupplierProductValue(f.id, product.product_id);
+                          const totalVal = getNormalizedTotalPrice(f.id, product.product_id);
                           const unitPrice = totalVal / (totalQuoteQty || 1);
                           const qty = allocs[f.id] || 0;
                           return (
@@ -418,7 +420,7 @@ export function QuoteConversionTab({
                   {products.map((product: any) => {
                     const { bestPrice } = getBestPriceInfoForProduct(product.product_id);
                     const selectedSupplierId = productSelections[product.product_id];
-                    const selectedValue = selectedSupplierId ? getSupplierProductValue(selectedSupplierId, product.product_id) : 0;
+                    const selectedValue = selectedSupplierId ? getNormalizedTotalPrice(selectedSupplierId, product.product_id) : 0;
                     const isBest = selectedValue > 0 && Math.abs(selectedValue - bestPrice) < 0.01;
 
                     return (

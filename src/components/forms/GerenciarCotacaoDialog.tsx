@@ -471,6 +471,7 @@ export function GerenciarCotacaoDialog({ quote: initialQuote, open, onOpenChange
                   onConvertToOrder={(quoteId, orders) => convertToOrder.mutate({ quoteId, orders })}
                   onOpenChange={onOpenChange}
                   getSupplierProductValue={getSupplierProductValue}
+                  getNormalizedTotalPrice={getNormalizedTotalPrice}
                   getBestPriceInfoForProduct={getBestPriceInfoForProduct}
                   supplierItems={supplierItems}
                   safeStr={safeStr}
