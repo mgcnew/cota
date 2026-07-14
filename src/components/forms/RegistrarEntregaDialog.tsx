@@ -272,6 +272,15 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
   const queueTotalPages = Math.ceil(pendentesFiltered.length / QUEUE_PAGE_SIZE);
   const queueItems = pendentesFiltered.slice(queuePage * QUEUE_PAGE_SIZE, (queuePage + 1) * QUEUE_PAGE_SIZE);
 
+  // Chip de status na fila — só o essencial, sem detalhes do pedido
+  const queueStatusInfo = (s: string) => {
+    switch (s) {
+      case "enviado":    return { label: "Enviado",    cls: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20" };
+      case "confirmado": return { label: "Confirmado", cls: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-500/20" };
+      default:            return { label: "Pendente",   cls: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20" };
+    }
+  };
+
   const buildItens = () => itensEntrega.map(item => ({
     itemId: item.itemId,
     quantidadeEntregue: item.quantidadeEntregue,
@@ -771,27 +780,26 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
               </Button>
             </div>
 
-            <div className="flex-1 divide-y divide-border/50">
-              {queueItems.map(p => (
-                <button
-                  key={p.id}
-                  onClick={() => { onSelectNext?.(p); }}
-                  className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-muted/40 transition-colors text-left"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center shrink-0">
-                    <Truck className="h-4 w-4 text-brand/70" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{p.supplier_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {p.order_date ? new Date(p.order_date + 'T12:00:00').toLocaleDateString('pt-BR') : '—'}
-                      {" · "}
-                      {p.items?.length || 0} {(p.items?.length || 0) === 1 ? "item" : "itens"}
-                    </p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                </button>
-              ))}
+            <div className="flex-1 overflow-y-auto divide-y divide-border/50 custom-scrollbar">
+              {queueItems.map(p => {
+                const st = queueStatusInfo(p.status);
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => { onSelectNext?.(p); }}
+                    className="w-full flex items-center gap-2.5 px-5 py-2 hover:bg-muted/40 transition-colors text-left"
+                  >
+                    <div className="w-6 h-6 rounded-md bg-brand/5 border border-brand/10 flex items-center justify-center shrink-0">
+                      <Truck className="h-3 w-3 text-brand/70" />
+                    </div>
+                    <p className="flex-1 min-w-0 text-[13px] font-semibold text-foreground truncate">{p.supplier_name}</p>
+                    <Badge variant="outline" className={cn("shrink-0 h-5 px-1.5 text-[9px] font-bold uppercase tracking-wider", st.cls)}>
+                      {st.label}
+                    </Badge>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                  </button>
+                );
+              })}
             </div>
 
             {queueTotalPages > 1 && (
@@ -896,7 +904,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         hideClose
-        className="w-[95vw] max-w-[720px] max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl border border-border dark:border-white/5 shadow-2xl bg-background [&>button]:hidden"
+        className="w-[95vw] max-w-[720px] h-[64vh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl border border-border dark:border-white/5 shadow-2xl bg-background [&>button]:hidden"
       >
         <DialogTitle className="sr-only">Registrar Recebimento</DialogTitle>
         <DialogDescription className="sr-only">Registre as quantidades recebidas</DialogDescription>
