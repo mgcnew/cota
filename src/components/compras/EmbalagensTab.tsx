@@ -182,31 +182,6 @@ function EmbalagensTab() {
 
   return (
     <div className="space-y-4">
-      {/* Header (título já exibido na topbar) */}
-      <div className="flex items-center justify-end gap-4 pb-5 border-b border-border dark:border-zinc-800">
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Button
-            variant="outline"
-            size={isMobile ? "icon" : "default"}
-            onClick={() => setItemsDialogOpen(true)}
-            className="h-9 text-sm"
-            title="Gestão de Itens"
-          >
-            <Package className={cn("h-4 w-4", !isMobile && "mr-2")} />
-            {!isMobile && "Gestão de Itens"}
-          </Button>
-          {activeSubTab === "cotacoes" && (
-            <Button
-              onClick={() => setAddDialogOpen(true)}
-              className="h-9 bg-brand hover:bg-brand/90 text-white text-sm"
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Nova Cotação
-            </Button>
-          )}
-        </div>
-      </div>
-
       {/* Tab Bar */}
       <Tabs value={activeSubTab} onValueChange={setActiveSubTab}>
         <TabsList variant="line" className="overflow-x-auto [&::-webkit-scrollbar]:hidden w-full">
@@ -272,6 +247,16 @@ function EmbalagensTab() {
                     ))}
                   </PopoverContent>
                 </Popover>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setItemsDialogOpen(true)}
+                  className="h-9 shrink-0 gap-1.5 text-sm"
+                  title="Gestão de Itens"
+                >
+                  <Package className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Gestão de Itens</span>
+                </Button>
               </div>
               <div className="flex items-center gap-2 ml-auto">
                 <Button onClick={() => setAddDialogOpen(true)} className={cn(designSystem.components.button.primary, "h-9 px-4")}>

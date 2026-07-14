@@ -32,8 +32,9 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
   CalendarIcon, Package, Building2, Plus, Loader2,
-  ChevronRight, ChevronLeft, Check, FileText, Search, X, Clock, Settings2, ChevronsUpDown
+  ChevronRight, ChevronLeft, Check, FileText, Search, X, Clock, Settings2, ChevronsUpDown, Tag
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { PackagingItem } from "@/types/packaging";
 import type { Supplier } from "@/hooks/useSuppliers";
@@ -299,14 +300,14 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
 
       {/* Tab Navigation */}
       <div className="flex-shrink-0 px-4 sm:px-5 py-3 border-b border-border dark:border-white/5 bg-muted/30">
-        <div className="flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-background rounded-lg border border-border dark:border-white/5 shadow-sm">
+        <div className="inline-flex space-x-1 overflow-x-auto scrollbar-hide p-1 bg-background rounded-lg border border-border dark:border-white/5 shadow-sm">
           {STEPS.map((step) => {
             const Icon = step.icon;
             const status = getStepStatus(step.id);
             return (
               <button key={step.id} type="button" onClick={() => setActiveStep(step.id)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 flex-1 justify-center",
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap flex-shrink-0 justify-center",
                   status === "current" && "bg-card text-foreground shadow-sm border border-border dark:border-white/5",
                   status === "completed" && "bg-muted text-foreground hover:bg-muted/80 cursor-pointer shadow-sm",
                   status === "pending" && "text-muted-foreground hover:bg-muted cursor-pointer"
@@ -325,8 +326,8 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
       <div className="flex-1 overflow-hidden relative bg-background">
         {/* Step: Embalagens */}
         {activeStep === "embalagens" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full content-start items-stretch">
+          <div className="h-full p-4 sm:p-6 overflow-y-auto lg:overflow-hidden custom-scrollbar">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 h-full min-h-0 content-start lg:content-stretch items-stretch">
               {/* Formulário de Seleção */}
               <Card className={cn("border-border bg-card shadow-sm h-full flex flex-col rounded-xl relative", isMobile ? "overflow-visible z-20" : "overflow-hidden")}>
                 <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20">
@@ -335,7 +336,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                     <span className="truncate">Selecionar Embalagens</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 flex-1 flex flex-col min-h-[300px]">
+                <CardContent className="pt-4 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
                   <div className="relative mb-3 z-30 flex-shrink-0">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                     <Input ref={itemSearchRef} placeholder="Buscar embalagem..." value={searchItem}
@@ -358,17 +359,25 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                             return (
                               <div key={item.id} onClick={() => toggleItem(item)}
                                 className={cn(
-                                  "w-full p-3 text-left transition-all flex items-center gap-3 group cursor-pointer border-b border-border dark:border-white/5/40 last:border-0",
+                                  "w-full px-3 py-2 text-left transition-all flex items-center gap-2.5 group cursor-pointer border-b border-border dark:border-white/5/40 last:border-0",
                                   isSelected
                                     ? "bg-muted/50"
                                     : "hover:bg-gray-50 dark:hover:bg-muted/50"
                                 )}>
                                 <Checkbox checked={isSelected}
                                   className="data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=checked]:text-white h-4 w-4 rounded pointer-events-none" />
-                                <div className="flex-1 min-w-0">
-                                  <p className={cn("text-xs font-bold truncate", isSelected ? "text-foreground" : "text-muted-foreground")}>{item.name}</p>
-                                  {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
-                                </div>
+                                <span className={cn("flex-1 min-w-0 text-xs font-bold truncate", isSelected ? "text-foreground" : "text-muted-foreground")}>{item.name}</span>
+                                {item.category && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span onClick={(e) => e.stopPropagation()}
+                                        className="shrink-0 flex items-center justify-center h-5 w-5 rounded-md text-gray-400 hover:text-brand hover:bg-brand/10 transition-colors">
+                                        <Tag className="h-3 w-3" />
+                                      </span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="left" className="text-[10px] font-bold uppercase tracking-wider">{item.category}</TooltipContent>
+                                  </Tooltip>
+                                )}
                               </div>
                             );
                           },
@@ -387,17 +396,25 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                       return (
                         <div key={item.id} onClick={() => toggleItem(item)}
                           className={cn(
-                            "w-full p-2.5 rounded-lg text-left transition-all flex items-center gap-3 group cursor-pointer",
+                            "w-full px-2.5 py-1.5 rounded-lg text-left transition-all flex items-center gap-2.5 group cursor-pointer",
                             isSelected
                               ? "bg-muted border border-border dark:border-white/5"
                               : "hover:bg-gray-50 dark:hover:bg-muted/50 border border-transparent"
                           )}>
                           <Checkbox checked={isSelected}
                             className="data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=checked]:text-white h-4 w-4 rounded pointer-events-none" />
-                          <div className="flex-1 min-w-0">
-                            <p className={cn("text-xs font-bold truncate", isSelected ? "text-foreground" : "text-muted-foreground")}>{item.name}</p>
-                            {item.category && <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{item.category}</span>}
-                          </div>
+                          <span className={cn("flex-1 min-w-0 text-xs font-bold truncate", isSelected ? "text-foreground" : "text-muted-foreground")}>{item.name}</span>
+                          {item.category && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span onClick={(e) => e.stopPropagation()}
+                                  className="shrink-0 flex items-center justify-center h-5 w-5 rounded-md text-gray-400 hover:text-brand hover:bg-brand/10 transition-colors cursor-help">
+                                  <Tag className="h-3 w-3" />
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="left" className="text-[10px] font-bold uppercase tracking-wider">{item.category}</TooltipContent>
+                            </Tooltip>
+                          )}
                         </div>
                       );
                     },
@@ -427,17 +444,17 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                     </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 flex-1 flex flex-col min-h-[300px]">
+                <CardContent className="pt-4 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
                   {renderList(
                     selectedItems,
                     (item) => (
-                      <div key={item.id} className="flex items-center gap-3 p-3 bg-card hover:bg-muted/30 border border-border dark:border-white/5 rounded-xl shadow-sm group transition-all">
-                        <div className="w-8 h-8 rounded-lg bg-brand/5 flex items-center justify-center flex-shrink-0 border border-brand/10">
-                          <Package className="h-4 w-4 text-brand" />
+                      <div key={item.id} className="flex items-center gap-2.5 px-2.5 py-1.5 bg-card hover:bg-muted/30 border border-border dark:border-white/5 rounded-lg group transition-all">
+                        <div className="w-6 h-6 rounded-md bg-brand/5 flex items-center justify-center flex-shrink-0 border border-brand/10">
+                          <Package className="h-3 w-3 text-brand" />
                         </div>
                         <span className="flex-1 text-xs font-bold text-foreground truncate">{item.name}</span>
                         <Button variant="ghost" size="sm" onClick={() => toggleItem(item)}
-                          className="h-6 w-6 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
+                          className="h-5 w-5 p-0 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors">
                           <X className="h-3 w-3" />
                         </Button>
                       </div>
@@ -453,11 +470,11 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
 
         {/* Step: Configuração (Merge Period, Suppliers and Confirmation) */}
         {activeStep === "configuracao" && (
-          <div className="h-full p-4 sm:p-6 overflow-y-auto custom-scrollbar">
-            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 h-full content-start pb-20">
+          <div className="h-full p-4 sm:p-6 overflow-y-auto md:overflow-hidden custom-scrollbar">
+            <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 h-full min-h-0 content-start md:content-stretch pb-20 md:pb-0">
 
               {/* Coluna Esquerda: Configurações Gerais */}
-              <div className="h-full">
+              <div className="h-full min-h-0">
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-visible relative z-30 h-full flex flex-col">
                   <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20 rounded-t-xl flex-shrink-0">
                     <CardTitle className="flex items-center gap-2 text-foreground text-sm font-black uppercase tracking-wide">
@@ -465,7 +482,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                       <span>Período & Detalhes</span>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-6 space-y-5 flex-1 flex flex-col min-h-[300px]">
+                  <CardContent className="pt-6 space-y-5 flex-1 flex flex-col min-h-[300px] md:min-h-0">
                     <div className="grid grid-cols-2 gap-4 flex-shrink-0">
                       <div className="space-y-2">
                         <Label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Início</Label>
@@ -507,7 +524,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
               </div>
 
               {/* Coluna Direita: Fornecedores */}
-              <div className="relative overflow-visible z-40 h-full">
+              <div className="relative overflow-visible z-40 h-full min-h-0">
                 <Card className="border-border bg-card shadow-sm rounded-xl overflow-visible h-full flex flex-col">
                   <CardHeader className="p-4 sm:p-5 border-b border-border dark:border-white/5 bg-muted/20 rounded-t-xl flex-shrink-0">
                     <CardTitle className="flex items-center justify-between text-sm font-black uppercase tracking-wide">
@@ -518,7 +535,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                       <Badge variant="outline" className="bg-muted">{selectedSuppliers.length}</Badge>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 sm:p-5 space-y-5 flex-1 flex flex-col min-h-[300px]">
+                  <CardContent className="p-4 sm:p-5 space-y-5 flex-1 flex flex-col min-h-[300px] md:min-h-0">
                     {/* Popover Selection for Suppliers (Prevents huge scroll) */}
                     <Popover>
                       <PopoverTrigger asChild>
@@ -557,16 +574,16 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
                           <p className="text-xs font-medium text-center text-muted-foreground">Convide fornecedores acima</p>
                         </div>
                       ) : (
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-1.5">
                           {selectedSuppliersData.map(supplier => (
-                            <div key={supplier.id} className="flex items-center justify-between p-3 bg-card border border-border dark:border-white/5 rounded-xl group hover:border-brand/30 transition-all">
-                              <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center flex-shrink-0">
-                                  <Building2 className="h-4 w-4 text-brand" />
+                            <div key={supplier.id} className="flex items-center justify-between px-2.5 py-1.5 bg-card border border-border dark:border-white/5 rounded-lg group hover:border-brand/30 transition-all">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-6 h-6 rounded-md bg-brand/5 border border-brand/10 flex items-center justify-center flex-shrink-0">
+                                  <Building2 className="h-3 w-3 text-brand" />
                                 </div>
                                 <span className="text-xs font-bold truncate text-foreground">{supplier.name}</span>
                               </div>
-                              <Button variant="ghost" size="icon" onClick={() => toggleSupplier(supplier.id)} className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                              <Button variant="ghost" size="icon" onClick={() => toggleSupplier(supplier.id)} className="h-5 w-5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                                 <X className="h-3 w-3" />
                               </Button>
                             </div>
@@ -605,7 +622,7 @@ export function AddPackagingQuoteDialog({ open, onOpenChange, packagingItems: _i
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[90vh] sm:h-[88vh] max-h-[750px] p-0 gap-0 overflow-hidden border border-border dark:border-white/5 shadow-md rounded-2xl flex flex-col bg-background [&>button]:hidden"
+        className="w-[96vw] sm:w-[92vw] md:w-[90vw] max-w-[800px] h-[72vh] max-h-[620px] p-0 gap-0 overflow-hidden border border-border dark:border-white/5 shadow-md rounded-2xl flex flex-col bg-background [&>button]:hidden"
         onKeyDown={handleKeyDown}
       >
         {content}
