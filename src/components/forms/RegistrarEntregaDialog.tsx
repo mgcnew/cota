@@ -13,9 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   Truck, Package, TrendingDown,
   Loader2, CheckCircle2, AlertCircle, X, Sparkles, BoxIcon, Scale,
-  ChevronRight, ChevronLeft, ListChecks,
+  ChevronRight, ChevronLeft, ListChecks, Download,
 } from "lucide-react";
 import { usePedidos, type Pedido } from "@/hooks/usePedidos";
+import { downloadPedidoReport, type PedidoReportItem } from "@/lib/pedidoReport";
 import { cn } from "@/lib/utils";
 
 const QUEUE_PAGE_SIZE = 8;
@@ -66,9 +67,11 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
   const [totalKgRaw, setTotalKgRaw] = useState<string[]>([]);
   const [showQueue, setShowQueue] = useState(false);
   const [queuePage, setQueuePage] = useState(0);
+  const [showReportPrompt, setShowReportPrompt] = useState(false);
 
   useEffect(() => {
     setShowQueue(false);
+    setShowReportPrompt(false);
     setQueuePage(0);
     if (pedido?.items) {
       const itens = pedido.items.map(item => {
@@ -283,10 +286,44 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
     if (itens.length === 0) return;
     try {
       await updateQuantidadeEntregue({ pedidoId: pedido.id, itens });
-      onOpenChange(false);
+      // Após confirmar, oferece o download do relatório (economia do pedido)
+      setShowReportPrompt(true);
     } catch (error) {
       console.error("Erro ao registrar entrega:", error);
     }
+  };
+
+  // Itens no formato do relatório, espelhando o que a entrega grava no banco
+  // (unit_price = valor faturado; total_item = qtd recebida × faturado × fator).
+  const buildReportItens = (): PedidoReportItem[] =>
+    itensEntrega.map(item => {
+      const fator = Math.max(getFatorEfetivo(item), 1);
+      return {
+        produto: item.productName,
+        unidade: item.unidadePedida,
+        quantidade: item.quantidadePedida,
+        valorUnitario: item.valorFaturado,
+        valorUnitarioCotado: item.valorUnitario,
+        maiorValorCotado: item.maiorValor,
+        totalItem: item.quantidadeEntregue * item.valorFaturado * fator,
+        quantidadeEntregue: item.quantidadeEntregue,
+      };
+    });
+
+  const handleDownloadReport = () => {
+    if (!pedido) return;
+    downloadPedidoReport({
+      pedidoId: pedido.id,
+      isFromQuote: pedido.quote_id != null,
+      isDelivered: true,
+      economiaReal: economiaRealPreview,
+      supplierName: pedido.supplier_name || "",
+      statusLabel: "Entregue",
+      dataEntrega: pedido.delivery_date || "",
+      observacoes: pedido.observations || "",
+      itens: buildReportItens(),
+    });
+    onOpenChange(false);
   };
 
   const handleSubmitAndNext = async () => {
@@ -678,8 +715,50 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
           </div>
         </div>
 
+        {/* Prompt: baixar relatório após confirmar a entrega */}
+        {showReportPrompt && (
+          <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center text-center p-8 gap-5 animate-in fade-in duration-300">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-500" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-foreground">Entrega registrada!</h3>
+              <p className="text-sm text-muted-foreground max-w-[300px]">
+                {veioDeCotacao && economiaRealPreview > 0
+                  ? "Deseja baixar o relatório com a economia deste pedido?"
+                  : "Deseja baixar o relatório deste pedido?"}
+              </p>
+            </div>
+            {veioDeCotacao && economiaRealPreview > 0 && (
+              <div className="px-6 py-3 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+                <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-500 uppercase tracking-widest mb-0.5 flex items-center justify-center gap-1">
+                  <TrendingDown className="h-3 w-3" />Economia Real
+                </p>
+                <p className="font-black text-2xl text-emerald-600 dark:text-emerald-400 tracking-tight">
+                  R$ {economiaRealPreview.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                </p>
+              </div>
+            )}
+            <div className="flex gap-2 w-full max-w-[320px] mt-1">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1 h-10 text-xs font-semibold"
+              >
+                Agora não
+              </Button>
+              <Button
+                onClick={handleDownloadReport}
+                className="flex-1 h-10 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+              >
+                <Download className="h-4 w-4" />Baixar relatório
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Fila de próximos recebimentos */}
-        {showQueue && (
+        {showQueue && !showReportPrompt && (
           <div className="flex-1 overflow-y-auto flex flex-col">
             <div className="px-5 py-4 border-b border-border bg-muted/20 flex items-center gap-3">
               <ListChecks className="h-4 w-4 text-brand shrink-0" />
@@ -742,7 +821,7 @@ export function RegistrarEntregaDialog({ open, onOpenChange, pedido, pedidosPend
         )}
 
         {/* Footer */}
-        {!showQueue && (
+        {!showQueue && !showReportPrompt && (
         <div className="flex-shrink-0 px-5 py-4 bg-muted/30 border-t border-border dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-8">
             <div>
