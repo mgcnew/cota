@@ -1357,136 +1357,131 @@ export function ManagePackagingQuoteDialog({
                               className="h-7 px-2.5 text-xs font-bold bg-background border-border hover:bg-muted hover:border-brand/40 touch-manipulation shrink-0"><Edit2 className="h-3.5 w-3.5 mr-1.5" />Editar</Button>}
                           </div>
                           {isEditing ? (
-                            <div className="space-y-4 bg-muted/60 -m-1 p-4 rounded-lg border border-border dark:border-white/5 shadow-inner">
-                              {/* Grid Principal de Inputs */}
-                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-4">
-                                {/* Preço */}
-                                <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "Preço (R$)" : "Preço Pacote/Fardo (R$) *"}
-                                  </Label>
-                                  <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground pointer-events-none select-none">R$</span>
+                            <div className="space-y-2.5 bg-muted/60 -m-1 p-3 rounded-lg border border-border dark:border-white/5 shadow-inner">
+                              {/* Essenciais — calculam o custo por unidade */}
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-1.5 ml-0.5">Dados do pacote</p>
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                                  {/* Preço */}
+                                  <div className="group flex flex-col">
+                                    <Label className="text-[10px] font-medium text-muted-foreground mb-0.5 ml-0.5 transition-colors group-focus-within:text-brand">Preço do pacote *</Label>
+                                    <div className="relative">
+                                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-muted-foreground pointer-events-none select-none">R$</span>
+                                      <Input
+                                        ref={valorTotalInputRef}
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={formData.valorTotal}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))}
+                                        onFocus={handleInputFocus}
+                                        placeholder="0,00"
+                                        className="h-9 pl-8 rounded-lg bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Unidade */}
+                                  <div className="group flex flex-col">
+                                    <Label className="text-[10px] font-medium text-muted-foreground mb-0.5 ml-0.5 transition-colors group-focus-within:text-brand">Vendido como *</Label>
+                                    <Select
+                                      value={formData.unidadeVenda}
+                                      onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}
+                                    >
+                                      <SelectTrigger className="h-9 rounded-lg bg-background border-border/50 font-bold text-sm uppercase">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-card border-border shadow-2xl rounded-xl">
+                                        {PACKAGING_SALE_UNITS.map(u => (
+                                          <SelectItem key={u.value} value={u.value} className="text-xs font-bold uppercase focus:bg-brand/10">
+                                            {u.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  {/* Qtd Compra */}
+                                  <div className="group flex flex-col">
+                                    <Label className="text-[10px] font-medium text-muted-foreground mb-0.5 ml-0.5 transition-colors group-focus-within:text-brand">Qtd. comprada *</Label>
                                     <Input
-                                      ref={valorTotalInputRef}
                                       type="text"
                                       inputMode="decimal"
-                                      value={formData.valorTotal}
-                                      onChange={(e) => setFormData(prev => ({ ...prev, valorTotal: e.target.value }))}
+                                      value={formData.quantidadeVenda}
+                                      onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))}
                                       onFocus={handleInputFocus}
-                                      placeholder="0,00"
-                                      className="h-10 sm:h-11 pl-9 rounded-xl bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
+                                      placeholder="1"
+                                      className="h-9 rounded-lg bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
+                                    />
+                                  </div>
+
+                                  {/* Peças no Pack */}
+                                  <div className="group flex flex-col">
+                                    <Label className="text-[10px] font-medium text-muted-foreground mb-0.5 ml-0.5 transition-colors group-focus-within:text-brand">Peças no pack *</Label>
+                                    <Input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={formData.quantidadeUnidadesEstimada}
+                                      onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))}
+                                      onFocus={handleInputFocus}
+                                      placeholder="500"
+                                      className="h-9 rounded-lg bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
                                     />
                                   </div>
                                 </div>
+                              </div>
 
-                                {/* Unidade */}
-                                <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "Venda" : "Vendido como *"}
-                                  </Label>
-                                  <Select 
-                                    value={formData.unidadeVenda} 
-                                    onValueChange={(v) => setFormData(prev => ({ ...prev, unidadeVenda: v }))}
-                                  >
-                                    <SelectTrigger className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm uppercase">
-                                      <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-card border-border shadow-2xl rounded-xl">
-                                      {PACKAGING_SALE_UNITS.map(u => (
-                                        <SelectItem key={u.value} value={u.value} className="text-xs font-bold uppercase focus:bg-brand/10">
-                                          {u.label}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
+                              {/* Especificações — opcionais */}
+                              <div>
+                                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70 mb-1.5 ml-0.5">Especificações <span className="font-medium normal-case tracking-normal opacity-70">(opcional)</span></p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {/* Gramatura */}
+                                  <div className="group flex flex-col">
+                                    <Label className="text-[10px] font-medium text-muted-foreground mb-0.5 ml-0.5 transition-colors group-focus-within:text-brand">Espessura (mm)</Label>
+                                    <Input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={formData.gramatura}
+                                      onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))}
+                                      onFocus={handleInputFocus}
+                                      placeholder="0.08"
+                                      className="h-9 rounded-lg bg-background border-border/40 text-sm focus-visible:ring-brand/30"
+                                    />
+                                  </div>
 
-                                {/* Qtd Compra */}
-                                <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "Qtd Compra" : "Qtd. Comprada *"}
-                                  </Label>
-                                  <Input 
-                                    type="text" 
-                                    inputMode="decimal" 
-                                    value={formData.quantidadeVenda} 
-                                    onChange={(e) => setFormData(prev => ({ ...prev, quantidadeVenda: e.target.value }))} 
-                                    onFocus={handleInputFocus} 
-                                    placeholder="1" 
-                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
-                                  />
-                                </div>
-
-                                {/* Peças no Pack */}
-                                <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "Peças/Pack" : "Total Peças no Pack *"}
-                                  </Label>
-                                  <Input 
-                                    type="text" 
-                                    inputMode="decimal" 
-                                    value={formData.quantidadeUnidadesEstimada} 
-                                    onChange={(e) => setFormData(prev => ({ ...prev, quantidadeUnidadesEstimada: e.target.value }))} 
-                                    onFocus={handleInputFocus} 
-                                    placeholder="500" 
-                                    className="h-10 sm:h-11 rounded-xl bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
-                                  />
-                                </div>
-
-                                {/* Gramatura */}
-                                <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "Espessura" : "Espessura (mm)"}
-                                  </Label>
-                                  <Input 
-                                    type="text" 
-                                    inputMode="decimal" 
-                                    value={formData.gramatura} 
-                                    onChange={(e) => setFormData(prev => ({ ...prev, gramatura: e.target.value }))} 
-                                    onFocus={handleInputFocus} 
-                                    placeholder="0.08"
-                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30"
-                                  />
-                                </div>
-
-                                {/* Tamanho */}
-                                <div className="space-y-1 group flex flex-col">
-                                  <Label className="text-[11px] font-medium text-muted-foreground ml-1 transition-colors group-focus-within:text-brand">
-                                    {isMobile ? "Tamanho" : "Tamanho (LxA)"}
-                                  </Label>
-                                  <Input 
-                                    value={formData.dimensoes} 
-                                    onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))} 
-                                    onFocus={handleInputFocus} 
-                                    placeholder="30x40" 
-                                    className="h-10 sm:h-11 bg-background border-border/50 font-bold text-sm focus-visible:ring-brand/30" 
-                                  />
+                                  {/* Tamanho */}
+                                  <div className="group flex flex-col">
+                                    <Label className="text-[10px] font-medium text-muted-foreground mb-0.5 ml-0.5 transition-colors group-focus-within:text-brand">Tamanho (LxA)</Label>
+                                    <Input
+                                      value={formData.dimensoes}
+                                      onChange={(e) => setFormData(prev => ({ ...prev, dimensoes: e.target.value }))}
+                                      onFocus={handleInputFocus}
+                                      placeholder="30x40"
+                                      className="h-9 rounded-lg bg-background border-border/40 text-sm focus-visible:ring-brand/30"
+                                    />
+                                  </div>
                                 </div>
                               </div>
-                              {/* Cálculo transparente */}
-                              {custoPorUnidadePreview && (
-                                <div className="bg-background/80 p-3.5 rounded-xl border border-border dark:border-white/5 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                                  <div className="flex flex-col text-center sm:text-left">
-                                    <span className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">Custo Real por Unidade</span>
-                                    <div className="flex items-center justify-center sm:justify-start gap-1.5 mt-0.5 opacity-60">
-                                      <div className="p-1 bg-brand/10 rounded-md">
-                                        <TrendingDown className="h-3 w-3 text-brand" />
-                                      </div>
-                                      <span className="text-[9px] font-bold uppercase tracking-tighter">R$ {formData.valorTotal || '0'} ÷ {formData.quantidadeUnidadesEstimada || '0'} unidades</span>
-                                    </div>
+
+                              {/* Custo por unidade + ações — barra única */}
+                              <div className="flex items-center justify-between gap-3 pt-2.5 border-t border-border dark:border-white/5">
+                                {custoPorUnidadePreview ? (
+                                  <div className="flex items-baseline gap-1.5 min-w-0">
+                                    <TrendingDown className="h-3.5 w-3.5 text-brand shrink-0 self-center" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">Custo/un</span>
+                                    <span className="text-lg font-black text-foreground tracking-tight tabular-nums">{formatCurrency(custoPorUnidadePreview)}</span>
+                                    <span className="text-[9px] text-muted-foreground/70 truncate hidden sm:inline">= {formData.valorTotal || '0'} ÷ {formData.quantidadeUnidadesEstimada || '0'}</span>
                                   </div>
-                                  <div className="flex items-baseline gap-1.5">
-                                    <span className="text-2xl font-black text-foreground tracking-tighter">{formatCurrency(custoPorUnidadePreview)}</span>
-                                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-40">/un</span>
-                                  </div>
-                                </div>
-                              )}
-                              <div className="flex items-center justify-between pt-2 border-t border-border dark:border-white/5">
-                                <p className="text-[10px] text-muted-foreground font-medium"><kbd className="px-1 py-0.5 rounded bg-background border border-border dark:border-white/5 font-sans">Enter</kbd> salvar</p>
-                                <div className="flex gap-2">
-                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)} className="h-9 px-3 text-xs font-bold text-muted-foreground hover:text-foreground">Cancelar</Button>
-                                  <Button size="sm" onClick={handleSaveItem} disabled={updateSupplierItem.isPending || !formData.valorTotal} className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-lg shadow-lg shadow-primary/20">{updateSupplierItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Save className="h-3 w-3 mr-1.5" />}Salvar</Button>
+                                ) : (
+                                  <p className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
+                                    <kbd className="px-1 py-0.5 rounded bg-background border border-border dark:border-white/5 font-sans text-[9px]">Ctrl</kbd>
+                                    +
+                                    <kbd className="px-1 py-0.5 rounded bg-background border border-border dark:border-white/5 font-sans text-[9px]">Enter</kbd>
+                                    salvar
+                                  </p>
+                                )}
+                                <div className="flex gap-2 shrink-0">
+                                  <Button size="sm" variant="ghost" onClick={() => setEditingItem(null)} className="h-8 px-3 text-xs font-bold text-muted-foreground hover:text-foreground">Cancelar</Button>
+                                  <Button size="sm" onClick={handleSaveItem} disabled={updateSupplierItem.isPending || !formData.valorTotal} className="h-8 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold rounded-lg shadow-md shadow-primary/20">{updateSupplierItem.isPending ? <Loader2 className="h-3 w-3 animate-spin mr-1.5" /> : <Save className="h-3 w-3 mr-1.5" />}Salvar</Button>
                                 </div>
                               </div>
                             </div>
