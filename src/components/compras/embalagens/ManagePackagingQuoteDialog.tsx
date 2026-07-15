@@ -48,8 +48,6 @@ import { generateWhatsAppMessage } from "@/lib/gemini";
 import { sendWhatsApp } from "@/lib/whatsapp-service";
 
 // Lazy load heavy tabs
-const ComparativoTab = lazy(() => import("./quote-tabs/ComparativoTab").then(m => ({ default: m.ComparativoTab })));
-const ExportarTab = lazy(() => import("./quote-tabs/ExportarTab").then(m => ({ default: m.ExportarTab })));
 const ConvertTab = lazy(() => import("./quote-tabs/ConvertTab").then(m => ({ default: m.ConvertTab })));
 
 async function getShortLink(tokens: string): Promise<string | null> {
@@ -99,7 +97,6 @@ export function ManagePackagingQuoteDialog({
   const [activeTab, setActiveTab] = useState("resumo");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   const [editingItem, setEditingItem] = useState<{ supplierId: string; packagingId: string } | null>(null);
-  const [showHtmlPreview, setShowHtmlPreview] = useState(false);
   const [formData, setFormData] = useState({
     valorTotal: "", unidadeVenda: "kg", quantidadeVenda: "",
     quantidadeUnidadesEstimada: "", gramatura: "", dimensoes: "",
@@ -170,7 +167,7 @@ export function ManagePackagingQuoteDialog({
   // Keyboard shortcuts: Ctrl+1-5 for tabs, Escape to close
   useEffect(() => {
     if (!open) return;
-    const TAB_MAP: Record<string, string> = { '1': 'resumo', '2': 'editar', '3': 'valores', '4': 'comparativo', '5': 'exportar' };
+    const TAB_MAP: Record<string, string> = { '1': 'resumo', '2': 'editar', '3': 'valores', '4': 'converter' };
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && TAB_MAP[e.key]) {
         e.preventDefault();
@@ -934,6 +931,8 @@ export function ManagePackagingQuoteDialog({
     fornecedoresRespondidos: quote.fornecedores.filter(f => f.status === "respondido").length,
   };
 
+  const exportDisabled = comparison.length === 0 || comparison.every(c => c.fornecedores.length === 0);
+
   const DialogContentComponent = isMobile ? DrawerContent : DialogContent;
   const DialogHeaderComponent = isMobile ? DrawerHeader : DialogHeader;
   const DialogTitleComponent = isMobile ? DrawerTitle : DialogTitle;
@@ -968,11 +967,22 @@ export function ManagePackagingQuoteDialog({
                 </div>
               </div>
             </div>
-            {/* X only on desktop — drawer closes by swipe on mobile */}
-            <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}
-              className="hidden sm:flex h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors flex-shrink-0">
-              <X className="h-4 w-4" />
-            </Button>
+            {/* Ações de exportação + fechar */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={handleGeneratePDF} disabled={exportDisabled} title="Baixar PDF"
+                className="h-8 px-2.5 gap-1.5 text-[11px] font-bold border-border hover:bg-muted rounded-lg">
+                <Download className="h-3.5 w-3.5" /><span className="hidden sm:inline">PDF</span>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleDownloadHtml} disabled={exportDisabled} title="Baixar HTML"
+                className="h-8 px-2.5 gap-1.5 text-[11px] font-bold border-border hover:bg-muted rounded-lg">
+                <FileText className="h-3.5 w-3.5" /><span className="hidden sm:inline">HTML</span>
+              </Button>
+              {/* X only on desktop — drawer closes by swipe on mobile */}
+              <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}
+                className="hidden sm:flex h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
           <DialogDescriptionComponent className="sr-only">Gerenciar cotação de embalagens</DialogDescriptionComponent>
         </div>
@@ -987,7 +997,7 @@ export function ManagePackagingQuoteDialog({
                 {[
                   { value: "resumo",      icon: <Trophy className="h-4 w-4" />,      label: "Resumo"  },
                   { value: "valores",     icon: <DollarSign className="h-4 w-4" />,  label: "Valores" },
-                  { value: "comparativo", icon: <TrendingDown className="h-4 w-4" />, label: "Comparar" },
+                  { value: "converter",   icon: <ShoppingCart className="h-4 w-4" />, label: "Pedido" },
                 ].map(tab => (
                   <TabsTrigger
                     key={tab.value}
@@ -1000,34 +1010,20 @@ export function ManagePackagingQuoteDialog({
                 ))}
               </TabsList>
 
-              {/* "Mais" — navigates to hidden tabs */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className={cn(
+              {/* "Editar" — única aba oculta no mobile (exportação foi para o header) */}
+              {quote?.status !== "concluida" && (
+                <button
+                  onClick={() => setActiveTab("editar")}
+                  className={cn(
                     "flex flex-col items-center gap-1 py-2.5 px-4 transition-colors min-w-[64px] border-b-2",
-                    ["editar","exportar","converter"].includes(activeTab)
+                    activeTab === "editar"
                       ? "text-brand border-brand"
                       : "text-muted-foreground border-transparent hover:text-foreground"
                   )}>
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Mais</span>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 rounded-xl">
-                  {quote?.status !== "concluida" && (
-                    <DropdownMenuItem onClick={() => setActiveTab("editar")} className="gap-2 py-2 cursor-pointer">
-                      <Settings className="h-4 w-4 text-muted-foreground" />Editar Cotação
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem onClick={() => setActiveTab("exportar")} className="gap-2 py-2 cursor-pointer">
-                    <FileDown className="h-4 w-4 text-muted-foreground" />Exportar PDF/HTML
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setActiveTab("converter")} className="gap-2 py-2 cursor-pointer text-brand focus:text-brand focus:bg-brand/10">
-                    <ShoppingCart className="h-4 w-4" />Converter em Pedido
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  <Settings className="h-4 w-4" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider">Editar</span>
+                </button>
+              )}
             </div>
 
             {/* Desktop: scrollable pill bar */}
@@ -1037,8 +1033,6 @@ export function ManagePackagingQuoteDialog({
                   { value: "resumo",      icon: <Trophy className="h-3 w-3" />,      label: "Resumo",      show: true },
                   { value: "editar",      icon: <Settings className="h-3 w-3" />,    label: "Editar",      show: quote?.status !== "concluida" },
                   { value: "valores",     icon: <DollarSign className="h-3 w-3" />,  label: "Valores",     show: quote?.status !== "concluida" },
-                  { value: "comparativo", icon: <TrendingDown className="h-3 w-3" />, label: "Comparativo", show: true },
-                  { value: "exportar",    icon: <FileDown className="h-3 w-3" />,    label: "Exportar",    show: true },
                   { value: "converter",   icon: <ShoppingCart className="h-3 w-3" />, label: "Pedido",     show: true },
                 ].filter(t => t.show).map(tab => (
                   <TabsTrigger
@@ -1060,9 +1054,13 @@ export function ManagePackagingQuoteDialog({
 
           {/* Tab Resumo */}
           <TabsContent value="resumo" className="flex-1 overflow-hidden m-0 p-0">
-            <ResumoTab 
+            <ResumoTab
               bestPricesData={bestPricesData}
+              comparisonBySupplier={comparisonBySupplier}
               onCopyBestPrices={handleCopyBestPricesSummary}
+              onCopySupplierSummary={handleCopySupplierSummary}
+              onExportSupplierHtml={handleExportSupplierHtml}
+              copiedId={copiedId}
               onEditItem={handleEditItem}
               isCompleted={quote?.status === "concluida"}
             />
@@ -1522,35 +1520,6 @@ export function ManagePackagingQuoteDialog({
                 </ScrollArea>
               </div>
             </div>
-          </TabsContent>
-
-          {/* Tab Comparativo */}
-          <TabsContent value="comparativo" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <Suspense fallback={<TabSkeleton />}>
-              <ComparativoTab 
-                comparison={comparison}
-                comparisonBySupplier={comparisonBySupplier}
-                onEditItem={handleEditItem}
-                onCopySupplierSummary={handleCopySupplierSummary}
-                onExportSupplierHtml={handleExportSupplierHtml}
-                copiedId={copiedId}
-              />
-            </Suspense>
-          </TabsContent>
-
-          {/* Tab Exportar PDF */}
-          <TabsContent value="exportar" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <Suspense fallback={<TabSkeleton />}>
-              <ExportarTab 
-                quote={quote}
-                comparison={comparison}
-                showHtmlPreview={showHtmlPreview}
-                onTogglePreview={() => setShowHtmlPreview(!showHtmlPreview)}
-                onGeneratePDF={handleGeneratePDF}
-                onDownloadHtml={handleDownloadHtml}
-                generateHtmlComparative={generateHtmlComparative}
-              />
-            </Suspense>
           </TabsContent>
 
           {/* Tab Converter em Pedido */}

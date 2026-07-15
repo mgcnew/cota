@@ -3,7 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Star, Award, TrendingDown, Copy, Package, Building2, Info } from "lucide-react";
+import { Star, Award, TrendingDown, Copy, Check, Package, Building2, Info, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 import type { PackagingQuoteDisplay } from "@/types/packaging";
@@ -22,12 +22,16 @@ interface BestPriceItem {
 
 interface ResumoTabProps {
   bestPricesData: BestPriceItem[];
+  comparisonBySupplier?: any[];
   onCopyBestPrices: () => void;
+  onCopySupplierSummary?: (group: any) => void;
+  onExportSupplierHtml?: (group: any) => void;
+  copiedId?: string | null;
   onEditItem: (supplierId: string, packagingId: string) => void;
   isCompleted?: boolean;
 }
 
-export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isCompleted }: ResumoTabProps) {
+export function ResumoTab({ bestPricesData, comparisonBySupplier = [], onCopyBestPrices, onCopySupplierSummary, onExportSupplierHtml, copiedId, onEditItem, isCompleted }: ResumoTabProps) {
   const [view, setView] = useState<"item" | "fornecedor" | "economia">(isCompleted ? "fornecedor" : "item");
 
   const bestPricesBySupplier = useMemo(() => {
@@ -126,18 +130,26 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                               <PopoverContent className="w-auto min-w-[220px] p-2.5 shadow-lg" align="end">
                                 <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border dark:border-white/5 pb-1.5 mb-1.5 px-1">Fornecedores · menor → maior</h4>
                                 <div className="flex flex-col gap-0.5">
-                                  {sortedPrices.map((price, idx) => (
+                                  {sortedPrices.map((price, idx) => {
+                                    const diffPct = idx > 0 && sortedPrices[0].custoPorUnidade > 0
+                                      ? (price.custoPorUnidade / sortedPrices[0].custoPorUnidade - 1) * 100
+                                      : 0;
+                                    return (
                                     <button key={price.supplierId} onClick={() => onEditItem(price.supplierId, item.packagingId)}
                                       className={cn("flex justify-between items-center gap-4 text-xs rounded-md px-2 py-1.5 transition-colors text-left", idx === 0 ? "bg-brand/5 hover:bg-brand/10" : "hover:bg-muted")}>
                                       <span className="flex items-center gap-1.5 min-w-0">
                                         {idx === 0 && <Award className="h-3 w-3 text-brand shrink-0" />}
                                         <span className={cn("truncate max-w-[150px]", idx === 0 ? "font-bold text-foreground" : "text-muted-foreground")} title={price.supplierName}>{price.supplierName}</span>
                                       </span>
-                                      <span className={cn("font-bold whitespace-nowrap tabular-nums", idx === 0 ? "text-brand" : "text-foreground")}>
-                                        {formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[10px] text-muted-foreground ml-0.5">/un</span>
+                                      <span className="flex items-baseline gap-1.5 shrink-0">
+                                        {diffPct > 0 && <span className="text-[10px] font-bold text-red-500 tabular-nums">+{diffPct.toFixed(1)}%</span>}
+                                        <span className={cn("font-bold whitespace-nowrap tabular-nums", idx === 0 ? "text-brand" : "text-foreground")}>
+                                          {formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[10px] text-muted-foreground ml-0.5">/un</span>
+                                        </span>
                                       </span>
                                     </button>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               </PopoverContent>
                             </Popover>
@@ -164,20 +176,36 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                 Nenhum vencedor atribuído ainda
               </div>
             ) : (
-              bestPricesBySupplier.map((group) => (
+              bestPricesBySupplier.map((group) => {
+                const cmpGroup = comparisonBySupplier.find((g) => g.supplierId === group.supplierId);
+                return (
                 <Card key={group.supplierId} className="overflow-hidden border-border bg-card shadow-sm rounded-xl">
-                  <div className="bg-muted/20 px-3 sm:px-4 py-2 border-b border-border dark:border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                  <div className="bg-muted/20 px-3 sm:px-4 py-2 border-b border-border dark:border-white/5 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <div className="w-7 h-7 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand flex-shrink-0">
                         <Building2 className="h-3.5 w-3.5" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-semibold text-[13px] text-foreground">{group.supplierName}</h4>
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <h4 className="font-semibold text-[13px] text-foreground truncate">{group.supplierName}</h4>
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider shrink-0">
                           · {group.items.length} {group.items.length === 1 ? 'item' : 'itens'}
                         </span>
                       </div>
                     </div>
+                    {cmpGroup && (onCopySupplierSummary || onExportSupplierHtml) && (
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {onCopySupplierSummary && (
+                          <Button variant="outline" size="icon" className="h-6 w-6 rounded-md border-border hover:bg-muted" onClick={() => onCopySupplierSummary(cmpGroup)} title="Copiar resumo">
+                            {copiedId === group.supplierId ? <Check className="h-3 w-3 text-brand" /> : <Copy className="h-3 w-3 text-muted-foreground" />}
+                          </Button>
+                        )}
+                        {onExportSupplierHtml && (
+                          <Button variant="outline" size="icon" className="h-6 w-6 rounded-md border-border hover:bg-muted" onClick={() => onExportSupplierHtml(cmpGroup)} title="Exportar proposta">
+                            <FileText className="h-3 w-3 text-muted-foreground" />
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div className="divide-y divide-border/50">
                     {group.items.map((item) => {
@@ -211,12 +239,18 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                                 <PopoverContent className="w-auto min-w-[200px] p-2.5 shadow-lg" align="end" onClick={(e) => e.stopPropagation()}>
                                   <h4 className="font-semibold text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border dark:border-white/5 pb-1.5 mb-1.5 px-1">Outros fornecedores</h4>
                                   <div className="flex flex-col gap-0.5">
-                                    {outros.map((price) => (
+                                    {outros.map((price) => {
+                                      const diffPct = item.bestPrice > 0 ? (price.custoPorUnidade / item.bestPrice - 1) * 100 : 0;
+                                      return (
                                       <div key={price.supplierId} className="flex justify-between items-center gap-4 text-xs px-1 py-0.5">
                                         <span className="text-muted-foreground truncate max-w-[150px]" title={price.supplierName}>{price.supplierName}</span>
-                                        <span className="font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[10px] text-muted-foreground ml-0.5">/un</span></span>
+                                        <span className="flex items-baseline gap-1.5 shrink-0">
+                                          {diffPct > 0 && <span className="text-[10px] font-bold text-red-500 tabular-nums">+{diffPct.toFixed(1)}%</span>}
+                                          <span className="font-bold text-foreground tabular-nums whitespace-nowrap">{formatCurrency(price.custoPorUnidade)}<span className="font-normal text-[10px] text-muted-foreground ml-0.5">/un</span></span>
+                                        </span>
                                       </div>
-                                    ))}
+                                      );
+                                    })}
                                   </div>
                                 </PopoverContent>
                               </Popover>
@@ -227,7 +261,8 @@ export function ResumoTab({ bestPricesData, onCopyBestPrices, onEditItem, isComp
                     })}
                   </div>
                 </Card>
-              ))
+                );
+              })
             )}
           </div>
         )}
