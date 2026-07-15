@@ -1321,44 +1321,42 @@ export function ManagePackagingQuoteDialog({
                       const isBestPrice = bestData && bestData.bestPrice > 0 && bestData.bestSupplierId === selectedSupplier;
 
                       return (
-                        <Card key={item.packagingId} className={cn("p-4 transition-all border shadow-sm rounded-xl", 
+                        <Card key={item.packagingId} className={cn("p-3 transition-all border shadow-sm rounded-xl",
                           isBestPrice ? "bg-brand/5 border-brand/30 ring-1 ring-brand/10" : "bg-card border-border/50",
                           isEditing && "ring-2 ring-brand border-brand/50 shadow-lg z-10")}>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shadow-none border", isBestPrice ? "bg-brand/10 text-brand border-brand/20" : "bg-muted text-muted-foreground border-border/50")}>
-                                <Package className="h-4 w-4" />
+                          <div className={cn("flex items-center justify-between gap-2", isEditing ? "mb-3" : "mb-2")}>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border", isBestPrice ? "bg-brand/10 text-brand border-brand/20" : "bg-muted text-muted-foreground border-border/50")}>
+                                <Package className="h-3.5 w-3.5" />
                               </div>
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-foreground block text-sm">{item.packagingName}</span>
-                                  {(() => {
-                                    const lastPurchase = getLastPurchaseInfo(item.packagingId);
-                                    if (!lastPurchase) return null;
-                                    return (
-                                      <TooltipProvider>
-                                        <Tooltip>
-                                          <TooltipTrigger asChild>
-                                            <div className="cursor-help inline-flex">
-                                              <Info className="h-3.5 w-3.5 text-brand hover:text-brand/80 transition-colors" />
-                                            </div>
-                                          </TooltipTrigger>
-                                          <TooltipContent className="max-w-[200px] text-xs">
-                                            <p className="font-bold mb-1">Última Compra:</p>
-                                            <p>Data: {lastPurchase.date}</p>
-                                            <p>Fornecedor: {lastPurchase.supplierName}</p>
-                                            <p>Preço: {formatCurrency(lastPurchase.price)}</p>
-                                          </TooltipContent>
-                                        </Tooltip>
-                                      </TooltipProvider>
-                                    );
-                                  })()}
-                                </div>
-                                {isBestPrice && <span className="text-[10px] font-bold text-brand uppercase tracking-wide flex items-center gap-1"><Award className="h-3 w-3" />Melhor Preço</span>}
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <span className="font-bold text-foreground text-sm truncate">{item.packagingName}</span>
+                                {(() => {
+                                  const lastPurchase = getLastPurchaseInfo(item.packagingId);
+                                  if (!lastPurchase) return null;
+                                  return (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="cursor-help inline-flex shrink-0">
+                                            <Info className="h-3.5 w-3.5 text-brand hover:text-brand/80 transition-colors" />
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="max-w-[200px] text-xs">
+                                          <p className="font-bold mb-1">Última Compra:</p>
+                                          <p>Data: {lastPurchase.date}</p>
+                                          <p>Fornecedor: {lastPurchase.supplierName}</p>
+                                          <p>Preço: {formatCurrency(lastPurchase.price)}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  );
+                                })()}
+                                {isBestPrice && <span className="text-[9px] font-bold text-brand uppercase tracking-wide flex items-center gap-0.5 shrink-0"><Award className="h-2.5 w-2.5" />Melhor</span>}
                               </div>
                             </div>
                             {!isEditing && <Button size="sm" variant="outline" onClick={() => handleEditItem(selectedSupplier, item.packagingId)}
-                              className="h-9 px-3 text-xs font-bold bg-background border-border hover:bg-muted hover:border-brand/40 touch-manipulation"><Edit2 className="h-3.5 w-3.5 mr-1.5" />Editar</Button>}
+                              className="h-7 px-2.5 text-xs font-bold bg-background border-border hover:bg-muted hover:border-brand/40 touch-manipulation shrink-0"><Edit2 className="h-3.5 w-3.5 mr-1.5" />Editar</Button>}
                           </div>
                           {isEditing ? (
                             <div className="space-y-4 bg-muted/60 -m-1 p-4 rounded-lg border border-border dark:border-white/5 shadow-inner">
@@ -1495,31 +1493,28 @@ export function ManagePackagingQuoteDialog({
                               </div>
                             </div>
                           ) : supplierItem?.valorTotal ? (
-                            <div className="flex items-center justify-between gap-3 bg-muted/40 px-3 py-2.5 rounded-lg border border-border dark:border-white/5">
+                            <div className="flex items-center justify-between gap-3 bg-muted/40 px-2.5 py-1.5 rounded-lg border border-border dark:border-white/5">
                               {/* Detalhes secundários */}
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground min-w-0 flex-1 flex-wrap">
-                                <span>
-                                  <span className="font-bold text-foreground">{formatCurrency(supplierItem.valorTotal)}</span>
-                                  <span className="opacity-60 ml-1">/ pacote</span>
-                                </span>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground min-w-0 flex-1">
+                                <span className="font-bold text-foreground whitespace-nowrap">{formatCurrency(supplierItem.valorTotal)}</span>
                                 <span className="opacity-50">·</span>
-                                <span>{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</span>
+                                <span className="truncate">{supplierItem.quantidadeVenda} {supplierItem.unidadeVenda}</span>
                                 {supplierItem.quantidadeUnidadesEstimada && (
                                   <>
                                     <span className="opacity-50">·</span>
-                                    <span>{supplierItem.quantidadeUnidadesEstimada} un</span>
+                                    <span className="whitespace-nowrap">{supplierItem.quantidadeUnidadesEstimada} un</span>
                                   </>
                                 )}
                               </div>
-                              {/* Custo/un em destaque */}
-                              <div className="text-right flex-shrink-0">
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">Custo/un</p>
-                                <p className={cn("font-extrabold text-base tabular-nums", isBestPrice ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
+                              {/* Custo/un inline */}
+                              <div className="flex items-baseline gap-1 flex-shrink-0">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Custo/un</span>
+                                <span className={cn("font-extrabold text-sm tabular-nums", isBestPrice ? "text-emerald-600 dark:text-emerald-400" : "text-foreground")}>
                                   {formatCurrency(supplierItem.custoPorUnidade)}
-                                </p>
+                                </span>
                               </div>
                             </div>
-                          ) : <div className="p-4 rounded-lg border-2 border-dashed border-border bg-muted/50 text-center"><p className="text-xs text-muted-foreground font-medium">Nenhum valor informado</p></div>}
+                          ) : <div className="py-2 rounded-lg border-2 border-dashed border-border bg-muted/50 text-center"><p className="text-xs text-muted-foreground font-medium">Nenhum valor informado</p></div>}
                         </Card>
                       );
                     })}
