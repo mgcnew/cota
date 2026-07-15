@@ -28,7 +28,7 @@ import { usePackagingOrders } from "@/hooks/usePackagingOrders";
 import {
   Package, Building2, DollarSign, CheckCircle2, Clock,
   TrendingDown, Award, Loader2, Save, X, Trophy, Star, Edit2, Plus, Trash2, Settings, FileDown, Download, Eye, FileText, Info,
-  Copy, Check, MessageCircle, ShoppingCart, MoreHorizontal, Send
+  Copy, Check, MessageCircle, ShoppingCart, MoreHorizontal, Send, Search
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
@@ -108,6 +108,8 @@ export function ManagePackagingQuoteDialog({
   // Estados para adicionar itens/fornecedores
   const [selectedPackagingToAdd, setSelectedPackagingToAdd] = useState("");
   const [selectedSupplierToAdd, setSelectedSupplierToAdd] = useState("");
+  // Busca única (aba Editar) — adiciona embalagem ou fornecedor
+  const [editSearch, setEditSearch] = useState("");
   
   const valorTotalInputRef = useRef<HTMLInputElement>(null);
 
@@ -504,6 +506,20 @@ export function ManagePackagingQuoteDialog({
     if (!quote) return;
     removeQuoteItem.mutate({ quoteId: quote.id, packagingId });
   }, [quote, removeQuoteItem]);
+
+  const handleAddPackagingById = useCallback((id: string) => {
+    if (!quote) return;
+    const pkg = availablePackagingItems.find(p => p.id === id);
+    if (!pkg) return;
+    addQuoteItem.mutate({ quoteId: quote.id, packagingId: pkg.id, packagingName: pkg.name });
+  }, [quote, availablePackagingItems, addQuoteItem]);
+
+  const handleAddSupplierById = useCallback((id: string) => {
+    if (!quote) return;
+    const supplier = availableSuppliers.find(s => s.id === id);
+    if (!supplier) return;
+    addQuoteSupplier.mutate({ quoteId: quote.id, supplierId: supplier.id, supplierName: supplier.name });
+  }, [quote, availableSuppliers, addQuoteSupplier]);
 
   const handleAddSupplier = useCallback(() => {
     if (!quote || !selectedSupplierToAdd) return;
@@ -1054,135 +1070,126 @@ export function ManagePackagingQuoteDialog({
 
           {/* Tab Editar Cotação */}
           <TabsContent value="editar" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-4">
-                {/* Seção Embalagens */}
-                <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-                  <div className="px-3 py-2 border-b bg-muted/50">
-                    <h3 className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5">
-                      <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                      Embalagens ({quote.itens.length})
-                    </h3>
-                  </div>
-                  {packagingNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-border dark:border-white/5 bg-muted/10">
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Select value={selectedPackagingToAdd} onValueChange={setSelectedPackagingToAdd}>
-                          <SelectTrigger className="flex-1 h-10 text-xs font-bold bg-background text-foreground border-border shadow-sm hover:bg-muted/40 transition-colors">
-                            <SelectValue placeholder="Selecione uma embalagem para adicionar..." />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background border-border shadow-xl">
-                            {packagingNotInQuote.map(p => <SelectItem key={p.id} value={p.id} className="text-xs font-medium focus:bg-accent focus:text-accent-foreground">{p.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <Button onClick={handleAddPackaging} disabled={!selectedPackagingToAdd || addQuoteItem.isPending} 
-                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-white hover:bg-brand/90 shadow-sm rounded-lg">
-                          {addQuoteItem.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}Adicionar
-                        </Button>
-                      </div>
+            <div className="flex flex-col h-full min-h-0 p-3 sm:p-4 gap-3 overflow-y-auto md:overflow-hidden">
+              {/* Busca única — adiciona embalagem OU fornecedor */}
+              <div className="relative flex-shrink-0 z-30">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                <Input
+                  value={editSearch}
+                  onChange={(e) => setEditSearch(e.target.value)}
+                  placeholder="Buscar embalagem ou fornecedor para adicionar..."
+                  className="pl-9 h-9 text-xs bg-background border-border"
+                />
+                {editSearch.trim() && (() => {
+                  const term = editSearch.trim().toLowerCase();
+                  const pkgs = packagingNotInQuote.filter(p => p.name.toLowerCase().includes(term));
+                  const sups = suppliersNotInQuote.filter(s => s.name.toLowerCase().includes(term));
+                  return (
+                    <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-50 max-h-[260px] overflow-y-auto custom-scrollbar bg-card border border-border dark:border-white/5 rounded-lg shadow-xl">
+                      {pkgs.length === 0 && sups.length === 0 && (
+                        <div className="px-3 py-4 text-center text-xs text-muted-foreground">Nada encontrado</div>
+                      )}
+                      {pkgs.length > 0 && (
+                        <div>
+                          <p className="px-3 pt-2 pb-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Embalagens</p>
+                          {pkgs.map(p => (
+                            <button key={p.id} onClick={() => handleAddPackagingById(p.id)}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-muted/50 transition-colors">
+                              <Package className="h-3.5 w-3.5 text-brand shrink-0" />
+                              <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">{p.name}</span>
+                              <Plus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {sups.length > 0 && (
+                        <div>
+                          <p className="px-3 pt-2 pb-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Fornecedores</p>
+                          {sups.map(s => (
+                            <button key={s.id} onClick={() => handleAddSupplierById(s.id)}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-left hover:bg-muted/50 transition-colors">
+                              <Building2 className="h-3.5 w-3.5 text-brand shrink-0" />
+                              <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">{s.name}</span>
+                              <Plus className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <div className="p-4 bg-background">
-                    {quote.itens.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Package className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhuma embalagem na cotação</p></div>
-                    ) : (
-                      <div className="flex flex-col gap-2.5">
-                        {quote.itens.map((item, index) => (
-                          <div key={item.packagingId} className="group relative p-3 flex items-center justify-between bg-card hover:bg-muted/20 hover:border-brand/30 border border-border dark:border-white/5 rounded-xl transition-all shadow-sm">
-                            <div className="flex items-center gap-3">
-                              <span className="text-[10px] font-black text-muted-foreground w-5 opacity-40">#{index + 1}</span>
-                              <div className="w-8 h-8 rounded-lg bg-brand/5 border border-brand/10 flex items-center justify-center flex-shrink-0">
-                                <Package className="h-4 w-4 text-brand" />
-                              </div>
-                              <span className="text-sm font-bold text-foreground">{item.packagingName}</span>
-                            </div>
-                            <Button variant="ghost" size="icon" onClick={() => handleRemovePackaging(item.packagingId)} disabled={removeQuoteItem.isPending}
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"><Trash2 className="h-4 w-4" /></Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-
-                {/* Seção Fornecedores */}
-                <Card className="border-border bg-card shadow-sm rounded-xl overflow-hidden">
-                  <div className="px-3 py-2 border-b bg-muted/50">
-                    <h3 className="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1.5">
-                      <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      Fornecedores ({quote.fornecedores.length})
-                    </h3>
-                  </div>
-                  {suppliersNotInQuote.length > 0 && (
-                    <div className="p-4 border-b border-border dark:border-white/5 bg-muted/10">
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <Select value={selectedSupplierToAdd} onValueChange={setSelectedSupplierToAdd}>
-                          <SelectTrigger className="flex-1 h-10 text-xs font-bold bg-background text-foreground border-border shadow-sm hover:bg-muted/40 transition-colors">
-                            <SelectValue placeholder="Selecione um fornecedor para adicionar..." />
-                          </SelectTrigger>
-                          <SelectContent className="bg-background border-border shadow-xl">
-                            {suppliersNotInQuote.map(s => <SelectItem key={s.id} value={s.id} className="text-xs font-medium">{s.name}</SelectItem>)}
-                          </SelectContent>
-                        </Select>
-                        <Button onClick={handleAddSupplier} disabled={!selectedSupplierToAdd || addQuoteSupplier.isPending} 
-                          className="h-10 px-5 text-xs font-bold uppercase tracking-wider w-full sm:w-auto bg-brand text-white hover:bg-brand/90 shadow-sm rounded-lg">
-                          {addQuoteSupplier.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}Adicionar
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  <div className="p-4 bg-background">
-                    {quote.fornecedores.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground border border-dashed rounded-xl border-border/50 bg-muted/20"><Building2 className="h-10 w-10 mx-auto mb-3 opacity-30 text-muted-foreground" /><p className="text-xs font-medium">Nenhum fornecedor na cotação</p></div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {quote.fornecedores.map((fornecedor) => (
-                          <div
-                            key={fornecedor.supplierId}
-                            className="group relative flex items-center p-3 rounded-xl border border-border bg-card hover:border-brand/30 transition-all duration-300 shadow-sm"
-                          >
-                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-muted flex items-center justify-center mr-3">
-                              <Building2 className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0 mr-2">
-                              <p className="text-[13px] font-bold text-foreground truncate leading-tight mb-1">
-                                {fornecedor.supplierName}
-                              </p>
-                              {fornecedor.status === "respondido" ? (
-                                <Badge className="bg-emerald-500/10 text-emerald-600 border-none px-2 py-0.5 h-5 rounded-full ring-1 ring-emerald-500/20">
-                                  <div className="w-1 h-1 rounded-full bg-emerald-500 mr-1.5" />
-                                  <span className="text-[10px] font-semibold tracking-wide">Respondido</span>
-                                </Badge>
-                              ) : (
-                                <Badge className="bg-muted text-muted-foreground border-none px-2 py-0.5 h-5 rounded-full ring-1 ring-border">
-                                  <div className="w-1 h-1 rounded-full bg-muted-foreground/50 mr-1.5" />
-                                  <span className="text-[10px] font-semibold tracking-wide">Pendente</span>
-                                </Badge>
-                              )}
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleRemoveSupplier(fornecedor.supplierId)}
-                              disabled={removeQuoteSupplier.isPending}
-                              className="h-9 w-9 rounded-lg border-border text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
+                  );
+                })()}
               </div>
-            </ScrollArea>
+
+              {/* Duas colunas: Fornecedores | Embalagens */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 min-h-0">
+                {/* Fornecedores */}
+                <div className="flex flex-col rounded-xl border border-border dark:border-white/5 bg-card/30 overflow-hidden min-h-0">
+                  <div className="px-3 py-2 border-b border-border dark:border-white/5 bg-muted/40 flex items-center gap-1.5 flex-shrink-0">
+                    <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Fornecedores</span>
+                    <Badge className="ml-auto bg-brand/10 text-brand border-brand/20 h-5 px-1.5 !text-[10px] font-bold">{quote.fornecedores.length}</Badge>
+                  </div>
+                  <div className="flex-1 min-h-0 max-h-[280px] md:max-h-none overflow-y-auto custom-scrollbar p-2 space-y-1.5">
+                    {quote.fornecedores.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center py-8 text-muted-foreground">
+                        <Building2 className="h-8 w-8 mb-2 opacity-30" />
+                        <p className="text-xs font-medium">Nenhum fornecedor</p>
+                      </div>
+                    ) : quote.fornecedores.map(f => (
+                      <div key={f.supplierId} className="group flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border dark:border-white/5 bg-card hover:border-brand/30 transition-all">
+                        <div className="w-6 h-6 rounded-md bg-muted flex items-center justify-center shrink-0">
+                          <Building2 className="h-3 w-3 text-muted-foreground" />
+                        </div>
+                        <span className="flex-1 min-w-0 text-xs font-bold text-foreground truncate">{f.supplierName}</span>
+                        {f.status === "respondido" ? (
+                          <span className="shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />Resp.</span>
+                        ) : (
+                          <span className="shrink-0 flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-muted-foreground"><span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50" />Pend.</span>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveSupplier(f.supplierId)} disabled={removeQuoteSupplier.isPending}
+                          className="h-5 w-5 shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Embalagens */}
+                <div className="flex flex-col rounded-xl border border-border dark:border-white/5 bg-card/30 overflow-hidden min-h-0">
+                  <div className="px-3 py-2 border-b border-border dark:border-white/5 bg-muted/40 flex items-center gap-1.5 flex-shrink-0">
+                    <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">Embalagens</span>
+                    <Badge className="ml-auto bg-brand/10 text-brand border-brand/20 h-5 px-1.5 !text-[10px] font-bold">{quote.itens.length}</Badge>
+                  </div>
+                  <div className="flex-1 min-h-0 max-h-[280px] md:max-h-none overflow-y-auto custom-scrollbar p-2 space-y-1.5">
+                    {quote.itens.length === 0 ? (
+                      <div className="h-full flex flex-col items-center justify-center py-8 text-muted-foreground">
+                        <Package className="h-8 w-8 mb-2 opacity-30" />
+                        <p className="text-xs font-medium">Nenhuma embalagem</p>
+                      </div>
+                    ) : quote.itens.map(item => (
+                      <div key={item.packagingId} className="group flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border dark:border-white/5 bg-card hover:border-brand/30 transition-all">
+                        <div className="w-6 h-6 rounded-md bg-brand/5 border border-brand/10 flex items-center justify-center shrink-0">
+                          <Package className="h-3 w-3 text-brand" />
+                        </div>
+                        <span className="flex-1 min-w-0 text-xs font-bold text-foreground truncate">{item.packagingName}</span>
+                        <Button variant="ghost" size="icon" onClick={() => handleRemovePackaging(item.packagingId)} disabled={removeQuoteItem.isPending}
+                          className="h-5 w-5 shrink-0 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Tab Valores */}
           <TabsContent value="valores" className="flex-1 overflow-hidden m-0 p-0 bg-background">
-            <div className="h-full flex flex-col md:flex-row">
-              <div className="w-full md:w-60 lg:w-64 flex-shrink-0 border-b md:border-b-0 md:border-r border-border bg-muted/10 flex flex-col">
+            <div className="h-full flex flex-col md:flex-row gap-3 p-3 sm:p-4 min-h-0 overflow-hidden">
+              <div className="w-full md:w-60 lg:w-64 flex-shrink-0 rounded-xl border border-border dark:border-white/5 bg-card/30 flex flex-col overflow-hidden min-h-0">
                 {isMobile ? (
                   <div className="p-3 space-y-2">
                     <Label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest block">Selecionar Fornecedor</Label>
@@ -1247,22 +1254,21 @@ export function ManagePackagingQuoteDialog({
                         </button>
                       )}
                     </div>
-                    <ScrollArea className="flex-1">
-                      <div className="p-2 space-y-1 pb-6">
+                    <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-2 space-y-1">
                         {quote.fornecedores.map((fornecedor) => (
-                          <div key={fornecedor.supplierId} className="flex items-center gap-1">
+                          <div key={fornecedor.supplierId} className="flex items-center gap-1 min-w-0">
                             <button onClick={() => setSelectedSupplier(fornecedor.supplierId)}
-                              className={cn("flex-1 p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background border",
+                              className={cn("flex-1 min-w-0 p-2.5 rounded-xl text-left transition-all font-medium group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-1 focus-visible:ring-offset-background border",
                                 selectedSupplier === fornecedor.supplierId
                                   ? "bg-card text-foreground shadow-sm border-border/50 font-bold"
                                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground border-transparent")}
                               title={fornecedor.supplierName}>
-                              <div className="flex items-center gap-2.5">
+                              <div className="flex items-center gap-2.5 min-w-0">
                                 <Building2 className={cn("h-4 w-4 flex-shrink-0 transition-colors", selectedSupplier === fornecedor.supplierId ? "text-brand" : "text-muted-foreground/60 group-hover:text-muted-foreground")} />
-                                <span className="truncate text-xs tracking-tight">{fornecedor.supplierName}</span>
+                                <span className="flex-1 min-w-0 truncate text-xs tracking-tight">{fornecedor.supplierName}</span>
                                 {fornecedor.status === "respondido"
-                                  ? <CheckCircle2 className="h-4 w-4 ml-auto flex-shrink-0 text-brand" />
-                                  : <Clock className={cn("h-3.5 w-3.5 ml-auto flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-muted-foreground" : "text-muted-foreground/40")} />
+                                  ? <CheckCircle2 className="h-4 w-4 flex-shrink-0 text-brand" />
+                                  : <Clock className={cn("h-3.5 w-3.5 flex-shrink-0", selectedSupplier === fornecedor.supplierId ? "text-muted-foreground" : "text-muted-foreground/40")} />
                                 }
                               </div>
                             </button>
@@ -1286,13 +1292,21 @@ export function ManagePackagingQuoteDialog({
                             </button>
                           </div>
                         ))}
-                      </div>
-                    </ScrollArea>
+                    </div>
                   </>
                 )}
               </div>
-              <div className="flex-1 overflow-hidden">
-                <ScrollArea className="h-full">
+              <div className="flex-1 rounded-xl border border-border dark:border-white/5 bg-card/30 overflow-hidden min-h-0 flex flex-col">
+                {selectedSupplier && (
+                  <div className="px-4 py-2.5 border-b border-border dark:border-white/5 bg-muted/20 flex items-center gap-2 flex-shrink-0">
+                    <Building2 className="h-4 w-4 text-brand shrink-0" />
+                    <span className="text-xs font-bold text-foreground truncate">
+                      {quote.fornecedores.find(f => f.supplierId === selectedSupplier)?.supplierName}
+                    </span>
+                    <span className="ml-auto text-[10px] font-bold uppercase tracking-widest text-muted-foreground shrink-0">Valores</span>
+                  </div>
+                )}
+                <ScrollArea className="flex-1 min-h-0">
                   <div className="p-4 md:p-5 space-y-3 pb-10" onKeyDown={handleKeyDown}>
                     {!selectedSupplier ? (
                       <div className="h-full flex flex-col items-center justify-center text-center p-8 text-muted-foreground">

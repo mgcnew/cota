@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingDown, Package, ArrowUpDown, Building2 } from "lucide-react";
+import { TrendingDown, Package, ArrowUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatters";
 
@@ -80,142 +80,109 @@ export function PackagingEconomyBreakdown({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       {/* Total Economy Summary */}
-      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800/50 p-4">
+      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800/50 px-3 py-2.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg">
-              <TrendingDown className="h-5 w-5 text-green-600 dark:text-green-400" />
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-lg">
+              <TrendingDown className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
                 Economia Potencial (por un)
               </p>
-              <p className="text-lg font-bold text-green-600 dark:text-green-400">
+              <p className="text-base font-bold text-green-600 dark:text-green-400 leading-tight">
                 {formatCurrency(totalEconomy)}
               </p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-              {economies.length} produto{economies.length !== 1 ? "s" : ""}
-            </p>
-          </div>
+          <p className="text-[10px] font-medium text-gray-600 dark:text-gray-400">
+            {economies.length} produto{economies.length !== 1 ? "s" : ""}
+          </p>
         </div>
       </Card>
 
       {/* Sorting Controls */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-            Ordenar por:
-          </span>
-          <div className="flex gap-2">
-            <Button
-              variant={sortBy === "economy" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSortBy("economy")}
-              className="text-[10px] uppercase font-bold tracking-wider h-7"
-            >
-              <ArrowUpDown className="h-3 w-3 mr-1" />
-              Economia
-            </Button>
-            <Button
-              variant={sortBy === "name" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSortBy("name")}
-              className="text-[10px] uppercase font-bold tracking-wider h-7"
-            >
-              <ArrowUpDown className="h-3 w-3 mr-1" />
-              Nome
-            </Button>
-          </div>
-        </div>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-medium text-gray-600 dark:text-gray-400">Ordenar por:</span>
+        <Button
+          variant={sortBy === "economy" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setSortBy("economy")}
+          className="text-[10px] uppercase font-bold tracking-wider h-6 px-2.5"
+        >
+          <ArrowUpDown className="h-3 w-3 mr-1" />
+          Economia
+        </Button>
+        <Button
+          variant={sortBy === "name" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setSortBy("name")}
+          className="text-[10px] uppercase font-bold tracking-wider h-6 px-2.5"
+        >
+          <ArrowUpDown className="h-3 w-3 mr-1" />
+          Nome
+        </Button>
       </div>
 
       {/* Products List */}
-      <div className="space-y-3">
-        {sortedEconomies.map((item) => (
-          <Card
-            key={item.productId}
-            className="border border-border dark:border-white/5 bg-card shadow-sm"
-          >
-            <div className="p-4 space-y-3">
-              {/* Product Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 flex items-center gap-2">
-                  <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <h4 className="font-semibold text-foreground text-[13px] truncate">
-                    {item.productName}
-                  </h4>
-                </div>
-                {item.hasMultipleSuppliers && item.economiaReal > 0 ? (
-                  <Badge className="bg-brand/10 text-brand border border-brand/20 flex-shrink-0 text-[10px] font-bold">
-                    -{formatCurrency(item.economiaReal)}/un
-                  </Badge>
+      <Card className="overflow-hidden border border-border dark:border-white/5 bg-card shadow-sm rounded-xl">
+        {/* Header */}
+        <div className="px-3 sm:px-4 py-1.5 flex items-center gap-2 sm:gap-3 bg-muted/40 border-b border-border dark:border-white/5">
+          <span className="flex-1 text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Embalagem</span>
+          <span className="w-[100px] sm:w-[168px] text-right text-[9px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Melhor</span>
+          <span className="hidden sm:block w-[168px] text-right text-[9px] font-bold uppercase tracking-widest text-red-500 dark:text-red-400">Pior</span>
+          <span className="w-[68px] text-right text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Econ.</span>
+        </div>
+
+        <div className="divide-y divide-border/50">
+          {sortedEconomies.map((item) => (
+            <div key={item.productId} className="px-3 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 hover:bg-muted/30 transition-colors">
+              <p className="flex-1 min-w-0 font-semibold text-foreground text-[13px] truncate" title={item.productName}>
+                {item.productName}
+              </p>
+
+              {/* Melhor */}
+              <div className="w-[100px] sm:w-[168px] shrink-0 flex items-baseline justify-end gap-1.5">
+                <span className="hidden sm:block flex-1 min-w-0 text-[9px] text-muted-foreground truncate text-right" title={item.bestPrice.supplierName}>
+                  {item.bestPrice.supplierName}
+                </span>
+                <span className="text-[13px] font-bold text-emerald-600 dark:text-emerald-400 tabular-nums whitespace-nowrap">
+                  {formatCurrency(item.bestPrice.valorUnitario)}<span className="text-[9px] font-medium text-muted-foreground ml-0.5">/un</span>
+                </span>
+              </div>
+
+              {/* Pior */}
+              <div className="hidden sm:flex w-[168px] shrink-0 items-baseline justify-end gap-1.5">
+                {item.hasMultipleSuppliers ? (
+                  <>
+                    <span className="flex-1 min-w-0 text-[9px] text-muted-foreground truncate text-right" title={item.worstPrice.supplierName}>
+                      {item.worstPrice.supplierName}
+                    </span>
+                    <span className="text-[13px] font-bold text-red-500 dark:text-red-400 tabular-nums whitespace-nowrap">
+                      {formatCurrency(item.worstPrice.valorUnitario)}<span className="text-[9px] font-medium text-muted-foreground ml-0.5">/un</span>
+                    </span>
+                  </>
                 ) : (
-                  <Badge variant="outline" className="flex-shrink-0 text-[10px] font-bold">
-                    N/A
-                  </Badge>
+                  <span className="text-xs text-muted-foreground">—</span>
                 )}
               </div>
 
-              {/* Prices Comparison */}
-              {item.hasMultipleSuppliers ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Best Price */}
-                  <div className="bg-green-50/50 dark:bg-green-900/10 rounded-lg p-3 border border-green-200/50 dark:border-green-800/30">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400 mb-1">
-                      Melhor Oferta
-                    </p>
-                    <p className="text-sm font-bold text-foreground">
-                      {formatCurrency(item.bestPrice.valorUnitario)}/un
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground">
-                      <Building2 className="h-3 w-3 flex-shrink-0" />
-                      <p className="text-[10px] font-medium truncate">
-                        {item.bestPrice.supplierName}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Worst Price */}
-                  <div className="bg-red-50/50 dark:bg-red-900/10 rounded-lg p-3 border border-red-200/50 dark:border-red-800/30">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 mb-1">
-                      Pior Oferta
-                    </p>
-                    <p className="text-sm font-bold text-foreground opacity-80">
-                      {formatCurrency(item.worstPrice.valorUnitario)}/un
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground">
-                      <Building2 className="h-3 w-3 flex-shrink-0" />
-                      <p className="text-[10px] font-medium truncate opacity-80">
-                        {item.worstPrice.supplierName}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-muted/20 rounded-lg p-3 border border-border dark:border-white/5">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                    Ãšnica Oferta
-                  </p>
-                  <p className="text-sm font-bold text-foreground">
-                    {formatCurrency(item.bestPrice.valorUnitario)}/un
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-1.5 text-muted-foreground">
-                    <Building2 className="h-3 w-3 flex-shrink-0" />
-                    <p className="text-[10px] font-medium truncate">
-                      {item.bestPrice.supplierName}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Economia */}
+              <div className="w-[68px] shrink-0 flex justify-end">
+                {item.hasMultipleSuppliers && item.economiaReal > 0 ? (
+                  <Badge className="bg-brand/10 text-brand border border-brand/20 text-[10px] font-bold px-1.5 whitespace-nowrap">
+                    -{formatCurrency(item.economiaReal)}
+                  </Badge>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">—</span>
+                )}
+              </div>
             </div>
-          </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      </Card>
     </div>
   );
 }
